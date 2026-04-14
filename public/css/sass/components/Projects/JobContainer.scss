@@ -161,7 +161,15 @@
 }
 
 .job-delivery-date {
+  display: flex;
   min-width: 0;
+  align-items: center;
+
+  > div {
+    white-space: nowrap;
+    display: block;
+    overflow: hidden;
+  }
 
   > span {
     display: block;
@@ -169,4 +177,26 @@
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+}
+
+.job-delivery-date-button-close {
+  flex-shrink: 0;
+  margin-left: 5px;
+}
+
+@media only screen and (min-width: 1300px) {
+  .job-delivery-email {
+    max-width: 130px;
+  }
+
+  .job-delivery-date {
+    > :nth-child(2) {
+      flex-shrink: 0;
+    }
+  }
+}
+
+.job-delivery-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

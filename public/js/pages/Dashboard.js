@@ -10,7 +10,7 @@ import {isEmpty} from 'lodash'
 import {debounce} from 'lodash/function'
 import ReactDOM, {flushSync} from 'react-dom'
 
-import {ProjectsContainer} from '../components/projects2.0/ProjectsContainer'
+import {ProjectsContainer} from '../components/projects/ProjectsContainer'
 import ManageActions from '../actions/ManageActions'
 import UserActions from '../actions/UserActions'
 import ModalsActions from '../actions/ModalsActions'

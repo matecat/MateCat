@@ -558,22 +558,6 @@ div#manage-container {
                 &:hover .translator .job-delivery {
                   display: none;
                 }
-                .job-delivery-date {
-                  margin-left: 5px;
-                  color: colors.$grey400;
-                  display: flex;
-                  gap: 4px;
-                  .job-delivery-email {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    max-width: 200px;
-                  }
-                  > :nth-child(2) {
-                    font-weight: bold;
-                    color: black;
-                  }
-                }
                 .item {
                   margin-left: 10px;
                   display: none;
@@ -830,9 +814,6 @@ div#manage-container {
     margin-right: auto !important;
     transition: 0.3s ease;
   }
-  .job-delivery-email {
-    display: none;
-  }
 }
 
 @media only screen and (min-width: 1501px) {
@@ -841,11 +822,6 @@ div#manage-container {
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
-  }
-
-  .job-delivery-email {
-    max-width: 130px;
-    display: block;
   }
 }
 
