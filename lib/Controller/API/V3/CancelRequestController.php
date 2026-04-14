@@ -30,6 +30,7 @@ use View\API\V3\Json\Chunk;
 
 class CancelRequestController extends KleinController
 {
+    use DaoCacheTrait;
     use RateLimiterTrait;
     use SegmentDisabledTrait;
     use ChunkNotFoundHandlerTrait;
@@ -48,8 +49,12 @@ class CancelRequestController extends KleinController
     /**
      * @throws Exception
      */
-    public function cancelRequest(int $id_job, string $password, int $id_segment): void
+    public function cancelRequest(): void
     {
+        $id_job = $this->request->param('id_job');
+        $password = $this->request->param('password');
+        $id_segment = $this->request->param('id_segment');
+
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
         $userEmail = $this->user->email ?? "BLANK_EMAIL";
         $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
@@ -91,7 +96,18 @@ class CancelRequestController extends KleinController
         }
 
         // 4. check is user is the owner of the segment
-        if(!$job->getProject()->getTeam()->hasUser( $this->user->uid)){
+        $team = $job->getProject()->getTeam();
+
+        if($team->created_by != $this->getUser()->uid){
+
+            // check if user is part of the team
+            if (!$team->hasUser( $this->user->uid)){
+                $this->incrementRateLimitCounter($userEmail, $route);
+                $this->incrementRateLimitCounter($userIp, $route);
+
+                throw new Exception('User is not part of the team');
+            }
+
             $this->incrementRateLimitCounter($userEmail, $route);
             $this->incrementRateLimitCounter($userIp, $route);
 
@@ -112,12 +128,15 @@ class CancelRequestController extends KleinController
         // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
         // setting the cache to avoid multiple disable requests for the same segment in a short time frame
         if (!$this->isSegmentDisabled($id_job, $id_segment)) {
-            SegmentMetadataDao::setTranslationDisabled($id_job, $id_segment);
             SegmentMetadataDao::destroyGetAllCache($id_segment);
+            SegmentMetadataDao::setTranslationDisabled($id_job, $id_segment);
+            $this->saveSegmentDisabledInCache($id_job, $id_segment);
         }
 
         $this->response->json([
             'id_segment' => $id_segment,
         ]);
     }
+
+
 }

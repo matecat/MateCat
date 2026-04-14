@@ -3,6 +3,7 @@
 namespace Model\Segments;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\DaoCacheTrait;
 use Model\DataAccess\Database;
 use ReflectionException;
 
@@ -149,11 +150,5 @@ class SegmentMetadataDao extends AbstractDao
         $metadata->meta_value = 1;
 
         SegmentMetadataDao::save($metadata);
-
-        $cacheKey = 'segment_is_disabled_' . $id_job . '_' . $id_segment;
-        $cachedQuery = "__SEGMENT_IS_DISABLED__" . $id_job . "_" . $id_segment . "";
-
-        $thisDao = new self();
-        $thisDao->_setInCacheMap($cacheKey, $cachedQuery, [1]);
     }
 }
