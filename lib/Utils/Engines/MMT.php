@@ -121,14 +121,14 @@ class MMT extends AbstractEngine
 
         $glossaries = null;
 
-        if (!empty($_config['project_id'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'mmt_glossaries');
+        if (!empty($_config['id_project'])) {
+            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'mmt_glossaries');
         }
 
         if ($glossaries !== null) {
             $mmtGlossariesArray = json_decode($glossaries->value, true);
             $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get(
-                $_config['project_id'],
+                $_config['id_project'],
                 'mmt_ignore_glossary_case'
             );
 
@@ -172,7 +172,7 @@ class MMT extends AbstractEngine
                 [],
                 $_config['source'],
                 $_config['target'],
-                $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]
+                array_key_exists(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $_config) ? $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] : []
             );
         } catch (Exception) {
             return $this->GoogleTranslateFallback($_config);
@@ -684,7 +684,7 @@ class MMT extends AbstractEngine
         $cacheTtl = 60 * 60 * 24 * 30;
 
         // Common metadata loading
-        if(!empty($id_job)){
+        if (!empty($id_job)) {
             $metadataDao = new MetadataDao();
             $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
