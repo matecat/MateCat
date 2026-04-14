@@ -632,7 +632,6 @@ class JobContainer extends React.Component {
   }
 
   getOutsourceJobSent() {
-    console.log('we')
     let outsourceJobLabel = ''
     if (this.props.job.get('outsource')) {
       if (this.props.job.get('outsource').get('id_vendor') == '1') {
