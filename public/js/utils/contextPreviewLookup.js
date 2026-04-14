@@ -1,5 +1,5 @@
 /**
- * DOM lookup strategies for the ContextReview segment tagging pass.
+ * DOM lookup strategies for the ContextPreview segment tagging pass.
  *
  * findElementByMetadata selects the strategy based on `restype` and
  * returns the matching DOM element, or null on miss / error / stub.

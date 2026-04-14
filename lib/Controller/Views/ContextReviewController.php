@@ -22,7 +22,7 @@ class ContextReviewController extends BaseKleinViewController implements IContro
     {
         $request = $this->validateTheRequest();
 
-        $this->setView('context_review.html', [
+        $this->setView('context_preview.html', [
             'id_project' => $request['id_project'],
             'password' => $request['password'],
         ]);

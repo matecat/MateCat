@@ -1,16 +1,16 @@
 import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import {mountPage} from './mountPage'
-import ContextReviewChannel from '../utils/contextReviewChannel'
-import {findSegmentSidsByClick, tagSegments} from '../utils/contextReviewUtils'
+import ContextPreviewChannel from '../utils/contextPreviewChannel'
+import {findSegmentSidsByClick, tagSegments} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconDown from '../components/icons/IconDown'
 import useContextDocument from '../hooks/useContextDocument'
 import useContextHighlight from '../hooks/useContextHighlight'
-import useContextReviewMessages from '../hooks/useContextReviewMessages'
+import useContextPreviewMessages from '../hooks/useContextPreviewMessages'
 import {
-  HtmlContextPanel,
+  LivePreviewPanel,
   ScreenshotContextPanel,
-} from '../components/contextReview'
+} from '../components/contextPreview'
 
 const VIEW_MODES = {
   BOTH: 'both',
@@ -21,23 +21,28 @@ const VIEW_MODES = {
 const VIEW_OPTIONS = [
   {id: VIEW_MODES.SOURCE, name: 'Source'},
   {id: VIEW_MODES.TARGET, name: 'Translation'},
-  {id: VIEW_MODES.BOTH, name: 'Source&Target'},
+  {id: VIEW_MODES.BOTH, name: 'Both'},
 ]
+
+const CONTENT_VIEWS = {
+  LIVE_PREVIEW: 'live-preview',
+  SCREENSHOT: 'screenshot',
+}
 
 const CONTENT_VIEW_OPTIONS = [
-  {id: 'html', name: 'HTML'},
-  {id: 'screenshot', name: 'Screenshot'},
+  {id: CONTENT_VIEWS.LIVE_PREVIEW, name: 'Live preview'},
+  {id: CONTENT_VIEWS.SCREENSHOT, name: 'Screenshot'},
 ]
 
-const ContextReview = () => {
+const ContextPreview = () => {
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
-  const [contentView, setContentView] = useState('html')
+  const [contentView, setContentView] = useState(CONTENT_VIEWS.LIVE_PREVIEW)
   const [htmlReady, setHtmlReady] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(100)
 
   const handleContentViewChange = useCallback((newView) => {
     setContentView(newView)
-    if (newView === 'screenshot') {
+    if (newView === CONTENT_VIEWS.SCREENSHOT) {
       setViewMode(VIEW_MODES.SOURCE)
     }
   }, [])
@@ -56,13 +61,14 @@ const ContextReview = () => {
 
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
+  const pendingHighlightRef = useRef(null)
 
   const showNodeWarning = useCallback(
-    (el) => el.classList.add('context-review-node--mismatch'),
+    (el) => el.classList.add('context-preview-node--mismatch'),
     [],
   )
   const clearNodeWarning = useCallback(
-    (el) => el.classList.remove('context-review-node--mismatch'),
+    (el) => el.classList.remove('context-preview-node--mismatch'),
     [],
   )
 
@@ -78,6 +84,7 @@ const ContextReview = () => {
 
   const onHighlight = useCallback(
     (numericSid) => {
+      pendingHighlightRef.current = numericSid
       const total = applyHighlightsForSegment(numericSid, 0, true)
       setHighlight(
         total > 0
@@ -89,10 +96,10 @@ const ContextReview = () => {
   )
 
   const onTranslationUpdate = useCallback(() => {
-    // no additional action needed here; useContextReviewMessages updates segments state
+    // no additional action needed here; useContextPreviewMessages updates segments state
   }, [])
 
-  const {segments, currentContextUrl} = useContextReviewMessages({
+  const {segments, currentContextUrl} = useContextPreviewMessages({
     onHighlight,
     onTranslationUpdate,
     highlightRef,
@@ -157,7 +164,7 @@ const ContextReview = () => {
     if (!htmlContent) return
 
     // When switching to screenshot mode, clear HTML content from refs
-    if (contentView !== 'html') {
+    if (contentView !== CONTENT_VIEWS.LIVE_PREVIEW) {
       if (sourceRef.current) sourceRef.current.innerHTML = ''
       if (targetRef.current) targetRef.current.innerHTML = ''
       htmlRenderedRef.current = {source: '', target: ''}
@@ -186,7 +193,12 @@ const ContextReview = () => {
 
   // Tag segments in panels when segments or HTML changes
   useEffect(() => {
-    if (!segments.length || !htmlReady || contentView !== 'html') return
+    if (
+      !segments.length ||
+      !htmlReady ||
+      contentView !== CONTENT_VIEWS.LIVE_PREVIEW
+    )
+      return
     if (targetRef.current) {
       tagSegments(targetRef.current, segments, {
         replaceWithTarget: true,
@@ -197,6 +209,29 @@ const ContextReview = () => {
       tagSegments(sourceRef.current, segments, {metadataMap})
     }
   }, [segments, htmlReady, viewMode, metadataMap, contentView])
+
+  // Re-apply pending highlight after tagging completes
+  useEffect(() => {
+    if (
+      !segments.length ||
+      !htmlReady ||
+      contentView !== CONTENT_VIEWS.LIVE_PREVIEW
+    )
+      return
+    const sid = pendingHighlightRef.current
+    if (sid == null || highlight) return
+    const total = applyHighlightsForSegment(sid, 0, true)
+    if (total > 0) {
+      setHighlight({mode: 'segment', sid, activeIndex: 0, total})
+    }
+  }, [
+    segments,
+    htmlReady,
+    contentView,
+    highlight,
+    applyHighlightsForSegment,
+    setHighlight,
+  ])
 
   // Scroll listener — detect untagged nodes and request more segments
   useEffect(() => {
@@ -237,7 +272,7 @@ const ContextReview = () => {
       if (scrollTop < 200 && now - lastRequestRef.before > THROTTLE_MS) {
         if (hasUntaggedNodesInViewport('before')) {
           lastRequestRef.before = now
-          ContextReviewChannel.sendMessage({
+          ContextPreviewChannel.sendMessage({
             type: 'loadMoreSegments',
             where: 'before',
           })
@@ -246,7 +281,7 @@ const ContextReview = () => {
       if (scrollBottom < 200 && now - lastRequestRef.after > THROTTLE_MS) {
         if (hasUntaggedNodesInViewport('after')) {
           lastRequestRef.after = now
-          ContextReviewChannel.sendMessage({
+          ContextPreviewChannel.sendMessage({
             type: 'loadMoreSegments',
             where: 'after',
           })
@@ -262,7 +297,7 @@ const ContextReview = () => {
   useEffect(() => {
     const sourceContainer = sourceRef.current
     const targetContainer = targetRef.current
-    if (!htmlContent || contentView !== 'html') return
+    if (!htmlContent || contentView !== CONTENT_VIEWS.LIVE_PREVIEW) return
 
     const handleSourceClick = (event) => {
       event.preventDefault()
@@ -274,9 +309,9 @@ const ContextReview = () => {
       )
       if (!result) return
       const {sids, nodeIndex} = result
-      ContextReviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
       applyHighlightsForNode(nodeIndex, 0, false)
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
+      ContextPreviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
     }
 
     const handleTargetClick = (event) => {
@@ -289,9 +324,9 @@ const ContextReview = () => {
       )
       if (!result) return
       const {sids, nodeIndex} = result
-      ContextReviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
       applyHighlightsForNode(nodeIndex, 0, false)
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
+      ContextPreviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
     }
 
     if (sourceContainer)
@@ -309,16 +344,16 @@ const ContextReview = () => {
 
   if (loading) {
     return (
-      <div className="context-review-container">
-        <div className="context-review-loading">Loading document...</div>
+      <div className="context-preview-container">
+        <div className="context-preview-loading">Loading document...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="context-review-container">
-        <div className="context-review-error">
+      <div className="context-preview-container">
+        <div className="context-preview-error">
           <h2>Error loading document</h2>
           <p>{error}</p>
         </div>
@@ -327,73 +362,73 @@ const ContextReview = () => {
   }
 
   return (
-    <div className="context-review-container">
-      <div className="context-review-toolbar">
+    <div className="context-preview-container">
+      <div className="context-preview-toolbar">
         {hasScreenshots && (
           <SegmentedControl
-            name="context-review-content-view"
+            name="context-preview-content-view"
             options={CONTENT_VIEW_OPTIONS}
             selectedId={contentView}
             onChange={handleContentViewChange}
             compact
           />
         )}
-        {contentView === 'html' && (
+        {contentView === CONTENT_VIEWS.LIVE_PREVIEW && (
           <SegmentedControl
-            name="context-review-view-mode"
+            name="context-preview-view-mode"
             options={VIEW_OPTIONS}
             selectedId={viewMode}
             onChange={setViewMode}
             compact
           />
         )}
-        {hasScreenshots && (
-          <div className="context-review-zoom">
-            <button
-              className="context-review-zoom__button"
-              onClick={handleZoomOut}
-              disabled={zoomLevel <= 50}
-              aria-label="Zoom out"
-            >
-              −
-            </button>
-            <span className="context-review-zoom__level">{zoomLevel}%</span>
-            <button
-              className="context-review-zoom__button"
-              onClick={handleZoomIn}
-              disabled={zoomLevel >= 200}
-              aria-label="Zoom in"
-            >
-              +
-            </button>
-            <button
-              className="context-review-zoom__reset"
-              onClick={handleZoomReset}
-              disabled={zoomLevel === 100}
-              aria-label="Reset zoom"
-            >
-              Reset
-            </button>
-          </div>
-        )}
+
+        <div className="context-preview-zoom">
+          <button
+            className="context-preview-zoom__button"
+            onClick={handleZoomOut}
+            disabled={zoomLevel <= 50}
+            aria-label="Zoom out"
+          >
+            −
+          </button>
+          <span className="context-preview-zoom__level">{zoomLevel}%</span>
+          <button
+            className="context-preview-zoom__button"
+            onClick={handleZoomIn}
+            disabled={zoomLevel >= 200}
+            aria-label="Zoom in"
+          >
+            +
+          </button>
+          <button
+            className="context-preview-zoom__reset"
+            onClick={handleZoomReset}
+            disabled={zoomLevel === 100}
+            aria-label="Reset zoom"
+          >
+            Reset
+          </button>
+        </div>
+
         {highlight &&
           ((highlight.mode === 'segment' && highlight.total > 1) ||
             (highlight.mode === 'node' && highlight.sids.length > 1)) && (
-            <div className="context-review-nav">
+            <div className="context-preview-nav">
               <button
-                className="context-review-nav__button"
+                className="context-preview-nav__button"
                 onClick={handlePrev}
                 aria-label="Previous"
               >
                 <IconDown size={16} />
               </button>
-              <span className="context-review-nav__counter">
+              <span className="context-preview-nav__counter">
                 {highlight.mode === 'segment'
                   ? `${highlight.activeIndex + 1} of ${highlight.total}`
                   : `Segment ${highlight.activeSegIdx + 1} of ${highlight.sids.length}`}
               </span>
               <button
-                className="context-review-nav__button"
+                className="context-preview-nav__button"
                 onClick={handleNext}
                 aria-label="Next"
               >
@@ -402,10 +437,10 @@ const ContextReview = () => {
             </div>
           )}
       </div>
-      <div className="context-review-panels">
+      <div className="context-preview-panels">
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) &&
-          (contentView === 'html' ? (
-            <HtmlContextPanel
+          (contentView === CONTENT_VIEWS.LIVE_PREVIEW ? (
+            <LivePreviewPanel
               key={`source-${contentView}`}
               panelRef={sourceRef}
               title="Source"
@@ -420,11 +455,11 @@ const ContextReview = () => {
             />
           ))}
         {viewMode === VIEW_MODES.BOTH && (
-          <div className="context-review-divider" />
+          <div className="context-preview-divider" />
         )}
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.TARGET) &&
-          (contentView === 'html' ? (
-            <HtmlContextPanel
+          (contentView === CONTENT_VIEWS.LIVE_PREVIEW ? (
+            <LivePreviewPanel
               key={`target-${contentView}`}
               panelRef={targetRef}
               title="Translation"
@@ -443,9 +478,9 @@ const ContextReview = () => {
   )
 }
 
-export default ContextReview
+export default ContextPreview
 
 mountPage({
-  Component: ContextReview,
+  Component: ContextPreview,
   rootElement: document.getElementsByClassName('context-review__page')[0],
 })

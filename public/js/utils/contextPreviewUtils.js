@@ -2,12 +2,12 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
-import {findElementByMetadata} from './contextReviewLookup'
+import {findElementByMetadata} from './contextPreviewLookup'
 
 const containerMaps = new WeakMap()
 
-const HIGHLIGHT_CLASS = 'context-review-highlight'
-const HIGHLIGHT_ACTIVE_CLASS = 'context-review-highlight--active'
+const HIGHLIGHT_CLASS = 'context-preview-highlight'
+const HIGHLIGHT_ACTIVE_CLASS = 'context-preview-highlight--active'
 const SEGMENT_SIDS_ATTR = 'data-context-sids'
 
 /**
@@ -585,7 +585,7 @@ export const tagSegments = (
 }
 
 /**
- * Extracts the context review payload fields from a raw segment object.
+ * Extracts the context preview payload fields from a raw segment object.
  *
  * Works with both plain JS objects (dot notation) and any shape where
  * `metadata` is an Array<{meta_key: string, meta_value: string}>.

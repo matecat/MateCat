@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-export const HtmlContextPanel = ({panelRef, title, zoomLevel, ...props}) => {
+export const LivePreviewPanel = ({panelRef, title, zoomLevel, ...props}) => {
   return (
-    <div className="context-review-panel" {...props}>
-      <div className="context-review-panel-header">{title}</div>
-      <div className="context-review-content">
+    <div className="context-preview-panel" {...props}>
+      <div className="context-preview-panel-header">{title}</div>
+      <div className="context-preview-content">
         <div
           ref={panelRef}
-          className="context-review-content__scaler"
+          className="context-preview-content__scaler"
           style={{transform: `scale(${zoomLevel / 100})`}}
         />
       </div>
@@ -16,7 +16,7 @@ export const HtmlContextPanel = ({panelRef, title, zoomLevel, ...props}) => {
   )
 }
 
-HtmlContextPanel.propTypes = {
+LivePreviewPanel.propTypes = {
   panelRef: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
   zoomLevel: PropTypes.number.isRequired,

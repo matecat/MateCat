@@ -6,7 +6,7 @@ import {
   findSegmentSidsByClick,
   updateNodeTranslation,
   extractSegmentContextFields,
-} from './contextReviewUtils'
+} from './contextPreviewUtils'
 
 describe('getSidsFromElement', () => {
   it('returns [] for an element with no attribute', () => {

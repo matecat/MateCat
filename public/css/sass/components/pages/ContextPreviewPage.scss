@@ -1,11 +1,11 @@
 @use '../common/SegmentedControl';
 @use '../../commons/colors';
-.context-review-page {
+.context-preview-page {
   width: 100%;
   max-width: unset;
 }
 
-.context-review-zoom {
+.context-preview-zoom {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -56,7 +56,7 @@
   }
 }
 
-.context-review-toolbar {
+.context-preview-toolbar {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   display: flex;
   flex-direction: column;
@@ -98,14 +98,14 @@
   }
 }
 
-.context-review-panels {
+.context-preview-panels {
   display: flex;
   flex: 1;
   gap: 0;
   overflow: hidden;
 }
 
-.context-review-panel {
+.context-preview-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -113,7 +113,7 @@
   overflow: hidden;
 }
 
-.context-review-panel-header {
+.context-preview-panel-header {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   padding: 8px 16px;
   font-size: 13px;
@@ -123,13 +123,13 @@
   flex-shrink: 0;
 }
 
-.context-review-divider {
+.context-preview-divider {
   width: 1px;
   background-color: colors.$grey4;
   flex-shrink: 0;
 }
 
-.context-review-content {
+.context-preview-content {
   flex: 1;
   overflow: auto;
   cursor: default;
@@ -140,10 +140,6 @@
     transform-origin: top left;
     transition: transform 0.2s ease;
     overflow: visible;
-
-    * {
-      overflow: visible !important;
-    }
   }
 
   p,
@@ -164,7 +160,7 @@
   }
 }
 
-.context-review-loading {
+.context-preview-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,7 +169,7 @@
   color: colors.$grey1;
 }
 
-.context-review-error {
+.context-preview-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -194,7 +190,7 @@
 }
 
 // Highlight styles for matched text
-mark.context-review-highlight {
+mark.context-preview-highlight {
   background-color: colors.$orangeDefaultTransparent;
   color: inherit;
   padding: 1px 2px;
@@ -202,14 +198,14 @@ mark.context-review-highlight {
   box-decoration-break: clone;
 }
 
-mark.context-review-highlight--active {
+mark.context-preview-highlight--active {
   background-color: colors.$warning;
   outline: 2px solid colors.$warningHover;
   outline-offset: 1px;
 }
 
 // Navigation bar for cycling through multiple occurrences
-.context-review-nav {
+.context-preview-nav {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -217,7 +213,7 @@ mark.context-review-highlight--active {
   font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
-.context-review-nav__button {
+.context-preview-nav__button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -248,7 +244,7 @@ mark.context-review-highlight--active {
   }
 }
 
-.context-review-nav__counter {
+.context-preview-nav__counter {
   font-size: 13px;
   font-weight: 600;
   color: colors.$grey6;
@@ -258,7 +254,7 @@ mark.context-review-highlight--active {
   user-select: none;
 }
 
-[data-context-sids].context-review-node--mismatch {
+[data-context-sids].context-preview-node--mismatch {
   outline: 2px solid #e05c00;
   outline-offset: 2px;
   position: relative;
@@ -274,7 +270,7 @@ mark.context-review-highlight--active {
   }
 }
 
-.context-review-screenshot {
+.context-preview-screenshot {
   flex: 1;
   width: 100%;
   height: 100%;
@@ -303,7 +299,7 @@ mark.context-review-highlight--active {
   }
 }
 
-.context-review-screenshot-placeholder {
+.context-preview-screenshot-placeholder {
   padding: 2rem;
   color: colors.$grey1;
   text-align: center;

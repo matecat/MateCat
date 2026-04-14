@@ -11,18 +11,18 @@ export const ScreenshotContextPanel = ({
   const margin = scale > 1 ? `${(scale - 1) * 25}%` : '0'
 
   return (
-    <div className="context-review-panel" {...props}>
-      <div className="context-review-panel-header">{title}</div>
-      <div className="context-review-screenshot">
+    <div className="context-preview-panel" {...props}>
+      <div className="context-preview-panel-header">{title}</div>
+      <div className="context-preview-screenshot">
         {screenshotUrl ? (
           <div
-            className="context-review-screenshot__scaler"
+            className="context-preview-screenshot__scaler"
             style={{transform: `scale(${scale})`, margin}}
           >
             <img src={screenshotUrl} alt="Segment context screenshot" />
           </div>
         ) : (
-          <div className="context-review-screenshot-placeholder">
+          <div className="context-preview-screenshot-placeholder">
             No screenshot available
           </div>
         )}

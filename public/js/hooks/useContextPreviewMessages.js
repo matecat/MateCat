@@ -1,12 +1,15 @@
 import {useState, useRef, useEffect} from 'react'
-import ContextReviewChannel from '../utils/contextReviewChannel'
+import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {
   getSegmentNodeMap,
+  getSidsFromElement,
+  replaceTextContent,
+  stripSegmentTags,
   updateNodeTranslation,
-} from '../utils/contextReviewUtils'
+} from '../utils/contextPreviewUtils'
 
 /**
- * Subscribes to ContextReviewChannel and handles all incoming message types.
+ * Subscribes to ContextPreviewChannel and handles all incoming message types.
  *
  * @param {{
  *   onHighlight: (numericSid: number, contextUrl: string|null) => void,
@@ -18,7 +21,7 @@ import {
  * }} params
  * @returns {{segments: Array, setSegments: Function, currentContextUrl: string|null}}
  */
-const useContextReviewMessages = ({
+const useContextPreviewMessages = ({
   onHighlight,
   onTranslationUpdate,
   highlightRef,
@@ -70,8 +73,22 @@ const useContextReviewMessages = ({
               const el = map.nodes[nodeIndex]
               if (!el) return
               const result = updateNodeTranslation(el, updated)
-              if (result === 'mismatch') showNodeWarning(el)
-              else clearNodeWarning(el)
+              if (result === 'mismatch') {
+                // Revert the node text to source so stale translation is removed
+                const sids = getSidsFromElement(el)
+                const sourceSeg = updated.find(
+                  (s) => sids.includes(Number(s.sid)) && s.source,
+                )
+                if (sourceSeg) {
+                  replaceTextContent(
+                    el,
+                    stripSegmentTags(sourceSeg.source).trim(),
+                  )
+                }
+                showNodeWarning(el)
+              } else {
+                clearNodeWarning(el)
+              }
             })
           }
           onTranslationUpdate(numericSid, target, updated)
@@ -80,7 +97,7 @@ const useContextReviewMessages = ({
       }
     }
 
-    const off = ContextReviewChannel.onMessage(handleMessage)
+    const off = ContextPreviewChannel.onMessage(handleMessage)
     return off
   }, [
     onHighlight,
@@ -93,10 +110,10 @@ const useContextReviewMessages = ({
 
   // Request segments from CatTool on mount
   useEffect(() => {
-    ContextReviewChannel.sendMessage({type: 'requestSegments'})
+    ContextPreviewChannel.sendMessage({type: 'requestSegments'})
   }, [])
 
   return {segments, setSegments, currentContextUrl}
 }
 
-export default useContextReviewMessages
+export default useContextPreviewMessages

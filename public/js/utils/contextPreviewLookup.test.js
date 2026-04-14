@@ -1,4 +1,4 @@
-import {findElementByMetadata} from './contextReviewLookup'
+import {findElementByMetadata} from './contextPreviewLookup'
 
 describe('findElementByMetadata', () => {
   let container
