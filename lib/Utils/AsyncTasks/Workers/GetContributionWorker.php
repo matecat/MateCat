@@ -475,6 +475,7 @@ class GetContributionWorker extends AbstractWorker
                 $config = $mt_engine->getConfigStruct();
 
                 $config['pid'] = $jobStruct->id_project;
+                $config['id_project'] = $contributionStruct->getProjectStruct()->id;
                 $config['segment'] = $contributionStruct->getContexts()->segment;
                 $config['source'] = $jobStruct->source;
                 $config['target'] = $jobStruct->target;
@@ -484,7 +485,6 @@ class GetContributionWorker extends AbstractWorker
                 $config['job_password'] = $jobStruct->password;
                 $config['session'] = $contributionStruct->getSessionId();
                 $config['all_job_tm_keys'] = $jobStruct->tm_keys;
-                $config['id_project'] = $contributionStruct->getProjectStruct()->id;
                 $config['context_list_before'] = $contributionStruct->context_list_before;
                 $config['context_list_after'] = $contributionStruct->context_list_after;
                 $config['user_id'] = $contributionStruct->getUser()->uid;
