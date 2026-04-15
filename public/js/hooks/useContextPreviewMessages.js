@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from 'react'
+import {useState, useEffect} from 'react'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {
   getSegmentNodeMap,
@@ -14,7 +14,6 @@ import {
  * @param {{
  *   onHighlight: (numericSid: number, contextUrl: string|null) => void,
  *   onTranslationUpdate: (numericSid: number, target: string, updatedSegments: Array) => void,
- *   highlightRef: React.RefObject,
  *   targetRef: React.RefObject,
  *   showNodeWarning: (el: HTMLElement) => void,
  *   clearNodeWarning: (el: HTMLElement) => void,
@@ -24,19 +23,12 @@ import {
 const useContextPreviewMessages = ({
   onHighlight,
   onTranslationUpdate,
-  highlightRef,
   targetRef,
   showNodeWarning,
   clearNodeWarning,
 }) => {
   const [segments, setSegments] = useState([])
   const [currentContextUrl, setCurrentContextUrl] = useState(null)
-  const segmentsRef = useRef([])
-
-  // Keep segmentsRef in sync for use inside channel callbacks
-  useEffect(() => {
-    segmentsRef.current = segments
-  }, [segments])
 
   useEffect(() => {
     const handleMessage = (message) => {
@@ -50,13 +42,14 @@ const useContextPreviewMessages = ({
       }
 
       if (message.type === 'highlight') {
-        const cur = highlightRef.current
         const numericSid = Number(message.sid)
-        if (cur?.mode === 'node' && cur.sids.includes(numericSid)) return
-        if (message.context_url) {
-          setCurrentContextUrl(message.context_url)
-        }
-        onHighlight(numericSid, message.context_url ?? null)
+        setSegments((prev) => {
+          const seg = prev.find((s) => Number(s.sid) === numericSid)
+          const contextUrl = seg?.context_url ?? null
+          setCurrentContextUrl(contextUrl)
+          onHighlight(numericSid, contextUrl)
+          return prev
+        })
       }
 
       if (message.type === 'updateTranslation') {
@@ -102,7 +95,6 @@ const useContextPreviewMessages = ({
   }, [
     onHighlight,
     onTranslationUpdate,
-    highlightRef,
     targetRef,
     showNodeWarning,
     clearNodeWarning,

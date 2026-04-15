@@ -102,36 +102,31 @@ const ContextPreview = () => {
   const {segments, currentContextUrl} = useContextPreviewMessages({
     onHighlight,
     onTranslationUpdate,
-    highlightRef,
     targetRef,
     showNodeWarning,
     clearNodeWarning,
   })
 
-  // Derive the URL to pass to useContextDocument:
-  // - If highlight messages have arrived and carried a context_url → use it.
-  // - Otherwise → use the first segment's context_url (if any).
-  // - Passing null → hook falls back to the hardcoded constant.
-  const firstSegmentContextUrl = useMemo(
-    () => segments.find((s) => s.context_url)?.context_url ?? null,
+  const {htmlContent, loading, error} = useContextDocument(currentContextUrl)
+
+  // Filter segments to only those with context_url
+  const mappableSegments = useMemo(
+    () => segments.filter((s) => s.context_url),
     [segments],
   )
-  const documentUrl = currentContextUrl ?? firstSegmentContextUrl
-
-  const {htmlContent, loading, error} = useContextDocument(documentUrl)
 
   // Build metadataMap for tagSegments strategy pass
   const metadataMap = useMemo(
     () =>
       Object.fromEntries(
-        segments
+        mappableSegments
           .filter((s) => s.resname && s.restype)
           .map((s) => [
             Number(s.sid),
             {resname: s.resname, restype: s.restype},
           ]),
       ),
-    [segments],
+    [mappableSegments],
   )
 
   const screenshotMap = useMemo(
@@ -159,6 +154,10 @@ const ContextPreview = () => {
 
   // Render the fetched HTML into panels once (or when viewMode changes)
   const htmlRenderedRef = useRef({source: '', target: ''})
+
+  useEffect(() => {
+    if (!currentContextUrl) htmlRenderedRef.current = {source: '', target: ''}
+  }, [currentContextUrl])
 
   useEffect(() => {
     if (!htmlContent) return
@@ -194,21 +193,21 @@ const ContextPreview = () => {
   // Tag segments in panels when segments or HTML changes
   useEffect(() => {
     if (
-      !segments.length ||
+      !mappableSegments.length ||
       !htmlReady ||
       contentView !== CONTENT_VIEWS.LIVE_PREVIEW
     )
       return
     if (targetRef.current) {
-      tagSegments(targetRef.current, segments, {
+      tagSegments(targetRef.current, mappableSegments, {
         replaceWithTarget: true,
         metadataMap,
       })
     }
     if (sourceRef.current) {
-      tagSegments(sourceRef.current, segments, {metadataMap})
+      tagSegments(sourceRef.current, mappableSegments, {metadataMap})
     }
-  }, [segments, htmlReady, viewMode, metadataMap, contentView])
+  }, [mappableSegments, htmlReady, viewMode, metadataMap, contentView])
 
   // Re-apply pending highlight after tagging completes
   useEffect(() => {
@@ -482,5 +481,5 @@ export default ContextPreview
 
 mountPage({
   Component: ContextPreview,
-  rootElement: document.getElementsByClassName('context-review__page')[0],
+  rootElement: document.getElementsByClassName('context-preview__page')[0],
 })
