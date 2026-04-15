@@ -322,8 +322,9 @@ function CatTool() {
         segment ?? {},
       )
 
-      setHasPreviewContent(Boolean(context_url || screenshot))
-      setIsPreviewOpen(false)
+      const hasContent = Boolean(context_url || screenshot)
+      setHasPreviewContent(hasContent)
+      if (!hasContent) setIsPreviewOpen(false)
       ContextPreviewChannel.sendMessage({
         type: 'highlight',
         sid: Number(sid),
