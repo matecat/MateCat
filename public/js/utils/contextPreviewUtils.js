@@ -494,10 +494,10 @@ export const tagSegments = (
 
   // Strategy pass — runs first, highest priority.
   // Segments with resname + restype are resolved via DOM-attribute lookups
-  // before any text-match runs. Misses join fallbackQueue and compete in
-  // text-match exactly as segments with no metadata.
+  // before any text-match runs. Misses (element not found) silently fall
+  // through to text-match exactly as segments with no metadata.
   const strategyResolved = new Set()
-  const fallbackQueue = new Set()
+  const tier1Nodes = new Set()
 
   for (const [sidStr, {resname, restype}] of Object.entries(metadataMap)) {
     const sid = Number(sidStr)
@@ -510,11 +510,10 @@ export const tagSegments = (
     if (el) {
       appendSid(el, sid)
       strategyResolved.add(sid)
+      tier1Nodes.add(el)
       // Mark the corresponding prepared entry as used so Pass 1 skips it
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
-    } else {
-      fallbackQueue.add(sid)
     }
   }
 
@@ -525,6 +524,9 @@ export const tagSegments = (
   // positional pairing when duplicate source texts appear in multiple
   // elements (e.g. two <p>Equipment</p> nodes).
   for (const el of candidates) {
+    // Skip elements that were successfully tagged by the Strategy Pass
+    if (tier1Nodes.has(el)) continue
+
     // Skip elements already tagged (from a previous incremental call) —
     // Pass 1 is strictly for fresh, untagged elements.
     if (el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
@@ -558,6 +560,9 @@ export const tagSegments = (
   // Text replacement (when replaceWithTarget is true) happens after both
   // passes, via updateNodeTranslation.
   for (const el of candidates) {
+    // Skip elements that were successfully tagged by the Strategy Pass
+    if (tier1Nodes.has(el)) continue
+
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
 

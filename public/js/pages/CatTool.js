@@ -92,8 +92,9 @@ function CatTool() {
     handleMouseDown: onResizeMouseDown,
   } = useResizable({initialHeight: 500, minHeight: 100})
 
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true)
-  const contextPreviewUrl = `${window.origin}/context-review/${config.id_job}/${config.password}`
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [hasPreviewContent, setHasPreviewContent] = useState(false)
+  const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}`
   const popupWindowRef = useRef(null)
 
   const togglePreview = useCallback(() => {
@@ -312,6 +313,23 @@ function CatTool() {
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
+    const onSegmentOpened = (sid) => {
+      const segFromById = SegmentStore.getSegmentById(sid)
+      const segment =
+        segFromById?.toJS?.() ||
+        SegmentStore.getAllSegments().find((seg) => seg.sid == sid)
+      const {context_url, screenshot} = extractSegmentContextFields(
+        segment ?? {},
+      )
+
+      setHasPreviewContent(Boolean(context_url || screenshot))
+      setIsPreviewOpen(false)
+      ContextPreviewChannel.sendMessage({
+        type: 'highlight',
+        sid: Number(sid),
+        context_url: context_url ?? null,
+      })
+    }
     const checkAnalysisState = ({analysis_complete}) => {
       setIsAnalysisCompleted(analysis_complete)
 
@@ -355,6 +373,7 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
+    SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, onSegmentOpened)
     CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     const getJobMetadata = ({jobMetadata}) => setJobMetadata(jobMetadata)
@@ -378,6 +397,10 @@ function CatTool() {
       SegmentStore.removeListener(
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.OPEN_SEGMENT,
+        onSegmentOpened,
       )
       CatToolStore.removeListener(
         CatToolConstants.SET_PROGRESS,
@@ -639,6 +662,7 @@ function CatTool() {
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
+      {/*{hasPreviewContent && (*/}
       <div id="context-preview-wrapper">
         {isPreviewOpen && (
           <div
@@ -685,6 +709,7 @@ function CatTool() {
           </div>
         )}
       </div>
+      {/*)}*/}
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel

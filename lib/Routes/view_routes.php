@@ -17,7 +17,7 @@ route('/analyze/[:project_name]/[i:pid]-[:password]', 'GET', ['Controller\Views\
 route('/jobanalysis/[i:pid]-[i:jid]-[:password]', 'GET', ['Controller\Views\AnalyzeController', 'renderView']);
 route('/revise-summary/[i:jid]-[:password]', 'GET', ['Controller\Views\QualityReportController', 'renderView']);
 route('/activityLog/[i:id_project]/[:password]', 'GET', ['Controller\Views\ActivityLogController', 'renderView']);
-route('/context-review/[i:id_project]/[:password]', 'GET', ['Controller\Views\ContextReviewController', 'renderView']);
+route('/context-preview/[i:id_project]/[:password]', 'GET', ['Controller\Views\ContextReviewController', 'renderView']);
 route('/utils/xliff-to-target', 'GET', ['Controller\Views\XliffToTargetController', 'renderView']);
 
 route('/translate/[:project_name]/[:lang_pair]/[i:jid]-?[i:split]?-[:password]', 'GET', ['Controller\Views\CattoolController', 'renderView']);
