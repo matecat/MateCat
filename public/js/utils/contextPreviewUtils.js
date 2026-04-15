@@ -504,6 +504,11 @@ export const tagSegments = (
     if (!resname || !restype) continue
     if (alreadyTagged.has(sid)) {
       strategyResolved.add(sid)
+      const idx = prepared.findIndex((p) => p.sid === sid)
+      if (idx !== -1) used.add(idx)
+      // Re-find the element so Pass 2 still excludes it on incremental calls
+      const existingEl = findElementByMetadata(container, resname, restype)
+      if (existingEl) tier1Nodes.add(existingEl)
       continue
     }
     const el = findElementByMetadata(container, resname, restype)
@@ -560,8 +565,10 @@ export const tagSegments = (
   // Text replacement (when replaceWithTarget is true) happens after both
   // passes, via updateNodeTranslation.
   for (const el of candidates) {
-    // Skip elements that were successfully tagged by the Strategy Pass
+    // Skip elements that were successfully tagged by the Strategy Pass,
+    // or that contain / are contained by a tier1 node.
     if (tier1Nodes.has(el)) continue
+    if ([...tier1Nodes].some((n) => el.contains(n) || n.contains(el))) continue
 
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
@@ -570,6 +577,7 @@ export const tagSegments = (
 
     for (let i = 0; i < prepared.length; i++) {
       if (getCachedSids(el).includes(prepared[i].sid)) continue
+      if (strategyResolved.has(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
         appendSid(el, prepared[i].sid)
       }

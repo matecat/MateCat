@@ -805,4 +805,35 @@ describe('tagSegments — strategy pass (metadataMap)', () => {
     const heroEl = document.body.querySelector('#hero')
     expect(getSidsFromElement(heroEl)).toContain(1)
   })
+
+  it('tier1 element is not re-tagged by text-match on incremental calls', () => {
+    // SID 1 is strategy-resolved to #hero on the first call.
+    // On the second call, SID 2 has the same text as #hero.
+    // #hero must NOT get SID 2 appended to it.
+    document.body.innerHTML =
+      '<p id="hero">Same text</p><p>Same text</p><p>Other</p>'
+    const heroEl = document.body.querySelector('#hero')
+    const dupEl = document.body.querySelectorAll('p')[1]
+
+    // First call: strategy resolves SID 1 to #hero
+    tagSegments(document.body, [{sid: 1, source: 'Same text', target: ''}], {
+      metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}},
+    })
+    expect(getSidsFromElement(heroEl)).toEqual([1])
+
+    // Second incremental call: SID 2 has same text as #hero but no strategy.
+    // #hero is already tagged (alreadyTagged); the tier1Nodes fix must protect it.
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Same text', target: ''},
+        {sid: 2, source: 'Same text', target: ''},
+      ],
+      {metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}}},
+    )
+    // #hero must still only have SID 1 — SID 2 must NOT be appended
+    expect(getSidsFromElement(heroEl)).toEqual([1])
+    // SID 2 should be tagged on the duplicate-text element via text-match
+    expect(getSidsFromElement(dupEl)).toContain(2)
+  })
 })
