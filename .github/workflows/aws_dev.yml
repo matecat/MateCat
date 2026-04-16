@@ -119,8 +119,8 @@ jobs:
           docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$RELEASE_TAG
 
           # PUSH Images
-          docker push $IMAGE_WEB_REPOSITORY:$RELEASE_TAG
-          docker push $IMAGE_DAEMONS_REPOSITORY:$RELEASE_TAG
-          
-          docker push $IMAGE_WEB_REPOSITORY:latest
-          docker push $IMAGE_WEB_REPOSITORY:latest
+#          docker push $IMAGE_WEB_REPOSITORY:$RELEASE_TAG
+#          docker push $IMAGE_DAEMONS_REPOSITORY:$RELEASE_TAG
+#
+#          docker push $IMAGE_WEB_REPOSITORY:latest
+#          docker push $IMAGE_DAEMONS_REPOSITORY:latest
