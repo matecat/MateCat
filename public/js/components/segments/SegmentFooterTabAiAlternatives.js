@@ -238,7 +238,11 @@ export const SegmentFooterTabAiAlternatives = ({
       if (cached) {
         receiveAlternatives({data: cached})
       } else {
-        aiAlternartiveTranslations(requestingParams.current)
+        aiAlternartiveTranslations(requestingParams.current).catch(() =>
+          receiveAlternatives({
+            data: {has_error: true, message: 'Fetch failed'},
+          }),
+        )
       }
     }
 

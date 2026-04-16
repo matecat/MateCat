@@ -727,7 +727,7 @@ export class MemoizeRequest {
   set(params, value) {
     if (!this.has(params)) this.cache.push({key: this.getKey(params), value})
 
-    if (Object.values(this.cache).length > this.LIMIT) this.cache.shift()
+    if (this.cache.length > this.LIMIT) this.cache.shift()
   }
 
   has(params) {

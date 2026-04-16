@@ -60,7 +60,9 @@ export const SegmentFooterTabAiFeedback = ({
       if (cached) {
         receiveFeedback({data: cached})
       } else {
-        aiFeedback(requestingParams.current)
+        aiFeedback(requestingParams.current).catch(() =>
+          receiveFeedback({data: {has_error: true, message: 'Fetch failed'}}),
+        )
       }
     }
 
