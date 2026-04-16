@@ -28,16 +28,16 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "no-valid-branch-develop" ]
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+    types: [ opened, reopened ]
 
 env:
-  AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
-  CONTAINER_NAME: MY_CONTAINER_NAME           # set this to the name of the container in the
+  AWS_REGION: 'eu-central-1'                   # set this to your preferred AWS region, e.g. us-west-1
   # containerDefinitions section of your task definition
   REPO_PATH: 208060995276.dkr.ecr.eu-central-1.amazonaws.com
   APP_NAME: matecat
-
 
 permissions:
   contents: read
@@ -46,7 +46,7 @@ jobs:
 
   tests:
     name: Run tests in a test container
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
@@ -70,47 +70,47 @@ jobs:
           # Run tests
           docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    environment: develop
-    needs:
-      - tests
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
-          submodules: recursive
-
-      #      - name: Configure AWS credentials
-      #        uses: aws-actions/configure-aws-credentials@v1
-      #        with:
-      #          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
-      #          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
-      #          aws-region: ${{ env.AWS_REGION }}
-      #
-      #      - name: Login to Amazon ECR
-      #        id: login-ecr
-      #        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build, tag, and push image to Amazon ECR for Development
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
-          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
-          BUILD_NUMBER: ${{ github.run_number }}
-
-        run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
-          
-          docker compose -f docker/docker-compose-ci.yml build
-          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
-          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$BUILD-$BUILD_NUMBER
-          
-          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:latest
-          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$BUILD-$BUILD_NUMBER
+#  deploy:
+#    name: Deploy
+#    runs-on: ubuntu-24.04
+#    environment: develop
+#    needs:
+#      - tests
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v6
+#        with:
+#          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
+#          submodules: recursive
+#
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
+#          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
+#          aws-region: ${{ env.AWS_REGION }}
+#
+#      - name: Login to Amazon ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v1
+#
+#      - name: Build, tag, and push image to Amazon ECR for Development
+#        id: build-image
+#        env:
+#          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
+#          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
+#          BUILD_NUMBER: ${{ github.run_number }}
+#
+#        run: |
+#          # Build a docker container and
+#          # push it to ECR so that it can
+#          # be deployed to ECS.
+#          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
+#
+#          docker compose -f docker/docker-compose-ci.yml build
+#          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
+#          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$BUILD-$BUILD_NUMBER
+#
+#          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:latest
+#          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$BUILD-$BUILD_NUMBER
