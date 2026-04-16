@@ -1,4 +1,4 @@
-import React, {createRef, useEffect, useState} from 'react'
+import React, {createRef, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -10,7 +10,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {EditorLite} from './EditorLite'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
-import CommonUtils from '../../utils/commonUtils'
+import CommonUtils, {MemoizeRequest} from '../../utils/commonUtils'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -174,6 +174,8 @@ const enrichAlternatives = ({
   })
 }
 
+const aiCache = new MemoizeRequest()
+
 export const SegmentFooterTabAiAlternatives = ({
   code,
   active_class,
@@ -183,6 +185,8 @@ export const SegmentFooterTabAiAlternatives = ({
   const [alternatives, setAlternatives] = useState()
 
   const editorLiteRefs = []
+
+  const requestingParams = useRef()
 
   const getEditorLiteRef = (index) => {
     if (!editorLiteRefs[index]) {
@@ -195,6 +199,8 @@ export const SegmentFooterTabAiAlternatives = ({
     let selectedText = ''
 
     const requestAlternatives = ({text}) => {
+      if (requestingParams.current) return
+
       selectedText = DraftMatecatUtils.excludeSomeTagsFromText(text, [
         'g',
         'bx',
@@ -212,7 +218,8 @@ export const SegmentFooterTabAiAlternatives = ({
       const laraStyle =
         CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
         LARA_STYLES.FAITHFUL
-      aiAlternartiveTranslations({
+
+      requestingParams.current = {
         id_job: segment.id_job,
         password: segment.password,
         idSegment: segment.sid,
@@ -224,11 +231,21 @@ export const SegmentFooterTabAiAlternatives = ({
         targetContextSentencesString: contextListAfter.map((t) => t).join('\n'),
         excerpt: text,
         styleInstructions: laraStyle,
-      })
+      }
+
+      const cached = aiCache.get(requestingParams.current)
+
+      if (cached) {
+        receiveAlternatives({data: cached})
+      } else {
+        aiAlternartiveTranslations(requestingParams.current)
+      }
     }
 
     const receiveAlternatives = ({data}) => {
       if (!data.has_error && Array.isArray(data.message)) {
+        aiCache.set(requestingParams.current, data)
+
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
           originalSentence: DraftMatecatUtils.excludeSomeTagsFromText(
@@ -282,6 +299,8 @@ export const SegmentFooterTabAiAlternatives = ({
         }
         CommonUtils.dispatchTrackingEvents('AiAlternativeError', message)
       }
+
+      requestingParams.current = undefined
     }
 
     SegmentStore.addListener(

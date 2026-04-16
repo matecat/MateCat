@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -9,9 +9,11 @@ import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
-import CommonUtils from '../../utils/commonUtils'
+import CommonUtils, {MemoizeRequest} from '../../utils/commonUtils'
 import IconLike from '../icons/IconLike'
 import IconDislike from '../icons/IconDislike'
+
+const aiCache = new MemoizeRequest()
 
 export const SegmentFooterTabAiFeedback = ({
   code,
@@ -22,8 +24,12 @@ export const SegmentFooterTabAiFeedback = ({
   const [feedback, setFeedback] = useState()
   const [feedbackLeave, setFeedbackLeave] = useState()
 
+  const requestingParams = useRef()
+
   useEffect(() => {
     const requestFeedback = () => {
+      if (requestingParams.current) return
+
       setFeedback()
       setFeedbackLeave(undefined)
 
@@ -40,18 +46,28 @@ export const SegmentFooterTabAiFeedback = ({
         ),
       ).replace(/·/g, ' ')
 
-      aiFeedback({
+      requestingParams.current = {
         idSegment: segment.sid,
         source: decodedSource,
         target: decodedTarget,
         style:
           CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
           LARA_STYLES.FAITHFUL,
-      })
+      }
+
+      const cached = aiCache.get(requestingParams.current)
+
+      if (cached) {
+        receiveFeedback({data: cached})
+      } else {
+        aiFeedback(requestingParams.current)
+      }
     }
 
     const receiveFeedback = ({data}) => {
       if (!data.has_error && data.message?.comment) {
+        aiCache.set(requestingParams.current, data)
+
         setFeedback({
           category: data.message.category,
           content: data.message.comment,
@@ -71,6 +87,8 @@ export const SegmentFooterTabAiFeedback = ({
         }
         CommonUtils.dispatchTrackingEvents('AiLaraFeedbackError', message)
       }
+
+      requestingParams.current = undefined
     }
 
     SegmentStore.addListener(SegmentConstants.AI_FEEDBACK, requestFeedback)
