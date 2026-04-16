@@ -699,7 +699,7 @@ class SegmentSource extends React.Component {
           className="segment-target-toolbar-icon"
           size={BUTTON_SIZE.ICON_SMALL}
           mode={BUTTON_MODE.OUTLINE}
-          title="Click to add the highlighted text to the glossary"
+          title="Click to add the highlighted text to the termbase"
           onMouseDown={() => {
             SegmentActions.openGlossaryFormPrefill({
               sid: segment.sid,
