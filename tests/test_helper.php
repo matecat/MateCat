@@ -14,7 +14,7 @@ require_once(PROJECT_ROOT . 'lib/Bootstrap.php');
 
 if (getenv('USE_LOCAL_DEVELOPMENT_ENV')) {
     Bootstrap::start();
-} elseif (getenv('TRAVIS')) {
+} elseif (getenv('TRAVIS') || getenv('GITHUB_ACTION')) {
     Bootstrap::start(new SplFileInfo(TEST_DIR . '/inc/config.travis.ini'), new SplFileInfo(TEST_DIR . '/inc/task_manager_config.ini'));
 } else {
     Bootstrap::start(new SplFileInfo(TEST_DIR . '/inc/config.local.ini'), new SplFileInfo(TEST_DIR . '/inc/task_manager_config.ini'));
