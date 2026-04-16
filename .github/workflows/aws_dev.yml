@@ -49,9 +49,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
-          token: '${{ github.event_name == ''push'' && secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
           submodules: recursive
 
       - name: Load services and build test node
@@ -78,7 +78,7 @@ jobs:
       - tests
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
           submodules: recursive
