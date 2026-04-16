@@ -35,6 +35,8 @@ on:
 env:
   AWS_REGION: 'eu-central-1'                   # set this to your preferred AWS region, e.g. us-west-1
   # containerDefinitions section of your task definition
+
+  # TODO Remove in favor of ECR_REGISTRY
   REPO_PATH: 208060995276.dkr.ecr.eu-central-1.amazonaws.com
   APP_NAME: matecat
 
@@ -92,7 +94,7 @@ jobs:
 
       #      - name: Login to Amazon ECR
       #        id: login_ecr
-#        uses: aws-actions/amazon-ecr-login@v1
+      #        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR for Development
         id: build-image
@@ -103,6 +105,9 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
 
         run: |
+          
+          echo "*** ----------> $ECR_REGISTRY"
+          
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
