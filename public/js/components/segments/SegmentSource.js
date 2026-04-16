@@ -669,16 +669,18 @@ class SegmentSource extends React.Component {
     })
 
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
-      <ul className="optionsToolbar">
+      <div className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) &&
           this.context.userInfo?.metadata.ai_assistant === 0 && (
-            <li
+            <Button
+              className="segment-target-toolbar-icon"
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
               title={
                 isEnabledAiAssistantButton
                   ? 'See the meaning of the highlighted text in this context'
                   : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
               }
-              className={!isEnabledAiAssistantButton ? 'disabled' : ''}
               onMouseDown={() => {
                 if (isEnabledAiAssistantButton) {
                   SegmentActions.helpAiAssistant({
@@ -687,11 +689,16 @@ class SegmentSource extends React.Component {
                   })
                 }
               }}
+              disabled={!isEnabledAiAssistantButton}
             >
               <Assistant />
-            </li>
+            </Button>
           )}
-        <li
+
+        <Button
+          className="segment-target-toolbar-icon"
+          size={BUTTON_SIZE.ICON_SMALL}
+          mode={BUTTON_MODE.OUTLINE}
           title="Click to add the highlighted text to the glossary"
           onMouseDown={() => {
             SegmentActions.openGlossaryFormPrefill({
@@ -701,8 +708,8 @@ class SegmentSource extends React.Component {
           }}
         >
           <Education />
-        </li>
-      </ul>
+        </Button>
+      </div>
     )
 
     // Standard editor
