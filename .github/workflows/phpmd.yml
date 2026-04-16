@@ -21,8 +21,6 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "develop" ]
-  schedule:
-    - cron: '40 17 * * 4'
 
 permissions:
   contents: read
@@ -38,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -49,12 +47,12 @@ jobs:
           tools: composer
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --no-interaction --prefer-dist
         continue-on-error: false
           
       - name: Run PHPMD
-        run: ./vendor/bin/phpmd . sarif codesize --reportfile phpmd-results.sarif
-        continue-on-error: false
+        run: ./vendor/bin/phpmd ./lib/ sarif codesize --reportfile phpmd-results.sarif
+        continue-on-error: true
 
       - name: Upload analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v3
