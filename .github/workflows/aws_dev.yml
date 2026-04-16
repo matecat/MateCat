@@ -24,7 +24,7 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
-name: Deploy to Amazon ECS
+name: Test the build and deploy to Freddy
 
 on:
   push:
@@ -49,9 +49,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
-          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
+          token: '${{ github.event_name == ''push'' && secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
           submodules: recursive
 
       - name: Load services and build test node
@@ -69,47 +69,58 @@ jobs:
           # Run tests
           docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
-#  deploy:
-#    name: Deploy
-#    runs-on: ubuntu-24.04
-#    environment: develop
-#    needs:
-#      - tests
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v6
-#        with:
-#          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
-#          submodules: recursive
-#
-#      - name: Configure AWS credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
-#          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
-#          aws-region: ${{ env.AWS_REGION }}
-#
-#      - name: Login to Amazon ECR
-#        id: login-ecr
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    environment: develop
+    if: ${{ github.base_ref == 'develop' || github.event_name == 'push' }}
+    needs:
+      - tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
+          submodules: recursive
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
+          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      #      - name: Login to Amazon ECR
+      #        id: login_ecr
 #        uses: aws-actions/amazon-ecr-login@v1
-#
-#      - name: Build, tag, and push image to Amazon ECR for Development
-#        id: build-image
-#        env:
-#          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
-#          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
-#          BUILD_NUMBER: ${{ github.run_number }}
-#
-#        run: |
-#          # Build a docker container and
-#          # push it to ECR so that it can
-#          # be deployed to ECS.
-#          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
-#
-#          docker compose -f docker/docker-compose-ci.yml build
-#          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
-#          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$BUILD-$BUILD_NUMBER
-#
-#          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:latest
-#          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$BUILD-$BUILD_NUMBER
+
+      - name: Build, tag, and push image to Amazon ECR for Development
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
+          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
+          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
+          BUILD_NUMBER: ${{ github.run_number }}
+
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
+          RELEASE_TAG=$BUILD-$BUILD_NUMBER
+          
+          docker compose -f docker/docker-compose-ci.yml build
+          
+          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
+          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$RELEASE_TAG
+
+          daemons_tag=$BUILD-$BUILD_NUMBER
+          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:latest
+          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$RELEASE_TAG
+
+          # PUSH Images
+          docker push $IMAGE_WEB_REPOSITORY:$RELEASE_TAG
+          docker push $IMAGE_DAEMONS_REPOSITORY:$RELEASE_TAG
+          
+          docker push $IMAGE_WEB_REPOSITORY:latest
+          docker push $IMAGE_WEB_REPOSITORY:latest
