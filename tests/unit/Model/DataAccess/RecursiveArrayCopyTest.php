@@ -6,17 +6,68 @@ use Model\DataAccess\RecursiveArrayCopy;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
+class TestObjectWithPublicProps {
+    use RecursiveArrayCopy;
+
+    public string $name = 'John';
+    public int $age = 30;
+}
+
+class TestObjectWithArrayProperties {
+    use RecursiveArrayCopy;
+
+    public array $items = ['item1', 'item2'];
+}
+
+class TestObjectWithTitle {
+    use RecursiveArrayCopy;
+
+    public string $title = 'Nested';
+}
+
+class TestObjectWithNestedObject {
+    use RecursiveArrayCopy;
+
+    public object $nested;
+
+    public function __construct($nested)
+    {
+        $this->nested = $nested;
+    }
+}
+
+class TestObjectWithMaskProperties {
+    use RecursiveArrayCopy;
+
+    public int $id = 1;
+    public string $name = 'John';
+    public string $email = 'john@example.com';
+}
+
+class TestObjectWithNullProperty {
+    use RecursiveArrayCopy;
+
+    public ?string $name = null;
+}
+
+class TestObjectWithMixedProperties {
+    use RecursiveArrayCopy;
+
+    private int $id = 1;
+    protected string $secret = 'hidden';
+    public string $email = 'public@example.com';
+}
+
+class TestObjectEmpty {
+    use RecursiveArrayCopy;
+}
+
 class RecursiveArrayCopyTest extends AbstractTest
 {
     #[Test]
     public function testToArrayWithPublicProperties()
     {
-        $testObject = new class {
-            use RecursiveArrayCopy;
-
-            public string $name = 'John';
-            public int $age = 30;
-        };
+        $testObject = new TestObjectWithPublicProps();
 
         $expected = [
             'name' => 'John',
@@ -29,11 +80,7 @@ class RecursiveArrayCopyTest extends AbstractTest
     #[Test]
     public function testToArrayWithArrayProperties()
     {
-        $testObject = new class {
-            use RecursiveArrayCopy;
-
-            public array $items = ['item1', 'item2'];
-        };
+        $testObject = new TestObjectWithArrayProperties();
 
         $expected = [
             'items' => ['item1', 'item2'],
@@ -45,22 +92,9 @@ class RecursiveArrayCopyTest extends AbstractTest
     #[Test]
     public function testToArrayWithNestedObjectProperties()
     {
-        $nestedObject = new class {
-            use RecursiveArrayCopy;
+        $nestedObject = new TestObjectWithTitle();
 
-            public string $title = 'Nested';
-        };
-
-        $testObject = new class ($nestedObject) {
-            use RecursiveArrayCopy;
-
-            public object $nested;
-
-            public function __construct($nested)
-            {
-                $this->nested = $nested;
-            }
-        };
+        $testObject = new TestObjectWithNestedObject($nestedObject);
 
         $expected = [
             'nested' => [
@@ -74,13 +108,7 @@ class RecursiveArrayCopyTest extends AbstractTest
     #[Test]
     public function testToArrayWithMask()
     {
-        $testObject = new class {
-            use RecursiveArrayCopy;
-
-            public int $id = 1;
-            public string $name = 'John';
-            public string $email = 'john@example.com';
-        };
+        $testObject = new TestObjectWithMaskProperties();
 
         $expected = [
             'name' => 'John',
@@ -92,11 +120,7 @@ class RecursiveArrayCopyTest extends AbstractTest
     #[Test]
     public function testToArrayWithNullPublicProperty()
     {
-        $testObject = new class {
-            use RecursiveArrayCopy;
-
-            public ?string $name = null;
-        };
+        $testObject = new TestObjectWithNullProperty();
 
         $expected = [
             'name' => null,
@@ -108,13 +132,7 @@ class RecursiveArrayCopyTest extends AbstractTest
     #[Test]
     public function testToArrayWithNonPublicProperties()
     {
-        $testObject = new class {
-            use RecursiveArrayCopy;
-
-            private int $id = 1;
-            protected string $secret = 'hidden';
-            public string $email = 'public@example.com';
-        };
+        $testObject = new TestObjectWithMixedProperties();
 
         $expected = [
             'email' => 'public@example.com',
@@ -126,9 +144,7 @@ class RecursiveArrayCopyTest extends AbstractTest
     #[Test]
     public function testToArrayWithEmptyObject()
     {
-        $testObject = new class {
-            use RecursiveArrayCopy;
-        };
+        $testObject = new TestObjectEmpty();
 
         $expected = [];
 
