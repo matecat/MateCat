@@ -31,8 +31,11 @@ jobs:
       contents: read # for checkout to fetch code
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
