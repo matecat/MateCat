@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Button} from './Button/Button'
 import Copy from '../icons/Copy'
 import Check from '../../../img/icons/Check'
@@ -9,12 +9,16 @@ export const ButtonCopy = (props) => {
   const tmOutRef = useRef()
 
   const {
-    onClick,
+    onClick = () => {},
     tooltip,
     tooltipCopied = 'Copied!',
     iconSize = 16,
     ...rest
   } = props
+
+  useEffect(() => {
+    return () => clearTimeout(tmOutRef.current)
+  }, [])
 
   const handleClick = (e) => {
     onClick(e)
