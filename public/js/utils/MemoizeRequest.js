@@ -16,13 +16,15 @@ export class MemoizeRequest {
   }
 
   set(params, value) {
-    if (!this.has(params)) this.cache.push({key: this.getKey(params), value})
+    const key = this.getKey(params)
+
+    if (!this.has(key)) this.cache.push({key, value})
 
     if (this.cache.length > this.LIMIT) this.cache.shift()
   }
 
-  has(params) {
-    return this.cache.some(({key}) => key === this.getKey(params))
+  has(key) {
+    return this.cache.some((item) => item.key === key)
   }
 
   stableStringify(obj) {
