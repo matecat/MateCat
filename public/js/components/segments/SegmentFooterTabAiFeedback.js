@@ -9,9 +9,10 @@ import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
-import CommonUtils, {MemoizeRequest} from '../../utils/commonUtils'
+import CommonUtils from '../../utils/commonUtils'
 import IconLike from '../icons/IconLike'
 import IconDislike from '../icons/IconDislike'
+import {MemoizeRequest} from '../../utils/MemoizeRequest'
 
 const aiCache = new MemoizeRequest()
 

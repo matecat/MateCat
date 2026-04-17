@@ -18,7 +18,7 @@ import TranslationMatches from './utils/translationMatches'
 import {getContributions} from '../../api/getContributions'
 import {SegmentContext} from './SegmentContext'
 import CatToolActions from '../../actions/CatToolActions'
-import {MemoizeRequest} from '../../utils/commonUtils'
+import {MemoizeRequest} from '../../utils/MemoizeRequest'
 
 const aiCache = new MemoizeRequest()
 

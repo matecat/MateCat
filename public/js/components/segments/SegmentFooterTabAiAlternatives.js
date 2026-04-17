@@ -10,7 +10,8 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {EditorLite} from './EditorLite'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
-import CommonUtils, {MemoizeRequest} from '../../utils/commonUtils'
+import CommonUtils from '../../utils/commonUtils'
+import {MemoizeRequest} from '../../utils/MemoizeRequest'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
