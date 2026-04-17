@@ -95,6 +95,20 @@ jobs:
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
           submodules: recursive
+
+      # For production deploys (tag-triggered), validate the tag matches
+      # strict semver: v<MAJOR>.<MINOR>.<PATCH> (e.g. v1.0.0, v10.2.3)
+      # Fails fast before any AWS credentials are used.
+      - name: Validate tag format
+        if: ${{ inputs.deploy_environment == 'production' }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$TAG' does not match v<MAJOR>.<MINOR>.<PATCH>"
+            exit 1
+          fi
+          echo "Tag '$TAG' is valid"
+
       # Extract version from inc/version.ini for the tag format:
       # build-<version>-<run_number>  (e.g. build-4.1.0-157)
       - name: Read app version
@@ -102,17 +116,20 @@ jobs:
         run: |
           BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
           echo "BUILD=$BUILD" >> $GITHUB_OUTPUT
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      # The registry URL is output dynamically (e.g. 208060995276.dkr.ecr...
+
+      # The registry URL is output dynamically (e.g. xxxxxxxxxxxxx.dkr.ecr...
       # for develop, 449641877310.dkr.ecr... for production).
       - name: Login to Amazon ECR
         id: login_ecr
         uses: aws-actions/amazon-ecr-login@v1
+
       # Build only base-node, web-node, and daemons-node (no test-node).
       - name: Build images
         env:
@@ -121,6 +138,7 @@ jobs:
         run: |
           docker compose -f docker/docker-compose-ci.yml build base-node
           docker compose -f docker/docker-compose-ci.yml build web-node daemons-node || exit 1
+
       # Push order: versioned tags first, then :latest aliases together.
       - name: Tag and push images to ECR
         env:
@@ -129,13 +147,16 @@ jobs:
         run: |
           WEB_REPO="${ECR_REGISTRY}/matecat/matecat-web-node"
           DAEMONS_REPO="${ECR_REGISTRY}/matecat/matecat-daemons-node"
+
           docker tag matecat/matecat-web-node     $WEB_REPO:$RELEASE_TAG
           docker tag matecat/matecat-web-node     $WEB_REPO:latest
           docker tag matecat/matecat-daemons-node $DAEMONS_REPO:$RELEASE_TAG
           docker tag matecat/matecat-daemons-node $DAEMONS_REPO:latest
+
           # ── versioned tags first ──────────────────────────────────────────
           docker push $WEB_REPO:$RELEASE_TAG
           docker push $DAEMONS_REPO:$RELEASE_TAG
+
           # ── :latest aliases together ──────────────────────────────────────
           docker push $WEB_REPO:latest
           docker push $DAEMONS_REPO:latest

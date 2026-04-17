@@ -1,11 +1,16 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Production: test on every PR/push to master, deploy ONLY on semver tags (v*)
+# Production: test on every PR/push to master, deploy ONLY on version tags
+#
+# GitHub Actions tag filters only support glob patterns (not regex).
+# We use "v[0-9]*.[0-9]*.[0-9]*" to approximate semver (v1.0.0, v10.2.3).
+# Each segment must start with a digit. Not perfect (glob limitation) but
+# a regex validation step in _ci-cd.yml enforces the exact format.
 # ─────────────────────────────────────────────────────────────────────────────
 name: "CI/CD: Production"
 on:
   push:
     branches: [ "master" ]
-    tags: [ "v*" ]
+    tags: [ "v[0-9]*.[0-9]*.[0-9]*" ]
   pull_request:
     branches: [ "master" ]
 permissions:
