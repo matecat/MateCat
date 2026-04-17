@@ -75,7 +75,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-24.04
     environment: develop
-    if: ${{ github.base_ref == 'develop' || github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' }}
     needs:
       - tests
     steps:
