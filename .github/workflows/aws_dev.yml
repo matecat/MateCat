@@ -58,9 +58,9 @@ jobs:
 
       - name: Load services and build test node
         env:
-          AWS_ACCESS_KEY_ID: ${{ env.TEST_AWS_ACCESS_KEY_ID }}
+          AWS_ACCESS_KEY_ID: ${{ vars.TEST_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          AWS_REGION: ${{ env.AWS_REGION }}
           REPOSITORY_BRANCH: ${{ github.ref_name }}
           REPOSITORY_TAG: ${{ github.ref_name }}
         run: |
@@ -94,7 +94,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
+          aws-access-key-id: ${{ vars.BETA_AWS_ACCESS_KEY_ID  }}
           aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
           aws-region: ${{ env.AWS_REGION }}
 
