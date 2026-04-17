@@ -30,9 +30,9 @@ name: Test the build and deploy to Freddy
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "fake_develop" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "fake_develop" ]
 
 # Global environment variables available to all jobs and steps.
 # REPO_PATH is the ECR registry host used to build image URIs.
