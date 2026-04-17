@@ -4,13 +4,13 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import Copy from '../icons/Copy'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {EditorLite} from './EditorLite'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
 import CommonUtils from '../../utils/commonUtils'
+import {ButtonCopy} from '../common/ButtonCopy'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -342,14 +342,12 @@ export const SegmentFooterTabAiAlternatives = ({
                         {context}{' '}
                       </p>
                     </div>
-                    <Button
+                    <ButtonCopy
                       className="ai-feature-button"
                       mode={BUTTON_MODE.OUTLINE}
-                      tooltip="Copy edited part"
+                      tooltip="Copy suggestion"
                       onClick={() => ref.current.copyToClipboardHighlight()}
-                    >
-                      <Copy size={16} />
-                    </Button>
+                    />
                   </div>
                 )
               })}
