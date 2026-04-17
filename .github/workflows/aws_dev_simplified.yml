@@ -1,0 +1,185 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WORKFLOW: Test the build and deploy to Freddy (develop environment)
+#
+# TRIGGERS:
+#   - push to develop         → runs tests, then deploys to AWS ECR
+#   - pull_request to develop → runs tests ONLY (no deploy)
+#
+# JOBS:
+#   1. tests  – builds all Docker images via docker compose (same as Travis),
+#               then runs the PHPUnit test suite inside a test-node container.
+#
+#   2. deploy – only on push events (merged PRs or direct pushes to develop).
+#               Rebuilds images via docker compose, tags and pushes to ECR.
+#               Versioned tags are pushed before :latest aliases to ensure
+#               both images are available as a consistent pair before :latest
+#               is updated.
+#               Tag format mirrors .travis.yml: build-${BUILD}-${BUILD_NUMBER}
+#               where BUILD is read from inc/version.ini.
+#
+# SECRETS & VARIABLES required in GitHub → Settings → Secrets and variables → Actions:
+#   Variables  (vars.*):    TEST_AWS_ACCESS_KEY_ID, BETA_AWS_ACCESS_KEY_ID
+#   Secrets    (secrets.*): TEST_AWS_SECRET_ACCESS_KEY, BETA_AWS_SECRET_ACCESS_KEY,
+#                           CI_USER_TOKEN_MATECATBOT
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Test the build and deploy to Freddy
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+# Global environment variables available to all jobs and steps.
+# REPO_PATH is the ECR registry host used to build image URIs.
+env:
+  AWS_REGION: 'eu-central-1'
+  # TODO Remove in favor of ECR_REGISTRY
+  REPO_PATH: 208060995276.dkr.ecr.eu-central-1.amazonaws.com
+  APP_NAME: matecat
+
+# Minimal permissions: only read access to repo contents.
+permissions:
+  contents: read
+
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 – tests
+  # Builds all Docker images using plain docker compose (no BuildKit container
+  # driver, no local registry, no layer cache). This is the same approach used
+  # by the Travis CI pipeline — simple, reliable, and easy to debug.
+  # Then starts MySQL + Redis and runs the test suite inside a test-node
+  # container.
+  # ───────────────────────────────────────────────────────────────────────────
+  tests:
+    name: Run tests in a test container
+    runs-on: ubuntu-24.04
+
+    steps:
+      # Checkout the repo including all git submodules.
+      # Falls back to the built-in github.token for fork PRs where
+      # CI_USER_TOKEN_MATECATBOT is not available.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
+
+      # Build all images and run the test suite.
+      # AWS credentials are injected as env vars so docker compose can pass
+      # them as build-args to the test-node Dockerfile (see docker-compose-ci.yml
+      # → test-node.build.args).
+      #
+      # On pull_request events, github.ref_name is "<pr_number>/merge" which
+      # Upgrade.php does not recognise. We use github.base_ref (the target
+      # branch, e.g. "develop") for PRs, and github.ref_name for pushes.
+      - name: Build and test
+        env:
+          TEST_AWS_ACCESS_KEY_ID: ${{ vars.TEST_AWS_ACCESS_KEY_ID }}
+          TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
+        run: |
+          # Build supporting services (MySQL, Redis) silently
+          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
+
+          # Build base-node (keep logs — useful for debugging)
+          docker compose -f docker/docker-compose-ci.yml build base-node
+
+          # Build test-node silently
+          echo "Build test node"
+          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+
+          # Run tests — exit code propagated to the workflow step
+          docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 – deploy
+  # Runs ONLY when code actually lands on develop (push event = merged PR or
+  # direct push). Open/updated PRs are excluded intentionally to avoid
+  # deploying unreviewed code and to prevent failures on fork PRs where
+  # AWS secrets are not available.
+  #
+  # Uses plain docker compose to build, then docker tag + docker push to ECR.
+  # Same approach as .travis.yml — simple and reliable.
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    environment: develop          # maps to the "develop" GitHub environment (with its own protection rules)
+    if: ${{ github.event_name == 'push' }}
+    needs:
+      - tests                     # deploy only runs if tests passed
+    steps:
+      # Full checkout with submodules needed for the build context.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
+          submodules: recursive
+
+      # Extract the application version from inc/version.ini to replicate
+      # the same tag format used in .travis.yml: build-<version>-<run_number>
+      # e.g. build-4.1.0-157
+      - name: Read app version from inc/version.ini
+        id: version
+        run: |
+          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
+          echo "BUILD=$BUILD" >> $GITHUB_OUTPUT
+
+      # Authenticate the runner with AWS using deploy-specific credentials
+      # (BETA_* = the staging/develop AWS account).
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ vars.BETA_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Log in to Amazon ECR so that docker push is authorized.
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Build only the images needed for deployment (base-node is built
+      # implicitly as a dependency via FROM matecat-base-node-24).
+      # This rebuilds from scratch since the deploy job runs on a fresh runner
+      # with no images from the tests job. The build takes ~5 min — the same
+      # time as Travis, which also rebuilt for deploy.
+      - name: Build images
+        env:
+          REPOSITORY_BRANCH: ${{ github.ref_name }}
+          REPOSITORY_TAG: ${{ github.ref_name }}
+        run: |
+          docker compose -f docker/docker-compose-ci.yml build base-node
+          docker compose -f docker/docker-compose-ci.yml build web-node daemons-node || exit 1
+
+      # Tag and push images to ECR.
+      # Push order matches .travis.yml:
+      #   1) versioned tags first  → guarantees they exist before :latest moves
+      #   2) :latest aliases after → both updated together as a consistent pair
+      - name: Tag and push images to ECR
+        env:
+          WEB_REPO: ${{ env.REPO_PATH }}/matecat/matecat-web-node
+          DAEMONS_REPO: ${{ env.REPO_PATH }}/matecat/matecat-daemons-node
+          RELEASE_TAG: build-${{ steps.version.outputs.BUILD }}-${{ github.run_number }}
+        run: |
+          # Tag images
+          docker tag matecat/matecat-web-node     $WEB_REPO:$RELEASE_TAG
+          docker tag matecat/matecat-web-node     $WEB_REPO:latest
+          docker tag matecat/matecat-daemons-node $DAEMONS_REPO:$RELEASE_TAG
+          docker tag matecat/matecat-daemons-node $DAEMONS_REPO:latest
+
+          # ── versioned tags first ──────────────────────────────────────────
+          # Both versioned tags are pushed before either :latest is updated.
+          # This guarantees that when :latest moves, both images are already
+          # confirmed in ECR as a consistent pair.
+          docker push $WEB_REPO:$RELEASE_TAG
+          docker push $DAEMONS_REPO:$RELEASE_TAG
+
+          # ── :latest aliases together ──────────────────────────────────────
+          docker push $WEB_REPO:latest
+          docker push $DAEMONS_REPO:latest
+
