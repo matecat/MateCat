@@ -9,7 +9,6 @@ on:
     branches: [ "develop" ]
 permissions:
   contents: read
-  packages: read
 jobs:
   ci-cd:
     uses: ./.github/workflows/_ci-cd.yml
