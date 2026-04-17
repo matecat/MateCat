@@ -58,8 +58,8 @@ jobs:
 
       - name: Load services and build test node
         env:
-          AWS_ACCESS_KEY_ID: ${{ vars.TEST_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+          TEST_AWS_ACCESS_KEY_ID: ${{ vars.TEST_AWS_ACCESS_KEY_ID }}
+          TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
           REPOSITORY_BRANCH: ${{ github.ref_name }}
           REPOSITORY_TAG: ${{ github.ref_name }}
