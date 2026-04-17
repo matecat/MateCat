@@ -8,6 +8,8 @@ on:
     tags: [ "v*" ]
   pull_request:
     branches: [ "master" ]
+permissions:
+  contents: read
 jobs:
   ci-cd:
     uses: ./.github/workflows/_ci-cd.yml
