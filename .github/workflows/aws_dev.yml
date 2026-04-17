@@ -73,9 +73,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Start a local Docker registry on localhost:5000.
+      # This is needed because the BuildKit docker-container driver runs in an
+      # isolated container and CANNOT see images loaded into the host daemon
+      # via `load: true`. Pushing base-node to a local registry makes it
+      # accessible to subsequent BuildKit builds via build-contexts.
+      - name: Start local Docker registry
+        run: docker run -d -p 5000:5000 --name registry registry:2
+
       # Build the base image that all other nodes inherit FROM.
-      # - load: true  → makes the image available to the local Docker daemon
-      #                 so subsequent compose builds can use it as base.
+      # - push: true → pushes to localhost:5000 so the BuildKit container can
+      #                pull it when building web-node and daemons-node.
+      # - load: true → also loads into the host daemon so docker compose (test-node)
+      #                can use it as base image.
       # - cache-to mode=max → stores ALL intermediate layers in GHA cache,
       #   maximising cache hits for dependent images (web-node, daemons-node).
       # - MATECAT_BRANCH / MATECAT_VERSION are passed as build-args so the
@@ -85,8 +95,11 @@ jobs:
         with:
           context: .
           file: docker/base-node/Dockerfile
+          push: true
           load: true
-          tags: matecat-base-node-24
+          tags: |
+            matecat-base-node-24
+            localhost:5000/matecat-base-node-24
           build-args: |
             MATECAT_BRANCH=${{ github.ref_name }}
             MATECAT_VERSION=${{ github.ref_name }}
@@ -96,6 +109,8 @@ jobs:
       # Build the Apache/PHP web application image.
       # context: . is required because the Dockerfile COPYs the entire repo
       # root (COPY . /var/www/matecat) — the context must include all those files.
+      # build-contexts overrides the FROM matecat-base-node-24 reference so
+      # BuildKit pulls it from the local registry instead of Docker Hub.
       - name: Build web-node (with layer cache)
         uses: docker/build-push-action@v6
         with:
@@ -103,10 +118,12 @@ jobs:
           file: docker/web-node/Dockerfile
           load: true
           tags: matecat/matecat-web-node
+          build-contexts: matecat-base-node-24=docker-image://localhost:5000/matecat-base-node-24
           cache-from: type=gha,scope=web-node
           cache-to: type=gha,scope=web-node,mode=max
 
       # Build the background daemons image (analysis workers, TM daemons, etc.)
+      # Same build-contexts override as web-node.
       - name: Build daemons-node (with layer cache)
         uses: docker/build-push-action@v6
         with:
@@ -114,6 +131,7 @@ jobs:
           file: docker/daemons-node/Dockerfile
           load: true
           tags: matecat/matecat-daemons-node
+          build-contexts: matecat-base-node-24=docker-image://localhost:5000/matecat-base-node-24
           cache-from: type=gha,scope=daemons-node
           cache-to: type=gha,scope=daemons-node,mode=max
 
