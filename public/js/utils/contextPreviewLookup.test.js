@@ -1,4 +1,4 @@
-import {findElementByMetadata} from './contextPreviewLookup'
+import {findElementByMetadata, walkNodePath} from './contextPreviewLookup'
 
 describe('findElementByMetadata', () => {
   let container
@@ -162,5 +162,127 @@ describe('findElementByMetadata', () => {
       // Pass null resname — querySelector will receive null, should not throw
       expect(findElementByMetadata(container, null, 'x-tag-id')).toBeNull()
     })
+  })
+})
+
+describe('walkNodePath', () => {
+  let container
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it('resolves a simple direct-child path', () => {
+    container.innerHTML = '<div><p>Hello</p></div>'
+    const el = walkNodePath(container, 'div[0]/p[0]')
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Hello')
+  })
+
+  it('strips html[N]/body[N] prefix', () => {
+    container.innerHTML = '<div><p>Target</p></div>'
+    const el = walkNodePath(container, 'html[0]/body[0]/div[0]/p[0]')
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Target')
+  })
+
+  it('uses 0-based indexing to pick the correct sibling', () => {
+    container.innerHTML = '<div>A</div><div>B</div><div>C</div>'
+    expect(walkNodePath(container, 'div[0]').textContent).toBe('A')
+    expect(walkNodePath(container, 'div[1]').textContent).toBe('B')
+    expect(walkNodePath(container, 'div[2]').textContent).toBe('C')
+  })
+
+  it('handles skipped intermediate elements (descendant fallback)', () => {
+    container.innerHTML =
+      '<ul>' +
+      '<li><custom-el><div><h3>Target</h3></div></custom-el></li>' +
+      '</ul>'
+    const el = walkNodePath(container, 'ul[0]/custom-el[0]/div[0]/h3[0]')
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Target')
+  })
+
+  it('resolves the Equipment.html product path structure', () => {
+    container.innerHTML =
+      '<div class="container">' +
+      '<div class="grid">' +
+      '<div class="col">' +
+      '<div class="productgrid">' +
+      '<div class="product-grid-container">' +
+      '<ul>' +
+      '<li><we-product-item><div><h3>Marin Mountain Bike Shoes</h3></div></we-product-item></li>' +
+      '<li><we-product-item><div><h3>Fleet Cross-Training Shoe</h3></div></we-product-item></li>' +
+      '</ul>' +
+      '</div></div></div></div></div>'
+    const el = walkNodePath(
+      container,
+      'div[0]/div[0]/div[0]/div[0]/div[0]/ul[0]/we-product-item[0]/div[0]/h3[0]',
+    )
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Marin Mountain Bike Shoes')
+  })
+
+  it('picks the correct 0-based index with skipped wrappers', () => {
+    container.innerHTML =
+      '<ul>' +
+      '<li><we-product-item><div><h3>First</h3></div></we-product-item></li>' +
+      '<li><we-product-item><div><h3>Second</h3></div></we-product-item></li>' +
+      '</ul>'
+    const el = walkNodePath(container, 'ul[0]/we-product-item[1]/div[0]/h3[0]')
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Second')
+  })
+
+  it('returns null when index is out of bounds', () => {
+    container.innerHTML = '<div>Only</div>'
+    expect(walkNodePath(container, 'div[5]')).toBeNull()
+  })
+
+  it('returns null when tag name does not exist', () => {
+    container.innerHTML = '<div>Hello</div>'
+    expect(walkNodePath(container, 'span[0]')).toBeNull()
+  })
+
+  it('returns null for malformed step (missing index)', () => {
+    container.innerHTML = '<div>Hello</div>'
+    expect(walkNodePath(container, 'div')).toBeNull()
+  })
+
+  it('returns null for empty path', () => {
+    expect(walkNodePath(container, '')).toBeNull()
+  })
+
+  it('returns null for null inputs', () => {
+    expect(walkNodePath(null, 'div[0]')).toBeNull()
+    expect(walkNodePath(container, null)).toBeNull()
+  })
+
+  it('integrates via findElementByMetadata with x-path restype', () => {
+    container.innerHTML =
+      '<ul><li><custom-el><h3>Found</h3></custom-el></li></ul>'
+    const el = findElementByMetadata(
+      container,
+      'html[0]/body[0]/ul[0]/custom-el[0]/h3[0]',
+      'x-path',
+    )
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Found')
+  })
+
+  it('does not break standard XPath in findElementByMetadata', () => {
+    container.innerHTML = '<div><p>First</p></div><div><p>Second</p></div>'
+    const el = findElementByMetadata(
+      container,
+      '/html/body/div[2]/p[1]',
+      'x-path',
+    )
+    expect(el).not.toBeNull()
+    expect(el.textContent).toBe('Second')
   })
 })

@@ -6,6 +6,81 @@
  */
 
 /**
+ * Regex that matches the 0-based node-path format produced by some CMS
+ * extractors (e.g. "html[0]/body[0]/div[2]/ul[0]/we-product-item[0]/h3[0]").
+ *
+ * Characteristics that distinguish it from standard XPath:
+ *   - Does NOT start with "/" or "//"
+ *   - Every step is `tagName[index]`
+ *   - Indices are 0-based
+ *
+ * @type {RegExp}
+ */
+const NODE_PATH_RE = /^[a-z][\w-]*\[\d+\](?:\/[a-z][\w-]*\[\d+\])*$/i
+
+/**
+ * Walks a 0-based node-path against `container`, returning the matched
+ * element or null.
+ *
+ * Algorithm per step:
+ *   1. Among `current`'s direct children, collect those whose tagName
+ *      matches (case-insensitive).  Pick the one at `index` (0-based).
+ *   2. If no direct child matches, search descendants (breadth-first via
+ *      querySelectorAll) — this handles CMS paths that skip structural
+ *      wrappers like `<li>`.
+ *
+ * The `html[N]/body[N]` prefix is stripped automatically because
+ * `container` already represents the body content.
+ *
+ * @param {HTMLElement} container
+ * @param {string} path  e.g. "html[0]/body[0]/div[0]/ul[0]/h3[0]"
+ * @returns {HTMLElement|null}
+ */
+export const walkNodePath = (container, path) => {
+  if (!container || !path) return null
+
+  const steps = path.split('/')
+
+  // Strip leading html[N] / body[N] prefix — container is already the body.
+  let start = 0
+  if (steps[start]?.match(/^html\[\d+\]$/i)) start++
+  if (steps[start]?.match(/^body\[\d+\]$/i)) start++
+
+  let current = container
+
+  for (let i = start; i < steps.length; i++) {
+    const match = steps[i].match(/^([\w-]+)\[(\d+)\]$/)
+    if (!match) return null
+
+    const tagName = match[1].toUpperCase()
+    const index = parseInt(match[2], 10)
+
+    // 1. Try direct children first (strict match)
+    const directChildren = []
+    for (const child of current.children) {
+      if (child.tagName === tagName) directChildren.push(child)
+    }
+
+    if (index < directChildren.length) {
+      current = directChildren[index]
+      continue
+    }
+
+    // 2. Descendant fallback — handles paths that skip wrapper elements
+    const descendants = current.getElementsByTagName(match[1])
+    const matching = [...descendants]
+    if (index < matching.length) {
+      current = matching[index]
+      continue
+    }
+
+    return null
+  }
+
+  return current === container ? null : current
+}
+
+/**
  * Finds the DOM element in `container` that corresponds to a segment,
  * selecting the lookup strategy based on `restype`.
  *
@@ -31,12 +106,13 @@ export const findElementByMetadata = (container, resname, restype) => {
         return container.querySelector('.' + CSS.escape(resname))
 
       case 'x-path': {
-        // XPaths are authored against the context HTML document structure,
-        // but `container` holds only the body content — not a full document.
-        // Absolute paths must be made relative to `container`:
-        //   /html/body/X  →  ./X   (strip the /html/body root prefix)
-        //   //X           →  .//X  (prepend . for container-relative search)
-        //   other /X      →  .X    (strip leading /)
+        // 0-based node-path format (e.g. "html[0]/body[0]/div[2]/h3[0]")
+        // — handled separately so it can be removed later without touching
+        // the standard XPath logic below.
+        if (NODE_PATH_RE.test(resname)) {
+          return walkNodePath(container, resname)
+        }
+
         let xpath = resname
         if (resname.startsWith('/html/body/')) {
           xpath = '.' + resname.slice('/html/body'.length)

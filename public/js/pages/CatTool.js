@@ -93,19 +93,30 @@ function CatTool() {
   } = useResizable({initialHeight: 500, minHeight: 100})
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [hasPreviewContent, setHasPreviewContent] = useState(false)
+  const [segmentHasPreview, setSegmentHasPreview] = useState(false)
   const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}`
   const popupWindowRef = useRef(null)
+  const previewDesiredOpenRef = useRef(false)
 
   const togglePreview = useCallback(() => {
     setIsPreviewOpen((prev) => {
+      const next = !prev
+      previewDesiredOpenRef.current = next
       if (!prev && popupWindowRef.current && !popupWindowRef.current.closed) {
         popupWindowRef.current.close()
         popupWindowRef.current = null
       }
-      return !prev
+      return next
     })
   }, [])
+
+  useHotkeys(
+    Shortcuts.cattol.events.toggleContextPreview.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    () => togglePreview(),
+    {enableOnContentEditable: true},
+  )
 
   const openPreviewInNewWindow = useCallback(() => {
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
@@ -323,8 +334,12 @@ function CatTool() {
       )
 
       const hasContent = Boolean(context_url || screenshot)
-      setHasPreviewContent(hasContent)
-      if (!hasContent) setIsPreviewOpen(false)
+      setSegmentHasPreview(hasContent)
+      if (hasContent) {
+        setIsPreviewOpen(previewDesiredOpenRef.current)
+      } else {
+        setIsPreviewOpen(false)
+      }
       ContextPreviewChannel.sendMessage({
         type: 'highlight',
         sid: Number(sid),
@@ -663,8 +678,10 @@ function CatTool() {
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
-      {/*{hasPreviewContent && (*/}
-      <div id="context-preview-wrapper">
+      <div
+        id="context-preview-wrapper"
+        style={{display: segmentHasPreview ? undefined : 'none'}}
+      >
         {isPreviewOpen && (
           <div
             className="context-preview__resize-handle"
@@ -710,7 +727,6 @@ function CatTool() {
           </div>
         )}
       </div>
-      {/*)}*/}
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
