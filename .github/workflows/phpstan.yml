@@ -1,0 +1,54 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# PHPStan is a static analysis tool for PHP that focuses on
+# finding errors in code without running it.
+# It helps detect issues such as:
+#   Undefined variables
+#   Invalid method calls
+#   Type mismatches
+#   Dead code and other logic problems
+# More details at https://phpstan.org/
+
+name: PHPStan
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  PHPStan:
+    name: Run PHPStan scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # for checkout to fetch code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, gd, intl, mbstring, readline, xml, zip, json
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+        continue-on-error: false
+
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse
+        continue-on-error: false
