@@ -28,6 +28,9 @@ before_install:
 script:
   - |
     
+    export REPOSITORY_BRANCH=${TRAVIS_BRANCH}
+    export REPOSITORY_TAG=${TRAVIS_TAG}
+    
     echo "Load services"
     docker-compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
     docker-compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1

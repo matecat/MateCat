@@ -1,116 +1,279 @@
-# This workflow will build and push a new container image to Amazon ECR,
-# and then will deploy a new task definition to Amazon ECS, when there is a push to the "develop" branch.
+# ─────────────────────────────────────────────────────────────────────────────
+# WORKFLOW: Test the build and deploy to Freddy (develop environment)
 #
-# To use this workflow, you will need to complete the following set-up steps:
+# TRIGGERS:
+#   - push to develop         → runs tests, then deploys to AWS ECR
+#   - pull_request to develop → runs tests ONLY (no deploy)
 #
-# 1. Create an ECR repository to store your images.
-#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
-#    Replace the value of the `ECR_REPOSITORY` environment variable in the workflow below with your repository's name.
-#    Replace the value of the `AWS_REGION` environment variable in the workflow below with your repository's region.
+# JOBS:
+#   1. tests  – builds all Docker images with BuildKit layer caching (GHA cache,
+#               ~10 GB limit), then runs the PHPUnit test suite inside a
+#               dedicated test-node container.
 #
-# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
-#    For example, follow the Getting Started guide on the ECS console:
-#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
-#    Replace the value of the `ECS_SERVICE` environment variable in the workflow below with the name you set for the Amazon ECS service.
-#    Replace the value of the `ECS_CLUSTER` environment variable in the workflow below with the name you set for the cluster.
+#   2. deploy – only on push events (merged PRs or direct pushes to develop).
+#               Reuses the GHA layer cache from job 1 — no recompilation.
+#               Each image is pushed in two sequential steps to guarantee
+#               tag availability order in ECR:
+#                 1) versioned tag  build-<version>-<run_number>  ← pushed first
+#                 2) :latest alias                                ← updated after
+#               This ensures :latest is never ahead of a confirmed versioned tag.
+#               Tag format mirrors .travis.yml: build-${BUILD}-${BUILD_NUMBER}
+#               where BUILD is read from inc/version.ini.
 #
-# 3. Store your ECS task definition as a JSON file in your repository.
-#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
-#    Replace the value of the `ECS_TASK_DEFINITION` environment variable in the workflow below with the path to the JSON file.
-#    Replace the value of the `CONTAINER_NAME` environment variable in the workflow below with the name of the container
-#    in the `containerDefinitions` section of the task definition.
-#
-# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
-#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
-#    and best practices on handling the access key credentials.
+# SECRETS & VARIABLES required in GitHub → Settings → Secrets and variables → Actions:
+#   Variables  (vars.*):    TEST_AWS_ACCESS_KEY_ID, BETA_AWS_ACCESS_KEY_ID
+#   Secrets    (secrets.*): TEST_AWS_SECRET_ACCESS_KEY, BETA_AWS_SECRET_ACCESS_KEY,
+#                           CI_USER_TOKEN_MATECATBOT
+# ─────────────────────────────────────────────────────────────────────────────
 
-name: Deploy to Amazon ECS
+name: Test the build and deploy to Freddy
 
 on:
   push:
-    branches: [ "no-valid-branch-develop" ]
+    branches: [ "fake_develop" ]
+  pull_request:
+    branches: [ "fake_develop" ]
 
+# Global environment variables available to all jobs and steps.
+# REPO_PATH is the ECR registry host used to build image URIs.
 env:
-  AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
-  CONTAINER_NAME: MY_CONTAINER_NAME           # set this to the name of the container in the
-  # containerDefinitions section of your task definition
+  AWS_REGION: 'eu-central-1'
+  # TODO Remove in favor of ECR_REGISTRY
   REPO_PATH: 208060995276.dkr.ecr.eu-central-1.amazonaws.com
   APP_NAME: matecat
 
-
+# Minimal permissions: only read access to repo contents.
 permissions:
   contents: read
 
 jobs:
 
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 – tests
+  # Builds base-node, web-node and daemons-node images using BuildKit layer
+  # caching (stored in GitHub Actions Cache, ~10 GB limit per repo).
+  # Then starts MySQL + Redis via docker compose and runs the test suite inside
+  # a dedicated test-node container.
+  # ───────────────────────────────────────────────────────────────────────────
   tests:
     name: Run tests in a test container
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
+      # Checkout the repo including all git submodules.
+      # Falls back to the built-in github.token for fork PRs where
+      # CI_USER_TOKEN_MATECATBOT is not available.
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
           submodules: recursive
 
-      - name: Load services and build test node
+      # Enable Docker BuildKit (required for type=gha layer cache).
+      # driver-opts: network=host → the BuildKit daemon container shares the
+      # host network stack, so localhost:5000 (local registry) is reachable
+      # from inside the BuildKit container during push/pull operations.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
+      # Start a local Docker registry on localhost:5000.
+      # This is needed because the BuildKit docker-container driver runs in an
+      # isolated container and CANNOT see images loaded into the host daemon
+      # via `load: true`. Pushing base-node to a local registry makes it
+      # accessible to subsequent BuildKit builds via build-contexts.
+      - name: Start local Docker registry
+        run: docker run -d -p 5000:5000 --name registry registry:2
+
+      # Build the base image that all other nodes inherit FROM.
+      # - push: true → pushes ONLY to localhost:5000 (local registry).
+      #                No Docker Hub credentials needed — the tag has a
+      #                registry prefix so BuildKit won't attempt docker.io.
+      # - cache-to mode=max → stores ALL intermediate layers in GHA cache,
+      #   maximising cache hits for dependent images (web-node, daemons-node).
+      # - MATECAT_BRANCH / MATECAT_VERSION are passed as build-args so the
+      #   Dockerfile can embed the current branch/tag into the image metadata.
+      #   On pull_request events, github.ref_name is "<pr_number>/merge" which
+      #   Upgrade.php does not recognise. We use github.base_ref (the target
+      #   branch, e.g. "develop") for PRs, and github.ref_name for pushes.
+      - name: Build base-node (with layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/base-node/Dockerfile
+          push: true
+          tags: localhost:5000/matecat-base-node-24
+          build-args: |
+            MATECAT_BRANCH=${{ github.base_ref || github.ref_name }}
+            MATECAT_VERSION=${{ github.base_ref || github.ref_name }}
+          cache-from: type=gha,scope=base-node
+          cache-to: type=gha,scope=base-node,mode=max
+
+      # Pull the just-pushed base image from the local registry into the host
+      # Docker daemon and retag it as matecat-base-node-24 (no registry prefix).
+      # This makes it available to docker compose build (test-node) which runs
+      # directly on the host daemon and uses FROM matecat-base-node-24.
+      - name: Tag base-node for host daemon (docker compose)
+        run: |
+          docker pull localhost:5000/matecat-base-node-24
+          docker tag  localhost:5000/matecat-base-node-24 matecat-base-node-24
+
+      # Build the Apache/PHP web application image.
+      # context: . is required because the Dockerfile COPYs the entire repo
+      # root (COPY . /var/www/matecat) — the context must include all those files.
+      # build-contexts overrides the FROM matecat-base-node-24 reference so
+      # BuildKit pulls it from the local registry instead of Docker Hub.
+      - name: Build web-node (with layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/web-node/Dockerfile
+          load: true
+          tags: matecat/matecat-web-node
+          build-contexts: matecat-base-node-24=docker-image://localhost:5000/matecat-base-node-24
+          cache-from: type=gha,scope=web-node
+          cache-to: type=gha,scope=web-node,mode=max
+
+      # Build the background daemons image (analysis workers, TM daemons, etc.)
+      # Same build-contexts override as web-node.
+      - name: Build daemons-node (with layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/daemons-node/Dockerfile
+          load: true
+          tags: matecat/matecat-daemons-node
+          build-contexts: matecat-base-node-24=docker-image://localhost:5000/matecat-base-node-24
+          cache-from: type=gha,scope=daemons-node
+          cache-to: type=gha,scope=daemons-node,mode=max
+
+      # Start supporting services (MySQL, Redis) and run the PHPUnit test suite.
+      # AWS credentials are injected as env vars so the test container can access
+      # S3 (file storage). docker compose passes them as Docker build-args via
+      # the ${TEST_AWS_ACCESS_KEY_ID} / ${TEST_AWS_SECRET_ACCESS_KEY} syntax
+      # defined in docker-compose-ci.yml → test-node.build.args.
+      # The workflow exits with the test container's exit code thanks to
+      # --exit-code-from test-node.
+      - name: Load services and run tests
+        env:
+          TEST_AWS_ACCESS_KEY_ID: ${{ vars.TEST_AWS_ACCESS_KEY_ID }}
+          TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
         run: |
           docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
           docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
-          
-          # keep logs for the base node
-          docker compose -f docker/docker-compose-ci.yml build base-node
-          
-          # silent for test node
-          echo "Build test node"
+
           docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
 
-          # Run tests
+          # Run tests — exit code propagated to the workflow step
           docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 – deploy
+  # Runs ONLY when code actually lands on develop (push event = merged PR or
+  # direct push). Open/updated PRs are excluded intentionally to avoid
+  # deploying unreviewed code and to prevent failures on fork PRs where
+  # AWS secrets are not available.
+  #
+  # Images are rebuilt using the GHA layer cache written by the tests job,
+  # so no actual compilation happens — BuildKit just restores cached layers
+  # and pushes them straight to ECR. This makes the deploy step very fast.
+  # ───────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
-    environment: develop
+    runs-on: ubuntu-24.04
+    environment: develop          # maps to the "develop" GitHub environment (with its own protection rules)
+    if: ${{ github.event_name == 'push' }}
     needs:
-      - tests
+      - tests                     # deploy only runs if tests passed
     steps:
+      # Full checkout with submodules needed so BuildKit can hash the context
+      # files and correctly match layers from the GHA cache.
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
           submodules: recursive
 
-      #      - name: Configure AWS credentials
-      #        uses: aws-actions/configure-aws-credentials@v1
-      #        with:
-      #          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
-      #          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
-      #          aws-region: ${{ env.AWS_REGION }}
-      #
-      #      - name: Login to Amazon ECR
-      #        id: login-ecr
-      #        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build, tag, and push image to Amazon ECR for Development
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
-          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
-          BUILD_NUMBER: ${{ github.run_number }}
-
+      # Extract the application version from inc/version.ini to replicate
+      # the same tag format used in .travis.yml: build-<version>-<run_number>
+      # e.g. build-4.1.0-157
+      # The value is written to GITHUB_OUTPUT so later steps can reference it
+      # as ${{ steps.version.outputs.BUILD }}.
+      - name: Read app version from inc/version.ini
+        id: version
         run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
           BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
-          
-          docker compose -f docker/docker-compose-ci.yml build
-          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
-          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$BUILD-$BUILD_NUMBER
-          
-          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:latest
-          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$BUILD-$BUILD_NUMBER
+          echo "BUILD=$BUILD" >> $GITHUB_OUTPUT
+
+      # Enable BuildKit — required to use type=gha cache backend.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Authenticate the runner with AWS using deploy-specific credentials
+      # (BETA_* = the staging/develop AWS account).
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ vars.BETA_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Log in to Amazon ECR so that subsequent docker push commands are
+      # authorized. Outputs: steps.login_ecr.outputs.registry (the ECR host).
+      - name: Login to Amazon ECR
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # ── versioned tags (pushed first) ───────────────────────────────────────
+      # Both versioned tags are pushed before either :latest alias is updated.
+      # This guarantees that when :latest moves, both images are already
+      # confirmed in ECR as a consistent pair.
+
+      # web-node versioned tag: build-<version>-<run_number>
+      # All layers restored from GHA cache — no recompilation.
+      - name: Push web-node versioned tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/web-node/Dockerfile
+          push: true
+          tags: ${{ env.REPO_PATH }}/matecat/matecat-web-node:build-${{ steps.version.outputs.BUILD }}-${{ github.run_number }}
+          cache-from: type=gha,scope=web-node
+
+      # daemons-node versioned tag: build-<version>-<run_number>
+      - name: Push daemons-node versioned tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/daemons-node/Dockerfile
+          push: true
+          tags: ${{ env.REPO_PATH }}/matecat/matecat-daemons-node:build-${{ steps.version.outputs.BUILD }}-${{ github.run_number }}
+          cache-from: type=gha,scope=daemons-node
+
+      # ── :latest aliases (pushed together after versioned tags) ──────────────
+      # Only after both versioned tags are confirmed in ECR do we advance
+      # the :latest pointers, ensuring both images are always in sync.
+
+      # web-node :latest
+      - name: Push web-node latest tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/web-node/Dockerfile
+          push: true
+          tags: ${{ env.REPO_PATH }}/matecat/matecat-web-node:latest
+          cache-from: type=gha,scope=web-node
+
+      # daemons-node :latest
+      - name: Push daemons-node latest tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/daemons-node/Dockerfile
+          push: true
+          tags: ${{ env.REPO_PATH }}/matecat/matecat-daemons-node:latest
+          cache-from: type=gha,scope=daemons-node

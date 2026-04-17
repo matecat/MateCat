@@ -43,7 +43,6 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      *
      * @throws DomainException
      */
-    /** @phpstan-ignore missingType.parameter, missingType.parameter */
     public function __set($name, $value)
     {
         if (!property_exists($this, $name)) {
