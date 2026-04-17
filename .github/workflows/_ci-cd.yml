@@ -30,6 +30,9 @@ on:
 env:
   AWS_REGION: 'eu-central-1'
   APP_NAME: matecat
+  # Opt into Node.js 24 for all JavaScript-based actions (checkout@v4, etc.)
+  # Remove once actions/checkout@v5 is released with native Node 24 support.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 permissions:
   contents: read
 jobs:
