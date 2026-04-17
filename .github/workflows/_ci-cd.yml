@@ -118,7 +118,7 @@ jobs:
           echo "BUILD=$BUILD" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -128,7 +128,7 @@ jobs:
       # for develop, 449641877310.dkr.ecr... for production).
       - name: Login to Amazon ECR
         id: login_ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       # Build only base-node, web-node, and daemons-node (no test-node).
       - name: Build images
