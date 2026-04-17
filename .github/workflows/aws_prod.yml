@@ -1,16 +1,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Develop: test on every PR/push to develop, deploy only on push to develop
+# Production: test on every PR/push to master, deploy ONLY on semver tags (v*)
 # ─────────────────────────────────────────────────────────────────────────────
-name: "CI/CD: Develop (Freddy)"
+name: "CI/CD: Production"
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "master" ]
+    tags: [ "v*" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "master" ]
 jobs:
   ci-cd:
     uses: ./.github/workflows/_ci-cd.yml
     with:
-      deploy_environment: develop
-      should_deploy: ${{ github.event_name == 'push' }}
+      deploy_environment: production
+      should_deploy: ${{ startsWith(github.ref, 'refs/tags/v') }}
     secrets: inherit
