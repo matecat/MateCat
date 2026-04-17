@@ -141,6 +141,7 @@ jobs:
 
       # Log in to Amazon ECR so that docker push is authorized.
       - name: Login to Amazon ECR
+        id: login_ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       # Build only the images needed for deployment (base-node is built
@@ -165,7 +166,11 @@ jobs:
           WEB_REPO: ${{ env.REPO_PATH }}/matecat/matecat-web-node
           DAEMONS_REPO: ${{ env.REPO_PATH }}/matecat/matecat-daemons-node
           RELEASE_TAG: build-${{ steps.version.outputs.BUILD }}-${{ github.run_number }}
+          ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
         run: |
+          
+          echo "*** TEST ----------> $ECR_REGISTRY"
+          
           # Tag images
           docker tag matecat/matecat-web-node     $WEB_REPO:$RELEASE_TAG
           docker tag matecat/matecat-web-node     $WEB_REPO:latest
