@@ -322,7 +322,7 @@ export const SegmentFooterTabAiAlternatives = ({
         SegmentConstants.AI_ALTERNATIVES,
         requestAlternatives,
       )
-      SegmentStore.addListener(
+      SegmentStore.removeListener(
         SegmentConstants.AI_ALTERNATIVES_SUGGESTION,
         receiveAlternatives,
       )
