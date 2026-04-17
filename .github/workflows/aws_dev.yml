@@ -82,10 +82,9 @@ jobs:
         run: docker run -d -p 5000:5000 --name registry registry:2
 
       # Build the base image that all other nodes inherit FROM.
-      # - push: true → pushes to localhost:5000 so the BuildKit container can
-      #                pull it when building web-node and daemons-node.
-      # - load: true → also loads into the host daemon so docker compose (test-node)
-      #                can use it as base image.
+      # - push: true → pushes ONLY to localhost:5000 (local registry).
+      #                No Docker Hub credentials needed — the tag has a
+      #                registry prefix so BuildKit won't attempt docker.io.
       # - cache-to mode=max → stores ALL intermediate layers in GHA cache,
       #   maximising cache hits for dependent images (web-node, daemons-node).
       # - MATECAT_BRANCH / MATECAT_VERSION are passed as build-args so the
@@ -96,15 +95,21 @@ jobs:
           context: .
           file: docker/base-node/Dockerfile
           push: true
-          load: true
-          tags: |
-            matecat-base-node-24
-            localhost:5000/matecat-base-node-24
+          tags: localhost:5000/matecat-base-node-24
           build-args: |
             MATECAT_BRANCH=${{ github.ref_name }}
             MATECAT_VERSION=${{ github.ref_name }}
           cache-from: type=gha,scope=base-node
           cache-to: type=gha,scope=base-node,mode=max
+
+      # Pull the just-pushed base image from the local registry into the host
+      # Docker daemon and retag it as matecat-base-node-24 (no registry prefix).
+      # This makes it available to docker compose build (test-node) which runs
+      # directly on the host daemon and uses FROM matecat-base-node-24.
+      - name: Tag base-node for host daemon (docker compose)
+        run: |
+          docker pull localhost:5000/matecat-base-node-24
+          docker tag  localhost:5000/matecat-base-node-24 matecat-base-node-24
 
       # Build the Apache/PHP web application image.
       # context: . is required because the Dockerfile COPYs the entire repo
