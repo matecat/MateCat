@@ -57,10 +57,12 @@ jobs:
           submodules: recursive
 
       - name: Load services and build test node
-        with:
-          aws-access-key-id: ${{ env.TEST_AWS_ACCESS_KEY_ID  }}
-          aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY  }}
-          aws-region: ${{ env.AWS_REGION }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.TEST_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          REPOSITORY_BRANCH: ${{ github.ref_name }}
+          REPOSITORY_TAG: ${{ github.ref_name }}
         run: |
           docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
           docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
@@ -104,8 +106,8 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
-          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
-          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
+          IMAGE_WEB_REPOSITORY: ${{ env.REPO_PATH }}/matecat/matecat-web-node
+          IMAGE_DAEMONS_REPOSITORY: ${{ env.REPO_PATH }}/matecat/matecat-daemons-node
           BUILD_NUMBER: ${{ github.run_number }}
 
         run: |
