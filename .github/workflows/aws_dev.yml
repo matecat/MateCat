@@ -70,8 +70,13 @@ jobs:
           submodules: recursive
 
       # Enable Docker BuildKit (required for type=gha layer cache).
+      # driver-opts: network=host → the BuildKit daemon container shares the
+      # host network stack, so localhost:5000 (local registry) is reachable
+      # from inside the BuildKit container during push/pull operations.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
 
       # Start a local Docker registry on localhost:5000.
       # This is needed because the BuildKit docker-container driver runs in an
