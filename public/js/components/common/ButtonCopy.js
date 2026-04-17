@@ -24,7 +24,7 @@ export const ButtonCopy = (props) => {
     onClick(e)
     setWasClicked(true)
     clearTimeout(tmOutRef.current)
-    tmOutRef.current = setTimeout(() => setWasClicked(false), 500)
+    tmOutRef.current = setTimeout(() => setWasClicked(false), 600)
   }
 
   return (
