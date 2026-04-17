@@ -94,6 +94,9 @@ jobs:
       #   maximising cache hits for dependent images (web-node, daemons-node).
       # - MATECAT_BRANCH / MATECAT_VERSION are passed as build-args so the
       #   Dockerfile can embed the current branch/tag into the image metadata.
+      #   On pull_request events, github.ref_name is "<pr_number>/merge" which
+      #   Upgrade.php does not recognise. We use github.base_ref (the target
+      #   branch, e.g. "develop") for PRs, and github.ref_name for pushes.
       - name: Build base-node (with layer cache)
         uses: docker/build-push-action@v6
         with:
@@ -102,8 +105,8 @@ jobs:
           push: true
           tags: localhost:5000/matecat-base-node-24
           build-args: |
-            MATECAT_BRANCH=${{ github.ref_name }}
-            MATECAT_VERSION=${{ github.ref_name }}
+            MATECAT_BRANCH=${{ github.base_ref || github.ref_name }}
+            MATECAT_VERSION=${{ github.base_ref || github.ref_name }}
           cache-from: type=gha,scope=base-node
           cache-to: type=gha,scope=base-node,mode=max
 
@@ -157,8 +160,8 @@ jobs:
           TEST_AWS_ACCESS_KEY_ID: ${{ vars.TEST_AWS_ACCESS_KEY_ID }}
           TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
-          REPOSITORY_BRANCH: ${{ github.ref_name }}
-          REPOSITORY_TAG: ${{ github.ref_name }}
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
         run: |
           docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
           docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
