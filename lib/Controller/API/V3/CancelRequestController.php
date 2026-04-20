@@ -49,13 +49,62 @@ class CancelRequestController extends KleinController
     /**
      * @throws Exception
      */
+    public function enableRequest(): void
+    {
+        $id_job = $this->request->param('id_job');
+        $password = $this->request->param('password');
+        $id_segment = $this->request->param('id_segment');
+        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
+
+        $this->performChecks($id_job, $password, $id_segment, $route);
+
+        if($this->isSegmentDisabled($id_job, $id_segment)){
+            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        }
+
+        $this->response->json([
+            'id_segment' => $id_segment,
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     */
     public function cancelRequest(): void
     {
         $id_job = $this->request->param('id_job');
         $password = $this->request->param('password');
         $id_segment = $this->request->param('id_segment');
-
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
+
+        $this->performChecks($id_job, $password, $id_segment, $route);
+
+        // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
+        // setting the cache to avoid multiple disable requests for the same segment in a short time frame
+        if (!$this->isSegmentDisabled($id_job, $id_segment)) {
+            SegmentMetadataDao::destroyGetAllCache($id_segment);
+            SegmentMetadataDao::setTranslationDisabled($id_segment);
+            $this->saveSegmentDisabledInCache($id_job, $id_segment);
+        }
+
+        $this->response->json([
+            'id_segment' => $id_segment,
+        ]);
+    }
+
+    /**
+     * Performs several validation checks and rate limit handling for disabling a segment in a job.
+     *
+     * @param int $id_job The unique identifier of the job.
+     * @param string $password The password associated with the job for authentication.
+     * @param int $id_segment The unique identifier of the segment to be validated.
+     * @param string $route The API route being accessed.
+     *
+     * @throws NotFoundException If the job or segment is not found.
+     * @throws Exception If the user is not the owner or part of the team, or if the segment status is not "new".
+     */
+    private function performChecks(int $id_job, string $password, int $id_segment, string $route): void
+    {
         $userEmail = $this->user->email ?? "BLANK_EMAIL";
         $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
 
@@ -124,19 +173,5 @@ class CancelRequestController extends KleinController
 
         $this->incrementRateLimitCounter($userEmail, $route);
         $this->incrementRateLimitCounter($userIp, $route);
-
-        // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
-        // setting the cache to avoid multiple disable requests for the same segment in a short time frame
-        if (!$this->isSegmentDisabled($id_job, $id_segment)) {
-            SegmentMetadataDao::destroyGetAllCache($id_segment);
-            SegmentMetadataDao::setTranslationDisabled($id_job, $id_segment);
-            $this->saveSegmentDisabledInCache($id_job, $id_segment);
-        }
-
-        $this->response->json([
-            'id_segment' => $id_segment,
-        ]);
     }
-
-
 }

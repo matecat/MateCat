@@ -115,6 +115,13 @@ class SegmentMetadataDao extends AbstractDao
         return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
     }
 
+    public static function delete(int $id_segment, string $key): void
+    {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
+        $stmt->execute([$id_segment, $key]);
+    }
+
     /**
      * @param SegmentMetadataStruct $metadataStruct
      */
@@ -137,12 +144,11 @@ class SegmentMetadataDao extends AbstractDao
     /**
      * Disable translation for a specific segment.
      *
-     * @param int $id_job The ID of the job associated with the segment.
      * @param int $id_segment The ID of the segment for which translation will be disabled.
      *
      * @return void
      */
-    public static function setTranslationDisabled(int $id_job, int $id_segment): void
+    public static function setTranslationDisabled(int $id_segment): void
     {
         $metadata = new SegmentMetadataStruct();
         $metadata->id_segment = $id_segment;

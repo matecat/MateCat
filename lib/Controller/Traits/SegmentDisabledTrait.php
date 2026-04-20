@@ -3,6 +3,7 @@
 namespace Controller\Traits;
 
 use Model\DataAccess\DaoCacheTrait;
+use Model\Segments\SegmentMetadataDao;
 use ReflectionException;
 
 trait SegmentDisabledTrait
@@ -10,6 +11,24 @@ trait SegmentDisabledTrait
     use DaoCacheTrait;
 
     const CACHE_TTL = 3600;
+
+    /**
+     * Removes the "translation_disabled" metadata for a given segment and clears the related cache.
+     *
+     * @param int $id_segment The unique identifier of the segment to clear metadata and cache for.
+     * @return void
+     * @throws ReflectionException
+     */
+    protected function destroySegmentDisabledCache(int $id_job, int $id_segment): void
+    {
+        SegmentMetadataDao::delete($id_segment, 'translation_disabled');
+        SegmentMetadataDao::destroyCache($id_segment, 'translation_disabled');
+        SegmentMetadataDao::destroyGetAllCache($id_segment);
+
+        $cache = $this->cacheKeyAndQuery($id_job, $id_segment);
+        $this->cacheInit();
+        $this->_deleteCacheByKey($cache['key'], false);
+    }
 
     /**
      * Checks if a specific segment is disabled for a given job.
