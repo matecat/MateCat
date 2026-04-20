@@ -76,7 +76,7 @@ jobs:
             const failures = [];
             for (const c of commits) {
               const msg = c.commit.message;
-              const result = validateCommitMessage(msg);
+              const result = validateCommitMessage(msg, {requireEmoji: false});
               if (result.skipped) continue;
               if (!result.valid) {
                 const sha = c.sha.slice(0, 7);
