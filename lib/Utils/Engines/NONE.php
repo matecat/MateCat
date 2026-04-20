@@ -39,7 +39,7 @@ class NONE extends AbstractEngine
         return [];
     }
 
-    public function getConfigurationParameters(): array
+    public static function getConfigurationParameters(): array
     {
         return [];
     }

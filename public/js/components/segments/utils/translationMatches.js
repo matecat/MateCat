@@ -15,7 +15,10 @@ import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
-import {decodePlaceholdersToPlainText, encodePlaceholdersToTags,} from './DraftMatecatUtils/tagUtils'
+import {
+  decodeTagsToUnicodeChar,
+  encodeTagsFromUnicodeChar,
+} from './DraftMatecatUtils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -39,7 +42,10 @@ let TranslationMatches = {
         segment: segment,
       })
 
-      SegmentActions.modifiedTranslation(segment.sid, true)
+      SegmentActions.modifiedTranslation(
+        segment.sid,
+        segment.translation !== '',
+      )
     }
   },
 
@@ -291,13 +297,14 @@ let TranslationMatches = {
 
     const jobLanguages = [config.source_code, config.target_code]
     // Keep only languages whose base code is 'en' or 'it'.
-    let allowed = jobLanguages
+    let allowed =
+      jobLanguages
         .map((x) => x.split('-')[0])
         .filter((x) => ['en', 'it'].includes(x))
         .filter(
-            // Remove duplicates, then check we have exactly two distinct matches.
-            (value, index, array) => array.indexOf(value) === index
-        ).length === 2;
+          // Remove duplicates, then check we have exactly two distinct matches.
+          (value, index, array) => array.indexOf(value) === index,
+        ).length === 2
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
@@ -311,17 +318,15 @@ let TranslationMatches = {
           const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
-          const decodedSource = decodePlaceholdersToPlainText(
-            currentSegment.segment,
-          )
+          const decodedSource = decodeTagsToUnicodeChar(currentSegment.segment)
           laraTranslate({
             token: response.token,
             source: decodedSource,
             contextListBefore: contextListBefore.map((t) =>
-              decodePlaceholdersToPlainText(t),
+              decodeTagsToUnicodeChar(t),
             ),
             contextListAfter: contextListAfter.map((t) =>
-              decodePlaceholdersToPlainText(t),
+              decodeTagsToUnicodeChar(t),
             ),
             sid: id_segment_original,
             jobId: config.id_job,
@@ -332,7 +337,7 @@ let TranslationMatches = {
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
               return getContributionRequest(
-                encodePlaceholdersToTags(translation),
+                encodeTagsFromUnicodeChar(translation),
               )
             })
             .catch((e) => {

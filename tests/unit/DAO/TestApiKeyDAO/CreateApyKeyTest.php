@@ -3,6 +3,7 @@
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -70,6 +71,7 @@ class CreateApyKeyTest extends AbstractTest
      * @group  regression
      * @covers ApiKeyDao::create
      */
+    #[Test]
     public function test_create_with_success()
     {
         $this->actual_apikey = $this->apikey_Dao->create($this->apikey_struct_param);

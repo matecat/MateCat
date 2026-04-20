@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\Results\MyMemory\Matches;
 
@@ -7,6 +8,7 @@ class MatchesTest extends AbstractTest
 {
 
 
+    #[Test]
     public function test_empty_constructor()
     {
         $match = new Matches([]);
@@ -18,6 +20,7 @@ class MatchesTest extends AbstractTest
         $this->assertEquals($match->match, 0);
     }
 
+    #[Test]
     public function test_real_constructor()
     {
         $createDate = date("Y-m-d");
@@ -45,6 +48,7 @@ class MatchesTest extends AbstractTest
         $this->assertEquals($matches['create_date'], $createDate);
     }
 
+    #[Test]
     public function test_tms_constructor()
     {
         $match = new Matches([
@@ -91,6 +95,7 @@ class MatchesTest extends AbstractTest
         ]);
     }
 
+    #[Test]
     public function test_lara_constructor()
     {
         $createDate = date("Y-m-d");

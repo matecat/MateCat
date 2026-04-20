@@ -8,6 +8,7 @@
  *
  */
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ServerCheck\ServerCheck;
 
@@ -18,6 +19,7 @@ use Utils\ServerCheck\ServerCheck;
 class ServerCheckTest extends AbstractTest
 {
 
+    #[Test]
     public function testSingleInstance()
     {
         $servCheck = ServerCheck::getInstance();
@@ -25,6 +27,7 @@ class ServerCheckTest extends AbstractTest
         $this->assertEquals(spl_object_hash($servCheck), spl_object_hash($servCheck2));
     }
 
+    #[Test]
     public function testUploadParams()
     {
         $servCheck = ServerCheck::getInstance();
@@ -40,6 +43,7 @@ class ServerCheckTest extends AbstractTest
         $this->assertNotEquals($params->getUploadMaxFilesize(), -1);
     }
 
+    #[Test]
     public function testReadOnly()
     {
         $servCheck = ServerCheck::getInstance();

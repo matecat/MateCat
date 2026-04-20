@@ -10,9 +10,12 @@ use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Monolog\Formatter\LineFormatter;
@@ -246,11 +249,11 @@ class FastAnalysis extends AbstractDaemon
                      */
                     Database::obtain()->getConnection()->beginTransaction();
                     $projectStruct = ProjectDao::findById($pid);
-                    $projectFeaturesString = $projectStruct->getMetadataValue(ProjectsMetadataDao::FEATURES_KEY);
-                    $mt_evaluation = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_EVALUATION);
-                    $mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED);
-                    $mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS);
-                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR);
+                    $projectFeaturesString = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
+                    $mt_evaluation = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value);
+                    $mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+                    $mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
+                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
                     $subfiltering_handlers = (new ProjectsMetadataDao)->getProjectStaticSubfilteringCustomHandlers($projectStruct->id);
                     Database::obtain()->getConnection()->commit();
 
@@ -446,7 +449,7 @@ class FastAnalysis extends AbstractDaemon
      * @param bool $perform_Tms_Analysis
      * @param bool|null $mt_evaluation
      * @param bool|null $mt_qe_workflow_enabled
-     * @param string|null $mt_qe_workflow_parameters
+     * @param MTQEWorkflowParams|null $mt_qe_workflow_parameters
      * @param int|null $mt_quality_value_in_editor
      * @param array|null $subfiltering_handlers
      * @return int
@@ -460,7 +463,7 @@ class FastAnalysis extends AbstractDaemon
         bool $perform_Tms_Analysis = true,
         ?bool $mt_evaluation = false,
         ?bool $mt_qe_workflow_enabled = false,
-        ?string $mt_qe_workflow_parameters = "",
+        ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
         ?int $mt_quality_value_in_editor = 85,
         ?array $subfiltering_handlers = []
     ): int {
@@ -670,9 +673,9 @@ class FastAnalysis extends AbstractDaemon
                         $queue_element['payable_rates'] = $jobs_payable_rates[$id_job]; // assign the right payable rate for the current job
 
                         $jobsMetadataDao = new MetadataDao();
-                        $tm_prioritization = $jobsMetadataDao->get($id_job, $password, 'tm_prioritization', 10 * 60);
-                        $dialect_strict = $jobsMetadataDao->get($id_job, $password, 'dialect_strict', 10 * 60);
-                        $public_tm_penalty = $jobsMetadataDao->get($id_job, $password, 'public_tm_penalty', 10 * 60);
+                        $tm_prioritization = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
+                        $dialect_strict = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
+                        $public_tm_penalty = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
 
                         if (!empty($public_tm_penalty)) {
                             $queue_element['public_tm_penalty'] = (int)$public_tm_penalty->value;
@@ -696,7 +699,7 @@ class FastAnalysis extends AbstractDaemon
                         }
                         $queue_element['mt_quality_value_in_editor'] = $mt_quality_value_in_editor ?? false;
 
-                        $queue_element[MetadataDao::SUBFILTERING_HANDLERS] = $subfiltering_handlers;
+                        $queue_element[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfiltering_handlers;
 
                         $element = new QueueElement();
                         $element->params = new Params($queue_element);

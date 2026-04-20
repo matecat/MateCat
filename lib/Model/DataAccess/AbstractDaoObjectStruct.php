@@ -32,10 +32,15 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     }
 
     /**
-     * @param $name
-     * @param $value
+     * Strict setter: validates that the property exists, then assigns.
      *
-     * @return void
+     * Direct property writes (`$this->unknownProp = ...`) throw for
+     * undefined properties. Array-access writes use {@see offsetSet()}
+     * instead, which routes unknown keys to the overflow map.
+     *
+     * @param string $name
+     * @param mixed $value
+     *
      * @throws DomainException
      */
     public function __set($name, $value)
@@ -43,6 +48,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
         if (!property_exists($this, $name)) {
             throw new DomainException('Unknown property ' . $name);
         }
+        $this->$name = $value;
     }
 
     /**

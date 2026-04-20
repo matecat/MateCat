@@ -13,8 +13,8 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -376,7 +376,7 @@ class GetContributionWorker extends AbstractWorker
 
         $_config['dialect_strict'] = $contributionStruct->dialect_strict;
         $_config['priority_key'] = $contributionStruct->tm_prioritization;
-        $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] = $contributionStruct->subfiltering_handlers;
+        $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 
         // penalty_key
         $penalty_key = TmKeyManager::getPenaltyMap($contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole);
@@ -475,6 +475,7 @@ class GetContributionWorker extends AbstractWorker
                 $config = $mt_engine->getConfigStruct();
 
                 $config['pid'] = $jobStruct->id_project;
+                $config['id_project'] = $contributionStruct->getProjectStruct()->id;
                 $config['segment'] = $contributionStruct->getContexts()->segment;
                 $config['source'] = $jobStruct->source;
                 $config['target'] = $jobStruct->target;
@@ -484,7 +485,6 @@ class GetContributionWorker extends AbstractWorker
                 $config['job_password'] = $jobStruct->password;
                 $config['session'] = $contributionStruct->getSessionId();
                 $config['all_job_tm_keys'] = $jobStruct->tm_keys;
-                $config['project_id'] = $contributionStruct->getProjectStruct()->id;
                 $config['context_list_before'] = $contributionStruct->context_list_before;
                 $config['context_list_after'] = $contributionStruct->context_list_after;
                 $config['user_id'] = $contributionStruct->getUser()->uid;
@@ -507,7 +507,7 @@ class GetContributionWorker extends AbstractWorker
 
                 if ($contributionStruct->mt_qe_workflow_enabled) {
                     // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-                    $mt_qe_config = new MTQEWorkflowParams(json_decode($queueElement->params->mt_qe_workflow_parameters ?? null, true) ?? []); // params or default configuration (NULL safe)
+                    $mt_qe_config = new MTQEWorkflowParams($queueElement->params->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
                     $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
                 }
 

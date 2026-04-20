@@ -22,6 +22,14 @@ let ApplicationStore = assign({}, EventEmitter.prototype, {
       return ''
     }
   },
+  getPluralRulesForLocale: function (code) {
+    try {
+      return this.languages.find((e) => e.code === code).plurals
+    } catch (e) {
+      //console.error('Unknown Language', e)
+      return null
+    }
+  },
   emitChange: function () {
     this.emit.apply(this, arguments)
   },

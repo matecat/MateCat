@@ -2,6 +2,7 @@
 
 namespace unit\Utils\Tools;
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -10,6 +11,7 @@ class CatUtilsTest extends AbstractTest
     /**
      * Test that a valid project name is returned as is.
      */
+    #[Test]
     public function testSanitizeOrFallbackProjectNameWithValidName()
     {
         $validName = "Valid_Project_Name";
@@ -20,6 +22,7 @@ class CatUtilsTest extends AbstractTest
     /**
      * Test that an invalid project name is sanitized.
      */
+    #[Test]
     public function testSanitizeOrFallbackProjectNameWithInvalidName()
     {
         $invalidName = "Invalid@Project#Name!";
@@ -32,6 +35,7 @@ class CatUtilsTest extends AbstractTest
      * Test that a fallback name is generated when input name is empty
      * and more than one file is given.
      */
+    #[Test]
     public function testFallbackNameGeneratedWhenNameIsEmptyAndMultipleFilesProvided()
     {
         $files = [
@@ -46,6 +50,7 @@ class CatUtilsTest extends AbstractTest
      * Test that the fallback name is based on file name when name is empty
      * and exactly one file is provided.
      */
+    #[Test]
     public function testFallbackNameBasedOnSingleFile()
     {
         $files = [
@@ -60,6 +65,7 @@ class CatUtilsTest extends AbstractTest
      * Test that an empty input name with no files provided results in
      * a generated fallback project name.
      */
+    #[Test]
     public function testFallbackNameGeneratedWhenNameIsEmptyAndNoFilesProvided()
     {
         $result = CatUtils::sanitizeOrFallbackProjectName("");

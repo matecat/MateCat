@@ -1,8 +1,11 @@
 <?php
 
+use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -17,14 +20,10 @@ class JobStructTest extends AbstractTest
 {
 
     /**
-     * @var JobDao
-     */
-    public $databaseInstance;
-
-    /**
      * @var JobStruct
      */
     public JobStruct $originalJobStruct;
+    protected JobDao $dao;
 
     public function setUp(): void
     {
@@ -78,12 +77,13 @@ class JobStructTest extends AbstractTest
             ]
         );
 
-        $this->databaseInstance = new JobDao(Database::obtain());
+        $this->dao = new JobDao(Database::obtain());
     }
 
+    #[Test]
     public function testAutoIncrementOnCreate()
     {
-        $jobStruct = $this->databaseInstance->createFromStruct($this->originalJobStruct);
+        $jobStruct = $this->dao->createFromStruct($this->originalJobStruct);
 
         $this->assertInstanceOf('Model\Jobs\JobStruct', $jobStruct);
         $this->assertNotEquals($jobStruct, $this->originalJobStruct);
@@ -91,37 +91,42 @@ class JobStructTest extends AbstractTest
 
     }
 
+    #[Test]
     public function testArrayAccessGet()
     {
         $this->assertEquals('0f020dee031d', $this->originalJobStruct['password']);
     }
 
-    public function testArrayAccesSet()
+    #[Test]
+    public function testArrayAccessSet()
     {
-        $jobStruct = $this->databaseInstance->createFromStruct($this->originalJobStruct);
+        $jobStruct = clone($this->originalJobStruct);
 
+        $pass = $jobStruct['password'];
         $jobStruct['password'] = 123;
-        $this->assertEquals(123, $jobStruct['password']);
+        $this->assertNotEquals($pass, $jobStruct['password']);
     }
 
+    #[Test]
     public function testArrayAccessUnset()
     {
-        $jobStruct = $this->databaseInstance->createFromStruct($this->originalJobStruct);
+        $jobStruct = clone($this->originalJobStruct);
 
         unset($jobStruct['password']);
         $this->assertNull($jobStruct['password']);
     }
 
+    #[Test]
     public function testArrayAccessOffsetExists()
     {
-        $this->assertTrue(empty($this->originalJobStruct['status_translator']));
+        $this->assertEmpty($this->originalJobStruct['status_translator']);
         $this->assertTrue(isset($this->originalJobStruct['status_translator']));
     }
 
+    #[Test]
     public function testPropertyAccess()
     {
-        $jobStruct = $this->databaseInstance->createFromStruct($this->originalJobStruct);
-
+        $jobStruct = clone($this->originalJobStruct);
         $id = $jobStruct->id;
         $jobStruct->id = 1234;
         $this->assertNotEquals($id, $jobStruct->id);

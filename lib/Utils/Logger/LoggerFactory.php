@@ -72,7 +72,6 @@ class LoggerFactory
      * @param mixed $content The content to log.
      * @param string $filename The name of the log file. Defaults to 'log.txt'.
      * @param string|null $logName The name of the logger. Defaults to the filename.
-     * @throws Exception
      */
     public static function doJsonLog(mixed $content, string $filename = self::LOG_FILENAME, ?string $logName = null): void
     {

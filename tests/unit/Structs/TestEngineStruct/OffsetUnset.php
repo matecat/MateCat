@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -44,6 +45,7 @@ class OffsetUnset extends AbstractTest
      * @group  regression
      * @covers EngineStruct::offsetUnset
      */
+    #[Test]
     public function test_offsetUnset_id_field()
     {
         $this->assertEquals(999, $this->engine_struct_param->id);

@@ -1,7 +1,9 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Network\MultiCurlHandler;
+use PHPUnit\Framework\Attributes\Group;
 use Utils\Registry\AppConfig;
 
 
@@ -11,16 +13,22 @@ use Utils\Registry\AppConfig;
  * Date: 09/10/13
  * Time: 15.31
  *
+ * @group ExternalServices
+ * @group HTTP
  */
+#[Group('ExternalServices')]
+#[Group('HTTP')]
 class MultiCurlHandlerTest extends AbstractTest
 {
 
+    #[Test]
     public function testInstance()
     {
         $mh = new MultiCurlHandler();
         $this->assertInstanceOf(MultiCurlHandler::class, $mh);
     }
 
+    #[Test]
     public function testCreateSingle()
     {
         $options = [
@@ -45,6 +53,7 @@ class MultiCurlHandlerTest extends AbstractTest
         $this->assertEquals($singleContent, $multiContent[$tokenHash]);
     }
 
+    #[Test]
     public function testAddSingle()
     {
         $options = [
@@ -73,6 +82,7 @@ class MultiCurlHandlerTest extends AbstractTest
         $this->assertEquals($singleContent, $multiContent[$tokenHash]);
     }
 
+    #[Test]
     public function testMultipleCurlCreate()
     {
         $options = [

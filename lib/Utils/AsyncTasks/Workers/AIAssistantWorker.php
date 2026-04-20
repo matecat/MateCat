@@ -3,11 +3,17 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\Segments\SegmentOriginalDataDao;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\AIAssistant\Client as AIAssistantClient;
+use Utils\AIAssistant\AIClientFactory;
+use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -17,6 +23,8 @@ use Utils\Tools\Utils;
 class AIAssistantWorker extends AbstractWorker
 {
     const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
+    const string FEEDBACK_ACTION = 'feedback';
+    const string ALTERNATIVE_TRANSLATIONS_ACTION = 'alternative_translations';
 
     /**
      * @var OpenAi
@@ -42,7 +50,6 @@ class AIAssistantWorker extends AbstractWorker
         $timeOut = (AppConfig::$OPEN_AI_TIMEOUT) ?: 30;
         $this->openAi = new OpenAi(AppConfig::$OPENAI_API_KEY);
         $this->openAi->setTimeout($timeOut);
-
         $this->redis = $queueHandler->getRedisClient();
     }
 
@@ -58,6 +65,8 @@ class AIAssistantWorker extends AbstractWorker
 
         $allowedActions = [
             self::EXPLAIN_MEANING_ACTION,
+            self::FEEDBACK_ACTION,
+            self::ALTERNATIVE_TRANSLATIONS_ACTION,
         ];
 
         if (false === in_array($action, $allowedActions)) {
@@ -69,6 +78,82 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog('AI ASSISTANT: ' . $action . ' action was executed with payload ' . json_encode($payload));
 
         $this->{$action}($payload);
+    }
+
+    /**
+     * Manages the generation and processing of alternative translations for a given payload.
+     *
+     * @param array $payload The input data required to generate alternative translations, including:
+     *                       - localized_source: The localized source language code.
+     *                       - localized_target: The localized target language code.
+     *                       - source_sentence: The source sentence to translate.
+     *                       - target_sentence: The target sentence to verify or enhance.
+     *                       - source_context_sentences_string: Context sentences for the source language.
+     *                       - target_context_sentences_string: Context sentences for the target language.
+     *                       - excerpt: The text excerpt to assist in translation.
+     *                       - style_instructions: Guidelines for translation style.
+     *                       - id_segment: The identifier for the segment, used for logging and messaging.
+     *                       - id_client*/
+    private function alternative_translations(array $payload): void
+    {
+        try {
+            $gemini = AIClientFactory::create("gemini");
+            $alternativeTranslations = $gemini->manageAlternativeTranslations(
+                sourceLanguage: $payload['localized_source'],
+                targetLanguage:  $payload['localized_target'],
+                sourceSentence:  $payload['source_sentence'],
+                sourceContextSentencesString:  $payload['source_context_sentences_string'],
+                targetSentence:  $payload['target_sentence'],
+                targetContextSentencesString:  $payload['target_context_sentences_string'],
+                excerpt:   $payload['excerpt'],
+                styleInstructions:   $payload['style_instructions']
+            );
+
+            $this->_doLog("Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations));
+
+            if(empty($alternativeTranslations)){
+                throw new Exception("No alternative translations found.");
+            }
+
+            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
+        } catch (Exception $exception){
+            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
+        }
+    }
+
+    /**
+     * Processes feedback by evaluating translation and emitting relevant messages.
+     *
+     * @param array $payload The data containing translation details, including:
+     *                       - localized_source: The source language.
+     *                       - localized_target: The target language.
+     *                       - text: The original text.
+     *                       - translation: The translated text.
+     *                       - context: The translation context.
+     *                       - style: The translation style.
+     *                       - id_client: The client identifier.
+     *                       - id_segment: The segment identifier.
+     *
+     * @return void
+     *
+     * @throws Exception If an error occurs during the feedback processing.
+     */
+    private function feedback(array $payload): void
+    {
+        try {
+            $openAi = AIClientFactory::create("openai");
+            $message = $openAi->evaluateTranslation(
+                sourceLanguage: $payload['localized_source'],
+                targetLanguage: $payload['localized_target'],
+                text: $payload['text'],
+                translation: $payload['translation'],
+                style: $payload['style']
+            );
+
+            $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
+        } catch (Exception $e) {
+            $this->emitErrorMessage("ai_assistant_feedback", $e->getMessage(), $payload);
+        }
     }
 
     /**
@@ -90,7 +175,8 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
-            $openAi = new AIAssistantClient($this->openAi);
+            $openAi = AIClientFactory::create("openai");
+
             $buffer = '';
 
             $openAi->findContextForAWord(
@@ -183,10 +269,11 @@ class AIAssistantWorker extends AbstractWorker
                         }
                     }
 
-                    // Continue the stream
+                    // ✅ Continua lo stream
                     return strlen($data);
                 }
             );
+
 
         } catch (Exception) {
         }

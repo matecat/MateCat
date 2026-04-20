@@ -11,6 +11,9 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import Cookies from 'js-cookie'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import ApplicationStore from '../../stores/ApplicationStore'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import IconDown from '../icons/IconDown'
+
 export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)
   const [isExtended, setIsExtended] = useState(
@@ -157,14 +160,20 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const resultsDisplaying =
     results && (isExtended ? results : [...results].splice(0, 3))
 
-  const moreButton = results?.length > MAX_ITEMS_TO_DISPLAY && (
-    <a className="more" onClick={toggleExtendend}>
+  const moreButton = (
+    <Button
+      className={`segment-footer-tab-more-button ${isExtended ? 'segment-footer-tab-more-button-extended-mode' : ''}`}
+      type={BUTTON_TYPE.DEFAULT}
+      size={BUTTON_SIZE.SMALL}
+      onClick={toggleExtendend}
+    >
+      <IconDown size={18} />
       {isExtended ? 'Fewer' : 'More'}
-    </a>
+    </Button>
   )
 
   return (
-    <div>
+    <div className="segment-footer-tab-concordance-results">
       {Array.isArray(resultsDisplaying) &&
         (resultsDisplaying.length > 0 ? (
           <div>

@@ -268,12 +268,13 @@ class SegmentTarget extends React.Component {
           <SegmentTargetToolbar
             {...{
               sid: this.props.segment.sid,
+              segment: this.props.segment,
               editArea: this.editArea,
               lockEditArea: this.lockEditArea.bind(this),
               qrLink,
               issuesLength: issues.length,
               showFormatMenu,
-              textHasTags: textHasTags(translation),
+              textHasTags: Boolean(textHasTags(translation)),
               removeTagsFromText: this.removeTagsFromText.bind(this),
               missingTagsInTarget: segment.missingTagsInTarget,
               addMissingSourceTagsToTarget:

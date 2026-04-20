@@ -532,7 +532,7 @@ const NewProject = () => {
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
       subfiltering_handlers: JSON.stringify(subfilteringHandlers),
-      mt_engine: mt.id,
+      ...(mt?.id != null && {mt_engine: mt.id}),
       private_keys_list: JSON.stringify({
         ownergroup: [],
         mine: tm,

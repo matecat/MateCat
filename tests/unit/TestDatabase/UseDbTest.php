@@ -2,13 +2,14 @@
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers \Model\DataAccess\Database::useDb
+ * @covers Database::useDb
  * User: dinies
  * Date: 12/04/16
  * Time: 16.49
@@ -17,9 +18,9 @@ class UseDbTest extends AbstractTest
 {
 
     /**
-     * @var \Model\DataAccess\Database|IDatabase
+     * @var Database|IDatabase
      */
-    protected $databaseInstance;
+    protected IDatabase|Database $databaseInstance;
 
     public function setUp(): void
     {
@@ -39,6 +40,7 @@ class UseDbTest extends AbstractTest
      * @group  regression
      * @covers Database::useDb
      */
+    #[Test]
     public function test_useDb_check_private_variable()
     {
         $this->databaseInstance->useDb('information_schema');

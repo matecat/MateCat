@@ -137,6 +137,8 @@ const tagSignaturesMap = {
     showTooltip: false,
     replaceForLexiqa: true,
     lexiqaText: ' ',
+    unicodeChar: '\u00A0',
+    regexUnicodeChar: /\u00A0/g,
   },
   tab: {
     type: 'tab',
@@ -154,13 +156,15 @@ const tagSignaturesMap = {
     showTooltip: false,
     replaceForLexiqa: true,
     lexiqaText: ' ',
+    unicodeChar: '\u0009',
+    regexUnicodeChar: /\\u0009/g,
   },
   carriageReturn: {
     type: 'carriageReturn',
     regex: /##\$(_0D)\$##/g,
     selfClosing: true,
     isClosure: false,
-    placeholder: '\\r',
+    placeholder: '\r',
     encodedPlaceholder: '##$_0D$##',
     placeholderRegex: null,
     decodeNeeded: false,
@@ -172,6 +176,8 @@ const tagSignaturesMap = {
     replaceForLexiqa: true,
     lexiqaText: '\n',
     convertToLexiqaIgnoreAnglesBrackets: true,
+    unicodeChar: '\u000D',
+    regexUnicodeChar: /\\u000D/g,
   },
   lineFeed: {
     type: 'lineFeed',
@@ -190,6 +196,8 @@ const tagSignaturesMap = {
     replaceForLexiqa: true,
     lexiqaText: '\n',
     convertToLexiqaIgnoreAnglesBrackets: true,
+    unicodeChar: '\u000A',
+    regexUnicodeChar: /\\u000A/g,
   },
   splitPoint: {
     type: 'splitPoint',

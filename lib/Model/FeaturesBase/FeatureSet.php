@@ -2,7 +2,6 @@
 
 namespace Model\FeaturesBase;
 
-use ArrayObject;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
@@ -13,6 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
 use Plugins\Features\BaseFeature;
@@ -124,7 +124,7 @@ class FeatureSet implements FeatureSetInterface
      */
     public function loadForProject(ProjectStruct $project): void
     {
-        $featureStrings = $project->getMetadataValue(MetadataDao::FEATURES_KEY);
+        $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
         $featureCodes = (!empty($featureStrings)) ? FeatureSet::splitString($featureStrings) : [];
 
         $this->clear();
@@ -145,7 +145,7 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @param ArrayObject $metadata
+     * @param array<string, mixed> $metadata
      *
      * @throws AuthenticationError
      * @throws EndQueueException
@@ -154,7 +154,7 @@ class FeatureSet implements FeatureSetInterface
      * @throws ValidationError
      * @throws Exception
      */
-    public function loadProjectDependenciesFromProjectMetadata(ArrayObject $metadata): void
+    public function loadProjectDependenciesFromProjectMetadata(array $metadata): void
     {
         $project_dependencies = [];
         $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata);

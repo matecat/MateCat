@@ -51,12 +51,13 @@ class LaraClient extends Translator
 
         };
 
+        // Sets an extra header for the HTTP client using the pre-shared key.
+        $this->client->setExtraHeader(Headers::LARA_PRE_SHARED_KEY_HEADER, AppConfig::$LARA_PRE_SHARED_KEY_HEADER);
+        $this->client->setExtraHeader(Headers::LARA_MEMORIES_IDS, "");
+
         $this->memories = new Memories($this->client);
         $this->documents = new Documents($this->client);
         $this->glossaries = new Glossaries($this->client);
-
-        // Sets an extra header for the HTTP client using the pre-shared key.
-        $this->client->setExtraHeader(Headers::LARA_PRE_SHARED_KEY_HEADER, AppConfig::$LARA_PRE_SHARED_KEY_HEADER);
     }
 
     /**

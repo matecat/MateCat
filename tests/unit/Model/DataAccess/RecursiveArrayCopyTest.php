@@ -3,12 +3,12 @@
 namespace unit\Model\DataAccess;
 
 use Model\DataAccess\RecursiveArrayCopy;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 class RecursiveArrayCopyTest extends AbstractTest
 {
-    use RecursiveArrayCopy;
-
+    #[Test]
     public function testToArrayWithPublicProperties()
     {
         $testObject = new class {
@@ -26,6 +26,7 @@ class RecursiveArrayCopyTest extends AbstractTest
         $this->assertEquals($expected, $testObject->toArray());
     }
 
+    #[Test]
     public function testToArrayWithArrayProperties()
     {
         $testObject = new class {
@@ -41,6 +42,7 @@ class RecursiveArrayCopyTest extends AbstractTest
         $this->assertEquals($expected, $testObject->toArray());
     }
 
+    #[Test]
     public function testToArrayWithNestedObjectProperties()
     {
         $nestedObject = new class {
@@ -69,6 +71,7 @@ class RecursiveArrayCopyTest extends AbstractTest
         $this->assertEquals($expected, $testObject->toArray());
     }
 
+    #[Test]
     public function testToArrayWithMask()
     {
         $testObject = new class {
@@ -86,6 +89,7 @@ class RecursiveArrayCopyTest extends AbstractTest
         $this->assertEquals($expected, $testObject->toArray(['name']));
     }
 
+    #[Test]
     public function testToArrayWithNullPublicProperty()
     {
         $testObject = new class {
@@ -101,6 +105,7 @@ class RecursiveArrayCopyTest extends AbstractTest
         $this->assertEquals($expected, $testObject->toArray());
     }
 
+    #[Test]
     public function testToArrayWithNonPublicProperties()
     {
         $testObject = new class {
@@ -118,6 +123,7 @@ class RecursiveArrayCopyTest extends AbstractTest
         $this->assertEquals($expected, $testObject->toArray());
     }
 
+    #[Test]
     public function testToArrayWithEmptyObject()
     {
         $testObject = new class {

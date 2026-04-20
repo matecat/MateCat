@@ -221,6 +221,7 @@ class TmKeyManagementTest extends AbstractTest
     /**
      * @depends testGetTmKeyStructure_noArgs
      */
+    #[Test]
     public function testGetClientTmKeyStructure_noArgs()
     {
         $structure = TmKeyManager::getClientTmKeyStructure();

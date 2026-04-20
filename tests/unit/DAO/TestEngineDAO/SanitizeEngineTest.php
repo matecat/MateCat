@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -36,6 +37,7 @@ class SanitizeEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_name_field()
     {
         $this->engine_struct_input->name = <<<LABEL
@@ -56,6 +58,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_description_field()
     {
         $this->engine_struct_input->description = <<<LABEL
@@ -76,6 +79,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_base_url_field()
     {
         $this->engine_struct_input->base_url = <<<LABEL
@@ -96,6 +100,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_translate_relative_url_field()
     {
         $this->engine_struct_input->translate_relative_url = <<<LABEL
@@ -116,6 +121,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_contribute_relative_url_field()
     {
         $this->engine_struct_input->contribute_relative_url = <<<LABEL
@@ -136,6 +142,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_delete_relative_url_field()
     {
         $this->engine_struct_input->delete_relative_url = <<<LABEL
@@ -156,6 +163,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_others_field()
     {
         $this->engine_struct_input->others = <<<LABEL
@@ -175,6 +183,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_class_load_field()
     {
         $this->engine_struct_input->class_load = <<<LABEL
@@ -195,6 +204,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_extra_parameters_field()
     {
         $this->engine_struct_input->extra_parameters = <<<LABEL
@@ -213,6 +223,7 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
+    #[Test]
     public function test_sanitize_realistic_others_field()
     {
         $this->engine_struct_input->others = <<<'LAB'

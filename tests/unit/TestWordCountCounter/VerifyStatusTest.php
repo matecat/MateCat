@@ -2,6 +2,7 @@
 
 
 use Model\WordCount\CounterModel;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -17,6 +18,7 @@ class VerifyStatusTest extends AbstractTest
      * @group  regression
      * @covers CounterModel::_verifyStatus
      */
+    #[Test]
     public function test__verifyStatus_without_exception_thrown()
     {
         $word_counter = new CounterModel();
@@ -37,6 +39,7 @@ class VerifyStatusTest extends AbstractTest
      * @group  regression
      * @covers CounterModel::_verifyStatus
      */
+    #[Test]
     public function test__verifyStatus_with_exception_thrown_because_status_is_invalid()
     {
         $word_counter = new CounterModel();

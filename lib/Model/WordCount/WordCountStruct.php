@@ -12,6 +12,7 @@ namespace Model\WordCount;
 use JsonSerializable;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 
 class WordCountStruct implements JsonSerializable
 {
@@ -443,7 +444,7 @@ class WordCountStruct implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            MetadataDao::WORD_COUNT_EQUIVALENT => [
+            ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value => [
                 'new' => $this->new_words,
                 'draft' => $this->draft_words,
                 'translated' => $this->translated_words,
@@ -451,7 +452,7 @@ class WordCountStruct implements JsonSerializable
                 'approved2' => $this->approved2_words,
                 'total' => $this->getTotal()
             ],
-            MetadataDao::WORD_COUNT_RAW => [
+            ProjectsMetadataMarshaller::WORD_COUNT_RAW->value => [
                 'new' => $this->new_raw_words,
                 'draft' => $this->draft_raw_words,
                 'translated' => $this->translated_raw_words,
@@ -468,7 +469,7 @@ class WordCountStruct implements JsonSerializable
     public function toArray(): array
     {
         return [
-            MetadataDao::WORD_COUNT_EQUIVALENT => [
+            ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value => [
                 'new' => $this->new_words,
                 'draft' => $this->draft_words,
                 'translated' => $this->translated_words,
@@ -476,7 +477,7 @@ class WordCountStruct implements JsonSerializable
                 'approved2' => $this->approved2_words,
                 'total' => $this->getTotal()
             ],
-            MetadataDao::WORD_COUNT_RAW => [
+            ProjectsMetadataMarshaller::WORD_COUNT_RAW->value => [
                 'new' => $this->new_raw_words,
                 'draft' => $this->draft_raw_words,
                 'translated' => $this->translated_raw_words,
