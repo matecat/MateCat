@@ -29167,18 +29167,6 @@ parameters:
 			path: lib/View/API/V3/Json/QualitySummary.php
 
 		-
-			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/APIDoc.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/APIDoc.php
-
-		-
 			message: '#^Method UploadHandler\:\:_isRightExtension\(\) has parameter \$fileUp with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -29387,21 +29375,3 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/View/fileupload/UploadHandler.php
-
-		-
-			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/templates/_APIDoc.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/templates/_APIDoc.php
-
-		-
-			message: '#^Path in require_once\(\) "\.\./\.\./lib/Bootstrap\.php" is not a file or it does not exist\.$#'
-			identifier: requireOnce.fileNotFound
-			count: 1
-			path: lib/View/templates/_APIDoc.php
