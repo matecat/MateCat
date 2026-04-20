@@ -145,28 +145,28 @@ body.cattool {
   gap: 8px;
   margin-left: -11px;
   margin-top: 8px;
+}
 
-  .segment-target-toolbar-icon {
-    width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
+.segment-target-toolbar-icon {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
 
-    &:disabled {
+  &:disabled {
+    color: colors.$grey8 !important;
+    box-shadow: inset 0 0 0 1px colors.$grey8 !important;
+
+    svg {
       color: colors.$grey8 !important;
-      box-shadow: inset 0 0 0 1px colors.$grey8 !important;
-
-      svg {
-        color: colors.$grey8 !important;
-      }
     }
   }
+}
 
-  .segment-target-toolbar-dropdown-trigger {
-    height: 32px !important;
-    padding: 0 16px !important;
-    font-weight: bold;
-    font-size: 14px !important;
-  }
+.segment-target-toolbar-dropdown-trigger {
+  height: 32px !important;
+  padding: 0 16px !important;
+  font-weight: bold;
+  font-size: 14px !important;
 }
 
 .lara-styles-dropdown {
