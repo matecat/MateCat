@@ -6,7 +6,7 @@ parameters:
     paths:
         - lib
     excludePaths:
-        - lib/View/APIDoc.php
+        - lib/View/APIDoc.php (?)
         - lib/View/templates/_APIDoc.php
     # Flag @throws \Exception on public/protected methods when only
     # a narrower exception (e.g. \InvalidArgumentException) is thrown
