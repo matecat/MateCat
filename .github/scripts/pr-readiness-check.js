@@ -46,10 +46,13 @@ function hasNonEmptySection(sectionHeader, body) {
     const re = new RegExp(`##\\s*${escapeRegex(sectionHeader)}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`);
     const match = body.match(re);
     if (!match) return false;
-    const content = match[1]
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .trim();
-    return content.length > 0;
+    let cleaned = match[1];
+    let prev;
+    do {
+        prev = cleaned;
+        cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
+    } while (cleaned !== prev);
+    return cleaned.trim().length > 0;
 }
 
 // ── Checklist items ───────────────────────────────────────────
