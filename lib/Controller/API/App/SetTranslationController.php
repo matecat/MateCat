@@ -411,6 +411,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->response->json($result);
         } catch (Exception $exception) {
             $db->rollback();
+            $this->logger->error($exception->getMessage());
             throw $exception;
         }
     }
@@ -573,9 +574,9 @@ class SetTranslationController extends AbstractStatefulKleinController
         $id_segment = $this->data['id_segment'];
 
         if ($this->isSegmentDisabled((int)$id_job, (int)$id_segment)) {
-            throw new Exception("Segment is disabled", -5);
+            throw new RuntimeException("Segment #".$id_segment." is disabled", -5);
         }
-    }
+}
 
     /**
      * @return bool

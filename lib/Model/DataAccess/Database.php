@@ -178,7 +178,12 @@ class Database implements IDatabase
      */
     public function rollback(): void
     {
-        $this->getConnection()->rollBack();
+        $connection = $this->getConnection();
+
+        // Check if a transaction is currently active
+        if ($connection->inTransaction()) {
+            $connection->rollBack();
+        }
     }
 
     /**
