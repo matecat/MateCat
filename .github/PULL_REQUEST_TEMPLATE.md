@@ -57,8 +57,8 @@
 - [ ] No AI tools were used in this PR
 - [ ] AI tools were used — details below
 
-<!-- If AI was used, specify which tools and for what purpose.
-     Example: "Claude Code (claude-opus-4-6) — implementation + test generation" -->
+<!-- If AI was used, just name the agent/tool.
+     Example: "Claude Code (claude-opus-4-6)" -->
 
 ## Notes
 
