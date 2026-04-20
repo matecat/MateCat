@@ -569,10 +569,10 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     private function checkIfSegmentIsNotDisabled(): void
     {
-        $id_job= $this->data->id_job;
-        $id_segment = $this->data->id_segment;
+        $id_job = $this->data['id_job'];
+        $id_segment = $this->data['id_segment'];
 
-        if ($this->isSegmentDisabled($id_job, $id_segment)) {
+        if ($this->isSegmentDisabled((int)$id_job, (int)$id_segment)) {
             throw new Exception("Segment is disabled", -5);
         }
     }
