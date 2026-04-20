@@ -44,9 +44,10 @@ trait ICUSourceSegmentChecker
             $sourceSegment,
         );
 
-        if ($this->icuEnabled($projectStruct)) {
-            $this->sourceContainsIcu = $this->icuSourcePatternValidator->containsComplexSyntax() && $this->icuSourcePatternValidator->isValidSyntax();
-        }
+        $this->sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $this->icuSourcePatternValidator,
+            $this->icuEnabled($projectStruct)
+        );
 
         return $this->sourceContainsIcu;
 

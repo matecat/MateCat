@@ -7,6 +7,7 @@ use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\QA;
 
 /**
@@ -114,8 +115,7 @@ class QAProcessor
 
         $sourceValidator = new MessagePatternValidator($sourceLang, $rawSource);
 
-        $sourceContainsIcu = $sourceValidator->containsComplexSyntax()
-            && $sourceValidator->isValidSyntax();
+        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu($sourceValidator, $this->icuEnabled);
 
         if (!$sourceContainsIcu) {
             return [null, false];
