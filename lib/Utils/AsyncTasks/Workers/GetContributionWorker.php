@@ -492,6 +492,7 @@ class GetContributionWorker extends AbstractWorker
                 $config['translation'] = $contributionStruct->translation;
                 $config['lara_style'] = $contributionStruct->lara_style;
                 $config['reasoning'] = $contributionStruct->reasoning;
+                $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
                 $config['keys'] = array_map(function ($tm_key) {
