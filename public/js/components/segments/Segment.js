@@ -1,4 +1,4 @@
-import {forEach, isUndefined} from 'lodash'
+import {forEach, isEqual, isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
 import React from 'react'
 import {union} from 'lodash/array'
@@ -691,7 +691,17 @@ class Segment extends React.Component {
     }
     return null
   }
-  componentDidUpdate() {}
+  componentDidUpdate(prevProps) {
+    if (!isEqual(prevProps.segment, this.props.segment)) {
+      const readonly = SegmentUtils.isReadonlySegment(this.props.segment)
+      if (readonly !== this.state.readonly) {
+        console.log('Segment ', this.props.segment.sid, 'readonly:', readonly)
+        this.setState({
+          readonly: SegmentUtils.isReadonlySegment(this.props.segment),
+        })
+      }
+    }
+  }
 
   render() {
     let job_marker = ''
