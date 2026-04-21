@@ -19753,36 +19753,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
-			message: '#^Call to function unset\(\) contains undefined variable \$chunks_bind_values\.$#'
-			identifier: unset.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Call to function unset\(\) contains undefined variable \$chunks_st\.$#'
-			identifier: unset.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Call to function unset\(\) contains undefined variable \$data\.$#'
-			identifier: unset.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Cannot access property \$password on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
 			message: '#^Cannot access property \$persistent on Utils\\ActiveMQ\\AMQHandler\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -19795,12 +19765,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
-			message: '#^Cannot access property \$status_analysis on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -19810,12 +19774,6 @@ parameters:
 			message: '#^Cannot call method getClient\(\) on Utils\\ActiveMQ\\AMQHandler\|null\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Cannot call method getMetadataValue\(\) on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 5
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
@@ -19966,48 +19924,6 @@ parameters:
 			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:get\(\) expects int, string given\.$#'
 			identifier: argument.type
 			count: 3
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Projects\\MetadataDao\:\:getProjectStaticSubfilteringCustomHandlers\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#1 \$projectStruct of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#2 \$projectFeaturesString of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#6 \$mt_evaluation of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects bool\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#7 \$mt_qe_workflow_enabled of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects bool\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#8 \$mt_qe_workflow_parameters of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#9 \$mt_quality_value_in_editor of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects int\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
