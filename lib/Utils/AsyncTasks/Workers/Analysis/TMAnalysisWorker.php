@@ -11,6 +11,8 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Matecat\ICU\MessagePatternComparator;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
@@ -20,7 +22,6 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -37,6 +38,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\PostProcess;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
@@ -164,6 +166,7 @@ class TMAnalysisWorker extends AbstractWorker
         //This function is necessary to prevent TM matches with a value of 75-84% from being overridden by the MT, which has a default value of 86.
         $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
         $metadataDao = new ProjectsMetadataDao();
+        $icuEnabled = !empty($queueElement->params->icu_enabled);
 
         /** @var MatecatFilter $filter */
         $filter = MateCatFilter::getInstance(
@@ -205,12 +208,13 @@ class TMAnalysisWorker extends AbstractWorker
                 $bestMatch['segment'], // Layer 1 here
                 $suggestion,
                 $queueElement->params->source,
-                $queueElement->params->target
+                $queueElement->params->target,
+                $icuEnabled
             );
             $check->realignMTSpaces();
         } else {
             // Otherwise, try to perform only the tagCheck
-            $check = $this->initPostProcess($queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target);
+            $check = $this->initPostProcess($queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target, $icuEnabled);
             $check->performTagCheckOnly();
         }
 
@@ -223,7 +227,8 @@ class TMAnalysisWorker extends AbstractWorker
             $queueElement->params->segment,
             $suggestion,
             $queueElement->params->source,
-            $queueElement->params->target
+            $queueElement->params->target,
+            $icuEnabled
         );
         $check->performConsistencyCheck();
 
@@ -305,24 +310,72 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * Init a \PostProcess instance.
-     * This method forces to set source/target languages
+     * This method forces to set source/target languages and wires ICU detection
+     * when ICU support is enabled for the project.
      *
      * @param $source_seg
      * @param $target_seg
      * @param $source_lang
      * @param $target_lang
+     * @param bool $icuEnabled
      *
      * @return PostProcess
      * @throws Exception
      */
-    private function initPostProcess($source_seg, $target_seg, $source_lang, $target_lang): PostProcess
+    private function initPostProcess($source_seg, $target_seg, $source_lang, $target_lang, bool $icuEnabled = false): PostProcess
     {
-        $check = new PostProcess($source_seg, $target_seg);
+        [$comparator, $sourceContainsIcu] = $this->detectIcu(
+            $source_lang,
+            $target_lang,
+            $source_seg,
+            $target_seg,
+            $icuEnabled,
+        );
+
+        $check = new PostProcess($source_seg, $target_seg, $comparator, $sourceContainsIcu);
         $check->setFeatureSet($this->featureSet);
         $check->setSourceSegLang($source_lang);
         $check->setTargetSegLang($target_lang);
 
         return $check;
+    }
+
+    /**
+     * Detect ICU MessageFormat patterns in the source segment.
+     *
+     * @param string $sourceLang source language code
+     * @param string $targetLang target language code
+     * @param string $rawSource source content
+     * @param string $rawTarget target content
+     * @param bool $icuEnabled whether ICU support is enabled for the current project
+     *
+     * @return array{0: ?MessagePatternComparator, 1: bool}
+     *         [comparator (null when ICU is not detected), sourceContainsIcu flag]
+     */
+    private function detectIcu(
+        string $sourceLang,
+        string $targetLang,
+        string $rawSource,
+        string $rawTarget,
+        bool $icuEnabled,
+    ): array {
+        if (!$icuEnabled) {
+            return [null, false];
+        }
+
+        $sourceValidator = new MessagePatternValidator($sourceLang, $rawSource);
+        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu($sourceValidator, $icuEnabled);
+
+        if (!$sourceContainsIcu) {
+            return [null, false];
+        }
+
+        $targetValidator = new MessagePatternValidator($targetLang, $rawTarget);
+
+        return [
+            MessagePatternComparator::fromValidators($sourceValidator, $targetValidator),
+            true,
+        ];
     }
 
     /**

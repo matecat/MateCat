@@ -3,6 +3,7 @@
 namespace Model\DataAccess;
 
 use PDO;
+use Throwable;
 
 interface IDatabase
 {
@@ -55,6 +56,22 @@ interface IDatabase
      * Roll back a transaction for InnoDB tables
      */
     public function rollback(): void;
+
+    /**
+     * Execute a callback within a database transaction.
+     *
+     * Begins a transaction, executes the callback, and commits.
+     * On any exception, rolls back (if still in transaction) and re-throws.
+     *
+     * @template T
+     *
+     * @param callable(): T $callback
+     *
+     * @return T The value returned by the callback
+     *
+     * @throws Throwable Re-throws the original exception after rollback
+     */
+    public function transaction( callable $callback ): mixed;
 
     /**
      * Execute a update query with an array as argument
