@@ -210,7 +210,7 @@ jobs:
           name: coverage-report
 
       - name: Test Guard
-        uses: ostico/test-guard@v1.0.5
+        uses: ostico/test-guard@v1
         with:
           coverage-file: coverage.xml
           coverage-threshold: '80'
