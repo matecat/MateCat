@@ -8,8 +8,6 @@ use TestHelpers\AbstractTest;
 
 class RecursiveArrayCopyTest extends AbstractTest
 {
-    use RecursiveArrayCopy;
-
     #[Test]
     public function testToArrayWithPublicProperties()
     {

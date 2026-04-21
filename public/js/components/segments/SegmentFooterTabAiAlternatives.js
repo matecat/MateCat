@@ -1,14 +1,17 @@
-import React, {createRef, useEffect, useState} from 'react'
+import React, {createRef, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import Copy from '../icons/Copy'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {EditorLite} from './EditorLite'
+import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
+import CommonUtils from '../../utils/commonUtils'
+import {MemoizeRequest} from '../../utils/MemoizeRequest'
+import {ButtonCopy} from '../common/ButtonCopy'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -172,6 +175,8 @@ const enrichAlternatives = ({
   })
 }
 
+const aiCache = new MemoizeRequest()
+
 export const SegmentFooterTabAiAlternatives = ({
   code,
   active_class,
@@ -181,6 +186,8 @@ export const SegmentFooterTabAiAlternatives = ({
   const [alternatives, setAlternatives] = useState()
 
   const editorLiteRefs = []
+
+  const requestingParams = useRef()
 
   const getEditorLiteRef = (index) => {
     if (!editorLiteRefs[index]) {
@@ -193,6 +200,8 @@ export const SegmentFooterTabAiAlternatives = ({
     let selectedText = ''
 
     const requestAlternatives = ({text}) => {
+      if (requestingParams.current) return
+
       selectedText = DraftMatecatUtils.excludeSomeTagsFromText(text, [
         'g',
         'bx',
@@ -207,8 +216,11 @@ export const SegmentFooterTabAiAlternatives = ({
 
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
+      const laraStyle =
+        CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
+        LARA_STYLES.FAITHFUL
 
-      aiAlternartiveTranslations({
+      requestingParams.current = {
         id_job: segment.id_job,
         password: segment.password,
         idSegment: segment.sid,
@@ -219,13 +231,26 @@ export const SegmentFooterTabAiAlternatives = ({
         targetSentence: decodedTarget,
         targetContextSentencesString: contextListAfter.map((t) => t).join('\n'),
         excerpt: text,
-        styleInstructions:
-          CatToolStore.getJobMetadata().project.mt_extra.lara_style,
-      })
+        styleInstructions: laraStyle,
+      }
+
+      const cached = aiCache.get(requestingParams.current)
+
+      if (cached) {
+        receiveAlternatives({data: cached})
+      } else {
+        aiAlternartiveTranslations(requestingParams.current).catch(() =>
+          receiveAlternatives({
+            data: {has_error: true, message: 'Fetch failed'},
+          }),
+        )
+      }
     }
 
     const receiveAlternatives = ({data}) => {
       if (!data.has_error && Array.isArray(data.message)) {
+        aiCache.set(requestingParams.current, data)
+
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
           originalSentence: DraftMatecatUtils.excludeSomeTagsFromText(
@@ -265,13 +290,22 @@ export const SegmentFooterTabAiAlternatives = ({
         )
       } else {
         setAlternatives({
-          error:
-            typeof data.message === 'string' && data.message !== ''
-              ? data.message
-              : 'Service currently unavailable. Please try again in a moment.',
+          error: 'Something went wrong. Please try again in a moment.',
           retryCallback: () => requestAlternatives({text: selectedText}),
         })
+        //Track Event
+        const message = {
+          sid: segment.sid,
+          segment: segment.decodedSource,
+          request: selectedText,
+          source: config.source_code,
+          target: config.target_code,
+          error: data.message,
+        }
+        CommonUtils.dispatchTrackingEvents('AiAlternativeError', message)
       }
+
+      requestingParams.current = undefined
     }
 
     SegmentStore.addListener(
@@ -288,7 +322,7 @@ export const SegmentFooterTabAiAlternatives = ({
         SegmentConstants.AI_ALTERNATIVES,
         requestAlternatives,
       )
-      SegmentStore.addListener(
+      SegmentStore.removeListener(
         SegmentConstants.AI_ALTERNATIVES_SUGGESTION,
         receiveAlternatives,
       )
@@ -307,54 +341,58 @@ export const SegmentFooterTabAiAlternatives = ({
     >
       {alternatives?.length ? (
         <div className="ai-feature-content">
-          <div className="ai-feature-alternatives-for">
-            <h4>Alternatives for:</h4>
-            <p
-              dangerouslySetInnerHTML={allowHTML(alternatives[0].selectedText)}
-            ></p>
-          </div>
-          <div className="ai-alternative-options">
-            {alternatives.map(({before, after, changed, context}, index) => {
-              const ref = getEditorLiteRef(index)
+          <div className="content">
+            <div className="ai-feature-alternatives-for">
+              <h4>Alternatives for:</h4>
+              <p
+                dangerouslySetInnerHTML={allowHTML(
+                  alternatives[0].selectedText,
+                )}
+              ></p>
+            </div>
+            <div className="ai-alternative-options">
+              {alternatives.map(({before, after, changed, context}, index) => {
+                const ref = getEditorLiteRef(index)
 
-              return (
-                <div key={index}>
-                  <div>
-                    <EditorLite
-                      ref={ref}
-                      highlightSnippet={{text: changed, style: 'BOLD'}}
-                      content={`${before}${changed}${after}`}
+                return (
+                  <div key={index}>
+                    <div>
+                      <EditorLite
+                        ref={ref}
+                        highlightSnippet={{text: changed, style: 'BOLD'}}
+                        content={`${before}${changed}${after}`}
+                      />
+                      <p className="ai-feature-option-alternative-description">
+                        {context}{' '}
+                      </p>
+                    </div>
+                    <ButtonCopy
+                      className="ai-feature-button"
+                      mode={BUTTON_MODE.OUTLINE}
+                      tooltip="Copy suggestion"
+                      onClick={() => ref.current.copyToClipboardHighlight()}
                     />
-                    <p className="ai-feature-option-alternative-description">
-                      {context}{' '}
-                    </p>
                   </div>
-                  <Button
-                    className="ai-feature-button"
-                    mode={BUTTON_MODE.OUTLINE}
-                    tooltip="Copy edited part"
-                    onClick={() => ref.current.copyToClipboardHighlight()}
-                  >
-                    <Copy size={16} />
-                  </Button>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       ) : alternatives?.error ? (
         <div className="ai-feature-content">
-          <p>{alternatives.error}</p>
-          {alternatives.error !== 'No alternative translations found.' && (
-            <Button
-              className="ai-feature-button-retry"
-              type={BUTTON_TYPE.DEFAULT}
-              mode={BUTTON_MODE.OUTLINE}
-              onClick={alternatives.retryCallback}
-            >
-              Retry
-            </Button>
-          )}
+          <div className="content">
+            <p>{alternatives.error}</p>
+            {alternatives.error !== 'No alternative translations found.' && (
+              <Button
+                className="ai-feature-button-retry"
+                type={BUTTON_TYPE.DEFAULT}
+                mode={BUTTON_MODE.OUTLINE}
+                onClick={alternatives.retryCallback}
+              >
+                Retry
+              </Button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="loading-container">

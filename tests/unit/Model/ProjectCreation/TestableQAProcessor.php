@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Matecat\ICU\MessagePatternComparator;
 use Model\ProjectCreation\QAProcessor;
 use Utils\LQA\QA;
 
@@ -12,19 +13,26 @@ class TestableQAProcessor extends QAProcessor
 {
     private ?QA $qaInstance = null;
 
-    /**
-     * Inject a QA stub/mock for tests.
-     */
+    /** @var ?MessagePatternComparator Captures the comparator passed to the last createQA() call */
+    public ?MessagePatternComparator $lastComparator = null;
+
+    /** @var ?bool Captures the sourceContainsIcu flag passed to the last createQA() call */
+    public ?bool $lastSourceContainsIcu = null;
+
     public function setQA(QA $qa): void
     {
         $this->qaInstance = $qa;
     }
 
-    /**
-     * Override to return the injected QA instance instead of creating a real one.
-     */
-    protected function createQA(string $source, string $target): QA
-    {
-        return $this->qaInstance ?? parent::createQA($source, $target);
+    protected function createQA(
+        string $source,
+        string $target,
+        ?MessagePatternComparator $comparator = null,
+        bool $sourceContainsIcu = false,
+    ): QA {
+        $this->lastComparator        = $comparator;
+        $this->lastSourceContainsIcu = $sourceContainsIcu;
+
+        return $this->qaInstance ?? parent::createQA($source, $target, $comparator, $sourceContainsIcu);
     }
 }

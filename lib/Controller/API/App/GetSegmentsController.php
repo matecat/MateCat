@@ -30,6 +30,7 @@ use Model\Segments\SegmentUIStruct;
 use ReflectionException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController
@@ -146,7 +147,7 @@ class GetSegmentsController extends KleinController
                     language: $job->source,
                     patternString: $seg['segment']
                 );
-                $string_contains_icu = $analyzer->containsComplexSyntax() && $analyzer->isValidSyntax();
+                $string_contains_icu = ICUSourceSegmentDetector::sourceContainsIcu($analyzer, $icu_enabled);
             }
 
             /** @var MateCatFilter $Filter */
