@@ -16015,30 +16015,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
-			message: '#^Call to function unset\(\) contains undefined variable \$chunks_bind_values\.$#'
-			identifier: unset.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Call to function unset\(\) contains undefined variable \$chunks_st\.$#'
-			identifier: unset.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Call to function unset\(\) contains undefined variable \$data\.$#'
-			identifier: unset.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Cannot access property \$password on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
 			message: '#^Cannot access property \$persistent on Utils\\ActiveMQ\\AMQHandler\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -16048,12 +16024,6 @@ parameters:
 			message: '#^Cannot access property \$queue_name on Utils\\TaskRunner\\Commons\\Context\|null\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Cannot access property \$status_analysis on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-

@@ -23,6 +23,7 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use Stomp\Transport\Message;
+use Throwable;
 use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
@@ -239,21 +240,31 @@ class FastAnalysis extends AbstractDaemon
                 // INSERT DATA
                 $this->logger->debug("Inserting segments...");
 
-                // define variable for the sake of the code, even if empty
                 $projectStruct = new ProjectStruct();
 
                 try {
                     /**
                      * Ensure we have fresh data from the master node
                      */
-                    Database::obtain()->getConnection()->beginTransaction();
-                    $projectStruct = ProjectDao::findById($pid);
-                    if ($projectStruct === null) {
-                        Database::obtain()->getConnection()->rollBack();
+                    $metadataResult = Database::obtain()->transaction(function () use ($pid) {
+                        $projectStruct = ProjectDao::findById($pid);
+                        if ($projectStruct === null) {
+                            return null;
+                        }
+
+                        return [
+                            'project' => $projectStruct,
+                            'metadata' => $projectStruct->getAllMetadataAsKeyValue(),
+                        ];
+                    });
+
+                    if ($metadataResult === null) {
                         $this->logger->error("Unable to insert fast analysis: project not found for pid $pid");
                         continue;
                     }
-                    $allMetadata = $projectStruct->getAllMetadataAsKeyValue();
+
+                    $projectStruct = $metadataResult['project'];
+                    $allMetadata = $metadataResult['metadata'];
                     $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
                     $mt_evaluation = $allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] ?? false;
                     $mt_qe_workflow_enabled = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] ?? false;
@@ -261,7 +272,6 @@ class FastAnalysis extends AbstractDaemon
                     $mt_quality_value_in_editor = $allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85;
                     $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
                     $icu_enabled = $allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false;
-                    Database::obtain()->getConnection()->commit();
 
                     $insertReportRes = $this->_insertFastAnalysis(
                         $projectStruct,
@@ -276,9 +286,7 @@ class FastAnalysis extends AbstractDaemon
                         $subfiltering_handlers,
                         $icu_enabled
                     );
-                } catch (Exception $e) {
-                    //Logging done and email sent
-                    //set to error
+                } catch (Throwable $e) {
                     $insertReportRes = -1;
                     $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 }
@@ -406,16 +414,23 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _updateProject($pid, $status): void
     {
-        Database::obtain()->begin();
-        $project = ProjectDao::findById($pid);
-        if ($project->status_analysis != ProjectStatus::STATUS_DONE) { // avoid concurrency between fast and tm daemons ( they set DONE when complete )
-            $this->logger->debug("*** Project $pid: Changing status...");
-            ProjectDao::changeProjectStatus($pid, $status);
-            $this->logger->debug("*** Project $pid: $status");
-        } else {
-            $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");
-        }
-        Database::obtain()->commit();
+        Database::obtain()->transaction(function () use ($pid, $status) {
+            $project = ProjectDao::findById($pid);
+            if ($project === null) {
+                $this->logger->debug("*** Project $pid: not found. Skip update.");
+
+                return;
+            }
+
+            // avoid concurrency between fast and tm daemons ( they set DONE when complete )
+            if ($project->status_analysis != ProjectStatus::STATUS_DONE) {
+                $this->logger->debug("*** Project $pid: Changing status...");
+                ProjectDao::changeProjectStatus($pid, $status);
+                $this->logger->debug("*** Project $pid: $status");
+            } else {
+                $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");
+            }
+        });
     }
 
     /**
@@ -569,45 +584,35 @@ class FastAnalysis extends AbstractDaemon
             }
         }
 
-        unset($data);
         unset($tuple_list);
-        unset($chunks_bind_values);
-        unset($chunks_st);
-
-        //_TimeStampMsg( "Done." );
 
         $data2 = ['fast_analysis_wc' => $total_eq_wc];
         $where = ["id" => $pid];
 
-
-        $db = Database::obtain();
-        $db->begin();
-
         try {
-            /*
-             * IF NO TM ANALYSIS, update the jobs global word count
-            */
-            if (!$perform_Tms_Analysis) {
-                $_details = $this->getProjectSegmentsTranslationSummary($pid);
+            $project_creation_success = Database::obtain()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
+                /*
+                 * IF NO TM ANALYSIS, update the jobs global word count
+                 */
+                if (!$perform_Tms_Analysis) {
+                    $_details = $this->getProjectSegmentsTranslationSummary($pid);
 
-                $this->logger->debug("--- trying to initialize job total word count.");
+                    $this->logger->debug("--- trying to initialize job total word count.");
 
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
+                    /** @noinspection PhpUnusedLocalVariableInspection */
+                    $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
 
-                foreach ($_details as $job_info) {
-                    $counter = new CounterModel();
-                    $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
+                    foreach ($_details as $job_info) {
+                        $counter = new CounterModel();
+                        $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
+                    }
                 }
-            }
-            /* IF NO TM ANALYSIS, upload the jobs global word count */
+                /* IF NO TM ANALYSIS, upload the jobs global word count */
 
-            $project_creation_success = $db->update('projects', $data2, $where);
-
-            $db->commit();
+                return Database::obtain()->update('projects', $data2, $where);
+            });
         } catch (PDOException $e) {
             $this->logger->debug($e->getMessage());
-            $db->rollback();
 
             return $e->getCode() * -1;
         }
@@ -904,14 +909,13 @@ HD;
         ORDER BY id LIMIT " . $limit;
 
         $db = Database::obtain();
-        //Needed to address the query to the master database if exists
-        Database::obtain()->begin();
+        // Needed to address the query to the master database if exists
+        $results = $db->transaction(function () use ($db, $query, $bindParams) {
+            $stmt = $db->getConnection()->prepare($query);
+            $stmt->execute($bindParams);
 
-        $stmt = $db->getConnection()->prepare($query);
-        $stmt->execute($bindParams);
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $db->getConnection()->commit();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        });
 
         foreach ($results as $position => $project) {
             //acquire a lock
@@ -923,7 +927,7 @@ HD;
 
                 try {
                     $this->_updateProject($project['id'], ProjectStatus::STATUS_BUSY);
-                } catch (PDOException) {
+                } catch (Exception) {
                     $this->queueHandler->getRedisClient()->del('_fPid:' . $project['id']);
                 }
             }
