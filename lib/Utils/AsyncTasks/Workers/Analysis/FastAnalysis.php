@@ -248,6 +248,11 @@ class FastAnalysis extends AbstractDaemon
                      */
                     Database::obtain()->getConnection()->beginTransaction();
                     $projectStruct = ProjectDao::findById($pid);
+                    if ($projectStruct === null) {
+                        Database::obtain()->getConnection()->rollBack();
+                        $this->logger->error("Unable to insert fast analysis: project not found for pid $pid");
+                        continue;
+                    }
                     $allMetadata = $projectStruct->getAllMetadataAsKeyValue();
                     $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
                     $mt_evaluation = $allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] ?? false;

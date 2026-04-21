@@ -16033,12 +16033,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
-			message: '#^Cannot call method getAllMetadataAsKeyValue\(\) on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
 			message: '#^Cannot access property \$password on Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -16204,12 +16198,6 @@ parameters:
 			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:get\(\) expects int, string given\.$#'
 			identifier: argument.type
 			count: 3
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Parameter \#1 \$projectStruct of method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_insertFastAnalysis\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
