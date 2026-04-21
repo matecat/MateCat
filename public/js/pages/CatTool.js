@@ -692,50 +692,69 @@ function CatTool() {
       </div>
       <div
         id="context-preview-wrapper"
-        style={{display: segmentHasPreview ? undefined : 'none'}}
+        className={
+          !isPreviewOpen
+            ? `context-preview-wrapper--collapsed${!segmentHasPreview ? ' context-preview-wrapper--tab-hidden' : ''}`
+            : undefined
+        }
+        style={{
+          display: isPreviewOpen && !segmentHasPreview ? 'none' : undefined,
+        }}
       >
-        {isPreviewOpen && (
-          <div
-            className="context-preview__resize-handle"
-            onMouseDown={onResizeMouseDown}
-          />
-        )}
-        <div className="context-preview__header">
-          <span className="context-preview__header-title">
-            <EyeIcon size={16} />
-            Preview
-          </span>
-          <div className="context-preview__header-actions">
-            <Button
-              className="context-preview__header-btn"
-              onClick={openPreviewInNewWindow}
-              title="Open in new window"
-            >
-              <IconRedirect size={16} />
-            </Button>
-
-            <Button
-              className="context-preview__header-btn"
-              onClick={togglePreview}
-              title={isPreviewOpen ? 'Close preview' : 'Open preview'}
-            >
-              <span className="context-preview__header-close-label">
-                {isPreviewOpen ? 'Close' : 'Open'}
+        {isPreviewOpen ? (
+          <>
+            <div
+              className="context-preview__resize-handle"
+              onMouseDown={onResizeMouseDown}
+            />
+            <div className="context-preview__header">
+              <span className="context-preview__header-title">
+                <EyeIcon size={16} />
+                Preview
               </span>
-              <IconDown size={16} />
-            </Button>
-          </div>
-        </div>
-        {isPreviewOpen && (
+              <div className="context-preview__header-actions">
+                <Button
+                  className="context-preview__header-btn"
+                  onClick={openPreviewInNewWindow}
+                  title="Open in new window"
+                >
+                  <IconRedirect size={16} />
+                </Button>
+
+                <Button
+                  className="context-preview__header-btn"
+                  onClick={togglePreview}
+                  title="Close preview"
+                >
+                  <span className="context-preview__header-close-label">
+                    Close
+                  </span>
+                  <IconDown size={16} />
+                </Button>
+              </div>
+            </div>
+            <div
+              className="context-preview__container"
+              id="context-preview"
+              style={{
+                height: contextPreviewHeight,
+                pointerEvents: isResizing ? 'none' : undefined,
+              }}
+            >
+              <iframe src={contextPreviewUrl} />
+            </div>
+          </>
+        ) : (
           <div
-            className="context-preview__container"
-            id="context-preview"
-            style={{
-              height: contextPreviewHeight,
-              pointerEvents: isResizing ? 'none' : undefined,
-            }}
+            className="context-preview__tab"
+            onClick={togglePreview}
+            role="button"
+            tabIndex={0}
           >
-            <iframe src={contextPreviewUrl} />
+            <span className="context-preview__tab-title">Visual context</span>
+            <span className="context-preview__tab-icon">
+              <IconDown size={16} />
+            </span>
           </div>
         )}
       </div>
@@ -770,7 +789,7 @@ function CatTool() {
           }}
         />
       )}
-      {isUserLogged && (
+      {isUserLogged && !isLoadingSegments && (
         <CattoolFooter
           idProject={config.id_project}
           idJob={config.id_job}
