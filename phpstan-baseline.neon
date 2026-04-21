@@ -19819,12 +19819,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_getLockProjectForVolumeAnalysis\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_getSegmentsForFastVolumeAnalysis\(\) has parameter \$pid with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -19905,12 +19899,6 @@ parameters:
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:main\(\) has parameter \$args with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:main\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
