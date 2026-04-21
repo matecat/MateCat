@@ -198,7 +198,7 @@ const SegmentUtils = {
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
 
-    const suggetionArray = segment.contributions.matches.filter(
+    const suggetionArray = segment.contributions?.matches.filter(
       (match, index) =>
         index <
         (segment.choosenSuggestionIndex > 3
@@ -236,6 +236,7 @@ const SegmentUtils = {
       suggestion_array:
         segment.contributions &&
         !config.isReview &&
+        Array.isArray(suggetionArray) &&
         segment.choosenSuggestionIndex
           ? JSON.stringify(suggetionArray)
           : undefined,
