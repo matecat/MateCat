@@ -346,6 +346,15 @@ function CatTool() {
         context_url: context_url ?? null,
       })
     }
+    let lastOpenedSid = null
+    const onSegmentsRendered = () => {
+      const current = SegmentStore.getCurrentSegment()
+      if (!current) return
+      const sid = current.sid
+      if (sid === lastOpenedSid) return
+      lastOpenedSid = sid
+      onSegmentOpened(sid)
+    }
     const checkAnalysisState = ({analysis_complete}) => {
       setIsAnalysisCompleted(analysis_complete)
 
@@ -389,7 +398,10 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
-    SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, onSegmentOpened)
+    SegmentStore.addListener(
+      SegmentConstants.RENDER_SEGMENTS,
+      onSegmentsRendered,
+    )
     CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     const getJobMetadata = ({jobMetadata}) => setJobMetadata(jobMetadata)
@@ -415,8 +427,8 @@ function CatTool() {
         getMoreSegments,
       )
       SegmentStore.removeListener(
-        SegmentConstants.OPEN_SEGMENT,
-        onSegmentOpened,
+        SegmentConstants.RENDER_SEGMENTS,
+        onSegmentsRendered,
       )
       CatToolStore.removeListener(
         CatToolConstants.SET_PROGRESS,
