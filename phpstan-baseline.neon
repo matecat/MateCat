@@ -25042,18 +25042,6 @@ parameters:
 			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: lib/View/APIDoc.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/APIDoc.php
-
-		-
-			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/View/templates/_APIDoc.php
 
 		-
