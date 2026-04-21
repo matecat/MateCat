@@ -13,7 +13,6 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
-use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -249,12 +248,14 @@ class FastAnalysis extends AbstractDaemon
                      */
                     Database::obtain()->getConnection()->beginTransaction();
                     $projectStruct = ProjectDao::findById($pid);
-                    $projectFeaturesString = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
-                    $mt_evaluation = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value);
-                    $mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
-                    $mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
-                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
-                    $subfiltering_handlers = (new ProjectsMetadataDao)->getProjectStaticSubfilteringCustomHandlers($projectStruct->id);
+                    $allMetadata = $projectStruct->getAllMetadataAsKeyValue();
+                    $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
+                    $mt_evaluation = $allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] ?? false;
+                    $mt_qe_workflow_enabled = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] ?? false;
+                    $mt_qe_workflow_parameters = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
+                    $mt_quality_value_in_editor = $allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85;
+                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
+                    $icu_enabled = $allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false;
                     Database::obtain()->getConnection()->commit();
 
                     $insertReportRes = $this->_insertFastAnalysis(
@@ -267,7 +268,8 @@ class FastAnalysis extends AbstractDaemon
                         $mt_qe_workflow_enabled,
                         $mt_qe_workflow_parameters,
                         $mt_quality_value_in_editor,
-                        $subfiltering_handlers
+                        $subfiltering_handlers,
+                        $icu_enabled
                     );
                 } catch (Exception $e) {
                     //Logging done and email sent
@@ -452,6 +454,7 @@ class FastAnalysis extends AbstractDaemon
      * @param MTQEWorkflowParams|null $mt_qe_workflow_parameters
      * @param int|null $mt_quality_value_in_editor
      * @param array|null $subfiltering_handlers
+     * @param bool $icu_enabled
      * @return int
      * @throws Exception
      */
@@ -465,7 +468,8 @@ class FastAnalysis extends AbstractDaemon
         ?bool $mt_qe_workflow_enabled = false,
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
         ?int $mt_quality_value_in_editor = 85,
-        ?array $subfiltering_handlers = []
+        ?array $subfiltering_handlers = [],
+        bool $icu_enabled = false
     ): int {
         $pid = $projectStruct->id;
         $total_eq_wc = 0;
@@ -700,6 +704,7 @@ class FastAnalysis extends AbstractDaemon
                         $queue_element['mt_quality_value_in_editor'] = $mt_quality_value_in_editor ?? false;
 
                         $queue_element[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfiltering_handlers;
+                        $queue_element[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
 
                         $element = new QueueElement();
                         $element->params = new Params($queue_element);
