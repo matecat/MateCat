@@ -1,0 +1,165 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# REUSABLE WORKFLOW: Test, build, and deploy MateCat Docker images
+#
+# Called by aws_dev.yml and aws_prod.yml via workflow_call.
+# This file contains ALL shared logic — callers only define triggers and
+# pass the target environment name.
+#
+# INPUTS:
+#   deploy_environment – GitHub environment name ("develop" or "production")
+#   should_deploy      – whether the deploy job should run (true/false)
+#
+# GITHUB ENVIRONMENTS required:
+#   ci_test     – vars.AWS_ACCESS_KEY_ID, secrets.AWS_SECRET_ACCESS_KEY
+#   develop     – vars.AWS_ACCESS_KEY_ID, secrets.AWS_SECRET_ACCESS_KEY
+#   production  – vars.AWS_ACCESS_KEY_ID, secrets.AWS_SECRET_ACCESS_KEY
+#   All need:    secrets.CI_USER_TOKEN_MATECATBOT
+# ─────────────────────────────────────────────────────────────────────────────
+name: CI/CD Pipeline
+on:
+  workflow_call:
+    inputs:
+      deploy_environment:
+        description: 'GitHub environment for deploy (develop or production)'
+        required: true
+        type: string
+      should_deploy:
+        description: 'Whether to run the deploy job'
+        required: true
+        type: boolean
+env:
+  AWS_REGION: 'eu-central-1'
+  APP_NAME: matecat
+  # Opt into Node.js 24 for all JavaScript-based actions (checkout@v4, etc.)
+  # Remove once actions/checkout@v5 is released with native Node 24 support.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: read
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 1 – tests
+  # Builds all Docker images using plain docker compose (same as Travis),
+  # then runs the PHPUnit test suite inside a test-node container with
+  # MySQL + Redis.
+  # ───────────────────────────────────────────────────────────────────────────
+  tests:
+    name: Run tests
+    runs-on: ubuntu-24.04
+    environment: ci_test
+    steps:
+      # Checkout the repo including all git submodules.
+      # Falls back to the built-in github.token for fork PRs where
+      # CI_USER_TOKEN_MATECATBOT is not available.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
+      # On pull_request events, github.ref_name is "<pr_number>/merge" which
+      # Upgrade.php does not recognise. We use github.base_ref (the target
+      # branch, e.g. "develop" or "master") for PRs, and github.ref_name
+      # for pushes/tags.
+      - name: Build and test
+        env:
+          TEST_AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
+        run: |
+          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
+          # Build base-node (keep logs — useful for debugging)
+          docker compose -f docker/docker-compose-ci.yml build base-node
+          echo "Build test node"
+          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+          # Run tests — exit code propagated to the workflow step
+          docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB 2 – deploy (only when should_deploy is true)
+  #
+  # Builds web-node and daemons-node, tags and pushes to ECR.
+  # The ECR registry URL is determined dynamically from the AWS credentials
+  # stored in the GitHub environment — no hardcoded account IDs.
+  #
+  # Versioned tags (build-<version>-<run_number>) are pushed before :latest
+  # aliases to ensure both images exist as a consistent pair before :latest
+  # is updated.
+  # ───────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to ${{ inputs.deploy_environment }}
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.deploy_environment }}
+    if: ${{ inputs.should_deploy }}
+    needs:
+      - tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
+          submodules: recursive
+
+      # For production deploys (tag-triggered), validate the tag matches
+      # strict semver: v<MAJOR>.<MINOR>.<PATCH> (e.g. v1.0.0, v10.2.3)
+      # Fails fast before any AWS credentials are used.
+      - name: Validate tag format
+        if: ${{ inputs.deploy_environment == 'production' }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$TAG' does not match v<MAJOR>.<MINOR>.<PATCH>"
+            exit 1
+          fi
+          echo "Tag '$TAG' is valid"
+
+      # Extract version from inc/version.ini for the tag format:
+      # build-<version>-<run_number>  (e.g. build-4.1.0-157)
+      - name: Read app version
+        id: version
+        run: |
+          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
+          echo "BUILD=$BUILD" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # The registry URL is output dynamically (e.g. xxxxxxxxxxxxx.dkr.ecr...
+      # for develop, 449641877310.dkr.ecr... for production).
+      - name: Login to Amazon ECR
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build only base-node, web-node, and daemons-node (no test-node).
+      - name: Build images
+        env:
+          REPOSITORY_BRANCH: ${{ github.ref_name }}
+          REPOSITORY_TAG: ${{ github.ref_name }}
+        run: |
+          docker compose -f docker/docker-compose-ci.yml build base-node
+          docker compose -f docker/docker-compose-ci.yml build web-node daemons-node || exit 1
+
+      # Push order: versioned tags first, then :latest aliases together.
+      - name: Tag and push images to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login_ecr.outputs.registry }}
+          RELEASE_TAG: build-${{ steps.version.outputs.BUILD }}-${{ github.run_number }}
+        run: |
+          WEB_REPO="${ECR_REGISTRY}/matecat/matecat-web-node"
+          DAEMONS_REPO="${ECR_REGISTRY}/matecat/matecat-daemons-node"
+
+          docker tag matecat/matecat-web-node     $WEB_REPO:$RELEASE_TAG
+          docker tag matecat/matecat-web-node     $WEB_REPO:latest
+          docker tag matecat/matecat-daemons-node $DAEMONS_REPO:$RELEASE_TAG
+          docker tag matecat/matecat-daemons-node $DAEMONS_REPO:latest
+
+          # ── versioned tags first ──────────────────────────────────────────
+          docker push $WEB_REPO:$RELEASE_TAG
+          docker push $DAEMONS_REPO:$RELEASE_TAG
+
+          # ── :latest aliases together ──────────────────────────────────────
+          docker push $WEB_REPO:latest
+          docker push $DAEMONS_REPO:latest

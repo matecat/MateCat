@@ -27,7 +27,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import ContextReviewChannel from '../../utils/contextReviewChannel'
+import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -419,7 +419,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         document.getElementsByTagName('header')[0].offsetHeight
       const footerHeight =
         document.getElementsByTagName('footer')[0].offsetHeight
-      const wrapperEl = document.getElementById('context-review-wrapper')
+      const wrapperEl = document.getElementById('context-preview-wrapper')
       const wrapperHeight = wrapperEl ? wrapperEl.offsetHeight : 0
 
       setHeightArea(
@@ -430,7 +430,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     recalcHeight()
     window.addEventListener('resize', recalcHeight)
 
-    const wrapperEl = document.getElementById('context-review-wrapper')
+    const wrapperEl = document.getElementById('context-preview-wrapper')
     let observer
     if (wrapperEl) {
       observer = new ResizeObserver(recalcHeight)
@@ -443,7 +443,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     }
   }, [])
 
-  // Send segment mappings to ContextReview when segments change
+  // Send segment mappings to ContextPreview when segments change
   // useEffect(() => {
   //   if (!segments.size) return
   //   const segmentsList = []
@@ -466,7 +466,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   //       restype: findMeta('restype'),
   //     })
   //   }
-  //   ContextReviewChannel.sendMessage({type: 'segments', segments: segmentsList})
+  //   ContextPreviewChannel.sendMessage({type: 'segments', segments: segmentsList})
   // }, [segments])
 
   // add actions listener
@@ -487,7 +487,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
       setScrollToSelected(false)
-      ContextReviewChannel.sendMessage({
+      ContextPreviewChannel.sendMessage({
         type: 'highlight',
         sid,
       })

@@ -45,7 +45,7 @@ body.cattool {
       background-color: rgba(255, 255, 255, 0.4);
     }
   }
-  .context-review__resize-handle {
+  .context-preview__resize-handle {
     width: 100px;
     height: 6px;
     border-radius: 16px;
@@ -58,7 +58,7 @@ body.cattool {
       background-color: colors.$grey1;
     }
   }
-  .context-review__header {
+  .context-preview__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -69,7 +69,7 @@ body.cattool {
     border-radius: 16px 16px 0 0;
     background-color: colors.$white;
   }
-  .context-review__header-title {
+  .context-preview__header-title {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -83,19 +83,19 @@ body.cattool {
       height: 16px;
     }
   }
-  .context-review__header-actions {
+  .context-preview__header-actions {
     display: flex;
     align-items: center;
     gap: 4px;
   }
-  .context-review__header-close-label {
+  .context-preview__header-close-label {
     font-family: Calibri, sans-serif;
     font-size: 12px;
     font-weight: 700;
     line-height: 1.33em;
     color: colors.$grey7;
   }
-  .context-review__header-btn {
+  .context-preview__header-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -108,7 +108,7 @@ body.cattool {
       height: 16px;
     }
   }
-  .context-review__container {
+  .context-preview__container {
     width: 100%;
     flex-shrink: 0;
     iframe {
@@ -217,28 +217,28 @@ body.cattool {
   gap: 8px;
   margin-left: -11px;
   margin-top: 8px;
+}
 
-  .segment-target-toolbar-icon {
-    width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
+.segment-target-toolbar-icon {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
 
-    &:disabled {
+  &:disabled {
+    color: colors.$grey8 !important;
+    box-shadow: inset 0 0 0 1px colors.$grey8 !important;
+
+    svg {
       color: colors.$grey8 !important;
-      box-shadow: inset 0 0 0 1px colors.$grey8 !important;
-
-      svg {
-        color: colors.$grey8 !important;
-      }
     }
   }
+}
 
-  .segment-target-toolbar-dropdown-trigger {
-    height: 32px !important;
-    padding: 0 16px !important;
-    font-weight: bold;
-    font-size: 14px !important;
-  }
+.segment-target-toolbar-dropdown-trigger {
+  height: 32px !important;
+  padding: 0 16px !important;
+  font-weight: bold;
+  font-size: 14px !important;
 }
 
 .lara-styles-dropdown {

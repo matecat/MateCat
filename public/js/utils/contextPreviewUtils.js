@@ -2,12 +2,12 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
-import {findElementByMetadata} from './contextReviewLookup'
+import {findElementByMetadata} from './contextPreviewLookup'
 
 const containerMaps = new WeakMap()
 
-const HIGHLIGHT_CLASS = 'context-review-highlight'
-const HIGHLIGHT_ACTIVE_CLASS = 'context-review-highlight--active'
+const HIGHLIGHT_CLASS = 'context-preview-highlight'
+const HIGHLIGHT_ACTIVE_CLASS = 'context-preview-highlight--active'
 const SEGMENT_SIDS_ATTR = 'data-context-sids'
 
 /**
@@ -494,27 +494,31 @@ export const tagSegments = (
 
   // Strategy pass — runs first, highest priority.
   // Segments with resname + restype are resolved via DOM-attribute lookups
-  // before any text-match runs. Misses join fallbackQueue and compete in
-  // text-match exactly as segments with no metadata.
+  // before any text-match runs. Misses (element not found) silently fall
+  // through to text-match exactly as segments with no metadata.
   const strategyResolved = new Set()
-  const fallbackQueue = new Set()
+  const tier1Nodes = new Set()
 
   for (const [sidStr, {resname, restype}] of Object.entries(metadataMap)) {
     const sid = Number(sidStr)
     if (!resname || !restype) continue
     if (alreadyTagged.has(sid)) {
       strategyResolved.add(sid)
+      const idx = prepared.findIndex((p) => p.sid === sid)
+      if (idx !== -1) used.add(idx)
+      // Re-find the element so Pass 2 still excludes it on incremental calls
+      const existingEl = findElementByMetadata(container, resname, restype)
+      if (existingEl) tier1Nodes.add(existingEl)
       continue
     }
     const el = findElementByMetadata(container, resname, restype)
     if (el) {
       appendSid(el, sid)
       strategyResolved.add(sid)
+      tier1Nodes.add(el)
       // Mark the corresponding prepared entry as used so Pass 1 skips it
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
-    } else {
-      fallbackQueue.add(sid)
     }
   }
 
@@ -525,6 +529,9 @@ export const tagSegments = (
   // positional pairing when duplicate source texts appear in multiple
   // elements (e.g. two <p>Equipment</p> nodes).
   for (const el of candidates) {
+    // Skip elements that were successfully tagged by the Strategy Pass
+    if (tier1Nodes.has(el)) continue
+
     // Skip elements already tagged (from a previous incremental call) —
     // Pass 1 is strictly for fresh, untagged elements.
     if (el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
@@ -558,6 +565,11 @@ export const tagSegments = (
   // Text replacement (when replaceWithTarget is true) happens after both
   // passes, via updateNodeTranslation.
   for (const el of candidates) {
+    // Skip elements that were successfully tagged by the Strategy Pass,
+    // or that contain / are contained by a tier1 node.
+    if (tier1Nodes.has(el)) continue
+    if ([...tier1Nodes].some((n) => el.contains(n) || n.contains(el))) continue
+
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
 
@@ -565,6 +577,7 @@ export const tagSegments = (
 
     for (let i = 0; i < prepared.length; i++) {
       if (getCachedSids(el).includes(prepared[i].sid)) continue
+      if (strategyResolved.has(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
         appendSid(el, prepared[i].sid)
       }
@@ -585,13 +598,13 @@ export const tagSegments = (
 }
 
 /**
- * Extracts the four new BroadcastChannel payload fields from a raw segment object.
+ * Extracts the context preview payload fields from a raw segment object.
  *
  * Works with both plain JS objects (dot notation) and any shape where
  * `metadata` is an Array<{meta_key: string, meta_value: string}>.
  *
  * @param {{metadata?: Array<{meta_key: string, meta_value: string}>, context_url?: string|null}} segment
- * @returns {{context_url: string|null, resname: string|null, restype: string|null}}
+ * @returns {{context_url: string|null, resname: string|null, restype: string|null, screenshot: string|null}}
  */
 export const extractSegmentContextFields = (segment) => {
   const meta = segment.metadata ?? []
@@ -600,5 +613,6 @@ export const extractSegmentContextFields = (segment) => {
     context_url: segment.context_url ?? null,
     resname: find('resname'),
     restype: find('restype'),
+    screenshot: find('screenshot'),
   }
 }

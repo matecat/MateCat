@@ -4,11 +4,11 @@ import {
   highlightBySid,
   setActiveHighlight,
   getSegmentNodeMap,
-} from '../utils/contextReviewUtils'
-import ContextReviewChannel from '../utils/contextReviewChannel'
+} from '../utils/contextPreviewUtils'
+import ContextPreviewChannel from '../utils/contextPreviewChannel'
 
 /**
- * Manages highlight state and occurrence navigation for the ContextReview panels.
+ * Manages highlight state and occurrence navigation for the ContextPreview panels.
  *
  * @param {{sourceRef: React.RefObject, targetRef: React.RefObject}} params
  * @returns {{
@@ -27,6 +27,9 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
   const highlightRef = useRef(null)
 
   const setHighlight = useCallback((valueOrUpdater) => {
+    if (typeof valueOrUpdater !== 'function') {
+      highlightRef.current = valueOrUpdater
+    }
     setHighlightState((prev) => {
       const next =
         typeof valueOrUpdater === 'function'
@@ -113,7 +116,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
           direction === 'next'
             ? (activeSegIdx + 1) % sids.length
             : (activeSegIdx - 1 + sids.length) % sids.length
-        ContextReviewChannel.sendMessage({
+        ContextPreviewChannel.sendMessage({
           type: 'segmentClicked',
           sid: sids[nextSegIdx],
         })

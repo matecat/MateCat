@@ -57,6 +57,7 @@ class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arr
      */
     public ?ContextStruct $context_groups = null;
     public ?array $metadata = null;
+    public ?string $context_url = null;
     public string $internal_id;
     public bool $icu = false;
 

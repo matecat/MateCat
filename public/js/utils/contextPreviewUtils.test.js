@@ -6,7 +6,7 @@ import {
   findSegmentSidsByClick,
   updateNodeTranslation,
   extractSegmentContextFields,
-} from './contextReviewUtils'
+} from './contextPreviewUtils'
 
 describe('getSidsFromElement', () => {
   it('returns [] for an element with no attribute', () => {
@@ -669,6 +669,7 @@ describe('extractSegmentContextFields', () => {
       context_url: 'https://example.com/page.html',
       resname: 'hero-title',
       restype: 'x-tag-id',
+      screenshot: null,
     })
   })
 
@@ -678,6 +679,7 @@ describe('extractSegmentContextFields', () => {
       context_url: null,
       resname: null,
       restype: null,
+      screenshot: null,
     })
   })
 
@@ -687,6 +689,7 @@ describe('extractSegmentContextFields', () => {
       context_url: null,
       resname: null,
       restype: null,
+      screenshot: null,
     })
   })
 
@@ -698,6 +701,35 @@ describe('extractSegmentContextFields', () => {
     const result = extractSegmentContextFields(seg)
     expect(result.resname).toBe('my-id')
     expect(result.restype).toBeNull()
+  })
+
+  it('extracts screenshot URL from metadata', () => {
+    const seg = {
+      context_url: 'https://example.com/page.html',
+      metadata: [
+        {meta_key: 'resname', meta_value: 'hero-title'},
+        {meta_key: 'restype', meta_value: 'x-tag-id'},
+        {
+          meta_key: 'screenshot',
+          meta_value: 'https://example.com/screenshot.png',
+        },
+      ],
+    }
+    expect(extractSegmentContextFields(seg)).toEqual({
+      context_url: 'https://example.com/page.html',
+      resname: 'hero-title',
+      restype: 'x-tag-id',
+      screenshot: 'https://example.com/screenshot.png',
+    })
+  })
+
+  it('returns null for screenshot when not in metadata', () => {
+    const seg = {
+      context_url: null,
+      metadata: [{meta_key: 'resname', meta_value: 'my-id'}],
+    }
+    const result = extractSegmentContextFields(seg)
+    expect(result.screenshot).toBeNull()
   })
 })
 
@@ -772,5 +804,36 @@ describe('tagSegments — strategy pass (metadataMap)', () => {
     // Should fall through to text-match, still tag the node
     const heroEl = document.body.querySelector('#hero')
     expect(getSidsFromElement(heroEl)).toContain(1)
+  })
+
+  it('tier1 element is not re-tagged by text-match on incremental calls', () => {
+    // SID 1 is strategy-resolved to #hero on the first call.
+    // On the second call, SID 2 has the same text as #hero.
+    // #hero must NOT get SID 2 appended to it.
+    document.body.innerHTML =
+      '<p id="hero">Same text</p><p>Same text</p><p>Other</p>'
+    const heroEl = document.body.querySelector('#hero')
+    const dupEl = document.body.querySelectorAll('p')[1]
+
+    // First call: strategy resolves SID 1 to #hero
+    tagSegments(document.body, [{sid: 1, source: 'Same text', target: ''}], {
+      metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}},
+    })
+    expect(getSidsFromElement(heroEl)).toEqual([1])
+
+    // Second incremental call: SID 2 has same text as #hero but no strategy.
+    // #hero is already tagged (alreadyTagged); the tier1Nodes fix must protect it.
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Same text', target: ''},
+        {sid: 2, source: 'Same text', target: ''},
+      ],
+      {metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}}},
+    )
+    // #hero must still only have SID 1 — SID 2 must NOT be appended
+    expect(getSidsFromElement(heroEl)).toEqual([1])
+    // SID 2 should be tagged on the duplicate-text element via text-match
+    expect(getSidsFromElement(dupEl)).toContain(2)
   })
 })

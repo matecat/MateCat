@@ -1,39 +1,34 @@
-import {useState, useRef, useEffect} from 'react'
-import ContextReviewChannel from '../utils/contextReviewChannel'
+import {useState, useEffect} from 'react'
+import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {
   getSegmentNodeMap,
+  getSidsFromElement,
+  replaceTextContent,
+  stripSegmentTags,
   updateNodeTranslation,
-} from '../utils/contextReviewUtils'
+} from '../utils/contextPreviewUtils'
 
 /**
- * Subscribes to ContextReviewChannel and handles all incoming message types.
+ * Subscribes to ContextPreviewChannel and handles all incoming message types.
  *
  * @param {{
  *   onHighlight: (numericSid: number, contextUrl: string|null) => void,
  *   onTranslationUpdate: (numericSid: number, target: string, updatedSegments: Array) => void,
- *   highlightRef: React.RefObject,
  *   targetRef: React.RefObject,
  *   showNodeWarning: (el: HTMLElement) => void,
  *   clearNodeWarning: (el: HTMLElement) => void,
  * }} params
  * @returns {{segments: Array, setSegments: Function, currentContextUrl: string|null}}
  */
-const useContextReviewMessages = ({
+const useContextPreviewMessages = ({
   onHighlight,
   onTranslationUpdate,
-  highlightRef,
   targetRef,
   showNodeWarning,
   clearNodeWarning,
 }) => {
   const [segments, setSegments] = useState([])
   const [currentContextUrl, setCurrentContextUrl] = useState(null)
-  const segmentsRef = useRef([])
-
-  // Keep segmentsRef in sync for use inside channel callbacks
-  useEffect(() => {
-    segmentsRef.current = segments
-  }, [segments])
 
   useEffect(() => {
     const handleMessage = (message) => {
@@ -47,13 +42,14 @@ const useContextReviewMessages = ({
       }
 
       if (message.type === 'highlight') {
-        const cur = highlightRef.current
         const numericSid = Number(message.sid)
-        if (cur?.mode === 'node' && cur.sids.includes(numericSid)) return
-        if (message.context_url) {
-          setCurrentContextUrl(message.context_url)
-        }
-        onHighlight(numericSid, message.context_url ?? null)
+        setSegments((prev) => {
+          const seg = prev.find((s) => Number(s.sid) === numericSid)
+          const contextUrl = seg?.context_url ?? null
+          setCurrentContextUrl(contextUrl)
+          onHighlight(numericSid, contextUrl)
+          return prev
+        })
       }
 
       if (message.type === 'updateTranslation') {
@@ -70,8 +66,22 @@ const useContextReviewMessages = ({
               const el = map.nodes[nodeIndex]
               if (!el) return
               const result = updateNodeTranslation(el, updated)
-              if (result === 'mismatch') showNodeWarning(el)
-              else clearNodeWarning(el)
+              if (result === 'mismatch') {
+                // Revert the node text to source so stale translation is removed
+                const sids = getSidsFromElement(el)
+                const sourceSeg = updated.find(
+                  (s) => sids.includes(Number(s.sid)) && s.source,
+                )
+                if (sourceSeg) {
+                  replaceTextContent(
+                    el,
+                    stripSegmentTags(sourceSeg.source).trim(),
+                  )
+                }
+                showNodeWarning(el)
+              } else {
+                clearNodeWarning(el)
+              }
             })
           }
           onTranslationUpdate(numericSid, target, updated)
@@ -80,12 +90,11 @@ const useContextReviewMessages = ({
       }
     }
 
-    const off = ContextReviewChannel.onMessage(handleMessage)
+    const off = ContextPreviewChannel.onMessage(handleMessage)
     return off
   }, [
     onHighlight,
     onTranslationUpdate,
-    highlightRef,
     targetRef,
     showNodeWarning,
     clearNodeWarning,
@@ -93,10 +102,10 @@ const useContextReviewMessages = ({
 
   // Request segments from CatTool on mount
   useEffect(() => {
-    ContextReviewChannel.sendMessage({type: 'requestSegments'})
+    ContextPreviewChannel.sendMessage({type: 'requestSegments'})
   }, [])
 
   return {segments, setSegments, currentContextUrl}
 }
 
-export default useContextReviewMessages
+export default useContextPreviewMessages

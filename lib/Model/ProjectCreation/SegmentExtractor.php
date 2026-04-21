@@ -161,7 +161,6 @@ class SegmentExtractor
         }
 
         // use generic
-        // @phpstan-ignore equal.alwaysTrue, booleanOr.alwaysTrue (false positive: processXliffFile mutates segments via $projectStructure)
         if (count($projectStructure->segments[$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
             $this->log("Segment import - no segments found in {$file_info[ 'original_filename' ]}\n");
             throw new Exception($file_info['original_filename'], ProjectCreationError::NO_TRANSLATABLE_TEXT->value);

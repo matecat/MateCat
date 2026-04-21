@@ -282,11 +282,11 @@ const matecatConfig = async ({env}, {mode}) => {
           'public/css/sass/components/pages/ActivityLogPage.scss',
         ),
       ],
-      contextReview: [
-        path.resolve(__dirname, 'public/js/pages/ContextReview.js'),
+      contextPreview: [
+        path.resolve(__dirname, 'public/js/pages/ContextPreview.js'),
         path.resolve(
           __dirname,
-          'public/css/sass/components/pages/ContextReviewPage.scss',
+          'public/css/sass/components/pages/ContextPreviewPage.scss',
         ),
       ],
       commonCss: [
@@ -407,12 +407,12 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/context_review.html'),
+        filename: path.resolve(__dirname, './lib/View/context_preview.html'),
         template: path.resolve(
           __dirname,
-          './lib/View/templates/_context_review.html',
+          './lib/View/templates/_context_preview.html',
         ),
-        chunks: ['contextReview', 'allPagesPlugins'],
+        chunks: ['contextPreview', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
