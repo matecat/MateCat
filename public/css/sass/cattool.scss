@@ -48,19 +48,25 @@ body.cattool {
   .context-preview-wrapper--collapsed {
     position: fixed;
     bottom: 88px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
     z-index: 10;
     opacity: 1;
     height: 0;
+    pointer-events: none;
     transition:
       opacity 250ms ease-out,
       transform 250ms ease-out;
 
+    .context-preview__tab {
+      pointer-events: auto;
+    }
+
     &.context-preview-wrapper--tab-hidden {
       opacity: 0;
-      transform: translateX(-50%) translateY(20px);
-      pointer-events: none;
+      transform: translateY(20px);
       transition:
         opacity 200ms ease-in,
         transform 200ms ease-in;
@@ -134,6 +140,7 @@ body.cattool {
     align-items: center;
     gap: 6px;
     padding: 4px 12px 4px 16px;
+    height: 26px;
     background-color: colors.$white;
     border-radius: 8px 8px 0 0;
     cursor: pointer;
