@@ -695,7 +695,6 @@ class Segment extends React.Component {
     if (!isEqual(prevProps.segment, this.props.segment)) {
       const readonly = SegmentUtils.isReadonlySegment(this.props.segment)
       if (readonly !== this.state.readonly) {
-        console.log('Segment ', this.props.segment.sid, 'readonly:', readonly)
         this.setState({
           readonly: SegmentUtils.isReadonlySegment(this.props.segment),
         })
