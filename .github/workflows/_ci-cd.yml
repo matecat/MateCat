@@ -197,6 +197,7 @@ jobs:
       contents: read
       pull-requests: write
       statuses: write
+      models: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
