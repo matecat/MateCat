@@ -60,7 +60,7 @@ Source: {text}
 
 Edited Translation: {translation}
 
-Return your classification and a brief explanation (2–3 lines).";
+Return your classification and a brief explanation (2–3 lines) in JSON format.";
 
         // Replace the placeholders with actual variables
         $vars = [
@@ -89,21 +89,37 @@ Return your classification and a brief explanation (2–3 lines).";
             'frequency_penalty' => 0,
             'presence_penalty' => 0,
             "stream" => false,
+            "response_format" => [
+                'type' => 'json_schema',
+                'json_schema' => [
+                    'name' => 'feedback_struct',
+                    'strict' => true,
+                    'schema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'category' => [
+                                'type' => 'string',
+                            ],
+                            'comment' => [
+                                'type' => 'string',
+                            ],
+                        ],
+                        'required' => ['category','comment'],
+                        'additionalProperties' => false,
+                    ],
+                ]
+            ],
         ];
 
         $response = $this->openAi->chat($opts);
         $response = json_decode($response, true);
 
         $message = $response['choices'][0]['message']['content'];
-        $feedback = explode(PHP_EOL, $message);
-
-        if(count($feedback) < 2){
-            return false;
-        }
+        $feedback = json_decode($message);
 
         return [
-            'category' => $this->formatFeedbackString($feedback[0]),
-            'comment' => $this->formatFeedbackString($feedback[1]),
+            'category' => $this->formatFeedbackString($feedback->category),
+            'comment' => $this->formatFeedbackString($feedback->comment),
         ];
     }
 

@@ -39,7 +39,8 @@ a.button-component-container {
     background-color: var(--btnBgColor);
     color: var(--btnTextColor);
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       background-color: var(--btnBgColorAlt);
       color: var(--btnTextColor);
     }
@@ -62,7 +63,8 @@ a.button-component-container {
       background-color: var(--btnBgColorSemitransAlt);
     }
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColorHover);
@@ -111,7 +113,8 @@ a.button-component-container {
       color: var(--btnAltTextColor);
     }
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColor);
     }
@@ -127,7 +130,8 @@ a.button-component-container {
       color: colors.$grey200;
     }
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       color: colors.$black;
     }
 

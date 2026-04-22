@@ -32,6 +32,7 @@ use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
@@ -215,7 +216,11 @@ class ProjectManager
      */
     protected function getQAProcessor(): QAProcessor
     {
-        return $this->qaProcessor ??= new QAProcessor($this->filter, $this->features);
+        return $this->qaProcessor ??= new QAProcessor(
+            $this->filter,
+            $this->features,
+            (bool) ($this->projectStructure->metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false),
+        );
     }
 
     /**
@@ -1017,6 +1022,7 @@ class ProjectManager
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function insertSegmentNotesForFile(): void
     {

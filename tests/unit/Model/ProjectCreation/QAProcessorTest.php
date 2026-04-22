@@ -50,7 +50,7 @@ class QAProcessorTest extends AbstractTest
      *
      * @throws MockException
      */
-    private function buildProcessor(?QA $qa = null): TestableQAProcessor
+    private function buildProcessor(?QA $qa = null, bool $icuEnabled = false): TestableQAProcessor
     {
         $filter = $this->createStub(MateCatFilter::class);
         $filter->method('fromLayer0ToLayer1')
@@ -61,6 +61,7 @@ class QAProcessorTest extends AbstractTest
         $processor = new TestableQAProcessor(
             $filter,
             $this->createStub(FeatureSet::class),
+            $icuEnabled,
         );
 
         if ($qa !== null) {
@@ -246,5 +247,98 @@ class QAProcessorTest extends AbstractTest
 
         // fromLayer1ToLayer0('L1:target text') → 'L0:L1:target text'
         $this->assertSame('L0:L1:target text', $tuple->translationLayer0);
+    }
+
+    // ── Test 6: ICU enabled + ICU source → comparator passed to createQA ─
+
+    /**
+     * @throws MockException
+     */
+    #[Test]
+    public function passesComparatorWhenIcuEnabledAndSourceContainsIcu(): void
+    {
+        $qa = $this->buildQAStub(normalizedTarget: 'norm');
+
+        $icuSource = '{count, plural, one{# item} other{# items}}';
+        $icuTarget = '{count, plural, one{# elemento} other{# elementi}}';
+
+        $tuple = $this->makeTuple(source: $icuSource, target: $icuTarget);
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $tuple],
+        ];
+
+        $processor = $this->buildProcessor($qa, icuEnabled: true);
+        $processor->process($this->projectStructure, 'en-US', 'it-IT');
+
+        $this->assertNotNull($processor->lastComparator);
+        $this->assertTrue($processor->lastSourceContainsIcu);
+    }
+
+    // ── Test 7: ICU disabled + ICU source → no comparator ────────────
+
+    /**
+     * @throws MockException
+     */
+    #[Test]
+    public function skipsIcuDetectionWhenIcuDisabled(): void
+    {
+        $qa = $this->buildQAStub(normalizedTarget: 'norm');
+
+        $icuSource = '{count, plural, one{# item} other{# items}}';
+        $icuTarget = '{count, plural, one{# elemento} other{# elementi}}';
+
+        $tuple = $this->makeTuple(source: $icuSource, target: $icuTarget);
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $tuple],
+        ];
+
+        $processor = $this->buildProcessor($qa, icuEnabled: false);
+        $processor->process($this->projectStructure, 'en-US', 'it-IT');
+
+        $this->assertNull($processor->lastComparator);
+        $this->assertFalse($processor->lastSourceContainsIcu);
+    }
+
+    // ── Test 8: ICU enabled + non-ICU source → no comparator ─────────
+
+    /**
+     * @throws MockException
+     */
+    #[Test]
+    public function skipsIcuDetectionWhenSourceHasNoIcuPatterns(): void
+    {
+        $qa = $this->buildQAStub(normalizedTarget: 'norm');
+
+        $tuple = $this->makeTuple(source: 'plain source text', target: 'plain target text');
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $tuple],
+        ];
+
+        $processor = $this->buildProcessor($qa, icuEnabled: true);
+        $processor->process($this->projectStructure, 'en-US', 'it-IT');
+
+        $this->assertNull($processor->lastComparator);
+        $this->assertFalse($processor->lastSourceContainsIcu);
+    }
+
+    // ── Test 9: ICU enabled + broken target → QA reports ICU errors ──
+
+    #[Test]
+    public function reportsIcuValidationErrorsForBrokenTarget(): void
+    {
+        $icuSource = '{count, plural, one{# item} other{# items}}';
+        $brokenTarget = '{count, plural, one{# elemento}}';
+
+        $tuple = $this->makeTuple(source: $icuSource, target: $brokenTarget);
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $tuple],
+        ];
+
+        // No QA stub — uses real QA so ICU validation actually runs
+        $processor = $this->buildProcessor(icuEnabled: true);
+        $processor->process($this->projectStructure, 'en-US', 'it-IT');
+
+        $this->assertSame(1, $tuple->warning);
+        $this->assertNotEmpty($tuple->serializedErrors);
     }
 }

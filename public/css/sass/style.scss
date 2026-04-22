@@ -2280,25 +2280,4 @@ section .segment-side-buttons {
   margin-top: 16px;
   display: flex;
   gap: 8px;
-
-  > li {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    border-radius: 3px;
-    border: 1px solid colors.$grey200;
-    color: colors.$grey500;
-
-    &:hover:not(.disabled) {
-      color: colors.$black;
-    }
-
-    &.disabled {
-      cursor: unset;
-      opacity: 0.6;
-    }
-  }
 }
