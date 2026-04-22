@@ -206,35 +206,6 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
     }
 
     /**
-     * Verify that the error is recorded on projectStructure before the exception propagates.
-     *
-     * @throws Exception
-     */
-    #[Test]
-    public function insertPreTranslationsRecordsErrorBeforePropagating(): void
-    {
-        $ps = $this->makeProjectStructure();
-        $ps->translations = ['some_translation_data'];
-        $ps->file_id_list = [];
-        $job = $this->makeJob(42);
-
-        $sss = $this->createStub(SegmentStorageService::class);
-        $sss->method('insertPreTranslations')
-            ->willThrowException(new Exception('DB connection lost', 500));
-
-        try {
-            $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss, $this->makeQAProcessorStub());
-            $this->fail('Expected exception was not thrown');
-        } catch (Exception) {
-            // Error was recorded before re-throwing
-            $this->assertCount(1, $ps->result['errors']);
-            $this->assertSame(500, $ps->result['errors'][0]['code']);
-            $this->assertStringContainsString('Pre-translations lost for job 42', $ps->result['errors'][0]['message']);
-            $this->assertStringContainsString('DB connection lost', $ps->result['errors'][0]['message']);
-        }
-    }
-
-    /**
      * @throws Exception
      */
     #[Test]
@@ -263,9 +234,6 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
             $this->assertSame('First job failed', $e->getMessage());
             // Only 1 call — second job was never attempted
             $this->assertSame(1, $callCount);
-            // Error recorded for the failed job
-            $this->assertCount(1, $ps->result['errors']);
-            $this->assertStringContainsString('job 1', $ps->result['errors'][0]['message']);
         }
     }
 }

@@ -352,13 +352,7 @@ class JobCreationService
             $qaProcessor->process($projectStructure, $job->source, $job->target);
             $segmentStorageService->insertPreTranslations($job, $projectStructure);
         } catch (Exception $e) {
-            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
-            Utils::sendErrMailReport($msg);
             $this->logger->debug("Pre-translation insertion failed for job $job->id", (new Error($e))->render(true));
-            $projectStructure->addError(
-                (int)$e->getCode(),
-                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
-            );
             throw $e;
         }
     }
