@@ -93,16 +93,25 @@ class SaveJobsMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // SUBFILTERING_HANDLERS — always persisted unconditionally
+    // SUBFILTERING_HANDLERS
     // =========================================================================
 
     #[Test]
-    public function testSubfilteringHandlersIsAlwaysPersisted(): void
+    public function testSubfilteringHandlersIsNotPersistedWhenEmptyJsonArray(): void
     {
         $this->setConfigAndSave();
 
-        $this->assertArrayHasKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $this->capturedMetadata);
-        $this->assertSame('[]', $this->capturedMetadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]);
+        $this->assertArrayNotHasKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $this->capturedMetadata);
+    }
+
+    #[Test]
+    public function testSubfilteringHandlersIsNotPersistedWhenNull(): void
+    {
+        $this->setConfigAndSave([
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => null,
+        ]);
+
+        $this->assertArrayNotHasKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $this->capturedMetadata);
     }
 
     #[Test]
@@ -136,16 +145,15 @@ class SaveJobsMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // Empty project structure — only SUBFILTERING_HANDLERS persisted
+    // Empty project structure — persists nothing
     // =========================================================================
 
     #[Test]
-    public function testEmptyProjectStructureOnlyPersistsSubfilteringHandlers(): void
+    public function testEmptyProjectStructurePersistsNothing(): void
     {
         $this->setConfigAndSave();
 
-        $this->assertCount(1, $this->capturedMetadata);
-        $this->assertArrayHasKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $this->capturedMetadata);
+        $this->assertCount(0, $this->capturedMetadata);
     }
 
     // =========================================================================
@@ -377,6 +385,7 @@ class SaveJobsMetadataTest extends AbstractTest
             'character_counter_mode'       => 'source',
             'tm_prioritization'           => true,
             'dialect_strict'              => ['it-IT' => true],
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode([['handler' => 'xliff']]),
         ]);
 
         $this->assertSame([
