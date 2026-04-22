@@ -365,16 +365,38 @@ class ProjectManagerModel
             $firstSegment = (int) min(array_column($jobs, 'job_first_segment'));
             $lastSegment  = (int) max(array_column($jobs, 'job_last_segment'));
 
-            $stmt = $conn->prepare("DELETE FROM segment_metadata WHERE id_segment BETWEEN :start AND :end");
-            $stmt->execute(['start' => $firstSegment, 'end' => $lastSegment]);
+            $this->deleteInBatches(
+                $conn,
+                "DELETE FROM segment_metadata WHERE id_segment BETWEEN :start AND :end",
+                $firstSegment,
+                $lastSegment,
+                $batchSize
+            );
 
-            $stmt = $conn->prepare("DELETE FROM segment_notes WHERE id_segment BETWEEN :start AND :end");
-            $stmt->execute(['start' => $firstSegment, 'end' => $lastSegment]);
+            $this->deleteInBatches(
+                $conn,
+                "DELETE FROM segment_notes WHERE id_segment BETWEEN :start AND :end",
+                $firstSegment,
+                $lastSegment,
+                $batchSize
+            );
 
-            $stmt = $conn->prepare("DELETE FROM segment_original_data WHERE id_segment BETWEEN :start AND :end");
-            $stmt->execute(['start' => $firstSegment, 'end' => $lastSegment]);
+            $this->deleteInBatches(
+                $conn,
+                "DELETE FROM segment_original_data WHERE id_segment BETWEEN :start AND :end",
+                $firstSegment,
+                $lastSegment,
+                $batchSize
+            );
 
-            // segments batched to avoid large deletion spikes
+            $this->deleteInBatches(
+                $conn,
+                "DELETE FROM context_groups WHERE id_segment BETWEEN :start AND :end",
+                $firstSegment,
+                $lastSegment,
+                $batchSize
+            );
+
             $this->deleteInBatches(
                 $conn,
                 "DELETE FROM segments WHERE id BETWEEN :start AND :end",
@@ -401,9 +423,6 @@ class ProjectManagerModel
         $stmt->execute(['id_project' => $idProject]);
 
         // --- Project-scoped metadata ---
-        $stmt = $conn->prepare("DELETE FROM context_groups WHERE id_project = :id_project");
-        $stmt->execute(['id_project' => $idProject]);
-
         $stmt = $conn->prepare("DELETE FROM project_metadata WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
 
@@ -428,6 +447,8 @@ class ProjectManagerModel
      * @param int $batchSize
      * @param array<string, mixed> $extraParams Additional bound parameters (e.g. ['id_job' => 10])
      */
+    public static int $batchSleepMicroseconds = 300000; // 300ms — matches production cleanup script
+
     private function deleteInBatches(
         PDO   $conn,
         string $sql,
@@ -450,6 +471,10 @@ class ProjectManagerModel
             $stmt->execute($params);
 
             $currentStart = $currentEnd + 1;
+
+            if ($currentStart <= $lastSegment && self::$batchSleepMicroseconds > 0) {
+                usleep(self::$batchSleepMicroseconds);
+            }
         }
     }
 

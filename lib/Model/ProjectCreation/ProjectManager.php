@@ -15,7 +15,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\Files\FileDao;
+
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -816,13 +816,23 @@ class ProjectManager
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
 
-        if (isset($this->project)) {
-            (new ProjectDao())->deleteFailedProject($this->projectStructure->id_project);
-            $this->log("Deleted Project ID: " . $this->projectStructure->id_project);
+        $idProject = $this->projectStructure->id_project;
+
+        if (empty($idProject)) {
+            $this->log("No project ID available — nothing to clean up.");
+
+            return;
         }
 
-        (new FileDao())->deleteFailedProjectFiles($this->projectStructure->file_id_list);
-        $this->log("Deleted Files ID: " . json_encode($this->projectStructure->file_id_list));
+        try {
+            $this->getProjectManagerModel()->deleteProject($idProject);
+            $this->log("Cascade-deleted project ID: " . $idProject);
+        } catch (Throwable $cleanupError) {
+            $this->log(
+                "Cleanup failed for project ID $idProject: " . $cleanupError->getMessage(),
+                $cleanupError,
+            );
+        }
     }
 
     /**

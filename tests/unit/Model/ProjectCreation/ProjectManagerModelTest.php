@@ -17,6 +17,21 @@ class ProjectManagerModelTest extends TestCase
     /** @var list<array<int, mixed>> Values passed to PDOStatement::execute() */
     private array $executedValues = [];
 
+    private int $originalBatchSleep;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->originalBatchSleep = ProjectManagerModel::$batchSleepMicroseconds;
+        ProjectManagerModel::$batchSleepMicroseconds = 0;
+    }
+
+    protected function tearDown(): void
+    {
+        ProjectManagerModel::$batchSleepMicroseconds = $this->originalBatchSleep;
+        parent::tearDown();
+    }
+
     private function createModel(): ProjectManagerModel
     {
         $this->preparedQueries = [];
@@ -465,15 +480,15 @@ class ProjectManagerModelTest extends TestCase
             'segment_translations',          // batched (1 batch for 101 segments)
             'files_job',
             'job_metadata',
-            'segment_metadata',              // segment-scoped
-            'segment_notes',
-            'segment_original_data',
-            'segments',                      // batched (1 batch)
+            'segment_metadata',              // segment-scoped (batched)
+            'segment_notes',                 // batched
+            'segment_original_data',         // batched
+            'context_groups',                // batched by segment range
+            'segments',                      // batched
             'files',                         // SELECT files
             'files_parts',                   // per-file
             'files',                         // DELETE files
             'file_metadata',
-            'context_groups',
             'project_metadata',
             'projects',
             'jobs',                          // DELETE jobs
@@ -521,17 +536,14 @@ class ProjectManagerModelTest extends TestCase
         $model->deleteProject(42);
 
         // After job-scoped (indices 0-7), segment-scoped start at index 8
-        // segment_metadata, segment_notes, segment_original_data
-        for ($i = 8; $i <= 10; $i++) {
+        // segment_metadata, segment_notes, segment_original_data, context_groups, segments
+        for ($i = 8; $i <= 12; $i++) {
             self::assertSame(
                 ['start' => 100, 'end' => 200],
                 $this->executedValues[$i],
                 "Segment-scoped delete at index $i"
             );
         }
-
-        // segments batch
-        self::assertSame(['start' => 100, 'end' => 200], $this->executedValues[11]);
     }
 
     public function testDeleteProjectWithNoJobsDeletesProjectAndFileLevelOnly(): void
@@ -553,7 +565,6 @@ class ProjectManagerModelTest extends TestCase
             'files_parts',                   // file 8
             'files',                         // DELETE files
             'file_metadata',
-            'context_groups',
             'project_metadata',
             'projects',
             // no DELETE jobs (empty list)
@@ -588,9 +599,21 @@ class ProjectManagerModelTest extends TestCase
             $this->executedValues[$stIndices[2]]
         );
 
+        // All segment-scoped tables should also produce 3 batches each
+        foreach (['segment_metadata', 'segment_notes', 'segment_original_data', 'context_groups'] as $table) {
+            $indices = $this->queryIndicesForTable($table);
+            $deleteIndices = array_values(array_filter($indices, function (int $i): bool {
+                return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
+            }));
+            self::assertCount(3, $deleteIndices, "$table should have 3 batches");
+
+            self::assertSame(['start' => 1, 'end' => 200], $this->executedValues[$deleteIndices[0]]);
+            self::assertSame(['start' => 201, 'end' => 400], $this->executedValues[$deleteIndices[1]]);
+            self::assertSame(['start' => 401, 'end' => 500], $this->executedValues[$deleteIndices[2]]);
+        }
+
         // segments should also produce 3 batches
         $segIndices = $this->queryIndicesForTable('segments');
-        // Filter to only DELETE queries (not SELECT)
         $segDeleteIndices = array_values(array_filter($segIndices, function (int $i): bool {
             return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
         }));
@@ -613,32 +636,31 @@ class ProjectManagerModelTest extends TestCase
 
         $model->deleteProject(42);
 
-        // Each job gets its own job-scoped deletes
-        // Job 10: comments, qa_chunk_reviews, segment_translation_events,
-        //         segment_translation_versions, segment_translations (2 batches: 100-299, 300-300),
-        //         files_job, job_metadata
-        // Job 11: same set
+        // Segment-scoped deletes use merged range: min(100,301)=100, max(300,500)=500
+        // With default batchSize=200: batch1=100-299, batch2=300-499, batch3=500-500
+        foreach (['segment_metadata', 'segment_notes', 'segment_original_data', 'context_groups'] as $table) {
+            $indices = $this->queryIndicesForTable($table);
+            $deleteIndices = array_values(array_filter($indices, function (int $i): bool {
+                return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
+            }));
+            self::assertCount(3, $deleteIndices, "$table should have 3 batches for range 100-500");
 
-        // Segment-scoped deletes should use the merged range: min(100,301)=100, max(300,500)=500
-        $smIndices = $this->queryIndicesForTable('segment_metadata');
-        self::assertCount(1, $smIndices);
-        self::assertSame(
-            ['start' => 100, 'end' => 500],
-            $this->executedValues[$smIndices[0]],
-            'segment_metadata should use merged segment range 100-500'
-        );
-
-        $snIndices = $this->queryIndicesForTable('segment_notes');
-        // Filter to DELETE queries only (not INSERT queries from other tests)
-        $snDeleteIndices = array_values(array_filter($snIndices, function (int $i): bool {
-            return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
-        }));
-        self::assertCount(1, $snDeleteIndices);
-        self::assertSame(
-            ['start' => 100, 'end' => 500],
-            $this->executedValues[$snDeleteIndices[0]],
-            'segment_notes should use merged segment range 100-500'
-        );
+            self::assertSame(
+                ['start' => 100, 'end' => 299],
+                $this->executedValues[$deleteIndices[0]],
+                "$table batch 1"
+            );
+            self::assertSame(
+                ['start' => 300, 'end' => 499],
+                $this->executedValues[$deleteIndices[1]],
+                "$table batch 2"
+            );
+            self::assertSame(
+                ['start' => 500, 'end' => 500],
+                $this->executedValues[$deleteIndices[2]],
+                "$table batch 3"
+            );
+        }
     }
 
     public function testDeleteProjectWithNoFilesSkipsFilePartsDelete(): void
