@@ -187,7 +187,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function insertPreTranslationsRecordsErrorAndPropagatesException(): void
+    public function insertPreTranslationsFailurePropagatesException(): void
     {
         $ps = $this->makeProjectStructure();
         $ps->translations = ['some_translation_data'];

@@ -329,8 +329,8 @@ class JobCreationService
     /**
      * Insert pre-translations for a job.
      *
-     * Failures are logged and an error email is sent, but the exception is
-     * re-thrown so the caller can abort project creation cleanly.
+     * Failures are logged and the exception is re-thrown so the caller
+     * can abort project creation cleanly.
      *
      * @throws Exception
      */
