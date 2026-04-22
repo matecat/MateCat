@@ -194,7 +194,7 @@ class JobCreationService
             }
         }
 
-        if (!empty($projectStructure->subfiltering_handlers)) {
+        if (!empty($projectStructure->subfiltering_handlers) && $projectStructure->subfiltering_handlers !== '[]') {
             $metadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 

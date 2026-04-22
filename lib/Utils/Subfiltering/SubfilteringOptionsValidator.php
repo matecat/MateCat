@@ -34,13 +34,13 @@ class SubfilteringOptionsValidator
             array_keys(HandlersSorter::getDefaultInjectedHandlers())
         );
 
-        $subfiltering_handlers_array = json_decode($subfiltering_handlers);
+        $subfiltering_handlers_array = json_decode($subfiltering_handlers, true);
 
         if(empty($subfiltering_handlers_array)){
             return [];
         }
 
-        if(empty(array_diff($defaultHandlers, $subfiltering_handlers_array))){
+        if(count($defaultHandlers) === count($subfiltering_handlers_array) && empty(array_diff($defaultHandlers, $subfiltering_handlers_array))){
             // subfiltering is default
             return [];
         }
