@@ -40,7 +40,10 @@ class SubfilteringOptionsValidator
             return [];
         }
 
-        if(count($defaultHandlers) === count($subfiltering_handlers_array) && empty(array_diff($defaultHandlers, $subfiltering_handlers_array))){
+        if(
+            count($defaultHandlers ?? []) === count($subfiltering_handlers_array) &&
+            empty(array_diff($defaultHandlers, $subfiltering_handlers_array))
+        ){
             // subfiltering is default
             return [];
         }
