@@ -5,6 +5,7 @@ namespace Utils\LQA;
 use DOMException;
 use Exception;
 use LogicException;
+use Matecat\ICU\MessagePatternComparator;
 use Model\FeaturesBase\FeatureSet;
 use Utils\LQA\QA\ErrObject;
 use Utils\LQA\QA\ErrorManager;
@@ -49,11 +50,18 @@ class PostProcess
      *
      * @param string|null $source_seg The source segment (reference for whitespace patterns)
      * @param string|null $target_seg The target segment to be realigned
+     * @param MessagePatternComparator|null $icuComparator Optional ICU message pattern comparator
+     * @param bool $string_contains_icu Whether the source contains ICU message patterns
      */
-    public function __construct(?string $source_seg = null, ?string $target_seg = null)
+    public function __construct(
+        ?string $source_seg = null,
+        ?string $target_seg = null,
+        ?MessagePatternComparator $icuComparator = null,
+        bool $string_contains_icu = false,
+    )
     {
         // Create QA instance - we'll reuse its internal components
-        $this->qa = new QA($source_seg, $target_seg);
+        $this->qa = new QA($source_seg, $target_seg, $icuComparator, $string_contains_icu);
 
         // Store preprocessed segments for manipulation (reuse QA's preprocessor)
         $this->source_seg = $this->qa->getPreprocessor()->preprocess($source_seg);

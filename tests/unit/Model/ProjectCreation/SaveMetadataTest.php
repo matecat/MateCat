@@ -114,6 +114,17 @@ class SaveMetadataTest extends AbstractTest
     }
 
     #[Test]
+    public function testSubfilteringHandlersIsNotPersistedWhenEmptyJsonArray(): void
+    {
+        $this->projectStructure->subfiltering_handlers = '[]';
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        $calls = $this->findDaoCallsByKey(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
+        self::assertEmpty($calls, 'subfiltering_handlers should NOT be persisted when it is "[]"');
+    }
+
+    #[Test]
     public function testAllDaoSetCallsUseCorrectProjectId(): void
     {
         // Set a metadata key so there is at least one option to persist
@@ -140,13 +151,12 @@ class SaveMetadataTest extends AbstractTest
         // metadata is already empty by default in ProjectStructure
         $this->service->save($this->projectStructure, $this->features);
 
-        // pretranslate_101 always exists (DTO default = 1), plus subfiltering_handlers
+        // pretranslate_101 always exists (DTO default = 1)
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(2, $metadata);
+        self::assertCount(1, $metadata);
 
         $keys = array_keys($metadata);
         self::assertContains(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value, $keys);
-        self::assertContains(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $keys);
     }
 
     // =========================================================================
@@ -348,9 +358,9 @@ class SaveMetadataTest extends AbstractTest
 
         $this->service->save($this->projectStructure, $this->features);
 
-        // 3 metadata keys + 1 pretranslate_101 (DTO default) + 1 subfiltering_handlers = 5 total
+        // 3 metadata keys + 1 pretranslate_101 (DTO default) = 4 total
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(5, $metadata);
+        self::assertCount(4, $metadata);
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));
