@@ -99,7 +99,7 @@ readonly class ProjectMetadataService
          * But the analysis must everytime be performed with the current configuration.
          * @see JobCreationService::saveJobsMetadata()
          */
-        if (!empty($projectStructure->subfiltering_handlers)) {
+        if (!empty($projectStructure->subfiltering_handlers) && $projectStructure->subfiltering_handlers !== '[]') {
             $options[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 
