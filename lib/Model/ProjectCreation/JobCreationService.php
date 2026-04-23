@@ -8,7 +8,6 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FileDao;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
@@ -194,7 +193,7 @@ class JobCreationService
             }
         }
 
-        if (!empty($projectStructure->subfiltering_handlers)) {
+        if (!empty($projectStructure->subfiltering_handlers) && $projectStructure->subfiltering_handlers !== '[]') {
             $metadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 
@@ -293,18 +292,6 @@ class JobCreationService
     }
 
     /**
-     * Look up job chunks by job ID.
-     * Protected so test subclasses can override to avoid DB access.
-     *
-     * @return JobStruct[]
-     * @throws ReflectionException
-     */
-    protected function getChunksByJobId(int $jobId): array
-    {
-        return ChunkDao::getByJobID($jobId);
-    }
-
-    /**
      * For each created job, link project files and insert any pre-translations.
      *
      * @param list<JobStruct> $jobs
@@ -340,8 +327,11 @@ class JobCreationService
     }
 
     /**
-     * Insert pre-translations for a job. Errors are logged and recorded
-     * but do not halt project creation.
+     * Insert pre-translations for a job.
+     *
+     * Failures are logged and the exception is re-thrown so the caller
+     * can abort project creation cleanly.
+     *
      * @throws Exception
      */
     private function insertPreTranslations(
@@ -355,24 +345,15 @@ class JobCreationService
         }
 
         try {
-            $chunks = $this->getChunksByJobId((int)$job->id);
-
-            if (empty($chunks)) {
-                throw new Exception("No Job found!!! $job->id");
-            }
-
-            $chunk = $chunks[0];
-
-            $qaProcessor->process($projectStructure, $chunk->source, $chunk->target);
+            // Use the in-memory $job directly instead of re-querying via getChunksByJobId().
+            // The job was just created by createFromStruct() and already carries source/target.
+            // Re-querying through ProxySQL risks hitting a read replica that hasn't replicated
+            // the INSERT yet, causing a spurious "No Job found" error.
+            $qaProcessor->process($projectStructure, $job->source, $job->target);
             $segmentStorageService->insertPreTranslations($job, $projectStructure);
         } catch (Exception $e) {
-            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
-            Utils::sendErrMailReport($msg);
             $this->logger->debug("Pre-translation insertion failed for job $job->id", (new Error($e))->render(true));
-            $projectStructure->addError(
-                (int)$e->getCode(),
-                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
-            );
+            throw $e;
         }
     }
 }
