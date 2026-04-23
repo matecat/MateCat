@@ -296,21 +296,18 @@ class ProjectManagerModel
      * Deletion order mirrors the production cleanup script to respect implicit
      * dependency ordering (no FK CASCADE constraints exist in the database).
      *
-     * Tables deleted per job:
+     * Phase 1 — Job-scoped:
      *   comments, qa_chunk_reviews, segment_translation_events,
      *   segment_translation_versions, segment_translations (batched),
      *   files_job, job_metadata
      *
-     * Tables deleted per project (segment-scoped):
+     * Phase 2 — Segment-scoped (project-wide range):
      *   segment_metadata, segment_notes, segment_original_data,
-     *   segments (batched)
+     *   context_groups, segments (batched)
      *
-     * Tables deleted per project (file/project-scoped):
+     * Phase 3 — File/project-scoped + root records:
      *   files_parts, files, file_metadata,
-     *   context_groups, project_metadata
-     *
-     * Root records:
-     *   projects, jobs
+     *   project_metadata, projects, jobs
      *
      * @param int $idProject
      * @param int $batchSize Max rows per batched DELETE for segment_translations and segments
@@ -325,7 +322,24 @@ class ProjectManagerModel
         /** @var list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs */
         $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // --- Job-scoped deletions ---
+        $this->deleteJobScopedData($conn, $jobs, $batchSize);
+        $this->deleteSegmentScopedData($conn, $jobs, $batchSize);
+        $this->deleteFileAndProjectScopedData($conn, $idProject, $jobs);
+    }
+
+    /**
+     * Phase 1 — Delete all job-scoped child rows.
+     *
+     * Per job: comments, qa_chunk_reviews, segment_translation_events,
+     * segment_translation_versions, segment_translations (batched),
+     * files_job, job_metadata.
+     *
+     * @param PDO $conn
+     * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
+     * @param int $batchSize
+     */
+    private function deleteJobScopedData(PDO $conn, array $jobs, int $batchSize): void
+    {
         foreach ($jobs as $job) {
             $idJob        = (int) $job['id'];
             $firstSegment = (int) $job['job_first_segment'];
@@ -359,53 +373,80 @@ class ProjectManagerModel
             $stmt = $conn->prepare("DELETE FROM job_metadata WHERE id_job = :id_job");
             $stmt->execute(['id_job' => $idJob]);
         }
+    }
 
-        // --- Segment-scoped deletions (project-wide segment range) ---
-        if (!empty($jobs)) {
-            $firstSegment = (int) min(array_column($jobs, 'job_first_segment'));
-            $lastSegment  = (int) max(array_column($jobs, 'job_last_segment'));
-
-            $this->deleteInBatches(
-                $conn,
-                "DELETE FROM segment_metadata WHERE id_segment BETWEEN :start AND :end",
-                $firstSegment,
-                $lastSegment,
-                $batchSize
-            );
-
-            $this->deleteInBatches(
-                $conn,
-                "DELETE FROM segment_notes WHERE id_segment BETWEEN :start AND :end",
-                $firstSegment,
-                $lastSegment,
-                $batchSize
-            );
-
-            $this->deleteInBatches(
-                $conn,
-                "DELETE FROM segment_original_data WHERE id_segment BETWEEN :start AND :end",
-                $firstSegment,
-                $lastSegment,
-                $batchSize
-            );
-
-            $this->deleteInBatches(
-                $conn,
-                "DELETE FROM context_groups WHERE id_segment BETWEEN :start AND :end",
-                $firstSegment,
-                $lastSegment,
-                $batchSize
-            );
-
-            $this->deleteInBatches(
-                $conn,
-                "DELETE FROM segments WHERE id BETWEEN :start AND :end",
-                $firstSegment,
-                $lastSegment,
-                $batchSize
-            );
+    /**
+     * Phase 2 — Delete segment-scoped rows across the project-wide segment range.
+     *
+     * Tables: segment_metadata, segment_notes, segment_original_data,
+     * context_groups, segments. All batched via deleteInBatches().
+     *
+     * @param PDO $conn
+     * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
+     * @param int $batchSize
+     */
+    private function deleteSegmentScopedData(PDO $conn, array $jobs, int $batchSize): void
+    {
+        if (empty($jobs)) {
+            return;
         }
 
+        $firstSegment = (int) min(array_column($jobs, 'job_first_segment'));
+        $lastSegment  = (int) max(array_column($jobs, 'job_last_segment'));
+
+        $this->deleteInBatches(
+            $conn,
+            "DELETE FROM segment_metadata WHERE id_segment BETWEEN :start AND :end",
+            $firstSegment,
+            $lastSegment,
+            $batchSize
+        );
+
+        $this->deleteInBatches(
+            $conn,
+            "DELETE FROM segment_notes WHERE id_segment BETWEEN :start AND :end",
+            $firstSegment,
+            $lastSegment,
+            $batchSize
+        );
+
+        $this->deleteInBatches(
+            $conn,
+            "DELETE FROM segment_original_data WHERE id_segment BETWEEN :start AND :end",
+            $firstSegment,
+            $lastSegment,
+            $batchSize
+        );
+
+        $this->deleteInBatches(
+            $conn,
+            "DELETE FROM context_groups WHERE id_segment BETWEEN :start AND :end",
+            $firstSegment,
+            $lastSegment,
+            $batchSize
+        );
+
+        $this->deleteInBatches(
+            $conn,
+            "DELETE FROM segments WHERE id BETWEEN :start AND :end",
+            $firstSegment,
+            $lastSegment,
+            $batchSize
+        );
+    }
+
+    /**
+     * Phase 3 — Delete file-scoped data, project metadata, and root records.
+     *
+     * Tables: files_parts, files, file_metadata, project_metadata,
+     * projects, jobs.
+     *
+     * @param PDO $conn
+     * @param int $idProject
+     * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
+     */
+    private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs): void
+    {
         // --- File-scoped deletions ---
         $stmt = $conn->prepare("SELECT id FROM files WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
