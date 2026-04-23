@@ -78,17 +78,20 @@ jobs:
           # Run tests — exit code propagated to the workflow step
           docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
-      # ── Coverage artifact (consumed by test-guard job) ──────────────────
-      - name: Extract coverage report from test container
+      # ── Coverage artifacts (consumed by test-guard job) ─────────────────
+      - name: Extract coverage reports from test container
         run: |
           CONTAINER_ID=$(docker compose -f docker/docker-compose-ci.yml ps -aq test-node | head -1)
-          docker cp "$CONTAINER_ID":/var/www/matecat/coverage.xml ./coverage.xml
+          docker cp "$CONTAINER_ID":/var/www/matecat/coverage.xml ./php-coverage.xml
+          docker cp "$CONTAINER_ID":/var/www/matecat/js-coverage/clover.xml ./js-coverage.xml
 
-      - name: Upload coverage artifact
+      - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage.xml
+          path: |
+            php-coverage.xml
+            js-coverage.xml
           retention-days: 7
   # ───────────────────────────────────────────────────────────────────────────
   # JOB 2 – deploy (only when should_deploy is true)
@@ -212,6 +215,8 @@ jobs:
       - name: Test Guard
         uses: ostico/test-guard@v1
         with:
-          coverage-file: coverage.xml
+          coverage-file: |
+            php-coverage.xml
+            js-coverage.xml
           coverage-threshold: '80'
           ai-enabled: 'true'
