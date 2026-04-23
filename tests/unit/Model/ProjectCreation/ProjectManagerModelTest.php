@@ -483,12 +483,13 @@ class ProjectManagerModelTest extends TestCase
             'segment_metadata',              // segment-scoped (batched)
             'segment_notes',                 // batched
             'segment_original_data',         // batched
-            'context_groups',                // batched by segment range
             'segments',                      // batched
             'files',                         // SELECT files
             'files_parts',                   // per-file
             'files',                         // DELETE files
+            'file_references',               // by id_project
             'file_metadata',
+            'context_groups',                // by id_project
             'project_metadata',
             'projects',
             'jobs',                          // DELETE jobs
@@ -536,8 +537,8 @@ class ProjectManagerModelTest extends TestCase
         $model->deleteProject(42);
 
         // After job-scoped (indices 0-7), segment-scoped start at index 8
-        // segment_metadata, segment_notes, segment_original_data, context_groups, segments
-        for ($i = 8; $i <= 12; $i++) {
+        // segment_metadata, segment_notes, segment_original_data, segments
+        for ($i = 8; $i <= 11; $i++) {
             self::assertSame(
                 ['start' => 100, 'end' => 200],
                 $this->executedValues[$i],
@@ -564,7 +565,9 @@ class ProjectManagerModelTest extends TestCase
             'files_parts',                   // file 5
             'files_parts',                   // file 8
             'files',                         // DELETE files
+            'file_references',
             'file_metadata',
+            'context_groups',
             'project_metadata',
             'projects',
             // no DELETE jobs (empty list)
@@ -600,7 +603,7 @@ class ProjectManagerModelTest extends TestCase
         );
 
         // All segment-scoped tables should also produce 3 batches each
-        foreach (['segment_metadata', 'segment_notes', 'segment_original_data', 'context_groups'] as $table) {
+        foreach (['segment_metadata', 'segment_notes', 'segment_original_data'] as $table) {
             $indices = $this->queryIndicesForTable($table);
             $deleteIndices = array_values(array_filter($indices, function (int $i): bool {
                 return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
@@ -624,7 +627,7 @@ class ProjectManagerModelTest extends TestCase
         self::assertSame(['start' => 401, 'end' => 500], $this->executedValues[$segDeleteIndices[2]]);
     }
 
-    public function testDeleteProjectWithMultipleJobsMergesSegmentRange(): void
+    public function testDeleteProjectWithMultipleJobsUsesPerJobSegmentRange(): void
     {
         $model = $this->createModelForDelete(
             jobRows: [
@@ -636,29 +639,34 @@ class ProjectManagerModelTest extends TestCase
 
         $model->deleteProject(42);
 
-        // Segment-scoped deletes use merged range: min(100,301)=100, max(300,500)=500
-        // With default batchSize=200: batch1=100-299, batch2=300-499, batch3=500-500
-        foreach (['segment_metadata', 'segment_notes', 'segment_original_data', 'context_groups'] as $table) {
+        // Segment-scoped deletes now iterate per-job, so each table appears twice
+        // (once per job). With batchSize=200:
+        //   Job 10: range 100-300 → batch1=100-299, batch2=300-300
+        //   Job 11: range 301-500 → batch1=301-500
+        foreach (['segment_metadata', 'segment_notes', 'segment_original_data'] as $table) {
             $indices = $this->queryIndicesForTable($table);
             $deleteIndices = array_values(array_filter($indices, function (int $i): bool {
                 return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
             }));
-            self::assertCount(3, $deleteIndices, "$table should have 3 batches for range 100-500");
+            self::assertCount(3, $deleteIndices, "$table should have 3 batches (2 for job 10, 1 for job 11)");
 
+            // Job 10: 100-299, 300-300
             self::assertSame(
                 ['start' => 100, 'end' => 299],
                 $this->executedValues[$deleteIndices[0]],
-                "$table batch 1"
+                "$table job 10 batch 1"
             );
             self::assertSame(
-                ['start' => 300, 'end' => 499],
+                ['start' => 300, 'end' => 300],
                 $this->executedValues[$deleteIndices[1]],
-                "$table batch 2"
+                "$table job 10 batch 2"
             );
+
+            // Job 11: 301-500
             self::assertSame(
-                ['start' => 500, 'end' => 500],
+                ['start' => 301, 'end' => 500],
                 $this->executedValues[$deleteIndices[2]],
-                "$table batch 3"
+                "$table job 11 batch 1"
             );
         }
     }
@@ -674,5 +682,103 @@ class ProjectManagerModelTest extends TestCase
 
         $fpIndices = $this->queryIndicesForTable('files_parts');
         self::assertEmpty($fpIndices, 'No files_parts DELETE when project has no files');
+    }
+
+    public function testDeleteProjectWithNonContiguousJobsDoesNotSpanGap(): void
+    {
+        // Jobs with a gap: 100-200 and 500-600.  Segments 201-499 belong to other projects.
+        $model = $this->createModelForDelete(
+            jobRows: [
+                ['id' => 10, 'job_first_segment' => 100, 'job_last_segment' => 200],
+                ['id' => 11, 'job_first_segment' => 500, 'job_last_segment' => 600],
+            ],
+            fileIds: [],
+        );
+
+        $model->deleteProject(42);
+
+        // Verify segment_metadata has exactly 2 batches — one per job, no merged super-range
+        $indices = $this->queryIndicesForTable('segment_metadata');
+        $deleteIndices = array_values(array_filter($indices, function (int $i): bool {
+            return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
+        }));
+        self::assertCount(2, $deleteIndices, 'segment_metadata should have 2 batches (one per job)');
+
+        // Job 10: 100-200
+        self::assertSame(['start' => 100, 'end' => 200], $this->executedValues[$deleteIndices[0]]);
+        // Job 11: 500-600
+        self::assertSame(['start' => 500, 'end' => 600], $this->executedValues[$deleteIndices[1]]);
+
+        // Crucially, no batch should cover the gap 201-499
+        foreach ($deleteIndices as $idx) {
+            $params = $this->executedValues[$idx];
+            self::assertFalse(
+                $params['start'] <= 201 && $params['end'] >= 499,
+                'Segment delete must not span the gap between non-contiguous jobs'
+            );
+        }
+    }
+
+    public function testDeleteProjectThrowsOnInvalidBatchSize(): void
+    {
+        $model = $this->createModelForDelete(
+            jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
+            fileIds: [],
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('batchSize must be >= 1, got 0');
+
+        $model->deleteProject(42, batchSize: 0);
+    }
+
+    public function testDeleteProjectThrowsOnNegativeBatchSize(): void
+    {
+        $model = $this->createModelForDelete(
+            jobRows: [],
+            fileIds: [],
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('batchSize must be >= 1, got -5');
+
+        $model->deleteProject(42, batchSize: -5);
+    }
+
+    public function testDeleteProjectDeletesContextGroupsByProject(): void
+    {
+        $model = $this->createModelForDelete(
+            jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
+            fileIds: [],
+        );
+
+        $model->deleteProject(42);
+
+        // context_groups should be deleted via WHERE id_project (Phase 3), not BETWEEN segment range
+        $indices = $this->queryIndicesForTable('context_groups');
+        self::assertCount(1, $indices, 'context_groups should appear exactly once');
+
+        $query = $this->preparedQueries[$indices[0]];
+        self::assertStringContainsString('id_project', $query, 'context_groups must be deleted by id_project');
+        self::assertStringNotContainsString('BETWEEN', $query, 'context_groups must NOT use BETWEEN segment range');
+
+        self::assertSame(['id_project' => 42], $this->executedValues[$indices[0]]);
+    }
+
+    public function testDeleteProjectDeletesFileReferences(): void
+    {
+        $model = $this->createModelForDelete(
+            jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
+            fileIds: [5],
+        );
+
+        $model->deleteProject(42);
+
+        $indices = $this->queryIndicesForTable('file_references');
+        self::assertCount(1, $indices, 'file_references should appear exactly once');
+
+        $query = $this->preparedQueries[$indices[0]];
+        self::assertStringContainsString('DELETE FROM file_references', $query);
+        self::assertSame(['id_project' => 42], $this->executedValues[$indices[0]]);
     }
 }
