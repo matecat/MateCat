@@ -193,7 +193,7 @@ class JobCreationService
             }
         }
 
-        if (!empty($projectStructure->subfiltering_handlers)) {
+        if (!empty($projectStructure->subfiltering_handlers) && $projectStructure->subfiltering_handlers !== '[]') {
             $metadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 
@@ -329,8 +329,8 @@ class JobCreationService
     /**
      * Insert pre-translations for a job.
      *
-     * Failures are logged and an error email is sent, but the exception is
-     * re-thrown so the caller can abort project creation cleanly.
+     * Failures are logged and the exception is re-thrown so the caller
+     * can abort project creation cleanly.
      *
      * @throws Exception
      */
@@ -352,13 +352,7 @@ class JobCreationService
             $qaProcessor->process($projectStructure, $job->source, $job->target);
             $segmentStorageService->insertPreTranslations($job, $projectStructure);
         } catch (Exception $e) {
-            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
-            Utils::sendErrMailReport($msg);
             $this->logger->debug("Pre-translation insertion failed for job $job->id", (new Error($e))->render(true));
-            $projectStructure->addError(
-                (int)$e->getCode(),
-                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
-            );
             throw $e;
         }
     }
