@@ -559,7 +559,9 @@ export const ProjectContainer = ({
           />
           <div>
             {projectNameElements}
-            <span title="Project id">ID: {project.get('id')}</span>
+            <span data-testid="project-id" title="Project id">
+              ID: {project.get('id')}
+            </span>
           </div>
         </div>
         <div className="project-container-header-dx">
@@ -571,13 +573,19 @@ export const ProjectContainer = ({
       {getJobContainer()}
       <div className="project-container-footer">
         {lastAction && (
-          <span>
-            Last action:{' '}
-            {lastAction.action +
-              ' on ' +
-              getFormattedDate(lastAction.event_date)}
-            <span> by {lastAction.first_name}</span>
-          </span>
+          <Button
+            testId="last-action-activity"
+            mode={BUTTON_MODE.LINK}
+            onClick={() => window.open(getActivityLogUrl(), '_blank')}
+          >
+            <span>
+              Last action:{' '}
+              {lastAction.action +
+                ' on ' +
+                getFormattedDate(lastAction.event_date)}
+              <span> by {lastAction.first_name}</span>
+            </span>
+          </Button>
         )}
         <span>Created: {getFormattedDate(project.get('create_date'))}</span>
       </div>

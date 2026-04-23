@@ -1,5 +1,14 @@
 import PropTypes from 'prop-types'
 import React, {useState, useRef, useEffect} from 'react'
+import IconClose from '../icons/IconClose'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import InfoIcon from '../../../img/icons/InfoIcon'
+import CheckCircleBroken from '../../../img/icons/CheckCircleBroken'
 
 const NotificationItem = ({
   uid,
@@ -10,7 +19,6 @@ const NotificationItem = ({
   autoDismiss = true,
   closeCallback,
   openCallback,
-  allowHtml = false,
   timer = 7000,
   dismissable = true,
   onRemove,
@@ -18,11 +26,10 @@ const NotificationItem = ({
 }) => {
   const [visible, setVisible] = useState(false)
   const [removed, setRemoved] = useState(false)
-
+  
   let _isMounted = useRef()
 
   const styleNameContainer = 'notification-type-' + type
-  const styleNameTitle = 'notification-title-' + type
   let _notificationTimer = useRef()
 
   const hideNotification = () => {
@@ -65,10 +72,6 @@ const NotificationItem = ({
       hideNotification()
     }
   }, [remove])
-
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
 
   const getCssPropertyByPosition = () => {
     let css = {}
@@ -121,32 +124,34 @@ const NotificationItem = ({
     return notificationStyle
   }
 
+  const icon =
+    type === 'success' ? (
+      <CheckCircleBroken size={16} />
+    ) : (
+      <InfoIcon size={16} />
+    )
+
   return (
-    <div className={styleNameContainer} style={getNotificationStyle()}>
-      {dismissable ? (
-        <span
-          className={'notification-close-button'}
+    <div
+      className={`notification-item ${styleNameContainer}`}
+      style={getNotificationStyle()}
+    >
+      <div>
+        <div className="notification-item-icon">{icon}</div>
+        <div className="notification-item-content">
+          <h6>{title}</h6>
+          <p>{text}</p>
+        </div>
+      </div>
+      {dismissable && (
+        <Button
+          mode={BUTTON_MODE.GHOST}
+          type={BUTTON_TYPE.ICON}
+          size={BUTTON_SIZE.ICON_XSMALL}
           onClick={hideNotification}
         >
-          ×
-        </span>
-      ) : null}
-      {allowHtml ? (
-        <>
-          <div
-            className={styleNameTitle}
-            dangerouslySetInnerHTML={allowHTML(title)}
-          />
-          <div
-            className={'notification-message'}
-            dangerouslySetInnerHTML={allowHTML(text)}
-          />
-        </>
-      ) : (
-        <>
-          <div className={styleNameTitle}> {title}</div>
-          <div className={'notification-message'}>{text}</div>
-        </>
+          <IconClose size={10} />
+        </Button>
       )}
     </div>
   )
@@ -154,13 +159,12 @@ const NotificationItem = ({
 
 NotificationItem.propTypes = {
   position: PropTypes.string,
-  title: PropTypes.string.isRequired,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   type: PropTypes.string,
   autoDismiss: PropTypes.bool,
   closeCallback: PropTypes.func,
   openCallback: PropTypes.func,
-  allowHtml: PropTypes.bool,
   timer: PropTypes.number,
   dismissable: PropTypes.bool,
 }

@@ -38,10 +38,10 @@ $notifications-width: 400px;
 
 $notificationShadowOpacity: 0.9;
 
-$notification-success: #5ea400;
-$notification-error: #ec3d3d;
-$notification-warning: #ebad1a;
-$notification-info: #369cc7;
+$notification-success: #11C38F;
+$notification-error: #ED655C ;
+$notification-warning: #D9943E;
+$notification-info: #60A9F6;
 
 @mixin box-sizing($boxsizing) {
   -webkit-box-sizing: $boxsizing;

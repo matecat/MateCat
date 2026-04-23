@@ -30,7 +30,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'MMT' && (
@@ -39,7 +39,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'DeepL' && (
@@ -48,7 +48,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'Lara' && (
@@ -57,7 +57,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'Intento' && (
@@ -66,7 +66,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
       </div>

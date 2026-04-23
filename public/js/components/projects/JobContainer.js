@@ -277,7 +277,6 @@ export const JobContainer = ({
         text: `The selected jobs has been successfully archived.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -291,7 +290,6 @@ export const JobContainer = ({
         text: `The selected jobs has been successfully unarchived.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -305,7 +303,6 @@ export const JobContainer = ({
         text: `The selected jobs has been successfully canceled.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -325,7 +322,6 @@ export const JobContainer = ({
             text: `The selected jobs has been successfully deleted permanently.`,
             type: 'warning',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           })
         }
@@ -714,7 +710,7 @@ export const JobContainer = ({
   const stats = job.get('stats').toJS()
 
   return (
-    <div className="job-container">
+    <div data-testid={job.get('id')} className="job-container">
       <div
         className={`job-container-grid ${isChunk ? 'chunk-job-container' : ''}`}
       >
@@ -733,7 +729,11 @@ export const JobContainer = ({
               <Tooltip
                 content={`${job.get('sourceTxt')} - ${job.get('targetTxt')}`}
               >
-                <span ref={sourceTargetTextRef} className="job-languages-code">
+                <span
+                  ref={sourceTargetTextRef}
+                  className="job-languages-code"
+                  data-testid="source-target-label"
+                >
                   {job.get('source')}
                   <IconDown size={16} />
                   {job.get('target')}
@@ -748,9 +748,10 @@ export const JobContainer = ({
         </div>
         <div>
           <Button
-            tooltip={`Total: ${Math.round(stats.equivalent.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
+            tooltip={`Total: ${Math.round(stats.raw.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
             className="job-container-button-weight-normal job-container-words-button"
             onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
+            testId="words-button"
           >
             Words: {Math.round(stats.raw.total)}{' '}
             <span>({Math.round(stats.equivalent.total)})</span>

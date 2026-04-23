@@ -10,6 +10,7 @@ import {DASHBOARD_REQUEST_PROJECTS_STATUS} from '../../constants/Constants'
 import {SPINNER_LOADER_SIZE, SpinnerLoader} from '../common/SpinnerLoader'
 import {Button, BUTTON_TYPE, BUTTON_SIZE} from '../common/Button/Button'
 import ManageActions from '../../actions/ManageActions'
+import CatToolActions from '../../actions/CatToolActions'
 
 export const ProjectsContainer = ({
   team,
@@ -46,6 +47,16 @@ export const ProjectsContainer = ({
     UserStore.addListener(UserConstants.UPDATE_TEAMS, updateTeams)
     UserStore.addListener(UserConstants.RENDER_TEAMS, updateTeams)
     ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, noMoreProjects)
+
+    setTimeout(() => {
+      const notification = {
+        title: 'Notification',
+        text: 'Lorem ipsum bla bla',
+        type: 'success',
+        autoDismiss: false,
+      }
+      CatToolActions.addNotification(notification)
+    })
 
     return () => {
       ProjectsStore.removeListener(
