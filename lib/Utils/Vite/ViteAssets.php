@@ -6,8 +6,7 @@ use Utils\Registry\AppConfig;
 
 class ViteAssets {
 
-    private const GROUPS_PATH    = 'public/vite-entries/groups.json';
-    private const DEV_SERVER_URL = 'https://dev.matecat.com';
+    private const GROUPS_PATH = 'public/vite-entries/groups.json';
 
     private static ?bool  $devMode = null;
 
@@ -66,6 +65,7 @@ class ViteAssets {
             return '';
         }
 
+        $host  = AppConfig::$HTTPHOST;
         $n     = $nonce ? " nonce=\"{$nonce}\"" : '';
         $lines = [];
 
@@ -77,10 +77,10 @@ class ViteAssets {
             . 'window.__vite_plugin_react_preamble_installed__ = true'
             . '</script>';
 
-        $lines[] = '<script type="module" src="' . self::DEV_SERVER_URL . '/@vite/client"' . $n . '></script>';
+        $lines[] = '<script type="module" src="' . $host . '/@vite/client"' . $n . '></script>';
 
         foreach ( $entries as $entry ) {
-            $lines[] = '<script type="module" src="' . self::DEV_SERVER_URL . '/public/vite-entries/' . $entry . '.js"' . $n . '></script>';
+            $lines[] = '<script type="module" src="' . $host . '/public/vite-entries/' . $entry . '.js"' . $n . '></script>';
         }
 
         return implode( "\n", $lines );
