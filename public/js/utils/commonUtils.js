@@ -1,11 +1,19 @@
 import Cookies from 'js-cookie'
 import $ from 'jquery'
-import OfflineUtils from './offlineUtils'
-import SegmentActions from '../actions/SegmentActions'
-import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
-import {isTranslationTailEmpty} from '../setTranslationUtil'
+
+// Lazy-loaded to break circular dependencies
+let _OfflineUtils, _SegmentActions, _SegmentStore
+const getOfflineUtils = () =>
+  _OfflineUtils || (_OfflineUtils = require('./offlineUtils').default)
+const getSegmentActions = () =>
+  _SegmentActions ||
+  (_SegmentActions = require('../actions/SegmentActions').default)
+const getSegmentStore = () =>
+  _SegmentStore || (_SegmentStore = require('../stores/SegmentStore').default)
+const checkTranslationTailEmpty = () =>
+  require('../setTranslationUtil').isTranslationTailEmpty()
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -118,11 +126,11 @@ const CommonUtils = {
 
   setBrowserHistoryBehavior() {
     let updateAppByPopState = () => {
-      var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
-      var currentSegment = SegmentStore.getCurrentSegment()
+      var segment = getSegmentStore().getSegmentByIdToJS(this.parsedHash.segmentId)
+      var currentSegment = getSegmentStore().getCurrentSegment()
       if (segment && currentSegment?.sid === segment.sid) return
       if (segment && !segment.opened) {
-        SegmentActions.openSegment(this.parsedHash.segmentId, true)
+        getSegmentActions().openSegment(this.parsedHash.segmentId, true)
       }
     }
 
@@ -168,8 +176,8 @@ const CommonUtils = {
       )
     }
 
-    if (OfflineUtils.offline) {
-      if (!isTranslationTailEmpty()) {
+    if (getOfflineUtils().offline) {
+      if (!checkTranslationTailEmpty()) {
         return say_goodbye(
           'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
             'Do you want to proceed with the refresh ?',

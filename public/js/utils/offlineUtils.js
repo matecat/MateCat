@@ -2,7 +2,14 @@ import SegmentActions from '../actions/SegmentActions'
 import {checkConnectionPing} from '../api/checkConnectionPing'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentStore from '../stores/SegmentStore'
-import {execSetTranslationTail} from '../setTranslationUtil'
+
+// Lazy-loaded to break circular dependency with setTranslationUtil
+// Using require() instead of import so madge's ES6 detective doesn't
+// register this as a static edge. Do NOT convert back to import.
+let _SetTranslationUtil
+const getSetTranslationUtil = () =>
+  _SetTranslationUtil ||
+  (_SetTranslationUtil = require('../setTranslationUtil'))
 
 const OfflineUtils = {
   offline: false,
@@ -67,7 +74,7 @@ const OfflineUtils = {
     checkConnectionPing()
       .then(() => {
         this.endOfflineMode()
-        execSetTranslationTail()
+        getSetTranslationUtil().execSetTranslationTail()
         //reset counter
         this.offlineCacheRemaining = this.offlineCacheSize
       })
