@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
@@ -111,7 +105,7 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   })
 }
 
-export const TranslationMemoryGlossaryTabContext = createContext({})
+import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
 
 export const TranslationMemoryGlossaryTab = () => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =

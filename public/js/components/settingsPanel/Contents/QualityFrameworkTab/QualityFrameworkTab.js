@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useContext, createContext} from 'react'
+import React, {useEffect, useRef, useContext} from 'react'
 import {SubTemplates} from '../SubTemplates'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
@@ -70,7 +70,6 @@ const getFilteredSchemaToCompare = (template) => {
 }
 
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
-export {QualityFrameworkTabContext}
 
 export const QualityFrameworkTab = () => {
   const {
