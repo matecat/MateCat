@@ -10,6 +10,7 @@
     "watch": "sed -i \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" ./nodejs/config.ini && webpack --mode development --watch",
     "build:dev": "sed -i \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" ./nodejs/config.ini && webpack --mode development",
     "build:production": "webpack --mode production",
+    "check:circular-deps": "node check-circular-deps.js",
     "prepare": "husky"
   },
   "workspaces": [
@@ -87,6 +88,7 @@
     "jest-environment-jsdom": "^30.0.0",
     "jest-transform-css": "^6.0.1",
     "lint-staged": ">=10",
+    "madge": "^8.0.0",
     "mini-css-extract-plugin": "^2.7.6",
     "msw": "^2.7.3",
     "prettier": "^3.0.0",
