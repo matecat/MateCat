@@ -12,9 +12,15 @@ import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import SegmentActions from './SegmentActions'
-import OfflineUtils from '../utils/offlineUtils'
 import {getGlobalWarnings} from '../api/getGlobalWarnings'
 import {isUndefined} from 'lodash'
+
+// Lazy-loaded to break circular dependency with offlineUtils.
+// Do NOT convert back to import — see SegmentActions.js for explanation.
+let _OfflineUtils
+const getOfflineUtils = () =>
+  _OfflineUtils ||
+  (_OfflineUtils = require('../utils/offlineUtils').default)
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -359,7 +365,7 @@ let CatToolActions = {
         CommonUtils.dispatchCustomEvent('getWarning:global:success')
       })
       .catch(() => {
-        OfflineUtils.failedConnection()
+        getOfflineUtils().failedConnection()
       })
   },
   processErrors: function (errors, operation) {
@@ -391,7 +397,7 @@ let CatToolActions = {
         }
         if (codeInt === -1000 || codeInt === -101) {
           console.log('ERROR ' + codeInt)
-          OfflineUtils.startOfflineMode()
+          getOfflineUtils().startOfflineMode()
         }
 
         if (codeInt === -2000 && !isUndefined(error.message)) {
