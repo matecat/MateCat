@@ -115,7 +115,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
         $this->view->{'vite_html'} = '';
         if ( $viteDevMode ) {
-            $this->view->{'vite_html'} = ViteAssets::getHtml( $template_name, $nonce );
+            $this->view->{'vite_html'} = ViteAssets::getHtml( $template_name, $nonce ?? '' );
         }
 
         // init oauth clients

@@ -10,6 +10,8 @@ class ViteAssets {
     private const DEV_SERVER_URL = 'https://dev.matecat.com';
 
     private static ?bool  $devMode = null;
+
+    /** @var array<string, list<string>>|null */
     private static ?array $groups  = null;
 
     public static function isDevMode(): bool {
@@ -21,6 +23,9 @@ class ViteAssets {
         return self::$devMode;
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     private static function loadGroups(): array {
         if ( self::$groups !== null ) {
             return self::$groups;
@@ -33,7 +38,14 @@ class ViteAssets {
             return self::$groups;
         }
 
-        self::$groups = json_decode( file_get_contents( $path ), true ) ?: [];
+        $raw = file_get_contents( $path );
+        if ( $raw === false ) {
+            self::$groups = [];
+
+            return self::$groups;
+        }
+
+        self::$groups = json_decode( $raw, true ) ?: [];
 
         return self::$groups;
     }
