@@ -25,7 +25,8 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
-export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
+import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
+export {DEEPL_GLOSSARY_CREATE_ROW_ID}
 export const DEEPL_GLOSSARY_ROW_NONE = ''
 
 export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {

@@ -62,7 +62,8 @@ const getFilteredSchemaToCompare = (template) => {
   /* eslint-enable no-unused-vars */
 }
 
-export const FiltersParamsContext = createContext({})
+import {FiltersParamsContext} from './FiltersParamsContext'
+export {FiltersParamsContext}
 
 export const FiltersParams = () => {
   const {

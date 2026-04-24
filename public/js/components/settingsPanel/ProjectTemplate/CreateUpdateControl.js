@@ -1,6 +1,6 @@
 import React, {useContext} from 'react'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
-import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
+import {TEMPLATE_MODIFIERS} from './ProjectTemplateConstants'
 import IconClose from '../../icons/IconClose'
 import Checkmark from '../../../../img/icons/Checkmark'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../common/Button/Button'

@@ -4,7 +4,7 @@ import {
   SUBTEMPLATE_MODIFIERS,
   SubTemplatesContext,
   isStandardSubTemplate,
-} from './SubTemplate'
+} from './SubTemplateContext'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import IconEdit from '../../../icons/IconEdit'

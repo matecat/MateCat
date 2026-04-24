@@ -11,14 +11,8 @@ import {flushSync} from 'react-dom'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {isEqual} from 'lodash'
 
-export const SUBTEMPLATE_MODIFIERS = {
-  CREATE: 'create',
-  UPDATE: 'update',
-}
-
-export const isStandardSubTemplate = ({id} = {}) => id === 0
-
-export const SubTemplatesContext = createContext({})
+import {SUBTEMPLATE_MODIFIERS, isStandardSubTemplate, SubTemplatesContext} from './SubTemplateContext'
+export {SUBTEMPLATE_MODIFIERS, isStandardSubTemplate, SubTemplatesContext}
 
 export const SubTemplates = ({
   templates,

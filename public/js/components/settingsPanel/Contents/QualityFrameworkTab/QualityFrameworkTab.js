@@ -69,7 +69,8 @@ const getFilteredSchemaToCompare = (template) => {
   /* eslint-enable no-unused-vars */
 }
 
-export const QualityFrameworkTabContext = createContext({})
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
+export {QualityFrameworkTabContext}
 
 export const QualityFrameworkTab = () => {
   const {
