@@ -20,6 +20,7 @@ use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Templating\PHPTALWithAppend;
 use Utils\Tools\Utils;
+use Utils\Vite\ViteAssets;
 
 /**
  * Created by PhpStorm.
@@ -67,8 +68,20 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      */
     public function setView(string $template_name, array $params = [], int $code = 200): void
     {
-        $this->view = new PHPTALWithAppend(AppConfig::$TEMPLATE_ROOT . "/$template_name");
+        $viteDevMode = ViteAssets::isDevMode();
+
+        if ( $viteDevMode ) {
+            $templatePath = AppConfig::$TEMPLATE_ROOT . "/templates/_$template_name";
+        } else {
+            $templatePath = AppConfig::$TEMPLATE_ROOT . "/$template_name";
+        }
+
+        $this->view = new PHPTALWithAppend($templatePath);
         $this->httpCode = $code;
+
+        if ( $viteDevMode ) {
+            $this->view->setTemplateRepository( AppConfig::$TEMPLATE_ROOT );
+        }
 
         $this->view->{'basepath'} = AppConfig::$BASEURL;
         $this->view->{'hostpath'} = AppConfig::$HTTPHOST;
@@ -92,7 +105,18 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];
-        $this->view->{'css_resources'} = [];
+
+        /**
+         * This is a unique ID generated at runtime.
+         * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
+         */
+        $nonce = Utils::uuid4();
+        $this->view->{'x_nonce_unique_id'} = $nonce;
+
+        $this->view->{'vite_html'} = '';
+        if ( $viteDevMode ) {
+            $this->view->{'vite_html'} = ViteAssets::getHtml( $template_name, $nonce );
+        }
 
         // init oauth clients
         $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
@@ -107,11 +131,6 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
             AppConfig::$HTTPHOST . "/gdrive/oauth/response"
         )->getAuthorizationUrl($_SESSION, 'drive') : "";
 
-        /**
-         * This is a unique ID generated at runtime.
-         * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
-         */
-        $this->view->{'x_nonce_unique_id'} = Utils::uuid4();
         $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url(AppConfig::$HTTPHOST)['host'] : null;
 
         $this->addParamsToView($params);
