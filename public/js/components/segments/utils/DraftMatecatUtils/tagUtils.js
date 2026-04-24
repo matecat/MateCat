@@ -363,15 +363,13 @@ export const encodeHtmlEntities = (text) => {
   // .replace(/'/g, '&apos;')
 }
 
-export const getIdAttributeRegEx = () => {
-  return /id="(-?\w+)"/g
-}
+import {
+  getIdAttributeRegEx,
+  unescapeHTMLinTags,
+  unescapeHTMLRecursive,
+} from './htmlUtils'
+export {getIdAttributeRegEx, unescapeHTMLinTags, unescapeHTMLRecursive}
 
-/**
- *
- * @param segmentString
- * @returns {*}
- */
 export const removeTagsFromText = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
@@ -380,53 +378,12 @@ export const removeTagsFromText = (segmentString) => {
   return segmentString
 }
 
-/**
- * Checks if the given segment string contains XLIFF tags.
- *
- * @param {string} segmentString - The segment string to check for XLIFF tags.
- * @returns {boolean|string} - Returns `true` if XLIFF tags are found, `false` if not,
- *                             or the original segment string if it is empty.
- */
 export const textHasTags = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
     return regExp.test(segmentString)
   }
   return segmentString
-}
-
-/**
- *
- * @param escapedHTML
- * @returns {string}
- */
-export const unescapeHTMLinTags = (escapedHTML) => {
-  try {
-    return escapedHTML
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-  } catch (e) {
-    return ''
-  }
-}
-
-export const unescapeHTMLRecursive = (escapedHTML) => {
-  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
-
-  try {
-    while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTMLinTags(escapedHTML)
-    }
-  } catch (e) {
-    console.error('Error unescapeHTMLRecursive')
-  }
-
-  return escapedHTML
 }
 
 /**
