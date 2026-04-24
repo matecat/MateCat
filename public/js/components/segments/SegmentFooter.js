@@ -28,8 +28,7 @@ import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
 import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 
-// Re-exported from constants for backward compatibility
-export {TAB} from '../../constants/SegmentTabConstants'
+import {TAB} from '../../constants/SegmentTabConstants'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
