@@ -33,21 +33,6 @@
     "components/segments/GlossaryComponents/GlossaryHighlight.component.js"
   ],
   [
-    "components/segments/utils/DraftMatecatUtils/tagUtils.js",
-    "components/segments/utils/DraftMatecatUtils/matchTag.js",
-    "components/segments/utils/DraftMatecatUtils/findTagWithRegex.js",
-    "components/segments/utils/DraftMatecatUtils/decodeTagInfo.js"
-  ],
-  [
-    "utils/textUtils.js",
-    "components/segments/utils/DraftMatecatUtils/textUtils.js",
-    "components/segments/utils/DraftMatecatUtils/tagUtils.js"
-  ],
-  [
-    "utils/textUtils.js",
-    "components/segments/utils/DraftMatecatUtils/textUtils.js"
-  ],
-  [
     "actions/SegmentActions.js",
     "components/header/cattol/segment_filter/segment_filter.js",
     "setTranslationUtil.js",
@@ -173,6 +158,12 @@
     "components/header/cattol/search/searchUtils.js"
   ],
   [
+    "components/segments/utils/DraftMatecatUtils/matchTag.js",
+    "components/segments/utils/DraftMatecatUtils/findTagWithRegex.js",
+    "components/segments/utils/DraftMatecatUtils/decodeTagInfo.js",
+    "components/segments/utils/DraftMatecatUtils/tagUtils.js"
+  ],
+  [
     "stores/SegmentStore.js",
     "utils/segmentUtils.js"
   ],
@@ -195,63 +186,5 @@
     "actions/SegmentActions.js",
     "components/segments/utils/translationMatches.js",
     "utils/speech2text.js"
-  ],
-  [
-    "components/activityLog/ActivityLogTable.js",
-    "components/activityLog/ColumnSorting.js",
-    "pages/ActivityLog.js"
-  ],
-  [
-    "components/activityLog/ActivityLogTable.js",
-    "components/activityLog/ColumnSorting.js",
-    "pages/ActivityLog.js",
-    "components/activityLog/FilterColumn.js"
-  ],
-  [
-    "pages/ActivityLog.js",
-    "components/activityLog/FilterColumn.js"
-  ],
-  [
-    "components/onBoarding/OnBoarding.js",
-    "components/onBoarding/ForgotPassword.js"
-  ],
-  [
-    "components/onBoarding/OnBoarding.js",
-    "components/onBoarding/Login.js"
-  ],
-  [
-    "components/onBoarding/OnBoarding.js",
-    "components/onBoarding/Login.js",
-    "components/onBoarding/SocialButtons.js"
-  ],
-  [
-    "components/onBoarding/OnBoarding.js",
-    "components/onBoarding/PasswordReset.js"
-  ],
-  [
-    "components/onBoarding/OnBoarding.js",
-    "components/onBoarding/Register.js"
-  ],
-  [
-    "components/segments/SegmentFooterTabGlossary/SegmentFooterTabGlossary.js",
-    "components/segments/SegmentFooterTabGlossary/GlossaryList.js",
-    "components/segments/SegmentFooterTabGlossary/GlossaryItem.js"
-  ],
-  [
-    "components/segments/SegmentFooterTabGlossary/SegmentFooterTabGlossary.js",
-    "components/segments/SegmentFooterTabGlossary/TermForm.js"
-  ],
-  [
-    "components/createProject/UploadFile.js",
-    "components/createProject/UploadFileLocal.js"
-  ],
-  [
-    "components/createProject/UploadFile.js",
-    "components/createProject/UploadGdrive.js"
-  ],
-  [
-    "components/settingsPanel/Contents/MachineTranslationTab/MachineTranslationTab.js",
-    "components/settingsPanel/SettingsPanel.js",
-    "components/settingsPanel/Contents/MachineTranslationTab/index.js"
   ]
 ]

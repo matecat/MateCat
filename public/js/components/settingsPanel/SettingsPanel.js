@@ -137,20 +137,8 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   ]
 }
 
-export const DEFAULT_ENGINE_MEMORY = {
-  id: 1,
-  name: 'ModernMT Lite',
-  description: (
-    <div
-      dangerouslySetInnerHTML={{
-        __html:
-          'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT’s basic features. To unlock all features, <a target="_blank" href="https://www.modernmt.com/pricing#translators">click here</a>.',
-      }}
-    />
-  ),
-  default: true,
-  engine_type: 'MMTLite',
-}
+import {DEFAULT_ENGINE_MEMORY} from './SettingsPanelConstants'
+export {DEFAULT_ENGINE_MEMORY}
 
 export const SettingsPanel = ({
   onClose,

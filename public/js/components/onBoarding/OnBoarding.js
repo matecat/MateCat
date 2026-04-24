@@ -1,4 +1,4 @@
-import React, {createContext, useState} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import Login from './Login'
 import Register from './Register'
@@ -14,14 +14,8 @@ import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
 // Re-exported for backward compatibility
 export {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
 
-export const OnBoardingContext = createContext({})
-export const socialUrls = {
-  googleUrl: config.googleAuthURL,
-  github: config.githubAuthUrl,
-  microsoft: config.microsoftAuthUrl,
-  linkedIn: config.linkedInAuthUrl,
-  meta: config.facebookAuthUrl,
-}
+import {OnBoardingContext, socialUrls} from './OnBoardingContext'
+export {OnBoardingContext, socialUrls}
 const OnBoarding = ({
   step = ONBOARDING_STEP.LOGIN,
   isCloseButtonEnabled = false,

@@ -1,5 +1,4 @@
 import React, {
-  createContext,
   useContext,
   useEffect,
   useRef,
@@ -24,7 +23,8 @@ const headerMountPoint = document.querySelector('header.upload-page-header')
 const projectId = config.project_id
 const password = config.password
 
-export const ActivityLogContext = createContext({})
+import {ActivityLogContext} from '../components/activityLog/ActivityLogContext'
+export {ActivityLogContext}
 
 export const ActivityLog = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)

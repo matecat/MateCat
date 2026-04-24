@@ -1,6 +1,6 @@
 import React, {useContext, useRef} from 'react'
 import PropTypes from 'prop-types'
-import {ActivityLogContext} from '../../pages/ActivityLog'
+import {ActivityLogContext} from './ActivityLogContext'
 import IconDown from '../icons/IconDown'
 
 export const ColumnSorting = ({

@@ -7,15 +7,9 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import {initFileUpload} from '../../api/initFileUpload'
 import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 
-export const getPrintableFileSize = (filesizeInBytes) => {
-  filesizeInBytes = filesizeInBytes / 1024
-  let ext = ' KB'
-  if (filesizeInBytes > 1024) {
-    filesizeInBytes = filesizeInBytes / 1024
-    ext = ' MB'
-  }
-  return Math.round(filesizeInBytes * 100, 2) / 100 + ext
-}
+import {getPrintableFileSize} from './UploadFileUtils'
+// Re-exported for backward compatibility
+export {getPrintableFileSize}
 export const UploadFile = ({...props}) => {
   const {openGDrive, currentProjectTemplate} = useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
