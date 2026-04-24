@@ -189,7 +189,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           title="Revise and go to next translated"
         >
           {' '}
-          A+>>
+          {'A+>>'}
         </a>
         <p>
           {isMac ? 'CMD' : 'CTRL'}
@@ -299,7 +299,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
             title="Translate and go to next untranslated"
           >
             {' '}
-            T+>>
+            {'T+>>'}
           </a>
           <p>
             {isMac ? 'CMD' : 'CTRL'}
@@ -325,7 +325,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
                 data-segmentid={'segment-' + segment.sid}
                 title="Translate and go to next repetition"
               >
-                REP >
+                {'REP >'}
               </a>
             </li>
             <li>
@@ -336,7 +336,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
                 data-segmentid={'segment-' + segment.sid}
                 title="Translate and go to next repetition group"
               >
-                REP >>
+                {'REP >>'}
               </a>
             </li>
           </React.Fragment>

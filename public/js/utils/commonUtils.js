@@ -1,8 +1,6 @@
 import Cookies from 'js-cookie'
 import $ from 'jquery'
 import OfflineUtils from './offlineUtils'
-import SegmentActions from '../actions/SegmentActions'
-import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
 import {isTranslationTailEmpty} from '../setTranslationUtil'
@@ -117,7 +115,12 @@ const CommonUtils = {
   },
 
   setBrowserHistoryBehavior() {
-    let updateAppByPopState = () => {
+    let updateAppByPopState = async () => {
+      const [{default: SegmentStore}, {default: SegmentActions}] =
+        await Promise.all([
+          import('../stores/SegmentStore'),
+          import('../actions/SegmentActions'),
+        ])
       var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
       var currentSegment = SegmentStore.getCurrentSegment()
       if (segment && currentSegment?.sid === segment.sid) return
