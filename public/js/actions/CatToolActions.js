@@ -1,5 +1,5 @@
 import AppDispatcher from '../stores/AppDispatcher'
-import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
+import {MODAL_KEY} from '../constants/ModalKeys'
 import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
@@ -11,11 +11,9 @@ import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
-import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
-import {getGlobalWarnings} from '../api/getGlobalWarnings'
 import SegmentActions from './SegmentActions'
 import OfflineUtils from '../utils/offlineUtils'
-import AlertModal from '../components/modals/AlertModal'
+import {getGlobalWarnings} from '../api/getGlobalWarnings'
 import {isUndefined} from 'lodash'
 
 let CatToolActions = {
@@ -121,7 +119,7 @@ let CatToolActions = {
       },
     }
     ModalsActions.showModalComponent(
-      RevisionFeedbackModal,
+      MODAL_KEY.REVISION_FEEDBACK,
       props,
       'Feedback submission',
     )
@@ -313,7 +311,7 @@ let CatToolActions = {
         },
       }
       ModalsActions.showModalComponent(
-        ConfirmMessageModal,
+        MODAL_KEY.CONFIRM_MESSAGE,
         props,
         'Lara Free Plan Limit Reached',
       )
@@ -372,7 +370,7 @@ let CatToolActions = {
         if (operation === 'setTranslation') {
           if (codeInt !== -10) {
             ModalsActions.showModalComponent(
-              AlertModal,
+              MODAL_KEY.ALERT,
               {
                 text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
               },
@@ -383,7 +381,7 @@ let CatToolActions = {
 
         if (codeInt === -10 && operation !== 'getSegments') {
           ModalsActions.showModalComponent(
-            AlertModal,
+            MODAL_KEY.ALERT,
             {
               text: 'Job canceled or assigned to another translator',
               successCallback: () => location.reload,
@@ -398,7 +396,7 @@ let CatToolActions = {
 
         if (codeInt === -2000 && !isUndefined(error.message)) {
           ModalsActions.showModalComponent(
-            AlertModal,
+            MODAL_KEY.ALERT,
             {
               /* text:
                 'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +

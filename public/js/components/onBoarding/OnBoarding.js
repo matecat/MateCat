@@ -10,13 +10,9 @@ import ChevronDown from '../../../img/icons/ChevronDown'
 import ModalsActions from '../../actions/ModalsActions'
 import CommonUtils from '../../utils/commonUtils'
 
-export const ONBOARDING_STEP = {
-  LOGIN: 'login',
-  REGISTER: 'register',
-  PASSWORD_RESET: 'passwordReset',
-  FORGOT_PASSWORD: 'forgotPassword',
-  SET_NEW_PASSWORD: 'setNewPassword',
-}
+import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
+// Re-exported for backward compatibility
+export {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
 
 export const OnBoardingContext = createContext({})
 export const socialUrls = {

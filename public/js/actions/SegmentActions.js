@@ -11,11 +11,9 @@ import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentUtils from '../utils/segmentUtils'
-import CopySourceModal, {
-  COPY_SOURCE_COOKIE,
-} from '../components/modals/CopySourceModal'
+import {MODAL_KEY, COPY_SOURCE_COOKIE} from '../constants/ModalKeys'
 import CatToolActions from './CatToolActions'
-import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import ModalsActions from './ModalsActions'
 import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
 import {getGlossaryMatch} from '../api/getGlossaryMatch'
 import {deleteGlossaryItem} from '../api/deleteGlossaryItem'
@@ -25,8 +23,6 @@ import {approveSegments} from '../api/approveSegments'
 import {translateSegments} from '../api/translateSegments'
 import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
-import AlertModal from '../components/modals/AlertModal'
-import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import CatToolStore from '../stores/CatToolStore'
@@ -37,10 +33,6 @@ import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../constants/Constants'
 import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
-import {
-  HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE,
-  UnlockAllSegmentsModal,
-} from '../components/modals/UnlockAllSegmentsModal'
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
 import CommonUtils from '../utils/commonUtils'
@@ -50,7 +42,7 @@ import {
   segmentTranslation,
   translationIsToSaveBeforeClose,
 } from '../setTranslationUtil'
-import {TAB} from '../components/segments/SegmentFooter'
+import {TAB} from '../constants/SegmentTabConstants'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -626,7 +618,7 @@ const SegmentActions = {
       }
 
       ModalsActions.showModalComponent(
-        CopySourceModal,
+        MODAL_KEY.COPY_SOURCE,
         props,
         'Copy source to ALL segments',
       )
@@ -695,10 +687,10 @@ const SegmentActions = {
     let locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
     if (locked) {
       ModalsActions.showModalComponent(
-        AlertModal,
+        MODAL_KEY.ALERT,
         {
           text:
-            'Segment is locked (in-context exact match) and shouldn’t be edited. ' +
+            "Segment is locked (in-context exact match) and shouldn't be edited. " +
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.',
         },
@@ -706,7 +698,7 @@ const SegmentActions = {
       )
       return
     }
-    ModalsActions.showModalComponent(AlertModal, {
+    ModalsActions.showModalComponent(MODAL_KEY.ALERT, {
       text: SegmentActions.messageForClickOnReadonly(),
     })
   },
@@ -846,7 +838,7 @@ const SegmentActions = {
   openSplitSegment: function (sid) {
     if (OfflineUtils.offline) {
       ModalsActions.showModalComponent(
-        AlertModal,
+        MODAL_KEY.ALERT,
         {
           text: 'Split is disabled in Offline Mode',
         },
@@ -1435,7 +1427,7 @@ const SegmentActions = {
         ModalsActions.onCloseModal()
       },
     }
-    ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
+    ModalsActions.showModalComponent(MODAL_KEY.CONFIRM_MESSAGE, props, 'Warning')
   },
   showTranslateAllModalWarnirng: function () {
     var props = {
@@ -1445,7 +1437,7 @@ const SegmentActions = {
         ModalsActions.onCloseModal()
       },
     }
-    ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
+    ModalsActions.showModalComponent(MODAL_KEY.CONFIRM_MESSAGE, props, 'Warning')
   },
   approveFilteredSegments: function (segmentsArray) {
     if (segmentsArray.length >= 100) {
@@ -1548,10 +1540,10 @@ const SegmentActions = {
       SegmentStore.consecutiveUnlockSegments.push(segment.sid)
       if (
         SegmentStore.consecutiveUnlockSegments.length >= 3 &&
-        !localStorage.getItem(HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE)
+        !localStorage.getItem('unlock-segments-modal' + config.id_job)
       ) {
         ModalsActions.showModalComponent(
-          UnlockAllSegmentsModal,
+          MODAL_KEY.UNLOCK_ALL_SEGMENTS,
           {},
           'Unlock all 101% segments',
         )
