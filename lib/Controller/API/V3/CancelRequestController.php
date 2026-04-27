@@ -35,12 +35,6 @@ class CancelRequestController extends KleinController
     use SegmentDisabledTrait;
     use ChunkNotFoundHandlerTrait;
 
-    private string $route;
-    private string $userEmail;
-    private string $userIp;
-
-
-
     protected function afterConstruct(): void
     {
         $this->appendValidator(new LoginValidator($this));
@@ -147,10 +141,17 @@ class CancelRequestController extends KleinController
         // 4. check is user is the owner of the segment
         $team = $job->getProject()->getTeam();
 
-        if($team->created_by != $this->getUser()->uid){
+        if(empty($team)){
+            $this->incrementRateLimitCounter($userEmail, $route);
+            $this->incrementRateLimitCounter($userIp, $route);
+
+            throw new NotFoundException('Team not found');
+        }
+
+        if(!empty($this->getUser()->uid) && $team->created_by != $this->getUser()->uid){
 
             // check if user is part of the team
-            if (!$team->hasUser( $this->user->uid)){
+            if (!$team->hasUser($this->getUser()->uid)){
                 $this->incrementRateLimitCounter($userEmail, $route);
                 $this->incrementRateLimitCounter($userIp, $route);
 
