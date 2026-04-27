@@ -14,7 +14,6 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\DaoCacheTrait;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
