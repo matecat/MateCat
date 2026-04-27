@@ -152,7 +152,7 @@ class SegmentMetadataDao extends AbstractDao
         $metadata = new SegmentMetadataStruct();
         $metadata->id_segment = $id_segment;
         $metadata->meta_key = 'translation_disabled';
-        $metadata->meta_value = 1;
+        $metadata->meta_value = "1";
 
         SegmentMetadataDao::save($metadata);
     }
