@@ -106,6 +106,7 @@ class AIAssistantWorker extends AbstractWorker
     private function alternative_translations(array $payload): void
     {
         try {
+            $errorCode = self::codeErrorsMap['NO_ERROR'];
             $gemini = AIClientFactory::create("gemini");
             $alternativeTranslations = $gemini->manageAlternativeTranslations(
                 sourceLanguage: $payload['localized_source'],
@@ -119,7 +120,6 @@ class AIAssistantWorker extends AbstractWorker
             );
 
             $this->_doLog("Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations));
-            $errorCode = self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
 
             if(empty($alternativeTranslations)){
                 $errorCode = self::codeErrorsMap['NO_ALTERNATIVE_TRANSLATIONS_FOUND'];
@@ -128,6 +128,7 @@ class AIAssistantWorker extends AbstractWorker
 
             $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
         } catch (Exception $exception){
+            $errorCode = $errorCode ?? self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
             $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload, $errorCode);
         }
     }
