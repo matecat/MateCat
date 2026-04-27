@@ -46,9 +46,6 @@ import {
 } from '../constants/Constants'
 
 // Lazy-loaded to break circular dependencies
-// Using require() instead of import so madge's ES6 detective doesn't
-// register these as static edges — webpack still resolves them correctly
-// at call time. Do NOT convert back to import statements.
 let _SegmentUtils, _DraftMatecatUtils
 const getDraftMatecatUtils = () =>
   _DraftMatecatUtils ||

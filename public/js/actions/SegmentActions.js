@@ -6,7 +6,6 @@ import $ from 'jquery'
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
 import EditAreaConstants from '../constants/EditAreaConstants'
-import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import {MODAL_KEY, COPY_SOURCE_COOKIE} from '../constants/ModalKeys'
 import ModalsActions from './ModalsActions'
@@ -19,8 +18,6 @@ import {approveSegments} from '../api/approveSegments'
 import {translateSegments} from '../api/translateSegments'
 import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
-import {getLocalWarnings} from '../api/getLocalWarnings'
-import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import CatToolStore from '../stores/CatToolStore'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../constants/Constants'
@@ -29,7 +26,38 @@ import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
-import CommonUtils from '../utils/commonUtils'
+import {setLastSegmentFromLocalStorage} from '../utils/segmentLocalStorage'
+import {addNotification} from './notificationActions'
+import {updateGlobalWarnings} from './warningActions'
+import {addClassToSegment, removeClassToSegment} from './segmentClassActions'
+import {getSegmentsQa, startSegmentQACheck} from './segmentQaActions'
+import {disableTPOnSegment} from './tagProjectionActions'
+import TranslationMatches from '../components/segments/utils/translationMatches'
+import {
+  setStatus,
+  setHeaderPercentage,
+  hideSegmentHeader,
+  setSegmentPropagation,
+  modifiedTranslation,
+  replaceEditAreaTextContent,
+  setChoosenSuggestion,
+  setSegmentContributions,
+  setSegmentSaving,
+  setMutedSegments,
+  removeAllMutedSegments,
+  activateTab,
+  highlightGlossaryTerm,
+  addSearchResultToSegments,
+  removeSearchResultToSegments,
+  qaComponentsetLxqIssues,
+  addLexiqaHighlight,
+  setSegmentWarnings,
+  setSegmentAsTagged,
+} from './segmentDispatchActions'
+import CatToolActions from './CatToolActions'
+import OfflineUtils from '../utils/offlineUtils'
+import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import SegmentUtils from '../utils/segmentUtils'
 import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/getTranslationMismatches'
 import TextUtils from '../utils/textUtils'
 import {TAB} from '../constants/SegmentTabConstants'
@@ -37,34 +65,16 @@ import {TAB} from '../constants/SegmentTabConstants'
 // Lazy-loaded to break circular dependencies
 // Using require() instead of import so madge's ES6 detective doesn't
 // register these as static edges — webpack still resolves them correctly
-// at call time. Do NOT convert back to import statements.
-let _CatToolActions, _SegmentsFilterUtil, _TranslationMatches
-let _DraftMatecatUtils, _SetTranslationUtil
-let _OfflineUtils, _SegmentUtils
-const getCatToolActions = () =>
-  _CatToolActions ||
-  (_CatToolActions = require('./CatToolActions').default)
+// at call time.
+let _SegmentsFilterUtil
+let _SetTranslationUtil
 const getSegmentsFilterUtil = () =>
   _SegmentsFilterUtil ||
   (_SegmentsFilterUtil =
     require('../components/header/cattol/segment_filter/segment_filter').default)
-const getTranslationMatches = () =>
-  _TranslationMatches ||
-  (_TranslationMatches =
-    require('../components/segments/utils/translationMatches').default)
-const getDraftMatecatUtils = () =>
-  _DraftMatecatUtils ||
-  (_DraftMatecatUtils =
-    require('../components/segments/utils/DraftMatecatUtils').default)
 const getSetTranslationUtil = () =>
   _SetTranslationUtil ||
   (_SetTranslationUtil = require('../setTranslationUtil'))
-const getOfflineUtils = () =>
-  _OfflineUtils ||
-  (_OfflineUtils = require('../utils/offlineUtils').default)
-const getSegmentUtils = () =>
-  _SegmentUtils ||
-  (_SegmentUtils = require('../utils/segmentUtils').default)
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -94,7 +104,7 @@ const SegmentActions = {
     splitSegment(sid, text)
       .then(() => {
         SegmentActions.removeAllSegments()
-        getCatToolActions().onRender({segmentToOpen: sid.split('-')[0]})
+        CatToolActions.onRender({segmentToOpen: sid.split('-')[0]})
       })
       .catch((errors) => {
         var notification = {
@@ -104,7 +114,7 @@ const SegmentActions = {
             : 'We got an error, please contact support',
           type: 'error',
         }
-        getCatToolActions().addNotification(notification)
+        addNotification(notification)
         SegmentActions.freezingSegments(false)
       })
   },
@@ -122,31 +132,14 @@ const SegmentActions = {
     })
   },
 
-  addSearchResultToSegments: function (
-    occurrencesList,
-    searchResultsDictionary,
-    currentIndex,
-    text,
-  ) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.ADD_SEARCH_RESULTS,
-      occurrencesList,
-      searchResultsDictionary,
-      currentIndex,
-      text,
-    })
-  },
+  addSearchResultToSegments,
   changeCurrentSearchSegment: function (currentIndex) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_CURRENT_SEARCH,
       currentIndex,
     })
   },
-  removeSearchResultToSegments: function () {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.REMOVE_SEARCH_RESULTS,
-    })
-  },
+  removeSearchResultToSegments,
   replaceCurrentSearch: function (text) {
     AppDispatcher.dispatch({
       actionType: EditAreaConstants.REPLACE_SEARCH_RESULTS,
@@ -181,7 +174,7 @@ const SegmentActions = {
       })
     } else {
       SegmentActions.removeAllSegments()
-      getCatToolActions().onRender({
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: sid,
       })
@@ -195,7 +188,12 @@ const SegmentActions = {
   },
   saveSegmentBeforeClose: function (segment) {
     if (getSetTranslationUtil().translationIsToSaveBeforeClose(segment)) {
-      return getSetTranslationUtil().segmentTranslation(segment, SEGMENTS_STATUS.DRAFT, () => {}, false)
+      return getSetTranslationUtil().segmentTranslation(
+        segment,
+        SEGMENTS_STATUS.DRAFT,
+        () => {},
+        false,
+      )
     } else {
       return Promise.resolve()
     }
@@ -216,7 +214,7 @@ const SegmentActions = {
       }
     } else {
       SegmentActions.removeAllSegments()
-      getCatToolActions().onRender({
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: sid,
         callbackAfterSegmentsResponse: () =>
@@ -224,38 +222,11 @@ const SegmentActions = {
       })
     }
   },
-  addClassToSegment: function (sid, newClass) {
-    setTimeout(function () {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.ADD_SEGMENT_CLASS,
-        id: sid,
-        newClass: newClass,
-      })
-    }, 0)
-  },
+  addClassToSegment,
 
-  removeClassToSegment: function (sid, className) {
-    if (sid) {
-      setTimeout(function () {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
-          id: sid,
-          className: className,
-        })
-      }, 0)
-    }
-  },
+  removeClassToSegment,
 
-  setStatus: function (sid, fid, status) {
-    if (sid) {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.SET_SEGMENT_STATUS,
-        id: sid,
-        fid: fid,
-        status: status,
-      })
-    }
-  },
+  setStatus,
 
   clickOnApprovedButton: function (segment, goToNextUnapproved) {
     // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
@@ -317,7 +288,7 @@ const SegmentActions = {
     getSetTranslationUtil().segmentTranslation(segment, status, afterApproveFn)
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {
-      getSegmentUtils().removeUnlockedSegment(sid)
+      SegmentUtils.removeUnlockedSegment(sid)
     }
   },
   openNextApproved: function (sid) {
@@ -366,27 +337,16 @@ const SegmentActions = {
       }
     }
 
-    getSetTranslationUtil().segmentTranslation(segment, SEGMENTS_STATUS.TRANSLATED, afterTranslateFn)
+    getSetTranslationUtil().segmentTranslation(
+      segment,
+      SEGMENTS_STATUS.TRANSLATED,
+      afterTranslateFn,
+    )
   },
 
-  setHeaderPercentage: function (sid, fid, match, className, createdBy) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_HEADER,
-      id: sid,
-      fid: fid,
-      match,
-      className: className,
-      createdBy: createdBy,
-    })
-  },
+  setHeaderPercentage,
 
-  hideSegmentHeader: function (sid, fid) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.HIDE_SEGMENT_HEADER,
-      id: sid,
-      fid: fid,
-    })
-  },
+  hideSegmentHeader,
 
   propagateTranslation: function (segmentId, propagatedSegments, status) {
     const segment = SegmentStore.getSegmentByIdToJS(segmentId)
@@ -417,15 +377,7 @@ const SegmentActions = {
     SegmentActions.setAlternatives(segmentId, undefined)
   },
 
-  setSegmentPropagation: function (sid, fid, propagation, from) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_PROPAGATION,
-      id: sid,
-      fid: fid,
-      propagation: propagation,
-      from: from,
-    })
-  },
+  setSegmentPropagation,
   /*++++++++++  Tag Proj start ++++++++++*/
   startSegmentTagProjection: function (sid) {
     SegmentActions.getSegmentTagsProjection(sid)
@@ -445,7 +397,7 @@ const SegmentActions = {
       })
       .catch((errors) => {
         if (errors && (errors.length > 0 || !isUndefined(errors.code))) {
-          getCatToolActions().processErrors(errors, 'getTagProjection')
+          CatToolActions.processErrors(errors, 'getTagProjection')
           SegmentActions.disableTPOnSegment()
           // Set as Tagged and restore source with taggedText
           SegmentActions.setSegmentAsTagged(sid)
@@ -460,12 +412,7 @@ const SegmentActions = {
         SegmentActions.startSegmentQACheck()
       })
   },
-  startSegmentQACheck: function () {
-    clearTimeout(SegmentActions.pendingQACheck)
-    SegmentActions.pendingQACheck = setTimeout(function () {
-      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
-    }, config.segmentQACheckInterval)
-  },
+  startSegmentQACheck,
   /**
    * Tag Projection: get the tag projection for the current segment
    * @returns translation with the Tag projection
@@ -507,60 +454,15 @@ const SegmentActions = {
   /**
    * Disable the Tag Projection, for example after clicking on the Translation Matches
    */
-  disableTPOnSegment: function (segmentObj) {
-    var currentSegment = segmentObj
-      ? segmentObj
-      : SegmentStore.getCurrentSegment()
+  disableTPOnSegment,
+  setSegmentAsTagged,
 
-    if (!currentSegment) return
+  setSegmentWarnings,
 
-    var tagProjectionEnabled =
-      getDraftMatecatUtils().hasDataOriginalTags(currentSegment.segment) &&
-      !currentSegment.tagged
-    if (getSegmentUtils().checkTPEnabled() && tagProjectionEnabled) {
-      SegmentActions.setSegmentAsTagged(
-        currentSegment.sid,
-        currentSegment.id_file,
-      )
-    }
-  },
-  setSegmentAsTagged: function (sid, fid) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_TAGGED,
-      id: sid,
-      fid: fid,
-    })
-  },
+  updateGlobalWarnings,
 
-  setSegmentWarnings: function (sid, warnings, tagMismatch) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
-      sid: sid,
-      warnings: warnings,
-      tagMismatch: tagMismatch,
-    })
-  },
-
-  updateGlobalWarnings: function (warnings) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.UPDATE_GLOBAL_WARNINGS,
-      warnings: warnings,
-    })
-  },
-
-  qaComponentsetLxqIssues: function (issues) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.QA_LEXIQA_ISSUES,
-      warnings: issues,
-    })
-  },
-  setChoosenSuggestion: function (sid, index) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_CHOOSEN_SUGGESTION,
-      sid: sid,
-      index: index,
-    })
-  },
+  qaComponentsetLxqIssues,
+  setChoosenSuggestion,
   addQaCheck: function (sid, data) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_QA_CHECK,
@@ -568,14 +470,7 @@ const SegmentActions = {
       data,
     })
   },
-  addLexiqaHighlight: function (sid, matches, type) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.ADD_LXQ_HIGHLIGHT,
-      sid: sid,
-      matches: matches,
-      type: type,
-    })
-  },
+  addLexiqaHighlight,
   selectNextSegmentDebounced: debounce(() => {
     SegmentActions.selectNextSegment()
   }, 100),
@@ -656,7 +551,7 @@ const SegmentActions = {
 
     copyAllSourceToTarget()
       .then(() => {
-        getCatToolActions().onRender({
+        CatToolActions.onRender({
           segmentToOpen: SegmentStore.getCurrentSegmentId(),
         })
       })
@@ -673,7 +568,7 @@ const SegmentActions = {
             position: 'bl',
           }),
         }
-        getCatToolActions().addNotification(notification)
+        addNotification(notification)
       })
   },
   abortCopyAllSources: function () {
@@ -694,7 +589,7 @@ const SegmentActions = {
           '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
       }
 
-      getCatToolActions().addNotification({
+      addNotification({
         uid: 'translate-warning',
         autoDismiss: false,
         dismissable: true,
@@ -706,7 +601,7 @@ const SegmentActions = {
       })
     }
     if (TextUtils.justSelecting('readonly')) return
-    let locked = !segment.unlocked && getSegmentUtils().isIceSegment(segment)
+    let locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
     if (locked) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,
@@ -736,20 +631,8 @@ const SegmentActions = {
     return 'This part has not been assigned to you.'
   },
   /******************* EditArea ************/
-  modifiedTranslation: function (sid, status) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.MODIFIED_TRANSLATION,
-      sid: sid,
-      status: status,
-    })
-  },
-  replaceEditAreaTextContent: function (sid, text) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.REPLACE_TRANSLATION,
-      id: sid,
-      translation: text,
-    })
-  },
+  modifiedTranslation,
+  replaceEditAreaTextContent,
 
   updateTranslation: function (
     sid,
@@ -828,16 +711,10 @@ const SegmentActions = {
       SegmentActions.replaceEditAreaTextContent(sid, translation)
     }
   },
-  setSegmentSaving(sid, saving) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_SAVING,
-      sid,
-      saving,
-    })
-  },
+  setSegmentSaving,
   translateAndGoToNext: function () {
     const segment = SegmentStore.getCurrentSegment()
-    if (!segment || getSegmentUtils().isReadonlySegment(segment)) {
+    if (!segment || SegmentUtils.isReadonlySegment(segment)) {
       return
     }
     if (config.isReview) {
@@ -858,7 +735,7 @@ const SegmentActions = {
   },
   /************ SPLIT ****************/
   openSplitSegment: function (sid) {
-    if (getOfflineUtils().offline) {
+    if (OfflineUtils.offline) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,
         {
@@ -887,14 +764,7 @@ const SegmentActions = {
       open: open,
     })
   },
-  setSegmentContributions: function (sid, contributions, errors) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_CONTRIBUTIONS,
-      sid: sid,
-      matches: contributions,
-      errors: errors,
-    })
-  },
+  setSegmentContributions,
   setSegmentCrossLanguageContributions: function (
     sid,
     fid,
@@ -927,7 +797,7 @@ const SegmentActions = {
     }
   },
   deleteContribution: function (source, target, matchId, sid) {
-    getTranslationMatches().setDeleteSuggestion(source, target, matchId, sid).then(
+    TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
       () => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.DELETE_CONTRIBUTION,
@@ -937,13 +807,7 @@ const SegmentActions = {
       },
     )
   },
-  activateTab: function (sid, tab) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.OPEN_TAB,
-      sid: sid,
-      data: tab,
-    })
-  },
+  activateTab,
   closeTabs: function (sid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_TABS,
@@ -963,15 +827,15 @@ const SegmentActions = {
 
     // refresh segment glossary already included
     if (shouldRefresh) {
-      const source = getDraftMatecatUtils().removePlaceholdersForGlossary(
-        getDraftMatecatUtils().removeTagsFromText(text),
+      const source = DraftMatecatUtils.removePlaceholdersForGlossary(
+        DraftMatecatUtils.removeTagsFromText(text),
       )
       if (source && source !== ' ') {
         getGlossaryForSegment({
           idSegment: sid,
           source,
         }).catch(() => {
-          getOfflineUtils().failedConnection()
+          OfflineUtils.failedConnection()
         })
       }
       return
@@ -1014,8 +878,8 @@ const SegmentActions = {
         segment &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
-        const source = getDraftMatecatUtils().removePlaceholdersForGlossary(
-          getDraftMatecatUtils().removeTagsFromText(request.text),
+        const source = DraftMatecatUtils.removePlaceholdersForGlossary(
+          DraftMatecatUtils.removeTagsFromText(request.text),
         )
 
         if (source && source !== ' ') {
@@ -1024,7 +888,7 @@ const SegmentActions = {
             idSegment: request.sid,
             source,
           }).catch(() => {
-            getOfflineUtils().failedConnection()
+            OfflineUtils.failedConnection()
           })
         }
       }
@@ -1045,7 +909,7 @@ const SegmentActions = {
       sourceLanguage,
       targetLanguage,
     }).catch(() => {
-      getOfflineUtils().failedConnection()
+      OfflineUtils.failedConnection()
       SegmentStore.isSearchingGlossaryInTarget = false
     })
   },
@@ -1087,9 +951,9 @@ const SegmentActions = {
             type: 'warning',
             position: 'bl',
           }
-          getCatToolActions().addNotification(notification)
+          addNotification(notification)
         } else {
-          getOfflineUtils().failedConnection()
+          OfflineUtils.failedConnection()
         }
 
         AppDispatcher.dispatch({
@@ -1144,7 +1008,7 @@ const SegmentActions = {
             type: 'warning',
             position: 'bl',
           }
-          getCatToolActions().addNotification(notification)
+          addNotification(notification)
         } else if (errors.length > 0) {
           AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
@@ -1152,7 +1016,7 @@ const SegmentActions = {
             message: errors[0].message,
           })
         } else {
-          getOfflineUtils().failedConnection()
+          OfflineUtils.failedConnection()
         }
 
         AppDispatcher.dispatch({
@@ -1199,9 +1063,9 @@ const SegmentActions = {
             type: 'warning',
             position: 'bl',
           }
-          getCatToolActions().addNotification(notification)
+          addNotification(notification)
         } else {
-          getOfflineUtils().failedConnection()
+          OfflineUtils.failedConnection()
         }
 
         AppDispatcher.dispatch({
@@ -1264,7 +1128,7 @@ const SegmentActions = {
   },
 
   getContributions: function (sid, multiMatchLangs, force) {
-    getTranslationMatches().getContributionsWithPrefetch({
+    TranslationMatches.getContributionsWithPrefetch({
       sid,
       crossLanguageSettings: multiMatchLangs,
       force,
@@ -1272,7 +1136,7 @@ const SegmentActions = {
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
-    getTranslationMatches().getContribution({
+    TranslationMatches.getContribution({
       sid,
       crossLanguageSettings: multiMatchLangs,
       force,
@@ -1280,7 +1144,7 @@ const SegmentActions = {
   },
 
   getContributionsSuccess: function (data, sid) {
-    getTranslationMatches().processContributions(data, sid)
+    TranslationMatches.processContributions(data, sid)
   },
 
   setConcordanceResult: function (sid, data) {
@@ -1420,7 +1284,7 @@ const SegmentActions = {
       .then(() => {
         SegmentActions.confirmDeletedIssue(sid, issue.id)
         this.getSegmentVersionsIssues(sid)
-        getCatToolActions().reloadQualityReport()
+        CatToolActions.reloadQualityReport()
       })
       .catch(() => {})
   },
@@ -1449,7 +1313,11 @@ const SegmentActions = {
         ModalsActions.onCloseModal()
       },
     }
-    ModalsActions.showModalComponent(MODAL_KEY.CONFIRM_MESSAGE, props, 'Warning')
+    ModalsActions.showModalComponent(
+      MODAL_KEY.CONFIRM_MESSAGE,
+      props,
+      'Warning',
+    )
   },
   showTranslateAllModalWarnirng: function () {
     var props = {
@@ -1459,7 +1327,11 @@ const SegmentActions = {
         ModalsActions.onCloseModal()
       },
     }
-    ModalsActions.showModalComponent(MODAL_KEY.CONFIRM_MESSAGE, props, 'Warning')
+    ModalsActions.showModalComponent(
+      MODAL_KEY.CONFIRM_MESSAGE,
+      props,
+      'Warning',
+    )
   },
   approveFilteredSegments: function (segmentsArray) {
     if (segmentsArray.length >= 100) {
@@ -1476,7 +1348,7 @@ const SegmentActions = {
           segmentsArray,
           SEGMENTS_STATUS.APPROVED,
         )
-        setTimeout(getCatToolActions().updateFooterStatistics(), 2000)
+        setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
       return promise
     }
@@ -1496,7 +1368,7 @@ const SegmentActions = {
           segmentsArray,
           SEGMENTS_STATUS.TRANSLATED,
         )
-        setTimeout(getCatToolActions().updateFooterStatistics(), 2000)
+        setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
       return promise
     }
@@ -1520,7 +1392,7 @@ const SegmentActions = {
           SegmentActions.disableTPOnSegment(segment)
         }
       })
-      setTimeout(getCatToolActions().reloadSegmentFilter, 500)
+      setTimeout(CatToolActions.reloadSegmentFilter, 500)
     }
   },
   toggleSegmentOnBulk: function (sid, fid) {
@@ -1546,19 +1418,19 @@ const SegmentActions = {
     })
 
     if (!unlocked) {
-      getSegmentUtils().removeUnlockedSegment(segment.sid)
+      SegmentUtils.removeUnlockedSegment(segment.sid)
       if (segment.inBulk) {
         this.toggleSegmentOnBulk(segment.sid, fid)
       }
     } else {
-      getSegmentUtils().addUnlockedSegment(segment.sid)
+      SegmentUtils.addUnlockedSegment(segment.sid)
       SegmentActions.checkUnlockAllSegmentsModal(segment)
       SegmentActions.openSegment(segment.sid)
     }
   },
 
   checkUnlockAllSegmentsModal(segment) {
-    if (!getSegmentUtils().isSecondPassLockedSegment(segment)) {
+    if (!SegmentUtils.isSecondPassLockedSegment(segment)) {
       SegmentStore.consecutiveUnlockSegments.push(segment.sid)
       if (
         SegmentStore.consecutiveUnlockSegments.length >= 3 &&
@@ -1579,7 +1451,7 @@ const SegmentActions = {
       segments,
     })
     segments.forEach((segmentSid) => {
-      getSegmentUtils().addUnlockedSegment(segmentSid)
+      SegmentUtils.addUnlockedSegment(segmentSid)
     })
   },
 
@@ -1597,17 +1469,8 @@ const SegmentActions = {
       segmentsArray: segmentsArray,
     })
   },
-  setMutedSegments(segmentsArray) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_MUTED_SEGMENTS,
-      segmentsArray: segmentsArray,
-    })
-  },
-  removeAllMutedSegments() {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS,
-    })
-  },
+  setMutedSegments,
+  removeAllMutedSegments,
 
   openSideSegments() {
     AppDispatcher.dispatch({
@@ -1639,7 +1502,9 @@ const SegmentActions = {
       getSegmentsFilterUtil().filtering() &&
       getSegmentsFilterUtil().open
     ) {
-      getSegmentsFilterUtil().gotoNextSegment(SegmentStore.getCurrentSegmentId())
+      getSegmentsFilterUtil().gotoNextSegment(
+        SegmentStore.getCurrentSegmentId(),
+      )
     } else {
       let next = SegmentStore.getNextSegment()
       if (next) {
@@ -1755,104 +1620,8 @@ const SegmentActions = {
       isFreezing,
     })
   },
-  getSegmentsQa: (segment) => {
-    if (!segment) return
-
-    const {status, translation, updatedSource} = segment
-
-    getLocalWarnings({
-      id: segment.sid,
-      id_job: config.id_job,
-      password: config.password,
-      src_content: updatedSource,
-      trg_content: translation,
-      segment_status: status,
-      characters_counter: segment.charactersCounter ?? 0,
-    })
-      .then((data) => {
-        if (data.details && data.details.id_segment) {
-          SegmentActions.setSegmentWarnings(
-            data.details.id_segment,
-            data.details.issues_info,
-            data.details.tag_mismatch,
-          )
-        } else {
-          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
-        }
-        CommonUtils.dispatchCustomEvent('getWarning:local:success', {
-          resp: data,
-          segment: segment,
-        })
-      })
-      .catch(() => {
-        getOfflineUtils().failedConnection()
-      })
-    // get tm keys
-    new Promise((resolve) => {
-      if (!CatToolStore.getJobTmKeys() || !CatToolStore.getHaveKeysGlossary()) {
-        let isJobTmKeysCompleted = !!CatToolStore.getJobTmKeys()
-        let isHaveKeysGlossaryCompleted = !!CatToolStore.getHaveKeysGlossary()
-
-        const resolvePromise = () =>
-          isJobTmKeysCompleted && isHaveKeysGlossaryCompleted && resolve()
-
-        const setJobTmKeys = () => {
-          isJobTmKeysCompleted = true
-          resolvePromise()
-
-          CatToolStore.removeListener(
-            CatToolConstants.UPDATE_TM_KEYS,
-            setJobTmKeys,
-          )
-        }
-        const setHaveKeysGlossary = () => {
-          isHaveKeysGlossaryCompleted = true
-          resolvePromise()
-
-          CatToolStore.removeListener(
-            CatToolConstants.HAVE_KEYS_GLOSSARY,
-            setHaveKeysGlossary,
-          )
-        }
-
-        CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
-        CatToolStore.addListener(
-          CatToolConstants.HAVE_KEYS_GLOSSARY,
-          setHaveKeysGlossary,
-        )
-      } else {
-        resolve()
-      }
-    }).then(() => {
-      const cleanSource = getDraftMatecatUtils().removeTagsFromText(updatedSource)
-      const cleanTranslation = getDraftMatecatUtils().removeTagsFromText(translation)
-      if (
-        CatToolStore.getHaveKeysGlossary() &&
-        cleanSource &&
-        cleanTranslation
-      ) {
-        const jobTmKeys = CatToolStore.getJobTmKeys()
-        getGlossaryCheck({
-          idSegment: segment.sid,
-          target: cleanTranslation,
-          source: cleanSource,
-          keys: jobTmKeys.map(({key}) => key),
-        }).catch((error) => {
-          console.log('Glossary check failed', error)
-        })
-      }
-    })
-  },
-  highlightGlossaryTerm: ({sid, termId, type, isTarget}) => {
-    SegmentActions.activateTab(sid, 'glossary')
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.HIGHLIGHT_GLOSSARY_TERM,
-      sid,
-      termId,
-      type,
-      isTarget,
-    })
-  },
+  getSegmentsQa,
+  highlightGlossaryTerm,
   helpAiAssistant: ({sid, value}) => {
     SegmentActions.modifyTabVisibility('AiAssistant', true)
     SegmentActions.activateTab(sid, 'AiAssistant')
@@ -1895,7 +1664,7 @@ const SegmentActions = {
     })
   },
   setCurrentSegment: function (id_segment) {
-    CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString())
+    setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',
       password: config.password,
@@ -1913,7 +1682,7 @@ const SegmentActions = {
         }
       })
       .catch(() => {
-        getOfflineUtils().failedConnection()
+        OfflineUtils.failedConnection()
       })
   },
   getTranslationMismatches: function (id_segment) {
@@ -1927,9 +1696,9 @@ const SegmentActions = {
       })
       .catch((errors) => {
         if (errors.length) {
-          getCatToolActions().processErrors(errors, 'setTranslation')
+          CatToolActions.processErrors(errors, 'setTranslation')
         } else {
-          getOfflineUtils().failedConnection()
+          OfflineUtils.failedConnection()
         }
       })
   },

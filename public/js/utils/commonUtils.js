@@ -2,16 +2,19 @@ import Cookies from 'js-cookie'
 import $ from 'jquery'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
+import SegmentStore from '../stores/SegmentStore'
+import {
+  getLastSegmentFromLocalStorage,
+  setLastSegmentFromLocalStorage,
+} from './segmentLocalStorage'
 
 // Lazy-loaded to break circular dependencies
-let _OfflineUtils, _SegmentActions, _SegmentStore
+let _OfflineUtils, _SegmentActions
 const getOfflineUtils = () =>
   _OfflineUtils || (_OfflineUtils = require('./offlineUtils').default)
 const getSegmentActions = () =>
   _SegmentActions ||
   (_SegmentActions = require('../actions/SegmentActions').default)
-const getSegmentStore = () =>
-  _SegmentStore || (_SegmentStore = require('../stores/SegmentStore').default)
 const checkTranslationTailEmpty = () =>
   require('../setTranslationUtil').isTranslationTailEmpty()
 
@@ -126,8 +129,8 @@ const CommonUtils = {
 
   setBrowserHistoryBehavior() {
     let updateAppByPopState = () => {
-      var segment = getSegmentStore().getSegmentByIdToJS(this.parsedHash.segmentId)
-      var currentSegment = getSegmentStore().getCurrentSegment()
+      var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
+      var currentSegment = SegmentStore.getCurrentSegment()
       if (segment && currentSegment?.sid === segment.sid) return
       if (segment && !segment.opened) {
         getSegmentActions().openSegment(this.parsedHash.segmentId, true)
@@ -285,21 +288,8 @@ const CommonUtils = {
     navigator.userAgent.search('Safari') >= 0 &&
     navigator.userAgent.search('Chrome') < 0 &&
     !CommonUtils.isLocalStorageNameSupported(),
-  getLastSegmentFromLocalStorage: function () {
-    let localStorageCurrentSegmentId =
-      'currentSegmentId-' + config.id_job + config.password
-    return localStorage.getItem(localStorageCurrentSegmentId)
-  },
-  setLastSegmentFromLocalStorage: function (segmentId) {
-    let localStorageCurrentSegmentId =
-      'currentSegmentId-' + config.id_job + config.password
-    try {
-      localStorage.setItem(localStorageCurrentSegmentId, segmentId)
-    } catch (e) {
-      this.clearStorage('currentSegmentId')
-      localStorage.setItem(localStorageCurrentSegmentId, segmentId)
-    }
-  },
+  getLastSegmentFromLocalStorage,
+  setLastSegmentFromLocalStorage,
   clearStorage: function (what) {
     $.each(localStorage, function (k) {
       if (k.substring(0, what.length) === what) {

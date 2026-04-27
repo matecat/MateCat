@@ -11,16 +11,15 @@ import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
-import SegmentActions from './SegmentActions'
+import {updateGlobalWarnings} from './warningActions'
 import {getGlobalWarnings} from '../api/getGlobalWarnings'
 import {isUndefined} from 'lodash'
-
-// Lazy-loaded to break circular dependency with offlineUtils.
-// Do NOT convert back to import — see SegmentActions.js for explanation.
-let _OfflineUtils
-const getOfflineUtils = () =>
-  _OfflineUtils ||
-  (_OfflineUtils = require('../utils/offlineUtils').default)
+import {
+  addNotification,
+  removeNotification,
+  removeAllNotifications,
+} from './notificationActions'
+import OfflineUtils from '../utils/offlineUtils'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -214,24 +213,9 @@ let CatToolActions = {
    * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
    *
    */
-  addNotification: function (notification) {
-    return AppDispatcher.dispatch({
-      actionType: CatToolConstants.ADD_NOTIFICATION,
-      notification,
-    })
-  },
-  removeNotification: function (notification) {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.REMOVE_NOTIFICATION,
-      notification,
-    })
-  },
-
-  removeAllNotifications: function () {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.REMOVE_ALL_NOTIFICATION,
-    })
-  },
+  addNotification,
+  removeNotification,
+  removeAllNotifications,
   onRender: (props = {}) => {
     SegmentStore.nextUntranslatedFromServer = null
 
@@ -360,12 +344,12 @@ let CatToolActions = {
 
         //check for errors
         if (data.details) {
-          SegmentActions.updateGlobalWarnings(data.details)
+          updateGlobalWarnings(data.details)
         }
         CommonUtils.dispatchCustomEvent('getWarning:global:success')
       })
       .catch(() => {
-        getOfflineUtils().failedConnection()
+        OfflineUtils.failedConnection()
       })
   },
   processErrors: function (errors, operation) {
@@ -397,7 +381,7 @@ let CatToolActions = {
         }
         if (codeInt === -1000 || codeInt === -101) {
           console.log('ERROR ' + codeInt)
-          getOfflineUtils().startOfflineMode()
+          OfflineUtils.startOfflineMode()
         }
 
         if (codeInt === -2000 && !isUndefined(error.message)) {
