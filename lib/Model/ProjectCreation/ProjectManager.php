@@ -32,6 +32,7 @@ use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
@@ -215,7 +216,11 @@ class ProjectManager
      */
     protected function getQAProcessor(): QAProcessor
     {
-        return $this->qaProcessor ??= new QAProcessor($this->filter, $this->features);
+        return $this->qaProcessor ??= new QAProcessor(
+            $this->filter,
+            $this->features,
+            (bool) ($this->projectStructure->metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false),
+        );
     }
 
     /**
@@ -388,18 +393,7 @@ class ProjectManager
             );
             $this->handleZipFiles($linkFiles);
 
-            try {
-                $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
-                    $fs, $this->projectStructure, $linkFiles
-                );
-            } catch (FileInsertionException $e) {
-                $this->clearFailedProject($e);
-                throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
-            }
-            $this->extractSegmentsCreateProjectAndStoreData($fs, $totalFilesStructure, $linkFiles);
-
-            $this->determineStatusAndPopulateResult();
-            $this->insertFileInstructions($totalFilesStructure);
+            $this->resolveFilesExtractSegmentsAndStoreData($fs, $linkFiles);
             $this->finalizeProjectInTransaction();
         } finally {
             // Ensure the upload directory is cleaned up even when an exception
@@ -547,17 +541,17 @@ class ProjectManager
     }
 
     /**
-     * Extract segments from all files, create project record, store segments, create jobs, and write analysis data.
+     * Resolve and insert files, extract segments, create project record, store segments,
+     * create jobs, insert pre-translations, and write analysis data.
      * Tolerates individual file extraction failures in multi-file projects.
+     * On any failure, cleans up the project and file records before aborting.
      *
-     * @param array<int, array<string, mixed>> $totalFilesStructure Modified by reference — failed files are removed.
      * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
      */
-    private function extractSegmentsCreateProjectAndStoreData(
+    private function resolveFilesExtractSegmentsAndStoreData(
         AbstractFilesStorage $fs,
-        array &$totalFilesStructure,
         array $linkFiles
     ): void {
         // $linkFile is needed in the error handler for hash cleanup
@@ -568,6 +562,10 @@ class ProjectManager
         }
 
         try {
+            $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
+                $fs, $this->projectStructure, $linkFiles
+            );
+
             $this->extractSegmentsFromFiles($totalFilesStructure);
 
             if ($this->total_segments === 0) {
@@ -612,7 +610,11 @@ class ProjectManager
             $this->projectStructure->translations = [];
 
             $this->writeFastAnalysisData();
+
+            $this->determineStatusAndPopulateResult();
+            $this->insertFileInstructions($totalFilesStructure);
         } catch (Throwable $e) {
+            $this->clearFailedProject($e);
             $this->mapSegmentExtractionError($e, $fs, $linkFile);
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
@@ -1017,6 +1019,7 @@ class ProjectManager
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function insertSegmentNotesForFile(): void
     {

@@ -136,4 +136,41 @@ class SubfilteringOptionsValidatorTest extends AbstractTest
         $this->assertIsArray($result);
         $this->assertEquals(['twig'], $result);
     }
+
+    #[Test]
+    public function test_validate_with_extra_valid_handler_returns_array()
+    {
+        $defaultHandlers = InjectableFiltersTags::tagNamesForArrayClasses(
+            array_keys(HandlersSorter::getDefaultInjectedHandlers())
+        );
+
+        $customHandlers = $defaultHandlers;
+        // find a handler that is in schema but not in default
+        $customHandlers[] = 'sprintf';
+
+        $jsonHandlers = json_encode($customHandlers);
+        $result = SubfilteringOptionsValidator::validate($jsonHandlers);
+
+        $this->assertIsArray($result);
+        $this->assertCount(count($defaultHandlers) + 1, $result);
+        $this->assertEquals($customHandlers, $result);
+    }
+
+    #[Test]
+    public function test_validate_with_duplicate_handlers_returns_array()
+    {
+        $defaultHandlers = InjectableFiltersTags::tagNamesForArrayClasses(
+            array_keys(HandlersSorter::getDefaultInjectedHandlers())
+        );
+
+        $customHandlers = $defaultHandlers;
+        $customHandlers[] = $defaultHandlers[0]; // Duplicate first handler
+
+        $jsonHandlers = json_encode($customHandlers);
+        $result = SubfilteringOptionsValidator::validate($jsonHandlers);
+
+        $this->assertIsArray($result);
+        $this->assertCount(count($defaultHandlers) + 1, $result);
+        $this->assertEquals($customHandlers, $result);
+    }
 }

@@ -5,6 +5,7 @@ namespace Model\DataAccess;
 use Exception;
 use PDO;
 use PDOException;
+use Throwable;
 
 /**
  * Class which implements a database using PDO
@@ -183,6 +184,26 @@ class Database implements IDatabase
         // Check if a transaction is currently active
         if ($connection->inTransaction()) {
             $connection->rollBack();
+        }
+    }
+
+    /**
+     * @Override
+     * {@inheritdoc}
+     */
+    public function transaction(callable $callback): mixed
+    {
+        $this->begin();
+        try {
+            $result = $callback();
+            $this->commit();
+
+            return $result;
+        } catch (Throwable $e) {
+            if ($this->getConnection()->inTransaction()) {
+                $this->rollback();
+            }
+            throw $e;
         }
     }
 

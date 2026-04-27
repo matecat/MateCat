@@ -5,3 +5,5 @@ parameters:
     level: 8
     paths:
         - lib
+    excludePaths:
+        - lib/View/APIDoc.php (?)

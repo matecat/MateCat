@@ -1682,16 +1682,16 @@
         },
         {
             "name": "matecat/icu-intl",
-            "version": "v1.1.27",
+            "version": "v1.1.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/icu-intl.git",
-                "reference": "bc036f29104ec7211bfe63d3bf49dd2e82741d0c"
+                "reference": "4cc293cc195c4d3c8d85338dcc426b230d9f413f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/bc036f29104ec7211bfe63d3bf49dd2e82741d0c",
-                "reference": "bc036f29104ec7211bfe63d3bf49dd2e82741d0c",
+                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/4cc293cc195c4d3c8d85338dcc426b230d9f413f",
+                "reference": "4cc293cc195c4d3c8d85338dcc426b230d9f413f",
                 "shasum": ""
             },
             "require": {
@@ -1728,9 +1728,9 @@
             "description": "A PHP port of ICU4J's MessagePattern parser with locale utilities. Parses ICU MessageFormat patterns into an inspectable AST and provides locale data support for internationalization in PHP.",
             "support": {
                 "issues": "https://github.com/matecat/icu-intl/issues",
-                "source": "https://github.com/matecat/icu-intl/tree/v1.1.27"
+                "source": "https://github.com/matecat/icu-intl/tree/v1.1.28"
             },
-            "time": "2026-04-17T07:31:47+00:00"
+            "time": "2026-04-20T09:19:42+00:00"
         },
         {
             "name": "matecat/klein",
@@ -1913,16 +1913,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.4",
+            "version": "v3.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7"
+                "reference": "5bc2651d94b37764df43e57bb305ec626e2d69c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7",
-                "reference": "1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/5bc2651d94b37764df43e57bb305ec626e2d69c5",
+                "reference": "5bc2651d94b37764df43e57bb305ec626e2d69c5",
                 "shasum": ""
             },
             "require": {
@@ -1969,9 +1969,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.4"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.5"
             },
-            "time": "2026-03-18T14:43:51+00:00"
+            "time": "2026-04-23T13:15:35+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
