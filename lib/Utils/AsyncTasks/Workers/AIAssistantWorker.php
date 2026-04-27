@@ -128,7 +128,11 @@ class AIAssistantWorker extends AbstractWorker
 
             $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
         } catch (Exception $exception){
-            $errorCode = $errorCode ?? self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
+
+            if($errorCode === self::codeErrorsMap['NO_ERROR']){
+                $errorCode = self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
+            }
+
             $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload, $errorCode);
         }
     }
