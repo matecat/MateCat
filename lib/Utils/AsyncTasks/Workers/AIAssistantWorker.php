@@ -22,6 +22,15 @@ use Utils\Tools\Utils;
 
 class AIAssistantWorker extends AbstractWorker
 {
+    
+    const array codeErrorsMap = [
+        'NO_ERROR' => 0,
+        'NO_ALTERNATIVE_TRANSLATIONS_FOUND' => 1,
+        'ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS' => 2,
+        'NO_ERROR_MESSAGE' => 3,
+        'OTHER_ERROR' => 4,
+    ];
+    
     const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
     const string FEEDBACK_ACTION = 'feedback';
     const string ALTERNATIVE_TRANSLATIONS_ACTION = 'alternative_translations';
@@ -97,6 +106,7 @@ class AIAssistantWorker extends AbstractWorker
     private function alternative_translations(array $payload): void
     {
         try {
+            $errorCode = self::codeErrorsMap['NO_ERROR'];
             $gemini = AIClientFactory::create("gemini");
             $alternativeTranslations = $gemini->manageAlternativeTranslations(
                 sourceLanguage: $payload['localized_source'],
@@ -112,12 +122,18 @@ class AIAssistantWorker extends AbstractWorker
             $this->_doLog("Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations));
 
             if(empty($alternativeTranslations)){
-                throw new Exception("No alternative translations found.");
+                $errorCode = self::codeErrorsMap['NO_ALTERNATIVE_TRANSLATIONS_FOUND'];
+                throw new Exception("No alternative translations found");
             }
 
             $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
         } catch (Exception $exception){
-            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
+
+            if($errorCode === self::codeErrorsMap['NO_ERROR']){
+                $errorCode = self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
+            }
+
+            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload, $errorCode);
         }
     }
 
@@ -283,13 +299,14 @@ class AIAssistantWorker extends AbstractWorker
      * @param string $type
      * @param string $message
      * @param array $payload
+     * @param int|null $errorCode
      *
      * @throws Exception
      */
-    private function emitErrorMessage(string $type, string $message, array $payload): void
+    private function emitErrorMessage(string $type, string $message, array $payload, ?int $errorCode = 4): void
     {
         $this->_doLog($message);
-        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true);
+        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true, true, $errorCode);
     }
 
     /**
@@ -299,12 +316,14 @@ class AIAssistantWorker extends AbstractWorker
      * @param string $message
      * @param bool $hasError
      * @param bool $completed
+     * @param int|null $errorCode
      *
      * @throws Exception
      */
-    private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false): void
+    private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false, ?int $errorCode = 0): void
     {
         if($message === null){
+            $errorCode = self::codeErrorsMap['NO_ERROR_MESSAGE'];
             $hasError = true;
         }
 
@@ -315,6 +334,7 @@ class AIAssistantWorker extends AbstractWorker
                 'payload' => [
                     'id_segment' => $idSegment,
                     'has_error' => $hasError,
+                    'error_code' => $errorCode ?? self::codeErrorsMap['NO_ERROR'],
                     'completed' => $completed,
                     'message' => is_string($message) ? trim($message) : $message
                 ],
