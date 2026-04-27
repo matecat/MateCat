@@ -3,7 +3,6 @@
 namespace Model\Segments;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\DaoCacheTrait;
 use Model\DataAccess\Database;
 use ReflectionException;
 
