@@ -7,9 +7,7 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import {initFileUpload} from '../../api/initFileUpload'
 import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 
-import {getPrintableFileSize} from './UploadFileUtils'
-// Re-exported for backward compatibility
-export {getPrintableFileSize}
+
 export const UploadFile = ({...props}) => {
   const {openGDrive, currentProjectTemplate} = useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)

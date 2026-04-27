@@ -10,10 +10,9 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import Footer from '../components/footer/Footer'
 import SocketListener from '../sse/SocketListener'
 import {mountPage} from './mountPage'
-import {
-  ACTIVITY_LOG_COLUMNS,
-  ActivityLogTable,
-} from '../components/activityLog/ActivityLogTable'
+import {ActivityLogTable} from '../components/activityLog/ActivityLogTable'
+import {ACTIVITY_LOG_COLUMNS} from '../components/activityLog/ActivityLogConstants'
+import {ActivityLogContext} from '../components/activityLog/ActivityLogContext'
 import {getActivityLog} from '../api/getActivityLog/getActivityLog'
 import {getProject} from '../api/getProject/getProject'
 import {FilterColumn} from '../components/activityLog/FilterColumn'
@@ -23,8 +22,7 @@ const headerMountPoint = document.querySelector('header.upload-page-header')
 const projectId = config.project_id
 const password = config.password
 
-import {ActivityLogContext} from '../components/activityLog/ActivityLogContext'
-export {ActivityLogContext}
+
 
 export const ActivityLog = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)

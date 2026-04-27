@@ -4,7 +4,6 @@ import {ActivityLogContext} from './ActivityLogContext'
 import LabelWithTooltip from '../common/LabelWithTooltip'
 
 import {ACTIVITY_LOG_COLUMNS} from './ActivityLogConstants'
-export {ACTIVITY_LOG_COLUMNS}
 
 export const ActivityLogTable = () => {
   const {activityLog, filterByColumn} = useContext(ActivityLogContext)

@@ -54,7 +54,6 @@ const getFilteredSchemaToCompare = (template) => {
 }
 
 import {XliffSettingsContext} from './XliffSettingsContext'
-export {XliffSettingsContext}
 
 export const XliffSettings = () => {
   const {

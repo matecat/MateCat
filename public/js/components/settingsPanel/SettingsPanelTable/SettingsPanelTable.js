@@ -12,7 +12,6 @@ import {SPECIAL_ROWS_ID} from '../Contents/TranslationMemoryGlossaryTab/Translat
 import {TmPrioritization} from '../Contents/TranslationMemoryGlossaryTab/TmPrioritization'
 
 import {SettingsPanelTableContext} from './SettingsPanelTableContext'
-export {SettingsPanelTableContext}
 
 export const SettingsPanelTable = ({
   columns,

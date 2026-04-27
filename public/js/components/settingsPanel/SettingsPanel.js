@@ -137,8 +137,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   ]
 }
 
-import {DEFAULT_ENGINE_MEMORY} from './SettingsPanelConstants'
-export {DEFAULT_ENGINE_MEMORY}
+
 
 export const SettingsPanel = ({
   onClose,

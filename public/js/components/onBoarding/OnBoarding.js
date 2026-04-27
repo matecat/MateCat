@@ -11,11 +11,8 @@ import ModalsActions from '../../actions/ModalsActions'
 import CommonUtils from '../../utils/commonUtils'
 
 import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
-// Re-exported for backward compatibility
-export {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
 
 import {OnBoardingContext, socialUrls} from './OnBoardingContext'
-export {OnBoardingContext, socialUrls}
 const OnBoarding = ({
   step = ONBOARDING_STEP.LOGIN,
   isCloseButtonEnabled = false,

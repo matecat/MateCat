@@ -12,7 +12,6 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import {isEqual} from 'lodash'
 
 import {SUBTEMPLATE_MODIFIERS, isStandardSubTemplate, SubTemplatesContext} from './SubTemplateContext'
-export {SUBTEMPLATE_MODIFIERS, isStandardSubTemplate, SubTemplatesContext}
 
 export const SubTemplates = ({
   templates,

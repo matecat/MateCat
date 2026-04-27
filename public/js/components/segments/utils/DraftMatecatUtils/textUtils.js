@@ -68,8 +68,7 @@ export const formatText = (text, format) => {
   return text
 }
 
-import {regexWordDelimiter} from './textConstants'
-export {regexWordDelimiter}
+
 
 export const getCharactersCounter = (value) => {
   let cleanedContent = TEXT_UTILS.removeHiddenCharacters(

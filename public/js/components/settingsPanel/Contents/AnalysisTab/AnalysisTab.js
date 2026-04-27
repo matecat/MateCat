@@ -15,6 +15,7 @@ import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {ANALYSIS_BREAKDOWNS} from './AnalysisTabConstants'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -26,8 +27,7 @@ export const ANALYSIS_SCHEMA_KEYS = {
   deletedAt: 'deletedAt',
   version: 'version',
 }
-import {ANALYSIS_BREAKDOWNS} from './AnalysisTabConstants'
-export {ANALYSIS_BREAKDOWNS}
+
 
 const getFilteredSchemaCreateUpdate = (template) => {
   /* eslint-disable no-unused-vars */

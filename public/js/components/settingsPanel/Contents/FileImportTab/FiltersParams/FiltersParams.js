@@ -63,7 +63,6 @@ const getFilteredSchemaToCompare = (template) => {
 }
 
 import {FiltersParamsContext} from './FiltersParamsContext'
-export {FiltersParamsContext}
 
 export const FiltersParams = () => {
   const {

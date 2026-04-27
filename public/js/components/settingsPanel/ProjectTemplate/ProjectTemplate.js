@@ -23,7 +23,6 @@ import ModalsActions from '../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../modals/ConfirmDeleteResourceProjectTemplates'
 
 import {TEMPLATE_MODIFIERS} from './ProjectTemplateConstants'
-export {TEMPLATE_MODIFIERS}
 
 export const ProjectTemplate = ({portalTarget}) => {
   const {

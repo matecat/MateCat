@@ -368,7 +368,6 @@ import {
   unescapeHTMLinTags,
   unescapeHTMLRecursive,
 } from './htmlUtils'
-export {getIdAttributeRegEx, unescapeHTMLinTags, unescapeHTMLRecursive}
 
 export const removeTagsFromText = (segmentString) => {
   const regExp = getXliffRegExpression()
