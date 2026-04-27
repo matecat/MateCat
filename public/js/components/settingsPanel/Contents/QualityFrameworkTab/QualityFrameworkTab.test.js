@@ -15,7 +15,7 @@ import {
 } from '@testing-library/react'
 import useTemplates from '../../../../hooks/useTemplates'
 import userEvent from '@testing-library/user-event'
-import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
+import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTableUtils'
 // Initializes window.eventHandler (required by Popover component)
 import '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 

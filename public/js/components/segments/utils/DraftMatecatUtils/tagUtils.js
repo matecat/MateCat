@@ -363,11 +363,6 @@ export const encodeHtmlEntities = (text) => {
   // .replace(/'/g, '&apos;')
 }
 
-import {
-  getIdAttributeRegEx,
-  unescapeHTMLinTags,
-  unescapeHTMLRecursive,
-} from './htmlUtils'
 
 export const removeTagsFromText = (segmentString) => {
   const regExp = getXliffRegExpression()

@@ -1,5 +1,4 @@
 import React from 'react'
-import {createRoot} from 'react-dom/client'
 
 import {ModalContainer} from './ModalContainer'
 import {ModalOverlay} from './ModalOverlay'

@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useRef,
-  createRef,
-  useState,
-  createContext,
-  Fragment,
-} from 'react'
+import React, {useCallback, useRef, createRef, useState, Fragment} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelRow} from './SettingsPanelRow'
 import {SPECIAL_ROWS_ID} from '../Contents/TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTabUtils'

@@ -24,14 +24,6 @@ import AppDispatcher from '../../../stores/AppDispatcher'
 import {removeZeroWidthSpace} from '../utils/DraftMatecatUtils/tagUtils'
 
 import {TERM_FORM_FIELDS} from './GlossaryConstants'
-export {
-  TERM_FORM_FIELDS,
-  DeleteIcon,
-  ModifyIcon,
-  GlossaryDefinitionIcon,
-  MoreIcon,
-  LockIcon,
-} from './GlossaryConstants'
 
 const initialState = {
   keys: [],

@@ -8,8 +8,7 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import {COPY_SOURCE_COOKIE} from '../../constants/ModalKeys'
-// Re-exported for backward compatibility
-export {COPY_SOURCE_COOKIE} from '../../constants/ModalKeys'
+
 class CopySourceModal extends React.Component {
   constructor(props) {
     super(props)

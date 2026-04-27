@@ -12,7 +12,7 @@ import CommonUtils from '../../utils/commonUtils'
 
 import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
 
-import {OnBoardingContext, socialUrls} from './OnBoardingContext'
+import {OnBoardingContext} from './OnBoardingContext'
 const OnBoarding = ({
   step = ONBOARDING_STEP.LOGIN,
   isCloseButtonEnabled = false,

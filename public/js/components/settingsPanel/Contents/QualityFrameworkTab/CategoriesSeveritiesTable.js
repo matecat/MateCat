@@ -7,8 +7,6 @@ import {AddCategory} from './AddCategory'
 import {AddSeverity} from './AddSeverity'
 import {AddSeverityCell} from './AddSeverityCell'
 
-export {getCategoryLabelAndDescription, formatCategoryDescription, getCodeFromLabel} from './CategoriesSeveritiesTableUtils'
-
 export const CategoriesSeveritiesTable = () => {
   const {currentTemplate} = useContext(QualityFrameworkTabContext)
 
