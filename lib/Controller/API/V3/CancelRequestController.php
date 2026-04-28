@@ -56,17 +56,22 @@ class CancelRequestController extends KleinController
         if ($id_job === false || $id_segment === false) {
             $this->response->code(400);
             $this->response->header('Content-Type', 'application/json');
-            $this->response->body(json_encode([
+            $this->response->json([
                 'errors' => [
                     [
                         'code' => 400,
                         'message' => 'Invalid id_job or id_segment',
                     ],
                 ],
-            ]));
+            ]);
 
             return;
         }
+
+        if($this->isSegmentDisabled($id_job, $id_segment)){
+            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        }
+
         $this->response->json([
             'id_segment' => $id_segment,
         ]);
