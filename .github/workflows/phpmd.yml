@@ -17,10 +17,9 @@ name: PHPMD
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "master" ]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "develop" ]
+    branches: [ "develop", "master" ]
 
 permissions:
   contents: read
@@ -45,13 +44,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: json, xml, curl, mbstring, redis, zip, gd, intl
+          extensions: curl, gd, intl, json, mbstring, redis, xml, zip
           coverage: none
           tools: composer
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-        continue-on-error: false
           
       - name: Run PHPMD
         run: ./vendor/bin/phpmd ./lib/ sarif codesize --reportfile phpmd-results.sarif

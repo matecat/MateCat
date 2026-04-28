@@ -15,10 +15,9 @@ name: PHPStan
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "master" ]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "develop" ]
+    branches: [ "develop", "master" ]
 
 permissions:
   contents: read
@@ -41,14 +40,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: curl, gd, intl, mbstring, readline, xml, zip, json
+          extensions: curl, gd, intl, json, mbstring, redis, xml, zip
           coverage: none
           tools: composer
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-        continue-on-error: false
 
       - name: Run PHPStan
         run: ./vendor/bin/phpstan analyse
-        continue-on-error: false
