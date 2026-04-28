@@ -65,7 +65,7 @@ var spec = {
             name: 'files[]',
             in: 'formData',
             description:
-              'The file(s) to be uploaded, supported file formats <a href="#file-format">available here</a>. You may also upload TMX files, which will trigger the creation of a new translation memory in the account.',
+                'The file(s) to be uploaded, supported file formats <a href="#file-format">available here</a>. You may also upload TMX files, which will trigger the creation of a new translation memory in the account.',
             required: true,
             type: 'file',
           },
@@ -80,7 +80,7 @@ var spec = {
             name: 'source_lang',
             in: 'formData',
             description:
-              'RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards.',
+                'RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards.',
             required: true,
             type: 'string',
           },
@@ -88,7 +88,7 @@ var spec = {
             name: 'target_lang',
             in: 'formData',
             description:
-              'RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)',
+                'RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)',
             required: true,
             type: 'string',
           },
@@ -96,7 +96,7 @@ var spec = {
             name: 'tms_engine',
             in: 'formData',
             description:
-              'Identifier for Memory Server 0 means disabled, 1 means MyMemory)',
+                'Identifier for Memory Server 0 means disabled, 1 means MyMemory)',
             required: false,
             type: 'integer',
             default: 1,
@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v3/engines/list endpoint).",
+                "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v3/engines/list endpoint).",
             required: false,
             type: 'integer',
             default: 1,
@@ -114,9 +114,9 @@ var spec = {
             name: 'private_tm_key',
             in: 'formData',
             description:
-              'Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create' +
-              ' a new key. - Multiple keys must be comma separated. Up to 10 keys allowed. (xxx345cvf,new,s342f234fc) - If you want to set read, write or both on your private key you can' +
-              " add after the key 'r' for read, 'w' for write or 'rw' for both  separated by ':' (xxx345cvf:r,new:w,s342f234fc:rw) - Only available if tms_engine is set to 1 or if is not used",
+                'Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create' +
+                ' a new key. - Multiple keys must be comma separated. Up to 10 keys allowed. (xxx345cvf,new,s342f234fc) - If you want to set read, write or both on your private key you can' +
+                " add after the key 'r' for read, 'w' for write or 'rw' for both  separated by ':' (xxx345cvf:r,new:w,s342f234fc:rw) - Only available if tms_engine is set to 1 or if is not used",
             required: false,
             type: 'string',
           },
@@ -124,11 +124,11 @@ var spec = {
             name: 'private_tm_key_json',
             in: 'formData',
             description:
-              'Private key(s) for MyMemory in a JSON format. `tm_prioritization` must be specified.',
+                'Private key(s) for MyMemory in a JSON format. `tm_prioritization` must be specified.',
             required: false,
             type: 'string',
             example:
-              '{"tm_prioritization":true, "keys":[{"key": "123456","read": true, "write": true, "penalty": 97},{"key": "xdfr3r","read": true, "write": true, "penalty": 95}]}',
+                '{"tm_prioritization":true, "keys":[{"key": "123456","read": true, "write": true, "penalty": 97},{"key": "xdfr3r","read": true, "write": true, "penalty": 95}]}',
           },
           {
             name: 'subject',
@@ -142,7 +142,7 @@ var spec = {
             name: 'segmentation_rule',
             in: 'formData',
             description:
-              'The segmentation rule you want to use to parse your file.',
+                'The segmentation rule you want to use to parse your file.',
             required: false,
             type: 'string',
           },
@@ -150,7 +150,7 @@ var spec = {
             name: 'owner_email',
             in: 'formData',
             description:
-              'The email of the owner of the project. This parameter is deprecated and being replaced by authentication headers.',
+                'The email of the owner of the project. This parameter is deprecated and being replaced by authentication headers.',
             required: false,
             type: 'string',
             default: 'anonymous',
@@ -159,7 +159,7 @@ var spec = {
             name: 'due_date',
             in: 'formData',
             description:
-              'If you want to set a due date for your project, send this param with a timestamp',
+                'If you want to set a due date for your project, send this param with a timestamp',
             required: false,
             type: 'string',
           },
@@ -174,7 +174,7 @@ var spec = {
             name: 'payable_rate_template_id',
             in: 'formData',
             description:
-              'The id of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
+                'The id of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'integer',
           },
@@ -182,7 +182,7 @@ var spec = {
             name: 'payable_rate_template_name',
             in: 'formData',
             description:
-              'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
+                'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'string',
           },
@@ -215,7 +215,7 @@ var spec = {
             name: 'dialect_strict',
             in: 'formData',
             description:
-              'Specify if you want matches only from dialect (excluding the other language variants)',
+                'Specify if you want matches only from dialect (excluding the other language variants)',
             required: false,
             type: 'string',
             example: '{"it-IT": true, "en-US": false, "fr-FR": false}',
@@ -224,7 +224,7 @@ var spec = {
             name: 'lara_glossaries',
             in: 'formData',
             description:
-              'Lara glossaries to be used for the project. Only works if a Lara engine is used.',
+                'Lara glossaries to be used for the project. Only works if a Lara engine is used.',
             required: false,
             type: 'string',
             example: '["gls_xyz123"]',
@@ -236,7 +236,7 @@ var spec = {
             required: false,
             type: 'string',
             example:
-              '{"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }',
+                '{"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }',
           },
           {
             name: 'mmt_ignore_glossary_case',
@@ -256,7 +256,7 @@ var spec = {
             name: 'deepl_formality',
             in: 'formData',
             description:
-              'DeepL formality (choose between `default`, `prefer_less` or `prefer_more`)',
+                'DeepL formality (choose between `default`, `prefer_less` or `prefer_more`)',
             required: false,
             type: 'string',
             default: 'default',
@@ -282,11 +282,11 @@ var spec = {
             name: 'filters_extraction_parameters',
             in: 'formData',
             description:
-              'Set the filters extraction parameters through a json string',
+                'Set the filters extraction parameters through a json string',
             required: false,
             type: 'string',
             example:
-              '{"name": "parameters": {"json": {"extract_arrays": true, "escape_forward_slashes": false, "translate_keys": ["key"], "do_not_translate_keys": [], "context_keys": [], "character_limit": []}}}',
+                '{"name": "parameters": {"json": {"extract_arrays": true, "escape_forward_slashes": false, "translate_keys": ["key"], "do_not_translate_keys": [], "context_keys": [], "character_limit": []}}}',
           },
           {
             name: 'xliff_parameters',
@@ -295,13 +295,13 @@ var spec = {
             required: false,
             type: 'string',
             example:
-              '{"xliff12": [{"analysis": "pre-translated", "states": ["final"], "editor": "new"}], "xliff20": []}',
+                '{"xliff12": [{"analysis": "pre-translated", "states": ["final"], "editor": "new"}], "xliff20": []}',
           },
           {
             name: 'xliff_parameters_template_id',
             in: 'formData',
             description:
-              'Load a specific template for the analysis of Xliff files',
+                'Load a specific template for the analysis of Xliff files',
             required: false,
             type: 'string',
             example: '3213',
@@ -310,7 +310,7 @@ var spec = {
             name: 'filters_extraction_parameters_template_id',
             in: 'formData',
             description:
-              'Load a specific template for the analysis of Xliff files and for filters extraction parameters',
+                'Load a specific template for the analysis of Xliff files and for filters extraction parameters',
             required: false,
             type: 'string',
             example: '3213',
@@ -327,7 +327,7 @@ var spec = {
             name: 'id_qa_model_template',
             in: 'formData',
             description:
-              'Load a previously saved, custom QA framework template',
+                'Load a previously saved, custom QA framework template',
             required: false,
             type: 'string',
             example: '3213',
@@ -376,7 +376,7 @@ var spec = {
             name: 'public_tm_penalty',
             in: 'formData',
             description:
-              'The penalty value (between 0 and 100) to be applied to the public TM matches',
+                'The penalty value (between 0 and 100) to be applied to the public TM matches',
             required: false,
             type: 'integer',
             default: 0,
@@ -394,7 +394,7 @@ var spec = {
             name: 'qa_model_template_id',
             in: 'formData',
             description:
-              'The id of the QA model you want to use in the project you are creating (if you want to use a custom QA model in a project, both relevant parameters must be included in the API call)',
+                'The id of the QA model you want to use in the project you are creating (if you want to use a custom QA model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'integer',
           },
@@ -410,7 +410,7 @@ var spec = {
             name: 'intento_routing',
             in: 'formData',
             description:
-              'Select the Intento routing (this parameter is only applied if Intento is enabled for the project)',
+                'Select the Intento routing (this parameter is only applied if Intento is enabled for the project)',
             required: false,
             type: 'string',
           },
@@ -418,7 +418,7 @@ var spec = {
             name: 'intento_provider',
             in: 'formData',
             description:
-              'Select the Intento provider (this parameter is only applied if Intento is enabled for the project)',
+                'Select the Intento provider (this parameter is only applied if Intento is enabled for the project)',
             required: false,
             type: 'string',
           },
@@ -433,7 +433,7 @@ var spec = {
             name: 'subfiltering_handlers',
             in: 'formData',
             description:
-              'An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: "markup", "percent_double_curly", "twig", "ruby_on_rails", "double_snail", "double_square", "dollar_curly", "single_curly", "objective_c_ns", "double_percent", "square_sprintf", "sprintf"',
+                'An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: "markup", "percent_double_curly", "twig", "ruby_on_rails", "double_snail", "double_square", "dollar_curly", "single_curly", "objective_c_ns", "double_percent", "square_sprintf", "sprintf"',
             required: false,
             type: 'string',
             default: '[]',
@@ -459,13 +459,13 @@ var spec = {
         tags: ['Project'],
         summary: 'Retrieve the status of a project',
         description:
-          'Check Status of a created Project With HTTP POST ( application/x-www-form-urlencoded ) protocol',
+            'Check Status of a created Project With HTTP POST ( application/x-www-form-urlencoded ) protocol',
         parameters: [
           {
             name: 'id_project',
             in: 'query',
             description:
-              'The identifier of the project, should be the value returned by the /new method.',
+                'The identifier of the project, should be the value returned by the /new method.',
             required: true,
             type: 'integer',
           },
@@ -473,7 +473,7 @@ var spec = {
             name: 'project_pass',
             in: 'query',
             description:
-              'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+                'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
             required: true,
             type: 'string',
           },
@@ -502,7 +502,7 @@ var spec = {
           name: 'res',
           in: 'formData',
           description:
-            'Possible values: job, prj (if left empy, job is the default value)',
+              'Possible values: job, prj (if left empy, job is the default value)',
           required: false,
           type: 'string',
         },
@@ -510,7 +510,7 @@ var spec = {
           name: 'id',
           in: 'formData',
           description:
-            'The id of the resource (project or job) whose password you want to change.',
+              'The id of the resource (project or job) whose password you want to change.',
           required: true,
           type: 'integer',
         },
@@ -518,7 +518,7 @@ var spec = {
           name: 'password',
           in: 'formData',
           description:
-            'The current password of the resource (project or job) whose password you want to change.',
+              'The current password of the resource (project or job) whose password you want to change.',
           required: true,
           type: 'string',
         },
@@ -526,7 +526,7 @@ var spec = {
           name: 'new_password',
           in: 'formData',
           description:
-            'Use this to define the new password of the resource whose password you are changing. Ignored if "undo" is not set or set to "false", mandatory if undo is set to "true".',
+              'Use this to define the new password of the resource whose password you are changing. Ignored if "undo" is not set or set to "false", mandatory if undo is set to "true".',
           required: false,
           type: 'string',
         },
@@ -534,7 +534,7 @@ var spec = {
           name: 'revision_number',
           in: 'formData',
           description:
-            'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
+              'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
           required: false,
           type: 'integer',
         },
@@ -542,7 +542,7 @@ var spec = {
           name: 'undo',
           in: 'formData',
           description:
-            'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
+              'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
           required: false,
           type: 'boolean',
         },
@@ -569,7 +569,7 @@ var spec = {
             name: 'id_project',
             in: 'path',
             description:
-              'The identifier of the project, should be the value returned by the /new method.',
+                'The identifier of the project, should be the value returned by the /new method.',
             required: true,
             type: 'integer',
           },
@@ -577,7 +577,7 @@ var spec = {
             name: 'password',
             in: 'path',
             description:
-              'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+                'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
             required: true,
             type: 'string',
           },
@@ -685,8 +685,8 @@ var spec = {
         tags: ['Project'],
         summary: 'Shows project completion statuses',
         description:
-          'Shows project completion statuses, ' +
-          'it is related to the phases defined by the click on Marked As Completed button.',
+            'Shows project completion statuses, ' +
+            'it is related to the phases defined by the click on Marked As Completed button.',
         parameters: [
           {
             name: 'id_project',
@@ -733,7 +733,7 @@ var spec = {
             name: 'password',
             in: 'path',
             description:
-              'The password of the revision the issue pertains to. If the issue pertains to r1, use the "revise" link password, otherwise use the "revise2" link password.',
+                'The password of the revision the issue pertains to. If the issue pertains to r1, use the "revise" link password, otherwise use the "revise2" link password.',
             required: true,
             type: 'string',
           },
@@ -920,6 +920,9 @@ var spec = {
     },
     '/api/v3/jobs/{id_job}/{password}/segment/disable/{id_segment}': {
       post: {
+        tags: ['Job'],
+        summary: 'Disable a segment',
+        description: 'Disables a segment in a job, preventing it from being translated. The segment must be in "new" status. The authenticated user must be the owner of the project or a member of the team. Rate limiting is applied (max 5 requests per route).',
         parameters: [
           {
             name: 'id_job',
@@ -966,6 +969,9 @@ var spec = {
     },
     '/api/v3/jobs/{id_job}/{password}/segment/enable/{id_segment}': {
       post: {
+        tags: ['Job'],
+        summary: 'Enable a segment',
+        description: 'Re-enables a previously disabled segment in a job, allowing it to be translated again. The authenticated user must be the owner of the project or a member of the team. Rate limiting is applied (max 5 requests per route).',
         parameters: [
           {
             name: 'id_job',
@@ -1020,7 +1026,7 @@ var spec = {
             name: 'id_project',
             in: 'path',
             description:
-              'The id of the parent project of the job you intend to generate the Revise 2 step for',
+                'The id of the parent project of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -1028,7 +1034,7 @@ var spec = {
             name: 'password',
             in: 'path',
             description:
-              'The password of parent project of the job you intend to generate the Revise 2 step for',
+                'The password of parent project of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -1036,7 +1042,7 @@ var spec = {
             name: 'id_job',
             in: 'formData',
             description:
-              'The id of the job you intend to generate the Revise 2 step for',
+                'The id of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -1044,7 +1050,7 @@ var spec = {
             name: 'password',
             in: 'formData',
             description:
-              'The password of the job you intend to generate the Revise 2 step for',
+                'The password of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -1121,7 +1127,7 @@ var spec = {
             name: 'due_date',
             in: 'formData',
             description:
-              'Date you want to set as due date. Date must be in the future',
+                'Date you want to set as due date. Date must be in the future',
             required: true,
             type: 'integer',
           },
@@ -1162,7 +1168,7 @@ var spec = {
             name: 'body',
             in: 'body',
             description:
-              'Date you want to set as due date. Date must be in the future',
+                'Date you want to set as due date. Date must be in the future',
             required: true,
             schema: {
               type: 'object',
@@ -1392,147 +1398,147 @@ var spec = {
       },
     },
     '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check':
-      {
-        post: {
-          tags: ['Project'],
-          summary: 'Split Check',
-          description: 'Check a job can be splitted',
-          parameters: [
-            {
-              name: 'id_project',
-              in: 'path',
-              description: 'The id of the project',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'path',
-              description: 'The password of the project',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_job',
-              in: 'path',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'job_password',
-              in: 'path',
-              description: 'The password of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'num_split',
-              in: 'path',
-              description: 'Number of chuck you want to split',
-              required: true,
-              type: 'integer',
-            },
-            {
-              name: 'split_values',
-              in: 'formData',
-              description:
-                'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
-              type: 'array',
-              items: {type: 'double'},
-            },
-            {
-              name: 'split_raw_words',
-              in: 'formData',
-              description:
-                'Split the job by raw words instead of equivalent words',
-              type: 'boolean',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Split',
-              schema: {
-                $ref: '#/definitions/Split',
+        {
+          post: {
+            tags: ['Project'],
+            summary: 'Split Check',
+            description: 'Check a job can be splitted',
+            parameters: [
+              {
+                name: 'id_project',
+                in: 'path',
+                description: 'The id of the project',
+                required: true,
+                type: 'string',
               },
-            },
-            default: {
-              description: 'Unexpected error',
+              {
+                name: 'password',
+                in: 'path',
+                description: 'The password of the project',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'id_job',
+                in: 'path',
+                description: 'The id of the job',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'job_password',
+                in: 'path',
+                description: 'The password of the job',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'num_split',
+                in: 'path',
+                description: 'Number of chuck you want to split',
+                required: true,
+                type: 'integer',
+              },
+              {
+                name: 'split_values',
+                in: 'formData',
+                description:
+                    'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
+                type: 'array',
+                items: {type: 'double'},
+              },
+              {
+                name: 'split_raw_words',
+                in: 'formData',
+                description:
+                    'Split the job by raw words instead of equivalent words',
+                type: 'boolean',
+              },
+            ],
+            responses: {
+              200: {
+                description: 'Split',
+                schema: {
+                  $ref: '#/definitions/Split',
+                },
+              },
+              default: {
+                description: 'Unexpected error',
+              },
             },
           },
         },
-      },
     '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply':
-      {
-        post: {
-          tags: ['Project'],
-          summary: 'Split Job',
-          description: 'Check a job can be splitted',
-          parameters: [
-            {
-              name: 'id_project',
-              in: 'path',
-              description: 'The id of the project',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'path',
-              description: 'The password of the project',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_job',
-              in: 'path',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'job_password',
-              in: 'path',
-              description: 'The password of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'num_split',
-              in: 'path',
-              description: 'Number of chuck you want to split',
-              required: true,
-              type: 'integer',
-            },
-            {
-              name: 'split_values',
-              in: 'formData',
-              description:
-                'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
-              type: 'array',
-              items: {type: 'double'},
-            },
-            {
-              name: 'split_raw_words',
-              in: 'formData',
-              description:
-                'Split the job by raw words instead of equivalent words',
-              type: 'boolean',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Split',
-              schema: {
-                $ref: '#/definitions/Split',
+        {
+          post: {
+            tags: ['Project'],
+            summary: 'Split Job',
+            description: 'Check a job can be splitted',
+            parameters: [
+              {
+                name: 'id_project',
+                in: 'path',
+                description: 'The id of the project',
+                required: true,
+                type: 'string',
               },
-            },
-            default: {
-              description: 'Unexpected error',
+              {
+                name: 'password',
+                in: 'path',
+                description: 'The password of the project',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'id_job',
+                in: 'path',
+                description: 'The id of the job',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'job_password',
+                in: 'path',
+                description: 'The password of the job',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'num_split',
+                in: 'path',
+                description: 'Number of chuck you want to split',
+                required: true,
+                type: 'integer',
+              },
+              {
+                name: 'split_values',
+                in: 'formData',
+                description:
+                    'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
+                type: 'array',
+                items: {type: 'double'},
+              },
+              {
+                name: 'split_raw_words',
+                in: 'formData',
+                description:
+                    'Split the job by raw words instead of equivalent words',
+                type: 'boolean',
+              },
+            ],
+            responses: {
+              200: {
+                description: 'Split',
+                schema: {
+                  $ref: '#/definitions/Split',
+                },
+              },
+              default: {
+                description: 'Unexpected error',
+              },
             },
           },
         },
-      },
     '/api/v3/jobs/{id_job}/{password}/translator': {
       get: {
         tags: ['Job'],
@@ -1596,7 +1602,7 @@ var spec = {
             name: 'delivery_date',
             in: 'formData',
             description:
-              'deliery date for the assignment, expressed as timestamp',
+                'deliery date for the assignment, expressed as timestamp',
             required: true,
             type: 'integer',
           },
@@ -1604,7 +1610,7 @@ var spec = {
             name: 'timezone',
             in: 'formData',
             description:
-              'time zone to convert the delivery_date param expressed as offset based on UTC. Example 1.0, -7.0 etc.',
+                'time zone to convert the delivery_date param expressed as offset based on UTC. Example 1.0, -7.0 etc.',
             required: true,
             type: 'string',
           },
@@ -1836,7 +1842,7 @@ var spec = {
         tags: ['Teams'],
         summary: 'List available teams',
         description:
-          'Returns a list of all teams the current user is member of.',
+            'Returns a list of all teams the current user is member of.',
         parameters: [],
         responses: {
           200: {
@@ -1878,7 +1884,7 @@ var spec = {
               collectionFormat: 'multi',
             },
             description:
-              'Array of email addresses of people to invite in a project. Example: members[0][email]="john_doe@acme.com", members[1][email]="jane_smith@acme.com"',
+                'Array of email addresses of people to invite in a project. Example: members[0][email]="john_doe@acme.com", members[1][email]="jane_smith@acme.com"',
             required: true,
           },
         ],
@@ -2045,7 +2051,7 @@ var spec = {
             required: false,
             default: 1,
             description:
-              'page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results.',
+                'page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results.',
           },
           {
             in: 'query',
@@ -2055,7 +2061,7 @@ var spec = {
             default: 20,
             maximum: 50,
             description:
-              'step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results.',
+                'step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results.',
           },
         ],
         responses: {
@@ -2249,96 +2255,96 @@ var spec = {
       },
     },
     '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions':
-      {
-        get: {
-          tags: ['Job', 'Translation Versions'],
-          summary: 'Segment versions',
-          description: 'Segment versions',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'path',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'path',
-              description: 'The password of the job (Translate password)',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'path',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Segment versions',
-              schema: {
-                $ref: '#/definitions/TranslationVersions',
+        {
+          get: {
+            tags: ['Job', 'Translation Versions'],
+            summary: 'Segment versions',
+            description: 'Segment versions',
+            parameters: [
+              {
+                name: 'id_job',
+                in: 'path',
+                description: 'The id of the job',
+                required: true,
+                type: 'string',
               },
-            },
-            default: {
-              description: 'Unexpected error',
+              {
+                name: 'password',
+                in: 'path',
+                description: 'The password of the job (Translate password)',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'id_segment',
+                in: 'path',
+                description: 'The id of the segment',
+                required: true,
+                type: 'string',
+              },
+            ],
+            responses: {
+              200: {
+                description: 'Segment versions',
+                schema: {
+                  $ref: '#/definitions/TranslationVersions',
+                },
+              },
+              default: {
+                description: 'Unexpected error',
+              },
             },
           },
         },
-      },
     '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}':
-      {
-        get: {
-          tags: ['Job', 'Translation Versions'],
-          summary: 'Get a Segment translation version',
-          description: 'Get a Segment translation version',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'path',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'path',
-              description: 'The password of the job (Translate password)',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'path',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'version_number',
-              in: 'path',
-              description: 'The version number',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Segment version',
-              schema: {
-                $ref: '#/definitions/TranslationVersion',
+        {
+          get: {
+            tags: ['Job', 'Translation Versions'],
+            summary: 'Get a Segment translation version',
+            description: 'Get a Segment translation version',
+            parameters: [
+              {
+                name: 'id_job',
+                in: 'path',
+                description: 'The id of the job',
+                required: true,
+                type: 'string',
               },
-            },
-            default: {
-              description: 'Unexpected error',
+              {
+                name: 'password',
+                in: 'path',
+                description: 'The password of the job (Translate password)',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'id_segment',
+                in: 'path',
+                description: 'The id of the segment',
+                required: true,
+                type: 'string',
+              },
+              {
+                name: 'version_number',
+                in: 'path',
+                description: 'The version number',
+                required: true,
+                type: 'string',
+              },
+            ],
+            responses: {
+              200: {
+                description: 'Segment version',
+                schema: {
+                  $ref: '#/definitions/TranslationVersion',
+                },
+              },
+              default: {
+                description: 'Unexpected error',
+              },
             },
           },
         },
-      },
     '/api/v3/jobs/{id_job}/{password}/files': {
       get: {
         tags: ['Job', 'Files'],
@@ -2497,7 +2503,7 @@ var spec = {
         responses: {
           200: {
             description:
-              'Insert/update job instructions for a specific job file',
+                'Insert/update job instructions for a specific job file',
             schema: {
               type: 'boolean',
             },
@@ -2650,9 +2656,9 @@ var spec = {
         tags: ['Glossary'],
         summary: 'Import Glossary',
         description:
-          '### Import glossary file (.xlsx) \n' +
-          'If your glossary has **between two and ten locales in it**, you will be able to use it for jobs **in any of the possible combinations of the locales** (e.g. if you have en-US, es-ES and it-IT in a glossary you will be able to use it for en-US <> es-ES, en-US <> it-IT and es-ES <> it-IT jobs).\n' +
-          'If your glossary has **more than 10 locales**, Matecat will only create combinations between **the first locale column from the left and the rest of the locales** (e.g. if in a glossary you have en-US as the first locale from the left, es-ES, it-IT and 10 more locales, you will be able to use it for en-US <> es-ES and en-US <> it-IT, but not for es-ES <> it-IT).',
+            '### Import glossary file (.xlsx) \n' +
+            'If your glossary has **between two and ten locales in it**, you will be able to use it for jobs **in any of the possible combinations of the locales** (e.g. if you have en-US, es-ES and it-IT in a glossary you will be able to use it for en-US <> es-ES, en-US <> it-IT and es-ES <> it-IT jobs).\n' +
+            'If your glossary has **more than 10 locales**, Matecat will only create combinations between **the first locale column from the left and the rest of the locales** (e.g. if in a glossary you have en-US as the first locale from the left, es-ES, it-IT and 10 more locales, you will be able to use it for en-US <> es-ES and en-US <> it-IT, but not for es-ES <> it-IT).',
         parameters: [
           {
             name: 'files',
@@ -2729,7 +2735,7 @@ var spec = {
             name: 'uuid',
             in: 'path',
             description:
-              'The UUID token received from `/api/v3/glossaries/import/` api.',
+                'The UUID token received from `/api/v3/glossaries/import/` api.',
             required: true,
             type: 'string',
           },
@@ -2780,7 +2786,7 @@ var spec = {
         tags: ['Engines'],
         summary: 'Retrieve personal MT engine list.',
         description:
-          'Retrieve personal MT engine list (ModernMT, Google, Microsoft, etc.). A machine translation (MT) engine is a software tool that uses artificial intelligence, such as neural networks and natural language processing (NLP), to automatically translate text from a source language to a target language without human involvement.',
+            'Retrieve personal MT engine list (ModernMT, Google, Microsoft, etc.). A machine translation (MT) engine is a software tool that uses artificial intelligence, such as neural networks and natural language processing (NLP), to automatically translate text from a source language to a target language without human involvement.',
         parameters: [],
         responses: {
           200: {
@@ -2800,7 +2806,7 @@ var spec = {
         tags: ['TM keys'],
         summary: 'Create (or update) a TM key.',
         description:
-          "Create a new TM key or update its name. If the 'key' parameter is not provided, a new key will be created; if a valid key is provided, the key's name will be updated.",
+            "Create a new TM key or update its name. If the 'key' parameter is not provided, a new key will be created; if a valid key is provided, the key's name will be updated.",
         consumes: ['application/json'],
         parameters: [
           {
@@ -2812,7 +2818,7 @@ var spec = {
                   type: 'string',
                   example: '1234_xxxx',
                   description:
-                    'In case of already existent TM key, it will be updated.',
+                      'In case of already existent TM key, it will be updated.',
                 },
                 name: {
                   type: 'string',
@@ -2925,9 +2931,9 @@ var spec = {
       get: {
         tags: ['Project templates'],
         summary:
-          'Shows the list of project template models available for the currents user',
+            'Shows the list of project template models available for the currents user',
         description:
-          'Shows the list of project template models available for the currents user',
+            'Shows the list of project template models available for the currents user',
         responses: {
           200: {
             description: 'An array of JSON representation models.',
@@ -3110,9 +3116,9 @@ var spec = {
       get: {
         tags: ['Billing models'],
         summary:
-          'Shows the list of billing models available for the currents user',
+            'Shows the list of billing models available for the currents user',
         description:
-          'Shows the list of billing models available for the currents user',
+            'Shows the list of billing models available for the currents user',
         responses: {
           200: {
             description: 'An array of JSON representation models.',
@@ -3295,9 +3301,9 @@ var spec = {
       get: {
         tags: ['Quality models'],
         summary:
-          'Shows the list of quality models available for the currents user',
+            'Shows the list of quality models available for the currents user',
         description:
-          'Shows the list of quality models available for the currents user',
+            'Shows the list of quality models available for the currents user',
         responses: {
           200: {
             description: 'An array of JSON representation models.',
@@ -3480,9 +3486,9 @@ var spec = {
       get: {
         tags: ['Extraction parameter configuration'],
         summary:
-          'Shows the list of filters analysis configuration models available for the currents user',
+            'Shows the list of filters analysis configuration models available for the currents user',
         description:
-          'Shows the list of filters analysis configuration models available for the currents user',
+            'Shows the list of filters analysis configuration models available for the currents user',
         responses: {
           200: {
             description: 'An array of JSON representation models.',
@@ -3556,7 +3562,7 @@ var spec = {
         tags: ['Extraction parameter configuration'],
         summary: 'Deletes a particular filters analysis configuration model',
         description:
-          'Deletes a particular filters analysis configuration model',
+            'Deletes a particular filters analysis configuration model',
         parameters: [
           {
             name: 'id',
@@ -3584,7 +3590,7 @@ var spec = {
         tags: ['Extraction parameter configuration'],
         summary: 'Updates a particular filters analysis configuration model',
         description:
-          'Updates a particular filters analysis configuration model',
+            'Updates a particular filters analysis configuration model',
         parameters: [
           {
             in: 'body',
@@ -3620,9 +3626,9 @@ var spec = {
       get: {
         tags: ['Extraction parameter configuration'],
         summary:
-          'Shows the filters analysis configuration model creation schema',
+            'Shows the filters analysis configuration model creation schema',
         description:
-          'Shows the filters analysis configuration model creation schema',
+            'Shows the filters analysis configuration model creation schema',
         parameters: [],
         responses: {
           200: {
@@ -3641,9 +3647,9 @@ var spec = {
       get: {
         tags: ['Xliff import configuration'],
         summary:
-          'Shows the list of xliff analysis configuration models available for the currents user',
+            'Shows the list of xliff analysis configuration models available for the currents user',
         description:
-          'Shows the list of xliff analysis configuration models available for the currents user',
+            'Shows the list of xliff analysis configuration models available for the currents user',
         responses: {
           200: {
             description: 'An array of JSON representation models.',
@@ -3780,7 +3786,7 @@ var spec = {
         tags: ['Xliff import configuration'],
         summary: 'Shows the xliff analysis configuration model creation schema',
         description:
-          'Shows the xliff analysis configuration model creation schema',
+            'Shows the xliff analysis configuration model creation schema',
         parameters: [],
         responses: {
           200: {
@@ -3953,7 +3959,7 @@ var spec = {
         responses: {
           200: {
             description:
-              'List the entries of a single glossary in the format specified by the Accept header.',
+                'List the entries of a single glossary in the format specified by the Accept header.',
             schema: {
               type: 'string',
               example: 'Hello! Guten Tag!',
@@ -4171,7 +4177,7 @@ var spec = {
         responses: {
           200: {
             description:
-              'Returns a JSON representation of the created glossary.',
+                'Returns a JSON representation of the created glossary.',
             schema: {
               $ref: '#/definitions/MMTGlossary',
             },
@@ -4281,7 +4287,7 @@ var spec = {
             name: 'tuid',
             in: 'body',
             description:
-              'The tuid of the glossary entry to be updated. forbidden if type is unidirectional, required if type is equivalent',
+                'The tuid of the glossary entry to be updated. forbidden if type is unidirectional, required if type is equivalent',
             required: true,
             type: 'integer',
           },
@@ -4292,13 +4298,13 @@ var spec = {
             required: true,
             type: 'string',
             example:
-              '[{"term": "test", "language": "en"}, {"term": "prova", "language": "it"}, {"term": "prueba", "language": "es"}]',
+                '[{"term": "test", "language": "en"}, {"term": "prova", "language": "it"}, {"term": "prueba", "language": "es"}]',
           },
           {
             name: 'type',
             in: 'body',
             description:
-              'The string identifying the glossary type (either unidirectional or equivalent)',
+                'The string identifying the glossary type (either unidirectional or equivalent)',
             required: true,
             type: 'string',
           },
@@ -4946,7 +4952,7 @@ var spec = {
           type: 'integer',
           readOnly: true,
           description:
-            "The model version. It's incremented on every model update.",
+              "The model version. It's incremented on every model update.",
           example: 1,
         },
         categories: {
@@ -5076,7 +5082,7 @@ var spec = {
           type: 'integer',
           readOnly: true,
           description:
-            "The model version. It's incremented on every model update.",
+              "The model version. It's incremented on every model update.",
           example: 1,
         },
         breakdowns: {
@@ -5171,93 +5177,93 @@ var spec = {
       },
       patternProperties: {
         '(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)':
-          {
-            type: 'object',
-            patternProperties: {
-              '(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)':
-                {
-                  type: 'object',
-                  properties: {
-                    NO_MATCH: {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
+            {
+              type: 'object',
+              patternProperties: {
+                '(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)':
+                    {
+                      type: 'object',
+                      properties: {
+                        NO_MATCH: {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        '50%-74%': {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        '75%-84%': {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        '85%-94%': {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        '95%-99%': {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        '100%': {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        '100%_PUBLIC': {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        REPETITIONS: {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        INTERNAL: {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        MT: {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        ICE: {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                        ICE_MT: {
+                          type: 'integer',
+                          maximum: 100,
+                          minimum: 0,
+                        },
+                      },
+                      additionalProperties: false,
+                      required: [
+                        'NO_MATCH',
+                        '50%-74%',
+                        '75%-84%',
+                        '85%-94%',
+                        '95%-99%',
+                        '100%',
+                        '100%_PUBLIC',
+                        'REPETITIONS',
+                        'INTERNAL',
+                        'MT',
+                        'ICE',
+                        'ICE_MT',
+                      ],
                     },
-                    '50%-74%': {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    '75%-84%': {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    '85%-94%': {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    '95%-99%': {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    '100%': {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    '100%_PUBLIC': {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    REPETITIONS: {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    INTERNAL: {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    MT: {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    ICE: {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                    ICE_MT: {
-                      type: 'integer',
-                      maximum: 100,
-                      minimum: 0,
-                    },
-                  },
-                  additionalProperties: false,
-                  required: [
-                    'NO_MATCH',
-                    '50%-74%',
-                    '75%-84%',
-                    '85%-94%',
-                    '95%-99%',
-                    '100%',
-                    '100%_PUBLIC',
-                    'REPETITIONS',
-                    'INTERNAL',
-                    'MT',
-                    'ICE',
-                    'ICE_MT',
-                  ],
-                },
+              },
+              additionalProperties: false,
             },
-            additionalProperties: false,
-          },
       },
       additionalProperties: false,
       required: ['default'],
@@ -5269,23 +5275,23 @@ var spec = {
         status: {
           type: 'string',
           description:
-            'Return the creation status of the project. The statuses can be:OK indicating that the creation worked.FAIL indicating that the creation is failed.',
+              'Return the creation status of the project. The statuses can be:OK indicating that the creation worked.FAIL indicating that the creation is failed.',
           enum: ['OK', 'FAIL'],
         },
         id_project: {
           type: 'string',
           description:
-            'Return the unique id of the project just created. If creation status is FAIL this key will simply be omitted from the result.',
+              'Return the unique id of the project just created. If creation status is FAIL this key will simply be omitted from the result.',
         },
         project_pass: {
           type: 'string',
           description:
-            'Return the password of the project just created. If creation status is FAIL this key will simply be omitted from the result.',
+              'Return the password of the project just created. If creation status is FAIL this key will simply be omitted from the result.',
         },
         new_keys: {
           type: 'string',
           description:
-            'If you specified new as one or more value in the private_tm_key parameter, the new created keys are returned as CSV string (4rcf34rc,r34rcfewf3r2). Otherwise empty string is returned',
+              'If you specified new as one or more value in the private_tm_key parameter, the new created keys are returned as CSV string (4rcf34rc,r34rcfewf3r2). Otherwise empty string is returned',
         },
       },
     },
@@ -5515,7 +5521,7 @@ var spec = {
     'Data-Status': {
       type: 'object',
       description:
-        'Holds all progress statisticts for every job and for overall project. It contains jobs and summary sub-sections.',
+          'Holds all progress statisticts for every job and for overall project. It contains jobs and summary sub-sections.',
       properties: {
         jobs: {
           $ref: '#/definitions/Jobs',
@@ -5528,17 +5534,17 @@ var spec = {
     'Jobs-Status': {
       type: 'object',
       description:
-        'Section jobs contains all metadata about job (like URIs, quality reports and languages)',
+          'Section jobs contains all metadata about job (like URIs, quality reports and languages)',
       properties: {
         langpairs: {
           type: 'object',
           description:
-            'the language pairs for your project; an entry for every chunk in the project, with the id-password combination as key and the language pair as the value',
+              'the language pairs for your project; an entry for every chunk in the project, with the id-password combination as key and the language pair as the value',
         },
         'job-url': {
           type: 'object',
           description:
-            'the links to the chunks of the project; an entry for every chunk in the project, with the id-password combination as key and the link to the chunk as the value.',
+              'the links to the chunks of the project; an entry for every chunk in the project, with the id-password combination as key and the link to the chunk as the value.',
         },
         'job-quality-details': {
           type: 'array',
@@ -5546,35 +5552,35 @@ var spec = {
             type: 'object',
           },
           description:
-            'a structure containing, for each chunk, an array of 5 objects, each object is a quality check performed on the job; the object contains the type of the check (Typing, Translation, Terminology, Language Quality, Style), the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio (same as quality-overall)',
+              'a structure containing, for each chunk, an array of 5 objects, each object is a quality check performed on the job; the object contains the type of the check (Typing, Translation, Terminology, Language Quality, Style), the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio (same as quality-overall)',
         },
         'quality-overall': {
           type: 'object',
           description:
-            'the overall quality rating for each chunk (Very good, Good, Acceptable, Poor, Fail)',
+              'the overall quality rating for each chunk (Very good, Good, Acceptable, Poor, Fail)',
         },
       },
     },
     Summary: {
       type: 'object',
       description:
-        'Sub-section summary holds statistict for the whole project that are not related to single job objects.',
+          'Sub-section summary holds statistict for the whole project that are not related to single job objects.',
       properties: {
         NAME: {
           type: 'string',
           description:
-            'A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in config.inc.php file and happens only after Matecat updates, so you should never see it ).',
+              'A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in config.inc.php file and happens only after Matecat updates, so you should never see it ).',
         },
         STATUS: {
           type: 'string',
           description:
-            'The status the project is from analysis perspective. NEW - just created, not analyzed yet, FAST_OK - preliminary (fast) analysis completed, now running translations ("TM") analysis, DONE - analysis complete.',
+              'The status the project is from analysis perspective. NEW - just created, not analyzed yet, FAST_OK - preliminary (fast) analysis completed, now running translations ("TM") analysis, DONE - analysis complete.',
           enum: ['NEW', 'FAST_OK', 'DONE'],
         },
         IN_QUEUE_BEFORE: {
           type: 'string',
           description:
-            "Number of segments belonging to other projects that are being analyzed before yours; it's the wait time for you.",
+              "Number of segments belonging to other projects that are being analyzed before yours; it's the wait time for you.",
         },
         TOTAL_SEGMENTS: {
           type: 'string',
@@ -5587,7 +5593,7 @@ var spec = {
         TOTAL_RAW_WC: {
           type: 'string',
           description:
-            'number of words (word count) of your project, as extracted by the textual parsers',
+              'number of words (word count) of your project, as extracted by the textual parsers',
         },
         TOTAL_STANDARD_WC: {
           type: 'string',
@@ -5596,12 +5602,12 @@ var spec = {
         TOTAL_FAST_WC: {
           type: 'string',
           description:
-            'word count, minus the sentences that are partially repeated',
+              'word count, minus the sentences that are partially repeated',
         },
         TOTAL_TM_WC: {
           type: 'string',
           description:
-            'word count, with sentences found in the cloud translation memory discounted from the total; this depends on the percentage of overlapping between the sentences of your project and the past translations',
+              'word count, with sentences found in the cloud translation memory discounted from the total; this depends on the percentage of overlapping between the sentences of your project and the past translations',
         },
         TOTAL_PAYABLE: {
           type: 'string',
@@ -5612,7 +5618,7 @@ var spec = {
     Jobs: {
       type: 'object',
       description:
-        'Sub-section jobs holds statistict for all the job objects. The numerical keys on the first level are the IDs of the jobs contained in the project. Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project. A job holds a chunks and a totals section.',
+          'Sub-section jobs holds statistict for all the job objects. The numerical keys on the first level are the IDs of the jobs contained in the project. Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project. A job holds a chunks and a totals section.',
       properties: {
         id_job: {
           $ref: '#/definitions/Job',
@@ -5622,12 +5628,12 @@ var spec = {
     Job: {
       type: 'object',
       description:
-        'The numerical keys on the first level are the IDs of the jobs contained in the project. Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project.',
+          'The numerical keys on the first level are the IDs of the jobs contained in the project. Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project.',
       properties: {
         chunk: {
           type: 'object',
           description:
-            'A structure modeling a portion of content to translate.  A whole file can be splitted in multiple chunks, to be distributed to multiple translators, or can be enveloped in a single chunk. Each chunk has a password as first level key and a numerical ID as second level key to identify different chunks for the same file. Each chunk contains the same structure of the totals section. The sum of the chunks equals to the totals.',
+              'A structure modeling a portion of content to translate.  A whole file can be splitted in multiple chunks, to be distributed to multiple translators, or can be enveloped in a single chunk. Each chunk has a password as first level key and a numerical ID as second level key to identify different chunks for the same file. Each chunk contains the same structure of the totals section. The sum of the chunks equals to the totals.',
         },
         totals: {
           $ref: '#/definitions/Totals',
@@ -5637,7 +5643,7 @@ var spec = {
     Totals: {
       type: 'object',
       description:
-        'Contains all analysis statistics for all files in the current job (i.e., all files that have to be translated in a target language)',
+          'Contains all analysis statistics for all files in the current job (i.e., all files that have to be translated in a target language)',
       properties: {
         job_pass: {
           $ref: '#/definitions/Total',
@@ -5661,7 +5667,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word count for the segments that repeat themselves in the file',
+              'cumulative word count for the segments that repeat themselves in the file',
         },
         INTERNAL_MATCHES: {
           type: 'array',
@@ -5669,7 +5675,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word count for the segments that fuzzily overlap with others in the file, while not being an exact repetition',
+              'cumulative word count for the segments that fuzzily overlap with others in the file, while not being an exact repetition',
         },
         MT: {
           type: 'array',
@@ -5677,7 +5683,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word count for all segments that can be translated with machine translation; it accounts for all the information that could not be discounted by repetitions, internal matches or translation memory',
+              'cumulative word count for all segments that can be translated with machine translation; it accounts for all the information that could not be discounted by repetitions, internal matches or translation memory',
         },
         NEW: {
           type: 'array',
@@ -5685,7 +5691,7 @@ var spec = {
             type: 'object',
           },
           description:
-            "cumulative word count for segments that can't be discounted with repetition or internal matches; it's the net translation effort",
+              "cumulative word count for segments that can't be discounted with repetition or internal matches; it's the net translation effort",
         },
         TM_100: {
           type: 'array',
@@ -5693,7 +5699,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word count for the exact matches found in TM server',
+              'cumulative word count for the exact matches found in TM server',
         },
         TM_75_99: {
           type: 'array',
@@ -5701,7 +5707,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word count for partial matches in the TM that cover 75-99% of each segment',
+              'cumulative word count for partial matches in the TM that cover 75-99% of each segment',
         },
         ICE: {
           type: 'array',
@@ -5709,7 +5715,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word count for 100% TM matches that also share the same context with the TM',
+              'cumulative word count for 100% TM matches that also share the same context with the TM',
         },
         NUMBERS_ONLY: {
           type: 'array',
@@ -5717,7 +5723,7 @@ var spec = {
             type: 'object',
           },
           description:
-            'cumulative word counts for segments made of numberings, dates and similar not translatable data ( i.e. 93 / 127 )',
+              'cumulative word counts for segments made of numberings, dates and similar not translatable data ( i.e. 93 / 127 )',
         },
       },
     },
@@ -6327,7 +6333,7 @@ var spec = {
           type: 'string',
           enum: ['ltr', 'rtl'],
           description:
-            'Language direction, ltr (left-to-right text) or rtl (right-to-left text)',
+              'Language direction, ltr (left-to-right text) or rtl (right-to-left text)',
         },
       },
     },
@@ -6919,7 +6925,7 @@ var spec = {
     Error: {
       type: 'object',
       description:
-        'This property contains any debug data that can serve for better understanding of the error',
+          'This property contains any debug data that can serve for better understanding of the error',
       properties: {
         errors: {
           type: 'array',
