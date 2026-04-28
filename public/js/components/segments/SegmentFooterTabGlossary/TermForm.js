@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react'
-import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
+import {MoreIcon, TERM_FORM_FIELDS} from './GlossaryConstants'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import SegmentActions from '../../../actions/SegmentActions'
 import CatToolActions from '../../../actions/CatToolActions'

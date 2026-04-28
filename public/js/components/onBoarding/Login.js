@@ -10,7 +10,8 @@ import SocialButtons from './SocialButtons'
 import {useForm, Controller} from 'react-hook-form'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import {Input, INPUT_TYPE} from '../common/Input/Input'
-import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
+import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
+import {OnBoardingContext} from './OnBoardingContext'
 import {loginUser} from '../../api/loginUser'
 
 const Login = () => {

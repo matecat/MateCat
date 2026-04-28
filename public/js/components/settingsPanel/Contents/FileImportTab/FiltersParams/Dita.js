@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import {FiltersParamsContext} from './FiltersParams'
+import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'

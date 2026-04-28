@@ -43,6 +43,10 @@ jest.mock('../components/modals/AlertModal', () => 'AlertModal')
 jest.mock('../components/modals/RevisionFeedbackModal', () => 'RevisionFeedbackModal')
 jest.mock('../components/modals/ConfirmMessageModal', () => 'ConfirmMessageModal')
 
+jest.mock('../constants/ModalKeys', () => ({
+  MODAL_KEY: {ALERT: 'Alert', COPY_SOURCE: 'CopySource'},
+  COPY_SOURCE_COOKIE: 'copySourceCookie',
+}))
 jest.mock('../constants/CatToolConstants', () => ({
   SET_FIRST_LOAD: 'SET_FIRST_LOAD',
 }))
@@ -52,7 +56,6 @@ jest.mock('lodash', () => ({
 
 import CatToolActions from './CatToolActions'
 import ModalsActions from './ModalsActions'
-import AlertModal from '../components/modals/AlertModal'
 
 describe('CatToolActions.processErrors', () => {
   beforeEach(() => {
@@ -68,7 +71,7 @@ describe('CatToolActions.processErrors', () => {
     CatToolActions.processErrors([{code: '-5'}], 'setTranslation')
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: 'This segment has been disabled by the project owner.<br />Refresh the page to update segment status.',
         buttonText: 'Refresh page',
@@ -86,7 +89,7 @@ describe('CatToolActions.processErrors', () => {
     CatToolActions.processErrors([{code: '-1'}], 'setTranslation')
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: expect.stringContaining('Error in saving the translation'),
       }),
@@ -111,7 +114,7 @@ describe('CatToolActions.processErrors', () => {
     CatToolActions.processErrors([{code: '-10'}], 'setSuggestion')
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: 'Job canceled or assigned to another translator',
         successCallback: expect.any(Function),

@@ -4,7 +4,32 @@ import {
   tagSignatures,
 } from './tagModel'
 import {Base64} from 'js-base64'
-import TextUtils from '../../../../utils/textUtils'
+// replaceTempTags/restoreTempTags inlined from textUtils to avoid
+// the cycle: SegmentStore → tagUtils → textUtils → commonUtils → SegmentStore
+const replaceTempTags = (text) => {
+  const tags = []
+  const makeid = (len) => {
+    let r = ''
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    for (let i = 0; i < len; i++)
+      r += chars.charAt(Math.floor(Math.random() * chars.length))
+    return r
+  }
+  text = text.replace(
+    /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+    (match) => {
+      const id = makeid(5)
+      tags.push({id, match})
+      return '#_' + id + '_#'
+    },
+  )
+  return {tags, text}
+}
+const restoreTempTags = (tags, text) =>
+  text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
+    const tag = tags.find((item) => item.id === id)
+    return tag ? tag.match : match
+  })
 import {isUndefined} from 'lodash'
 import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
@@ -155,9 +180,9 @@ export const transformTagsToLexiqaText = (text) => {
   )
 
   let textNormalized = text
-  const {tags, text: tempText} = TextUtils.replaceTempTags(text)
+  const {tags, text: tempText} = replaceTempTags(text)
   textNormalized = decodeHtmlEntities(tempText)
-  textNormalized = TextUtils.restoreTempTags(tags, textNormalized)
+  textNormalized = restoreTempTags(tags, textNormalized)
 
   return tagsStruct.reduce(
     (acc, {data}) => {
@@ -363,15 +388,7 @@ export const encodeHtmlEntities = (text) => {
   // .replace(/'/g, '&apos;')
 }
 
-export const getIdAttributeRegEx = () => {
-  return /id="(-?\w+)"/g
-}
 
-/**
- *
- * @param segmentString
- * @returns {*}
- */
 export const removeTagsFromText = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
@@ -380,53 +397,12 @@ export const removeTagsFromText = (segmentString) => {
   return segmentString
 }
 
-/**
- * Checks if the given segment string contains XLIFF tags.
- *
- * @param {string} segmentString - The segment string to check for XLIFF tags.
- * @returns {boolean|string} - Returns `true` if XLIFF tags are found, `false` if not,
- *                             or the original segment string if it is empty.
- */
 export const textHasTags = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
     return regExp.test(segmentString)
   }
   return segmentString
-}
-
-/**
- *
- * @param escapedHTML
- * @returns {string}
- */
-export const unescapeHTMLinTags = (escapedHTML) => {
-  try {
-    return escapedHTML
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-  } catch (e) {
-    return ''
-  }
-}
-
-export const unescapeHTMLRecursive = (escapedHTML) => {
-  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
-
-  try {
-    while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTMLinTags(escapedHTML)
-    }
-  } catch (e) {
-    console.error('Error unescapeHTMLRecursive')
-  }
-
-  return escapedHTML
 }
 
 /**

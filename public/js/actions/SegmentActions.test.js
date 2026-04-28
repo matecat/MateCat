@@ -129,7 +129,6 @@ jest.mock('../utils/speech2text', () => ({
 import SegmentActions from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
-import AlertModal from '../components/modals/AlertModal'
 
 describe('SegmentActions.handleClickOnReadOnly', () => {
   beforeEach(() => {
@@ -153,7 +152,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentActions.handleClickOnReadOnly(segment)
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       {
         text: 'This segment has been disabled by the project owner, so it cannot be translated.',
       },
@@ -170,13 +169,13 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentActions.handleClickOnReadOnly(segment)
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: expect.any(String),
       }),
     )
     expect(ModalsActions.showModalComponent).not.toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: 'This segment has been disabled by the project owner, so it cannot be translated.',
       }),
@@ -195,7 +194,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentActions.handleClickOnReadOnly(segment)
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: expect.stringContaining('Segment is locked'),
       }),
@@ -212,7 +211,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     SegmentActions.handleClickOnReadOnly(segment)
 
     expect(ModalsActions.showModalComponent).not.toHaveBeenCalledWith(
-      AlertModal,
+      'Alert',
       expect.objectContaining({
         text: 'This segment has been disabled by the project owner, so it cannot be translated.',
       }),

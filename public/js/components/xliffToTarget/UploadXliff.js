@@ -1,13 +1,12 @@
 import React, {useCallback, useState} from 'react'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
-import {DeleteIcon} from '../segments/SegmentFooterTabGlossary'
+import {DeleteIcon} from '../segments/SegmentFooterTabGlossary/GlossaryConstants'
 import FileUploadIconBig from '../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
-import IconAdd from '../icons/IconAdd'
 import IconClose from '../icons/IconClose'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {xliffToTargetUpload} from '../../api/xliffToTargetUpload'
-import {getPrintableFileSize} from '../createProject/UploadFile'
+import {getPrintableFileSize} from '../createProject/UploadFileUtils'
 import {saveAs} from 'file-saver'
 
 const b64toBlob = (b64Data, contentType, sliceSize) => {
