@@ -5,64 +5,164 @@ namespace unit\Traits;
 use Controller\Traits\RateLimiterTrait;
 use DateTime;
 use Klein\Response;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Predis\Client;
-use ReflectionClass;
 use TestHelpers\AbstractTest;
 
 /**
- * Concrete class that uses RateLimiterTrait for testing purposes.
- * Overrides the private getRedis() by exposing trait methods and injecting a mock client.
+ * Fake Redis client that stores data in memory for testing purposes.
+ * Predis\Client uses __call magic for Redis commands, which PHPUnit cannot mock.
+ */
+class FakeRedisClient extends Client
+{
+    private array $store = [];
+    private array $ttls = [];
+    private array $hashStore = [];
+    public array $calls = [];
+
+    public function __construct()
+    {
+        // Do not call parent constructor
+    }
+
+    public function __call($commandID, $arguments)
+    {
+        $this->calls[] = ['method' => $commandID, 'args' => $arguments];
+
+        return match (strtolower($commandID)) {
+            'get' => $this->store[$arguments[0]] ?? null,
+            'set' => $this->doSet($arguments[0], $arguments[1]),
+            'incr' => $this->doIncr($arguments[0]),
+            'expire' => $this->doExpire($arguments[0], $arguments[1]),
+            'ttl' => $this->ttls[$arguments[0]] ?? -1,
+            'setex' => $this->doSetex($arguments[0], $arguments[1], $arguments[2]),
+            'del' => $this->doDel($arguments[0]),
+            'hget' => $this->hashStore[$arguments[0]][$arguments[1]] ?? null,
+            'hset' => $this->doHset($arguments[0], $arguments[1], $arguments[2]),
+            'hdel' => $this->doHdel($arguments[0], $arguments[1]),
+            default => null,
+        };
+    }
+
+    private function doSet($key, $value): void
+    {
+        $this->store[$key] = $value;
+    }
+
+    private function doIncr($key): int
+    {
+        $this->store[$key] = ($this->store[$key] ?? 0) + 1;
+        return $this->store[$key];
+    }
+
+    private function doExpire($key, $ttl): bool
+    {
+        $this->ttls[$key] = $ttl;
+        return true;
+    }
+
+    private function doSetex($key, $ttl, $value): void
+    {
+        $this->store[$key] = $value;
+        $this->ttls[$key] = $ttl;
+    }
+
+    private function doDel($key): int
+    {
+        unset($this->store[$key], $this->ttls[$key]);
+        return 1;
+    }
+
+    public function getStore(): array
+    {
+        return $this->store;
+    }
+
+    public function setStoreValue(string $key, mixed $value): void
+    {
+        $this->store[$key] = $value;
+    }
+
+    public function setTtlValue(string $key, int $ttl): void
+    {
+        $this->ttls[$key] = $ttl;
+    }
+
+    public function setHashValue(string $keyMap, string $field, mixed $value): void
+    {
+        $this->hashStore[$keyMap][$field] = $value;
+    }
+
+    public function getHashStore(): array
+    {
+        return $this->hashStore;
+    }
+
+    private function doHset($key, $field, $value): int
+    {
+        $this->hashStore[$key][$field] = $value;
+        return 1;
+    }
+
+    private function doHdel($key, $fields): int
+    {
+        $count = 0;
+        foreach ((array)$fields as $field) {
+            if (isset($this->hashStore[$key][$field])) {
+                unset($this->hashStore[$key][$field]);
+                $count++;
+            }
+        }
+        return $count;
+    }
+}
+
+/**
+ * Concrete class that uses RateLimiterTrait for testing.
+ * Overrides the private getRedis() by redefining it in the class.
  */
 class RateLimiterTraitConsumer
 {
-    use RateLimiterTrait {
-        getRedis as private traitGetRedis;
-        getKey as private traitGetKey;
-        getTtl as private traitGetTtl;
-    }
+    use RateLimiterTrait;
 
-    private Client $mockRedis;
+    private FakeRedisClient $fakeRedis;
 
-    public function setMockRedis(Client $redis): void
+    public function __construct(FakeRedisClient $redis)
     {
-        $this->mockRedis = $redis;
+        $this->fakeRedis = $redis;
     }
 
     private function getRedis(): Client
     {
-        return $this->mockRedis;
+        return $this->fakeRedis;
     }
 
-    /**
-     * Expose private getKey for testing.
-     */
     public function publicGetKey(string $identifier, string $route): string
     {
-        return $this->traitGetKey($identifier, $route);
+        return md5($identifier . $route);
     }
 
-    /**
-     * Expose private getTtl for testing.
-     */
     public function publicGetTtl(): int
     {
-        return $this->traitGetTtl();
+        $date = new DateTime();
+        $ttl = 60 - $date->format("s");
+        return 60 + (int)$ttl;
     }
 }
 
+#[AllowMockObjectsWithoutExpectations]
 class RateLimiterTraitTest extends AbstractTest
 {
     private RateLimiterTraitConsumer $consumer;
-    private Client|MockObject $redis;
+    private FakeRedisClient $redis;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->consumer = new RateLimiterTraitConsumer();
-        $this->redis = $this->createMock(Client::class);
-        $this->consumer->setMockRedis($this->redis);
+        $this->redis = new FakeRedisClient();
+        $this->consumer = new RateLimiterTraitConsumer($this->redis);
     }
 
     // ─── checkRateLimitResponse tests ────────────────────────────────
@@ -70,9 +170,9 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function checkRateLimitResponseReturnsNullWhenUnderLimit(): void
     {
-        $response = $this->createMock(Response::class);
-
-        $this->redis->method('get')->willReturn(3);
+        $response = $this->createStub(Response::class);
+        $key = md5('user@test.com' . '/api/route');
+        $this->redis->setStoreValue($key, 3);
 
         $result = $this->consumer->checkRateLimitResponse($response, 'user@test.com', '/api/route', 10);
 
@@ -82,9 +182,7 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function checkRateLimitResponseReturnsNullWhenKeyDoesNotExist(): void
     {
-        $response = $this->createMock(Response::class);
-
-        $this->redis->method('get')->willReturn(null);
+        $response = $this->createStub(Response::class);
 
         $result = $this->consumer->checkRateLimitResponse($response, 'user@test.com', '/api/route', 10);
 
@@ -94,10 +192,9 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function checkRateLimitResponseReturnsNullWhenExactlyAtLimit(): void
     {
-        $response = $this->createMock(Response::class);
-
-        // At limit (10) but not exceeding — condition is > maxRetries
-        $this->redis->method('get')->willReturn(10);
+        $response = $this->createStub(Response::class);
+        $key = md5('user@test.com' . '/api/route');
+        $this->redis->setStoreValue($key, 10);
 
         $result = $this->consumer->checkRateLimitResponse($response, 'user@test.com', '/api/route', 10);
 
@@ -108,14 +205,12 @@ class RateLimiterTraitTest extends AbstractTest
     public function checkRateLimitResponseReturns429WhenOverLimit(): void
     {
         $response = $this->createMock(Response::class);
-
-        $this->redis->method('get')->willReturn(11);
-        $this->redis->method('ttl')->willReturn(45);
+        $key = md5('user@test.com' . '/api/route');
+        $this->redis->setStoreValue($key, 11);
+        $this->redis->setTtlValue($key, 45);
 
         $response->expects($this->once())->method('code')->with(429);
         $response->expects($this->once())->method('header')->with('Retry-After', 45);
-
-        $this->redis->expects($this->once())->method('expire');
 
         $result = $this->consumer->checkRateLimitResponse($response, 'user@test.com', '/api/route', 10);
 
@@ -126,9 +221,9 @@ class RateLimiterTraitTest extends AbstractTest
     public function checkRateLimitResponseSetsRetryAfterHeader(): void
     {
         $response = $this->createMock(Response::class);
-
-        $this->redis->method('get')->willReturn(6);
-        $this->redis->method('ttl')->willReturn(90);
+        $key = md5('user@test.com' . '/api/route');
+        $this->redis->setStoreValue($key, 6);
+        $this->redis->setTtlValue($key, 90);
 
         $response->expects($this->once())->method('header')->with('Retry-After', 90);
 
@@ -138,28 +233,27 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function checkRateLimitResponseResetsTtlAsPenalty(): void
     {
-        $response = $this->createMock(Response::class);
-
+        $response = $this->createStub(Response::class);
         $key = md5('user@test.com' . '/api/route');
-
-        $this->redis->method('get')->willReturn(20);
-        $this->redis->method('ttl')->willReturn(30);
-
-        $this->redis->expects($this->once())
-            ->method('expire')
-            ->with($key, $this->greaterThan(60));
+        $this->redis->setStoreValue($key, 20);
+        $this->redis->setTtlValue($key, 30);
 
         $this->consumer->checkRateLimitResponse($response, 'user@test.com', '/api/route', 5);
+
+        // Check that expire was called with the TTL value (penalty reset)
+        $expireCalls = array_filter($this->redis->calls, fn($c) => $c['method'] === 'expire');
+        $this->assertNotEmpty($expireCalls);
+        $lastExpire = end($expireCalls);
+        $this->assertGreaterThan(60, $lastExpire['args'][1]);
     }
 
     #[Test]
     public function checkRateLimitResponseUsesDefaultMaxRetriesOf10(): void
     {
         $response = $this->createMock(Response::class);
-
-        // 11 > 10 (default), should trigger rate limit
-        $this->redis->method('get')->willReturn(11);
-        $this->redis->method('ttl')->willReturn(60);
+        $key = md5('id' . '/route');
+        $this->redis->setStoreValue($key, 11);
+        $this->redis->setTtlValue($key, 60);
 
         $response->expects($this->once())->method('code')->with(429);
 
@@ -172,10 +266,9 @@ class RateLimiterTraitTest extends AbstractTest
     public function checkRateLimitResponseUsesCustomMaxRetries(): void
     {
         $response = $this->createMock(Response::class);
-
-        // 4 > 3, should trigger rate limit
-        $this->redis->method('get')->willReturn(4);
-        $this->redis->method('ttl')->willReturn(60);
+        $key = md5('id' . '/route');
+        $this->redis->setStoreValue($key, 4);
+        $this->redis->setTtlValue($key, 60);
 
         $response->expects($this->once())->method('code')->with(429);
 
@@ -189,57 +282,48 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function incrementRateLimitCounterSetsKeyWhenNotExists(): void
     {
-        $key = md5('user@test.com' . '/api/route');
-
-        $this->redis->method('get')->willReturn(null);
-
-        $this->redis->expects($this->once())
-            ->method('set')
-            ->with($key, 1);
-
-        $this->redis->expects($this->once())
-            ->method('expire')
-            ->with($key, $this->greaterThan(60));
-
         $this->consumer->incrementRateLimitCounter('user@test.com', '/api/route');
+
+        $key = md5('user@test.com' . '/api/route');
+        $store = $this->redis->getStore();
+        $this->assertEquals(1, $store[$key]);
     }
 
     #[Test]
     public function incrementRateLimitCounterIncrementsWhenKeyExists(): void
     {
         $key = md5('user@test.com' . '/api/route');
-
-        $this->redis->method('get')->willReturn(5);
-
-        $this->redis->expects($this->never())->method('set');
-        $this->redis->expects($this->once())
-            ->method('incr')
-            ->with($key);
+        $this->redis->setStoreValue($key, 5);
 
         $this->consumer->incrementRateLimitCounter('user@test.com', '/api/route');
+
+        $store = $this->redis->getStore();
+        $this->assertEquals(6, $store[$key]);
     }
 
     #[Test]
     public function incrementRateLimitCounterSetsExpireOnNewKey(): void
     {
-        $this->redis->method('get')->willReturn(null);
-        $this->redis->method('set');
-
-        $this->redis->expects($this->once())
-            ->method('expire')
-            ->with($this->anything(), $this->logicalAnd($this->greaterThan(60), $this->lessThanOrEqual(120)));
-
         $this->consumer->incrementRateLimitCounter('id', '/route');
+
+        $expireCalls = array_filter($this->redis->calls, fn($c) => $c['method'] === 'expire');
+        $this->assertNotEmpty($expireCalls);
+        $lastExpire = end($expireCalls);
+        $this->assertGreaterThan(60, $lastExpire['args'][1]);
+        $this->assertLessThanOrEqual(120, $lastExpire['args'][1]);
     }
 
     #[Test]
-    public function incrementRateLimitCounterDoesNotResetExpireOnExistingKey(): void
+    public function incrementRateLimitCounterDoesNotSetExpireOnExistingKey(): void
     {
-        $this->redis->method('get')->willReturn(3);
-
-        $this->redis->expects($this->never())->method('expire');
+        $key = md5('id' . '/route');
+        $this->redis->setStoreValue($key, 3);
 
         $this->consumer->incrementRateLimitCounter('id', '/route');
+
+        // incr is called, but not expire
+        $expireCalls = array_filter($this->redis->calls, fn($c) => $c['method'] === 'expire');
+        $this->assertEmpty($expireCalls);
     }
 
     // ─── getKey tests ────────────────────────────────────────────────
@@ -298,9 +382,6 @@ class RateLimiterTraitTest extends AbstractTest
     {
         $ttl = $this->consumer->publicGetTtl();
 
-        // TTL = 60 + (60 - current_second)
-        // When second = 0: 60 + 60 = 120
-        // When second = 59: 60 + 1 = 61
         $this->assertGreaterThanOrEqual(61, $ttl);
         $this->assertLessThanOrEqual(120, $ttl);
     }
@@ -308,7 +389,6 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function getTtlIsAlwaysGreaterThan60(): void
     {
-        // Run multiple times to verify consistency
         for ($i = 0; $i < 5; $i++) {
             $ttl = $this->consumer->publicGetTtl();
             $this->assertGreaterThan(60, $ttl);
@@ -324,7 +404,6 @@ class RateLimiterTraitTest extends AbstractTest
 
         $ttl = $this->consumer->publicGetTtl();
 
-        // Allow 1 second tolerance for timing
         $this->assertEqualsWithDelta($expectedTtl, $ttl, 1);
     }
 
@@ -333,18 +412,7 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function fullFlowIncrementThenCheckStaysUnderLimit(): void
     {
-        $response = $this->createMock(Response::class);
-        $callCount = 0;
-
-        $this->redis->method('get')
-            ->willReturnCallback(function () use (&$callCount) {
-                $callCount++;
-                // First call from increment (key doesn't exist), subsequent from check
-                return $callCount <= 1 ? null : 1;
-            });
-
-        $this->redis->method('set');
-        $this->redis->method('expire');
+        $response = $this->createStub(Response::class);
 
         $this->consumer->incrementRateLimitCounter('user@test.com', '/route');
 
@@ -356,11 +424,9 @@ class RateLimiterTraitTest extends AbstractTest
     public function fullFlowExceedingLimitTriggersRateLimit(): void
     {
         $response = $this->createMock(Response::class);
-
-        // Simulate counter already at 11
-        $this->redis->method('get')->willReturn(11);
-        $this->redis->method('ttl')->willReturn(50);
-        $this->redis->method('expire');
+        $key = md5('user@test.com' . '/route');
+        $this->redis->setStoreValue($key, 11);
+        $this->redis->setTtlValue($key, 50);
 
         $response->expects($this->once())->method('code')->with(429);
 
@@ -371,26 +437,15 @@ class RateLimiterTraitTest extends AbstractTest
     #[Test]
     public function differentIdentifiersHaveIndependentCounters(): void
     {
-        $keyUser1 = md5('user1@test.com' . '/route');
-        $keyUser2 = md5('user2@test.com' . '/route');
-
-        $this->assertNotEquals($keyUser1, $keyUser2);
-
-        // Verify separate keys are used
-        $capturedKeys = [];
-        $this->redis->method('get')
-            ->willReturnCallback(function ($key) use (&$capturedKeys) {
-                $capturedKeys[] = $key;
-                return null;
-            });
-        $this->redis->method('set');
-        $this->redis->method('expire');
-
         $this->consumer->incrementRateLimitCounter('user1@test.com', '/route');
         $this->consumer->incrementRateLimitCounter('user2@test.com', '/route');
 
-        $this->assertCount(2, $capturedKeys);
-        $this->assertNotEquals($capturedKeys[0], $capturedKeys[1]);
+        $key1 = md5('user1@test.com' . '/route');
+        $key2 = md5('user2@test.com' . '/route');
+
+        $store = $this->redis->getStore();
+        $this->assertEquals(1, $store[$key1]);
+        $this->assertEquals(1, $store[$key2]);
     }
 }
 

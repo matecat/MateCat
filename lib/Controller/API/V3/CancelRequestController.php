@@ -19,6 +19,7 @@ use Model\DataAccess\DaoCacheTrait;
 use Model\Exceptions\NotFoundException;
 use Model\Segments\SegmentMetadataDao;
 use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\Utils;
 
@@ -59,7 +60,6 @@ class CancelRequestController extends KleinController
 
         if ($id_job === false || $id_segment === false) {
             $this->response->code(400);
-            $this->response->header('Content-Type', 'application/json');
             $this->response->json([
                 'errors' => [
                     [
@@ -153,7 +153,7 @@ class CancelRequestController extends KleinController
         }
 
         // 3. check segment translation
-        $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
+        $segmentTranslation = $this->findSegmentTranslation($id_segment, $id_job);
 
         if (empty($segmentTranslation)) {
             $this->incrementRateLimitCounter($userEmail, $route);
@@ -193,5 +193,16 @@ class CancelRequestController extends KleinController
 
         $this->incrementRateLimitCounter($userEmail, $route);
         $this->incrementRateLimitCounter($userIp, $route);
+    }
+
+    /**
+     * @param int $id_segment
+     * @param int $id_job
+     *
+     * @return ?SegmentTranslationStruct
+     */
+    protected function findSegmentTranslation(int $id_segment, int $id_job): ?SegmentTranslationStruct
+    {
+        return SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
     }
 }

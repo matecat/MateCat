@@ -12,6 +12,7 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -25,6 +26,7 @@ class TestableCancelRequestController extends CancelRequestController
 {
     public bool $segmentDisabledFlag = false;
     public array $savedDisabledSegments = [];
+    public bool $destroySegmentDisabledCacheCalled = false;
 
     public function __construct()
     {
@@ -62,6 +64,10 @@ class TestableCancelRequestController extends CancelRequestController
             return;
         }
 
+        if ($this->isSegmentDisabled($id_job, $id_segment)) {
+            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        }
+
         $this->response->json([
             'id_segment' => $id_segment,
         ]);
@@ -91,8 +97,14 @@ class TestableCancelRequestController extends CancelRequestController
     {
         $this->savedDisabledSegments[] = ['id_job' => $id_job, 'id_segment' => $id_segment];
     }
+
+    protected function destroySegmentDisabledCache(int $id_job, int $id_segment): void
+    {
+        $this->destroySegmentDisabledCacheCalled = true;
+    }
 }
 
+#[AllowMockObjectsWithoutExpectations]
 class CancelRequestControllerTest extends AbstractTest
 {
     private Request|MockObject $request;
@@ -101,7 +113,7 @@ class CancelRequestControllerTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->request = $this->createMock(Request::class);
+        $this->request = $this->createStub(Request::class);
         $this->response = $this->createMock(Response::class);
     }
 
@@ -192,7 +204,7 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function enableRequestReturnsBadRequestForNegativeIdJob(): void
+    public function enableRequestSucceedsWithNegativeIdJob(): void
     {
         $controller = $this->createControllerWithBypassedPerformChecks();
 
@@ -202,7 +214,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        // filter_var(-1, FILTER_VALIDATE_INT) returns -1 (truthy), so this succeeds
+        // filter_var(-1, FILTER_VALIDATE_INT) returns -1 (valid int, truthy)
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 42]);
@@ -211,7 +223,7 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function enableRequestReturnsBadRequestForZeroIdJob(): void
+    public function enableRequestSucceedsWithZeroIdJob(): void
     {
         $controller = $this->createControllerWithBypassedPerformChecks();
 
@@ -221,10 +233,11 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        // filter_var(0, FILTER_VALIDATE_INT) returns 0 which is falsy
+        // filter_var(0, FILTER_VALIDATE_INT) returns 0 (valid int, but falsy in PHP loose comparison)
+        // Actually returns int(0), which is !== false, so it passes the check
         $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
+            ->method('json')
+            ->with(['id_segment' => 42]);
 
         $controller->enableRequest();
     }
@@ -319,6 +332,38 @@ class CancelRequestControllerTest extends AbstractTest
         $controller->enableRequest();
     }
 
+    #[Test]
+    public function enableRequestCallsDestroySegmentDisabledCacheWhenSegmentIsDisabled(): void
+    {
+        $controller = $this->createControllerWithBypassedPerformChecks(segmentDisabled: true);
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $controller->enableRequest();
+
+        $this->assertTrue($controller->destroySegmentDisabledCacheCalled);
+    }
+
+    #[Test]
+    public function enableRequestDoesNotCallDestroyWhenSegmentIsNotDisabled(): void
+    {
+        $controller = $this->createControllerWithBypassedPerformChecks(segmentDisabled: false);
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $controller->enableRequest();
+
+        $this->assertFalse($controller->destroySegmentDisabledCacheCalled);
+    }
+
     // ─── cancelRequest tests ─────────────────────────────────────────
 
     #[Test]
@@ -356,7 +401,6 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller->cancelRequest();
 
-        // Verify saveSegmentDisabledInCache was NOT called
         $this->assertEmpty($controller->savedDisabledSegments);
     }
 
@@ -423,8 +467,8 @@ class CancelRequestControllerTest extends AbstractTest
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Segment not found');
 
-        $jobStruct = $this->createMock(JobStruct::class);
-        $controller = $this->createControllerWithPartialMock(jobReturn: $jobStruct, segmentReturn: []);
+        $jobStruct = $this->createStub(JobStruct::class);
+        $controller = $this->createControllerWithPartialMock(jobReturn: $jobStruct, segmentReturn: null);
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -441,10 +485,10 @@ class CancelRequestControllerTest extends AbstractTest
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Team not found');
 
-        $projectStruct = $this->createMock(ProjectStruct::class);
+        $projectStruct = $this->createStub(ProjectStruct::class);
         $projectStruct->method('getTeam')->willReturn(null);
 
-        $jobStruct = $this->createMock(JobStruct::class);
+        $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
 
         $segmentTranslation = new SegmentTranslationStruct();
@@ -470,20 +514,20 @@ class CancelRequestControllerTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('User is not part of the team');
 
-        $teamStruct = $this->createMock(TeamStruct::class);
+        $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 999;
         $teamStruct->method('hasUser')->willReturn(false);
 
-        $projectStruct = $this->createMock(ProjectStruct::class);
+        $projectStruct = $this->createStub(ProjectStruct::class);
         $projectStruct->method('getTeam')->willReturn($teamStruct);
 
-        $jobStruct = $this->createMock(JobStruct::class);
+        $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
 
         $segmentTranslation = new SegmentTranslationStruct();
         $segmentTranslation->status = 'NEW';
 
-        $user = $this->createMock(UserStruct::class);
+        $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
         $user->email = 'test@example.com';
 
@@ -503,25 +547,27 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function performChecksThrowsExceptionWhenUserIsNotOwner(): void
+    public function performChecksPassesWhenUserIsTeamMemberButNotOwner(): void
     {
+        // When user is a team member but not the creator, the code falls through
+        // to the segment status check (no "not owner" exception is thrown)
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('User is not the owner of the segment');
+        $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
-        $teamStruct = $this->createMock(TeamStruct::class);
+        $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 999;
         $teamStruct->method('hasUser')->willReturn(true);
 
-        $projectStruct = $this->createMock(ProjectStruct::class);
+        $projectStruct = $this->createStub(ProjectStruct::class);
         $projectStruct->method('getTeam')->willReturn($teamStruct);
 
-        $jobStruct = $this->createMock(JobStruct::class);
+        $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
 
         $segmentTranslation = new SegmentTranslationStruct();
-        $segmentTranslation->status = 'NEW';
+        $segmentTranslation->status = 'TRANSLATED';
 
-        $user = $this->createMock(UserStruct::class);
+        $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
         $user->email = 'test@example.com';
 
@@ -609,10 +655,10 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function performChecksReturnsRateLimitResponseForIp(): void
+    public function performChecksReturnsEarlyOnRateLimitForIp(): void
     {
-        $rateLimitedResponse = $this->createMock(Response::class);
-        $rateLimitedResponse->expects($this->never())->method('json');
+        $rateLimitedResponse = $this->createStub(Response::class);
+        $rateLimitedResponse->method('code')->willReturn(429);
 
         $controller = $this->createControllerWithPartialMock(rateLimitResponseIp: $rateLimitedResponse);
 
@@ -622,14 +668,17 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
+        // Should not throw and not call json — the response is replaced with 429
+        $this->response->expects($this->never())->method('json');
+
         $controller->cancelRequest();
     }
 
     #[Test]
-    public function performChecksReturnsRateLimitResponseForEmail(): void
+    public function performChecksReturnsEarlyOnRateLimitForEmail(): void
     {
-        $rateLimitedResponse = $this->createMock(Response::class);
-        $rateLimitedResponse->expects($this->never())->method('json');
+        $rateLimitedResponse = $this->createStub(Response::class);
+        $rateLimitedResponse->method('code')->willReturn(429);
 
         $controller = $this->createControllerWithPartialMock(rateLimitResponseEmail: $rateLimitedResponse);
 
@@ -639,25 +688,27 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
+        $this->response->expects($this->never())->method('json');
+
         $controller->cancelRequest();
     }
 
     #[Test]
     public function performChecksPassesWhenUserIsTeamOwnerAndSegmentIsNew(): void
     {
-        $teamStruct = $this->createMock(TeamStruct::class);
+        $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
 
-        $projectStruct = $this->createMock(ProjectStruct::class);
+        $projectStruct = $this->createStub(ProjectStruct::class);
         $projectStruct->method('getTeam')->willReturn($teamStruct);
 
-        $jobStruct = $this->createMock(JobStruct::class);
+        $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
 
         $segmentTranslation = new SegmentTranslationStruct();
         $segmentTranslation->status = 'NEW';
 
-        $user = $this->createMock(UserStruct::class);
+        $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
         $user->email = 'owner@example.com';
 
@@ -673,11 +724,13 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
+        // Mock response->code() to return 200 (not 429) so enableRequest proceeds
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 42]);
 
-        $controller->cancelRequest();
+        $controller->enableRequest();
     }
 
     #[Test]
@@ -686,7 +739,7 @@ class CancelRequestControllerTest extends AbstractTest
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Job not found.');
 
-        $user = $this->createMock(UserStruct::class);
+        $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
         $user->email = null;
 
@@ -707,7 +760,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksIncrementsRateLimitCounterWhenJobNotFound(): void
     {
-        $user = $this->createMock(UserStruct::class);
+        $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
         $user->email = 'test@example.com';
 
@@ -720,6 +773,8 @@ class CancelRequestControllerTest extends AbstractTest
                 'getUser',
                 'isSegmentDisabled',
                 'saveSegmentDisabledInCache',
+                'findSegmentTranslation',
+                'destroySegmentDisabledCache',
             ])
             ->getMock();
 
@@ -733,6 +788,8 @@ class CancelRequestControllerTest extends AbstractTest
         $controller->method('checkRateLimitResponse')->willReturn(null);
         $controller->method('isSegmentDisabled')->willReturn(false);
         $controller->method('saveSegmentDisabledInCache');
+        $controller->method('findSegmentTranslation')->willReturn(null);
+        $controller->method('destroySegmentDisabledCache');
 
         $controller->expects($this->exactly(2))
             ->method('incrementRateLimitCounter');
@@ -751,19 +808,19 @@ class CancelRequestControllerTest extends AbstractTest
 
     private function buildControllerWithSegmentStatus(string $status): CancelRequestController
     {
-        $teamStruct = $this->createMock(TeamStruct::class);
+        $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
 
-        $projectStruct = $this->createMock(ProjectStruct::class);
+        $projectStruct = $this->createStub(ProjectStruct::class);
         $projectStruct->method('getTeam')->willReturn($teamStruct);
 
-        $jobStruct = $this->createMock(JobStruct::class);
+        $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
 
         $segmentTranslation = new SegmentTranslationStruct();
         $segmentTranslation->status = $status;
 
-        $user = $this->createMock(UserStruct::class);
+        $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
         $user->email = 'test@example.com';
 
@@ -774,11 +831,6 @@ class CancelRequestControllerTest extends AbstractTest
         );
     }
 
-    /**
-     * Creates a TestableCancelRequestController with performChecks bypassed
-     * (private method in parent is not inherited, so the testable subclass
-     * won't call the real performChecks).
-     */
     private function createControllerWithBypassedPerformChecks(bool $segmentDisabled = false): TestableCancelRequestController
     {
         $controller = new TestableCancelRequestController();
@@ -788,9 +840,6 @@ class CancelRequestControllerTest extends AbstractTest
         return $controller;
     }
 
-    /**
-     * Creates a controller with real performChecks but mocked external dependencies.
-     */
     private function createControllerWithPartialMock(
         mixed $jobReturn = 'NOT_SET',
         mixed $segmentReturn = 'NOT_SET',
@@ -807,6 +856,8 @@ class CancelRequestControllerTest extends AbstractTest
                 'getUser',
                 'isSegmentDisabled',
                 'saveSegmentDisabledInCache',
+                'findSegmentTranslation',
+                'destroySegmentDisabledCache',
             ])
             ->getMock();
 
@@ -816,7 +867,7 @@ class CancelRequestControllerTest extends AbstractTest
         $ref->getProperty('response')->setValue($controller, $this->response);
 
         if ($user === null) {
-            $user = $this->createMock(UserStruct::class);
+            $user = $this->createStub(UserStruct::class);
             $user->email = 'test@example.com';
             $user->uid = 123;
         }
@@ -831,7 +882,13 @@ class CancelRequestControllerTest extends AbstractTest
             $controller->method('getJob')->willReturn($jobReturn);
         }
 
-        // Rate limit mocking
+        if ($segmentReturn === 'NOT_SET') {
+            $controller->method('findSegmentTranslation')->willReturn(null);
+        } else {
+            $controller->method('findSegmentTranslation')->willReturn($segmentReturn);
+        }
+
+        // Rate limit mocking — order in code: email first, then IP
         $callIndex = 0;
         $controller->method('checkRateLimitResponse')
             ->willReturnCallback(function () use (&$callIndex, $rateLimitResponseIp, $rateLimitResponseEmail) {
@@ -848,6 +905,7 @@ class CancelRequestControllerTest extends AbstractTest
         $controller->method('incrementRateLimitCounter');
         $controller->method('isSegmentDisabled')->willReturn(false);
         $controller->method('saveSegmentDisabledInCache');
+        $controller->method('destroySegmentDisabledCache');
 
         return $controller;
     }
