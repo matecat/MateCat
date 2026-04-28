@@ -4,6 +4,7 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\ConstantsInterface;
@@ -29,6 +30,7 @@ use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController
 {
+    use SegmentDisabledTrait;
 
     const int MAX_PER_PAGE = 200;
 
@@ -346,6 +348,8 @@ class SegmentAnalysisController extends KleinController
             $metadataDao->getProjectStaticSubfilteringCustomHandlers($jobStruct->id_project)
         );
 
+        $disabled = $this->isSegmentDisabled($segmentForAnalysis->id_job, $segmentForAnalysis->id);
+
         return [
             'id_segment' => (int)$segmentForAnalysis->id,
             'id_chunk' => (int)$segmentForAnalysis->id_job,
@@ -366,6 +370,7 @@ class SegmentAnalysisController extends KleinController
             'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
             'status' => $this->getStatusObject($segmentForAnalysis),
             'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date(DATE_ATOM, strtotime($segmentForAnalysis->last_edit)) : null,
+            'disabled' => $disabled,
         ];
     }
 

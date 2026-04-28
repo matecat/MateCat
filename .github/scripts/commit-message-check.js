@@ -103,10 +103,21 @@ function validateCommitMessage(message, {requireEmoji = true} = {}) {
     const hasEmoji = emojiType !== null;
 
     if (requireEmoji && !hasEmoji) {
-        const validList = Object.entries(EMOJI_TYPE_MAP)
-            .map(([e, t]) => `${e} ${t}`)
-            .join(', ');
-        errors.push(`Unknown emoji "${firstToken}". Valid: ${validList}`);
+        // Check if the token is a known emoji glued to the type (missing space)
+        const gluedEmoji = Object.keys(EMOJI_TYPE_MAP).find(
+            (e) => firstToken.startsWith(e) || firstToken.startsWith(stripVS16(e)),
+        );
+        if (gluedEmoji) {
+            const expectedType = EMOJI_TYPE_MAP[gluedEmoji];
+            errors.push(
+                `Missing space between emoji and type. Got "${firstToken}" — expected "${gluedEmoji} ${expectedType}..."`,
+            );
+        } else {
+            const validList = Object.entries(EMOJI_TYPE_MAP)
+                .map(([e, t]) => `${e} ${t}`)
+                .join(', ');
+            errors.push(`Unknown emoji "${firstToken}". Valid: ${validList}`);
+        }
     }
 
     const textToParse = hasEmoji ? rest : subject;

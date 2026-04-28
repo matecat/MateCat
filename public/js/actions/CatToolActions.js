@@ -358,7 +358,17 @@ let CatToolActions = {
         const codeInt = parseInt(error.code)
 
         if (operation === 'setTranslation') {
-          if (codeInt !== -10) {
+          if (codeInt === -5) {
+            ModalsActions.showModalComponent(
+              AlertModal,
+              {
+                text: 'This segment has been disabled by the project owner.<br />Refresh the page to update segment status.',
+                buttonText: 'Refresh page',
+                successCallback: () => CatToolActions.onRender(),
+              },
+              'Segment disabled',
+            )
+          } else if (codeInt !== -10) {
             ModalsActions.showModalComponent(
               MODAL_KEY.ALERT,
               {

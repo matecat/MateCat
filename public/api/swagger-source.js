@@ -918,6 +918,98 @@ var spec = {
         },
       },
     },
+    '/api/v3/jobs/{id_job}/{password}/segment/disable/{id_segment}': {
+      post: {
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description:
+                'The id of the parent job of the segment you intend to disable',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description:
+                'The password of the parent job of the segment you intend to disable',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_segment',
+            in: 'path',
+            description:
+                'The id of the segment you intend to disable',
+            required: true,
+            type: 'integer',
+          }
+        ],
+        responses: {
+          200: {
+            schema: {
+              type: 'object',
+              properties: {
+                id_segment: {
+                  type: 'integer',
+                  example: 123,
+                }
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
+    },
+    '/api/v3/jobs/{id_job}/{password}/segment/enable/{id_segment}': {
+      post: {
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description:
+                'The id of the parent job of the segment you intend to enable',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description:
+                'The password of the parent job of the segment you intend to enable',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_segment',
+            in: 'path',
+            description:
+                'The id of the segment you intend to enable',
+            required: true,
+            type: 'integer',
+          }
+        ],
+        responses: {
+          200: {
+            schema: {
+              type: 'object',
+              properties: {
+                id_segment: {
+                  type: 'integer',
+                  example: 123,
+                }
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
+    },
     '/api/v3/projects/{id_project}/{password}/r2': {
       post: {
         tags: ['Project'],

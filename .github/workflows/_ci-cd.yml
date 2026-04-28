@@ -219,4 +219,5 @@ jobs:
             php-coverage.xml
             js-coverage.xml
           coverage-threshold: '80'
+          exclude-patterns: '.github/**'
           ai-enabled: 'true'

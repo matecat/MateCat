@@ -601,7 +601,8 @@ const SegmentActions = {
       })
     }
     if (TextUtils.justSelecting('readonly')) return
-    let locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
+
+    const locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
     if (locked) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,
@@ -615,6 +616,23 @@ const SegmentActions = {
       )
       return
     }
+
+    const isTranslationDisabled = segment?.metadata?.some(
+      ({meta_key, meta_value}) =>
+        meta_key === 'translation_disabled' && meta_value === '1',
+    )
+
+    if (isTranslationDisabled) {
+      ModalsActions.showModalComponent(
+        MODAL_KEY.ALERT,
+        {
+          text: "This segment has been disabled by the project owner, so it cannot be translated.",
+        },
+        'Segment disabled',
+      )
+      return
+    }
+
     ModalsActions.showModalComponent(MODAL_KEY.ALERT, {
       text: SegmentActions.messageForClickOnReadonly(),
     })
