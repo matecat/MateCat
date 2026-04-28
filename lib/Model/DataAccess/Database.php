@@ -190,6 +190,8 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @throws \Throwable Re-throws the original exception after rollback
      */
     public function transaction(callable $callback): mixed
     {

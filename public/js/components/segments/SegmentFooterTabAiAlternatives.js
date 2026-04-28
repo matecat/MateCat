@@ -290,8 +290,14 @@ export const SegmentFooterTabAiAlternatives = ({
         )
       } else {
         setAlternatives({
-          error: 'Something went wrong. Please try again in a moment.',
-          retryCallback: () => requestAlternatives({text: selectedText}),
+          ...(data.error_code === 1
+            ? {
+                error: `No alternative translations found for: ${selectedText}`,
+              }
+            : {
+                error: 'Something went wrong. Please try again in a moment.',
+                retryCallback: () => requestAlternatives({text: selectedText}),
+              }),
         })
         //Track Event
         const message = {
@@ -382,16 +388,17 @@ export const SegmentFooterTabAiAlternatives = ({
         <div className="ai-feature-content">
           <div className="content">
             <p>{alternatives.error}</p>
-            {alternatives.error !== 'No alternative translations found.' && (
-              <Button
-                className="ai-feature-button-retry"
-                type={BUTTON_TYPE.DEFAULT}
-                mode={BUTTON_MODE.OUTLINE}
-                onClick={alternatives.retryCallback}
-              >
-                Retry
-              </Button>
-            )}
+            {alternatives.has_error &&
+              typeof alternatives.retryCallback === 'function' && (
+                <Button
+                  className="ai-feature-button-retry"
+                  type={BUTTON_TYPE.DEFAULT}
+                  mode={BUTTON_MODE.OUTLINE}
+                  onClick={alternatives.retryCallback}
+                >
+                  Retry
+                </Button>
+              )}
           </div>
         </div>
       ) : (
