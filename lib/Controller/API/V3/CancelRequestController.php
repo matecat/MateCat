@@ -45,6 +45,7 @@ class CancelRequestController extends KleinController
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
+
         if ($this->response->code() === 429) {
             return;
         }
@@ -91,6 +92,10 @@ class CancelRequestController extends KleinController
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
+
+        if ($this->response->code() === 429) {
+            return;
+        }
 
         // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
         // setting the cache to avoid multiple disable requests for the same segment in a short time frame
