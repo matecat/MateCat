@@ -45,6 +45,9 @@ class CancelRequestController extends KleinController
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
+        if ($this->response->code() === 429) {
+            return;
+        }
 
         $rawIdJob = $this->request->param('id_job');
         $password = $this->request->param('password');
