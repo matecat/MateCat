@@ -920,6 +920,9 @@ var spec = {
     },
     '/api/v3/jobs/{id_job}/{password}/segment/disable/{id_segment}': {
       post: {
+        tags: ['Job'],
+        summary: 'Disable a segment',
+        description: 'Disables a segment in a job, preventing it from being translated. The segment must be in "new" status. The authenticated user must be the owner of the project or a member of the team. Rate limiting is applied (max 5 requests per route).',
         parameters: [
           {
             name: 'id_job',
@@ -966,6 +969,9 @@ var spec = {
     },
     '/api/v3/jobs/{id_job}/{password}/segment/enable/{id_segment}': {
       post: {
+        tags: ['Job'],
+        summary: 'Enable a segment',
+        description: 'Re-enables a previously disabled segment in a job, allowing it to be translated again. The authenticated user must be the owner of the project or a member of the team. Rate limiting is applied (max 5 requests per route).',
         parameters: [
           {
             name: 'id_job',
