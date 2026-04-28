@@ -5,5 +5,5 @@ export const getPrintableFileSize = (filesizeInBytes) => {
     filesizeInBytes = filesizeInBytes / 1024
     ext = ' MB'
   }
-  return Math.round(filesizeInBytes * 100, 2) / 100 + ext
+  return Math.round(filesizeInBytes * 100) / 100 + ext
 }
