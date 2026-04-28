@@ -39,13 +39,6 @@ class CancelRequestController extends KleinController
      */
     public function enableRequest(): void
     {
-        $id_job = $this->request->param('id_job');
-        $password = $this->request->param('password');
-        $id_segment = $this->request->param('id_segment');
-        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
-
-        $this->performChecks($id_job, $password, $id_segment, $route);
-
         $rawIdJob = $this->request->param('id_job');
         $password = $this->request->param('password');
         $rawIdSegment = $this->request->param('id_segment');
@@ -55,18 +48,25 @@ class CancelRequestController extends KleinController
 
         if ($id_job === false || $id_segment === false) {
             $this->response->code(400);
-            $this->response->header('Content-Type', 'application/json');
-            $this->response->body(json_encode([
+            $this->response->json([
                 'errors' => [
                     [
                         'code' => 400,
                         'message' => 'Invalid id_job or id_segment',
                     ],
                 ],
-            ]));
+            ]);
 
             return;
         }
+
+        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
+        $this->performChecks($id_job, $password, $id_segment, $route);
+
+        if ($this->isSegmentDisabled($id_job, $id_segment)) {
+            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        }
+
         $this->response->json([
             'id_segment' => $id_segment,
         ]);
