@@ -470,7 +470,7 @@ class ProjectManagerModelTest extends TestCase
         $tables = $this->extractTableSequence();
 
         // Expected order: jobs(SELECT), per-job deletes, segment-scoped deletes,
-        // files(SELECT), file-scoped deletes, project-scoped deletes, root deletes
+        // file-scoped deletes, project-scoped deletes, root deletes
         $expected = [
             'jobs',                          // SELECT jobs
             'comments',                      // per-job
@@ -484,8 +484,7 @@ class ProjectManagerModelTest extends TestCase
             'segment_notes',                 // batched
             'segment_original_data',         // batched
             'segments',                      // batched
-            'files',                         // SELECT files
-            'files_parts',                   // per-file
+            'files_parts',                   // subquery DELETE (by id_project via files)
             'files',                         // DELETE files
             'file_references',               // by id_project
             'file_metadata',
@@ -561,9 +560,7 @@ class ProjectManagerModelTest extends TestCase
         // No job-scoped or segment-scoped deletes
         $expected = [
             'jobs',                          // SELECT jobs (returns empty)
-            'files',                         // SELECT files
-            'files_parts',                   // file 5
-            'files_parts',                   // file 8
+            'files_parts',                   // subquery DELETE (by id_project via files)
             'files',                         // DELETE files
             'file_references',
             'file_metadata',
@@ -671,7 +668,7 @@ class ProjectManagerModelTest extends TestCase
         }
     }
 
-    public function testDeleteProjectWithNoFilesSkipsFilePartsDelete(): void
+    public function testDeleteProjectWithNoFilesStillIssuesFilePartsDelete(): void
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
@@ -681,7 +678,7 @@ class ProjectManagerModelTest extends TestCase
         $model->deleteProject(42);
 
         $fpIndices = $this->queryIndicesForTable('files_parts');
-        self::assertEmpty($fpIndices, 'No files_parts DELETE when project has no files');
+        self::assertCount(1, $fpIndices, 'files_parts DELETE always executes (subquery returns 0 rows when no files)');
     }
 
     public function testDeleteProjectWithNonContiguousJobsDoesNotSpanGap(): void

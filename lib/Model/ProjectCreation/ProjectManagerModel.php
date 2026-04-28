@@ -455,14 +455,12 @@ class ProjectManagerModel
     private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs): void
     {
         // --- File-scoped deletions ---
-        $stmt = $conn->prepare("SELECT id FROM files WHERE id_project = :id_project");
+        $stmt = $conn->prepare(
+            "DELETE FROM files_parts WHERE id_file IN (
+                SELECT id FROM files WHERE id_project = :id_project
+            )"
+        );
         $stmt->execute(['id_project' => $idProject]);
-        $fileIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        foreach ($fileIds as $idFile) {
-            $stmt = $conn->prepare("DELETE FROM files_parts WHERE id_file = :id_file");
-            $stmt->execute(['id_file' => $idFile]);
-        }
 
         $stmt = $conn->prepare("DELETE FROM files WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
