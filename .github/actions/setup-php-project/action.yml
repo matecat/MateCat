@@ -1,0 +1,30 @@
+name: Setup PHP Project
+description: Checkout, install PHP with extensions from composer.json, and run composer install
+
+inputs:
+  php-version:
+    description: PHP version to install
+    default: '8.3'
+  token:
+    description: GitHub token for checkout
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ inputs.token }}
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: curl, dom, fileinfo, gd, iconv, intl, libxml, mbstring, openssl, pcntl, pdo, pdo_mysql, posix, redis, simplexml, zip, zlib
+        coverage: none
+        tools: composer
+
+    - name: Install dependencies
+      shell: bash
+      run: composer install --no-interaction --prefer-dist
