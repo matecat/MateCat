@@ -1,7 +1,7 @@
 import {hasDataOriginalTags} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
 import {setSegmentAsTagged} from './segmentDispatchActions'
 import SegmentStore from '../stores/SegmentStore'
-import SegmentUtils from '../utils/segmentUtils'
+import {checkTPEnabled} from '../utils/tagProjectionUtils'
 
 export const disableTPOnSegment = (segmentObj) => {
   var currentSegment = segmentObj
@@ -12,7 +12,7 @@ export const disableTPOnSegment = (segmentObj) => {
 
   var tagProjectionEnabled =
     hasDataOriginalTags(currentSegment.segment) && !currentSegment.tagged
-  if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
+  if (checkTPEnabled() && tagProjectionEnabled) {
     setSegmentAsTagged(currentSegment.sid, currentSegment.id_file)
   }
 }

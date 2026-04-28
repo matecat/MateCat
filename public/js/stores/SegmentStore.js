@@ -45,12 +45,10 @@ import {
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
 
+import {transformTagsToText, removeTagsFromText, checkXliffTagsInText} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {checkTPEnabled, checkCurrentSegmentTPEnabled} from '../utils/tagProjectionUtils'
 // Lazy-loaded to break circular dependencies
-let _SegmentUtils, _DraftMatecatUtils
-const getDraftMatecatUtils = () =>
-  _DraftMatecatUtils ||
-  (_DraftMatecatUtils =
-    require('../components/segments/utils/DraftMatecatUtils').default)
+let _SegmentUtils
 const getSegmentUtils = () =>
   _SegmentUtils || (_SegmentUtils = require('../utils/segmentUtils').default)
 
@@ -173,7 +171,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: false,
             segment: splittedSourceAr[i],
-            decodedSource: getDraftMatecatUtils().transformTagsToText(
+            decodedSource: transformTagsToText(
               segment.segment,
             ),
             segment_hash: segment.segment_hash,
@@ -191,7 +189,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
             decodedTranslation:
-              getDraftMatecatUtils().transformTagsToText(translation),
+              transformTagsToText(translation),
             warning: false,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -240,16 +238,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = segment.translation
-        segment.decodedTranslation = getDraftMatecatUtils().transformTagsToText(
+        segment.decodedTranslation = transformTagsToText(
           segment.translation,
         )
-        segment.decodedSource = getDraftMatecatUtils().transformTagsToText(
+        segment.decodedSource = transformTagsToText(
           segment.segment,
         )
-        segment.updatedSource = getSegmentUtils().checkCurrentSegmentTPEnabled(
+        segment.updatedSource = checkCurrentSegmentTPEnabled(
           segment,
         )
-          ? getDraftMatecatUtils().removeTagsFromText(segment.segment)
+          ? removeTagsFromText(segment.segment)
           : segment.segment
         segment.openComments = false
         segment.openSplit = false
@@ -363,7 +361,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = getDraftMatecatUtils().transformTagsToText(translation)
+    const newTrans = transformTagsToText(translation)
 
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
@@ -1001,11 +999,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
   hasSegmentTagProjectionEnabled: function (segment) {
-    if (getSegmentUtils().checkTPEnabled()) {
+    if (checkTPEnabled()) {
       if (
         (segment.status === 'NEW' || segment.status === 'DRAFT') &&
-        getDraftMatecatUtils().checkXliffTagsInText(segment.segment) &&
-        !getDraftMatecatUtils().checkXliffTagsInText(segment.translation)
+        checkXliffTagsInText(segment.segment) &&
+        !checkXliffTagsInText(segment.translation)
       ) {
         return true
       }

@@ -8,10 +8,10 @@ import {
   setLastSegmentFromLocalStorage,
 } from './segmentLocalStorage'
 
+import OfflineUtils from './offlineUtils'
+
 // Lazy-loaded to break circular dependencies
-let _OfflineUtils, _SegmentActions
-const getOfflineUtils = () =>
-  _OfflineUtils || (_OfflineUtils = require('./offlineUtils').default)
+let _SegmentActions
 const getSegmentActions = () =>
   _SegmentActions ||
   (_SegmentActions = require('../actions/SegmentActions').default)
@@ -179,7 +179,7 @@ const CommonUtils = {
       )
     }
 
-    if (getOfflineUtils().offline) {
+    if (OfflineUtils.offline) {
       if (!checkTranslationTailEmpty()) {
         return say_goodbye(
           'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +

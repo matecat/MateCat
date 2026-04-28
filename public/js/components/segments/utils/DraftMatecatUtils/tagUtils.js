@@ -4,7 +4,32 @@ import {
   tagSignatures,
 } from './tagModel'
 import {Base64} from 'js-base64'
-import TextUtils from '../../../../utils/textUtils'
+// replaceTempTags/restoreTempTags inlined from textUtils to avoid
+// the cycle: SegmentStore → tagUtils → textUtils → commonUtils → SegmentStore
+const replaceTempTags = (text) => {
+  const tags = []
+  const makeid = (len) => {
+    let r = ''
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    for (let i = 0; i < len; i++)
+      r += chars.charAt(Math.floor(Math.random() * chars.length))
+    return r
+  }
+  text = text.replace(
+    /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+    (match) => {
+      const id = makeid(5)
+      tags.push({id, match})
+      return '#_' + id + '_#'
+    },
+  )
+  return {tags, text}
+}
+const restoreTempTags = (tags, text) =>
+  text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
+    const tag = tags.find((item) => item.id === id)
+    return tag ? tag.match : match
+  })
 import {isUndefined} from 'lodash'
 import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
@@ -155,9 +180,9 @@ export const transformTagsToLexiqaText = (text) => {
   )
 
   let textNormalized = text
-  const {tags, text: tempText} = TextUtils.replaceTempTags(text)
+  const {tags, text: tempText} = replaceTempTags(text)
   textNormalized = decodeHtmlEntities(tempText)
-  textNormalized = TextUtils.restoreTempTags(tags, textNormalized)
+  textNormalized = restoreTempTags(tags, textNormalized)
 
   return tagsStruct.reduce(
     (acc, {data}) => {
