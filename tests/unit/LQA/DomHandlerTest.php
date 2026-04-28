@@ -1165,5 +1165,24 @@ class DomHandlerTest extends AbstractTest
         $this->assertCount(1, $srcMap['ph']);
         $this->assertEquals('2', $srcMap['ph'][0]);
     }
+
+    /**
+     * @throws DOMException
+     * @throws Exception
+     */
+    #[Test]
+    public function loadDomsWithNestedPcTags(): void
+    {
+        $source = '<pc id="source1" dataRefStart="source1">To identify who needs to complete the training, refer to the </pc><pc id="source2" dataRefStart="source2"><pc id="1u" type="fmt" subType="m:u">“</pc></pc><pc id="source3" dataRefStart="source3"><pc id="2u" type="fmt" subType="m:u">Learning – Compliance”</pc></pc>';
+        $target = '<pc id="source1" dataRefStart="source1">Para identificar quién tiene que completar la formación, consulta el panel </pc><pc id="source2" dataRefStart="source2"><pc id="1u" type="fmt" subType="m:u">"Learning – Compliance"</pc></pc><pc id="source3" dataRefStart="source3"> (Formación: cumplimiento normativo)<pc id="2u" type="fmt" subType="m:u"></pc></pc>';
+
+        $this->domHandler->loadDoms($source, $target);
+        $this->domHandler->prepareDOMStructures();
+
+        $srcMap = $this->domHandler->getSrcDomMap();
+        $trgMap = $this->domHandler->getTrgDomMap();
+
+        $this->assertEquals($srcMap['elemCount'], $trgMap['elemCount']);
+    }
 }
 
