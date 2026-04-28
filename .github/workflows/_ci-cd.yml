@@ -33,8 +33,9 @@ env:
   # Opt into Node.js 24 for all JavaScript-based actions (checkout@v4, etc.)
   # Remove once actions/checkout@v5 is released with native Node 24 support.
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-permissions:
-  contents: read
+# Permissions are set per-job (not workflow-level) because test-guard
+# requires pull-requests:write while other jobs only need contents:read.
+# The calling workflow (aws_dev.yml / aws_prod.yml) sets the ceiling.
 jobs:
   # ───────────────────────────────────────────────────────────────────────────
   # JOB 1 – tests
@@ -46,6 +47,8 @@ jobs:
     name: Run tests
     runs-on: ubuntu-24.04
     environment: ci_test
+    permissions:
+      contents: read
     steps:
       # Checkout the repo including all git submodules.
       # Falls back to the built-in github.token for fork PRs where
@@ -74,6 +77,22 @@ jobs:
           docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
           # Run tests — exit code propagated to the workflow step
           docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
+
+      # ── Coverage artifacts (consumed by test-guard job) ─────────────────
+      - name: Extract coverage reports from test container
+        run: |
+          CONTAINER_ID=$(docker compose -f docker/docker-compose-ci.yml ps -aq test-node | head -1)
+          docker cp "$CONTAINER_ID":/var/www/matecat/coverage.xml ./php-coverage.xml
+          docker cp "$CONTAINER_ID":/var/www/matecat/js-coverage/clover.xml ./js-coverage.xml
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            php-coverage.xml
+            js-coverage.xml
+          retention-days: 7
   # ───────────────────────────────────────────────────────────────────────────
   # JOB 2 – deploy (only when should_deploy is true)
   #
@@ -89,6 +108,8 @@ jobs:
     name: Deploy to ${{ inputs.deploy_environment }}
     runs-on: ubuntu-24.04
     environment: ${{ inputs.deploy_environment }}
+    permissions:
+      contents: read
     if: ${{ inputs.should_deploy }}
     needs:
       - tests
@@ -163,3 +184,39 @@ jobs:
           # ── :latest aliases together ──────────────────────────────────────
           docker push $WEB_REPO:latest
           docker push $DAEMONS_REPO:latest
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # JOB – test-guard (PR only)
+  #
+  # Downloads the "coverage-report" artifact produced by the tests job and
+  # runs ostico/test-guard to evaluate test adequacy on changed files.
+  # ───────────────────────────────────────────────────────────────────────────
+  test-guard:
+    name: Test adequacy gate
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+      models: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: Test Guard
+        uses: ostico/test-guard@v1
+        with:
+          coverage-file: |
+            php-coverage.xml
+            js-coverage.xml
+          coverage-threshold: '80'
+          ai-enabled: 'true'

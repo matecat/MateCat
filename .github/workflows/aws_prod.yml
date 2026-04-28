@@ -15,6 +15,9 @@ on:
     branches: [ "master" ]
 permissions:
   contents: read
+  pull-requests: write
+  checks: write
+  models: read
 jobs:
   ci-cd:
     uses: ./.github/workflows/_ci-cd.yml
