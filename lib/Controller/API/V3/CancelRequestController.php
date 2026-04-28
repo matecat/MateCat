@@ -40,35 +40,16 @@ class CancelRequestController extends KleinController
      */
     public function enableRequest(): void
     {
-        $id_job = $this->request->param('id_job');
+        $rawIdJob = $this->request->param('id_job');
         $password = $this->request->param('password');
-        $id_segment = $this->request->param('id_segment');
+        $rawIdSegment = $this->request->param('id_segment');
+        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
+        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
 
         if ($this->response->code() === 429) {
-            return;
-        }
-
-        $rawIdJob = $this->request->param('id_job');
-        $password = $this->request->param('password');
-        $rawIdSegment = $this->request->param('id_segment');
-
-        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
-        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
-
-        if ($id_job === false || $id_segment === false) {
-            $this->response->code(400);
-            $this->response->json([
-                'errors' => [
-                    [
-                        'code' => 400,
-                        'message' => 'Invalid id_job or id_segment',
-                    ],
-                ],
-            ]);
-
             return;
         }
 
@@ -86,9 +67,11 @@ class CancelRequestController extends KleinController
      */
     public function cancelRequest(): void
     {
-        $id_job = $this->request->param('id_job');
+        $rawIdJob = $this->request->param('id_job');
         $password = $this->request->param('password');
-        $id_segment = $this->request->param('id_segment');
+        $rawIdSegment = $this->request->param('id_segment');
+        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
+        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
