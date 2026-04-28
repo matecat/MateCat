@@ -4,6 +4,8 @@ namespace unit\LQA;
 
 use Exception;
 use LogicException;
+use Matecat\ICU\MessagePatternComparator;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -980,5 +982,78 @@ TRG;
         $this->assertFalse($check->thereAreErrors());
         $normalized = $check->getTrgNormalized();
         $this->assertEquals($source_seg, $normalized);
+    }
+
+    // ========== ICU Validation Tests ==========
+
+    /**
+     * When a MessagePatternComparator and string_contains_icu=true are provided,
+     * performConsistencyCheck detects broken ICU patterns in the target.
+     *
+     * This tests the PostProcess → QA wiring added for the TM Analysis path.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function performConsistencyCheckDetectsIcuErrorsWhenComparatorProvided(): void
+    {
+        $icuSource = '{count, plural, one{# item} other{# items}}';
+        $brokenTarget = '{count, plural, one{# elemento}}'; // missing "other" branch
+
+        $sourceValidator = new MessagePatternValidator('en-US', $icuSource);
+        $targetValidator = new MessagePatternValidator('it-IT', $brokenTarget);
+        $comparator = MessagePatternComparator::fromValidators($sourceValidator, $targetValidator);
+
+        $check = new PostProcess($icuSource, $brokenTarget, $comparator, true);
+        $check->setFeatureSet($this->featureSet);
+        $check->performConsistencyCheck();
+
+        $this->assertTrue($check->thereAreErrors());
+    }
+
+    /**
+     * Without a comparator (null) and string_contains_icu=false, the ICU
+     * validation path in QA is skipped entirely — even when the content
+     * contains ICU-like syntax.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function performConsistencyCheckSkipsIcuWhenNoComparator(): void
+    {
+        $icuSource = '{count, plural, one{# item} other{# items}}';
+        $brokenTarget = '{count, plural, one{# elemento}}'; // broken but ICU not checked
+
+        $check = new PostProcess($icuSource, $brokenTarget);
+        $check->setFeatureSet($this->featureSet);
+        $check->performConsistencyCheck();
+
+        // No ICU comparator → ICU errors are NOT detected; plain QA runs and
+        // finds no tag-level issues in this tag-free content.
+        $this->assertFalse($check->thereAreErrors());
+    }
+
+    /**
+     * When both source and target contain valid ICU patterns and a comparator
+     * is provided, performConsistencyCheck completes without errors.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function performConsistencyCheckPassesIcuValidation(): void
+    {
+        $icuSource = '{count, plural, one{# item} other{# items}}';
+        $icuTarget = '{count, plural, one{# thing} other{# things}}';
+
+        // en-US → en-GB: same CLDR plural categories (one, other), avoids locale mismatch
+        $sourceValidator = new MessagePatternValidator('en-US', $icuSource);
+        $targetValidator = new MessagePatternValidator('en-GB', $icuTarget);
+        $comparator = MessagePatternComparator::fromValidators($sourceValidator, $targetValidator);
+
+        $check = new PostProcess($icuSource, $icuTarget, $comparator, true);
+        $check->setFeatureSet($this->featureSet);
+        $check->performConsistencyCheck();
+
+        $this->assertFalse($check->thereAreErrors());
     }
 }

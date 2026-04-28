@@ -201,13 +201,13 @@ class QA
      *
      * @param string|null $source_seg The source segment to check (may contain XML/XLIFF tags)
      * @param string|null $target_seg The target segment to check (may contain XML/XLIFF tags)
-     * @param MessagePatternComparator|null $icuPluralsValidator Optional ICU message pattern validator
+     * @param MessagePatternComparator|null $icuComparator Optional ICU message pattern comparator
      * @param bool $string_contains_icu Whether the source contains ICU message patterns
      */
     public function __construct(
         ?string $source_seg = null,
         ?string $target_seg = null,
-        ?MessagePatternComparator $icuPluralsValidator = null,
+        ?MessagePatternComparator $icuComparator = null,
         bool $string_contains_icu = false
     ) {
         // Set UTF-8 encoding for multibyte string functions
@@ -234,7 +234,7 @@ class QA
         $this->domHandler->loadDoms($this->source_seg, $this->target_seg);
 
         // Configure ICU checker for plural form validation
-        $this->icuChecker->setIcuPatternComparator($icuPluralsValidator);
+        $this->icuChecker->setIcuPatternComparator($icuComparator);
         $this->icuChecker->setSourceContainsIcu($string_contains_icu);
     }
 

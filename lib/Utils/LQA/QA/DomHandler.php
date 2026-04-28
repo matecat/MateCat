@@ -276,6 +276,7 @@ class DomHandler
 
                     $srcDomElements['DOMElement'][] = $plainRef;
                     @$srcDomElements[$element->tagName][] = $elementID;
+                    $srcDomElements['elemCount']++;
 
                     // Handle PH tags specially for content comparison
                     if ($element->tagName === 'ph') {
@@ -309,8 +310,6 @@ class DomHandler
 
                 $srcDomElements['DOMText'][$depth++] = $plainRef;
             }
-
-            $srcDomElements['elemCount']++;
         }
     }
 
