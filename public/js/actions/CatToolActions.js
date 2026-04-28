@@ -360,7 +360,7 @@ let CatToolActions = {
         if (operation === 'setTranslation') {
           if (codeInt === -5) {
             ModalsActions.showModalComponent(
-              AlertModal,
+              MODAL_KEY.ALERT,
               {
                 text: 'This segment has been disabled by the project owner.<br />Refresh the page to update segment status.',
                 buttonText: 'Refresh page',
