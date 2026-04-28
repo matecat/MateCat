@@ -4,6 +4,8 @@ namespace Controller\Traits;
 
 use Model\DataAccess\DaoCacheTrait;
 use Model\Segments\SegmentMetadataDao;
+use Exception;
+use PDOException;
 use ReflectionException;
 
 trait SegmentDisabledTrait
@@ -18,6 +20,7 @@ trait SegmentDisabledTrait
      * @param int $id_segment The unique identifier of the segment to clear metadata and cache for.
      * @return void
      * @throws ReflectionException
+     * @throws PDOException
      */
     protected function destroySegmentDisabledCache(int $id_job, int $id_segment): void
     {
@@ -37,6 +40,7 @@ trait SegmentDisabledTrait
      * @param int $id_segment The unique identifier of the segment.
      * @return bool Returns true if the segment is disabled, false otherwise.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function isSegmentDisabled(int $id_job, int $id_segment): bool
     {
@@ -64,6 +68,7 @@ trait SegmentDisabledTrait
      * @param int $id_segment The identifier for the segment to be marked as disabled in the cache.
      *
      * @return void
+     * @throws ReflectionException
      */
     protected function saveSegmentDisabledInCache(int $id_job, int $id_segment): void
     {
@@ -74,6 +79,8 @@ trait SegmentDisabledTrait
 
     /**
      * Generates a cache key and query string for a specific segment.
+     *
+     * @return array{key: string, query: string}
      */
     private function cacheKeyAndQuery(int $id_job, int $id_segment): array
     {
@@ -90,6 +97,7 @@ trait SegmentDisabledTrait
      * Initializes the cache system by setting the time-to-live (TTL) and establishing the cache connection.
      *
      * @return void
+     * @throws ReflectionException
      */
     private function cacheInit(): void
     {

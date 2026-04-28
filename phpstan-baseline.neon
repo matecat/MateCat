@@ -151,12 +151,6 @@ parameters:
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:getTtl\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -199,22 +193,10 @@ parameters:
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LaraAuthController\:\:getTtl\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LaraAuthController.php
-
-		-
 			message: '#^PHPDoc tag @var has invalid value \(\$tm_key MemoryKeyStruct\)\: Unexpected token "\$tm_key", expected type at offset 9 on line 1$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: lib/Controller/API/App/Authentication/LaraAuthController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:getTtl\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
 
 		-
 			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|false\|null given\.$#'
@@ -253,12 +235,6 @@ parameters:
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:getTtl\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:validateCreationRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -293,12 +269,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\UserController\:\:getTtl\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
 
 		-
 			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\UserController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
@@ -2671,6 +2641,30 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
+			identifier: return.type
+			count: 2
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:checkStatus\(\) has parameter \$status with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2863,6 +2857,18 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
+			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
 			message: '#^Parameter \#1 \$sourceValidator of static method Matecat\\ICU\\MessagePatternComparator\:\:fromValidators\(\) expects Matecat\\ICU\\MessagePatternValidator, Matecat\\ICU\\MessagePatternValidator\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3033,6 +3039,18 @@ parameters:
 		-
 			message: '#^Strict comparison using \!\=\= between string\|false and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Template type T of method Controller\\API\\App\\SetTranslationController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Template type T of method Controller\\API\\App\\SetTranslationController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
 
@@ -4399,46 +4417,10 @@ parameters:
 			path: lib/Controller/API/V2/ChangeProjectNameController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationIssueController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/ChunkTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationIssueController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/ChunkTranslationIssueController.php
-
-		-
 			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/V2/ChunkTranslationVersionController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationVersionController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/ChunkTranslationVersionController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationVersionController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/ChunkTranslationVersionController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\CommentsController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/CommentsController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\CommentsController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/CommentsController.php
 
 		-
 			message: '#^Binary operation "\." between ''/tmp/'' and array\|string results in an error\.$#'
@@ -4855,18 +4837,6 @@ parameters:
 			path: lib/Controller/API/V2/JobMergeController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\JobsController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/JobsController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\JobsController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/JobsController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\JobsTranslatorsController\:\:get\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -4883,24 +4853,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/JobsTranslatorsController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\KeyCheckController\:\:getTtl\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/V2/KeyCheckController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\MarkAllSegmentStatusController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/MarkAllSegmentStatusController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\MarkAllSegmentStatusController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/MarkAllSegmentStatusController.php
 
 		-
 			message: '#^Method Controller\\API\\V2\\MarkAllSegmentStatusController\:\:sanitizeSegmentIDs\(\) has parameter \$segment_list with no type specified\.$#'
@@ -4993,18 +4945,6 @@ parameters:
 			path: lib/Controller/API/V2/ReviseTranslationIssuesController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\ReviseTranslationIssuesController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/ReviseTranslationIssuesController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\ReviseTranslationIssuesController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/ReviseTranslationIssuesController.php
-
-		-
 			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$uid\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5093,18 +5033,6 @@ parameters:
 			identifier: empty.variable
 			count: 2
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\SegmentVersionController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/SegmentVersionController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\SegmentVersionController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/SegmentVersionController.php
 
 		-
 			message: '#^Method Controller\\API\\V2\\SplitJobController\:\:checkSplit\(\) has parameter \$request with no value type specified in iterable type array\.$#'
@@ -5335,16 +5263,52 @@ parameters:
 			path: lib/Controller/API/V2/UserController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\ChunkController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
-			path: lib/Controller/API/V3/ChunkController.php
+			path: lib/Controller/API/V3/CancelRequestController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\ChunkController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
+			identifier: return.type
+			count: 2
+			path: lib/Controller/API/V3/CancelRequestController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Controller/API/V3/ChunkController.php
+			path: lib/Controller/API/V3/CancelRequestController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/V3/CancelRequestController.php
+
+		-
+			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/CancelRequestController.php
+
+		-
+			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/CancelRequestController.php
+
+		-
+			message: '#^Template type T of method Controller\\API\\V3\\CancelRequestController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: lib/Controller/API/V3/CancelRequestController.php
+
+		-
+			message: '#^Template type T of method Controller\\API\\V3\\CancelRequestController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: lib/Controller/API/V3/CancelRequestController.php
 
 		-
 			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer2\(\)\.$#'
@@ -5521,18 +5485,6 @@ parameters:
 			path: lib/Controller/API/V3/FileInfoController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/FileInfoController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/FileInfoController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:setInstructions\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -5599,18 +5551,6 @@ parameters:
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\IssueCheckController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/IssueCheckController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\IssueCheckController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/IssueCheckController.php
-
-		-
 			message: '#^Parameter \#2 \$password of method Model\\Translations\\SegmentTranslationDao\:\:getSegmentTranslationsModifiedByRevisorWithIssueCount\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -5631,18 +5571,6 @@ parameters:
 		-
 			message: '#^Argument of an invalid type array\<Model\\Files\\MetadataStruct\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Controller/API/V3/MetaDataController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\MetaDataController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/MetaDataController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\MetaDataController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: lib/Controller/API/V3/MetaDataController.php
 
@@ -6067,18 +5995,6 @@ parameters:
 			path: lib/Controller/API/V3/QualityReportControllerAPI.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6139,92 +6055,32 @@ parameters:
 			path: lib/Controller/API/V3/RevisionFeedbackController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/RevisionFeedbackController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/RevisionFeedbackController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$filename\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 6
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$id_job\.$#'
-			identifier: property.notFound
-			count: 3
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$job_password\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$last_edit\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$segment\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$source\.$#'
-			identifier: property.notFound
-			count: 3
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$source_page\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$tag_key\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$tag_value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 3
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$translation\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Cannot access property \$id_project on Model\\Jobs\\JobStruct\|null\.$#'
 			identifier: property.nonObject
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
+			identifier: return.type
+			count: 2
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
@@ -6277,12 +6133,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:getJobUrls\(\) has parameter \$segmentForAnalysis with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:getJobUrls\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6325,12 +6175,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:getStatusObject\(\) has parameter \$segmentForAnalysis with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:getStatusObject\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6349,12 +6193,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^PHPDoc tag @var has invalid value \(\$segmentForAnalysis ShapelessConcreteStruct\)\: Unexpected token "\$segmentForAnalysis", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Parameter \#1 \$featureSet of static method Matecat\\SubFiltering\\AbstractFilter\:\:getInstance\(\) expects Matecat\\SubFiltering\\Contracts\\FeatureSetInterface, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -6362,6 +6200,18 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$idJob of static method Model\\Segments\\SegmentDao\:\:getSegmentsForAnalysisFromIdJobAndPassword\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
@@ -6387,6 +6237,18 @@ parameters:
 		-
 			message: '#^Parameter \#5 \$segmentsCount of method Controller\\API\\V3\\SegmentAnalysisController\:\:getSegmentsForAProject\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Template type T of method Controller\\API\\V3\\SegmentAnalysisController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: lib/Controller/API/V3/SegmentAnalysisController.php
+
+		-
+			message: '#^Template type T of method Controller\\API\\V3\\SegmentAnalysisController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
@@ -18145,12 +18007,6 @@ parameters:
 			path: lib/Plugins/Features/AbstractRevisionFeature.php
 
 		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
 			message: '#^Instanceof between class\-string\<static\(Plugins\\Features\\AbstractRevisionFeature\)\> and Plugins\\Features\\ReviewExtended will always evaluate to false\.$#'
 			identifier: instanceof.alwaysFalse
 			count: 1
@@ -18961,18 +18817,6 @@ parameters:
 			path: lib/Plugins/Features/SecondPassReview.php
 
 		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:getJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Controller/API/FilterController.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:getJob\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Controller/API/FilterController.php
-
-		-
 			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\FilterDefinition\:\:__construct\(\) has parameter \$filter_data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -19423,46 +19267,10 @@ parameters:
 			path: lib/Plugins/Features/TranslationVersions/VersionHandlerInterface.php
 
 		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 3
-			path: lib/Routes/api_v1_routes.php
-
-		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 74
-			path: lib/Routes/api_v2_routes.php
-
-		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 146
-			path: lib/Routes/api_v3_routes.php
-
-		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 119
-			path: lib/Routes/app_routes.php
-
-		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 5
-			path: lib/Routes/gdrive_routes.php
-
-		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
+			message: '#^Parameter \#3 \$callback of function route expects array\{class\-string\<Controller\\Abstracts\\KleinController\>, string\}, array\{''Controller\\\\API\\\\App…'', ''update''\} given\.$#'
+			identifier: argument.type
 			count: 1
-			path: lib/Routes/oauth_routes.php
-
-		-
-			message: '#^Function route not found\.$#'
-			identifier: function.notFound
-			count: 13
-			path: lib/Routes/view_routes.php
+			path: lib/Routes/app_routes.php
 
 		-
 			message: '#^Method Utils\\AIAssistant\\AIClientFactory\:\:create\(\) has parameter \$agent with no type specified\.$#'

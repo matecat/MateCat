@@ -4,6 +4,7 @@ namespace Model\Segments;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class SegmentMetadataDao extends AbstractDao
@@ -41,6 +42,7 @@ class SegmentMetadataDao extends AbstractDao
      *
      * @return bool True if the cache was successfully destroyed, false otherwise.
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function destroyGetAllCache(int $id_segment): bool
     {
@@ -104,6 +106,8 @@ class SegmentMetadataDao extends AbstractDao
      * @param string $key The key associated with the cache entry to be destroyed.
      *
      * @return bool True if the cache was successfully destroyed, false otherwise.
+     * @throws PDOException
+     * @throws ReflectionException
      */
     public static function destroyCache(int $id_segment, string $key): bool
     {
@@ -114,6 +118,9 @@ class SegmentMetadataDao extends AbstractDao
         return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
     }
 
+    /**
+     * @throws PDOException
+     */
     public static function delete(int $id_segment, string $key): void
     {
         $conn = Database::obtain()->getConnection();
