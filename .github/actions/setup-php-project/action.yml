@@ -1,22 +1,14 @@
 name: Setup PHP Project
-description: Checkout, install PHP with extensions from composer.json, and run composer install
+description: Install PHP with the required extensions and run composer install
 
 inputs:
   php-version:
     description: PHP version to install
     default: '8.3'
-  token:
-    description: GitHub token for checkout
-    default: ${{ github.token }}
 
 runs:
   using: composite
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ inputs.token }}
-
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:

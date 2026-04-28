@@ -19,10 +19,13 @@ jobs:
       actions: read
 
     steps:
-      - name: Setup PHP project
-        uses: ./.github/actions/setup-php-project
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+
+      - name: Setup PHP project
+        uses: ./.github/actions/setup-php-project
 
       - name: Run PHPMD
         run: ./vendor/bin/phpmd ./lib/ sarif codesize --reportfile phpmd-results.sarif
