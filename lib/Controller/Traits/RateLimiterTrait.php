@@ -93,6 +93,6 @@ trait RateLimiterTrait
         $date = new DateTime();
         $ttl = 60 - $date->format("s");
 
-        return 60 + $ttl;
+        return 60 + (int)$ttl;
     }
 }
