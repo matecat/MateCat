@@ -179,7 +179,7 @@ describe('validateCommitMessage – invalid', () => {
     it('no space after emoji', () => {
         const r = validateCommitMessage('\u2728feat: add login');
         assert.equal(r.valid, false);
-        assert.ok(r.errors.some(e => e.includes('Format')));
+        assert.ok(r.errors.some(e => e.includes('Missing space between emoji and type')));
     });
 
     it('unknown emoji', () => {
