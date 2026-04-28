@@ -173,11 +173,6 @@ class CancelRequestController extends KleinController
 
                 throw new Exception('User is not part of the team');
             }
-
-            $this->incrementRateLimitCounter($userEmail, $route);
-            $this->incrementRateLimitCounter($userIp, $route);
-
-            throw new Exception('User is not the owner of the segment');
         }
 
         // 5. check segment status
