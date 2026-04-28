@@ -50,7 +50,7 @@ trait SegmentDisabledTrait
             $value = $metadata->meta_value ?? '0';
             $this->_setInCacheMap($cache['key'], $cache['query'], [$value]);
 
-            return $value;
+            return $value == "1";
         }
 
         return $cachedValue == [1];
