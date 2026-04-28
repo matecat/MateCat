@@ -50,18 +50,7 @@ class TestableCancelRequestController extends CancelRequestController
         $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
 
         if ($id_job === false || $id_segment === false) {
-            $this->response->code(400);
-            $this->response->header('Content-Type', 'application/json');
-            $this->response->body(json_encode([
-                'errors' => [
-                    [
-                        'code' => 400,
-                        'message' => 'Invalid id_job or id_segment',
-                    ],
-                ],
-            ]));
-
-            return;
+            throw new NotFoundException('Invalid id_job or id_segment');
         }
 
         if ($this->isSegmentDisabled($id_job, $id_segment)) {
@@ -76,8 +65,14 @@ class TestableCancelRequestController extends CancelRequestController
     public function cancelRequest(): void
     {
         // Skip performChecks, go straight to disable logic
-        $id_job = $this->request->param('id_job');
-        $id_segment = $this->request->param('id_segment');
+        $rawIdJob = $this->request->param('id_job');
+        $rawIdSegment = $this->request->param('id_segment');
+        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
+        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
+
+        if ($id_job === false || $id_segment === false) {
+            throw new NotFoundException('Invalid id_job or id_segment');
+        }
 
         if (!$this->isSegmentDisabled($id_job, $id_segment)) {
             $this->saveSegmentDisabledInCache($id_job, $id_segment);
@@ -148,21 +143,8 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
-
-        $this->response->expects($this->once())
-            ->method('header')
-            ->with('Content-Type', 'application/json');
-
-        $this->response->expects($this->once())
-            ->method('body')
-            ->with($this->callback(function ($body) {
-                $decoded = json_decode($body, true);
-                return $decoded['errors'][0]['code'] === 400
-                    && $decoded['errors'][0]['message'] === 'Invalid id_job or id_segment';
-            }));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Invalid id_job or id_segment');
 
         $controller->enableRequest();
     }
@@ -178,9 +160,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 'invalid'],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
+        $this->expectException(NotFoundException::class);
 
         $controller->enableRequest();
     }
@@ -196,9 +176,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 'xyz'],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
+        $this->expectException(NotFoundException::class);
 
         $controller->enableRequest();
     }
@@ -253,9 +231,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, null],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
+        $this->expectException(NotFoundException::class);
 
         $controller->enableRequest();
     }
@@ -271,9 +247,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
+        $this->expectException(NotFoundException::class);
 
         $controller->enableRequest();
     }
@@ -325,9 +299,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('code')
-            ->with(400);
+        $this->expectException(NotFoundException::class);
 
         $controller->enableRequest();
     }

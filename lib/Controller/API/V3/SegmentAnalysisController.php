@@ -9,7 +9,6 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
-use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
@@ -294,7 +293,7 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param IDaoStruct $segmentForAnalysis
+     * @param ShapelessConcreteStruct $segmentForAnalysis
      * @param array $projectPasswordsMap
      * @param array $notesAggregate
      * @param array $issuesAggregate
@@ -305,7 +304,7 @@ class SegmentAnalysisController extends KleinController
      * @throws Exception
      */
     private function formatSegment(
-        IDaoStruct $segmentForAnalysis,
+        ShapelessConcreteStruct $segmentForAnalysis,
         array $projectPasswordsMap,
         array $notesAggregate,
         array $issuesAggregate,
@@ -315,9 +314,6 @@ class SegmentAnalysisController extends KleinController
         // id_request
         $idRequest = $idRequestsAggregate[$segmentForAnalysis->id] ?? null;
 
-        /**
-         * @var $segmentForAnalysis ShapelessConcreteStruct
-         */
         // original_filename
         $originalFile = (null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original') ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
@@ -375,12 +371,12 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param       $segmentForAnalysis
+     * @param ShapelessConcreteStruct $segmentForAnalysis
      * @param array $projectPasswordsMap
      *
      * @return array
      */
-    private function getJobUrls($segmentForAnalysis, array $projectPasswordsMap = []): array
+    private function getJobUrls(ShapelessConcreteStruct $segmentForAnalysis, array $projectPasswordsMap = []): array
     {
         $passwords = [];
         foreach ($projectPasswordsMap as $map) {
@@ -409,11 +405,11 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param $segmentForAnalysis
+     * @param ShapelessConcreteStruct $segmentForAnalysis
      *
      * @return array
      */
-    private function getStatusObject($segmentForAnalysis): array
+    private function getStatusObject(ShapelessConcreteStruct $segmentForAnalysis): array
     {
         $finalVersion = null;
 

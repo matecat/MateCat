@@ -14,8 +14,8 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Controller\Traits\RateLimiterTrait;
 use Controller\Traits\SegmentDisabledTrait;
 use Exception;
+use ReflectionException;
 use Klein\Response;
-use Model\DataAccess\DaoCacheTrait;
 use Model\Exceptions\NotFoundException;
 use Model\Segments\SegmentMetadataDao;
 use Model\Translations\SegmentTranslationDao;
@@ -25,7 +25,6 @@ use Utils\Tools\Utils;
 
 class CancelRequestController extends KleinController
 {
-    use DaoCacheTrait;
     use RateLimiterTrait;
     use SegmentDisabledTrait;
     use ChunkNotFoundHandlerTrait;
@@ -45,6 +44,11 @@ class CancelRequestController extends KleinController
         $rawIdSegment = $this->request->param('id_segment');
         $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
         $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
+
+        if ($id_job === false || $id_segment === false) {
+            throw new NotFoundException('Invalid id_job or id_segment');
+        }
+
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
@@ -53,7 +57,7 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        if($this->isSegmentDisabled($id_job, $id_segment)){
+        if ($this->isSegmentDisabled($id_job, $id_segment)) {
             $this->destroySegmentDisabledCache($id_job, $id_segment);
         }
 
@@ -72,6 +76,11 @@ class CancelRequestController extends KleinController
         $rawIdSegment = $this->request->param('id_segment');
         $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
         $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
+
+        if ($id_job === false || $id_segment === false) {
+            throw new NotFoundException('Invalid id_job or id_segment');
+        }
+
         $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
@@ -183,6 +192,7 @@ class CancelRequestController extends KleinController
      * @param int $id_job
      *
      * @return ?SegmentTranslationStruct
+     * @throws ReflectionException
      */
     protected function findSegmentTranslation(int $id_segment, int $id_job): ?SegmentTranslationStruct
     {
