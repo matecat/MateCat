@@ -47,8 +47,10 @@ trait SegmentDisabledTrait
         // retrieve from cache fails, we need to check the database and update the cache accordingly
         if(empty($cachedValue)){
             $metadata = SegmentMetadataDao::get($id_segment, 'translation_disabled');
+            $value = $metadata->meta_value ?? '0';
+            $this->_setInCacheMap($cache['key'], $cache['query'], [$value]);
 
-            return $metadata->meta_value ?? '0';
+            return $value;
         }
 
         return $cachedValue == [1];
