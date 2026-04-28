@@ -137,7 +137,7 @@ class FastAnalysis extends AbstractDaemon
      * @param array|null $args
      *
      * @return void
-     * @throws Exception
+     * @throws \Throwable
      */
     public function main(array $args = null): void
     {
@@ -410,7 +410,7 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * @throws ReflectionException
+     * @throws \Throwable
      */
     protected function _updateProject($pid, $status): void
     {
@@ -476,7 +476,7 @@ class FastAnalysis extends AbstractDaemon
      * @param array|null $subfiltering_handlers
      * @param bool $icu_enabled
      * @return int
-     * @throws Exception
+     * @throws \Throwable
      */
     protected function _insertFastAnalysis(
         ProjectStruct $projectStruct,
@@ -888,7 +888,7 @@ HD;
      * @param int $limit
      *
      * @return array
-     * @throws ReflectionException
+     * @throws \Throwable
      */
     protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
     {
