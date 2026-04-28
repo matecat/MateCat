@@ -503,11 +503,8 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function performChecksThrowsExceptionWhenUserIsNotOwner(): void
+    public function performChecksAllowsTeamMemberAccess(): void
     {
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('User is not the owner of the segment');
-
         $teamStruct = $this->createMock(TeamStruct::class);
         $teamStruct->created_by = 999;
         $teamStruct->method('hasUser')->willReturn(true);
@@ -536,6 +533,10 @@ class CancelRequestControllerTest extends AbstractTest
             ['password', null, 'abc123'],
             ['id_segment', null, 42],
         ]);
+
+        $this->response->expects($this->once())
+            ->method('json')
+            ->with(['id_segment' => 42]);
 
         $controller->cancelRequest();
     }
@@ -720,6 +721,7 @@ class CancelRequestControllerTest extends AbstractTest
                 'getUser',
                 'isSegmentDisabled',
                 'saveSegmentDisabledInCache',
+                'findSegmentTranslation',
             ])
             ->getMock();
 
@@ -807,6 +809,7 @@ class CancelRequestControllerTest extends AbstractTest
                 'getUser',
                 'isSegmentDisabled',
                 'saveSegmentDisabledInCache',
+                'findSegmentTranslation',
             ])
             ->getMock();
 
@@ -829,6 +832,12 @@ class CancelRequestControllerTest extends AbstractTest
             $controller->method('getJob')->willReturn(null);
         } else {
             $controller->method('getJob')->willReturn($jobReturn);
+        }
+
+        if ($segmentReturn === 'NOT_SET') {
+            $controller->method('findSegmentTranslation')->willReturn(null);
+        } else {
+            $controller->method('findSegmentTranslation')->willReturn($segmentReturn);
         }
 
         // Rate limit mocking

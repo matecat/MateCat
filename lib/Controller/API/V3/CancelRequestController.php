@@ -39,16 +39,6 @@ class CancelRequestController extends KleinController
      */
     public function enableRequest(): void
     {
-        $id_job = $this->request->param('id_job');
-        $password = $this->request->param('password');
-        $id_segment = $this->request->param('id_segment');
-        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
-
-        $this->performChecks($id_job, $password, $id_segment, $route);
-        if ($this->response->code() === 429) {
-            return;
-        }
-
         $rawIdJob = $this->request->param('id_job');
         $password = $this->request->param('password');
         $rawIdSegment = $this->request->param('id_segment');
@@ -58,7 +48,6 @@ class CancelRequestController extends KleinController
 
         if ($id_job === false || $id_segment === false) {
             $this->response->code(400);
-            $this->response->header('Content-Type', 'application/json');
             $this->response->json([
                 'errors' => [
                     [
@@ -71,7 +60,13 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        if($this->isSegmentDisabled($id_job, $id_segment)){
+        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
+        $this->performChecks($id_job, $password, $id_segment, $route);
+        if ($this->response->code() === 429) {
+            return;
+        }
+
+        if ($this->isSegmentDisabled($id_job, $id_segment)) {
             $this->destroySegmentDisabledCache($id_job, $id_segment);
         }
 
@@ -97,6 +92,7 @@ class CancelRequestController extends KleinController
         if (!$this->isSegmentDisabled($id_job, $id_segment)) {
             SegmentMetadataDao::destroyGetAllCache($id_segment);
             SegmentMetadataDao::setTranslationDisabled($id_segment);
+            SegmentMetadataDao::destroyCache($id_segment, 'translation_disabled');
             $this->saveSegmentDisabledInCache($id_job, $id_segment);
         }
 
@@ -148,7 +144,7 @@ class CancelRequestController extends KleinController
         }
 
         // 3. check segment translation
-        $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
+        $segmentTranslation = $this->findSegmentTranslation($id_segment, $id_job);
 
         if (empty($segmentTranslation)) {
             $this->incrementRateLimitCounter($userEmail, $route);
@@ -188,5 +184,18 @@ class CancelRequestController extends KleinController
 
         $this->incrementRateLimitCounter($userEmail, $route);
         $this->incrementRateLimitCounter($userIp, $route);
+    }
+
+    /**
+     * Retrieves the segment translation for the given segment and job.
+     * Extracted to a protected method to allow mocking in unit tests.
+     *
+     * @param int $id_segment
+     * @param int $id_job
+     * @return mixed
+     */
+    protected function findSegmentTranslation(int $id_segment, int $id_job): mixed
+    {
+        return SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
     }
 }
