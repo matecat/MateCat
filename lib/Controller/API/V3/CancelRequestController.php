@@ -46,10 +46,27 @@ class CancelRequestController extends KleinController
 
         $this->performChecks($id_job, $password, $id_segment, $route);
 
-        if($this->isSegmentDisabled($id_job, $id_segment)){
-            $this->destroySegmentDisabledCache($id_job, $id_segment);
-        }
+        $rawIdJob = $this->request->param('id_job');
+        $password = $this->request->param('password');
+        $rawIdSegment = $this->request->param('id_segment');
 
+        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
+        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
+
+        if ($id_job === false || $id_segment === false) {
+            $this->response->code(400);
+            $this->response->header('Content-Type', 'application/json');
+            $this->response->body(json_encode([
+                'errors' => [
+                    [
+                        'code' => 400,
+                        'message' => 'Invalid id_job or id_segment',
+                    ],
+                ],
+            ]));
+
+            return;
+        }
         $this->response->json([
             'id_segment' => $id_segment,
         ]);
