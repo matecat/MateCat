@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import {Select} from '../common/Select'
-import {ACTIVITY_LOG_COLUMNS} from './ActivityLogTable'
-import {ActivityLogContext} from '../../pages/ActivityLog'
+import {ACTIVITY_LOG_COLUMNS} from './ActivityLogConstants'
+import {ActivityLogContext} from './ActivityLogContext'
 
 export const FilterColumn = () => {
   const {filterByColumn, setFilterByColumn} = useContext(ActivityLogContext)

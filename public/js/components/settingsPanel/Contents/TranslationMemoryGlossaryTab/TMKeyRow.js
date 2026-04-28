@@ -1,13 +1,13 @@
 import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
 import {
   SPECIAL_ROWS_ID,
-  TranslationMemoryGlossaryTabContext,
   getTmDataStructureToSendServer,
   isOwnerOfKey,
   orderTmKeys,
-} from './TranslationMemoryGlossaryTab'
+} from './TranslationMemoryGlossaryTabUtils'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import {ImportTMX} from './ImportTMX'

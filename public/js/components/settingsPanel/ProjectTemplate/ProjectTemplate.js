@@ -22,10 +22,7 @@ import {isEqual} from 'lodash'
 import ModalsActions from '../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../modals/ConfirmDeleteResourceProjectTemplates'
 
-export const TEMPLATE_MODIFIERS = {
-  CREATE: 'create',
-  UPDATE: 'update',
-}
+import {TEMPLATE_MODIFIERS} from './ProjectTemplateConstants'
 
 export const ProjectTemplate = ({portalTarget}) => {
   const {
