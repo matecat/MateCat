@@ -14,6 +14,12 @@ import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import Close from '../../../../../img/icons/Close'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
 
 export const TMCreateResourceRow = ({row}) => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
@@ -350,22 +356,25 @@ export const TMCreateResourceRow = ({row}) => {
       </div>
       <div />
       <div className="translation-memory-glossary-tab-buttons-group">
-        <button
-          className="ui primary button settings-panel-button-icon confirm-button"
-          type="submit"
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           disabled={!isFormFilled}
-          data-testid="create-tmkey-confirm"
+          htmlType={BUTTON_HTML_TYPE.SUBMIT}
+          testId="create-tmkey-confirm"
         >
           <Checkmark size={12} />
           Confirm
-        </button>
-        <button
-          className="ui button orange close-button"
+        </Button>
+
+        <Button
+          type={BUTTON_TYPE.WARNING}
+          size={BUTTON_SIZE.ICON_SMALL}
+          htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
-          type="reset"
         >
           <Close size={18} />
-        </button>
+        </Button>
       </div>
     </form>
   )

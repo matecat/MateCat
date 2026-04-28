@@ -4,9 +4,10 @@ import $ from 'jquery'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
+import {Button} from '../common/Button/Button'
+import {SpinnerLoader} from '../common/SpinnerLoader'
 
-const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
-  const [showAnalysis, setShowAnalysis] = useState(false)
+const AnalyzeMain = ({volumeAnalysis, project}) => {
   const [intervalId, setIntervalId] = useState()
   const [scrollTop, setScrollTop] = useState()
   const [jobToScroll, setJobToScroll] = useState()
@@ -23,18 +24,15 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
 
   const spinner = (
     <div style={spinnerContainer}>
-      <div className="ui active inverted dimmer">
-        <div className="ui massive text loader">Loading Volume Analysis</div>
-      </div>
+      <SpinnerLoader label="Loading Volume Analysis" />
     </div>
   )
 
-  const openAnalysisReport = (idJob, forceOpen) => {
-    setShowAnalysis((showAnalysis) => (forceOpen ? forceOpen : !showAnalysis))
+  const openAnalysisReport = (idJob) => {
     setJobToScroll(idJob)
   }
 
-  const scrollStep = () => {
+  /*  const scrollStep = () => {
     if (window.pageYOffset === 0) {
       clearInterval(intervalId)
     }
@@ -55,60 +53,45 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
       parentRef.current &&
         parentRef.current.removeEventListener('scroll', handleScroll)
     }
-  })
+  })*/
 
   return (
-    <div className="ui container">
+    <div className="layout__container">
       {volumeAnalysis && project ? (
-        <div className="project ui grid">
-          <div className="sixteen wide column">
-            <div className="analyze-header">
-              <AnalyzeHeader
-                data={volumeAnalysis.get('summary')}
+        <div className="project">
+          <h4>Volume Analysis</h4>
+          <AnalyzeHeader
+            data={volumeAnalysis.get('summary')}
+            project={project}
+          />
+          {volumeAnalysis.get('jobs').size > 0 ? (
+            <>
+              <AnalyzeChunksResume
+                jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
                 project={project}
+                status={volumeAnalysis.get('summary').get('status')}
+                openAnalysisReport={openAnalysisReport}
               />
-            </div>
-            {volumeAnalysis.get('jobs').size > 0 ? (
-              <>
-                {' '}
-                <AnalyzeChunksResume
-                  jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
+              <div className="project-body">
+                <h5>Job details</h5>
+                <ProjectAnalyze
+                  volumeAnalysis={volumeAnalysis.get('jobs')}
                   project={project}
                   status={volumeAnalysis.get('summary').get('status')}
-                  showAnalysis={showAnalysis}
-                  openAnalysisReport={openAnalysisReport}
+                  jobToScroll={jobToScroll}
                 />
-                {showAnalysis ? (
-                  <div className="project-body ui grid">
-                    {/*<TransitionGroup>
-                      <CSSTransition
-                        key={0}
-                        classNames="transitionAnalyzeMain"
-                        timeout={{enter: 1000, exit: 300}}
-                      >*/}
-                    <ProjectAnalyze
-                      volumeAnalysis={volumeAnalysis.get('jobs')}
-                      project={project}
-                      status={volumeAnalysis.get('summary').get('status')}
-                      jobToScroll={jobToScroll}
-                      showAnalysis={showAnalysis}
-                    />
-                    {/* </CSSTransition>
-                    </TransitionGroup>*/}
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-          </div>
-          {scrollTop > 200 ? (
-            <button
+              </div>
+            </>
+          ) : null}
+          {/*{scrollTop > 200 ? (
+            <Button
               title="Back to top"
               className="scroll"
               onClick={() => scrollToTop()}
             >
               <i className="icon-sort-up icon"></i>
-            </button>
-          ) : null}
+            </Button>
+          ) : null}*/}
         </div>
       ) : (
         spinner

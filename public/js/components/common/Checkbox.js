@@ -70,19 +70,19 @@ export const Checkbox = ({
         <svg width="14" height="14" viewBox="0 0 16 16">
           {value == CHECKBOX_STATE.CHECKED ? (
             <path
-              d="M14 0a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12Zm-1.685 4.9a1 1 0 0 0-1.414-.015L6.69 9 5.099 7.445a1 1 0 0 0-1.398 1.43l2.29 2.24a1 1 0 0 0 1.399 0l4.91-4.8a1 1 0 0 0 .015-1.414Z"
+              d="M14 0a30 30 0 0 1 2 2v12a30 30 0 0 1-2 2H2a30 30 0 0 1-2-2V2a30 30 0 0 1 2-2h12Zm-1.685 4.9a1 1 0 0 0-1.414-.015L6.69 9 5.099 7.445a1 1 0 0 0-1.398 1.43l2.29 2.24a1 1 0 0 0 1.399 0l4.91-4.8a1 1 0 0 0 .015-1.414Z"
               fill="currentColor"
               fillRule="evenodd"
             />
           ) : value === CHECKBOX_STATE.INDETERMINATE ? (
             <path
-              d="M14 0a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12Zm-2 7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2Z"
+              d="M14 0a30 30 0 0 1 2 2v12a30 30 0 0 1-2 2H2a30 30 0 0 1-2-2V2a30 30 0 0 1 2-2h12Zm-2 7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2Z"
               fill="currentColor"
               fillRule="evenodd"
             />
           ) : (
             <path
-              d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm0 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12Z"
+              d="M14 0H2a30 30 0 0 0-2 2v12a30 30 0 0 0 2 2h12a30 30 0 0 0 2-2V2a30 30 0 0 0-2-2Zm0 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12Z"
               fill="currentColor"
               fillRule="evenodd"
             />

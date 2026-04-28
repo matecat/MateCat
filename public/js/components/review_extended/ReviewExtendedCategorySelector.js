@@ -36,7 +36,7 @@ const ReviewExtendedCategorySelector = ({
           align={DROPDOWN_MENU_ALIGN.RIGHT}
           toggleButtonProps={{
             mode: BUTTON_MODE.OUTLINE,
-            size: BUTTON_SIZE.ICON_SMALL,
+            size: BUTTON_SIZE.ICON_XSMALL,
             className: 'severities-dropdown-trigger',
             children: <i className="icon-sort-down icon" />,
           }}

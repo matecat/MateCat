@@ -1,3 +1,4 @@
+import React from 'react'
 import Cookies from 'js-cookie'
 import $ from 'jquery'
 import OfflineUtils from './offlineUtils'
@@ -6,6 +7,18 @@ import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
 import {isTranslationTailEmpty} from '../setTranslationUtil'
+import FileTypeText from '../../img/icons/FileTypeText'
+import FileTypePresentation from '../../img/icons/FileTypePresentation'
+import FileTypeHtml from '../../img/icons/FileTypeHtml'
+import FileTypePdf from '../../img/icons/FileTypePdf'
+import FileTypeXls from '../../img/icons/FileTypeXls'
+import FileTypeFile from '../../img/icons/FileTypeFile'
+import FileTypeXliff from '../../img/icons/FileTypeXliff'
+import FileTypeZip from '../../img/icons/FileTypeZip'
+import FileTypeCode from '../../img/icons/FileTypeCode'
+import FileTypeImage from '../../img/icons/FileTypeImage'
+import FileTypeSub from '../../img/icons/FileTypeSub'
+import FileTypePub from '../../img/icons/FileTypePub'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -178,7 +191,7 @@ const CommonUtils = {
     }
   },
 
-  getIconClass: function (ext) {
+  getFileIcon: function (ext, size = 24) {
     switch (ext) {
       case 'doc':
       case 'dot':
@@ -188,8 +201,9 @@ const CommonUtils = {
       case 'dotm':
       case 'odt':
       case 'sxw':
-        return 'extdoc'
-      case 'pot':
+      case 'pages':
+      case 'ott':
+        return <FileTypeText size={size} />
       case 'pps':
       case 'ppt':
       case 'potm':
@@ -199,13 +213,15 @@ const CommonUtils = {
       case 'pptm':
       case 'pptx':
       case 'odp':
-      case 'sxi':
-        return 'extppt'
+      case 'key':
+      case 'otp':
+        return <FileTypePresentation size={size} />
       case 'htm':
       case 'html':
-        return 'exthtm'
+      case 'xhtml':
+        return <FileTypeHtml size={size} />
       case 'pdf':
-        return 'extpdf'
+        return <FileTypePdf size={size} />
       case 'xls':
       case 'xlt':
       case 'xlsm':
@@ -214,42 +230,71 @@ const CommonUtils = {
       case 'ods':
       case 'sxc':
       case 'csv':
-        return 'extxls'
+      case 'numbers':
+      case 'xltm':
+      case 'ots':
+      case 'tsv':
+        return <FileTypeXls size={size} />
+      case 'sbv':
+      case 'srt':
+      case 'vtt':
+        return <FileTypeSub size={size} />
+      case 'avif':
+      case 'bmp':
+      case 'png':
+      case 'gif':
+      case 'jpeg':
+      case 'jpg':
+      case 'heic':
+      case 'heif':
+      case 'jfif':
+      case 'tif':
+      case 'tiff':
+      case 'webp':
+        return <FileTypeImage size={size} />
       case 'txt':
-        return 'exttxt'
-      case 'ttx':
-        return 'extttx'
-      case 'itd':
-        return 'extitd'
+        return <FileTypeFile size={size} />
       case 'xlf':
-        return 'extxlf'
+      case 'ttx':
+      case 'xliff':
+      case 'sdlxliff':
+      case 'tmx':
+      case 'po':
+      case 'g':
+      case 'ts':
+      case 'pot':
+        return <FileTypeXliff size={size} />
       case 'mif':
-        return 'extmif'
       case 'idml':
-        return 'extidd'
-      case 'xtg':
-        return 'extqxp'
+      case 'icml':
+      case 'tex':
+        return <FileTypePub size={size} /> //TODO add specific icons for these file types
+      case 'zip':
+        return <FileTypeZip size={size} />
       case 'xml':
-      case 'x-jsont2':
+      case 'Android xml':
+      case 'dtd':
       case 'json':
+      case 'x-jsont2':
+      case 'jsont2':
       case 'jsont':
       case 'yaml':
       case 'yml':
-        return 'extxml'
-      case 'rc':
-        return 'extrcc'
-      case 'resx':
-        return 'extres'
-      case 'sgml':
-        return 'extsgl'
-      case 'sgm':
-        return 'extsgm'
       case 'properties':
-        return 'extpro'
-      case 'zip':
-        return 'extzip'
+      case 'resx':
+      case 'strings':
+      case 'markdown':
+      case 'md':
+      case 'dita':
+      case 'wix':
+      case 'ditamap':
+      case 'php':
+      case 'xini':
+      case 'sxml':
+      case 'txml':
+        return <FileTypeCode size={size} />
       default:
-        return 'exttxt'
+        return <FileTypeFile size={size} />
     }
   },
 
@@ -473,7 +518,7 @@ const CommonUtils = {
     // Format the Date object using toLocaleString.
     return {
       day: dd.getDate().toString(),
-      month: dd.toLocaleString('default', {month: 'long'}),
+      month: dd.toLocaleString('default', {month: 'short'}),
       time: dd.toLocaleTimeString('en-US', {
         hour12: true,
         hour: '2-digit',

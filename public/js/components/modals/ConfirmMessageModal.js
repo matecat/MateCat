@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 
 class ConfirmMessageModal extends React.Component {
   allowHTML(string) {
@@ -18,43 +19,44 @@ class ConfirmMessageModal extends React.Component {
                 this.props.text
               )}
             </div>
-            <div className="column right aligned">
+            <div className="buttons-container">
               {this.props.cancelCallback || this.props.cancelText ? (
-                <div
-                  className="ui button cancel-button"
+                <Button
+                  type={BUTTON_TYPE.DEFAULT}
+                  mode={BUTTON_MODE.OUTLINE}
                   onClick={() => {
                     if (this.props.closeOnSuccess) this.props.onClose()
                     this.props.cancelCallback?.()
                   }}
                 >
                   {this.props.cancelText ? this.props.cancelText : 'Cancel'}
-                </div>
+                </Button>
               ) : (
                 ''
               )}
               {this.props.warningCallback ? (
-                <div
-                  className="ui primary button button-modal warning-button orange margin left-10 right-20"
+                <Button
+                  type={BUTTON_TYPE.WARNING}
                   onClick={() => {
                     if (this.props.closeOnSuccess) this.props.onClose()
                     this.props.warningCallback?.()
                   }}
                 >
                   {this.props.warningText}
-                </div>
+                </Button>
               ) : (
                 ''
               )}
               {this.props.successCallback || this.props.successText ? (
-                <div
-                  className="ui primary button right floated"
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
                   onClick={() => {
                     if (this.props.closeOnSuccess) this.props.onClose()
                     this.props.successCallback?.()
                   }}
                 >
                   {this.props.successText ? this.props.successText : 'Confirm'}
-                </div>
+                </Button>
               ) : (
                 ''
               )}

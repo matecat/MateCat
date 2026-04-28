@@ -105,7 +105,7 @@ export const Lara = ({
                   }
                 >
                   <div ref={infoIcon1}>
-                    <InfoIcon />
+                    <InfoIcon size={16} />
                   </div>
                 </Tooltip>
               </div>
@@ -133,7 +133,6 @@ export const Lara = ({
             <Button
               type={BUTTON_TYPE.PRIMARY}
               mode={BUTTON_MODE.BASIC}
-              size={BUTTON_SIZE.MEDIUM}
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >

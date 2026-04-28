@@ -1225,7 +1225,7 @@ test('Rendering elements', () => {
   render(<FilterProjects {...props} />)
 
   expect(screen.getByTestId('input-search-projects')).toBeInTheDocument()
-  expect(screen.getByTestId('status-filter')).toBeInTheDocument()
+  expect(screen.getByTestId('status-filter-trigger')).toBeInTheDocument()
 })
 
 test('Searching with no result', async () => {
@@ -1233,7 +1233,6 @@ test('Searching with no result', async () => {
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
   render(<FilterProjects {...props} />)
-
   const searchTerm = 'my project'
 
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({searchTerm}))

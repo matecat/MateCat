@@ -8,6 +8,7 @@ import {EMAIL_PATTERN} from '../../constants/Constants'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 export const CreateTeam = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
@@ -47,7 +48,7 @@ export const CreateTeam = () => {
         Create a team and invite your colleagues to share and manage projects.
       </p>
       <div>
-        <h2>Assign a name to your team</h2>
+        <h5>Assign a name to your team</h5>
         <div className="team-name-container">
           <input
             className="team-modal-input"
@@ -59,7 +60,7 @@ export const CreateTeam = () => {
         </div>
       </div>
       <div>
-        <h2>Add members</h2>
+        <h5>Add members</h5>
         <EmailsBadge
           name="team"
           value={emailsCollection}
@@ -83,13 +84,14 @@ export const CreateTeam = () => {
           </div>
         </div>
       </div>
-      <button
-        className="create-team ui primary button open button-close"
+      <Button
+        className="submit-team-button"
+        type={BUTTON_TYPE.PRIMARY}
         disabled={isDisabledCreation}
         onClick={sendCreate}
       >
         Create
-      </button>
+      </Button>
     </div>
   )
 }

@@ -19,4 +19,6 @@
 @use '../UserProjectDropdown';
 @use '../signin/OnBoarding';
 @use '../MembersFilter';
+@use '../Projects/ProjectContainer.scss';
+@use '../Projects/JobContainer.scss';
 @use '../ProjectBulkActions';

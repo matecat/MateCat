@@ -202,6 +202,12 @@ test('Delete MT Confirm', async () => {
   const user = userEvent.setup()
   global.config.isLoggedIn = true
 
+  mswServer.use(
+    http.post(`${config.basepath}api/app/disable-engine`, () => {
+      return HttpResponse.json({})
+    }),
+  )
+
   const values = {
     mtEngines: mtEnginesMock,
     setMtEngines: () => {},

@@ -189,6 +189,7 @@ class QualityReportControllerAPI extends KleinController
             $seg['ice_modified'] = $segment->ice_modified;
             $seg['is_pre_translated'] = $segment->is_pre_translated;
             $seg['issues'] = $segment->issues;
+            $seg['history'] = $segment->history;
             $seg['last_revisions'] = $segment->last_revisions;
             $seg['last_translation'] = $segment->last_translation;
             $seg['locked'] = $segment->locked;

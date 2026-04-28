@@ -129,7 +129,6 @@ export const LaraOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
-      <h2>Glossaries</h2>
       <LaraGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}

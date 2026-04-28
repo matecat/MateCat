@@ -50,17 +50,8 @@ class QualityReportSegmentModel
      */
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
-        if (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != 'all') {
-            $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
-                $this->chunk->getProject()->id_qa_model,
-                $options['filter']['issue_category']
-            );
-
-            if (!empty($subCategories) > 0) {
-                $options['filter']['issue_category'] = array_map(function (CategoryStruct $subcat) {
-                    return $subcat->id;
-                }, $subCategories);
-            }
+        if (isset($options['filter']['issue_category'])) {
+            $options['filter']['issue_category'] = $this->issueCategoryIds($options['filter']['issue_category']);
         }
 
         /**
@@ -88,6 +79,39 @@ class QualityReportSegmentModel
         );
 
         return $segments_id;
+    }
+
+    /**
+     * Processes a string of issue category IDs, converting them into an array of integers,
+     * and expands the list by including IDs of subcategories if applicable.
+     *
+     * @param string $issue_category A comma-separated string of issue category IDs.
+     *                                If it contains 'all', the method returns null.
+     *
+     * @return array|null Returns an array of category IDs, including subcategory IDs, or null if 'all' is present.
+     */
+    private function issueCategoryIds(string $issue_category): ?array
+    {
+        if (str_contains($issue_category, 'all')){
+            return null;
+        }
+
+        $issue_category = array_map('intval', explode(',', $issue_category));
+
+        foreach ($issue_category as $issue_category_id) {
+            $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
+                $this->chunk->getProject()->id_qa_model,
+                $issue_category_id
+            );
+
+            if (!empty($subCategories)) {
+                foreach ($subCategories as $subcat) {
+                    $issue_category[] = (int)$subcat->id;
+                }
+            }
+        }
+
+        return $issue_category;
     }
 
     /**
@@ -180,10 +204,9 @@ class QualityReportSegmentModel
         $commentsDao = new CommentDao;
         $comments = $commentsDao->getThreadsBySegments($segment_ids, $this->chunk->id);
 
-        $all_events = [];
-
         $translationVersionDao = new TranslationVersionDao;
         $all_events = $translationVersionDao->getAllRelevantEvents($segment_ids, $this->chunk->id);
+        $history_events = $translationVersionDao->historyEvents($segment_ids, $this->chunk->id);
 
         $segments = [];
 
@@ -205,7 +228,8 @@ class QualityReportSegmentModel
             $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI);
             $this->_assignIssues($seg, $issues ?? [], $issue_comments);
             $this->_assignComments($seg, $comments);
-            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events, $isForUI);
+            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
+            $this->_populateHistory($seg, $Filter, $history_events,$issues ?? [], $isForUI);
 
             $seg->pee_translation_revise = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
@@ -214,6 +238,55 @@ class QualityReportSegmentModel
         }
 
         return $segments;
+    }
+
+    /**
+     * Populates the history for a given quality report segment by organizing events and associated issues.
+     *
+     * @param QualityReportSegmentStruct $seg The segment structure where the history will be populated.
+     * @param MateCatFilter $Filter The filter used to process translations for UI rendering.
+     * @param array $events An array of SegmentEventsStruct objects representing the events related to the segment.
+     * @param array $issues An array of issue objects to associate with the events, filtered by segment and version.
+     * @param bool $isForUI Indicates whether the translation should be processed for UI display purposes.
+     *
+     * @return void
+     */
+    protected function _populateHistory(
+        QualityReportSegmentStruct $seg,
+        MateCatFilter $Filter,
+        array $events = [],
+        array $issues = [],
+        bool $isForUI = false
+    )
+    {
+        $elements = [];
+
+        $eventsForThisSegment = array_filter($events, function (HistoryElementStruct $event) use ($seg) {
+            return $event->id_segment == $seg->sid;
+        });
+
+        /** @var HistoryElementStruct $event */
+        foreach ($eventsForThisSegment as $event) {
+            $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation) : $event->translation;
+
+            $elements[] = [
+                'status' => $event->status,
+                'date' => $event->creation_date ?? $event->create_date,
+                'revision_number' => ReviewUtils::sourcePageToRevisionNumber($event->source_page),
+                'source_page' => $event->source_page,
+                'version_number' => $event->version_number,
+                'translation' => $translation,
+                'issues' => array_filter($issues, function ($issue) use ($event) {
+                    return
+                        $issue->deleted_at === null &&
+                        $event->id_segment == $issue->segment_id &&
+                        $event->version_number == $issue->translation_version
+                    ;
+                })
+            ];
+        }
+
+        $seg->history = $elements;
     }
 
     /**

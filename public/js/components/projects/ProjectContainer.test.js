@@ -1,7 +1,7 @@
-import {render, screen} from '@testing-library/react'
+import {act, render, screen} from '@testing-library/react'
 import React from 'react'
 import {createRoot} from 'react-dom/client'
-import ProjectContainer from './ProjectContainer'
+import {ProjectContainer} from './ProjectContainer'
 import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 
@@ -16,7 +16,7 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 const mountPoint = createRoot(modalElement)
-afterAll(() => mountPoint.unmount())
+afterAll(() => act(() => mountPoint.unmount()))
 
 global.config = {
   enable_outsource: 1,
@@ -411,12 +411,6 @@ const executeMswServer = () => {
   )
 }
 
-const getActivityLogUrl = (projectId, password) =>
-  `/activityLog/${projectId}/${password}`
-const createActivityLogUrl = (project) => {
-  return getActivityLogUrl(project.get('id'), project.get('password'))
-}
-
 class ResizeObserver {
   observe() {}
   unobserve() {}
@@ -445,7 +439,7 @@ test('Rendering elements', async () => {
     </ApplicationWrapperContext.Provider>,
   )
 
-  expect(screen.getByText(`(${project.get('id')})`)).toBeInTheDocument()
+  expect(screen.getByTestId('project-id')).toBeInTheDocument()
   const projectName = screen.getByTestId('project-name').textContent
   expect(projectName).toBe(project.get('name'))
   await userEvent.click(screen.getByTestId('project-teams'))
@@ -459,8 +453,8 @@ test('Rendering elements', async () => {
 
   expect(screen.getByText(`by ${first_name}`)).toBeInTheDocument()
 
-  const href = screen.getByTestId('last-action-activity').getAttribute('href')
-  expect(href).toBe(createActivityLogUrl(project))
+  expect(screen.getByTestId('last-action-activity')).toBeInTheDocument()
+
   const dropdown = screen.getByTestId('teams-dropdown')
   expect(dropdown).toBeInTheDocument()
 

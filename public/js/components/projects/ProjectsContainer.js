@@ -1,323 +1,244 @@
-import React from 'react'
-import $ from 'jquery'
-import {flushSync} from 'react-dom'
-import ProjectContainer from './ProjectContainer'
-import UserConstants from '../../constants/UserConstants'
-import ManageConstants from '../../constants/ManageConstants'
+import PropTypes from 'prop-types'
+import React, {useEffect, useState} from 'react'
 import ProjectsStore from '../../stores/ProjectsStore'
-import UserStore from '../../stores/UserStore'
-import ManageActions from '../../actions/ManageActions'
-import {fromJS} from 'immutable'
+import ManageConstants from '../../constants/ManageConstants'
 import {ProjectsBulkActions} from './ProjectsBulkActions'
+import {ProjectContainer} from './ProjectContainer'
+import UserConstants from '../../constants/UserConstants'
+import UserStore from '../../stores/UserStore'
+import {DASHBOARD_REQUEST_PROJECTS_STATUS} from '../../constants/Constants'
+import {SPINNER_LOADER_SIZE, SpinnerLoader} from '../common/SpinnerLoader'
+import {Button, BUTTON_TYPE, BUTTON_SIZE} from '../common/Button/Button'
+import ManageActions from '../../actions/ManageActions'
+import CatToolActions from '../../actions/CatToolActions'
 
-class ProjectsContainer extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      projects: fromJS([]),
-      more_projects: false,
-      reloading_projects: false,
-      team: this.props.team,
-      teams: this.props.teams,
-      filtering: false,
+export const ProjectsContainer = ({
+  team,
+  teams,
+  downloadTranslationFn,
+  selectedUser,
+  requestProjectsStatus,
+}) => {
+  const [projects, setProjects] = useState()
+  const [teamState, setTeamState] = useState(team)
+  const [teamsState, setTeamsState] = useState(teams)
+  const [isFilterApplied, setIsFilterApplied] = useState(false)
+  const [reachNoMoreProjects, setReachNoMoreProjects] = useState(false)
+
+  useEffect(() => {
+    const renderProjects = (projects, team, teams, hideSpinner, filtering) => {
+      setProjects(projects)
+      setTeamState((prevState) => (team ? team : prevState))
+      setTeamsState((prevState) => (teams ? teams : prevState))
+      setIsFilterApplied(filtering)
+      setReachNoMoreProjects((prevState) => (hideSpinner ? prevState : false))
     }
-    this.renderProjects = this.renderProjects.bind(this)
-    this.updateProjects = this.updateProjects.bind(this)
-    this.updateTeam = this.updateTeam.bind(this)
-    this.updateTeams = this.updateTeams.bind(this)
-    this.hideSpinner = this.hideSpinner.bind(this)
-    this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this)
-  }
+    const updateProjects = (projects) => setProjects(projects)
+    const updateTeams = (teams) => setTeamsState(teams)
+    const updateTeam = (team) =>
+      setTeamState((prevState) =>
+        team.get('id') === prevState.get('id') ? team : prevState,
+      )
+    const noMoreProjects = () => setReachNoMoreProjects(true)
 
-  renderProjects(projects, team, teams, hideSpinner, filtering) {
-    let more_projects = true
-    if (hideSpinner) {
-      more_projects = this.state.more_projects
+    ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, renderProjects)
+    ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, updateProjects)
+    UserStore.addListener(UserConstants.UPDATE_TEAM, updateTeam)
+    UserStore.addListener(UserConstants.UPDATE_TEAMS, updateTeams)
+    UserStore.addListener(UserConstants.RENDER_TEAMS, updateTeams)
+    ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, noMoreProjects)
+
+    setTimeout(() => {
+      const notification = {
+        title: 'Notification',
+        text: 'Lorem ipsum bla bla',
+        type: 'success',
+        autoDismiss: false,
+      }
+      CatToolActions.addNotification(notification)
+    })
+
+    return () => {
+      ProjectsStore.removeListener(
+        ManageConstants.RENDER_PROJECTS,
+        renderProjects,
+      )
+      ProjectsStore.removeListener(
+        ManageConstants.UPDATE_PROJECTS,
+        updateProjects,
+      )
+      UserStore.removeListener(UserConstants.UPDATE_TEAM, updateTeam)
+      UserStore.removeListener(UserConstants.UPDATE_TEAMS, updateTeams)
+      UserStore.removeListener(UserConstants.RENDER_TEAMS, updateTeams)
+      ProjectsStore.removeListener(
+        ManageConstants.NO_MORE_PROJECTS,
+        noMoreProjects,
+      )
     }
-    let teamState = team ? team : this.state.team
-    let teamsState = teams ? teams : this.state.teams
-    let filteringState = filtering ? filtering : this.state.filtering
-    this.setState({
-      projects: projects,
-      more_projects: more_projects,
-      reloading_projects: false,
-      team: teamState,
-      teams: teamsState,
-      filtering: filteringState,
-    })
-  }
+  }, [])
 
-  updateTeam(team) {
-    if (team.get('id') === this.state.team.get('id')) {
-      this.setState({
-        team: team,
-      })
-    }
-  }
+  const getEmptyState = () => {
+    const thereAreMembers =
+      (teamState.get('members') && teamState.get('members').size > 1) ||
+      (teamState.get('pending_invitations') &&
+        teamState.get('pending_invitations').size > 0) ||
+      teamState.get('type') === 'personal'
 
-  updateTeams(teams) {
-    this.setState({
-      teams: teams,
-    })
-  }
+    const isProjectsEmpty =
+      typeof projects !== 'undefined' && projects.size === 0
 
-  updateProjects(projects) {
-    flushSync(() =>
-      this.setState({
-        projects: projects,
-      }),
-    )
-  }
-
-  hideSpinner() {
-    this.setState({
-      more_projects: false,
-    })
-  }
-
-  showProjectsReloadSpinner() {
-    this.setState({
-      reloading_projects: true,
-    })
-  }
-
-  openAddMember() {
-    ManageActions.openModifyTeamModal(this.state.team.toJS())
-  }
-
-  createNewProject() {
-    window.open(`/?idTeam=${this.state.team.get('id')}`, '_blank')
-  }
-
-  getButtonsNoProjects() {
-    if (!this.state.team) return
-
-    let thereAreMembers =
-      (this.state.team.get('members') &&
-        this.state.team.get('members').size > 1) ||
-      (this.state.team.get('pending_invitations') &&
-        this.state.team.get('pending_invitations').size > 0) ||
-      this.state.team.get('type') === 'personal'
     return (
       <div className="notify-notfound">
-        {this.state.filtering ? (
+        {isFilterApplied ? (
           <div>
             <div className="message-nofound">No Projects Found</div>
             <div className="no-results-found"></div>
           </div>
-        ) : this.state.team.get('type') === 'personal' ? (
+        ) : isProjectsEmpty && teamState.get('type') === 'personal' ? (
           <div className="no-results-teams">
             <div className="message-nofound">Welcome to your Personal area</div>
             <div className="welcome-to-matecat"></div>
             <div className="message-create">
-              {/*Lorem ipsum dolor sit amet*/}
-              <p>
-                <a
-                  className="ui primary button"
-                  onClick={this.createNewProject.bind(this)}
+              <Button
+                size={BUTTON_SIZE.MEDIUM}
+                type={BUTTON_TYPE.PRIMARY}
+                onClick={() =>
+                  window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
+                }
+              >
+                Create Project
+              </Button>
+              {!thereAreMembers && (
+                <Button
+                  size={BUTTON_SIZE.MEDIUM}
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={() =>
+                    ManageActions.openModifyTeamModal(teamState.toJS())
+                  }
                 >
-                  Create Project
-                </a>
-              </p>
-              {!thereAreMembers ? (
-                <p>
-                  <a
-                    className="ui primary button"
-                    onClick={this.openAddMember.bind(this)}
-                  >
-                    Add member
-                  </a>
-                </p>
-              ) : (
-                ''
+                  Add member
+                </Button>
               )}
             </div>
           </div>
         ) : (
-          <div className="no-results-teams">
-            <div className="message-nofound">
-              Welcome to {this.state.team.get('name')}
-            </div>
-            <div className="no-results-found"></div>
-            <div className="message-create">
-              {/*Lorem ipsum dolor sit amet*/}
-              <p>
-                <a
-                  className="ui primary button"
-                  onClick={this.createNewProject.bind(this)}
+          isProjectsEmpty && (
+            <div className="no-results-teams">
+              <div className="message-nofound">
+                Welcome to {teamState.get('name')}
+              </div>
+              <div className="no-results-found"></div>
+              <div className="message-create">
+                <Button
+                  size={BUTTON_SIZE.MEDIUM}
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={() =>
+                    window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
+                  }
                 >
                   Create Project
-                </a>
-                {!thereAreMembers ? (
-                  <a
-                    className="ui primary button"
-                    onClick={this.openAddMember.bind(this)}
+                </Button>
+                {!thereAreMembers && (
+                  <Button
+                    size={BUTTON_SIZE.MEDIUM}
+                    type={BUTTON_TYPE.PRIMARY}
+                    onClick={() =>
+                      ManageActions.openModifyTeamModal(teamState.toJS())
+                    }
                   >
                     Add member
-                  </a>
-                ) : (
-                  ''
+                  </Button>
                 )}
-              </p>
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
     )
   }
 
-  componentDidMount() {
-    ProjectsStore.addListener(
-      ManageConstants.RENDER_PROJECTS,
-      this.renderProjects,
-    )
-    // ProjectsStore.addListener(ManageConstants.RENDER_ALL_TEAM_PROJECTS, this.renderAllTeamssProjects);
-    ProjectsStore.addListener(
-      ManageConstants.UPDATE_PROJECTS,
-      this.updateProjects,
-    )
-    ProjectsStore.addListener(
-      ManageConstants.NO_MORE_PROJECTS,
-      this.hideSpinner,
-    )
-    ProjectsStore.addListener(
-      ManageConstants.SHOW_RELOAD_SPINNER,
-      this.showProjectsReloadSpinner,
-    )
-    UserStore.addListener(UserConstants.UPDATE_TEAM, this.updateTeam)
-    UserStore.addListener(UserConstants.UPDATE_TEAMS, this.updateTeams)
-    UserStore.addListener(UserConstants.RENDER_TEAMS, this.updateTeams)
-  }
-
-  componentWillUnmount() {
-    ProjectsStore.removeListener(
-      ManageConstants.RENDER_PROJECTS,
-      this.renderProjects,
-    )
-    // ProjectsStore.removeListener(ManageConstants.RENDER_ALL_TEAM_PROJECTS, this.renderAllTeamssProjects);
-    ProjectsStore.removeListener(
-      ManageConstants.UPDATE_PROJECTS,
-      this.updateProjects,
-    )
-    ProjectsStore.removeListener(
-      ManageConstants.NO_MORE_PROJECTS,
-      this.hideSpinner,
-    )
-    ProjectsStore.removeListener(
-      ManageConstants.SHOW_RELOAD_SPINNER,
-      this.showProjectsReloadSpinner,
-    )
-    UserStore.removeListener(UserConstants.UPDATE_TEAM, this.updateTeam)
-    UserStore.removeListener(UserConstants.UPDATE_TEAMS, this.updateTeams)
-    UserStore.removeListener(UserConstants.RENDER_TEAMS, this.updateTeams)
-  }
-
-  componentDidUpdate() {
-    let self = this
-    if (!this.state.more_projects) {
-      setTimeout(function () {
-        $(self.spinner).css('visibility', 'hidden')
-      }, 3000)
-    }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      !nextState.projects.equals(this.state.projects) ||
-      nextState.more_projects !== this.state.more_projects ||
-      nextState.reloading_projects !== this.state.reloading_projects ||
-      !nextState.team.equals(this.state.team) ||
-      !nextState.teams.equals(this.state.teams)
-    )
-  }
-
-  render() {
-    let projects = this.state.projects
-
-    let items = projects.map((project) => (
-      <ProjectContainer
-        key={project.get('id')}
-        project={project}
-        downloadTranslationFn={this.props.downloadTranslationFn}
-        team={this.state.team}
-        teams={this.state.teams}
-        selectedUser={this.props.selectedUser}
-      />
-    ))
-
-    let spinner = ''
-    if (this.state.more_projects && projects.size > 9) {
-      spinner = (
-        <div className="ui one column grid">
-          <div className="one column spinner" style={{height: '100px'}}>
-            <div className="ui active inverted dimmer more">
-              <div className="ui medium text loader">Loading more projects</div>
-            </div>
+  return (
+    <div
+      className={`layout__container projects-container ${requestProjectsStatus === DASHBOARD_REQUEST_PROJECTS_STATUS.RELOAD_IN_PROGRESS ? 'projects-container--loading' : ''}`}
+    >
+      {projects?.size > 0 && (
+        <div className="projects-container-title">
+          <h4>Projects</h4>
+          <div>
+            <span>Legend:</span>
+            <span>
+              <span className="projects-container-legend-unconfirmed-quad" />
+              Unconfirmed
+            </span>
+            <span>
+              <span className="projects-container-legend-translated-quad" />
+              Translated
+            </span>
+            <span>
+              <span className="projects-container-legend-approved-quad" />
+              Revise
+            </span>
+            <span>
+              <span className="projects-container-legend-approved2-quad" />
+              Revise 2
+            </span>
           </div>
         </div>
-      )
-    } else if (projects.size > 9) {
-      spinner = (
+      )}
+
+      <ProjectsBulkActions
+        projects={projects?.toJS() ?? []}
+        teams={teamsState.toJS()}
+        isSelectedTeamPersonal={teamState.get('type') === 'personal'}
+      >
+        {projects?.size > 0 ? (
+          <div className="projects-list">
+            {projects.map((project) => (
+              <ProjectContainer
+                key={project.get('id')}
+                project={project}
+                downloadTranslationFn={downloadTranslationFn}
+                team={teamState}
+                teams={teamsState}
+                selectedUser={selectedUser}
+              />
+            ))}
+          </div>
+        ) : (
+          getEmptyState()
+        )}
+      </ProjectsBulkActions>
+
+      {reachNoMoreProjects ? (
+        <div className="spinner-loader-more-projects spinner-loader-more-projects--visible">
+          <h5>No more projects</h5>
+        </div>
+      ) : (
         <div
-          className="ui one column grid"
-          ref={(spinner) => (this.spinner = spinner)}
+          className={`spinner-loader-more-projects ${
+            requestProjectsStatus ===
+            DASHBOARD_REQUEST_PROJECTS_STATUS.MORE_IN_PROGRESS
+              ? 'spinner-loader-more-projects--visible'
+              : ''
+          }`}
         >
-          <div className="one column spinner center aligned">
-            <div className="ui medium header">No more projects</div>
-          </div>
+          <SpinnerLoader
+            className="spinner-loader-more-projects__loader-component"
+            size={SPINNER_LOADER_SIZE.MEDIUM}
+            label="Loading more projects"
+          />
         </div>
-      )
-    }
-
-    if (!items.size) {
-      items = this.getButtonsNoProjects()
-      spinner = ''
-    }
-
-    var spinnerReloadProjects = ''
-    if (this.state.reloading_projects) {
-      var spinnerContainer = {
-        position: 'absolute',
-        height: '100%',
-        width: '100%',
-        backgroundColor: 'rgba(76, 69, 69, 0.3)',
-        top: $(window).scrollTop(),
-        left: 0,
-        zIndex: 3,
-      }
-      spinnerReloadProjects = (
-        <div style={spinnerContainer}>
-          <div className="ui active inverted dimmer">
-            <div className="ui massive text loader">Updating Projects</div>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="project-list">
-        <div className="ui container">
-          <ProjectsBulkActions
-            projects={this.state.projects.toJS()}
-            teams={this.state.teams.toJS()}
-            isSelectedTeamPersonal={this.state.team.get('type') === 'personal'}
-          >
-            {this.props.fetchingProjects ? (
-              <div className="ui active inverted dimmer">
-                <div className="ui massive text loader">Loading Projects</div>
-              </div>
-            ) : (
-              <React.Fragment>
-                {spinnerReloadProjects}
-                {items}
-                {spinner}
-              </React.Fragment>
-            )}
-          </ProjectsBulkActions>
-        </div>
-      </div>
-    )
-  }
+      )}
+    </div>
+  )
 }
 
-export default ProjectsContainer
+ProjectsContainer.propTypes = {
+  team: PropTypes.object,
+  teams: PropTypes.object,
+  downloadTranslationFn: PropTypes.func,
+  selectedUser: PropTypes.string,
+  requestProjectsStatus: PropTypes.oneOf(
+    Object.values(DASHBOARD_REQUEST_PROJECTS_STATUS),
+  ),
+}

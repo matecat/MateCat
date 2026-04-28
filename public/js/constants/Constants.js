@@ -30,6 +30,7 @@ export const ANALYSIS_STATUS = {
   EMPTY: 'EMPTY',
   DONE: 'DONE',
   NOT_TO_ANALYZE: 'NOT_TO_ANALYZE',
+  FAST_OK: 'FAST_OK',
 }
 
 export const UNIT_COUNT = {
@@ -70,3 +71,9 @@ export const ANALYSIS_WORKFLOW_TYPES = {
 }
 
 export const splittedTranslationPlaceholder = '##$_SPLIT$##'
+
+export const DASHBOARD_REQUEST_PROJECTS_STATUS = {
+  RELOAD_IN_PROGRESS: 'reload_in_progress',
+  MORE_IN_PROGRESS: 'more_in_progress',
+  COMPLETED: 'completed',
+}

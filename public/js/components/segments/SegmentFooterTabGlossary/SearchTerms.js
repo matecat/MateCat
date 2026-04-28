@@ -4,6 +4,8 @@ import {SegmentedControl} from '../../common/SegmentedControl'
 import IconClose from '../../icons/IconClose'
 import IconSearch from '../../icons/IconSearch'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import IconAdd from '../../icons/IconAdd'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
 
 export const SearchTerms = () => {
   const {
@@ -101,13 +103,15 @@ export const SearchTerms = () => {
         />
       </div>
       <div className="glossary__button-add-container">
-        <button
-          className="glossary__button-add"
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           onClick={openForm}
           disabled={isLoading}
         >
-          + Add Term
-        </button>
+          <IconAdd size={12} />
+          Add Term
+        </Button>
       </div>
     </div>
   )
