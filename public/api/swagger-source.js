@@ -927,7 +927,7 @@ var spec = {
             description:
                 'The id of the parent job of the segment you intend to disable',
             required: true,
-            type: 'string',
+            type: 'integer',
           },
           {
             name: 'password',
@@ -943,7 +943,7 @@ var spec = {
             description:
                 'The id of the segment you intend to disable',
             required: true,
-            type: 'string',
+            type: 'integer',
           }
         ],
         responses: {
@@ -971,15 +971,15 @@ var spec = {
             name: 'id_job',
             in: 'path',
             description:
-                'The id of the parent job of the segment you intend to disable',
+                'The id of the parent job of the segment you intend to enable',
             required: true,
-            type: 'string',
+            type: 'integer',
           },
           {
             name: 'password',
             in: 'path',
             description:
-                'The password of the parent job of the segment you intend to disable',
+                'The password of the parent job of the segment you intend to enable',
             required: true,
             type: 'string',
           },
@@ -987,9 +987,9 @@ var spec = {
             name: 'id_segment',
             in: 'path',
             description:
-                'The id of the segment you intend to disable',
+                'The id of the segment you intend to enable',
             required: true,
-            type: 'string',
+            type: 'integer',
           }
         ],
         responses: {
