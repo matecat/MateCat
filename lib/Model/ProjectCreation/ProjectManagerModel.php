@@ -312,9 +312,9 @@ class ProjectManagerModel
      * @param int $idProject
      * @param int $batchSize Max rows per batched DELETE (must be >= 1)
      *
- * @throws \InvalidArgumentException if $batchSize < 1
- * @throws PDOException
- */
+     * @throws \InvalidArgumentException if $batchSize < 1
+     * @throws PDOException
+     */
     public function deleteProject(int $idProject, int $batchSize = 200): void
     {
         if ($batchSize < 1) {

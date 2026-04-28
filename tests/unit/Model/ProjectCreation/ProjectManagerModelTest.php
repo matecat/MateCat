@@ -14,7 +14,7 @@ class ProjectManagerModelTest extends TestCase
     /** @var list<string> Queries passed to PDO::prepare() */
     private array $preparedQueries = [];
 
-    /** @var list<array<int, mixed>> Values passed to PDOStatement::execute() */
+    /** @var list<array<int|string, mixed>> Values passed to PDOStatement::execute() */
     private array $executedValues = [];
 
     private int $originalBatchSleep;
