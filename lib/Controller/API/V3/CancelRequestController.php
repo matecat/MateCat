@@ -9,7 +9,6 @@
 namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Controller\Traits\RateLimiterTrait;
@@ -18,15 +17,10 @@ use Exception;
 use Klein\Response;
 use Model\DataAccess\DaoCacheTrait;
 use Model\Exceptions\NotFoundException;
-use Model\LQA\ChunkReviewDao;
-use Model\LQA\ChunkReviewStruct;
-use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentMetadataDao;
-use Model\Segments\SegmentMetadataStruct;
 use Model\Translations\SegmentTranslationDao;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\Utils;
-use View\API\V3\Json\Chunk;
 
 class CancelRequestController extends KleinController
 {

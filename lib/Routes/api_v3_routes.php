@@ -35,8 +35,8 @@ $klein->with('/api/v3/jobs/[i:id_job]/[:password]', function () {
     route('/archive', 'POST', ['Controller\API\V2\JobsController', 'archive']);
     route('/active', 'POST', ['Controller\API\V2\JobsController', 'active']);
 
-    route('/segment/disable/[i:id_segment]', 'GET', ['\Controller\API\V3\CancelRequestController', 'cancelRequest']);
-    route('/segment/enable/[i:id_segment]', 'GET', ['\Controller\API\V3\CancelRequestController', 'enableRequest']);
+    route('/segment/disable/[i:id_segment]', 'POST', ['\Controller\API\V3\CancelRequestController', 'cancelRequest']);
+    route('/segment/enable/[i:id_segment]', 'POST', ['\Controller\API\V3\CancelRequestController', 'enableRequest']);
 });
 
 $klein->with('/api/v3/teams', function () {

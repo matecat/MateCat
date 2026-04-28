@@ -919,7 +919,7 @@ var spec = {
       },
     },
     '/api/v3/jobs/{id_job}/{password}/segment/disable/{id_segment}': {
-      get: {
+      post: {
         parameters: [
           {
             name: 'id_job',
@@ -965,7 +965,7 @@ var spec = {
       }
     },
     '/api/v3/jobs/{id_job}/{password}/segment/enable/{id_segment}': {
-      get: {
+      post: {
         parameters: [
           {
             name: 'id_job',
