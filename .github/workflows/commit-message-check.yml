@@ -2,7 +2,7 @@ name: Commit Message Check
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize, labeled]
 
 permissions:
   contents: read
