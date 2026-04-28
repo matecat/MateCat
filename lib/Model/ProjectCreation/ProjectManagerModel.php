@@ -312,8 +312,9 @@ class ProjectManagerModel
      * @param int $idProject
      * @param int $batchSize Max rows per batched DELETE (must be >= 1)
      *
-     * @throws \InvalidArgumentException if $batchSize < 1
-     */
+ * @throws \InvalidArgumentException if $batchSize < 1
+ * @throws PDOException
+ */
     public function deleteProject(int $idProject, int $batchSize = 200): void
     {
         if ($batchSize < 1) {
@@ -343,6 +344,8 @@ class ProjectManagerModel
      * @param PDO $conn
      * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
      * @param int $batchSize
+     *
+     * @throws PDOException
      */
     private function deleteJobScopedData(PDO $conn, array $jobs, int $batchSize): void
     {
@@ -394,6 +397,8 @@ class ProjectManagerModel
      * @param PDO $conn
      * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
      * @param int $batchSize
+     *
+     * @throws PDOException
      */
     private function deleteSegmentScopedData(PDO $conn, array $jobs, int $batchSize): void
     {
@@ -444,6 +449,8 @@ class ProjectManagerModel
      * @param PDO $conn
      * @param int $idProject
      * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
+     *
+     * @throws PDOException
      */
     private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs): void
     {
@@ -496,6 +503,8 @@ class ProjectManagerModel
      * @param int $lastSegment
      * @param int $batchSize
      * @param array<string, mixed> $extraParams Additional bound parameters (e.g. ['id_job' => 10])
+     *
+     * @throws PDOException
      */
     private function deleteInBatches(
         PDO   $conn,
