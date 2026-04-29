@@ -62,19 +62,19 @@ import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/ge
 import TextUtils from '../utils/textUtils'
 import {TAB} from '../constants/SegmentTabConstants'
 
-// Lazy-loaded to break circular dependencies
-// Using require() instead of import so madge's ES6 detective doesn't
-// register these as static edges — webpack still resolves them correctly
-// at call time.
+// Async-loaded to break circular dependency for static analysis.
 let _SegmentsFilterUtil
 let _SetTranslationUtil
-const getSegmentsFilterUtil = () =>
-  _SegmentsFilterUtil ||
-  (_SegmentsFilterUtil =
-    require('../components/header/cattol/segment_filter/segment_filter').default)
-const getSetTranslationUtil = () =>
-  _SetTranslationUtil ||
-  (_SetTranslationUtil = require('../setTranslationUtil'))
+import(
+  '../components/header/cattol/segment_filter/segment_filter'
+).then((m) => {
+  _SegmentsFilterUtil = m.default
+})
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
+const getSegmentsFilterUtil = () => _SegmentsFilterUtil
+const getSetTranslationUtil = () => _SetTranslationUtil
 
 const SegmentActions = {
   localStorageCommentsClosed:

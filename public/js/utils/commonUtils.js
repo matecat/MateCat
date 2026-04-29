@@ -9,13 +9,20 @@ import {
   setLastSegmentFromLocalStorage,
 } from './segmentLocalStorage'
 
-// Lazy-loaded to break circular dependencies
+// Async-loaded to break circular dependency for static analysis.
+// In Vite/ESM, the module resolves before any user interaction triggers these getters.
 let _SegmentActions
-const getSegmentActions = () =>
-  _SegmentActions ||
-  (_SegmentActions = require('../actions/SegmentActions').default)
+import('../actions/SegmentActions').then((m) => {
+  _SegmentActions = m.default
+})
+const getSegmentActions = () => _SegmentActions
+
+let _SetTranslationUtil
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
 const checkTranslationTailEmpty = () =>
-  require('../setTranslationUtil').isTranslationTailEmpty()
+  _SetTranslationUtil.isTranslationTailEmpty()
 
 const CommonUtils = {
   millisecondsToTime(milli) {
