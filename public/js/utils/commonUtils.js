@@ -134,17 +134,23 @@ const CommonUtils = {
   },
 
   setBrowserHistoryBehavior() {
-    let updateAppByPopState = async () => {
-      const [{default: SegmentStore}, {default: SegmentActions}] =
-        await Promise.all([
-          import('../stores/SegmentStore'),
-          import('../actions/SegmentActions'),
-        ])
-      var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
-      var currentSegment = SegmentStore.getCurrentSegment()
-      if (segment && currentSegment?.sid === segment.sid) return
-      if (segment && !segment.opened) {
-        getSegmentActions().openSegment(this.parsedHash.segmentId, true)
+    const updateAppByPopState = () => {
+      try {
+        const segment = SegmentStore.getSegmentByIdToJS(
+          this.parsedHash.segmentId,
+        )
+        const currentSegment = SegmentStore.getCurrentSegment()
+        if (segment && currentSegment?.sid === segment.sid) return
+        if (segment && !segment.opened) {
+          getSegmentActions().openSegment(this.parsedHash.segmentId, true)
+        }
+      } catch (e) {
+        console.error(
+          '[commonUtils] updateAppByPopState failed for segment',
+          this.parsedHash.segmentId,
+          '- navigation may be incomplete:',
+          e,
+        )
       }
     }
 
