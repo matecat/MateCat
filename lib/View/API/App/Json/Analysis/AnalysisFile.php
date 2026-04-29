@@ -62,12 +62,12 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable
 
         foreach ($metadata as $metadatum) {
             if (isset($metadatum->key) and isset($metadatum->value)) {
-                $key = is_string($metadatum->key) ? $metadatum->key : (string)$metadatum->key;
+                $key   = is_string($metadatum->key) ? $metadatum->key : (string)$metadatum->key;
                 $value = is_string($metadatum->value)
                     ? $metadatum->value
-                    : (is_scalar($metadatum->value) || $metadatum->value === null
+                    : (is_scalar($metadatum->value)
                         ? (string)$metadatum->value
-                        : json_encode($metadatum->value));
+                        : (json_encode($metadatum->value) ?: ''));
 
                 $this->metadata[] = new AnalysisFileMetadata($key, $value);
             }

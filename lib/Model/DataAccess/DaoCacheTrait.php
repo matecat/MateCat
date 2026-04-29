@@ -56,7 +56,7 @@ trait DaoCacheTrait
      * Override to false in classes that use DaoCacheTrait for non-query storage
      * (e.g., SessionTokenStoreHandler).
      */
-    protected bool $xfetchEnabled = true;
+    protected bool $xFetchEnabled = true;
 
     /**
      * Last measured recomputation time (δ) in seconds.
@@ -163,7 +163,7 @@ trait DaoCacheTrait
 
         if ($unserialized instanceof XFetchEnvelope) {
             if (
-                $this->xfetchEnabled
+                $this->xFetchEnabled
                 && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD
                 && $this->_shouldRecompute($unserialized->storedAt, $unserialized->delta, $this->cacheTTL)
             ) {
@@ -201,7 +201,7 @@ trait DaoCacheTrait
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             $key = md5($query);
 
-            if ($this->xfetchEnabled && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD) {
+            if ($this->xFetchEnabled && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD) {
                 $delta = $this->lastComputeDelta > 0.0 ? $this->lastComputeDelta : static::XFETCH_FALLBACK_DELTA;
                 $this->lastComputeDelta = 0.0;
                 $storable = serialize(new XFetchEnvelope($value, microtime(true), $delta));

@@ -44,7 +44,7 @@ class XFetchAlgorithmTest extends TestCase
 
             public function getXfetchEnabled(): bool
             {
-                return $this->xfetchEnabled;
+                return $this->xFetchEnabled;
             }
         };
         $this->reflector = new ReflectionClass($this->traitUser);
@@ -218,7 +218,7 @@ class XFetchAlgorithmTest extends TestCase
     {
         $handler = new \Controller\Abstracts\Authentication\SessionTokenStoreHandler();
         $reflector = new ReflectionClass($handler);
-        $prop = $reflector->getProperty('xfetchEnabled');
-        $this->assertFalse($prop->getValue($handler), 'SessionTokenStoreHandler must have xfetchEnabled = false');
+        $prop = $reflector->getProperty('xFetchEnabled');
+        $this->assertFalse($prop->getValue($handler), 'SessionTokenStoreHandler must have xFetchEnabled = false');
     }
 }

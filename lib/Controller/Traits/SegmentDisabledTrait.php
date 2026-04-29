@@ -102,6 +102,7 @@ trait SegmentDisabledTrait
      */
     private function cacheInit(): void
     {
+        $this->xFetchEnabled = false;
         $this->setCacheTTL(self::CACHE_TTL);
         $this->_cacheSetConnection();
     }
