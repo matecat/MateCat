@@ -154,7 +154,7 @@ class GetWarningController extends KleinController
         $QA->setTargetSegLang($chunk->target);
 
         if (!$this->sourceContainsIcu && isset($characters_counter)) {
-            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
+            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value)[0] ?? null);
         }
 
         $QA->performConsistencyCheck();
@@ -164,7 +164,6 @@ class GetWarningController extends KleinController
                 'data' => [],
                 'errors' => []
             ],
-            $this->invokeLocalWarningsOnFeatures(),
             (new QALocalWarning(
                 $QA,
                 $id,
@@ -240,10 +239,4 @@ class GetWarningController extends KleinController
         return $chunk;
     }
 
-    private function invokeLocalWarningsOnFeatures(): array
-    {
-        return [
-            'data' => []
-        ];
-    }
 }
