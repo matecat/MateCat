@@ -21,7 +21,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { validatePrChecklist } = require('./.github/scripts/pr-readiness-check.js');
+            const { validatePrChecklist, getTestFilesWithAdditions } = require('./.github/scripts/pr-readiness-check.js');
             const pr = context.payload.pull_request;
 
             const labels = (pr.labels || []).map((l) => l.name);
@@ -41,12 +41,7 @@ jobs:
               .map((f) => f.filename)
               .filter((name) => name.startsWith('migrations/') && name !== 'migrations/AbstractMatecatMigration.php');
 
-            const testFilesWithAdditions = files
-              .filter((f) =>
-                (f.filename.startsWith('tests/') || /\.(test|spec)\.[jt]sx?$/.test(f.filename))
-                && f.additions > 0
-              )
-              .map((f) => f.filename);
+            const testFilesWithAdditions = getTestFilesWithAdditions(files);
 
             const errors = validatePrChecklist(pr.body || '', { migrationFilenames, testFilesWithAdditions });
 

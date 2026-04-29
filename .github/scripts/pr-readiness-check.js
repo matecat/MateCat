@@ -55,6 +55,20 @@ function hasNonEmptySection(sectionHeader, body) {
     return cleaned.trim().length > 0;
 }
 
+// ── Test-file detection ───────────────────────────────────────
+
+/** @param {string} filename */
+function isTestFile(filename) {
+    return filename.startsWith('tests/') || /\.(test|spec)\.[jt]sx?$/.test(filename);
+}
+
+/** @param {Array<{filename: string, additions: number}>} files */
+function getTestFilesWithAdditions(files) {
+    return files
+        .filter((f) => isTestFile(f.filename) && f.additions > 0)
+        .map((f) => f.filename);
+}
+
 // ── Checklist items ───────────────────────────────────────────
 
 const TYPE_ITEMS = [
@@ -193,6 +207,8 @@ function validatePrChecklist(body, {migrationFilenames = [], testFilesWithAdditi
 
 module.exports = {
     validatePrChecklist,
+    isTestFile,
+    getTestFilesWithAdditions,
     getChecked,
     getUnchecked,
     isChecked,

@@ -4,6 +4,8 @@ const {describe, it} = require('node:test');
 const assert = require('node:assert/strict');
 const {
     validatePrChecklist,
+    isTestFile,
+    getTestFilesWithAdditions,
     getChecked,
     getUnchecked,
     hasNonEmptySection,
@@ -59,7 +61,57 @@ function validBody({
 }
 
 const TEST_FILES = ['tests/unit/SomeTest.php'];
-const TEST_FILES_JS_COLOCATED = ['public/js/components/Foo.test.js'];
+
+// ── Test-file detection tests ─────────────────────────────────
+
+describe('isTestFile', () => {
+    it('matches files under tests/', () => {
+        assert.equal(isTestFile('tests/unit/SomeTest.php'), true);
+        assert.equal(isTestFile('tests/integration/ApiTest.php'), true);
+    });
+
+    it('matches co-located .test.js files', () => {
+        assert.equal(isTestFile('public/js/components/Foo.test.js'), true);
+    });
+
+    it('matches co-located .spec.ts files', () => {
+        assert.equal(isTestFile('src/utils/helper.spec.ts'), true);
+    });
+
+    it('matches .test.tsx and .spec.jsx', () => {
+        assert.equal(isTestFile('components/Bar.test.tsx'), true);
+        assert.equal(isTestFile('components/Bar.spec.jsx'), true);
+    });
+
+    it('rejects non-test files', () => {
+        assert.equal(isTestFile('public/js/components/Foo.js'), false);
+        assert.equal(isTestFile('src/utils/helper.ts'), false);
+        assert.equal(isTestFile('lib/testing/utils.js'), false);
+    });
+});
+
+describe('getTestFilesWithAdditions', () => {
+    it('returns test files with additions > 0', () => {
+        const files = [
+            {filename: 'tests/unit/FooTest.php', additions: 10},
+            {filename: 'src/Foo.php', additions: 5},
+            {filename: 'public/js/Bar.test.js', additions: 22},
+            {filename: 'public/js/Bar.js', additions: 8},
+        ];
+        assert.deepEqual(getTestFilesWithAdditions(files), [
+            'tests/unit/FooTest.php',
+            'public/js/Bar.test.js',
+        ]);
+    });
+
+    it('excludes test files with 0 additions', () => {
+        const files = [
+            {filename: 'tests/unit/FooTest.php', additions: 0},
+            {filename: 'public/js/Bar.test.js', additions: 0},
+        ];
+        assert.deepEqual(getTestFilesWithAdditions(files), []);
+    });
+});
 
 // ── Helper tests ──────────────────────────────────────────────
 
@@ -202,11 +254,6 @@ describe('validatePrChecklist', () => {
 
         it('passes when type is fix and test files have additions', () => {
             const errors = validatePrChecklist(validBody(), {testFilesWithAdditions: ['tests/unit/FooTest.php']});
-            assert.deepEqual(errors, []);
-        });
-
-        it('passes when type is fix and co-located JS test files have additions', () => {
-            const errors = validatePrChecklist(validBody(), {testFilesWithAdditions: TEST_FILES_JS_COLOCATED});
             assert.deepEqual(errors, []);
         });
 
