@@ -1,4 +1,5 @@
 import React from 'react'
+import {render} from '@testing-library/react'
 
 const mockIsReadonlySegment = jest.fn()
 
@@ -117,6 +118,7 @@ jest.mock('immutable', () => {
 jest.mock('../modals/ConfirmMessageModal', () => 'ConfirmMessageModal')
 
 import Segment from './Segment'
+import {fromJS} from 'immutable'
 
 function makeSegment(overrides = {}) {
   return {
@@ -140,10 +142,21 @@ function makeSegment(overrides = {}) {
   }
 }
 
-describe('Segment componentDidUpdate readonly re-evaluation', () => {
-  let instance
-  let setStateCalls
+function renderSegment(segment, extraProps = {}) {
+  return render(
+    <Segment
+      segment={segment}
+      segImmutable={fromJS(segment)}
+      isReview={false}
+      guessTagActive={false}
+      speechToTextActive={false}
+      files={{}}
+      {...extraProps}
+    />,
+  )
+}
 
+describe('Segment readonly re-evaluation', () => {
   beforeEach(() => {
     window.React = React
     window.config = {
@@ -153,84 +166,92 @@ describe('Segment componentDidUpdate readonly re-evaluation', () => {
       isReview: false,
       project_completion_feature_enabled: false,
       segmentFilterEnabled: false,
+      source_code: 'en-US',
       source_rfc: 'en-US',
+      target_code: 'it-IT',
       target_rfc: 'it-IT',
+      isSourceRTL: false,
+      isTargetRTL: false,
       tag_projection_languages: '{}',
     }
 
     mockIsReadonlySegment.mockReset()
-    setStateCalls = []
-
-    const segment = makeSegment()
-    instance = new Segment({
-      segment,
-      segImmutable: segment,
-      isReview: false,
-      guessTagActive: false,
-      speechToTextActive: false,
-      files: {},
-    })
-    // Override setState to capture calls since React's updater is a no-op on unmounted instances
-    instance.setState = (arg) => setStateCalls.push(arg)
   })
 
-  test('calls setState with readonly=true when segment changes and becomes disabled', () => {
-    const prevSegment = makeSegment()
-    const newSegment = makeSegment({
+  test('renders with readonly class when segment is disabled', () => {
+    const segment = makeSegment({
       metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
     })
-
-    instance.props = {...instance.props, segment: newSegment}
-    instance.state = {...instance.state, readonly: false}
     mockIsReadonlySegment.mockReturnValue(true)
 
-    instance.componentDidUpdate({...instance.props, segment: prevSegment})
+    const {container} = renderSegment(segment)
 
-    expect(mockIsReadonlySegment).toHaveBeenCalledWith(newSegment)
-    expect(setStateCalls).toContainEqual({readonly: true})
+    expect(mockIsReadonlySegment).toHaveBeenCalledWith(segment)
+    const section = container.querySelector('section')
+    expect(section.className).toContain('readonly')
   })
 
-  test('calls setState with readonly=false when segment changes and becomes enabled', () => {
-    const prevSegment = makeSegment({
+  test('renders without readonly class when segment is enabled', () => {
+    const segment = makeSegment()
+    mockIsReadonlySegment.mockReturnValue(false)
+
+    const {container} = renderSegment(segment)
+
+    expect(mockIsReadonlySegment).toHaveBeenCalledWith(segment)
+    const section = container.querySelector('section')
+    expect(section.className).not.toContain('readonly')
+  })
+
+  test('updates readonly class when segment prop changes', () => {
+    const segment = makeSegment()
+    mockIsReadonlySegment.mockReturnValue(false)
+
+    const {container, rerender} = renderSegment(segment)
+    const section = container.querySelector('section')
+    expect(section.className).not.toContain('readonly')
+
+    const disabledSegment = makeSegment({
       metadata: [{meta_key: 'translation_disabled', meta_value: '1'}],
     })
-    const newSegment = makeSegment({metadata: []})
+    mockIsReadonlySegment.mockReturnValue(true)
 
-    instance.props = {...instance.props, segment: newSegment}
-    instance.state = {...instance.state, readonly: true}
-    mockIsReadonlySegment.mockReturnValue(false)
+    rerender(
+      <Segment
+        segment={disabledSegment}
+        segImmutable={fromJS(disabledSegment)}
+        isReview={false}
+        guessTagActive={false}
+        speechToTextActive={false}
+        files={{}}
+      />,
+    )
 
-    instance.componentDidUpdate({...instance.props, segment: prevSegment})
-
-    expect(mockIsReadonlySegment).toHaveBeenCalledWith(newSegment)
-    expect(setStateCalls).toContainEqual({readonly: false})
+    expect(section.className).toContain('readonly')
   })
 
-  test('does not call setState when segment prop is unchanged', () => {
+  test('does not add readonly class when segment changes but readonly stays false', () => {
     const segment = makeSegment()
-
-    instance.props = {...instance.props, segment}
-    instance.state = {...instance.state, readonly: false}
     mockIsReadonlySegment.mockReturnValue(false)
 
-    instance.componentDidUpdate({...instance.props, segment})
+    const {container, rerender} = renderSegment(segment)
+    const section = container.querySelector('section')
+    expect(section.className).not.toContain('readonly')
 
-    const readonlyCalls = setStateCalls.filter((call) => 'readonly' in call)
-    expect(readonlyCalls).toHaveLength(0)
-  })
-
-  test('does not call setState when readonly value has not changed', () => {
-    const prevSegment = makeSegment()
-    const newSegment = makeSegment({translation: 'Different translation'})
-
-    instance.props = {...instance.props, segment: newSegment}
-    instance.state = {...instance.state, readonly: false}
+    const updatedSegment = makeSegment({translation: 'Different translation'})
     mockIsReadonlySegment.mockReturnValue(false)
 
-    instance.componentDidUpdate({...instance.props, segment: prevSegment})
+    rerender(
+      <Segment
+        segment={updatedSegment}
+        segImmutable={fromJS(updatedSegment)}
+        isReview={false}
+        guessTagActive={false}
+        speechToTextActive={false}
+        files={{}}
+      />,
+    )
 
-    expect(mockIsReadonlySegment).toHaveBeenCalledWith(newSegment)
-    const readonlyCalls = setStateCalls.filter((call) => 'readonly' in call)
-    expect(readonlyCalls).toHaveLength(0)
+    expect(mockIsReadonlySegment).toHaveBeenCalledWith(updatedSegment)
+    expect(section.className).not.toContain('readonly')
   })
 })
