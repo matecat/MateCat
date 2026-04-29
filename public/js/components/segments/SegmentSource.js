@@ -18,7 +18,7 @@ import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
-import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
+import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/GlossaryConstants'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {
   createICUDecorator,

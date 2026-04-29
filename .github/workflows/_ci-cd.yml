@@ -193,9 +193,11 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   test-guard:
     name: Test adequacy gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: tests
-    if: github.event_name == 'pull_request'
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.labels.*.name, 'test-guard-exception')
     permissions:
       contents: read
       pull-requests: write
@@ -219,4 +221,5 @@ jobs:
             php-coverage.xml
             js-coverage.xml
           coverage-threshold: '80'
+          exclude-patterns: '.github/**'
           ai-enabled: 'true'

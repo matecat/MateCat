@@ -10,7 +10,8 @@ import {
   BUTTON_TYPE,
   Button,
 } from '../common/Button/Button'
-import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
+import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
+import {OnBoardingContext} from './OnBoardingContext'
 import Checkmark from '../../../img/icons/Checkmark'
 import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'

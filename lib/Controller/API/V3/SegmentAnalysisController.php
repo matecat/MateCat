@@ -4,11 +4,11 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
-use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
@@ -29,6 +29,7 @@ use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController
 {
+    use SegmentDisabledTrait;
 
     const int MAX_PER_PAGE = 200;
 
@@ -292,7 +293,7 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param IDaoStruct $segmentForAnalysis
+     * @param ShapelessConcreteStruct $segmentForAnalysis
      * @param array $projectPasswordsMap
      * @param array $notesAggregate
      * @param array $issuesAggregate
@@ -303,7 +304,7 @@ class SegmentAnalysisController extends KleinController
      * @throws Exception
      */
     private function formatSegment(
-        IDaoStruct $segmentForAnalysis,
+        ShapelessConcreteStruct $segmentForAnalysis,
         array $projectPasswordsMap,
         array $notesAggregate,
         array $issuesAggregate,
@@ -313,9 +314,6 @@ class SegmentAnalysisController extends KleinController
         // id_request
         $idRequest = $idRequestsAggregate[$segmentForAnalysis->id] ?? null;
 
-        /**
-         * @var $segmentForAnalysis ShapelessConcreteStruct
-         */
         // original_filename
         $originalFile = (null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original') ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
@@ -346,6 +344,8 @@ class SegmentAnalysisController extends KleinController
             $metadataDao->getProjectStaticSubfilteringCustomHandlers($jobStruct->id_project)
         );
 
+        $disabled = $this->isSegmentDisabled($segmentForAnalysis->id_job, $segmentForAnalysis->id);
+
         return [
             'id_segment' => (int)$segmentForAnalysis->id,
             'id_chunk' => (int)$segmentForAnalysis->id_job,
@@ -366,16 +366,17 @@ class SegmentAnalysisController extends KleinController
             'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
             'status' => $this->getStatusObject($segmentForAnalysis),
             'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date(DATE_ATOM, strtotime($segmentForAnalysis->last_edit)) : null,
+            'disabled' => $disabled,
         ];
     }
 
     /**
-     * @param       $segmentForAnalysis
+     * @param ShapelessConcreteStruct $segmentForAnalysis
      * @param array $projectPasswordsMap
      *
      * @return array
      */
-    private function getJobUrls($segmentForAnalysis, array $projectPasswordsMap = []): array
+    private function getJobUrls(ShapelessConcreteStruct $segmentForAnalysis, array $projectPasswordsMap = []): array
     {
         $passwords = [];
         foreach ($projectPasswordsMap as $map) {
@@ -404,11 +405,11 @@ class SegmentAnalysisController extends KleinController
     }
 
     /**
-     * @param $segmentForAnalysis
+     * @param ShapelessConcreteStruct $segmentForAnalysis
      *
      * @return array
      */
-    private function getStatusObject($segmentForAnalysis): array
+    private function getStatusObject(ShapelessConcreteStruct $segmentForAnalysis): array
     {
         $finalVersion = null;
 

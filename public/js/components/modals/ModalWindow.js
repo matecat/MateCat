@@ -1,10 +1,10 @@
 import React from 'react'
-import {createRoot} from 'react-dom/client'
 
 import {ModalContainer} from './ModalContainer'
 import {ModalOverlay} from './ModalOverlay'
 import ModalsConstants from '../../constants/ModalsConstants'
 import CatToolStore from '../../stores/CatToolStore'
+import {resolveModal} from './modalRegistry'
 
 const initialState = {
   isShowingModal: false,
@@ -71,10 +71,11 @@ export class ModalWindow extends React.Component {
     styleBody,
     isCloseButtonDisabled,
   ) => {
+    const resolvedComponent = resolveModal(component)
     this.setState({
       ...initialState,
       title,
-      component,
+      component: resolvedComponent,
       showHeader,
       compProps: {
         ...initialState.compProps,

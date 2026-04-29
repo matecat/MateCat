@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import IconDown from '../../../icons/IconDown'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
@@ -10,7 +10,7 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
 import {ModifyCategory} from './ModifyCategory'
-import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
+import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTableUtils'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 
 export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
