@@ -78,6 +78,16 @@ class AppConfig
      */
     public static string $TRACKING_CODES_VIEW_PATH = "";
 
+    public static string $VITE_ASSETS_PATH = "";
+
+    /**
+     * View decorator callable, registered at bootstrap by an external script (e.g. internal_scripts/ViteAssets.php).
+     * When set, it is invoked by {@see decorateView()} to inject additional assets into the PHPTAL view.
+     *
+     * @var callable|null
+     */
+    protected static $viewDecorator = null;
+
     public static bool $COMMENTS_ENABLED = true;
     public static string $SOCKET_NOTIFICATIONS_QUEUE_NAME = "/queue/matecat_socket_notifications";
     public static string $SOCKET_BASE_URL = '';
@@ -388,6 +398,14 @@ class AppConfig
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/View";
         self::$UTILS_ROOT = self::$ROOT . '/lib/Utils';
 
+        // Load external view decorator (e.g. Vite asset injection) if configured
+        if ( self::$VITE_ASSETS_PATH ) {
+            $viteAssetsFullPath = self::$ROOT . '/' . self::$VITE_ASSETS_PATH;
+            if ( file_exists( $viteAssetsFullPath ) ) {
+                require_once $viteAssetsFullPath;
+            }
+        }
+
         $oauth_config_file = self::$ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini';
 
         if (file_exists($oauth_config_file)) {
@@ -622,6 +640,30 @@ class AppConfig
         }
 
         return true;
+    }
+
+    /**
+     * Register an external view decorator callable.
+     * Called by scripts loaded via VITE_ASSETS_PATH to inject themselves without coupling.
+     *
+     * @param callable $decorator fn(PHPTAL $view, string $templateName, string $nonce): void
+     */
+    public static function registerViewDecorator( callable $decorator ): void {
+        self::$viewDecorator = $decorator;
+    }
+
+    /**
+     * Invoke the registered view decorator, if any.
+     * No-op when no decorator has been registered.
+     *
+     * @param \PHPTAL  $view
+     * @param string   $templateName
+     * @param string   $nonce
+     */
+    public static function decorateView( \PHPTAL $view, string $templateName, string $nonce ): void {
+        if ( self::$viewDecorator ) {
+            ( self::$viewDecorator )( $view, $templateName, $nonce );
+        }
     }
 
 }
