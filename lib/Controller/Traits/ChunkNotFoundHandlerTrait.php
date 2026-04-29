@@ -22,7 +22,7 @@ trait ChunkNotFoundHandlerTrait
      * @return ?JobStruct
      * @throws ReflectionException
      */
-    protected function getJob($id_job, $password): ?JobStruct
+    protected function getJob(int $id_job, string $password): ?JobStruct
     {
         $job = JobDao::getByIdAndPassword($id_job, $password);
 

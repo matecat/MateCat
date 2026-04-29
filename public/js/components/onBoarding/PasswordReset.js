@@ -8,7 +8,8 @@ import {
   Button,
 } from '../common/Button/Button'
 import {resetPasswordUser} from '../../api/resetPasswordUser'
-import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
+import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
+import {OnBoardingContext} from './OnBoardingContext'
 import {setNewUserPassword} from '../../api/setNewUserPassword'
 import ModalsActions from '../../actions/ModalsActions'
 

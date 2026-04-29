@@ -6,6 +6,7 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
+use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternComparator;
@@ -63,7 +64,7 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-
+    use SegmentDisabledTrait;
     use APISourcePageGuesserTrait;
     use ICUSourceSegmentChecker;
 
@@ -186,6 +187,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function prepareTranslation(): array
     {
         $this->data = $this->validateTheRequest();
+        $this->checkIfSegmentIsNotDisabled();
         $this->setSubFilteringBehavior();
         $this->checkSegmentSplitData();
         $this->initVersionHandler();
@@ -688,6 +690,26 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         return $data;
     }
+
+    /**
+     * checkIfIsNotDisabled
+     *
+     * Determines whether the segment associated with a specific job and segment ID
+     * is disabled by checking cached information. If the segment is found to be disabled,
+     * an exception is thrown.
+     *
+     * @return void
+     * @throws Exception If the segment is disabled.
+     */
+    private function checkIfSegmentIsNotDisabled(): void
+    {
+        $id_job = $this->data['id_job'];
+        $id_segment = $this->data['id_segment'];
+
+        if ($this->isSegmentDisabled((int)$id_job, (int)$id_segment)) {
+            throw new RuntimeException("Segment #".$id_segment." is disabled", -5);
+        }
+}
 
     /**
      * @return bool

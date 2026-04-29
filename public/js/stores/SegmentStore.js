@@ -37,15 +37,20 @@ import $ from 'jquery'
 
 import AppDispatcher from './AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
-import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
-import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {
   JOB_WORD_CONT_TYPE,
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
+
+import {transformTagsToText, removeTagsFromText, checkXliffTagsInText} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {checkTPEnabled, checkCurrentSegmentTPEnabled} from '../utils/tagProjectionUtils'
+// Lazy-loaded to break circular dependencies
+let _SegmentUtils
+const getSegmentUtils = () =>
+  _SegmentUtils || (_SegmentUtils = require('../utils/segmentUtils').default)
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -166,7 +171,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: false,
             segment: splittedSourceAr[i],
-            decodedSource: DraftMatecatUtils.transformTagsToText(
+            decodedSource: transformTagsToText(
               segment.segment,
             ),
             segment_hash: segment.segment_hash,
@@ -184,7 +189,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
             decodedTranslation:
-              DraftMatecatUtils.transformTagsToText(translation),
+              transformTagsToText(translation),
             warning: false,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -219,7 +224,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             : segment.status
         segment.splitted = false
         segment.original_translation = segment.translation
-        segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
+        segment.unlocked = getSegmentUtils().isUnlockedSegment(segment)
         segment.warnings = {}
         segment.tagged = !this.hasSegmentTagProjectionEnabled(segment)
         segment.edit_area_locked = false
@@ -233,16 +238,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = segment.translation
-        segment.decodedTranslation = DraftMatecatUtils.transformTagsToText(
+        segment.decodedTranslation = transformTagsToText(
           segment.translation,
         )
-        segment.decodedSource = DraftMatecatUtils.transformTagsToText(
+        segment.decodedSource = transformTagsToText(
           segment.segment,
         )
-        segment.updatedSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+        segment.updatedSource = checkCurrentSegmentTPEnabled(
           segment,
         )
-          ? DraftMatecatUtils.removeTagsFromText(segment.segment)
+          ? removeTagsFromText(segment.segment)
           : segment.segment
         segment.openComments = false
         segment.openSplit = false
@@ -356,7 +361,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.transformTagsToText(translation)
+    const newTrans = transformTagsToText(translation)
 
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
@@ -994,11 +999,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
   hasSegmentTagProjectionEnabled: function (segment) {
-    if (SegmentUtils.checkTPEnabled()) {
+    if (checkTPEnabled()) {
       if (
         (segment.status === 'NEW' || segment.status === 'DRAFT') &&
-        DraftMatecatUtils.checkXliffTagsInText(segment.segment) &&
-        !DraftMatecatUtils.checkXliffTagsInText(segment.translation)
+        checkXliffTagsInText(segment.segment) &&
+        !checkXliffTagsInText(segment.translation)
       ) {
         return true
       }

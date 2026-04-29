@@ -6,7 +6,19 @@ import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
-import SegmentActions from '../../../actions/SegmentActions'
+import {addClassToSegment} from '../../../actions/segmentClassActions'
+import {
+  replaceEditAreaTextContent,
+  setHeaderPercentage,
+  modifiedTranslation,
+  setSegmentContributions,
+  setChoosenSuggestion,
+} from '../../../actions/segmentDispatchActions'
+import {
+  getSegmentsQa,
+  startSegmentQACheck,
+} from '../../../actions/segmentQaActions'
+import {disableTPOnSegment} from '../../../actions/tagProjectionActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
@@ -28,21 +40,21 @@ let TranslationMatches = {
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentageClass(matchToUse)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
-      SegmentActions.setHeaderPercentage(
+      replaceEditAreaTextContent(segment.sid, translation)
+      setHeaderPercentage(
         segment.sid,
         segment.id_file,
         matchToUse,
         percentageClass,
         matchToUse.created_by,
       )
-      SegmentActions.startSegmentQACheck()
+      startSegmentQACheck()
       CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
       })
 
-      SegmentActions.modifiedTranslation(
+      modifiedTranslation(
         segment.sid,
         segment.translation !== '',
       )
@@ -54,7 +66,7 @@ let TranslationMatches = {
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
     if (isUndefined(segmentObj)) return
 
-    SegmentActions.setSegmentContributions(
+    setSegmentContributions(
       segmentObj.sid,
       data.matches,
       data.errors,
@@ -62,7 +74,7 @@ let TranslationMatches = {
 
     this.useSuggestionInEditArea(sid)
 
-    SegmentActions.addClassToSegment(sid, 'loaded')
+    addClassToSegment(sid, 'loaded')
   },
   useSuggestionInEditArea: function (sid) {
     let segmentObj = SegmentStore.getSegmentByIdToJS(sid)
@@ -80,7 +92,7 @@ let TranslationMatches = {
       var translation = matches[0].translation
 
       if (editareaLength === 0) {
-        SegmentActions.setChoosenSuggestion(segmentObj.sid, 1)
+        setChoosenSuggestion(segmentObj.sid, 1)
 
         /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
          * the source with the text with tags, the segment is tagged
@@ -91,7 +103,7 @@ let TranslationMatches = {
           if (parseInt(match) !== 100) {
             translation = DraftMatecatUtils.removeTagsFromText(translation)
           } else {
-            SegmentActions.disableTPOnSegment(segmentObj)
+            disableTPOnSegment(segmentObj)
           }
         }
 
@@ -194,8 +206,8 @@ let TranslationMatches = {
     const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
     if (!currentSegment) return Promise.resolve()
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
-      SegmentActions.getSegmentsQa(currentSegment)
+      addClassToSegment(currentSegment.sid, 'loaded')
+      getSegmentsQa(currentSegment)
       return Promise.resolve()
     }
 
@@ -368,7 +380,7 @@ let TranslationMatches = {
   },
 
   renderContributionErrors: function (errors, segmentId) {
-    SegmentActions.setSegmentContributions(segmentId, [], errors)
+    setSegmentContributions(segmentId, [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id, sid) {

@@ -4,6 +4,7 @@ namespace Model\Segments;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class SegmentMetadataDao extends AbstractDao
@@ -35,6 +36,24 @@ class SegmentMetadataDao extends AbstractDao
         );
 
         return new SegmentMetadataCollection($results);
+    }
+
+    /**
+     * Destroys the cached metadata for the specified segment.
+     *
+     * @param int $id_segment The ID of the segment whose cache needs to be destroyed.
+     *
+     * @return bool True if the cache was successfully destroyed, false otherwise.
+     * @throws ReflectionException
+     * @throws PDOException
+     */
+    public static function destroyGetAllCache(int $id_segment): bool
+    {
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(self::$sql_get_all);
+
+        return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment]);
     }
 
     /**
@@ -81,6 +100,35 @@ class SegmentMetadataDao extends AbstractDao
         );
 
         return $results[0] ?? null;
+    }
+
+    /**
+     * Destroy cache of segment metadata based on segment ID and key.
+     *
+     * @param int $id_segment The identifier of the segment to target.
+     * @param string $key The key associated with the cache entry to be destroyed.
+     *
+     * @return bool True if the cache was successfully destroyed, false otherwise.
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public static function destroyCache(int $id_segment, string $key): bool
+    {
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(self::$sql_find_by_id_segment_and_key);
+
+        return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
+    }
+
+    /**
+     * @throws PDOException
+     */
+    public static function delete(int $id_segment, string $key): void
+    {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
+        $stmt->execute([$id_segment, $key]);
     }
 
     /**
@@ -153,6 +201,23 @@ class SegmentMetadataDao extends AbstractDao
         $stmt    = $conn->getConnection()->prepare(self::_query_get);
 
         return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
+    }
+
+    /**
+     * Disable translation for a specific segment.
+     *
+     * @param int $id_segment The ID of the segment for which translation will be disabled.
+     *
+     * @return void
+     */
+    public static function setTranslationDisabled(int $id_segment): void
+    {
+        $metadata = new SegmentMetadataStruct();
+        $metadata->id_segment = $id_segment;
+        $metadata->meta_key = 'translation_disabled';
+        $metadata->meta_value = "1";
+
+        SegmentMetadataDao::save($metadata);
     }
 
     /**

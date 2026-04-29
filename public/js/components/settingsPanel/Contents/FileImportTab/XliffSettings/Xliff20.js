@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useMemo, useState} from 'react'
-import {XliffSettingsContext} from './XliffSettings'
+import {XliffSettingsContext} from './XliffSettingsContext'
 import {XliffRulesRow} from './XliffRulesRow'
 import {Accordion} from '../../../../common/Accordion/Accordion'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'

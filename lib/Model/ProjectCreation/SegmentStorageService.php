@@ -399,7 +399,7 @@ class SegmentStorageService
             isset($metadataStruct->meta_key) && $metadataStruct->meta_key !== '' &&
             isset($metadataStruct->meta_value) && $metadataStruct->meta_value !== ''
         ) {
-            $metadataStruct->id_segment = (string)$id_segment;
+            $metadataStruct->id_segment = $id_segment;
             $this->persistSegmentMetadata($metadataStruct);
         }
     }

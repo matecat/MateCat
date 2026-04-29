@@ -21,10 +21,10 @@ import LXQ from '../utils/lxq.main'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
-  DEFAULT_ENGINE_MEMORY,
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'

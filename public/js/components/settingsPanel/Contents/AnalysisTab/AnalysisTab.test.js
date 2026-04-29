@@ -7,11 +7,8 @@ import {
   waitFor,
 } from '@testing-library/react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {
-  ANALYSIS_BREAKDOWNS,
-  ANALYSIS_SCHEMA_KEYS,
-  AnalysisTab,
-} from './AnalysisTab'
+import {ANALYSIS_SCHEMA_KEYS, AnalysisTab} from './AnalysisTab'
+import {ANALYSIS_BREAKDOWNS} from './AnalysisTabConstants'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import {mswServer} from '../../../../../mocks/mswServer'
 import {http, HttpResponse} from 'msw'

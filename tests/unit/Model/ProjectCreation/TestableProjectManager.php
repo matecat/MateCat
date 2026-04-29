@@ -353,6 +353,17 @@ class TestableProjectManager extends ProjectManager
         $this->projectManagerModel = $model;
     }
 
+    /**
+     * Public wrapper to invoke the private clearFailedProject().
+     * @throws ReflectionException
+     */
+    public function callClearFailedProject(Throwable $e): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('clearFailedProject');
+        $method->invoke($this, $e);
+    }
+
     // ── Step 13: additional private methods testing support ──
 
     /**

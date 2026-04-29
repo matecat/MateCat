@@ -20,7 +20,6 @@ use Model\FeaturesBase\Hook\Event\Filter\HandleJsonNotesBeforeInsertEvent;
 use Model\FeaturesBase\Hook\Event\Run\BeforeProjectCreationEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostProjectCreateEvent;
 use Model\FeaturesBase\Hook\Event\Run\ValidateProjectCreationEvent;
-use Model\Files\FileDao;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -30,10 +29,10 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataMapper;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
-use Model\Segments\SegmentMetadataMapper;
 use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
@@ -398,18 +397,7 @@ class ProjectManager
             );
             $this->handleZipFiles($linkFiles);
 
-            try {
-                $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
-                    $fs, $this->projectStructure, $linkFiles
-                );
-            } catch (FileInsertionException $e) {
-                $this->clearFailedProject($e);
-                throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
-            }
-            $this->extractSegmentsCreateProjectAndStoreData($fs, $totalFilesStructure, $linkFiles);
-
-            $this->determineStatusAndPopulateResult();
-            $this->insertFileInstructions($totalFilesStructure);
+            $this->resolveFilesExtractSegmentsAndStoreData($fs, $linkFiles);
             $this->finalizeProjectInTransaction();
         } finally {
             // Ensure the upload directory is cleaned up even when an exception
@@ -557,17 +545,17 @@ class ProjectManager
     }
 
     /**
-     * Extract segments from all files, create project record, store segments, create jobs, and write analysis data.
+     * Resolve and insert files, extract segments, create project record, store segments,
+     * create jobs, insert pre-translations, and write analysis data.
      * Tolerates individual file extraction failures in multi-file projects.
+     * On any failure, cleans up the project and file records before aborting.
      *
-     * @param array<int, array<string, mixed>> $totalFilesStructure Modified by reference — failed files are removed.
      * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
      */
-    private function extractSegmentsCreateProjectAndStoreData(
+    private function resolveFilesExtractSegmentsAndStoreData(
         AbstractFilesStorage $fs,
-        array &$totalFilesStructure,
         array $linkFiles
     ): void {
         // $linkFile is needed in the error handler for hash cleanup
@@ -578,6 +566,10 @@ class ProjectManager
         }
 
         try {
+            $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
+                $fs, $this->projectStructure, $linkFiles
+            );
+
             $this->extractSegmentsFromFiles($totalFilesStructure);
 
             if ($this->total_segments === 0) {
@@ -624,7 +616,11 @@ class ProjectManager
             $this->projectStructure->translations = [];
 
             $this->writeFastAnalysisData();
+
+            $this->determineStatusAndPopulateResult();
+            $this->insertFileInstructions($totalFilesStructure);
         } catch (Throwable $e) {
+            $this->clearFailedProject($e);
             $this->mapSegmentExtractionError($e, $fs, $linkFile);
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
@@ -824,13 +820,23 @@ class ProjectManager
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
 
-        if (isset($this->project)) {
-            (new ProjectDao())->deleteFailedProject($this->projectStructure->id_project);
-            $this->log("Deleted Project ID: " . $this->projectStructure->id_project);
+        $idProject = $this->projectStructure->id_project;
+
+        if (empty($idProject)) {
+            $this->log("No project ID available — nothing to clean up.");
+
+            return;
         }
 
-        (new FileDao())->deleteFailedProjectFiles($this->projectStructure->file_id_list);
-        $this->log("Deleted Files ID: " . json_encode($this->projectStructure->file_id_list));
+        try {
+            $this->getProjectManagerModel()->deleteProject($idProject);
+            $this->log("Cascade-deleted project ID: " . $idProject);
+        } catch (Throwable $cleanupError) {
+            $this->log(
+                "Cleanup failed for project ID $idProject: " . $cleanupError->getMessage(),
+                $cleanupError,
+            );
+        }
     }
 
     /**
