@@ -202,14 +202,15 @@ class Utils
             $string = "-";
         }
 
-        // Percent-encode Unicode letters/numbers that fall outside ASCII slug characters;
-        // drop any other special characters (punctuation, symbols, etc.).
-        // The named 'encode' capture group identifies characters to percent-encode;
-        // the fallback branch catches remaining special chars to drop.
+        // Percent-encode non-ASCII Unicode letters/numbers that fall outside ASCII slug
+        // characters; drop any other special characters (punctuation, symbols, etc.).
+        // The negative lookahead (?![a-z0-9]) excludes ASCII alphanumerics from the
+        // 'encode' branch so they are left untouched by the callback. The fallback
+        // branch catches remaining non-slug characters to drop.
         $slug = preg_replace_callback(
-            '/(?P<encode>[\p{L}\p{N}])|[^a-z0-9\-<>]/u',
+            '/(?P<encode>(?![a-z0-9])[\p{L}\p{N}])|[^a-z0-9\-<>]/u',
             static function (array $matches): string {
-                return $matches['encode'] !== '' ? rawurlencode($matches['encode']) : '';
+                return !empty($matches['encode']) ? rawurlencode($matches['encode']) : '';
             },
             $string
         ) ?? '';
