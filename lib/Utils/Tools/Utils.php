@@ -203,7 +203,13 @@ class Utils
         $repl = ['', '-', ''];
 
         //return the friendly url
-        return preg_replace($find, $repl, $string);
+        $slug = preg_replace($find, $repl, $string);
+
+        if ($slug === '-' || $slug === '') {
+            $slug = rawurlencode($string);
+        }
+
+        return $slug;
     }
 
     /**
