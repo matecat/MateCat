@@ -73,8 +73,14 @@ import(
 import('../setTranslationUtil').then((m) => {
   _SetTranslationUtil = m
 })
-const getSegmentsFilterUtil = () => _SegmentsFilterUtil
-const getSetTranslationUtil = () => _SetTranslationUtil
+const getSegmentsFilterUtil = () => {
+  if (!_SegmentsFilterUtil) throw new Error('[SegmentActions] SegmentsFilterUtil not loaded yet')
+  return _SegmentsFilterUtil
+}
+const getSetTranslationUtil = () => {
+  if (!_SetTranslationUtil) throw new Error('[SegmentActions] SetTranslationUtil not loaded yet')
+  return _SetTranslationUtil
+}
 
 const SegmentActions = {
   localStorageCommentsClosed:

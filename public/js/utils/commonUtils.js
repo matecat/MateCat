@@ -15,14 +15,21 @@ let _SegmentActions
 import('../actions/SegmentActions').then((m) => {
   _SegmentActions = m.default
 })
-const getSegmentActions = () => _SegmentActions
+const getSegmentActions = () => {
+  if (!_SegmentActions)
+    throw new Error('[commonUtils] SegmentActions not loaded yet')
+  return _SegmentActions
+}
 
 let _SetTranslationUtil
 import('../setTranslationUtil').then((m) => {
   _SetTranslationUtil = m
 })
-const checkTranslationTailEmpty = () =>
-  _SetTranslationUtil.isTranslationTailEmpty()
+const checkTranslationTailEmpty = () => {
+  if (!_SetTranslationUtil)
+    throw new Error('[commonUtils] SetTranslationUtil not loaded yet')
+  return _SetTranslationUtil.isTranslationTailEmpty()
+}
 
 const CommonUtils = {
   millisecondsToTime(milli) {

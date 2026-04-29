@@ -52,7 +52,10 @@ let _SegmentUtils
 import('../utils/segmentUtils').then((m) => {
   _SegmentUtils = m.default
 })
-const getSegmentUtils = () => _SegmentUtils
+const getSegmentUtils = () => {
+  if (!_SegmentUtils) throw new Error('[SegmentStore] SegmentUtils not loaded yet')
+  return _SegmentUtils
+}
 
 EventEmitter.prototype.setMaxListeners(0)
 
