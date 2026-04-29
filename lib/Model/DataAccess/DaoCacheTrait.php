@@ -94,6 +94,17 @@ trait DaoCacheTrait
         }
     }
 
+    /**
+     * Sets the cache connection instance.
+     *
+     * @param Client|null $connection The cache connection instance to set, or null to unset.
+     * @return void
+     */
+    public static function setCacheConnection(?Client $connection): void
+    {
+        self::$cache_con = $connection;
+    }
+
 
     /** @noinspection PhpUnusedParameterInspection */
     protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
