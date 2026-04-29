@@ -193,18 +193,40 @@ class Utils
         $find = [' ', '&', '\r\n', '\n', '+', ','];
         $string = str_replace($find, '-', $string);
 
+        // Preserve original value before the empty-string placeholder is applied,
+        // so we can percent-encode it if the slug ends up empty or dash-only.
+        $originalForEncoding = $string;
+
         // avoid empty strings
         if (empty($string)) {
             $string = "-";
         }
 
-        // delete and replace rest of special chars
-        $find = ['/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/'];
-        $repl = ['', '-', ''];
+        // Percent-encode non-ASCII Unicode letters/numbers that fall outside ASCII slug
+        // characters; drop any other special characters (punctuation, symbols, etc.).
+        // The negative lookahead (?![a-z0-9]) excludes ASCII alphanumerics from the
+        // 'encode' branch so they are left untouched by the callback. The fallback
+        // branch catches remaining non-slug characters to drop.
+        $slug = preg_replace_callback(
+            '/(?P<encode>(?![a-z0-9])[\p{L}\p{N}])|[^a-z0-9\-<>]/u',
+            static function (array $matches): string {
+                return !empty($matches['encode']) ? rawurlencode($matches['encode']) : '';
+            },
+            $string
+        ) ?? '';
 
-        // return the friendly url
-        $slug = preg_replace($find, $repl, $string);
+        // Consolidate multiple consecutive dashes
+        $slug = preg_replace('/-+/', '-', $slug) ?? '';
 
+        // Remove HTML tags
+        $slug = preg_replace('/<[^>]*>/', '', $slug) ?? '';
+
+        // Fall back to encoding the whole pre-placeholder value only for the rare
+        // case where every character was a non-letter/non-number special char
+        // (e.g. '@!#'). Whitespace-only input ($originalForEncoding === '') keeps
+        // the '-' placeholder for backward compatibility.
+        if (($slug === '-' || $slug === '') && $originalForEncoding !== '') {
+            $slug = rawurlencode($originalForEncoding);
         if ($slug === '-' || empty($slug)) {
             $slug = rawurlencode($string);
         }

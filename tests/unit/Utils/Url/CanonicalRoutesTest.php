@@ -9,10 +9,25 @@ use Utils\Url\CanonicalRoutes;
 
 class CanonicalRoutesTest extends AbstractTest
 {
+    private ?string $originalHttpHost = null;
+
     protected function setUp(): void
     {
         parent::setUp();
+        // $HTTPHOST is a typed static property with no default, so it may be
+        // uninitialized. isset() returns false (without throwing) in that case.
+        if (isset(AppConfig::$HTTPHOST)) {
+            $this->originalHttpHost = AppConfig::$HTTPHOST;
+        }
         AppConfig::$HTTPHOST = 'https://example.org';
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->originalHttpHost !== null) {
+            AppConfig::$HTTPHOST = $this->originalHttpHost;
+        }
+        parent::tearDown();
     }
 
     #[Test]
@@ -60,10 +75,11 @@ class CanonicalRoutesTest extends AbstractTest
             'password' => 'jkl',
         ]);
 
-        // friendlySlug keeps latin chars, so "project-" remains (not just "-")
-        $this->assertStringStartsWith('https://example.org/analyze/', $url);
-        $this->assertStringEndsWith('/101-jkl', $url);
-        $this->assertStringNotContainsString('/analyze/-/', $url);
+        // Latin chars are slugified; non-Latin (Cyrillic) chars are percent-encoded
+        // per codepoint by friendlySlug(). PHP's strtolower() is ASCII-only, so 'П'
+        // is not lowercased and is encoded as uppercase '%D0%9F' (not lowercase '%D0%BF').
+        $expectedSlug = 'project-' . rawurlencode('Проф');
+        $this->assertEquals('https://example.org/analyze/' . $expectedSlug . '/101-jkl', $url);
     }
 }
 
