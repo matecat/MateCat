@@ -76,8 +76,8 @@ class CanonicalRoutesTest extends AbstractTest
         ]);
 
         // Latin chars are slugified; non-Latin (Cyrillic) chars are percent-encoded
-        // per codepoint by friendlySlug(). PHP's strtolower() is ASCII-only, so the
-        // uppercase 'П' from the original project name is preserved in the slug.
+        // per codepoint by friendlySlug(). PHP's strtolower() is ASCII-only, so 'П'
+        // is not lowercased and is encoded as uppercase '%D0%9F' (not lowercase '%D0%BF').
         $expectedSlug = 'project-' . rawurlencode('Проф');
         $this->assertEquals('https://example.org/analyze/' . $expectedSlug . '/101-jkl', $url);
     }
