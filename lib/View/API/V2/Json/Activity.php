@@ -48,9 +48,9 @@ class Activity
                 $record->email = "Unknown";
             }
 
-            $filterActivityLogEntryEvent = new FilterActivityLogEntryEvent($record->toArray());
+            $filterActivityLogEntryEvent = new FilterActivityLogEntryEvent($record);
             $featureSet->dispatchFilter($filterActivityLogEntryEvent);
-            $filteredRecord = new ActivityLogStruct($filterActivityLogEntryEvent->getRecord());
+            $filteredRecord = $filterActivityLogEntryEvent->getRecord();
 
             $formatted = [
                 'id' => (int)$filteredRecord->ID,

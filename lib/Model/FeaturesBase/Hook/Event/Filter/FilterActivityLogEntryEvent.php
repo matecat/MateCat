@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Model\FeaturesBase\Hook\Event\Filter;
 
+use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\Hook\FilterEvent;
 
 /**
@@ -15,15 +16,18 @@ final class FilterActivityLogEntryEvent extends FilterEvent
     {
         return 'filterActivityLogEntry';
     }
+
     public function __construct(
-        private array $record,
+        private ActivityLogStruct $record,
     ) {
     }
-    public function getRecord(): array
+
+    public function getRecord(): ActivityLogStruct
     {
         return $this->record;
     }
-    public function setRecord(array $record): void
+
+    public function setRecord(ActivityLogStruct $record): void
     {
         $this->record = $record;
     }
