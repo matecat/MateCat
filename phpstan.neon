@@ -12,6 +12,8 @@ parameters:
         - lib/View/APIDoc.php (?)
         - lib/View/templates/_APIDoc.php
         - vendor
+        - plugins/translated/tests
+        - plugins/uber/tests
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
     # Flag @throws \Exception on public/protected methods when only
