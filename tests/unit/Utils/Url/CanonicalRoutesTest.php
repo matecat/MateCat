@@ -14,10 +14,10 @@ class CanonicalRoutesTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        try {
+        // $HTTPHOST is a typed static property with no default, so it may be
+        // uninitialized. isset() returns false (without throwing) in that case.
+        if (isset(AppConfig::$HTTPHOST)) {
             $this->originalHttpHost = AppConfig::$HTTPHOST;
-        } catch (\Error) {
-            $this->originalHttpHost = null;
         }
         AppConfig::$HTTPHOST = 'https://example.org';
     }

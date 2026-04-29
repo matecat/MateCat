@@ -212,6 +212,9 @@ class Utils
         // Only fall back to rawurlencode when the original input was non-empty
         // (i.e. non-Latin characters were stripped). Truly empty/whitespace-only
         // input keeps the '-' placeholder for backward compatibility.
+        // Note: $slug === '' can happen when non-empty non-Latin input (e.g. Cyrillic)
+        // has all its characters removed by the ASCII-only preg_replace above;
+        // $slug === '-' can happen when such input contained spaces that became dashes.
         if (($slug === '-' || $slug === '') && $originalForEncoding !== '') {
             $slug = rawurlencode($originalForEncoding);
         }
