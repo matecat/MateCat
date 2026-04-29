@@ -225,10 +225,8 @@ class Utils
         // case where every character was a non-letter/non-number special char
         // (e.g. '@!#'). Whitespace-only input ($originalForEncoding === '') keeps
         // the '-' placeholder for backward compatibility.
-        if (($slug === '-' || $slug === '') && $originalForEncoding !== '') {
+        if (($slug === '-' || empty($slug)) && $originalForEncoding !== '') {
             $slug = rawurlencode($originalForEncoding);
-        if ($slug === '-' || empty($slug)) {
-            $slug = rawurlencode($string);
         }
 
         return $slug;
