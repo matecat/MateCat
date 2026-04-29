@@ -75,10 +75,10 @@ class CanonicalRoutesTest extends AbstractTest
             'password' => 'jkl',
         ]);
 
-        // friendlySlug keeps latin chars, so "project-" remains (not just "-")
-        $this->assertStringStartsWith('https://example.org/analyze/', $url);
-        $this->assertStringEndsWith('/101-jkl', $url);
-        $this->assertStringNotContainsString('/analyze/-/', $url);
+        // Latin chars are slugified; non-Latin (Cyrillic) chars are percent-encoded
+        // per codepoint. PHP strtolower() is ASCII-only, so 'П' stays uppercase.
+        $expectedSlug = 'project-' . rawurlencode('Проф');
+        $this->assertEquals('https://example.org/analyze/' . $expectedSlug . '/101-jkl', $url);
     }
 }
 

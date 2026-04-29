@@ -202,19 +202,28 @@ class Utils
             $string = "-";
         }
 
-        //delete and replace rest of special chars
-        $find = ['/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/'];
-        $repl = ['', '-', ''];
+        // Percent-encode Unicode letters/numbers that fall outside ASCII slug characters;
+        // drop any other special characters (punctuation, symbols, etc.).
+        // The named 'encode' capture group identifies characters to percent-encode;
+        // the fallback branch catches remaining special chars to drop.
+        $slug = preg_replace_callback(
+            '/(?P<encode>[\p{L}\p{N}])|[^a-z0-9\-<>]/u',
+            static function (array $matches): string {
+                return $matches['encode'] !== '' ? rawurlencode($matches['encode']) : '';
+            },
+            $string
+        ) ?? '';
 
-        //return the friendly url
-        $slug = preg_replace($find, $repl, $string);
+        // Consolidate multiple consecutive dashes
+        $slug = preg_replace('/-+/', '-', $slug) ?? '';
 
-        // Only fall back to rawurlencode when the original input was non-empty
-        // (i.e. non-Latin characters were stripped). Truly empty/whitespace-only
-        // input keeps the '-' placeholder for backward compatibility.
-        // Note: $slug === '' can happen when non-empty non-Latin input (e.g. Cyrillic)
-        // has all its characters removed by the ASCII-only preg_replace above;
-        // $slug === '-' can happen when such input contained spaces that became dashes.
+        // Remove HTML tags
+        $slug = preg_replace('/<[^>]*>/', '', $slug) ?? '';
+
+        // Fall back to encoding the whole pre-placeholder value only for the rare
+        // case where every character was a non-letter/non-number special char
+        // (e.g. '@!#'). Whitespace-only input ($originalForEncoding === '') keeps
+        // the '-' placeholder for backward compatibility.
         if (($slug === '-' || $slug === '') && $originalForEncoding !== '') {
             $slug = rawurlencode($originalForEncoding);
         }
