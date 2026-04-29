@@ -184,6 +184,9 @@ function htmlTemplatePlugin() {
   }
 }
 
+const cliHttpHost = matecatConfig.CLI_HTTP_HOST?.replace(/"/g, '') || 'https://dev.matecat.com'
+const hostUrl = new URL(cliHttpHost)
+
 export default defineConfig(({mode, command}) => {
   const isProd = mode === 'production'
   const hasSentry = isProd && sentryVitePlugin && pluginConfig.sentryVitePlugin
@@ -276,12 +279,12 @@ export default defineConfig(({mode, command}) => {
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
-    origin: 'https://dev.matecat.com',
+    origin: cliHttpHost,
     cors: true,
     hmr: {
-      protocol: 'wss',
-      host: 'dev.matecat.com',
-      clientPort: 443,
+      protocol: hostUrl.protocol === 'https:' ? 'wss' : 'ws',
+      host: hostUrl.hostname,
+      clientPort: parseInt(hostUrl.port) || (hostUrl.protocol === 'https:' ? 443 : 80),
       path: '__vite_hmr',
     },
     watch: {
