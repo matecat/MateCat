@@ -198,14 +198,14 @@ class Utils
             $string = "-";
         }
 
-        //delete and replace rest of special chars
+        // delete and replace rest of special chars
         $find = ['/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/'];
         $repl = ['', '-', ''];
 
-        //return the friendly url
+        // return the friendly url
         $slug = preg_replace($find, $repl, $string);
 
-        if ($slug === '-' || $slug === '') {
+        if ($slug === '-' || empty($slug)) {
             $slug = rawurlencode($string);
         }
 
