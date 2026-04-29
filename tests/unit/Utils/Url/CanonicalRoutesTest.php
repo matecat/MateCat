@@ -9,10 +9,25 @@ use Utils\Url\CanonicalRoutes;
 
 class CanonicalRoutesTest extends AbstractTest
 {
+    private ?string $originalHttpHost = null;
+
     protected function setUp(): void
     {
         parent::setUp();
+        try {
+            $this->originalHttpHost = AppConfig::$HTTPHOST;
+        } catch (\Error) {
+            $this->originalHttpHost = null;
+        }
         AppConfig::$HTTPHOST = 'https://example.org';
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->originalHttpHost !== null) {
+            AppConfig::$HTTPHOST = $this->originalHttpHost;
+        }
+        parent::tearDown();
     }
 
     #[Test]

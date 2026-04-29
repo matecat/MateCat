@@ -193,6 +193,10 @@ class Utils
         $find = [' ', '&', '\r\n', '\n', '+', ','];
         $string = str_replace($find, '-', $string);
 
+        // Preserve original value before the empty-string placeholder is applied,
+        // so we can percent-encode it if the slug ends up empty or dash-only.
+        $originalForEncoding = $string;
+
         // avoid empty strings
         if (empty($string)) {
             $string = "-";
@@ -205,8 +209,11 @@ class Utils
         //return the friendly url
         $slug = preg_replace($find, $repl, $string);
 
-        if ($slug === '-' || $slug === '') {
-            $slug = rawurlencode($string);
+        // Only fall back to rawurlencode when the original input was non-empty
+        // (i.e. non-Latin characters were stripped). Truly empty/whitespace-only
+        // input keeps the '-' placeholder for backward compatibility.
+        if (($slug === '-' || $slug === '') && $originalForEncoding !== '') {
+            $slug = rawurlencode($originalForEncoding);
         }
 
         return $slug;
