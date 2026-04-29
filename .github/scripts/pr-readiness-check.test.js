@@ -6,6 +6,7 @@ const {
     validatePrChecklist,
     isTestFile,
     getTestFilesWithAdditions,
+    getMigrationFilenames,
     getChecked,
     getUnchecked,
     hasNonEmptySection,
@@ -110,6 +111,29 @@ describe('getTestFilesWithAdditions', () => {
             {filename: 'public/js/Bar.test.js', additions: 0},
         ];
         assert.deepEqual(getTestFilesWithAdditions(files), []);
+    });
+});
+
+describe('getMigrationFilenames', () => {
+    it('returns files under migrations/', () => {
+        const files = [
+            {filename: 'migrations/20260420120000_add_column.php'},
+            {filename: 'src/Foo.php'},
+        ];
+        assert.deepEqual(getMigrationFilenames(files), ['migrations/20260420120000_add_column.php']);
+    });
+
+    it('excludes AbstractMatecatMigration.php', () => {
+        const files = [
+            {filename: 'migrations/AbstractMatecatMigration.php'},
+            {filename: 'migrations/20260420120000_add_column.php'},
+        ];
+        assert.deepEqual(getMigrationFilenames(files), ['migrations/20260420120000_add_column.php']);
+    });
+
+    it('returns empty when no migration files', () => {
+        const files = [{filename: 'src/Foo.php'}, {filename: 'tests/FooTest.php'}];
+        assert.deepEqual(getMigrationFilenames(files), []);
     });
 });
 

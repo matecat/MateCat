@@ -69,6 +69,15 @@ function getTestFilesWithAdditions(files) {
         .map((f) => f.filename);
 }
 
+// ── Migration-file detection ──────────────────────────────────
+
+/** @param {Array<{filename: string}>} files */
+function getMigrationFilenames(files) {
+    return files
+        .map((f) => f.filename)
+        .filter((name) => name.startsWith('migrations/') && name !== 'migrations/AbstractMatecatMigration.php');
+}
+
 // ── Checklist items ───────────────────────────────────────────
 
 const TYPE_ITEMS = [
@@ -209,6 +218,7 @@ module.exports = {
     validatePrChecklist,
     isTestFile,
     getTestFilesWithAdditions,
+    getMigrationFilenames,
     getChecked,
     getUnchecked,
     isChecked,
