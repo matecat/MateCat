@@ -4,6 +4,9 @@ const {describe, it} = require('node:test');
 const assert = require('node:assert/strict');
 const {
     validatePrChecklist,
+    isTestFile,
+    getTestFilesWithAdditions,
+    getMigrationFilenames,
     getChecked,
     getUnchecked,
     hasNonEmptySection,
@@ -59,6 +62,80 @@ function validBody({
 }
 
 const TEST_FILES = ['tests/unit/SomeTest.php'];
+
+// ── Test-file detection tests ─────────────────────────────────
+
+describe('isTestFile', () => {
+    it('matches files under tests/', () => {
+        assert.equal(isTestFile('tests/unit/SomeTest.php'), true);
+        assert.equal(isTestFile('tests/integration/ApiTest.php'), true);
+    });
+
+    it('matches co-located .test.js files', () => {
+        assert.equal(isTestFile('public/js/components/Foo.test.js'), true);
+    });
+
+    it('matches co-located .spec.ts files', () => {
+        assert.equal(isTestFile('src/utils/helper.spec.ts'), true);
+    });
+
+    it('matches .test.tsx and .spec.jsx', () => {
+        assert.equal(isTestFile('components/Bar.test.tsx'), true);
+        assert.equal(isTestFile('components/Bar.spec.jsx'), true);
+    });
+
+    it('rejects non-test files', () => {
+        assert.equal(isTestFile('public/js/components/Foo.js'), false);
+        assert.equal(isTestFile('src/utils/helper.ts'), false);
+        assert.equal(isTestFile('lib/testing/utils.js'), false);
+    });
+});
+
+describe('getTestFilesWithAdditions', () => {
+    it('returns test files with additions > 0', () => {
+        const files = [
+            {filename: 'tests/unit/FooTest.php', additions: 10},
+            {filename: 'src/Foo.php', additions: 5},
+            {filename: 'public/js/Bar.test.js', additions: 22},
+            {filename: 'public/js/Bar.js', additions: 8},
+        ];
+        assert.deepEqual(getTestFilesWithAdditions(files), [
+            'tests/unit/FooTest.php',
+            'public/js/Bar.test.js',
+        ]);
+    });
+
+    it('excludes test files with 0 additions', () => {
+        const files = [
+            {filename: 'tests/unit/FooTest.php', additions: 0},
+            {filename: 'public/js/Bar.test.js', additions: 0},
+        ];
+        assert.deepEqual(getTestFilesWithAdditions(files), []);
+    });
+});
+
+describe('getMigrationFilenames', () => {
+    it('returns files under migrations/', () => {
+        const files = [
+            {filename: 'migrations/20260420120000_add_column.php'},
+            {filename: 'src/Foo.php'},
+        ];
+        assert.deepEqual(getMigrationFilenames(files), ['migrations/20260420120000_add_column.php']);
+    });
+
+    it('excludes AbstractMatecatMigration.php', () => {
+        const files = [
+            {filename: 'migrations/AbstractMatecatMigration.php'},
+            {filename: 'migrations/20260420120000_add_column.php'},
+        ];
+        assert.deepEqual(getMigrationFilenames(files), ['migrations/20260420120000_add_column.php']);
+    });
+
+    it('returns empty when no migration files', () => {
+        const files = [{filename: 'src/Foo.php'}, {filename: 'tests/FooTest.php'}];
+        assert.deepEqual(getMigrationFilenames(files), []);
+    });
+});
 
 // ── Helper tests ──────────────────────────────────────────────
 
