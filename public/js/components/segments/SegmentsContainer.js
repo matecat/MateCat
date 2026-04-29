@@ -443,32 +443,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     }
   }, [])
 
-  // Send segment mappings to ContextPreview when segments change
-  // useEffect(() => {
-  //   if (!segments.size) return
-  //   const segmentsList = []
-  //   for (let i = 0; i < segments.size; i++) {
-  //     const seg = segments.get(i)
-  //     const rawMetadata = seg.get('metadata')
-  //     const metadataArr = rawMetadata
-  //       ? typeof rawMetadata.toJS === 'function'
-  //         ? rawMetadata.toJS()
-  //         : rawMetadata
-  //       : []
-  //     const findMeta = (key) =>
-  //       metadataArr.find((m) => m.meta_key === key)?.meta_value ?? null
-  //     segmentsList.push({
-  //       sid: seg.get('sid'),
-  //       source: seg.get('segment'),
-  //       target: seg.get('translation'),
-  //       context_url: seg.get('context_url') ?? null,
-  //       resname: findMeta('resname'),
-  //       restype: findMeta('restype'),
-  //     })
-  //   }
-  //   ContextPreviewChannel.sendMessage({type: 'segments', segments: segmentsList})
-  // }, [segments])
-
   // add actions listener
   useEffect(() => {
     let wasRemovedAllSegments = false

@@ -43,6 +43,11 @@ const useResizable = ({initialHeight = 500, minHeight = 100, maxHeight}) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false
+        document.body.style.cursor = ''
+        document.body.style.userSelect = ''
+      }
     }
   }, [minHeight, maxHeight])
 
