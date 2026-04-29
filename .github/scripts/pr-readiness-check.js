@@ -125,7 +125,7 @@ const NOT_BACKWARD_COMPATIBLE = 'NOT backward-compatible — breaking changes do
  * @param {string} body - PR body markdown text
  * @param {object} files
  * @param {string[]} files.migrationFilenames - filenames under migrations/ from the PR diff
- * @param {string[]} files.testFilesWithAdditions - test filenames (under tests/) that have additions > 0
+ * @param {string[]} files.testFilesWithAdditions - test filenames (under tests/ or matching *.(test|spec).[jt]sx?) with additions > 0
  * @returns {string[]} error messages (empty = all checks pass)
  */
 function validatePrChecklist(body, {migrationFilenames = [], testFilesWithAdditions = []} = {}) {
@@ -159,7 +159,7 @@ function validatePrChecklist(body, {migrationFilenames = [], testFilesWithAdditi
     if ((isFeat || isFix) && testFilesWithAdditions.length === 0) {
         errors.push(
             `PR type is \`${isFix ? 'fix' : 'feat'}\` but no test files with added lines found in the diff.\n` +
-            'Features and bug fixes must include new or updated tests (under tests/).',
+            'Features and bug fixes must include new or updated tests (under tests/ or co-located *.test.*/*.spec.* files).',
         );
     }
 
