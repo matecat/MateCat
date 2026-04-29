@@ -42,7 +42,10 @@ jobs:
               .filter((name) => name.startsWith('migrations/') && name !== 'migrations/AbstractMatecatMigration.php');
 
             const testFilesWithAdditions = files
-              .filter((f) => f.filename.startsWith('tests/') && f.additions > 0)
+              .filter((f) =>
+                (f.filename.startsWith('tests/') || /\.(test|spec)\.[jt]sx?$/.test(f.filename))
+                && f.additions > 0
+              )
               .map((f) => f.filename);
 
             const errors = validatePrChecklist(pr.body || '', { migrationFilenames, testFilesWithAdditions });

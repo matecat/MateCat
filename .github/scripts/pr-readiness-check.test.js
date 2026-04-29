@@ -59,6 +59,7 @@ function validBody({
 }
 
 const TEST_FILES = ['tests/unit/SomeTest.php'];
+const TEST_FILES_JS_COLOCATED = ['public/js/components/Foo.test.js'];
 
 // ── Helper tests ──────────────────────────────────────────────
 
@@ -201,6 +202,11 @@ describe('validatePrChecklist', () => {
 
         it('passes when type is fix and test files have additions', () => {
             const errors = validatePrChecklist(validBody(), {testFilesWithAdditions: ['tests/unit/FooTest.php']});
+            assert.deepEqual(errors, []);
+        });
+
+        it('passes when type is fix and co-located JS test files have additions', () => {
+            const errors = validatePrChecklist(validBody(), {testFilesWithAdditions: TEST_FILES_JS_COLOCATED});
             assert.deepEqual(errors, []);
         });
 
