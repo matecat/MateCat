@@ -4,6 +4,7 @@ namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 
 class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface
 {
@@ -15,6 +16,7 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      * @param int $idJob
      *
      * @return int
+     * @throws PDOException
      */
     public function getActualIndex(int $idJob): int
     {
@@ -33,6 +35,7 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      * @param int $version
      *
      * @return int
+     * @throws PDOException
      */
     public function save(int $id_job, int $version): int
     {

@@ -2,6 +2,7 @@
 
 namespace Model\LQA;
 
+use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
@@ -153,6 +154,7 @@ class ModelDao extends AbstractDao
      * }} $json
      *
      * @return ModelStruct
+     * @throws DomainException
      * @throws PDOException
      * @throws ReflectionException
      * @throws TypeError
@@ -165,8 +167,10 @@ class ModelDao extends AbstractDao
         $default_severities = $model_root['severities'] ?? [];
         $categories = $model_root['categories'];
 
+        $modelId = $model->id ?? throw new DomainException("Model ID must not be null after creation");
+
         foreach ($categories as $category) {
-            self::insertCategory($category, $model->id, $default_severities, null);
+            self::insertCategory($category, $modelId, $default_severities, null);
         }
 
         return $model;

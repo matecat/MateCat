@@ -789,9 +789,14 @@ class SegmentDao extends AbstractDao
         if ($sid != null) {
             $stmt = $this->_getStatementForQuery(self::$queryForLocalMismatches);
 
+            $lastChunk = end($jStructs);
+            if ($lastChunk === false) {
+                return [];
+            }
+
             return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
                     'job_first_segment' => $jStructs[0]->job_first_segment,
-                    'job_last_segment' => end($jStructs)->job_last_segment,
+                    'job_last_segment' => $lastChunk->job_last_segment,
                     'job_password' => $currentJob->password,
                     'st_approved' => TranslationStatus::STATUS_APPROVED,
                     'st_approved2' => TranslationStatus::STATUS_APPROVED2,

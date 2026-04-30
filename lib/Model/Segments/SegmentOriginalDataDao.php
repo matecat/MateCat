@@ -70,8 +70,11 @@ class SegmentOriginalDataDao extends AbstractDao
 
         // remove any carriage return or extra space from the map
         $json = json_encode($map);
+        if ($json === false) {
+            $json = '{}';
+        }
         $string = str_replace(["\\n", "\\r"], '', $json);
-        $string = trim(preg_replace('/\s+/', ' ', $string));
+        $string = trim(preg_replace('/\s+/', ' ', $string) ?? $string);
 
         $stmt->execute([
             'id_segment' => $id_segment,

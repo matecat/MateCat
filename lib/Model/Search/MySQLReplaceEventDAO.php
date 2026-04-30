@@ -6,6 +6,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Translations\SegmentTranslationDao;
 use PDO;
+use PDOException;
 
 class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface
 {
@@ -18,6 +19,7 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      * @param int $version
      *
      * @return ReplaceEventStruct[]
+     * @throws PDOException
      */
     public function getEvents(int $id_job, int $version): array
     {
@@ -37,6 +39,7 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      * @param ReplaceEventStruct $eventStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function save(ReplaceEventStruct $eventStruct): int
     {

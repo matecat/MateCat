@@ -258,8 +258,10 @@ class MembershipDao extends AbstractDao
         ]);
 
         $this->destroyCacheForListByTeamId($teamId);
-        $this->destroyCacheUserTeams($user);
-        $this->destroyCacheTeamByIdAndUser($teamId, $user);
+        if ($user !== null) {
+            $this->destroyCacheUserTeams($user);
+            $this->destroyCacheTeamByIdAndUser($teamId, $user);
+        }
         if ($stmt->rowCount()) {
             return $user;
         } else {

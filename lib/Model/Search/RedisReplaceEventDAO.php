@@ -2,9 +2,11 @@
 
 namespace Model\Search;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
+use PDOException;
 use Predis\Client;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
@@ -29,6 +31,7 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      *
      * @param IDatabase|null $con
      *
+     * @throws Exception
      * @throws ReflectionException
      */
     public function __construct(?IDatabase $con = null)
@@ -59,6 +62,7 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      * @param ReplaceEventStruct $eventStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function save(ReplaceEventStruct $eventStruct): int
     {
@@ -72,10 +76,11 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
         $eventStruct->created_at = date('Y-m-d H:i:s');
 
         // insert
-        $redisKey = $this->getRedisKey($eventStruct->id_job, $eventStruct->replace_version);
-        $index = (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) > 0) ? (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) + 1) : 0;
+        $replaceVersion = (int)$eventStruct->replace_version;
+        $redisKey = $this->getRedisKey($eventStruct->id_job, $replaceVersion);
+        $index = count($this->getEvents($eventStruct->id_job, $replaceVersion));
 
-        $result = $this->redis->hset($redisKey, $index, serialize($eventStruct));
+        $result = $this->redis->hset($redisKey, (string)$index, serialize($eventStruct));
         $this->redis->expire($redisKey, $this->ttl);
 
         return $result ? 1 : 0;

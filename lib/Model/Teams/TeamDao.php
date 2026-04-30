@@ -8,6 +8,7 @@
 
 namespace Model\Teams;
 
+use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
@@ -221,7 +222,9 @@ class TeamDao extends AbstractDao
      */
     public function getPersonalByUser(UserStruct $user): TeamStruct
     {
-        return $this->getPersonalByUid($user->uid);
+        $uid = $user->uid ?? throw new DomainException("User UID must not be null");
+
+        return $this->getPersonalByUid($uid);
     }
 
     /**

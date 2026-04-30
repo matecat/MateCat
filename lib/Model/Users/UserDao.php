@@ -334,7 +334,7 @@ class UserDao extends AbstractDao
      * @return UserStruct[]
      * @throws Exception
      */
-    public function read(IDaoStruct $UserQuery): array
+    public function read(UserStruct $UserQuery): array
     {
         [$query, $where_parameters] = $this->_buildReadQuery($UserQuery);
         $stmt = $this->_getStatementForQuery($query);
@@ -351,7 +351,7 @@ class UserDao extends AbstractDao
      * @return array{0:string,1:array<string,int|string>}
      * @throws Exception
      */
-    protected function _buildReadQuery(IDaoStruct $UserQuery): array
+    protected function _buildReadQuery(UserStruct $UserQuery): array
     {
         $UserQuery = $this->sanitize($UserQuery);
 

@@ -604,10 +604,14 @@ class ChunkReviewDao extends AbstractDao
      *
      * @throws Exception
      */
-    public function passFailCountsAtomicUpdate(int $chunkReviewID, array $data = []): void
+    public function passFailCountsAtomicUpdate(int $chunkReviewID, array $data): void
     {
         $chunkReview = $data['chunkReview'];
-        $data['force_pass_at'] = ReviewUtils::filterLQAModelLimit($chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page);
+        $lqaModel = $chunkReview->getChunk()->getProject()->getLqaModel();
+        if ($lqaModel === null) {
+            return;
+        }
+        $data['force_pass_at'] = ReviewUtils::filterLQAModelLimit($lqaModel, $chunkReview->source_page);
 
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL, division by zero returns NULL, so we have to coalesce null values from is_pass division

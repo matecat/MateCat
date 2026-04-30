@@ -380,7 +380,7 @@ class JobDao extends AbstractDao
 
         $stmt->execute();
 
-        $job = static::getById($conn->lastInsertId())[0];
+        $job = static::getById((int)$conn->lastInsertId())[0];
 
         $conn->commit();
 
