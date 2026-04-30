@@ -234,4 +234,4 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: travis-ci
-          SLACK_TITLE: Github CI/CD Pipeline Complete for ${{ github.ref_name }}
+          SLACK_TITLE: Github CI/CD Pipeline Complete for ${{ github.base_ref || github.ref_name }}
