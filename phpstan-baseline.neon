@@ -2779,6 +2779,12 @@ parameters:
 			path: lib/Controller/API/App/UpdateJobKeysController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\UpdateJobKeysController\:\:validateTheRequest\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/UpdateJobKeysController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\UpdateJobKeysController\:\:validateTheRequest\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -2967,7 +2973,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkFromRevisePassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
 
 		-
@@ -3035,6 +3041,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/Commons/Validators/InternalUserValidator.php
+
+		-
+			message: '#^Method Controller\\API\\Commons\\Validators\\JobPasswordValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/Commons/Validators/JobPasswordValidator.php
 
 		-
 			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\ChunkDao\:\:getByIdAndPassword\(\) expects int, string\|false\|null given\.$#'
@@ -5889,7 +5901,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:job\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
@@ -10561,36 +10573,6 @@ parameters:
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
-			message: '#^Method Model\\Jobs\\ChunkDao\:\:getByIdAndPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/ChunkDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\ChunkDao\:\:getByIdProjectAndIdJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/ChunkDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\ChunkDao\:\:getByJobID\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/ChunkDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\ChunkDao\:\:getByProjectID\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/ChunkDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\ChunkDao\:\:getBySegmentTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/ChunkDao.php
-
-		-
 			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\JobDao\:\:getById\(\) expects int, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -11657,12 +11639,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Model\\Projects\\ProjectDao\:\:destroyCacheById\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Projects/ProjectDao.php
 
 		-
 			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$uid\.$#'

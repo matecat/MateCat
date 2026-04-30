@@ -113,8 +113,9 @@ class ProjectDao extends AbstractDao
      */
     public function changePassword(ProjectStruct $project, string $newPass): ProjectStruct
     {
+        $id = $project->id ?? throw new DomainException("Project ID must not be null when changing password");
         $res = $this->updateField($project, 'password', $newPass);
-        $this->destroyCacheById($project->id);
+        $this->destroyCacheById($id);
 
         return $res;
     }
@@ -130,8 +131,9 @@ class ProjectDao extends AbstractDao
      */
     public function changeName(ProjectStruct $project, string $name): ProjectStruct
     {
+        $id = $project->id ?? throw new DomainException("Project ID must not be null when changing name");
         $res = $this->updateField($project, 'name', $name);
-        $this->destroyCacheById($project->id);
+        $this->destroyCacheById($id);
 
         return $res;
     }
