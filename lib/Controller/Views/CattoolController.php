@@ -186,7 +186,7 @@ class CattoolController extends BaseKleinViewController
             'pageTitle' => $this->buildPageTitle($revisionNumber, $chunkStruct),
             'password' => $chunkStruct->password,
             'project' => $chunkStruct->getProject(),
-            'project_name' => $chunkStruct->getProject()->name,
+            'project_name' => Utils::friendlySlug($chunkStruct->getProject()->name),
             'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkStruct->id-$chunkStruct->password",
             'review_extended' => new PHPTalBoolean(true),
             'review_password' => $isRevision ? $chunkReviewStruct->review_password : (new ChunkReviewDao())->findChunkReviewsForSourcePage(
