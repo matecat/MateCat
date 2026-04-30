@@ -231,7 +231,9 @@ jobs:
       - tests
       - deploy
       - test-guard
-    if: always()
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork)
     permissions: {}
     steps:
       - name: Slack Notification
@@ -239,4 +241,4 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: travis-ci
-          SLACK_TITLE: Github CI/CD Pipeline Complete for ${{ github.head_ref || github.ref_name }}
+          SLACK_TITLE: GitHub CI/CD Pipeline Complete for ${{ github.head_ref || github.ref_name }}
