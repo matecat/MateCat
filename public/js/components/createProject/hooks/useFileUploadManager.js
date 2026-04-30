@@ -259,8 +259,8 @@ export function useFileUploadManager({
 
       setFiles((prevFiles) => prevFiles.concat(fileList))
 
-      fileList.forEach(({file, name, ext}) => {
-        if (file.error) return
+      fileList.forEach(({file, name, ext, error}) => {
+        if (error) return
 
         const onProgress = (progress) => {
           setFiles((prevFiles) =>
