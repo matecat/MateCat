@@ -26,8 +26,7 @@ import('../setTranslationUtil').then((m) => {
   _SetTranslationUtil = m
 })
 const checkTranslationTailEmpty = () => {
-  if (!_SetTranslationUtil)
-    throw new Error('[commonUtils] SetTranslationUtil not loaded yet')
+  if (!_SetTranslationUtil) return false // safe default: assume not empty → show onbeforeunload warning
   return _SetTranslationUtil.isTranslationTailEmpty()
 }
 

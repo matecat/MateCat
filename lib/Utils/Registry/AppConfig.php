@@ -400,8 +400,8 @@ class AppConfig
 
         // Load external view decorator (e.g. Vite asset injection) if configured
         if ( self::$VITE_ASSETS_PATH ) {
-            $viteAssetsFullPath = self::$ROOT . '/' . self::$VITE_ASSETS_PATH;
-            if ( file_exists( $viteAssetsFullPath ) ) {
+            $viteAssetsFullPath = realpath( self::$ROOT . '/' . self::$VITE_ASSETS_PATH );
+            if ( $viteAssetsFullPath && str_starts_with( $viteAssetsFullPath, self::$ROOT ) && file_exists( $viteAssetsFullPath ) ) {
                 require_once $viteAssetsFullPath;
             }
         }
