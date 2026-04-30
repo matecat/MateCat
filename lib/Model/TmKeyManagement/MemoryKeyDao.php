@@ -43,6 +43,8 @@ class MemoryKeyDao extends AbstractDao
 
         $this->_validateNotNullFields($obj);
 
+        $tmKey = $obj->tm_key ?? throw new Exception("Key value cannot be null");
+
         $query = "INSERT INTO " . self::TABLE .
             " (uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ( :uid, :key_value, :key_name, :key_tm, :key_glos, NOW())";
@@ -51,14 +53,13 @@ class MemoryKeyDao extends AbstractDao
         $stmt->execute(
             [
                 "uid" => $obj->uid,
-                "key_value" => trim($obj->tm_key->key),
-                "key_name" => ($obj->tm_key->name == null) ? '' : trim($obj->tm_key->name),
-                "key_tm" => ($obj->tm_key->tm == null) ? 1 : $obj->tm_key->tm,
-                "key_glos" => ($obj->tm_key->glos == null) ? 1 : $obj->tm_key->glos
+                "key_value" => trim($tmKey->key ?? throw new Exception("Key value cannot be null")),
+                "key_name" => ($tmKey->name === null) ? '' : trim($tmKey->name),
+                "key_tm" => $tmKey->tm ?? true,
+                "key_glos" => $tmKey->glos ?? true
             ]
         );
 
-        //return the inserted object on success, null otherwise
         if ($stmt->rowCount() > 0) {
             return $obj;
         }
@@ -190,6 +191,8 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+
         $set_array = [];
         $where_conditions = [];
         $bind_params = [];
@@ -200,14 +203,11 @@ class MemoryKeyDao extends AbstractDao
         $bind_params['uid'] = $obj->uid;
 
         $where_conditions[] = "key_value = :key_value";
-        $bind_params['key_value'] = $obj->tm_key->key;
+        $bind_params['key_value'] = $tmKey->key;
 
-        //tm_key conditions
-        if ($obj->tm_key !== null) {
-            if ($obj->tm_key->name !== null) {
-                $set_array[] = "key_name = :key_name";
-                $bind_params['key_name'] = $obj->tm_key->name;
-            }
+        if ($tmKey->name !== null) {
+            $set_array[] = "key_name = :key_name";
+            $bind_params['key_name'] = $tmKey->name;
         }
 
         $where_string = implode(" AND ", $where_conditions);
@@ -240,12 +240,14 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+
         $query = "DELETE FROM " . self::TABLE . " WHERE uid = :uid and key_value = :key_value";
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
             'uid' => $obj->uid,
-            'key_value' => $obj->tm_key->key
+            'key_value' => $tmKey->key
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -265,12 +267,14 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+
         $query = "UPDATE " . self::TABLE . " set deleted = 1 WHERE uid = :uid and key_value = :key_value";
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
             'uid' => $obj->uid,
-            'key_value' => $obj->tm_key->key
+            'key_value' => $tmKey->key
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -290,12 +294,14 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+
         $query = "UPDATE " . self::TABLE . " set deleted = 0 WHERE uid = :uid and key_value = :key_value";
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
             'uid' => $obj->uid,
-            'key_value' => $obj->tm_key->key
+            'key_value' => $tmKey->key
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -307,13 +313,13 @@ class MemoryKeyDao extends AbstractDao
 
 
     /**
-     * @param $obj_arr MemoryKeyStruct[] An array of MemoryKeyStruct objects
+     * @param MemoryKeyStruct[] $obj_arr
      *
      * @throws Exception
      */
     public function createList(array $obj_arr): void
     {
-        $obj_arr = $this->sanitizeArray($obj_arr);
+        $obj_arr = self::sanitizeArray($obj_arr);
 
         $query = "INSERT INTO " . self::TABLE .
             " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
@@ -321,24 +327,21 @@ class MemoryKeyDao extends AbstractDao
 
         $values = [];
 
-        //chunk array using MAX_INSERT_NUMBER
-        $objects = array_chunk($obj_arr, static::MAX_INSERT_NUMBER);
+        $objects = array_chunk($obj_arr, self::MAX_INSERT_NUMBER);
 
-        //create an insert query for each chunk
         foreach ($objects as $chunk) {
             $insert_query = $query;
-            /**
-             * @var $chunk MemoryKeyStruct[]
-             */
+            /** @var MemoryKeyStruct[] $chunk */
             foreach ($chunk as $obj) {
+                $this->_validateNotNullFields($obj);
+                $tmKey = $obj->tm_key ?? throw new Exception("Key value cannot be null");
                 $insert_query .= "( ?, ?, ?, ?, ?, NOW() ),";
 
-                //fill values array
                 $values[] = $obj->uid;
-                $values[] = $obj->tm_key->key;
-                $values[] = ($obj->tm_key->name == null) ? '' : $obj->tm_key->name;
-                $values[] = ($obj->tm_key->tm == null) ? 1 : $obj->tm_key->tm;
-                $values[] = ($obj->tm_key->glos == null) ? 1 : $obj->tm_key->glos;
+                $values[] = $tmKey->key ?? throw new Exception("Key value cannot be null");
+                $values[] = $tmKey->name ?? '';
+                $values[] = $tmKey->tm ?? true;
+                $values[] = $tmKey->glos ?? true;
             }
 
             $insert_query = rtrim($insert_query, ",");
@@ -350,80 +353,69 @@ class MemoryKeyDao extends AbstractDao
     }
 
     /**
-     * See parent definition
-     *
-     * @template T of IDaoStruct
-     *
      * @param MemoryKeyStruct $input
      *
      * @return MemoryKeyStruct
      * @throws Exception
-     * @see AbstractDao::sanitize
-     *
      */
-    public function sanitize(IDaoStruct $input): IDaoStruct
+    public function sanitize(IDaoStruct $input): MemoryKeyStruct
     {
-        return parent::_sanitizeInput($input, self::STRUCT_TYPE);
+        parent::_sanitizeInput($input, self::STRUCT_TYPE);
+
+        return $input;
     }
 
     /**
-     * See parent definition.
+     * @param MemoryKeyStruct[] $input
      *
-     * @param array $input
-     *
-     * @return array
+     * @return MemoryKeyStruct[]
      * @throws Exception
-     * @see AbstractDao::sanitizeArray
-     *
      */
     public static function sanitizeArray(array $input): array
     {
-        return parent::_sanitizeInputArray($input, self::STRUCT_TYPE);
+        $result = [];
+        foreach ($input as $elem) {
+            if (!$elem instanceof MemoryKeyStruct) {
+                throw new Exception("Invalid input. Expected " . self::STRUCT_TYPE, -1);
+            }
+            $result[] = $elem;
+        }
+
+        return $result;
     }
 
     /**
-     * See in AbstractDao::validatePrimaryKey
-     *
-     * @param MemoryKeyStruct $obj
-     *
-     * @return void
      * @throws Exception
-     * @see AbstractDao::_validatePrimaryKey
-     *
      */
     protected function _validatePrimaryKey(IDaoStruct $obj): void
     {
-        /**
-         * @var $obj MemoryKeyStruct
-         */
+        if (!$obj instanceof MemoryKeyStruct) {
+            throw new Exception("Expected MemoryKeyStruct");
+        }
+
         if (empty($obj->uid)) {
             throw new Exception("Invalid Uid");
         }
 
-        if (is_null($obj->tm_key) || is_null($obj->tm_key->key)) {
+        if ($obj->tm_key === null || empty($obj->tm_key->key)) {
             throw new Exception("Invalid Key value");
         }
     }
 
     /**
-     * See in AbstractDao::validateNotNullFields
-     *
-     * @param IDaoStruct $obj
-     *
-     * @return void
      * @throws Exception
-     * @see AbstractDao::_validateNotNullFields
      */
     protected function _validateNotNullFields(IDaoStruct $obj): void
     {
-        /**
-         * @var $obj MemoryKeyStruct
-         */
+        if (!$obj instanceof MemoryKeyStruct) {
+            throw new Exception("Expected MemoryKeyStruct");
+        }
+
         if (empty($obj->uid)) {
             throw new Exception("Uid cannot be null");
         }
 
-        if (is_null($obj->tm_key->key)) {
+        if ($obj->tm_key === null || $obj->tm_key->key === null) {
             throw new Exception("Key value cannot be null");
         }
     }
