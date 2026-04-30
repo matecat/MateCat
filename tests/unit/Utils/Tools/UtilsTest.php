@@ -241,6 +241,45 @@ class UtilsTest extends AbstractTest
         $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
     }
 
+    #[Test]
+    public function testFriendlySlugReturnsHyphenForEmptyStringInput(): void
+    {
+        $result = Utils::friendlySlug('');
+        $this->assertEquals('-', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugHandlesValidAsciiSymbol(): void
+    {
+        $result = Utils::friendlySlug('hello-world');
+        $this->assertEquals('hello-world', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugStripsLogicalNegationSymbol(): void
+    {
+        $result = Utils::friendlySlug('hello¬world');
+        $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
+        $this->assertStringNotContainsString('¬', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugStripsBoxDrawingCharacter(): void
+    {
+        $result = Utils::friendlySlug('╚══test══╝');
+        $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
+        $this->assertStringNotContainsString('╚', $result);
+        $this->assertStringNotContainsString('═', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugStripsBlockGraphicSymbol(): void
+    {
+        $result = Utils::friendlySlug('hello░world');
+        $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
+        $this->assertStringNotContainsString('░', $result);
+    }
+
     // =========================================================================
     // Tests for replace_accents()
     // =========================================================================

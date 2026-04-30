@@ -223,3 +223,22 @@ jobs:
           coverage-threshold: '80'
           exclude-patterns: '.github/**'
           ai-enabled: 'true'
+
+  slack-notification:
+    name: Slack Notification
+    runs-on: ubuntu-24.04
+    needs:
+      - tests
+      - deploy
+      - test-guard
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork)
+    permissions: {}
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: travis-ci
+          SLACK_TITLE: GitHub CI/CD Pipeline Complete for ${{ github.head_ref || github.ref_name }}
