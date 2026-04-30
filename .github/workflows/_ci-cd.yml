@@ -224,7 +224,7 @@ jobs:
           exclude-patterns: '.github/**'
           ai-enabled: 'true'
 
-  slackNotification:
+  slack-notification:
     name: Slack Notification
     runs-on: ubuntu-24.04
     permissions: {}
