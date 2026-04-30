@@ -5707,6 +5707,12 @@ parameters:
 			path: lib/Controller/API/V3/QualityReportControllerAPI.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:feedback\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/RevisionFeedbackController.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:feedback\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
@@ -12439,48 +12445,6 @@ parameters:
 			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
 
 		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:getFeedback\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:getFeedback\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:getFeedback\(\) has parameter \$revision_number with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:getFeedback\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:getFeedback\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:insertOrUpdate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
-			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:updateFeedbackPassword\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ReviseFeedback/FeedbackDAO.php
-
-		-
 			message: '#^Method Model\\Search\\MySQLReplaceEventDAO\:\:getEvents\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -14144,6 +14108,12 @@ parameters:
 
 		-
 			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:postProjectCreate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Plugins/Features/AbstractRevisionFeature.php
+
+		-
+			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:reviewPasswordChanged\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Plugins/Features/AbstractRevisionFeature.php
@@ -24621,6 +24591,12 @@ parameters:
 		-
 			message: '#^Method View\\API\\V3\\Json\\QualitySummary\:\:populateQualitySummarySection\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/View/API/V3/Json/QualitySummary.php
+
+		-
+			message: '#^Method View\\API\\V3\\Json\\QualitySummary\:\:populateQualitySummarySection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/View/API/V3/Json/QualitySummary.php
 

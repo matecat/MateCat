@@ -2,8 +2,10 @@
 
 namespace Model\ReviseFeedback;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use PDOException;
 use ReflectionException;
 
 class FeedbackDAO extends AbstractDao
@@ -17,6 +19,7 @@ class FeedbackDAO extends AbstractDao
      * @param FeedbackStruct $feedbackStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function insertOrUpdate(FeedbackStruct $feedbackStruct): int
     {
@@ -46,6 +49,7 @@ class FeedbackDAO extends AbstractDao
      * @param int $revision_number
      *
      * @return int
+     * @throws PDOException
      */
     public function updateFeedbackPassword(int $id_job, string $old_password, string $new_password, int $revision_number): int
     {
@@ -71,15 +75,21 @@ class FeedbackDAO extends AbstractDao
     }
 
     /**
-     * @param $id_job
-     * @param $password
-     * @param $revision_number
+     * @param int|null $id_job
+     * @param string|null $password
+     * @param int|null $revision_number
      *
      * @return ShapelessConcreteStruct|null
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getFeedback($id_job, $password, $revision_number): ?ShapelessConcreteStruct
     {
+        if ($id_job === null || $password === null || $revision_number === null) {
+            return null;
+        }
+
         $query = "SELECT feedback FROM  " . self::TABLE . " 
                 WHERE
                 id_job = :id_job AND 
