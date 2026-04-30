@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -14,6 +15,7 @@ use Utils\Registry\AppConfig;
  * Date: 18/04/16
  * Time: 15.08
  */
+#[Group('PersistenceNeeded')]
 class SetCacheTTLTest extends AbstractTest
 {
     protected ReflectionClass $reflector;

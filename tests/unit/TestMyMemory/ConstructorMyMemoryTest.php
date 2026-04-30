@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -16,6 +17,7 @@ use Utils\Registry\AppConfig;
  * Date: 28/04/16
  * Time: 15.45
  */
+#[Group('PersistenceNeeded')]
 class ConstructorMyMemoryTest extends AbstractTest
 {
 

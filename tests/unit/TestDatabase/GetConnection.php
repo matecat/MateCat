@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -13,6 +14,7 @@ use Utils\Registry\AppConfig;
  * Date: 11/04/16
  * Time: 19.06
  */
+#[Group('PersistenceNeeded')]
 class GetConnection extends AbstractTest
 {
     protected $reflector;

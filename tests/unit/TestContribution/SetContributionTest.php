@@ -10,6 +10,7 @@
 
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -23,6 +24,7 @@ use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 
+#[Group('PersistenceNeeded')]
 class SetContributionTest extends AbstractTest
 {
 

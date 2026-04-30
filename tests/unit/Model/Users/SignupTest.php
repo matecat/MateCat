@@ -4,9 +4,11 @@ use Model\DataAccess\Database;
 use Model\Exceptions\ValidationError;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\UserDao;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
+#[Group('PersistenceNeeded')]
 class SignupTest extends AbstractTest
 {
 

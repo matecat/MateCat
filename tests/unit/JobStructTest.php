@@ -5,6 +5,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
@@ -16,6 +17,7 @@ use TestHelpers\AbstractTest;
  * Time: 15.31
  *
  */
+#[Group('PersistenceNeeded')]
 class JobStructTest extends AbstractTest
 {
 

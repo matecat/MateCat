@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Group;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 30/06/16
  * Time: 19.01
  */
+#[Group('PersistenceNeeded')]
 class GetByIdProjectAndIdJobChunkTest extends AbstractTest
 {
     /**

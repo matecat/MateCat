@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Group;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 01/07/16
  * Time: 12.02
  */
+#[Group('PersistenceNeeded')]
 class FindProjectTest extends AbstractTest
 {
 

@@ -16,6 +16,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use TestHelpers\AbstractTest;
@@ -23,6 +24,7 @@ use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
+#[Group('PersistenceNeeded')]
 class CacheSystemThroughConcreteClassesTest extends AbstractTest
 {
     private static string $email;

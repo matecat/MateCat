@@ -5,12 +5,14 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 use Utils\Url\JobUrlBuilder;
 use Utils\Url\JobUrls;
 
+#[Group('PersistenceNeeded')]
 class JobUrlBuilderTest extends AbstractTest
 {
 

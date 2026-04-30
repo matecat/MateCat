@@ -6,6 +6,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
@@ -20,7 +21,7 @@ use TestHelpers\AbstractTest;
  * - Hello Hello world 4WD &amp; ampoule %{variable}%
  * - Hello world &#13;&#13;
  * - This unit has a &quot;comment&quot; too;
- * - Hello world qarkullimit” &amp; faturës.
+ * - Hello world qarkullimit" &amp; faturës.
  *
  * ############################################
  * # TRANSLATIONS (used for target tests)     #
@@ -30,6 +31,7 @@ use TestHelpers\AbstractTest;
  * - Anche questa unità ha un &quot;commento&quot;;
  * - Ciao mondo
  */
+#[Group('PersistenceNeeded')]
 class SearchModelTest extends AbstractTest
 {
 

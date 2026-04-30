@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Connection\Resource\Exception\StreamInitException;
 use TestHelpers\AbstractTest;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 15/04/16
  * Time: 19.17
  */
+#[Group('PersistenceNeeded')]
 class CacheSetConnectionTest extends AbstractTest
 {
     protected ReflectionClass $reflector;

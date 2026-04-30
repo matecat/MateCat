@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 01/07/16
  * Time: 12.45
  */
+#[Group('PersistenceNeeded')]
 class UpdateFieldProjectTest extends AbstractTest
 {
 

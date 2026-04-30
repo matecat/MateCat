@@ -3,6 +3,7 @@
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -11,6 +12,7 @@ use Utils\Registry\AppConfig;
  * @group regression
  * @covers \Model\DataAccess\Database::insert
  */
+#[Group('PersistenceNeeded')]
 class InsertOnDuplicateKeyTest extends AbstractTest
 {
     protected const string TABLE_NAME = 'test_insert_on_duplicate';

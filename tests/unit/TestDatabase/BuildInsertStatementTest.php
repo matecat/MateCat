@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -8,6 +9,7 @@ use PHPUnit\Framework\TestCase;
  * @group regression
  * @covers \Model\DataAccess\Database::buildInsertStatement
  */
+#[Group('PersistenceNeeded')]
 class BuildInsertStatementTest extends TestCase
 {
     /**

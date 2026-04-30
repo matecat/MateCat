@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\Apertium;
@@ -17,6 +18,7 @@ use Utils\Registry\AppConfig;
  * Date: 14/04/16
  * Time: 17.45
  */
+#[Group('PersistenceNeeded')]
 class GetInstanceTest extends AbstractTest
 {
     /**
