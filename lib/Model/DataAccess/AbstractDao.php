@@ -91,10 +91,9 @@ abstract class AbstractDao
     }
 
     /**
-     * @template T of IDaoStruct
      * @param $input IDaoStruct The input object
      *
-     * @return T The input object, sanitized.
+     * @return IDaoStruct The input object, sanitized.
      * @throws Exception This function throws exception input is not a \DataAccess\IDaoStruct object
      */
     public function sanitize(IDaoStruct $input): IDaoStruct
@@ -227,7 +226,7 @@ abstract class AbstractDao
     {
         if (empty($keyMap)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $keyMap = $trace[1]['class'] . "::" . $trace[1]['function'] . "-" . implode(":", $bindParams);
+            $keyMap = ($trace[1]['class'] ?? '') . "::" . ($trace[1]['function'] ?? '') . "-" . implode(":", $bindParams);
         }
 
         $_cacheResult = $this->_getFromCacheMap($keyMap, $stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass);
@@ -279,7 +278,7 @@ abstract class AbstractDao
      * provided by the attributes array.
      *
      * @param array<string, scalar|null> $attrs array of full attributes to update
-     * @param array $mask array of attributes to include in the update
+     * @param array<int|string, mixed> $mask array of attributes to include in the update
      * @param bool $ignore Use INSERT IGNORE query type
      * @param bool $no_nulls Exclude NULL fields when build the sql
      * @param array<string, string> $on_duplicate_fields
