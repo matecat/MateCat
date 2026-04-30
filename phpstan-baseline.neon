@@ -9025,18 +9025,6 @@ parameters:
 			path: lib/Model/EditLog/EditLogSegmentStruct.php
 
 		-
-			message: '#^Loose comparison using \=\= between int and ''NULL'' will always evaluate to false\.$#'
-			identifier: equal.alwaysFalse
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
 			message: '#^Method Model\\Engines\\Structs\\AltlangStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\AltlangStruct\) but returns Model\\Engines\\Structs\\AltlangStruct\.$#'
 			identifier: return.type
 			count: 1
@@ -11401,30 +11389,6 @@ parameters:
 			path: lib/Model/Pagination/PaginationParameters.php
 
 		-
-			message: '#^Parameter \#1 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryPaginated\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Parameter \#2 \$id of static method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Parameter \#2 \$id of static method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryByIdCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Parameter \#3 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
 			message: '#^Argument of an invalid type array\|string supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -11909,36 +11873,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$excludeId of static method Model\\Projects\\ProjectTemplateDao\:\:markAsNotDefault\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$id of static method Model\\Projects\\ProjectTemplateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$id of static method Model\\Projects\\ProjectTemplateDao\:\:destroyQueryByIdCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$uid of method Model\\Projects\\ProjectTemplateStruct\:\:hydrateFromJSON\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Projects/ProjectTemplateDao.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'

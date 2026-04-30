@@ -52,9 +52,7 @@ class EngineDAO extends AbstractDao
         }
 
         if ($obj->uid !== null) {
-            if ($obj->uid == 'NULL') {
-                $where_conditions[] = "uid IS NULL";
-            } elseif (empty($obj->uid) || $obj->uid <= 0) {
+            if (empty($obj->uid) || $obj->uid <= 0) {
                 throw new DomainException("Anonymous User."); //do not perform any query on anonymous user requests
             } elseif (is_numeric($obj->uid)) {
                 $bind_values['uid'] = (int)$obj->uid;
@@ -127,8 +125,12 @@ class EngineDAO extends AbstractDao
         $obj->id = (int)$this->database->last_insert();
 
         // revert internal JSON fields to arrays
-        $obj->others = json_decode($obj->others, true);
-        $obj->extra_parameters = json_decode($obj->extra_parameters, true);
+        if (is_string($obj->others)) {
+            $obj->others = json_decode($obj->others, true);
+        }
+        if (is_string($obj->extra_parameters)) {
+            $obj->extra_parameters = json_decode($obj->extra_parameters, true);
+        }
 
         return $obj;
     }

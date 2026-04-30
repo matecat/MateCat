@@ -143,6 +143,8 @@ class CustomPayableRateDao extends AbstractDao
      */
     public static function save(CustomPayableRateStruct $customPayableRateStruct): CustomPayableRateStruct
     {
+        $uid = $customPayableRateStruct->uid ?? throw new Exception("CustomPayableRateStruct::uid must not be null when saving");
+
         $sql = "INSERT INTO " . self::TABLE .
             " ( `uid`, `version`, `name`, `breakdowns`, `created_at`, `modified_at` ) " .
             " VALUES " .
@@ -153,7 +155,7 @@ class CustomPayableRateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            'uid' => $customPayableRateStruct->uid,
+            'uid' => $uid,
             'version' => 1,
             'name' => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
@@ -165,7 +167,7 @@ class CustomPayableRateDao extends AbstractDao
         $customPayableRateStruct->created_at = $now;
         $customPayableRateStruct->modified_at = $now;
 
-        self::destroyQueryPaginated($customPayableRateStruct->uid);
+        self::destroyQueryPaginated($uid);
 
         return $customPayableRateStruct;
     }
@@ -178,22 +180,25 @@ class CustomPayableRateDao extends AbstractDao
      */
     public static function update(CustomPayableRateStruct $customPayableRateStruct): CustomPayableRateStruct
     {
+        $id = $customPayableRateStruct->id ?? throw new Exception("CustomPayableRateStruct::id must not be null when updating");
+        $uid = $customPayableRateStruct->uid ?? throw new Exception("CustomPayableRateStruct::uid must not be null when updating");
+
         $sql = "UPDATE " . self::TABLE . " SET `uid` = :uid, `version` = :version, `name` = :name, `breakdowns` = :breakdowns, `modified_at` = :now WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            'id' => $customPayableRateStruct->id,
-            'uid' => $customPayableRateStruct->uid,
+            'id' => $id,
+            'uid' => $uid,
             'version' => ($customPayableRateStruct->version + 1),
             'name' => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        self::destroyQueryByIdCache($conn, $customPayableRateStruct->id);
-        self::destroyQueryByIdAndUserCache($conn, $customPayableRateStruct->id, $customPayableRateStruct->uid);
-        self::destroyQueryPaginated($customPayableRateStruct->uid);
+        self::destroyQueryByIdCache($conn, $id);
+        self::destroyQueryByIdAndUserCache($conn, $id, $uid);
+        self::destroyQueryPaginated($uid);
 
         return $customPayableRateStruct;
     }

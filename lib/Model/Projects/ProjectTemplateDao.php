@@ -133,8 +133,10 @@ class ProjectTemplateDao extends AbstractDao
      */
     public static function createFromJSON(object $decodedObject, UserStruct $user): ProjectTemplateStruct
     {
+        $uid = $user->uid ?? throw new Exception("UserStruct::uid must not be null when creating a project template");
+
         $projectTemplateStruct = new ProjectTemplateStruct();
-        $projectTemplateStruct->hydrateFromJSON($decodedObject, $user->uid);
+        $projectTemplateStruct->hydrateFromJSON($decodedObject, $uid);
 
         self::checkValues($projectTemplateStruct, $user);
 
@@ -154,7 +156,9 @@ class ProjectTemplateDao extends AbstractDao
      */
     public static function editFromJSON(ProjectTemplateStruct $projectTemplateStruct, object $json, int $id, UserStruct $user): ProjectTemplateStruct
     {
-        $projectTemplateStruct->hydrateFromJSON($json, $user->uid, $id);
+        $uid = $user->uid ?? throw new Exception("UserStruct::uid must not be null when editing a project template");
+
+        $projectTemplateStruct->hydrateFromJSON($json, $uid, $id);
 
         self::checkValues($projectTemplateStruct, $user);
 
@@ -287,8 +291,11 @@ class ProjectTemplateDao extends AbstractDao
             $mkDao = new MemoryKeyDao();
 
             foreach ($tmKeys as $tmKey) {
-                // convert $tmKey to an array
-                $tmKey = json_decode(json_encode($tmKey), true);
+                $tmKeyJson = json_encode($tmKey);
+                if ($tmKeyJson === false) {
+                    throw new Exception("Failed to encode TM key to JSON");
+                }
+                $tmKey = json_decode($tmKeyJson, true);
 
                 $keyRing = $mkDao->read(
                     (new MemoryKeyStruct([
@@ -519,6 +526,8 @@ class ProjectTemplateDao extends AbstractDao
      */
     public static function update(ProjectTemplateStruct $projectTemplateStruct): ProjectTemplateStruct
     {
+        $id = $projectTemplateStruct->id ?? throw new Exception("ProjectTemplateStruct::id must not be null when updating");
+
         $sql = "UPDATE " . self::TABLE . " SET 
             `name` = :name, 
             `is_default` = :is_default, 
@@ -551,7 +560,7 @@ class ProjectTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            "id" => $projectTemplateStruct->id,
+            "id" => $id,
             "name" => $projectTemplateStruct->name,
             "subfiltering_handlers" => $projectTemplateStruct->subfiltering_handlers,
             "is_default" => $projectTemplateStruct->is_default,
@@ -580,12 +589,12 @@ class ProjectTemplateDao extends AbstractDao
             'icu_enabled' => $projectTemplateStruct->icu_enabled
         ]);
 
-        self::destroyQueryByIdCache($conn, $projectTemplateStruct->id);
-        self::destroyQueryByIdAndUserCache($conn, $projectTemplateStruct->id, $projectTemplateStruct->uid);
+        self::destroyQueryByIdCache($conn, $id);
+        self::destroyQueryByIdAndUserCache($conn, $id, $projectTemplateStruct->uid);
         self::destroyQueryPaginated($projectTemplateStruct->uid);
 
         if ($projectTemplateStruct->is_default === true) {
-            self::markAsNotDefault($projectTemplateStruct->uid, $projectTemplateStruct->id);
+            self::markAsNotDefault($projectTemplateStruct->uid, $id);
         }
 
         return $projectTemplateStruct;
