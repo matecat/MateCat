@@ -8713,48 +8713,6 @@ parameters:
 			path: lib/Model/ConnectedServices/Oauth/LinkedIn/LinkedInProvider.php
 
 		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\LinkedIn\\LinkedInProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: lib/Model/ConnectedServices/Oauth/LinkedIn/LinkedInProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getAccessTokenFromAuthCode\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getAuthorizationUrl\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getResourceOwner\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type Model\\ConnectedServices\\Oauth\\ProviderUser\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\ProviderUser\:\:\$email \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
 			message: '#^Property Model\\ConnectedServices\\Oauth\\ProviderUser\:\:\$name \(string\) does not accept string\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
