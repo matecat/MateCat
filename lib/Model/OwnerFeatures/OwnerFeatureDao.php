@@ -80,6 +80,7 @@ class OwnerFeatureDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function destroyCacheByIdCustomer(string $id_customer): bool
     {
@@ -112,6 +113,7 @@ class OwnerFeatureDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function destroyCacheByUserId(int $uid): bool
     {

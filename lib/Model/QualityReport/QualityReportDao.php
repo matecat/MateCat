@@ -20,15 +20,14 @@ use Utils\Constants\TranslationStatus;
 class QualityReportDao extends AbstractDao
 {
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
-
     /**
+     * @param JobStruct $chunk
+     *
+     * @return array<string, mixed>|false
+     *
      * @throws PDOException
      */
-    public function getAverages(JobStruct $chunk)
+    public function getAverages(JobStruct $chunk): array|false
     {
         $sql = <<<SQL
 
@@ -72,7 +71,7 @@ SQL;
     /**
      * @param JobStruct $chunk
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws PDOException
      */
     public static function getSegmentsForQualityReport(JobStruct $chunk): array
@@ -179,10 +178,10 @@ SQL;
     }
 
     /**
-     * @param $segments_id array
-     * @param $job_id      integer
+     * @param array<int, int> $segments_id
+     * @param int $job_id
      *
-     * @return array
+     * @return array<int, ShapelessConcreteStruct>
      * @throws PDOException
      */
     public static function getIssuesBySegments(array $segments_id, int $job_id): array

@@ -23,7 +23,9 @@ class JobDao extends AbstractDao
     const string TABLE = "jobs";
     const string STRUCT_TYPE = JobStruct::class;
 
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
+    /** @var list<string> */
     protected static array $primary_keys = ['id', 'password'];
 
     protected static string $_sql_update_password = "UPDATE jobs SET password = :new_password, last_update = :last_update WHERE id = :id AND password = :old_password ";
@@ -61,15 +63,6 @@ class JobDao extends AbstractDao
                 'password' => $jobQuery->password
             ]
         );
-    }
-
-    /**
-     * @param array $array_result
-     *
-     * @return void
-     */
-    protected function _buildResult(array $array_result)
-    {
     }
 
     /**
@@ -218,13 +211,13 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * @param $project_id
+     * @param int $project_id
      *
      * @return bool
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByProjectId($project_id): bool
+    public function destroyCacheByProjectId(int $project_id): bool
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_jobs_by_project);
@@ -596,15 +589,15 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * @param $id_job
-     * @param $source_page
+     * @param int $id_job
+     * @param int $source_page
      *
      * @return ShapelessConcreteStruct
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function getTimeToEdit($id_job, $source_page): ShapelessConcreteStruct
+    public function getTimeToEdit(int $id_job, int $source_page): ShapelessConcreteStruct
     {
         $query = "SELECT sum(time_to_edit) as tte 
                     FROM segment_translation_events 
@@ -743,13 +736,13 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * @param                $id_project
-     * @param                $new_status
+     * @param int $id_project
+     * @param string $new_status
      *
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function updateAllJobsStatusesByProjectId($id_project, $new_status): void
+    public static function updateAllJobsStatusesByProjectId(int $id_project, string $new_status): void
     {
         self::updateFields([
             'status_owner' => $new_status,
@@ -850,7 +843,7 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * @param array $idJobs
+     * @param array<int, int> $idJobs
      * @param int $ttl
      *
      * @return int|null

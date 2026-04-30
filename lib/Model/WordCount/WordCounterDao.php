@@ -83,7 +83,7 @@ class WordCounterDao extends AbstractDao
         return $stmt->rowCount();
     }
 
-    public function initializeWordCount(WordCountStruct $wStruct)
+    public function initializeWordCount(WordCountStruct $wStruct): int
     {
         $db = Database::obtain();
 
@@ -128,7 +128,7 @@ class WordCounterDao extends AbstractDao
      * @param int|null $id_file
      * @param string|null $jPassword
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws PDOException
      */
     public function getStatsForJob(int $id_job, ?int $id_file = null, ?string $jPassword = null): array

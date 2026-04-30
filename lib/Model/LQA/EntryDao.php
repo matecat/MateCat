@@ -18,12 +18,8 @@ use Utils\Tools\Utils;
 
 class EntryDao extends AbstractDao
 {
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
-     * @param array $ids
+     * @param array<int, int> $ids
      *
      * @return ShapelessConcreteStruct[]
      * @throws PDOException
@@ -58,7 +54,7 @@ class EntryDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public static function updateRepliesCount($id): bool
+    public static function updateRepliesCount(int $id): bool
     {
         $sql = "UPDATE qa_entries SET replies_count = " .
             " ( SELECT count(*) FROM " .
@@ -90,12 +86,12 @@ class EntryDao extends AbstractDao
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
      * @return ?EntryStruct
      * @throws PDOException
      */
-    public static function findById($id): ?EntryStruct
+    public static function findById(int $id): ?EntryStruct
     {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
             " FROM qa_entries " .
@@ -328,7 +324,7 @@ class EntryDao extends AbstractDao
         );
 
         $stmt->execute($values);
-        $lastId = $conn->lastInsertId();
+        $lastId = (int)$conn->lastInsertId();
 
         $entryStruct->id = $lastId;
 

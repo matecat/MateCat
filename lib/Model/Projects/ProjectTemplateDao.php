@@ -40,13 +40,13 @@ class ProjectTemplateDao extends AbstractDao
     const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
-     * @param $uid
+     * @param int $uid
      *
      * @return ProjectTemplateStruct
      * @throws Exception
      * @throws TypeError
      */
-    public static function getDefaultTemplate($uid): ProjectTemplateStruct
+    public static function getDefaultTemplate(int $uid): ProjectTemplateStruct
     {
         $defaultProject = self::getTheDefaultProject($uid);
         $team = (new TeamDao())->getPersonalByUid($uid);
@@ -55,7 +55,7 @@ class ProjectTemplateDao extends AbstractDao
         $default->id = 0;
         $default->name = "Matecat original settings";
         $default->is_default = empty($defaultProject);
-        $default->id_team = $team->id;
+        $default->id_team = (int)$team->id;
         $default->uid = $uid;
         $default->pretranslate_100 = false;
         $default->pretranslate_101 = true;
@@ -76,26 +76,26 @@ class ProjectTemplateDao extends AbstractDao
         $default->segmentation_rule = json_encode([
             "name" => "General",
             "id" => "standard"
-        ]);
+        ]) ?: null;
 
         // MT
-        $default->mt = json_encode(self::getUserDefaultMt());
+        $default->mt = json_encode(self::getUserDefaultMt()) ?: null;
 
-        $default->tm = json_encode([]);
+        $default->tm = json_encode([]) ?: null;
         $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");
         $default->subfiltering_handlers = json_encode(
             InjectableFiltersTags::tagNamesForArrayClasses(
                 array_keys(HandlersSorter::getDefaultInjectedHandlers())
             )
-        );
+        ) ?: null;
         $default->icu_enabled = false;
 
         return $default;
     }
 
     /**
-     * @return array
+     * @return array{id: int, extra: stdClass}
      */
     private static function getUserDefaultMt(): array
     {
@@ -312,7 +312,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
@@ -344,7 +344,7 @@ class ProjectTemplateDao extends AbstractDao
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_default);
         /**
-         * @var $result ProjectTemplateStruct[]
+         * @var ProjectTemplateStruct[] $result
          */
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectTemplateStruct::class, [
             'uid' => $uid,
@@ -366,7 +366,7 @@ class ProjectTemplateDao extends AbstractDao
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         /**
-         * @var $result ProjectTemplateStruct[]
+         * @var ProjectTemplateStruct[] $result
          */
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectTemplateStruct::class, [
             'id' => $id,
@@ -388,7 +388,7 @@ class ProjectTemplateDao extends AbstractDao
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
         /**
-         * @var $result ProjectTemplateStruct[]
+         * @var ProjectTemplateStruct[] $result
          */
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectTemplateStruct::class, [
             'id' => $id,
@@ -496,7 +496,7 @@ class ProjectTemplateDao extends AbstractDao
             'icu_enabled' => $projectTemplateStruct->icu_enabled
         ]);
 
-        $projectTemplateStruct->id = $conn->lastInsertId();
+        $projectTemplateStruct->id = (int)$conn->lastInsertId();
         $projectTemplateStruct->created_at = $now;
         $projectTemplateStruct->modified_at = $now;
 

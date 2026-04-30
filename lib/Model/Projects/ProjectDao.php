@@ -24,7 +24,9 @@ class ProjectDao extends AbstractDao
 {
     const string TABLE = "projects";
 
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
+    /** @var list<string> */
     protected static array $primary_keys = ['id'];
 
     protected static string $_sql_project_data = "
@@ -79,12 +81,12 @@ class ProjectDao extends AbstractDao
     /**
      * @param ProjectStruct $project
      * @param string $field
-     * @param                        $value
+     * @param int|float|string|bool|null $value
      *
      * @return ProjectStruct
      * @throws DomainException
      */
-    public function updateField(ProjectStruct $project, string $field, $value): ProjectStruct
+    public function updateField(ProjectStruct $project, string $field, int|float|string|bool|null $value): ProjectStruct
     {
         $data = [];
         $data[$field] = $value;
@@ -176,7 +178,7 @@ class ProjectDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public function assignToAssignee(int $pid, int $idAssignee)
+    public function assignToAssignee(int $pid, int $idAssignee): int
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("UPDATE projects SET id_assignee = :id_assignee WHERE id = :id ;");
@@ -191,7 +193,7 @@ class ProjectDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public function assignToTeam(int $pid, int $idTeam)
+    public function assignToTeam(int $pid, int $idTeam): void
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("UPDATE projects SET id_team = :id_team WHERE id = :id ;");
@@ -225,7 +227,7 @@ class ProjectDao extends AbstractDao
     /**
      * @param int $id_team
      * @param int $ttl
-     * @param array $filter
+     * @param array{limit?: int, offset?: int, search?: array{id?: int, name?: string}} $filter
      *
      * @return IDaoStruct[]
      * @throws Exception
@@ -271,7 +273,7 @@ class ProjectDao extends AbstractDao
 
     /**
      * @param int $id_team
-     * @param array $filter
+     * @param array{search?: array{id?: int, name?: string}} $filter
      * @param int $ttl
      *
      * @return int
@@ -338,13 +340,13 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * @param $id_customer
+     * @param int|string $id_customer
      *
      * @return ProjectStruct[]
      * @throws PDOException
      */
 
-    static function findByIdCustomer($id_customer): array
+    static function findByIdCustomer(int|string $id_customer): array
     {
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT projects.* FROM projects " .
@@ -358,7 +360,7 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * @param     $id
+     * @param int $id
      * @param int $ttl
      *
      * @return ?ProjectStruct
@@ -366,7 +368,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function findById($id, int $ttl = 0): ?ProjectStruct
+    public static function findById(int $id, int $ttl = 0): ?ProjectStruct
     {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
@@ -412,9 +414,9 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * @param array $id_list
+     * @param array<int, int> $id_list
      *
-     * @return ProjectStruct[]|IDaoStruct[]|[]
+     * @return ProjectStruct[]|IDaoStruct[]
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
@@ -432,8 +434,8 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * @param     $id
-     * @param     $password
+     * @param int $id
+     * @param string $password
      *
      * @param int $ttl
      *
@@ -442,7 +444,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws NotFoundException|ReflectionException
      */
-    static function findByIdAndPassword($id, $password, int $ttl = 0): ProjectStruct
+    static function findByIdAndPassword(int $id, string $password, int $ttl = 0): ProjectStruct
     {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
@@ -474,12 +476,15 @@ class ProjectDao extends AbstractDao
      * Returns uncompleted chunks by project ID. Requires 'is_review' to be passed
      * as a param to filter the query.
      *
+     * @param int $id_project
+     * @param array{is_review?: bool} $params
+     *
      * @return JobStruct[]
      *
      * @throws Exception
      * @throws PDOException
      */
-    static function uncompletedChunksByProjectId($id_project, $params = []): array
+    static function uncompletedChunksByProjectId(int $id_project, array $params = []): array
     {
         $params = Utils::ensure_keys($params, ['is_review']);
         $is_review = $params['is_review'] ?: false;
@@ -519,7 +524,7 @@ class ProjectDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    static function isGDriveProject($id_project): bool
+    static function isGDriveProject(int $id_project): bool
     {
         $conn = Database::obtain()->getConnection();
 
@@ -546,7 +551,7 @@ class ProjectDao extends AbstractDao
 
 
     /**
-     * @param array $project_ids
+     * @param array<int, int> $project_ids
      *
      * @return RemoteFileServiceNameStruct[]
      * @throws Exception
@@ -572,6 +577,9 @@ class ProjectDao extends AbstractDao
         return $this->_fetchObjectMap($stmt, RemoteFileServiceNameStruct::class, []);
     }
 
+    /**
+     * @return array{0: string, 1: array<int, int|string>}
+     */
     protected function _getProjectDataSQLAndValues(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): array
     {
         $query = self::$_sql_project_data;
@@ -626,7 +634,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheForProjectData($pid, $project_password = null, $jid = null, $jpassword = null): bool
+    public function destroyCacheForProjectData(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): bool
     {
         [$query, $values] = $this->_getProjectDataSQLAndValues($pid, $project_password, $jid, $jpassword);
 
@@ -638,7 +646,7 @@ class ProjectDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public static function updateAnalysisStatus($project_id, $status, $stWordCount): bool
+    public static function updateAnalysisStatus(int $project_id, string $status, int $stWordCount): bool
     {
         $update_project_count = "
             UPDATE projects
@@ -660,7 +668,7 @@ class ProjectDao extends AbstractDao
     /**
      * @throws DomainException
      */
-    public static function changeProjectStatus($pid, $status): int
+    public static function changeProjectStatus(int $pid, string $status): int
     {
         $data = [];
         $data['status_analysis'] = $status;
@@ -672,7 +680,7 @@ class ProjectDao extends AbstractDao
     /**
      * @param int $pid Project ID
      *
-     * @return array
+     * @return array<int, array<string, int|string|null>>
      * @throws PDOException
      */
     public static function getProjectAndJobData(int $pid): array
@@ -711,12 +719,12 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * @param $pid
+     * @param int $pid
      *
-     * @return array
+     * @return array<int, array{id: int|string}>
      * @throws PDOException
      */
-    public function getJobIds($pid): array
+    public function getJobIds(int $pid): array
     {
         $db = Database::obtain();
 
@@ -735,12 +743,12 @@ class ProjectDao extends AbstractDao
     /**
      * Get a password map (t, r1, r2)
      *
-     * @param $pid
+     * @param int $pid
      *
-     * @return array
+     * @return array<int, array<string, int|string|null>>
      * @throws PDOException
      */
-    public function getPasswordsMap($pid): array
+    public function getPasswordsMap(int $pid): array
     {
         $db = Database::obtain();
 

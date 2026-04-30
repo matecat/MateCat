@@ -23,7 +23,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Tools\Utils;
 
-class MTQEPayableRateTemplateDao extends AbstractDao
+final class MTQEPayableRateTemplateDao extends AbstractDao
 {
 
     const string TABLE = 'mt_qe_payable_rate_templates';
@@ -37,12 +37,12 @@ class MTQEPayableRateTemplateDao extends AbstractDao
     /**
      * @var ?MTQEPayableRateTemplateDao
      */
-    private static ?MTQEPayableRateTemplateDao $instance = null;
+    protected static ?MTQEPayableRateTemplateDao $instance = null;
 
     /**
      * @return MTQEPayableRateTemplateDao
      */
-    private static function getInstance(): MTQEPayableRateTemplateDao
+    protected static function getInstance(): MTQEPayableRateTemplateDao
     {
         if (!isset(static::$instance)) {
             static::$instance = new static();
@@ -58,7 +58,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws TypeError
      * @throws ReflectionException
      */
@@ -164,7 +164,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
             $res[] = self::hydrateTemplateStruct((array)$r);
         }
 
-        return $res;
+        return array_values(array_filter($res, fn($item) => $item !== null));
     }
 
     /**
@@ -183,7 +183,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
     /**
      * WARNING Use this method only when no user authentication is needed or when it is already performed
      *
-     * @param     $id
+     * @param int $id
      * @param int $ttl
      *
      * @return MTQEPayableRateStruct|null
@@ -191,7 +191,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @throws TypeError
      * @throws ReflectionException
      */
-    public static function getById($id, int $ttl = 60): ?MTQEPayableRateStruct
+    public static function getById(int $id, int $ttl = 60): ?MTQEPayableRateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
@@ -248,9 +248,9 @@ class MTQEPayableRateTemplateDao extends AbstractDao
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      *
-     * @return MTQEPayableRateBreakdowns|null
+     * @return MTQEPayableRateStruct|null
      * @throws TypeError
      */
     private static function hydrateTemplateStruct(array $data): ?MTQEPayableRateStruct

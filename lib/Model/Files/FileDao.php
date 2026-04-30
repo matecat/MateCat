@@ -15,7 +15,7 @@ class FileDao extends AbstractDao
     protected static array $auto_increment_field = ['id'];
 
     /**
-     * @param     $id_job
+     * @param int $id_job
      *
      * @param int $ttl
      *
@@ -24,7 +24,7 @@ class FileDao extends AbstractDao
      * @throws Exception
      * @throws ReflectionException
      */
-    public static function getByJobId($id_job, int $ttl = 60): array
+    public static function getByJobId(int $id_job, int $ttl = 60): array
     {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
@@ -61,7 +61,7 @@ class FileDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public static function updateField($file, $field, $value): bool
+    public static function updateField(FileStruct $file, string $field, string|int|float|bool|null $value): bool
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
@@ -112,7 +112,7 @@ class FileDao extends AbstractDao
     }
 
     /**
-     * @param array $idFiles
+     * @param array<int, int> $idFiles
      *
      * @return int
      * @throws PDOException
@@ -134,7 +134,7 @@ class FileDao extends AbstractDao
     /**
      * @throws Exception
      */
-    public static function insertFilesJob($id_job, $id_file): void
+    public static function insertFilesJob(int $id_job, int $id_file): void
     {
         $data = [];
         $data['id_job'] = (int)$id_job;

@@ -50,6 +50,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobIdProjectAndIdFile(int $id_project, int $id_file): bool
@@ -65,6 +66,7 @@ class MetadataDao extends AbstractDao
      * Must reconstruct the same query and params used in get() so that
      * _destroyObjectCache computes the matching cache key.
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyGetCache(int $id_project, int $id_file, string $key, ?int $filePartsId = null): bool

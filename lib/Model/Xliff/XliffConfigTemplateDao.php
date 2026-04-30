@@ -16,7 +16,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Tools\Utils;
 
-class XliffConfigTemplateDao extends AbstractDao
+final class XliffConfigTemplateDao extends AbstractDao
 {
 
     const string TABLE = 'xliff_config_templates';
@@ -30,12 +30,12 @@ class XliffConfigTemplateDao extends AbstractDao
     /**
      * @var XliffConfigTemplateDao|null
      */
-    private static ?XliffConfigTemplateDao $instance = null;
+    protected static ?XliffConfigTemplateDao $instance = null;
 
     /**
      * @return XliffConfigTemplateDao
      */
-    private static function getInstance(): XliffConfigTemplateDao
+    protected static function getInstance(): XliffConfigTemplateDao
     {
         if (!isset(static::$instance)) {
             static::$instance = new static();
@@ -99,7 +99,7 @@ class XliffConfigTemplateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
@@ -141,7 +141,7 @@ class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getById($id, int $ttl = 60): ?XliffConfigTemplateStruct
+    public static function getById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
@@ -204,7 +204,7 @@ class XliffConfigTemplateDao extends AbstractDao
             $res[] = self::hydrateTemplateStruct((array)$r);
         }
 
-        return $res;
+        return array_values(array_filter($res, fn($item) => $item !== null));
     }
 
     /**
@@ -288,7 +288,7 @@ class XliffConfigTemplateDao extends AbstractDao
 
 
     /**
-     * @param array $data
+     * @param array<string, int|string|null> $data
      *
      * @return XliffConfigTemplateStruct|null
      * @throws Exception
@@ -306,14 +306,14 @@ class XliffConfigTemplateDao extends AbstractDao
         }
 
         $struct = new XliffConfigTemplateStruct();
-        $struct->id = $data['id'];
-        $struct->uid = $data['uid'];
-        $struct->name = $data['name'];
+        $struct->id = (int)$data['id'];
+        $struct->uid = (int)$data['uid'];
+        $struct->name = (string)$data['name'];
 
-        $struct->created_at = $data['created_at'];
-        $struct->modified_at = $data['modified_at'];
-        $struct->deleted_at = $data['deleted_at'];
-        $struct->hydrateRulesFromJson($data['rules']);
+        $struct->created_at = isset($data['created_at']) ? (string)$data['created_at'] : null;
+        $struct->modified_at = isset($data['modified_at']) ? (string)$data['modified_at'] : null;
+        $struct->deleted_at = isset($data['deleted_at']) ? (string)$data['deleted_at'] : null;
+        $struct->hydrateRulesFromJson((string)$data['rules']);
 
         return $struct;
     }
@@ -343,7 +343,7 @@ class XliffConfigTemplateDao extends AbstractDao
             'now' => $now,
         ]);
 
-        $templateStruct->id = $conn->lastInsertId();
+        $templateStruct->id = (int)$conn->lastInsertId();
         $templateStruct->created_at = $now;
         $templateStruct->modified_at = $now;
 

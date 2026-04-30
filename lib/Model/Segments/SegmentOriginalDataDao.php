@@ -37,7 +37,7 @@ class SegmentOriginalDataDao extends AbstractDao
      * @param int $id_segment
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws Exception
      */
@@ -56,7 +56,7 @@ class SegmentOriginalDataDao extends AbstractDao
 
     /**
      * @param int $id_segment
-     * @param array $map
+     * @param array<string, mixed> $map
      * @throws PDOException
      */
     public static function insertRecord(int $id_segment, array $map): void

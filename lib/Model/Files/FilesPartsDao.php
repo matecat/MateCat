@@ -34,7 +34,7 @@ class FilesPartsDao extends AbstractDao
         ]);
 
         if ($stmt->rowCount() === 1) {
-            return $conn->lastInsertId();
+            return (int)$conn->lastInsertId();
         }
 
         return 0;

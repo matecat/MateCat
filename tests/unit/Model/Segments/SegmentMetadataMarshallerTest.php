@@ -118,6 +118,7 @@ class SegmentMetadataMarshallerTest extends TestCase
             'restype',
             'context-url',
             'x-client-name',
+            'translation_disabled',
         ];
 
         $actual = array_map(fn(SegmentMetadataMarshaller $case) => $case->value, SegmentMetadataMarshaller::cases());

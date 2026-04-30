@@ -149,8 +149,4 @@ class RemoteFileDao extends AbstractDao
 
         return false;
     }
-
-    protected function _buildResult(array $array_result): void
-    {
-    }
 }

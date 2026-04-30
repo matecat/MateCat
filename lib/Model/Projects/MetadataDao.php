@@ -116,7 +116,7 @@ class MetadataDao extends AbstractDao
         $this->destroyMetadataCache($id_project);
         $this->destroyMetadataCache($id_project, $key);
 
-        return $conn->lastInsertId();
+        return $stmt->rowCount() > 0;
     }
 
     /**
@@ -187,21 +187,17 @@ class MetadataDao extends AbstractDao
         return "{$key}_chunk_{$chunk->id}_$chunk->password";
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
      * @param int $id_project
      *
-     * @return array|null
+     * @return array<string, mixed>
      */
-    public function getProjectStaticSubfilteringCustomHandlers(int $id_project): ?array
+    public function getProjectStaticSubfilteringCustomHandlers(int $id_project): array
     {
         try {
             $subfiltering = $this->setCacheTTL(86400)->get($id_project, ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
 
-            return $subfiltering?->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return $subfiltering->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }

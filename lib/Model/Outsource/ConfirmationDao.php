@@ -30,9 +30,13 @@ class ConfirmationDao extends AbstractDao
     protected static string $_query_get_by_job_id_password = "SELECT * FROM outsource_confirmation WHERE id_job = :id_job AND password = :password LIMIT 1";
 
     /**
+     * @param int $jid
+     * @param string $old_password
+     * @param string $new_password
+     *
      * @throws PDOException
      */
-    public function updatePassword($jid, $old_password, $new_password): int
+    public function updatePassword(int $jid, string $old_password, string $new_password): int
     {
         $conn = Database::obtain()->getConnection();
 

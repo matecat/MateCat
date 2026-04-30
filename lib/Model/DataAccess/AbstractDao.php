@@ -22,7 +22,7 @@ abstract class AbstractDao
 
     /**
      * The connection object
-     * @var Database
+     * @var IDatabase
      */
     protected IDatabase $database;
 
@@ -37,12 +37,12 @@ abstract class AbstractDao
     const int MAX_INSERT_NUMBER = 1;
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected static array $primary_keys;
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected static array $auto_increment_field = [];
 
@@ -53,10 +53,6 @@ abstract class AbstractDao
 
     public function __construct(?IDatabase $con = null)
     {
-        /**
-         * @var $con IDatabase
-         */
-
         if ($con == null) {
             $con = Database::obtain();
         }
@@ -74,6 +70,9 @@ abstract class AbstractDao
     }
 
     /**
+     * @param array<int, IDaoStruct> $obj_arr
+     *
+     * @return mixed
      * @throws Exception
      */
     public function createList(array $obj_arr)
@@ -82,6 +81,8 @@ abstract class AbstractDao
     }
 
     /**
+     * @param array<int, IDaoStruct> $obj_arr
+     *
      * @throws Exception
      */
     public function updateList(array $obj_arr): void
@@ -102,9 +103,9 @@ abstract class AbstractDao
     }
 
     /**
-     * @param $input array An array of \DataAccess\IDaoStruct objects
+     * @param array<int, IDaoStruct> $input An array of \DataAccess\IDaoStruct objects
      *
-     * @return array The input array, sanitized.
+     * @return array<int, IDaoStruct> The input array, sanitized.
      * @throws Exception This function throws exception if input is not:<br/>
      *                  <ul>
      *                      <li>An array of $type objects</li>
@@ -118,10 +119,10 @@ abstract class AbstractDao
     }
 
     /**
-     * @param array $input The input array
+     * @param array<int, IDaoStruct> $input The input array
      * @param string $type The expected type
      *
-     * @return array The input array if sanitize was successful, otherwise this function throws exception
+     * @return array<int, IDaoStruct> The input array if sanitize was successful, otherwise this function throws exception
      * @throws Exception This function throws exception if input is not:<br/>
      *                  <ul>
      *                      <li>An array of $type objects</li>
@@ -183,12 +184,12 @@ abstract class AbstractDao
     /**
      * Get a statement object by query string
      *
-     * @param $query
+     * @param string $query
      *
      * @return PDOStatement
      * @throws PDOException
      */
-    protected function _getStatementForQuery($query): PDOStatement
+    protected function _getStatementForQuery(string $query): PDOStatement
     {
         $conn = Database::obtain()->getConnection();
 
@@ -196,6 +197,8 @@ abstract class AbstractDao
     }
 
     /**
+     * @param array<int|string, scalar|null> $bindParams
+     *
      * @throws ReflectionException
      */
     protected function _destroyObjectCache(PDOStatement $stmt, string $fetchClass, array $bindParams): bool
@@ -212,25 +215,32 @@ abstract class AbstractDao
      *
      * @param PDOStatement $stmt
      * @param class-string<T> $fetchClass
-     * @param array $bindParams
+     * @param array<int|string, scalar|null> $bindParams
      *
      * @param string|null $keyMap
      *
-     * @return T[]
+     * @return list<T>
      * @throws ReflectionException
      * @throws Exception
      */
     protected function _fetchObjectMap(PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null): array
     {
         if (empty($keyMap)) {
-            $trace = debug_backtrace(!DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             $keyMap = $trace[1]['class'] . "::" . $trace[1]['function'] . "-" . implode(":", $bindParams);
         }
 
         $_cacheResult = $this->_getFromCacheMap($keyMap, $stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass);
 
         if (!is_null($_cacheResult)) {
-            return $_cacheResult;
+            $typedCachedResult = [];
+            foreach ((array)$_cacheResult as $item) {
+                if ($item instanceof $fetchClass) {
+                    $typedCachedResult[] = $item;
+                }
+            }
+
+            return $typedCachedResult;
         }
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, $fetchClass);
@@ -240,32 +250,41 @@ abstract class AbstractDao
         $result = $stmt->fetchAll();
         $this->_setLastComputeDelta(microtime(true) - $t0);
 
-        $this->_setInCacheMap($keyMap, $stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass, $result);
+        $typedResult = [];
+        foreach ($result as $item) {
+            if ($item instanceof $fetchClass) {
+                $typedResult[] = $item;
+            }
+        }
 
-        return $result;
+        $this->_setInCacheMap($keyMap, $stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass, $typedResult);
+
+        return $typedResult;
     }
 
     /**
-     * @param $array_result array
+     * @param array<int, array<string, mixed>> $array_result
      *
+     * @return array<int, IDaoStruct>
      * @deprecated Use instead PDO::setFetchMode()
      */
-    protected function _buildResult(array $array_result)
+    protected function _buildResult(array $array_result): array
     {
+        return [];
     }
 
     /**
      * Returns a string suitable for insert of the fields
      * provided by the attributes array.
      *
-     * @param       $attrs    array of full attributes to update
-     * @param       $mask     array of attributes to include in the update
+     * @param array<string, scalar|null> $attrs array of full attributes to update
+     * @param list<string> $mask array of attributes to include in the update
      * @param bool $ignore Use INSERT IGNORE query type
      * @param bool $no_nulls Exclude NULL fields when build the sql
      *
-     * @param array $on_duplicate_fields
+     * @param list<string> $on_duplicate_fields
      *
-     * @return array{0: string, 1: array} [sql, dupBindValues]
+     * @return array{0: string, 1: array<string, scalar|null>} [sql, dupBindValues]
      * @throws Exception
      * @internal param array $options of options for the SQL statement
      */
@@ -279,8 +298,8 @@ abstract class AbstractDao
      * Returns a string suitable for updates of the fields
      * provided by the attributes array.
      *
-     * @param            $attrs array of full attributes to update
-     * @param array|null $mask array of attributes to include in the update
+     * @param array<string, scalar|null> $attrs array of full attributes to update
+     * @param list<string>|null $mask array of attributes to include in the update
      *
      * @return string
      */
@@ -309,7 +328,7 @@ abstract class AbstractDao
      *
      * WARNING: only AND conditions are supported
      *
-     * @param $attrs array of attributes of the struct
+     * @param array<string, scalar|null> $attrs array of attributes of the struct
      *
      * @return string
      *
@@ -334,7 +353,7 @@ abstract class AbstractDao
      *
      * @param AbstractDaoObjectStruct $struct
      *
-     * @return array the struct's primary keys
+     * @return array<string, scalar|null> the struct's primary keys
      */
 
     protected static function structKeys(AbstractDaoObjectStruct $struct): array
@@ -344,6 +363,10 @@ abstract class AbstractDao
         return $struct->toArray($keys);
     }
 
+    /**
+     * @param array<string, scalar|null> $data
+     * @param array<string, scalar|null> $where
+     */
     public static function updateFields(array $data = [], array $where = []): int
     {
         return Database::obtain()->update(static::TABLE, $data, $where);
@@ -354,7 +377,7 @@ abstract class AbstractDao
      * key attributes provided by the struct.
      *
      * @param AbstractDaoObjectStruct $struct
-     * @param array $options
+     * @param array{fields?: list<string>} $options
      *
      * @return int
      * @throws Exception
@@ -411,7 +434,7 @@ abstract class AbstractDao
      * Returns FALSE on failure.
      *
      * @param IDaoStruct $struct
-     * @param array|null $options
+     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_update?: list<string>}|null $options
      *
      * @return int|false
      * @throws Exception
@@ -437,7 +460,9 @@ abstract class AbstractDao
         $stmt->execute($data);
 
         if (count(static::$auto_increment_field)) {
-            return $conn->lastInsertId();
+            $id = $conn->lastInsertId();
+
+            return $id === false ? false : (int)$id;
         } else {
             return $stmt->rowCount();
         }

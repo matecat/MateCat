@@ -64,17 +64,17 @@ class TeamDao extends AbstractDao
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
-     * @return TeamStruct
+     * @return TeamStruct|null
      * @throws ReflectionException
      * @throws Exception
      */
-    public function findById($id): ?TeamStruct
+    public function findById(int $id): ?TeamStruct
     {
         $stmt = $this->_getStatementForQuery(self::$_query_find_by_id);
 
-        /** @var $res TeamStruct */
+        /** @var TeamStruct|null $res */
         $res = $this->_fetchObjectMap(
             $stmt,
             TeamStruct::class,
@@ -104,7 +104,7 @@ class TeamDao extends AbstractDao
 
     /**
      * @param UserStruct $orgCreatorUser
-     * @param array $params
+     * @param array{name:string,type:string,members?:array<int,string>} $params
      *
      * @return  TeamStruct
      * @throws ReflectionException
@@ -121,7 +121,7 @@ class TeamDao extends AbstractDao
         ]);
 
         $orgId = TeamDao::insertStruct($teamStruct);
-        $teamStruct->id = $orgId;
+        $teamStruct->id = (int)$orgId;
 
 
         //add the creator to the list of members
@@ -302,7 +302,7 @@ class TeamDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
 
         $teamQuery = new TeamStruct();
-        $teamQuery->created_by = $user->uid;
+        $teamQuery->created_by = (int)$user->uid;
 
         return $this->_destroyObjectCache(
             $stmt,

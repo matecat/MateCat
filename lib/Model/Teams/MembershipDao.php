@@ -26,7 +26,9 @@ class MembershipDao extends AbstractDao
     const string TABLE = "teams_users";
     const string STRUCT_TYPE = MembershipStruct::class;
 
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
+    /** @var list<string> */
     protected static array $primary_keys = ['id'];
 
     protected static string $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
@@ -56,9 +58,12 @@ class MembershipDao extends AbstractDao
     ";
 
     /**
+     * @param int $id
+     *
+     * @return MembershipStruct|false
      * @throws PDOException
      */
-    public function findById($id)
+    public function findById(int $id): MembershipStruct|false
     {
         $sql = " SELECT * FROM " . self::TABLE . " WHERE id = ? ";
         $stmt = $this->getDatabaseHandler()->getConnection()->prepare($sql);
@@ -88,7 +93,7 @@ class MembershipDao extends AbstractDao
             [
                 'uid' => $user->uid,
             ]
-        ) ?? null;
+        );
     }
 
     /**
@@ -175,9 +180,7 @@ class MembershipDao extends AbstractDao
     {
         $stmt = $this->_getStatementForQuery(self::$_query_member_list);
 
-        /**
-         * @var $members MembershipStruct[]
-         */
+        /** @var MembershipStruct[] $members */
         $members = $this->_fetchObjectMap(
             $stmt,
             MembershipStruct::class,
@@ -265,7 +268,7 @@ class MembershipDao extends AbstractDao
      * This method takes a list of email addresses as an argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
-     * @param $obj_arr array{team: TeamStruct, members: array}
+     * @param array{team: TeamStruct, members: list<string>} $obj_arr
      *
      *
      * @return MembershipStruct[]

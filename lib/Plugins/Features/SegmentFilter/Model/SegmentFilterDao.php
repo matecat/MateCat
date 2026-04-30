@@ -521,8 +521,4 @@ class SegmentFilterDao extends AbstractDao
         ";
     }
 
-    protected function _buildResult(array $array_result): void
-    {
-    }
-
 }

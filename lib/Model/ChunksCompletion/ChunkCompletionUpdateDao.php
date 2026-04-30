@@ -10,14 +10,10 @@ use PDOException;
 class ChunkCompletionUpdateDao extends AbstractDao
 {
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
      * @throws PDOException
      */
-    public function updatePassword($id_job, $password, $old_password): int
+    public function updatePassword(int $id_job, string $password, string $old_password): int
     {
         $sql = "UPDATE chunk_completion_updates SET password = :new_password
                WHERE id_job = :id_job AND password = :password ";
@@ -33,7 +29,8 @@ class ChunkCompletionUpdateDao extends AbstractDao
         return $stmt->rowCount();
     }
 
-    public static function validSources()
+    /** @return array<string, string> */
+    public static function validSources(): array
     {
         return [
             'user' => ChunkCompletionEventStruct::SOURCE_USER,

@@ -18,6 +18,9 @@ class ChunkCompletionEventDao extends AbstractDao
     const string REVISE = 'revise';
     const string TRANSLATE = 'translate';
 
+    /**
+     * @return array<string, string>
+     */
     public static function validSources(): array
     {
         return [
@@ -42,7 +45,7 @@ class ChunkCompletionEventDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public function getByIdAndChunk(int $id_event, JobStruct $chunk)
+    public function getByIdAndChunk(int $id_event, JobStruct $chunk): ChunkCompletionEventStruct|false
     {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
@@ -115,7 +118,7 @@ class ChunkCompletionEventDao extends AbstractDao
             'is_review' => $params->is_review
         ]);
 
-        return $conn->lastInsertId();
+        return (string)$conn->lastInsertId();
     }
 
 
@@ -151,10 +154,10 @@ class ChunkCompletionEventDao extends AbstractDao
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk  JobStruct to examinate
-     * @param $params array of params for query: is_review
+     * @param JobStruct $chunk JobStruct to examinate
+     * @param array{is_review?: bool} $params array of params for query: is_review
      *
-     * @return array
+     * @return array<string, mixed>
      *
      * @throws Exception
      */
@@ -194,7 +197,4 @@ class ChunkCompletionEventDao extends AbstractDao
         return $stmt->fetch() ?: [];
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
 }

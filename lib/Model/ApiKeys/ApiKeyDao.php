@@ -11,12 +11,12 @@ class ApiKeyDao extends AbstractDao
 {
 
     /**
-     * @param       $key
+     * @param string $key
      *
      * @return ApiKeyStruct|null
      * @throws PDOException
      */
-    static function findByKey($key): ?ApiKeyStruct
+    static function findByKey(string $key): ?ApiKeyStruct
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND api_key = :key ");
@@ -28,9 +28,10 @@ class ApiKeyDao extends AbstractDao
     }
 
     /**
+     * @param ApiKeyStruct $obj
      * @throws PDOException
      */
-    public function create($obj): ApiKeyStruct
+    public function create(ApiKeyStruct $obj): ApiKeyStruct
     {
         $conn = $this->database->getConnection();
 
@@ -48,35 +49,35 @@ class ApiKeyDao extends AbstractDao
 
         $this->database->begin();
         $stmt->execute($values);
-        $result = $this->getById($conn->lastInsertId());
+        $result = $this->getById((int)$conn->lastInsertId());
         $this->database->commit();
 
         return $result[0];
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
-     * @return ApiKeyStruct[]
+     * @return list<ApiKeyStruct>
      * @throws PDOException
      */
-    public function getById($id): array
+    public function getById(int $id): array
     {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(" SELECT * FROM api_keys WHERE id = ? ");
         $stmt->execute([$id]);
 
-        return $stmt->fetchAll(PDO::FETCH_CLASS, ApiKeyStruct::class);
+        return array_values($stmt->fetchAll(PDO::FETCH_CLASS, ApiKeyStruct::class));
     }
 
     /**
-     * @param $uid
+     * @param int $uid
      *
      * @return ApiKeyStruct|null
      * @throws PDOException
      */
-    public function getByUid($uid): ?ApiKeyStruct
+    public function getByUid(int $uid): ?ApiKeyStruct
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND uid = :uid ");
@@ -88,9 +89,10 @@ class ApiKeyDao extends AbstractDao
     }
 
     /**
+     * @param int $uid
      * @throws PDOException
      */
-    public function deleteByUid($uid): int
+    public function deleteByUid(int $uid): int
     {
         $apiKey = $this->getByUid($uid);
 

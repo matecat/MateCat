@@ -23,7 +23,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Tools\Utils;
 
-class MTQEWorkflowTemplateDao extends AbstractDao
+final class MTQEWorkflowTemplateDao extends AbstractDao
 {
 
     const string TABLE = 'mt_qe_templates';
@@ -37,12 +37,12 @@ class MTQEWorkflowTemplateDao extends AbstractDao
     /**
      * @var MTQEWorkflowTemplateDao|null
      */
-    private static ?MTQEWorkflowTemplateDao $instance = null;
+    protected static ?MTQEWorkflowTemplateDao $instance = null;
 
     /**
      * @return MTQEWorkflowTemplateDao
      */
-    private static function getInstance(): MTQEWorkflowTemplateDao
+    protected static function getInstance(): MTQEWorkflowTemplateDao
     {
         if (!isset(static::$instance)) {
             static::$instance = new static();
@@ -58,7 +58,7 @@ class MTQEWorkflowTemplateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws TypeError
      * @throws ReflectionException
      */
@@ -163,7 +163,7 @@ class MTQEWorkflowTemplateDao extends AbstractDao
             $res[] = self::hydrateTemplateStruct((array)$r);
         }
 
-        return $res;
+        return array_values(array_filter($res, fn($item) => $item !== null));
     }
 
     /**
@@ -182,14 +182,14 @@ class MTQEWorkflowTemplateDao extends AbstractDao
     /**
      * WARNING: Use this method only when no user authentication is needed or when it is already performed
      *
-     * @param     $id
+     * @param int $id
      * @param int $ttl
      *
      * @return MTQEWorkflowTemplateStruct|null
      * @throws Exception
      * @throws TypeError
      */
-    public static function getById($id, int $ttl = 60): ?MTQEWorkflowTemplateStruct
+    public static function getById(int $id, int $ttl = 60): ?MTQEWorkflowTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
@@ -246,7 +246,7 @@ class MTQEWorkflowTemplateDao extends AbstractDao
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      *
      * @return MTQEWorkflowTemplateStruct|null
      * @throws TypeError

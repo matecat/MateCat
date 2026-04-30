@@ -17,10 +17,6 @@ class ModelDao extends AbstractDao
 
     protected static string $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
      * @param int $id
      * @param int $ttl
@@ -36,14 +32,22 @@ class ModelDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_model_by_id);
 
-        /** @var ModelStruct $result */
+        /** @var list<ModelStruct> $result */
         $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ModelStruct::class, ['id' => $id]);
 
         return $result[0] ?? null;
     }
 
     /**
-     * @param array $data
+     * @param array{
+     *     uid: int,
+     *     label?: string|null,
+     *     passfail: array{type: string, options: array{limit?: list<int|string>}},
+     *     id_template?: int|null,
+     *     version?: string|int,
+     *     categories?: list<array<string, mixed>>,
+     *     severities?: list<array{penalty: int|string}>
+     * } $data
      *
      * @return ModelStruct
      * @throws PDOException
@@ -74,7 +78,7 @@ class ModelDao extends AbstractDao
             )
         );
 
-        $struct->id = $conn->lastInsertId();
+        $struct->id = (int)$conn->lastInsertId();
 
         return $struct;
     }
@@ -82,7 +86,7 @@ class ModelDao extends AbstractDao
     /**
      * Return ALWAYS a structure like this: {"limit":[15,10]}
      *
-     * @param array $options
+     * @param array{limit?: list<int|string>} $options
      *
      * @return false|string
      */
@@ -103,6 +107,14 @@ class ModelDao extends AbstractDao
         return json_encode($options);
     }
 
+    /**
+     * @param array{
+     *     version: string|int,
+     *     categories: list<array{code: string}>,
+     *     severities?: list<array{penalty: int|string}>,
+     *     passfail: array{type: string, options: array{limit: list<int|string>}}
+     * } $model_root
+     */
     protected static function _getModelHash(array $model_root): int
     {
         $h_string = '';
@@ -128,7 +140,15 @@ class ModelDao extends AbstractDao
      * Recursively create categories and subcategories based on the
      * QA model definition.
      *
-     * @param array $json
+     * @param array{model: array{
+     *     uid: int,
+     *     label?: string|null,
+     *     version: string|int,
+     *     passfail: array{type: string, options: array{limit?: list<int|string>}},
+     *     categories: list<array<string, mixed>>,
+     *     severities?: list<array{penalty: int|string}>,
+     *     id_template?: int|null
+     * }} $json
      *
      * @return ModelStruct
      * @throws PDOException
@@ -151,6 +171,8 @@ class ModelDao extends AbstractDao
     }
 
     /**
+     * @param array{label: string, severities?: list<mixed>, subcategories?: list<array<string, mixed>>}|array<string, mixed> $category
+     * @param list<mixed> $default_severities
      * @throws PDOException
      * @throws ReflectionException
      * @throws TypeError

@@ -34,9 +34,9 @@ class CustomPayableRateDao extends AbstractDao
     private static ?CustomPayableRateDao $instance = null;
 
     /**
-     * @return CustomPayableRateDao|null
+     * @return CustomPayableRateDao
      */
-    private static function getInstance(): ?CustomPayableRateDao
+    private static function getInstance(): CustomPayableRateDao
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -48,7 +48,7 @@ class CustomPayableRateDao extends AbstractDao
     /**
      * @param int $uid
      *
-     * @return array
+     * @return array{id: int, uid: int, payable_rate_template_name: string, version: int, breakdowns: array{default: array<string, mixed>}, createdAt: string|null, modifiedAt: string|null}
      * @throws Exception
      */
     public static function getDefaultTemplate(int $uid): array
@@ -73,7 +73,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
@@ -108,9 +108,7 @@ class CustomPayableRateDao extends AbstractDao
             'id' => $id,
         ]);
 
-        /**
-         * @var $result CustomPayableRateStruct[]
-         */
+        /** @var CustomPayableRateStruct[] $result */
         return $result[0] ?? null;
     }
 
@@ -132,9 +130,7 @@ class CustomPayableRateDao extends AbstractDao
             'uid' => $uid,
         ]);
 
-        /**
-         * @var $result CustomPayableRateStruct[]
-         */
+        /** @var CustomPayableRateStruct[] $result */
         return $result[0] ?? null;
     }
 
@@ -164,7 +160,7 @@ class CustomPayableRateDao extends AbstractDao
             'now' => $now,
         ]);
 
-        $customPayableRateStruct->id = $conn->lastInsertId();
+        $customPayableRateStruct->id = (int)$conn->lastInsertId();
         $customPayableRateStruct->version = 1;
         $customPayableRateStruct->created_at = $now;
         $customPayableRateStruct->modified_at = $now;
@@ -338,6 +334,6 @@ class CustomPayableRateDao extends AbstractDao
             'model_name' => $name,
         ]);
 
-        return $conn->lastInsertId();
+        return (string)$conn->lastInsertId();
     }
 }

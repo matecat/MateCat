@@ -166,7 +166,7 @@ class SegmentDao extends AbstractDao
     }
 
     /**
-     * @param array $id_list
+     * @param array{id_before: int, id_segment: int, id_after: int} $id_list
      *
      * @return object
      * @throws Exception
@@ -183,7 +183,6 @@ class SegmentDao extends AbstractDao
             $id_list
         );
 
-        /** @var iterable $res */
         $reverse_id_list = @array_flip($id_list);
         foreach ($res as $element) {
             $id_list[$reverse_id_list[$element->id]] = $element;
@@ -198,9 +197,17 @@ class SegmentDao extends AbstractDao
      * @param int $ref_segment
      * @param string $where
      *
-     * @param array $options
+     * @param array{
+     *     filter?: array{
+     *         status?: string,
+     *         issues_in_r?: int,
+     *         issue_category?: string|list<int>,
+     *         severity?: string,
+     *         id_segment?: int
+     *     }
+     * } $options
      *
-     * @return array
+     * @return list<int>
      * @throws Exception
      * @internal param $jid
      * @internal param $password
@@ -392,21 +399,21 @@ class SegmentDao extends AbstractDao
         $stmt->execute($conditions_values);
         $segments_id = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return array_map(function ($segment_row) {
+        return array_values(array_map(function ($segment_row) {
             return $segment_row['__sid'];
-        }, $segments_id);
+        }, $segments_id));
     }
 
     /**
-     * @param $segments_id
-     * @param $job_id
-     * @param $job_password
+     * @param list<int> $segments_id
+     * @param int $job_id
+     * @param string $job_password
      *
-     * @return QualityReportSegmentStruct[]
+     * @return list<QualityReportSegmentStruct>
      * @throws PDOException
      */
 
-    public function getSegmentsForQr($segments_id, $job_id, $job_password): array
+    public function getSegmentsForQr(array $segments_id, int $job_id, string $job_password): array
     {
         $db = Database::obtain()->getConnection();
 
@@ -472,7 +479,7 @@ class SegmentDao extends AbstractDao
         $stmt->setFetchMode(PDO::FETCH_CLASS, QualityReportSegmentStruct::class);
         $stmt->execute(array_merge([$job_id, $min, $max], $segments_id, [$job_id, $job_password]));
 
-        return $stmt->fetchAll();
+        return array_values($stmt->fetchAll());
     }
 
     /**
@@ -545,9 +552,9 @@ class SegmentDao extends AbstractDao
      * @param int $step
      * @param int $ref_segment
      * @param string|null $where
-     * @param array $options
+     * @param array{optional_fields?: list<string>} $options
      *
-     * @return SegmentUIStruct[]
+     * @return list<SegmentUIStruct>
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
@@ -675,14 +682,14 @@ class SegmentDao extends AbstractDao
 
         $stm = $this->getDatabaseHandler()->getConnection()->prepare($query);
 
-        return $this->_fetchObjectMap($stm, SegmentUIStruct::class, $bind_keys);
+        return array_values($this->_fetchObjectMap($stm, SegmentUIStruct::class, $bind_keys));
     }
 
     /**
      * @param JobStruct $jStruct
      * @param int $id_file
      *
-     * @return array
+     * @return list<array<string, scalar|null>>
      * @throws PDOException
      */
     public function getSegmentsDownload(JobStruct $jStruct, int $id_file): array
@@ -726,7 +733,7 @@ class SegmentDao extends AbstractDao
         $stm->setFetchMode(PDO::FETCH_ASSOC);
         $stm->execute($bind_keys);
 
-        return $stm->fetchAll();
+        return array_values($stm->fetchAll());
     }
 
     /**
@@ -750,7 +757,7 @@ class SegmentDao extends AbstractDao
      * @param string $jpassword
      * @param int|null $sid
      *
-     * @return array
+     * @return list<ShapelessConcreteStruct|array{total_sources: int, first_of_my_job: int|null, translations_available: int}>
      * @throws Exception
      * @throws ReflectionException
      */
@@ -878,7 +885,7 @@ class SegmentDao extends AbstractDao
                 }
             }
 
-            return array_values($twin_segments);
+            return array_values(array_values($twin_segments));
         }
     }
 
@@ -890,7 +897,7 @@ class SegmentDao extends AbstractDao
      * @param string $password
      * @param bool $getTranslatedInstead
      *
-     * @return array
+     * @return list<array{id: int, status: string|null}>
      * @throws PDOException
      */
     public static function getNextSegment(int $sid, int $jid, string $password = '', bool $getTranslatedInstead = false): array
@@ -930,7 +937,7 @@ class SegmentDao extends AbstractDao
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute($bind_values);
 
-        return $stmt->fetchAll();
+        return array_values($stmt->fetchAll());
     }
 
     /**
@@ -1028,7 +1035,7 @@ class SegmentDao extends AbstractDao
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'id_job' => $idJob,
             'password' => $password,
-        ]) ?? [];
+        ]);
     }
 
     /**
@@ -1123,6 +1130,6 @@ class SegmentDao extends AbstractDao
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'id_project' => $idProject,
             'password' => $password,
-        ]) ?? [];
+        ]);
     }
 }

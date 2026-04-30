@@ -82,7 +82,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws TypeError
      */
@@ -269,7 +269,7 @@ class FiltersConfigTemplateDao extends AbstractDao
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      *
      * @return FiltersConfigTemplateStruct|null
      * @throws TypeError
@@ -328,7 +328,7 @@ class FiltersConfigTemplateDao extends AbstractDao
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        $templateStruct->id = $conn->lastInsertId();
+        $templateStruct->id = (int)$conn->lastInsertId();
         $templateStruct->created_at = $now;
 
         self::destroyQueryByIdCache($conn, $templateStruct->id);

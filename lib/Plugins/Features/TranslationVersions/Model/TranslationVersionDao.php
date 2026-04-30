@@ -19,10 +19,6 @@ class TranslationVersionDao extends AbstractDao
 
     protected static array $primary_keys = ['id_job', 'id_segment', 'version_number'];
 
-    protected function _buildResult(array $array_result): void
-    {
-    }
-
     /**
      * @param $id_job
      *

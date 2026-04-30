@@ -23,9 +23,10 @@ class ActivityLogDao extends AbstractDao
     public string $whereConditions = " id_project = :id_project ";
 
     /**
+     * @return ActivityLogStruct[]
      * @throws PDOException
      */
-    public function getAllForProject($id_project): array
+    public function getAllForProject(int $id_project): array
     {
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
@@ -40,9 +41,10 @@ class ActivityLogDao extends AbstractDao
     }
 
     /**
+     * @return ActivityLogStruct[]
      * @throws PDOException
      */
-    public function getLastActionInProject($id_project): array
+    public function getLastActionInProject(int $id_project): array
     {
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
@@ -86,7 +88,7 @@ class ActivityLogDao extends AbstractDao
 
         $stmt->execute();
 
-        return $conn->lastInsertId();
+        return (int)$conn->lastInsertId();
     }
 
     /**
@@ -95,7 +97,7 @@ class ActivityLogDao extends AbstractDao
      * Use when counters of the job value are not important but only the metadata are needed
      *
      * @param IDaoStruct $activityQuery
-     * @param array $whereKeys
+     * @param array<string, int|string> $whereKeys
      *
      * @return IDaoStruct[]
      * @throws Exception
@@ -121,21 +123,12 @@ class ActivityLogDao extends AbstractDao
     }
 
     /**
-     * @param array $array_result
-     *
-     * @return void
-     */
-    protected function _buildResult(array $array_result)
-    {
-    }
-
-    /**
-     * @param $activity_id
+     * @param int $activity_id
      *
      * @return ActivityLogStruct|null
      * @throws PDOException
      */
-    public static function getByID($activity_id)
+    public static function getByID(int $activity_id): ?ActivityLogStruct
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM activity_log WHERE id = ?");
