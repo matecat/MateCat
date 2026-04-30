@@ -25,6 +25,7 @@ use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Constants\JobStatus;
 use Utils\Tools\CatUtils;
 
@@ -210,14 +211,15 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         });
     }
 
-    /**
-     * @return FileStruct[]
-     * @throws ReflectionException
-     */
-    public function getFiles(): array
-    {
-        return FileDao::getByJobId($this->id);
-    }
+      /**
+       * @return FileStruct[]
+       * @throws ReflectionException
+       * @throws RuntimeException
+       */
+      public function getFiles(): array
+     {
+         return FileDao::getByJobId($this->id ?? throw new RuntimeException('Missing job id'));
+     }
 
     /**
      * getProject

@@ -143,8 +143,10 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         return $this->cachable(__METHOD__, function () {
             $dao = new ProjectDao();
 
+            $projectId = $this->id !== null ? [$this->id] : [];
+
             /** @var RemoteFileServiceNameStruct[] */
-            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([$this->id])[0] ?? null;
+            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName($projectId)[0] ?? null;
         });
     }
 

@@ -33,6 +33,7 @@ use Model\Segments\SegmentMetadataMapper;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use RuntimeException;
 use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
@@ -756,9 +757,14 @@ class ProjectManager
 
             $this->features->dispatchRun(new PostProjectCreateEvent($this->projectStructure));
 
+            $projectId = $this->projectStructure->id_project
+                ?? throw new RuntimeException('Project id must be available before updating analysis status');
+            $status = $this->projectStructure->status
+                ?? throw new RuntimeException('Project status must be available before updating analysis status');
+
             ProjectDao::updateAnalysisStatus(
-                $this->projectStructure->id_project,
-                $this->projectStructure->status,
+                $projectId,
+                $status,
                 $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
             );
 

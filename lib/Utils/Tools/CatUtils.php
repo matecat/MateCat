@@ -239,7 +239,9 @@ class CatUtils
         $last_10_worked_ids = SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour($id_job);
         if (!empty($last_10_worked_ids) and count($last_10_worked_ids) === 10) {
             // Calculating words per hour and estimated completion
-            $estimation_temp = SegmentTranslationDao::getWordsPerSecond($id_job, $last_10_worked_ids);
+            /** @var list<int> $last10WorkedIds */
+            $last10WorkedIds = array_values(array_map('intval', $last_10_worked_ids));
+            $estimation_temp = SegmentTranslationDao::getWordsPerSecond($id_job, $last10WorkedIds);
             $words_per_second = (!empty($estimation_temp[0]['words_per_second']) ? $estimation_temp[0]['words_per_second'] : 1); // avoid division by zero
 
             $totalWordsToDo = $job_stats['raw']['new'] + $job_stats['raw']['draft'] + ($job_stats['raw']['rejected'] ?? 0);
@@ -847,6 +849,8 @@ class CatUtils
         }
 
         $idJobs = array_unique($idJobs);
+        /** @var array<int, int> $idJobs */
+        $idJobs = array_values(array_filter($idJobs, fn ($value) => $value !== null));
 
         return JobDao::getSegmentTranslationsCount($idJobs);
     }

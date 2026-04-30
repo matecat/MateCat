@@ -104,14 +104,14 @@ class TeamDao extends AbstractDao
 
     /**
      * @param UserStruct $orgCreatorUser
-     * @param array{name:string,type:string,members?:array<int,string>} $params
+     * @param array{name: string, type: string, members?: array<int, string|null>} $params
      *
      * @return  TeamStruct
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
-    public function createUserTeam(UserStruct $orgCreatorUser, array $params = []): TeamStruct
+    public function createUserTeam(UserStruct $orgCreatorUser, array $params): TeamStruct
     {
         $teamStruct = new TeamStruct([
             'name' => $params['name'],
@@ -135,9 +135,11 @@ class TeamDao extends AbstractDao
         // get fresh cache from the primary database
         (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($teamStruct->id);
 
+        $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
+
         $membersList = (new MembershipDao)->createList([
             'team' => $teamStruct,
-            'members' => $params['members']
+            'members' => $members
         ]);
         $teamStruct->setMembers($membersList);
 

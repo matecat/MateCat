@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\TeamAccessValidator;
 use Model\Teams\MembershipDao;
 use ReflectionException;
 use View\API\V2\Json\Membership;
+use RuntimeException;
 
 class TeamPublicMembersController extends KleinController
 {
@@ -21,6 +22,7 @@ class TeamPublicMembersController extends KleinController
     /**
      * Get a team members list
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function publicList(): void
     {

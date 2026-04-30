@@ -142,6 +142,7 @@ class ManageModel
 
         $_projects = new ProjectDao();
         $projects = $_projects->getByIdList($id_list);
+        /** @var array<ProjectStruct> $projects */
 
         $projectRenderer = new Project($projects, $search_status);
         $projectRenderer->setUser($user);

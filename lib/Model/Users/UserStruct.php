@@ -11,6 +11,7 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use ReflectionException;
+use RuntimeException;
 use stdClass;
 use Utils\Tools\Utils;
 
@@ -158,9 +159,14 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     /**
      * @return array
+     * @throws RuntimeException
      */
     public function getMetadataAsKeyValue(): array
     {
+        if ($this->uid === null) {
+            throw new RuntimeException('User uid must be set before reading metadata');
+        }
+
         $dao = new MetadataDao();
         $collection = $dao->getAllByUid($this->uid);
         $data = [];

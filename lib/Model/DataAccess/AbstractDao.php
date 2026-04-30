@@ -263,10 +263,11 @@ abstract class AbstractDao
     }
 
     /**
-     * @param array<int, array<string, mixed>> $array_result
-     *
-     * @return array<int, IDaoStruct>
      * @deprecated Use instead PDO::setFetchMode()
+     *
+     * @param list<mixed> $array_result
+     *
+     * @return list<mixed>
      */
     protected function _buildResult(array $array_result): array
     {
@@ -278,15 +279,13 @@ abstract class AbstractDao
      * provided by the attributes array.
      *
      * @param array<string, scalar|null> $attrs array of full attributes to update
-     * @param list<string> $mask array of attributes to include in the update
+     * @param array $mask array of attributes to include in the update
      * @param bool $ignore Use INSERT IGNORE query type
      * @param bool $no_nulls Exclude NULL fields when build the sql
-     *
-     * @param list<string> $on_duplicate_fields
+     * @param array<string, string> $on_duplicate_fields
      *
      * @return array{0: string, 1: array<string, scalar|null>} [sql, dupBindValues]
      * @throws Exception
-     * @internal param array $options of options for the SQL statement
      */
      public static function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): array
     {
@@ -434,7 +433,7 @@ abstract class AbstractDao
      * Returns FALSE on failure.
      *
      * @param IDaoStruct $struct
-     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_update?: list<string>}|null $options
+     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_update?: array<string, string>}|null $options
      *
      * @return int|false
      * @throws Exception
@@ -447,7 +446,8 @@ abstract class AbstractDao
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys($struct->toArray());
-        $mask = array_diff($mask, static::$auto_increment_field);
+        /** @var list<string> $mask */
+        $mask = array_values(array_diff($mask, static::$auto_increment_field));
 
         [$sql, $dupBindValues] = self::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields);
 

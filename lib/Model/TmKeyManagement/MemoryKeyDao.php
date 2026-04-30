@@ -156,7 +156,7 @@ class MemoryKeyDao extends AbstractDao
         $stmt = $this->database->getConnection()->prepare($query);
 
         /**
-         * @var ShapelessConcreteStruct $arr_result
+         * @var list<ShapelessConcreteStruct> $arr_result
          */
         $arr_result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $where_params);
 
@@ -173,6 +173,7 @@ class MemoryKeyDao extends AbstractDao
             }
         }
 
+        /** @var list<ShapelessConcreteStruct> $arr_result */
         return $this->_buildResult($arr_result);
     }
 
@@ -430,9 +431,9 @@ class MemoryKeyDao extends AbstractDao
     /**
      * Builds an array with a result set according to the data structure it handles.
      *
-     * @param $array_result array A result array obtained by a MySql query
+     * @param list<ShapelessConcreteStruct> $array_result
      *
-     * @return MemoryKeyStruct[] An array containing MemoryKeyStruct objects
+     * @return list<MemoryKeyStruct>
      */
     protected function _buildResult(array $array_result): array
     {

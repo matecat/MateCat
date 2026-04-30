@@ -109,19 +109,21 @@ class ModelDao extends AbstractDao
 
     /**
      * @param array{
-     *     version: string|int,
-     *     categories: list<array{code: string}>,
+     *     uid?: int,
+     *     label?: string|null,
+     *     version?: string|int,
+     *     categories?: list<array<string, mixed>>,
      *     severities?: list<array{penalty: int|string}>,
-     *     passfail: array{type: string, options: array{limit: list<int|string>}}
+     *     passfail: array{type: string, options: array{limit?: list<int|string>}}
      * } $model_root
      */
     protected static function _getModelHash(array $model_root): int
     {
         $h_string = '';
 
-        $h_string .= $model_root['version'];
+        $h_string .= $model_root['version'] ?? '';
 
-        foreach ($model_root['categories'] as $category) {
+        foreach ($model_root['categories'] ?? [] as $category) {
             $h_string .= $category['code'];
         }
 
@@ -131,7 +133,7 @@ class ModelDao extends AbstractDao
             }
         }
 
-        $h_string .= $model_root['passfail']['type'] . implode("", $model_root['passfail']['options']['limit']);
+        $h_string .= $model_root['passfail']['type'] . implode("", $model_root['passfail']['options']['limit'] ?? []);
 
         return crc32($h_string);
     }

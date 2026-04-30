@@ -229,6 +229,8 @@ class UserKeysController extends KleinController
      */
     private function removeKeyFromEngines(MemoryKeyStruct $memoryKey, ?string $enginesListCsv = ''): void
     {
+        $uid = $this->getUser()->uid ?? throw new Exception('User not authenticated');
+
         // Convert the CSV string into an array of engine names, filtering out empty values.
         $deleteFrom = array_filter(explode(",", $enginesListCsv));
 
@@ -244,9 +246,9 @@ class UserKeysController extends KleinController
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
-                    $ownerMmtEngineMetaData = (new MetadataDao())
-                        ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
-                        ->get($this->getUser()->uid, $engine->getEngineRecord()->class_load);
+                     $ownerMmtEngineMetaData = (new MetadataDao())
+                         ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
+                         ->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load'));
 
                     // If metadata exists, attempt to delete the memory key from the engine.
                     if (!empty($ownerMmtEngineMetaData)) {

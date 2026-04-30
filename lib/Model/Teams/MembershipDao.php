@@ -195,13 +195,17 @@ class MembershipDao extends AbstractDao
                 $membersUIDs[] = $member->uid;
             }
 
-            $users = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUids($membersUIDs);
-            $metadata = (new MetadataDao())->setCacheTTL(60 * 60 * 24)->getAllByUidList($membersUIDs);
+            $memberUIDs = array_values(array_filter($membersUIDs, fn($v) => $v !== null));
+
+            $users = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUids($memberUIDs);
+            $metadata = (new MetadataDao())->setCacheTTL(60 * 60 * 24)->getAllByUidList($memberUIDs);
 
             foreach ($members as $member) {
-                $member->setUser($users[$member->uid]);
+                if ($member->uid !== null && isset($users[$member->uid])) {
+                    $member->setUser($users[$member->uid]);
+                }
 
-                if (isset($metadata[$member->uid]) and is_array($metadata[$member->uid])) {
+                if ($member->uid !== null && isset($metadata[$member->uid]) and is_array($metadata[$member->uid])) {
                     $member->setUserMetadata($metadata[$member->uid]);
                 }
             }
@@ -268,7 +272,7 @@ class MembershipDao extends AbstractDao
      * This method takes a list of email addresses as an argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
-     * @param array{team: TeamStruct, members: list<string>} $obj_arr
+     * @param array<int, IDaoStruct>|array{team: TeamStruct, members: list<string>} $obj_arr
      *
      *
      * @return MembershipStruct[]

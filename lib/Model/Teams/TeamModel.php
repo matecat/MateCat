@@ -9,6 +9,7 @@ use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Constants\Teams;
 use Utils\Email\InvitedToTeamEmail;
 use Utils\Email\MembershipCreatedEmail;
@@ -95,9 +96,11 @@ class TeamModel
         if (!empty($this->member_emails)) {
             $this->_checkAddMembersToPersonalTeam();
 
+            $members = array_values(array_filter($this->member_emails, fn($member) => $member !== null));
+
             $this->new_memberships = $membershipDao->createList([
                 'team' => $this->struct,
-                'members' => $this->member_emails
+                'members' => $members
             ]);
         }
 
@@ -163,6 +166,7 @@ class TeamModel
 
     /**
      * @throws Exception
+     * @throws \RuntimeException
      */
     protected function _sendEmailsToInvited(): void
     {
@@ -174,6 +178,7 @@ class TeamModel
 
     /**
      * @throws ReflectionException
+     * @throws \RuntimeException
      */
     protected function _setPendingStatuses(): void
     {
@@ -187,6 +192,9 @@ class TeamModel
         }
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     protected function _getInvitedEmails(): array
     {
         $emails_of_existing_members = array_map(
@@ -204,6 +212,7 @@ class TeamModel
     /**
      * @return MembershipStruct[]
      * @throws ReflectionException
+     * @throws \RuntimeException
      */
     protected function _getNewMembershipEmailList(): array
     {
@@ -282,6 +291,7 @@ class TeamModel
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \RuntimeException
      */
     protected function _sendEmailsToNewMemberships(): void
     {

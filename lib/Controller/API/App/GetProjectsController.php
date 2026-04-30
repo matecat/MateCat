@@ -13,6 +13,7 @@ use Model\Teams\MembershipStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Constants\JobStatus;
 use Utils\Constants\Teams;
 
@@ -141,6 +142,7 @@ class GetProjectsController extends KleinController
      * @return UserStruct|null
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     private function filterAssignee(TeamStruct $team, ?int $id_assignee): ?UserStruct
     {

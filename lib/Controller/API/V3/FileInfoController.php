@@ -18,6 +18,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use InvalidArgumentException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
+use PDOException;
 use Model\Files\FilesInfoUtility;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
@@ -95,11 +96,10 @@ class FileInfoController extends KleinController
     }
 
     /**
-     * save instructions
-     *
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
+     * @throws PDOException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError

@@ -82,7 +82,8 @@ class ChangeProjectNameController extends KleinController
         $pDao = new ProjectDao();
         $pDao->changeName($pStruct, $name);
         $pDao->destroyCacheById($id);
-        $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
+        $projectId = $pStruct->id ?? throw new Exception('Project not found');
+        $pDao->destroyCacheForProjectData((int)$projectId, $pStruct->password);
     }
 
     /**

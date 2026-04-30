@@ -12,6 +12,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use RuntimeException;
 use ReflectionException;
 
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
@@ -64,10 +65,15 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
     /**
      * @return UserStruct
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function getUser(): UserStruct
     {
         if (is_null($this->user)) {
+            if ($this->uid === null) {
+                throw new RuntimeException('Membership user uid must be set before loading user');
+            }
+
             $this->user = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid($this->uid);
         }
 

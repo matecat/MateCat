@@ -68,9 +68,11 @@ class UserDao extends AbstractDao
         $sanitized_array = [];
 
         foreach ($uids_array as $v) {
-            if (!is_numeric($v)) {
-                $sanitized_array[] = (int)$v['uid'];
-            } else {
+            if (is_array($v)) {
+                if (isset($v['uid'])) {
+                    $sanitized_array[] = (int)$v['uid'];
+                }
+            } elseif (is_numeric($v)) {
                 $sanitized_array[] = (int)$v;
             }
         }
@@ -161,7 +163,12 @@ class UserDao extends AbstractDao
         ])
         );
 
-        $record = $this->getByUid($conn->lastInsertId());
+        $id = $conn->lastInsertId();
+        if ($id === false) {
+            throw new Exception('Unable to retrieve last inserted user id');
+        }
+
+        $record = $this->getByUid((int)$id);
         $conn->commit();
 
         if (!$record instanceof UserStruct) {

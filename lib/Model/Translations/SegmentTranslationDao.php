@@ -769,7 +769,7 @@ class SegmentTranslationDao extends AbstractDao
 
     /**
      * @param int $id_job
-     * @param array<int, int>|null $estimation_seg_ids
+     * @param list<int> $estimation_seg_ids
      *
      * @return array<int, array<string, mixed>>
      * @throws PDOException
@@ -777,7 +777,7 @@ class SegmentTranslationDao extends AbstractDao
     public
     static function getWordsPerSecond(
         int $id_job,
-        ?array $estimation_seg_ids = []
+        array $estimation_seg_ids = []
     ): array {
         /**
          * If the translator translated the last ten segments in less than 1 hour

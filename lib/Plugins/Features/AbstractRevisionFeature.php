@@ -35,6 +35,7 @@ use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use ReflectionException;
+use RuntimeException;
 use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -141,6 +142,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * If not, then try to find the qa_model from the project structure.
      *
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function postProjectCreate(PostProjectCreateEvent $event): void
     {
@@ -193,7 +195,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     protected function createChunkReviewRecords(ProjectStructure $projectStructure): void
     {
-        $project = ProjectDao::findById($projectStructure->id_project);
+        $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to create chunk review records');
+        $project = ProjectDao::findById($idProject);
         foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
             $chunkStruct = JobDao::getById($id_job);
 
@@ -225,7 +228,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
          *
          */
 
-        $id_job = $projectStructure->jobToSplit;
+        $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
         $previousRevisionRecords = ChunkReviewDao::findByIdJob($id_job);
         $project = ProjectDao::findById($projectStructure->idProject, 86400);
 
@@ -269,7 +272,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
     {
         $projectStructure = $event->data;
 
-        $id_job = $projectStructure->jobToMerge;
+        $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
         $old_reviews = ChunkReviewDao::findByIdJob($id_job);
         $project = ProjectDao::findById($projectStructure->idProject, 86400);
 
@@ -390,16 +393,30 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *  and added to the project structure.
      *
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     private function setQaModelFromJsonFile(ProjectStructure $projectStructure): void
     {
         /** @var array<string, mixed> $model_json */
         $model_json = $projectStructure->features['quality_framework'];
 
+        /**
+         * @var array{model: array{
+         *     uid: int,
+         *     label?: string|null,
+         *     version: string|int,
+         *     passfail: array{type: string, options: array{limit?: list<int|string>}},
+         *     categories: list<array<string, mixed>>,
+         *     severities?: list<array{penalty: int|string}>,
+         *     id_template?: int|null
+         * }} $model_json
+         */
+
         $model_record = ModelDao::createModelFromJsonDefinition($model_json);
 
+        $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to set QA model');
         $project = ProjectDao::findById(
-            $projectStructure->id_project
+            $idProject
         );
 
         $dao = new ProjectDao(Database::obtain());

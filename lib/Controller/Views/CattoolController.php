@@ -28,6 +28,7 @@ use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
+use RuntimeException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
@@ -346,6 +347,7 @@ class CattoolController extends BaseKleinViewController
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     private function findOwnerEmailAndTeam(ProjectStruct $project): array
     {
@@ -361,7 +363,8 @@ class CattoolController extends BaseKleinViewController
             if ($team->type == Teams::PERSONAL) {
                 $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
             } else {
-                $assignee = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid($project->id_assignee);
+                $idAssignee = $project->id_assignee ?? 0;
+                $assignee = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid((int)$idAssignee);
 
                 if ($assignee) {
                     $ownerMail = $assignee->getEmail();

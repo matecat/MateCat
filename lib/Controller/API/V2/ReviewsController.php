@@ -50,12 +50,13 @@ class ReviewsController extends KleinController
         );
 
         // destroy project data cache
-        (new ProjectDao())->destroyCacheForProjectData($this->project->id, $this->project->password);
+        $projectId = $this->project->id ?? throw new Exception('Project not found');
+        (new ProjectDao())->destroyCacheForProjectData((int)$projectId, $this->project->password);
 
         // destroy the 5 minutes chunk review cache
         $chunk = (new ChunkDao())->getByIdAndPassword($records[0]->id_job, $records[0]->password);
         (new ChunkReviewDao())->destroyCacheForFindChunkReviews($chunk);
-        ChunkReviewDao::destroyCacheByProjectId($this->project->id);
+        ChunkReviewDao::destroyCacheByProjectId((int)$projectId);
 
         $this->response->json([
                 'chunk_review' => [

@@ -12,6 +12,7 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use RuntimeException;
 use stdClass;
 use Utils\Constants\EngineConstants;
 
@@ -28,6 +29,7 @@ class MetaDataController extends KleinController
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws RuntimeException
      */
     public function index(): void
     {
@@ -111,6 +113,7 @@ class MetaDataController extends KleinController
      *
      * @return array
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     private function getJobFilesMetaData(JobStruct $job): array
     {

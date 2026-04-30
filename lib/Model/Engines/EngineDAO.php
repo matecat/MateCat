@@ -296,7 +296,7 @@ class EngineDAO extends AbstractDao
     /**
      * Needed to decode json fields
      *
-     * @param array<int, array<string, mixed>> $array_result
+     * @param list<EngineStruct> $array_result
      *
      * @return list<EngineStruct>
      */
@@ -344,7 +344,6 @@ class EngineDAO extends AbstractDao
      *
      * @return EngineStruct
      * @throws Exception
-     * @throws TypeError
      */
     public function sanitize(IDaoStruct $input): EngineStruct
     {

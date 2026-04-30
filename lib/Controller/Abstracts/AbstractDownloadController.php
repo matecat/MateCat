@@ -169,7 +169,8 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 $this->_filename = $this->getDefaultFileName($this->project);
             }
 
-            $isGDriveProject = ProjectDao::isGDriveProject($this->project->id);
+            $projectId = $this->project->id ?? throw new Exception('Project not found');
+            $isGDriveProject = ProjectDao::isGDriveProject((int)$projectId);
 
             if (!$isGDriveProject || $forceXliff === true) {
                 ob_get_contents();

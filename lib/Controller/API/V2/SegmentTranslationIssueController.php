@@ -22,6 +22,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
+use RuntimeException;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use View\API\V2\Json\TranslationIssueComment;
 
@@ -32,6 +33,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      */
     private SegmentTranslationIssueValidator $validator;
 
+    /**
+     * @throws RuntimeException
+     */
     public function index(): void {
         $result = EntryDao::findAllByTranslationVersion(
             $this->validator->translation->id_segment,
@@ -47,6 +51,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      * @throws ValidationError
+     * @throws RuntimeException
      */
     public function create(): void {
         $data = [
@@ -169,9 +174,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             (int)$struct->id
         );
 
-        // update replies count
-        $entryDao = new EntryDao();
-        $entryDao->updateRepliesCount($struct->id);
+         // update replies count
+         $entryDao = new EntryDao();
+         $entryDao->updateRepliesCount($struct->id ?? throw new RuntimeException('Missing entry id'));
 
         Database::obtain()->commit();
 
@@ -215,32 +220,36 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->response->code( 200 );
     }
 
-    public function getComments(): void {
-        $dao = new EntryCommentDao();
+      /**
+       * @throws RuntimeException
+       */
+      public function getComments(): void {
+          $dao = new EntryCommentDao();
 
-        $comments = $dao->findByIssueId(
-            $this->validator->issue->id
-        );
+          $comments = $dao->findByIssueId(
+              $this->validator->issue->id ?? throw new RuntimeException('Missing issue id')
+          );
 
-        $json = new TranslationIssueComment();
-        $rendered = $json->render( $comments );
-        $this->response->json( [ 'comments' => $rendered ] );
-    }
+         $json = new TranslationIssueComment();
+         $rendered = $json->render( $comments );
+         $this->response->json( [ 'comments' => $rendered ] );
+     }
 
-    /**
-     * @throws AuthorizationError
-     * @throws NotFoundException
-     */
-    public function createComment(): void {
-        $data = [
-            'comment' => $this->request->param( 'message' ),
-            'id_qa_entry' => $this->validator->issue->id,
-            'source_page' => $this->request->param( 'source_page' ),
-            'uid' => $this->user->uid
-        ];
+     /**
+      * @throws AuthorizationError
+      * @throws NotFoundException
+      * @throws RuntimeException
+      */
+      public function createComment(): void {
+         $data = [
+             'comment' => $this->request->param( 'message' ),
+             'id_qa_entry' => (int)($this->validator->issue->id ?? throw new RuntimeException('Missing issue id')),
+             'source_page' => (int)($this->request->param( 'source_page' ) ?? throw new RuntimeException('Missing source_page')),
+             'uid' => (int)($this->user->uid ?? throw new RuntimeException('Missing user uid'))
+         ];
 
-        $dao = new EntryCommentDao();
-        $entry = EntryDao::findById( $this->validator->issue->id );
+         $dao = new EntryCommentDao();
+         $entry = EntryDao::findById( $this->validator->issue->id ?? throw new RuntimeException('Missing issue id') );
 
         if ( empty( $entry ) ) {
             throw new NotFoundException( "Issue not found", 404 );

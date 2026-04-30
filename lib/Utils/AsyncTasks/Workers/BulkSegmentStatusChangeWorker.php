@@ -20,6 +20,7 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
+use TypeError;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -43,6 +44,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
      * @throws ReflectionException
      * @throws EndQueueException
      * @throws Exception
+     * @throws TypeError
      */
     public function process(AbstractElement $queueElement): void
     {

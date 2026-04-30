@@ -3,6 +3,7 @@
 namespace Plugins\Features;
 
 use Exception;
+use RuntimeException;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
@@ -55,13 +56,19 @@ class ProjectCompletion extends BaseFeature
         }
     }
 
-        public function jobPasswordChanged(JobPasswordChangedEvent $event): void
+    /**
+     * @throws RuntimeException
+     */
+    public function jobPasswordChanged(JobPasswordChangedEvent $event): void
     {
+        $idJob = $event->job->id ?? throw new RuntimeException('Job id is required when updating completion passwords');
+        $password = $event->job->password ?? throw new RuntimeException('Job password is required when updating completion passwords');
+
         $dao = new ChunkCompletionUpdateDao();
-        $dao->updatePassword($event->job->id, $event->job->password, $event->oldPassword);
+        $dao->updatePassword($idJob, $password, $event->oldPassword);
 
         $dao = new ChunkCompletionEventDao();
-        $dao->updatePassword($event->job->id, $event->job->password, $event->oldPassword);
+        $dao->updatePassword($idJob, $password, $event->oldPassword);
     }
 
 }

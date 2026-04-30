@@ -862,9 +862,9 @@ class SetTranslationController extends AbstractStatefulKleinController
         //Get contexts
         $segmentsList = (new SegmentDao)->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
             [
-                'id_before' => $this->data['id_before'],
-                'id_segment' => $this->data['id_segment'],
-                'id_after' => $this->data['id_after']
+                'id_before' => (int)$this->data['id_before'],
+                'id_segment' => (int)$this->data['id_segment'],
+                'id_after' => (int)$this->data['id_after']
             ]
         );
 

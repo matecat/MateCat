@@ -98,7 +98,7 @@ class ChangePasswordController extends KleinController
             $pDao = new ProjectDao();
             $pDao->changePassword($pStruct, $new_password);
             $pDao->destroyCacheById($id);
-            $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
+            $pDao->destroyCacheForProjectData($pStruct->id ?? throw new \RuntimeException('Missing project id'), $pStruct->password);
         } else { // change job passwords
 
             Database::obtain()->begin();
@@ -141,7 +141,8 @@ class ChangePasswordController extends KleinController
 
             // invalidate cache for ProjectData
             $pDao = new ProjectDao();
-            $pDao->destroyCacheForProjectData($jStruct->getProject()->id, $jStruct->getProject()->password);
+            $projectId = $jStruct->getProject()->id ?? throw new Exception('Project not found');
+            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject()->password);
             $pDao->destroyCacheById($jStruct->getProject()->id);
 
             Database::obtain()->commit();

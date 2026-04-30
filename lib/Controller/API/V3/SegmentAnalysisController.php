@@ -229,7 +229,8 @@ class SegmentAnalysisController extends KleinController
         $offset = ($page - 1) * $perPage;
 
         $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
-        $projectPasswordsMap = $this->projectDao->getPasswordsMap($this->project->id);
+        $projectIdFromProject = $this->project->id ?? throw new Exception('Project not found');
+        $projectPasswordsMap = $this->projectDao->getPasswordsMap((int)$projectIdFromProject);
         $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
 
         $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];

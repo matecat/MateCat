@@ -247,6 +247,7 @@ class DownloadController extends AbstractDownloadController
                     mkdir(dirname($outputPath), 0775, true);
                 }
 
+                /** @var array<int|string, array<string, mixed>> $data */
                 $data = $sDao->getSegmentsDownload($this->job, $fileID);
 
                 $transUnits = [];
@@ -254,7 +255,7 @@ class DownloadController extends AbstractDownloadController
                 foreach ($data as $i => $k) {
                     //create a secondary indexing mechanism on segments' array; this will be useful
                     //prepend a string so non-trans unit id (ex: numerical) are not overwritten
-                    $internalId = $k['internal_id'];
+                    $internalId = (string)$k['internal_id'];
 
                     $transUnits[$internalId] [] = $i;
 

@@ -5,6 +5,7 @@ namespace Model\LQA;
 use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use RuntimeException;
 
 class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface
 {
@@ -20,20 +21,24 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     public ?int $qa_model_template_id = null;
     public ?int $uid = null; // nullable for backward compatibility
 
-    /**
-     * Returns the serialized representation of categories and subcategories.
-     *
-     * @return array
-     */
-    public function getSerializedCategories(): array
-    {
-        return ['categories' => CategoryDao::getCategoriesAndSeverities($this->id)];
-    }
+      /**
+       * Returns the serialized representation of categories and subcategories.
+       *
+       * @return array
+       * @throws RuntimeException
+       */
+      public function getSerializedCategories(): array
+     {
+         return ['categories' => CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'))];
+     }
 
-    public function getCategoriesAndSeverities(): array
-    {
-        return CategoryDao::getCategoriesAndSeverities($this->id);
-    }
+      /**
+       * @throws RuntimeException
+       */
+      public function getCategoriesAndSeverities(): array
+     {
+         return CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
+     }
 
     /**
      * @return CategoryStruct[]

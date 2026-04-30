@@ -9,6 +9,7 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use RuntimeException;
 use Model\DataAccess\TransactionalTrait;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
@@ -317,7 +318,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                 continue;
             }
 
-            $user = (new UserDao())->getByUid($finalRevision->uid);
+            $uid = $finalRevision->uid ?? throw new RuntimeException('Final revision uid is required to send notifications');
+            $user = (new UserDao())->getByUid($uid);
             if ($user) {
                 $emails[] = [
                     'isPreviousChangeAuthor' => true,
@@ -334,7 +336,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $projectAssignee = (new UserDao())->getByUid($this->_chunk->getProject()->id_assignee);
+        $projectAssigneeId = $this->_chunk->getProject()->id_assignee;
+        $projectAssignee = $projectAssigneeId === null ? null : (new UserDao())->getByUid($projectAssigneeId);
         if ($projectAssignee) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,

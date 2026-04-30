@@ -885,7 +885,7 @@ class SegmentDao extends AbstractDao
                 }
             }
 
-            return array_values(array_values($twin_segments));
+            return array_values($twin_segments);
         }
     }
 

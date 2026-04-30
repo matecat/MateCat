@@ -42,8 +42,9 @@ class ChangeJobsStatusController extends KleinController
             }
 
             $chunks = $project->getJobs();
+            $projectId = $project->id ?? throw new NotFoundException("Project not found");
 
-            JobDao::updateAllJobsStatusesByProjectId($project->id, $request['new_status']);
+            JobDao::updateAllJobsStatusesByProjectId((int)$projectId, $request['new_status']);
 
             foreach ($chunks as $chunk) {
                 $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);

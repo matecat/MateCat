@@ -164,6 +164,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
     {
         // load tmx in engines with adaptivity
         $engineList = EngineConstants::getAvailableEnginesList();
+        $uid = $this->getUser()->uid ?? throw new Exception('User not authenticated');
 
         $response = [];
 
@@ -175,8 +176,8 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                 $engine = EnginesFactory::createTempInstance($struct);
 
                 if ($engine->isAdaptiveMT()) {
-                    //retrieve OWNER EnginesFactory License
-                    $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($this->getUser()->uid, $engine->getEngineRecord()->class_load); // engine_id
+                     //retrieve OWNER EnginesFactory License
+                     $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
                         $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
                         if ($engine->getMemoryIfMine($memoryKey)) {

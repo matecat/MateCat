@@ -1003,12 +1003,6 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validateQaModelTemplate\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/CreateProjectController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validateSourceLang\(\) has parameter \$source_lang with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -1275,7 +1269,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\DownloadAnalysisReportController\:\:download\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 1
 			path: lib/Controller/API/App/DownloadAnalysisReportController.php
 
 		-
@@ -1423,12 +1417,6 @@ parameters:
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Parameter \#1 \$uid of method Model\\Users\\MetadataDao\:\:set\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/EngineController.php
-
-		-
 			message: '#^Parameter \#2 \$key of method Model\\Users\\MetadataDao\:\:delete\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1436,12 +1424,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$key of method Model\\Users\\MetadataDao\:\:set\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Parameter \#3 \$value of method Model\\Users\\MetadataDao\:\:set\(\) expects array\|string, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
 			path: lib/Controller/API/App/EngineController.php
@@ -3853,12 +3835,6 @@ parameters:
 			path: lib/Controller/API/V2/ChangePasswordController.php
 
 		-
-			message: '#^Parameter \#1 \$id of method Model\\Projects\\ProjectDao\:\:destroyCacheById\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/ChangePasswordController.php
-
-		-
 			message: '#^Parameter \#1 \$id of method Model\\Teams\\MembershipDao\:\:findTeamByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3940,12 +3916,6 @@ parameters:
 			message: '#^Method Controller\\API\\V2\\ChunkTranslationIssueController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Controller/API/V2/ChunkTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationIssueController\:\:index\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
 			path: lib/Controller/API/V2/ChunkTranslationIssueController.php
 
 		-
@@ -4117,6 +4087,12 @@ parameters:
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
+			message: '#^Parameter \#2 \$data of method Matecat\\XliffParser\\XliffParser\:\:replaceTranslation\(\) expects array\<int\|string, array\<string, mixed\>\>, array\<int\|string, array\<int\|string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
 			message: '#^Parameter \#2 \$id_job of static method Model\\RemoteFiles\\RemoteFileDao\:\:getByFileAndJob\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -4126,6 +4102,12 @@ parameters:
 			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 2
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Parameter \#3 \$transUnits of method Matecat\\XliffParser\\XliffParser\:\:replaceTranslation\(\) expects array\<int\|string, array\<int, int\>\>, array\<string, list\<int\|string\>\> given\.$#'
+			identifier: argument.type
+			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
@@ -4501,12 +4483,6 @@ parameters:
 			path: lib/Controller/API/V2/ReviewsController.php
 
 		-
-			message: '#^Parameter \#1 \$id_project of static method Model\\LQA\\ChunkReviewDao\:\:destroyCacheByProjectId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/ReviewsController.php
-
-		-
 			message: '#^Property Controller\\API\\V2\\ReviewsController\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -4528,12 +4504,6 @@ parameters:
 			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$uid\.$#'
 			identifier: property.notFound
 			count: 1
-			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\LQA\\EntryStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
 
 		-
@@ -4573,25 +4543,7 @@ parameters:
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:createComment\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:createComment\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:getComments\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:index\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
@@ -5569,19 +5521,7 @@ parameters:
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$properties\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:default\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/ProjectTemplateController.php
@@ -5590,18 +5530,6 @@ parameters:
 			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:delete\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:getProjectTemplateModelSchema\(\) should return string but returns object\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: lib/Controller/API/V3/ProjectTemplateController.php
 
 		-
@@ -5629,15 +5557,9 @@ parameters:
 			path: lib/Controller/API/V3/ProjectTemplateController.php
 
 		-
-			message: '#^Parameter \#1 \$uid of static method Model\\Projects\\ProjectTemplateDao\:\:markAsNotDefault\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
 			message: '#^Parameter \#2 \$uid of static method Model\\Projects\\ProjectTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: lib/Controller/API/V3/ProjectTemplateController.php
 
 		-
@@ -5649,18 +5571,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Throwable\:\:getFormattedError\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:edit\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/QAModelTemplateController.php
 
@@ -5684,24 +5594,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$json of class Utils\\Validator\\JSONSchema\\JSONValidatorObject constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$uid of static method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:createFromJSON\(\) expects null, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:remove\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/QAModelTemplateController.php
@@ -6109,18 +6001,6 @@ parameters:
 			path: lib/Controller/API/V3/TeamsProjectsController.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$definitions\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$properties\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:all\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6374,12 +6254,6 @@ parameters:
 
 		-
 			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:getUserProfile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:getUserProfile\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
@@ -7081,6 +6955,12 @@ parameters:
 			path: lib/Controller/Views/CattoolController.php
 
 		-
+			message: '#^Property Controller\\Views\\CattoolController\:\:\$id_job is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: lib/Controller/Views/CattoolController.php
+
+		-
 			message: '#^Property Controller\\Views\\CattoolController\:\:\$request_password \(string\) does not accept string\|false\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -7321,54 +7201,6 @@ parameters:
 			path: lib/Controller/Views/XliffToTargetController.php
 
 		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:create\(\) should return int but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:getAllForProject\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:getAllForProject\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:getByID\(\) has parameter \$activity_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:getLastActionInProject\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:getLastActionInProject\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\ActivityLogDao\:\:read\(\) has parameter \$whereKeys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogDao.php
-
-		-
 			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$actionsStrings type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7505,24 +7337,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AnalysisDao\:\:destroyCacheByProjectId\(\) has parameter \$project_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Analysis/AnalysisDao.php
-
-		-
-			message: '#^Method Model\\Analysis\\AnalysisDao\:\:getProjectStatsVolumeAnalysis\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/AnalysisDao.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Model/Analysis/AnalysisDao.php
 
 		-
 			message: '#^Method Model\\Analysis\\Constants\\AbstractConstants\:\:forValue\(\) return type has no value type specified in iterable type array\.$#'
@@ -7675,36 +7489,6 @@ parameters:
 			path: lib/Model/ApiKeys/ApiKeyDao.php
 
 		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyDao\:\:create\(\) has parameter \$obj with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyDao.php
-
-		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyDao\:\:deleteByUid\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyDao.php
-
-		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyDao\:\:findByKey\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyDao.php
-
-		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyDao\:\:getById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyDao.php
-
-		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyDao\:\:getByUid\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyDao.php
-
-		-
 			message: '#^Method Model\\ApiKeys\\ApiKeyStruct\:\:getUser\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -7715,84 +7499,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Model/ApiKeys/ApiKeyStruct.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:createFromChunk\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:getByIdAndChunk\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:lastCompletionRecord\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:lastCompletionRecord\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:validSources\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionEventDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionUpdateDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionUpdateDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionUpdateDao\:\:updatePassword\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionUpdateDao\:\:updatePassword\(\) has parameter \$old_password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionUpdateDao\:\:updatePassword\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php
-
-		-
-			message: '#^Method Model\\ChunksCompletion\\ChunkCompletionUpdateDao\:\:validSources\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php
 
 		-
 			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -7807,166 +7513,16 @@ parameters:
 			path: lib/Model/Comments/BaseCommentStruct.php
 
 		-
-			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:templateMessage\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Comments/BaseCommentStruct.php
-
-		-
 			message: '#^Parameter \#1 \$object of function date_format expects DateTimeInterface, DateTime\|false given\.$#'
 			identifier: argument.type
 			count: 2
 			path: lib/Model/Comments/BaseCommentStruct.php
 
 		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getCommentsForChunk\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getOpenThreadsForProjects\(\) has parameter \$projectIds with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getOpenThreadsForProjects\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getThreadContributorUids\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getThreadsBySegments\(\) has parameter \$job_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getThreadsBySegments\(\) has parameter \$segments_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getThreadsBySegments\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getUsersIdFromContent\(\) has parameter \$content with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:getUsersIdFromContent\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:placeholdContent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:placeholdContent\(\) has parameter \$content with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:validateComment\(\) has parameter \$obj with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Offset 1 on array\{list\<string\>, list\<numeric\-string\>\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(OpenThreadsStruct\[\];\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 136 on line 6$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Property Model\\Comments\\CommentDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
-			message: '#^Property Model\\Comments\\CommentDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentDao.php
-
-		-
 			message: '#^Method Model\\Comments\\CommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Comments/CommentStruct.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\ConnectedServiceDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\ConnectedServiceDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\ConnectedServiceDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\ConnectedServiceDao\:\:findServiceByUserAndId\(\) has parameter \$id_service with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\ConnectedServiceDao\:\:setServiceExpired\(\) has parameter \$time with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\ConnectedServiceDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\ConnectedServiceDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceDao.php
 
 		-
 			message: '#^Cannot call method decrypt\(\) on Model\\ConnectedServices\\Oauth\\OauthTokenEncryption\|null\.$#'
@@ -9085,18 +8641,6 @@ parameters:
 			path: lib/Model/DataAccess/AbstractDao.php
 
 		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
 			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -9106,42 +8650,6 @@ parameters:
 			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
 			identifier: return.type
 			count: 2
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_destroyObjectCache\(\) has parameter \$bindParams with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_fetchObjectMap\(\) has parameter \$bindParams with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_fetchObjectMap\(\) should return array\<T of Model\\DataAccess\\IDaoStruct\> but returns array\<Model\\DataAccess\\IDaoStruct\>\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_getStatementForQuery\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_sanitizeInputArray\(\) has parameter \$input with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_sanitizeInputArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: lib/Model/DataAccess/AbstractDao.php
 
 		-
@@ -9157,128 +8665,14 @@ parameters:
 			path: lib/Model/DataAccess/AbstractDao.php
 
 		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildInsertStatement\(\) has parameter \$attrs with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
 			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildInsertStatement\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/DataAccess/AbstractDao.php
 
 		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildInsertStatement\(\) has parameter \$on_duplicate_fields with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildInsertStatement\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildPkeyCondition\(\) has parameter \$attrs with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildUpdateSet\(\) has parameter \$attrs with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:buildUpdateSet\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:createList\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:createList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:insertStruct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:insertStruct\(\) should return int\|false but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:sanitizeArray\(\) has parameter \$input with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:sanitizeArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:structKeys\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:updateFields\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:updateFields\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:updateList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:updateStruct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
 			message: '#^Offset ''class'' might not exist on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$con IDatabase\)\: Unexpected token "\$con", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: lib/Model/DataAccess/AbstractDao.php
 
@@ -9291,24 +8685,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Property Model\\DataAccess\\AbstractDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Property Model\\DataAccess\\AbstractDao\:\:\$database \(Model\\DataAccess\\Database\) does not accept Model\\DataAccess\\IDatabase\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Property Model\\DataAccess\\AbstractDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/DataAccess/AbstractDao.php
 
@@ -9655,69 +9031,9 @@ parameters:
 			path: lib/Model/Engines/EngineDAO.php
 
 		-
-			message: '#^Method Model\\Engines\\EngineDAO\:\:_buildQueryForEngine\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Method Model\\Engines\\EngineDAO\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$obj EngineStruct\)\: Unexpected token "\$obj", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$obj EngineStruct\)\: Unexpected token "\$obj", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Property Model\\Engines\\EngineDAO\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Property Model\\Engines\\EngineDAO\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$active \(bool\|null\) does not accept int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$extra_parameters \(array\|string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Engines/EngineDAO.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$others \(array\|string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: lib/Model/Engines/EngineDAO.php
 
 		-
@@ -10285,54 +9601,6 @@ parameters:
 			path: lib/Model/FeaturesBase/PluginsLoader.php
 
 		-
-			message: '#^Method Model\\Files\\FileDao\:\:deleteFailedProjectFiles\(\) has parameter \$idFiles with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Model\\Files\\FileDao\:\:getByJobId\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Model\\Files\\FileDao\:\:insertFilesJob\(\) has parameter \$id_file with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Model\\Files\\FileDao\:\:insertFilesJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Model\\Files\\FileDao\:\:updateField\(\) has parameter \$field with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Model\\Files\\FileDao\:\:updateField\(\) has parameter \$file with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Model\\Files\\FileDao\:\:updateField\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
-			message: '#^Property Model\\Files\\FileDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Files/FileDao.php
-
-		-
 			message: '#^Argument of an invalid type array\<Model\\Files\\MetadataStruct\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -10372,12 +9640,6 @@ parameters:
 			message: '#^Method Model\\Files\\FilesInfoUtility\:\:setInstructions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:setInstructions\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
 			path: lib/Model/Files/FilesInfoUtility.php
 
 		-
@@ -10433,24 +9695,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: lib/Model/Files/FilesMetadataMarshaller.php
-
-		-
-			message: '#^Method Model\\Files\\FilesPartsDao\:\:insert\(\) should return int but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Files/FilesPartsDao.php
-
-		-
-			message: '#^Method Model\\Files\\MetadataDao\:\:destroyCacheByJobIdProjectAndIdFile\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Files/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Files\\MetadataDao\:\:destroyGetCache\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Files/MetadataDao.php
 
 		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
@@ -11227,18 +10471,6 @@ parameters:
 			path: lib/Model/Filters/DTO/Yaml.php
 
 		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:hydrateTemplateStruct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
 			message: '#^Parameter \#1 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryPaginated\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -11272,12 +10504,6 @@ parameters:
 			message: '#^Parameter \#3 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Property Model\\Filters\\FiltersConfigTemplateStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: lib/Model/Filters/FiltersConfigTemplateDao.php
 
 		-
@@ -11377,12 +10603,6 @@ parameters:
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:destroyCacheByJobAndPasswordAndKey\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
 			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:get\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -11392,12 +10612,6 @@ parameters:
 			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:set\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:destroyCacheByJobAndPasswordAndKey\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
@@ -11443,62 +10657,8 @@ parameters:
 			path: lib/Model/Jobs/ChunkDao.php
 
 		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:destroyCacheByProjectId\(\) has parameter \$project_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:getSegmentTranslationsCount\(\) has parameter \$idJobs with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:getTimeToEdit\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:getTimeToEdit\(\) has parameter \$source_page with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:updateAllJobsStatusesByProjectId\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobDao\:\:updateAllJobsStatusesByProjectId\(\) has parameter \$new_status with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
 			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\JobDao\:\:getById\(\) expects int, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Jobs/JobDao.php
 
@@ -11683,148 +10843,10 @@ parameters:
 			path: lib/Model/Jobs/LexiQaAndTagProjectionLanguages.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:delete\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:delete\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:delete\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
 			message: '#^Unsafe access to private property Model\\Jobs\\MetadataDao\:\:\$__transactionStarted through static\:\:\.$#'
 			identifier: staticClassAccess.privateProperty
 			count: 5
 			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:createRecord\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:extractOptions\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:extractOptions\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:extractSeverities\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:extractSeverities\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:findByIdModelAndIdParent\(\) has parameter \$id_model with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:findByIdModelAndIdParent\(\) has parameter \$id_parent with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:getCategoriesAndSeverities\(\) has parameter \$id_model with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\CategoryDao\:\:getCategoriesAndSeverities\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Offset ''id'' might not exist on array\{subcategories\: list\<array\{label\: mixed, id\: mixed, options\: array, severities\: array\}\>, label\?\: mixed, id\?\: int, options\?\: array, severities\?\: array\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Offset ''label'' might not exist on array\{subcategories\: list\<array\{label\: mixed, id\: mixed, options\: array, severities\: array\}\>, label\?\: mixed, id\?\: int, options\?\: array, severities\?\: array\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Offset ''options'' might not exist on array\{subcategories\: list\<array\{label\: mixed, id\: mixed, options\: array, severities\: array\}\>, label\?\: mixed, id\?\: int, options\?\: array, severities\?\: array\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Offset ''severities'' might not exist on array\{subcategories\: list\<array\{label\: mixed, id\: mixed, options\: array, severities\: array\}\>, label\?\: mixed, id\?\: int, options\?\: array, severities\?\: array\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
-
-		-
-			message: '#^Property Model\\LQA\\CategoryStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/CategoryDao.php
 
 		-
 			message: '#^Method Model\\LQA\\CategoryStruct\:\:toArrayWithJsonDecoded\(\) return type has no value type specified in iterable type array\.$#'
@@ -11845,92 +10867,8 @@ parameters:
 			path: lib/Model/LQA/ChunkReviewDao.php
 
 		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:_findChunkReviewsStatement\(\) has parameter \$chunksArray with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:_findChunkReviewsStatement\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:countTimeToEdit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:countTimeToEdit\(\) has parameter \$source_page with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:createRecord\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:findByIdJob\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:findByProjectId\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:findLastReviewByJobIdPasswordAndSourcePage\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:findLastReviewByJobIdPasswordAndSourcePage\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:findLastReviewByJobIdPasswordAndSourcePage\(\) has parameter \$source_page with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
 			message: '#^Parameter \#1 \$lqaModel of static method Plugins\\Features\\ReviewExtended\\ReviewUtils\:\:filterLQAModelLimit\(\) expects Model\\LQA\\ModelStruct, Model\\LQA\\ModelStruct\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Property Model\\LQA\\ChunkReviewDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ChunkReviewDao.php
-
-		-
-			message: '#^Property Model\\LQA\\ChunkReviewStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/LQA/ChunkReviewDao.php
 
@@ -11947,94 +10885,10 @@ parameters:
 			path: lib/Model/LQA/ChunkReviewStruct.php
 
 		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:createComment\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:fetchCommentsGroupedByIssueIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:fetchCommentsGroupedByIssueIds\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryCommentDao\:\:findByIssueId\(\) has parameter \$id_issue with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Property Model\\LQA\\EntryCommentStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
 			message: '#^Anonymous function has an unused use \$ttl\.$#'
 			identifier: closure.unusedUse
 			count: 1
 			path: lib/Model/LQA/EntryCommentStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:getBySegmentIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:updateRepliesCount\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
-
-		-
-			message: '#^Property Model\\LQA\\EntryStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
 
 		-
 			message: '#^Cannot access property \$id on Model\\LQA\\CategoryStruct\|null\.$#'
@@ -12163,80 +11017,8 @@ parameters:
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
-			message: '#^Cannot access offset 0 on Model\\LQA\\ModelStruct\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:_getModelHash\(\) has parameter \$model_root with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:createModelFromJsonDefinition\(\) has parameter \$json with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:createRecord\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:decodePassOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:insertCategory\(\) has parameter \$category with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelDao\:\:insertCategory\(\) has parameter \$default_severities with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^PHPDoc tag @var with type Model\\LQA\\ModelStruct is not subtype of native type array\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
 			message: '#^Parameter \#2 \$model_id of static method Model\\LQA\\ModelDao\:\:insertCategory\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Property Model\\LQA\\ModelDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelDao.php
-
-		-
-			message: '#^Property Model\\LQA\\ModelStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/LQA/ModelDao.php
 
@@ -12253,12 +11035,6 @@ parameters:
 			path: lib/Model/LQA/ModelStruct.php
 
 		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:getCategoriesAndSeverities\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
 			message: '#^Method Model\\LQA\\ModelStruct\:\:getDecodedModel\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -12267,12 +11043,6 @@ parameters:
 		-
 			message: '#^Method Model\\LQA\\ModelStruct\:\:getSerializedCategories\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:getSerializedCategories\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/LQA/ModelStruct.php
 
@@ -12325,60 +11095,6 @@ parameters:
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
 
 		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:createFromJSON\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:destroyQueryPaginated\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:editFromJSON\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:get\(\) has parameter \$meta with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:getDefaultTemplate\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:getDefaultTemplate\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:getQaModelTemplateByIdAndUid\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:getQaModelTemplateByIdAndUid\(\) has parameter \$meta with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
 			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -12387,60 +11103,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplateCategoryStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplateCategoryStruct\:\:\$id_template \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailThresholdStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailThresholdStruct\:\:\$id_passfail \(int\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplateSeverityStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplateSeverityStruct\:\:\$id_category \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Property Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:\$id \(int\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Unsafe call to private method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:destroyQueryPaginated\(\) through static\:\:\.$#'
-			identifier: staticClassAccess.privateMethod
-			count: 3
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
 			count: 1
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
 
@@ -12553,48 +11215,6 @@ parameters:
 			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
 
 		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getByUid\(\) should return array\<Model\\MTQE\\PayableRate\\MTQEPayableRateStruct\> but returns list\<Model\\MTQE\\PayableRate\\MTQEPayableRateStruct\|null\>\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:hydrateTemplateStruct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\MTQE\\PayableRate\\DTO\\MTQEPayableRateBreakdowns\|null is not subtype of native type Model\\MTQE\\PayableRate\\MTQEPayableRateStruct\|null\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
-			message: '#^Unsafe access to private property Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:\$instance through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 3
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
-
-		-
 			message: '#^Method Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\:\:__toString\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -12605,42 +11225,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/MTQE/Templates/DTO/MTQEWorkflowParams.php
-
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
-
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
-
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getByUid\(\) should return array\<Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\> but returns list\<Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\|null\>\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
-
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:hydrateTemplateStruct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
-
-		-
-			message: '#^Unsafe access to private property Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:\$instance through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 3
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
 		-
 			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\:\:__toString\(\) should return string but returns string\|false\.$#'
@@ -12671,36 +11255,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php
-
-		-
-			message: '#^Method Model\\Outsource\\ConfirmationDao\:\:updatePassword\(\) has parameter \$jid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Outsource/ConfirmationDao.php
-
-		-
-			message: '#^Method Model\\Outsource\\ConfirmationDao\:\:updatePassword\(\) has parameter \$new_password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Outsource/ConfirmationDao.php
-
-		-
-			message: '#^Method Model\\Outsource\\ConfirmationDao\:\:updatePassword\(\) has parameter \$old_password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Outsource/ConfirmationDao.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Outsource/ConfirmationDao.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Outsource/ConfirmationDao.php
 
 		-
 			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$create_date has no type specified\.$#'
@@ -12761,18 +11315,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureDao\:\:destroyCacheByIdCustomer\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/OwnerFeatures/OwnerFeatureDao.php
-
-		-
-			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureDao\:\:destroyCacheByUserId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/OwnerFeatures/OwnerFeatureDao.php
 
 		-
 			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureStruct\:\:getOptions\(\) has no return type specified\.$#'
@@ -12943,60 +11485,6 @@ parameters:
 			path: lib/Model/Pagination/PaginationParameters.php
 
 		-
-			message: '#^Cannot call method _deleteCacheByKey\(\) on Model\\PayableRates\\CustomPayableRateDao\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Cannot call method _destroyObjectCache\(\) on Model\\PayableRates\\CustomPayableRateDao\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Cannot call method _getStatementForQuery\(\) on Model\\PayableRates\\CustomPayableRateDao\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Cannot call method setCacheTTL\(\) on Model\\PayableRates\\CustomPayableRateDao\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:assocModelToJob\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getDefaultTemplate\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getInstance\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$result CustomPayableRateStruct\[\]\)\: Unexpected token "\$result", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
 			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -13023,12 +11511,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
-			message: '#^Property Model\\PayableRates\\CustomPayableRateStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateDao.php
 
@@ -13321,237 +11803,9 @@ parameters:
 			path: lib/Model/Projects/ManageModel.php
 
 		-
-			message: '#^Method Model\\Projects\\MetadataDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Projects/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Projects\\MetadataDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Projects\\MetadataDao\:\:getProjectStaticSubfilteringCustomHandlers\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Projects\\MetadataDao\:\:set\(\) should return bool but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Projects/MetadataDao.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: lib/Model/Projects/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:_getProjectDataSQLAndValues\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:assignToAssignee\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:assignToTeam\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:changeProjectStatus\(\) has parameter \$pid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:changeProjectStatus\(\) has parameter \$status with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheForProjectData\(\) has parameter \$jid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheForProjectData\(\) has parameter \$jpassword with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheForProjectData\(\) has parameter \$pid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheForProjectData\(\) has parameter \$project_password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:findByIdAndPassword\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:findByIdAndPassword\(\) has parameter \$password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:findByIdCustomer\(\) has parameter \$id_customer with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:findByTeamId\(\) has parameter \$filter with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getByIdList\(\) has parameter \$id_list with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getByIdList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getJobIds\(\) has parameter \$pid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getJobIds\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getPasswordsMap\(\) has parameter \$pid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getPasswordsMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getProjectAndJobData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getRemoteFileServiceName\(\) has parameter \$project_ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:getTotalCountByTeamId\(\) has parameter \$filter with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:isGDriveProject\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:uncompletedChunksByProjectId\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:uncompletedChunksByProjectId\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:updateAnalysisStatus\(\) has parameter \$project_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:updateAnalysisStatus\(\) has parameter \$stWordCount with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:updateAnalysisStatus\(\) has parameter \$status with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:updateField\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(ProjectStruct\[\]\|IDaoStruct\[\]\|\[\]\)\: Unexpected token "\[", expected type at offset 84 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
 			message: '#^Parameter \#1 \$id of method Model\\Projects\\ProjectDao\:\:destroyCacheById\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: lib/Model/Projects/ProjectDao.php
 
 		-
@@ -13753,30 +12007,6 @@ parameters:
 			path: lib/Model/Projects/ProjectStruct.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectTemplateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectTemplateDao\:\:getDefaultTemplate\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectTemplateDao\:\:getUserDefaultMt\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$result ProjectTemplateStruct\[\]\)\: Unexpected token "\$result", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 3
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -13804,42 +12034,6 @@ parameters:
 			message: '#^Parameter \#2 \$uid of method Model\\Projects\\ProjectTemplateStruct\:\:hydrateFromJSON\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectTemplateStruct\:\:\$id \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectTemplateStruct\:\:\$id_team \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectTemplateStruct\:\:\$mt \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectTemplateStruct\:\:\$segmentation_rule \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectTemplateStruct\:\:\$subfiltering_handlers \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectTemplateStruct\:\:\$tm \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: lib/Model/Projects/ProjectTemplateDao.php
 
 		-
@@ -14081,42 +12275,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/QualityReport/QualityReportDao.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportDao.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportDao\:\:getAverages\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/QualityReport/QualityReportDao.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportDao\:\:getIssuesBySegments\(\) has parameter \$segments_id with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportDao.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportDao\:\:getIssuesBySegments\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportDao.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportDao\:\:getSegmentsForQualityReport\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportDao.php
 
 		-
 			message: '#^Cannot call method fullName\(\) on Model\\Users\\UserStruct\|null\.$#'
@@ -14461,12 +12619,6 @@ parameters:
 			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
 
 		-
-			message: '#^Method Model\\RemoteFiles\\RemoteFileDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/RemoteFiles/RemoteFileDao.php
-
-		-
 			message: '#^Method Model\\ReviseFeedback\\FeedbackDAO\:\:getFeedback\(\) has parameter \$id_job with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -14653,42 +12805,6 @@ parameters:
 			path: lib/Model/Search/SearchModel.php
 
 		-
-			message: '#^Method Model\\Segments\\ContextGroupDao\:\:getByFileID\(\) has parameter \$fid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/ContextGroupDao.php
-
-		-
-			message: '#^Method Model\\Segments\\ContextGroupDao\:\:getBySIDRange\(\) has parameter \$start with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/ContextGroupDao.php
-
-		-
-			message: '#^Method Model\\Segments\\ContextGroupDao\:\:getBySIDRange\(\) has parameter \$stop with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/ContextGroupDao.php
-
-		-
-			message: '#^Method Model\\Segments\\ContextGroupDao\:\:getBySegmentID\(\) has parameter \$sid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/ContextGroupDao.php
-
-		-
-			message: '#^Property Model\\Segments\\ContextGroupDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/ContextGroupDao.php
-
-		-
-			message: '#^Property Model\\Segments\\ContextGroupDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/ContextGroupDao.php
-
-		-
 			message: '#^Class Model\\Segments\\ContextStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -14743,84 +12859,6 @@ parameters:
 			path: lib/Model/Segments/SegmentDao.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 2
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getContextAndSegmentByIDs\(\) has parameter \$id_list with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getNextSegment\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getPaginationSegments\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getSegmentsDownload\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getSegmentsForQr\(\) has parameter \$job_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getSegmentsForQr\(\) has parameter \$job_password with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getSegmentsForQr\(\) has parameter \$segments_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getSegmentsIdForQR\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getSegmentsIdForQR\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getTranslationsMismatches\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^PHPDoc tag @var for variable \$res has no value type specified in iterable type iterable\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
-
-		-
 			message: '#^Method Model\\Segments\\SegmentMetadataCollection\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -14831,48 +12869,6 @@ parameters:
 			identifier: match.alwaysFalse
 			count: 1
 			path: lib/Model/Segments/SegmentMetadataMarshaller.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentNoteDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Segments/SegmentNoteDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentNoteDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentNoteDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentNoteDao\:\:getAggregatedBySegmentIdInInterval\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentNoteDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentNoteDao\:\:getAllAggregatedBySegmentIdInInterval\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentNoteDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentNoteDao\:\:getBySegmentIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentNoteDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentOriginalDataDao\:\:getSegmentDataRefMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataDao.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentOriginalDataDao\:\:insertRecord\(\) has parameter \$map with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataDao.php
 
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
@@ -15007,24 +13003,6 @@ parameters:
 			path: lib/Model/Segments/SegmentUIStruct.php
 
 		-
-			message: '#^Method Model\\TMSService\\TMSServiceDao\:\:getMTForTMXExport\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TMSService/TMSServiceDao.php
-
-		-
-			message: '#^Method Model\\TMSService\\TMSServiceDao\:\:getTMForTMXExport\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TMSService/TMSServiceDao.php
-
-		-
-			message: '#^Method Model\\TMSService\\TMSServiceDao\:\:getTranslationsForTMXExport\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TMSService/TMSServiceDao.php
-
-		-
 			message: '#^Method Model\\Teams\\InvitedUser\:\:completeTeamSignUp\(\) has parameter \$invitation with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -15055,36 +13033,6 @@ parameters:
 			path: lib/Model/Teams/InvitedUser.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipDao\:\:createList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipDao\:\:findById\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$members MembershipStruct\[\]\)\: Unexpected token "\$members", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
 			message: '#^Parameter \#1 \$user of method Model\\Teams\\MembershipDao\:\:destroyCacheUserTeams\(\) expects Model\\Users\\UserStruct, Model\\Users\\UserStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -15093,18 +13041,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$user of method Model\\Teams\\MembershipDao\:\:destroyCacheTeamByIdAndUser\(\) expects Model\\Users\\UserStruct, Model\\Users\\UserStruct\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
-			message: '#^Property Model\\Teams\\MembershipDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
-			message: '#^Property Model\\Teams\\MembershipDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Teams/MembershipDao.php
 
@@ -15169,50 +13105,8 @@ parameters:
 			path: lib/Model/Teams/PendingInvitations.php
 
 		-
-			message: '#^Method Model\\Teams\\TeamDao\:\:createUserTeam\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamDao\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$res TeamStruct\)\: Unexpected token "\$res", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
 			message: '#^Parameter \#1 \$uid of method Model\\Teams\\TeamDao\:\:getPersonalByUid\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamStruct\:\:\$created_by \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Teams/TeamDao.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamStruct\:\:\$id \(int\|null\) does not accept int\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/Teams/TeamDao.php
 
@@ -15397,12 +13291,6 @@ parameters:
 			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
 
 		-
-			message: '#^Argument of an invalid type Model\\DataAccess\\ShapelessConcreteStruct supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
 			message: '#^Cannot access property \$glos on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -15424,18 +13312,6 @@ parameters:
 			message: '#^Cannot access property \$tm on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:createList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
 
 		-
@@ -15466,18 +13342,6 @@ parameters:
 			message: '#^PHPDoc tag @var has invalid value \(\$obj MemoryKeyStruct\)\: Unexpected token "\$obj", expected type at offset 20 on line 2$#'
 			identifier: phpDoc.parseError
 			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^PHPDoc tag @var with type Model\\DataAccess\\ShapelessConcreteStruct is not subtype of native type array\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Parameter \#1 \$array_result of method Model\\TmKeyManagement\\MemoryKeyDao\:\:_buildResult\(\) expects array, Model\\DataAccess\\ShapelessConcreteStruct given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
 
 		-
@@ -15559,152 +13423,8 @@ parameters:
 			path: lib/Model/TmKeyManagement/UserKeysModel.php
 
 		-
-			message: '#^Call to function is_array\(\) with list\<mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getAllSegmentsByIdListAndJobId\(\) has parameter \$id_list with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getAllSegmentsByIdListAndJobId\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getLast10TranslatedSegmentIDsInLastHour\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getMaxSegmentIdsFromJob\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getUnchangeableStatus\(\) has parameter \$segments_ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getUnchangeableStatus\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getWordsPerSecond\(\) has parameter \$estimation_seg_ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:getWordsPerSecond\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:propagateTranslation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:rebuildFromReplaceEvents\(\) has parameter \$events with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:setAnalysisValue\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:updateFirstTimeOpenedContribution\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:updateFirstTimeOpenedContribution\(\) has parameter \$where with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:updateLastTranslationDateByIdList\(\) has parameter \$segmentIdList with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:updateSuggestionsArray\(\) has parameter \$id_segment with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:updateSuggestionsArray\(\) has parameter \$suggestions with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$result SegmentTranslationStruct\[\]\)\: Unexpected token "\$result", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$result SegmentTranslationStruct\[\]\)\: Unexpected token "\$result", expected type at offset 24 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
 			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Parameter \#1 \$value of function count expects array\|Countable, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Parameter \#2 \.\.\.\$arrays of function array_merge expects array, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
-			message: '#^Property Model\\Translations\\SegmentTranslationDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Translations/SegmentTranslationDao.php
 
@@ -15739,48 +13459,6 @@ parameters:
 			path: lib/Model/Translations/SegmentTranslationStruct.php
 
 		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:getWarningsByJobIdAndPassword\(\) has parameter \$jid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:getWarningsByJobIdAndPassword\(\) has parameter \$jpassword with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:getWarningsByJobIdAndPassword\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:getWarningsByProjectIds\(\) has parameter \$projectIds with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
-			message: '#^Method Model\\Translations\\WarningDao\:\:getWarningsByProjectIds\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translations/WarningDao.php
-
-		-
 			message: '#^Property Model\\TranslationsSplit\\SegmentSplitStruct\:\:\$source_chunk_lengths type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -15791,12 +13469,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/TranslationsSplit/SegmentSplitStruct.php
-
-		-
-			message: '#^Method Model\\TranslationsSplit\\SplitDAO\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TranslationsSplit/SplitDAO.php
 
 		-
 			message: '#^Method Model\\TranslationsSplit\\SplitDAO\:\:_validatePrimaryKey\(\) has Exception in PHPDoc @throws tag but it''s not thrown\.$#'
@@ -15815,18 +13487,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/TranslationsSplit/SplitDAO.php
-
-		-
-			message: '#^Property Model\\Translators\\JobsTranslatorsDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translators/JobsTranslatorsDao.php
-
-		-
-			message: '#^Property Model\\Translators\\JobsTranslatorsDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translators/JobsTranslatorsDao.php
 
 		-
 			message: '#^Method Model\\Translators\\JobsTranslatorsStruct\:\:getUser\(\) should return Model\\Users\\UserStruct but returns Model\\Users\\UserStruct\|null\.$#'
@@ -15997,18 +13657,6 @@ parameters:
 			path: lib/Model/Translators/TranslatorsModel.php
 
 		-
-			message: '#^Property Model\\Translators\\TranslatorsProfilesDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translators/TranslatorsProfilesDao.php
-
-		-
-			message: '#^Property Model\\Translators\\TranslatorsProfilesDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Translators/TranslatorsProfilesDao.php
-
-		-
 			message: '#^Method Model\\Users\\Authentication\\ChangePasswordModel\:\:changePassword\(\) has parameter \$new_password with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -16035,42 +13683,12 @@ parameters:
 		-
 			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_createNewUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_updateProfilePicture\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_updateProvider\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Users/Authentication/OAuthSignInModel.php
 
 		-
 			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Parameter \#1 \$uid of method Model\\Users\\MetadataDao\:\:set\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Parameter \#3 \$value of method Model\\Users\\MetadataDao\:\:set\(\) expects array\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Property Model\\Users\\UserStruct\:\:\$uid \(int\|null\) does not accept int\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/Users/Authentication/OAuthSignInModel.php
 
@@ -16137,7 +13755,7 @@ parameters:
 		-
 			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:processSignup\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: lib/Model/Users/Authentication/SignupModel.php
 
 		-
@@ -16171,12 +13789,6 @@ parameters:
 			path: lib/Model/Users/Authentication/SignupModel.php
 
 		-
-			message: '#^Property Model\\Users\\UserStruct\:\:\$uid \(int\|null\) does not accept int\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
 			message: '#^Argument of an invalid type Model\\Users\\UserStruct supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -16187,78 +13799,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: lib/Model/Users/ClientUserFacade.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:_buildResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:destroyCacheKey\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:destroyCacheKey\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:get\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:get\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:getAllByUid\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:getAllByUid\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:getAllByUidList\(\) has parameter \$UIDs with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:getAllByUidList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Users\\MetadataDao\:\:set\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$result MetadataStruct\)\: Unexpected token "\$result", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Users/MetadataDao.php
 
 		-
 			message: '#^Method Model\\Users\\MetadataStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -16351,98 +13891,8 @@ parameters:
 			path: lib/Model/Users/RedeemableProject.php
 
 		-
-			message: '#^Call to function is_iterable\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:_buildReadQuery\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:destroyCacheByEmail\(\) has parameter \$email with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:destroyCacheByUid\(\) has parameter \$uid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:getByConfirmationToken\(\) has parameter \$token with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:getByUid\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:getByUids\(\) has parameter \$uids_array with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Method Model\\Users\\UserDao\:\:updateUser\(\) should return Model\\Users\\UserStruct but returns Model\\Users\\UserStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$__resultSet UserStruct\[\]\)\: Unexpected token "\$__resultSet", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$res \?UserStruct\)\: Unexpected token "\$res", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$res UserStruct\)\: Unexpected token "\$res", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$res UserStruct\)\: Unexpected token "\$res", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
 			message: '#^Parameter \#1 \$input of method Model\\Users\\UserDao\:\:sanitize\(\) expects Model\\Users\\UserStruct, Model\\DataAccess\\IDaoStruct given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Property Model\\Users\\UserDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/UserDao.php
-
-		-
-			message: '#^Property Model\\Users\\UserDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Users/UserDao.php
 
@@ -16467,12 +13917,6 @@ parameters:
 		-
 			message: '#^Method Model\\Users\\UserStruct\:\:getMetadataAsKeyValue\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
-			message: '#^Method Model\\Users\\UserStruct\:\:getMetadataAsKeyValue\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Users/UserStruct.php
 
@@ -16673,18 +14117,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/WordCount/WordCountStruct.php
-
-		-
-			message: '#^Method Model\\WordCount\\WordCounterDao\:\:getStatsForJob\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/WordCount/WordCounterDao.php
-
-		-
-			message: '#^Method Model\\WordCount\\WordCounterDao\:\:initializeWordCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/WordCount/WordCounterDao.php
 
 		-
 			message: '#^Cannot assign new offset to string\.$#'
@@ -16897,48 +14329,6 @@ parameters:
 			path: lib/Model/Xliff/DTO/XliffRulesModel.php
 
 		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:getAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:getById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:getByUid\(\) should return array\<Model\\Xliff\\XliffConfigTemplateStruct\> but returns list\<Model\\Xliff\\XliffConfigTemplateStruct\|null\>\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:hydrateTemplateStruct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
-			message: '#^Property Model\\Xliff\\XliffConfigTemplateStruct\:\:\$id \(int\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
-			message: '#^Unsafe access to private property Model\\Xliff\\XliffConfigTemplateDao\:\:\$instance through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 3
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
-
-		-
 			message: '#^Method Model\\Xliff\\XliffConfigTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 6
@@ -17035,12 +14425,6 @@ parameters:
 			path: lib/Plugins/Features/AbstractRevisionFeature.php
 
 		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:setQaModelFromJsonFile\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
 			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:setQaModelFromJsonFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -17056,18 +14440,6 @@ parameters:
 			message: '#^Parameter \#1 \$id_job of method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getLatestEventsInSegmentInterval\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\JobDao\:\:getById\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\LQA\\ChunkReviewDao\:\:deleteByJobId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: lib/Plugins/Features/AbstractRevisionFeature.php
 
 		-
@@ -17215,27 +14587,9 @@ parameters:
 			path: lib/Plugins/Features/IBaseFeature.php
 
 		-
-			message: '#^Method Plugins\\Features\\ProjectCompletion\:\:jobPasswordChanged\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/ProjectCompletion.php
-
-		-
 			message: '#^Method Plugins\\Features\\ProjectCompletion\:\:postAddSegmentTranslation\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
-			path: lib/Plugins/Features/ProjectCompletion.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:updatePassword\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\ChunksCompletion\\ChunkCompletionEventDao\:\:updatePassword\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Plugins/Features/ProjectCompletion.php
 
 		-
@@ -17457,12 +14811,6 @@ parameters:
 		-
 			message: '#^Method Plugins\\Features\\ReviewExtended\\ChunkReviewModel\:\:addPenaltyPoints\(\) has parameter \$penalty_points with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ChunkReviewModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ChunkReviewModel\:\:recountAndUpdatePassFailResult\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Plugins/Features/ReviewExtended/ChunkReviewModel.php
 
@@ -17869,12 +15217,6 @@ parameters:
 			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
 
 		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
 			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:findSegmentIdsBySimpleFilter\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -18001,18 +15343,6 @@ parameters:
 			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
 
 		-
-			message: '#^Property Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
-
-		-
-			message: '#^Property Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
-
-		-
 			message: '#^Cannot access property \$id on Model\\Segments\\SegmentStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -18079,6 +15409,12 @@ parameters:
 			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
 
 		-
+			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\TranslationVersionsHandler\:\:saveVersion\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 3
+			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
+
+		-
 			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\TranslationVersionsHandler\:\:saveVersion\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -18113,168 +15449,6 @@ parameters:
 			identifier: property.onlyWritten
 			count: 1
 			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:_buildResult\(\) has parameter \$array_result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getAllRelevantEvents\(\) has parameter \$segments_id with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getAllRelevantEvents\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getLastRevisionsBySegmentsAndSourcePage\(\) has parameter \$job_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getLastRevisionsBySegmentsAndSourcePage\(\) has parameter \$segments_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getLastRevisionsBySegmentsAndSourcePage\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getLastRevisionsBySegmentsAndSourcePage\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionNumberForTranslation\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForChunk\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForChunk\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForJob\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForJob\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForRevision\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForRevision\(\) has parameter \$id_segment with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForRevision\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForRevision\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:getVersionsForTranslation\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:insertVersionRecords\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:insertVersionRecords\(\) has parameter \$params with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:insertVersionRecords\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:insertVersionRecords\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:saveVersion\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:saveVersion\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:updateVersion\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:updateVersion\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Parameter \$segmentsToUpdate of method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:savePropagationVersions\(\) has invalid type Plugins\\Features\\TranslationVersions\\Model\\Propagation_PropagationTotalStruct\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
-
-		-
-			message: '#^Property Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php
 
 		-
 			message: '#^Method Plugins\\Features\\TranslationVersions\\VersionHandlerInterface\:\:propagateTranslation\(\) return type has no value type specified in iterable type array\.$#'
@@ -19111,37 +16285,13 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$translation_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
-
-		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
 
 		-
-			message: '#^Parameter \#1 \$translation_struct of static method Model\\Translations\\SegmentTranslationDao\:\:updateTranslationAndStatusAndDateByList\(\) expects array\<Model\\Translations\\SegmentTranslationStruct\>, list\<object\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
-
-		-
 			message: '#^Parameter \#2 \$jobId of static method Model\\Translations\\SegmentTranslationDao\:\:getAllSegmentsByIdListAndJobId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
-
-		-
-			message: '#^Parameter \#2 \$translation of class Plugins\\Features\\TranslationEvents\\Model\\TranslationEvent constructor expects Model\\Translations\\SegmentTranslationStruct, object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
@@ -19628,6 +16778,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
+
+		-
+			message: '#^Parameter \#4 \$segmentsToUpdate of method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:savePropagationVersions\(\) expects list\<Model\\Translations\\SegmentTranslationStruct\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
@@ -24883,12 +22039,6 @@ parameters:
 			path: lib/Utils/TMS/TMSService.php
 
 		-
-			message: '#^Method Utils\\TMS\\TMSService\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TMS/TMSService.php
-
-		-
 			message: '#^Method Utils\\TMS\\TMSService\:\:_fileUploadStatus\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -24937,12 +22087,6 @@ parameters:
 			path: lib/Utils/TMS/TMSService.php
 
 		-
-			message: '#^Method Utils\\TMS\\TMSService\:\:getUserAdaptiveMTEngines\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TMS/TMSService.php
-
-		-
 			message: '#^Method Utils\\TMS\\TMSService\:\:glossaryUploadStatus\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -24957,12 +22101,6 @@ parameters:
 		-
 			message: '#^Method Utils\\TMS\\TMSService\:\:uploadFile\(\) has parameter \$files with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TMS/TMSService.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$mymemory_engine MyMemory\)\: Unexpected token "\$mymemory_engine", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: lib/Utils/TMS/TMSService.php
 
@@ -24993,24 +22131,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Utils/TMS/TMSService.php
-
-		-
-			message: '#^Part \$engineName \(Utils\\Engines\\AbstractEngine\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: lib/Utils/TMS/TMSService.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$class_load \(string\|null\) does not accept Utils\\Engines\\AbstractEngine\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TMS/TMSService.php
-
-		-
-			message: '#^Property Utils\\TMS\\TMSService\:\:\$mymemory_engine \(Utils\\Engines\\MyMemory\) does not accept Utils\\Engines\\AbstractEngine\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Utils/TMS/TMSService.php
 
@@ -26677,12 +23797,6 @@ parameters:
 			path: lib/Utils/Validator/JSONSchema/Errors/JsonValidatorGenericException.php
 
 		-
-			message: '#^Method Swaggest\\JsonSchema\\RemoteRefProvider@anonymous/lib/Utils/Validator/JSONSchema/JSONValidator\.php\:49\:\:getSchemaData\(\) should return stdClass but returns object\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Validator/JSONSchema/JSONValidator.php
-
-		-
 			message: '#^Method Utils\\Validator\\JSONSchema\\JSONValidator\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -27477,12 +24591,6 @@ parameters:
 		-
 			message: '#^Method View\\API\\V2\\Json\\SegmentTranslationIssue\:\:renderItem\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationIssue.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\SegmentTranslationIssue\:\:renderItem\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/View/API/V2/Json/SegmentTranslationIssue.php
 
@@ -28801,6 +25909,24 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
+			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, array\<int, array\<string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
+
+		-
+			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, array\<int, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
+
+		-
+			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
+			identifier: argument.type
+			count: 9
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
+
+		-
 			message: '#^Variable \$new_inverse_order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -29191,6 +26317,18 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
+			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, array\<int, array\<string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 4
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
+
+		-
+			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, list\<array\<string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 4
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
+
+		-
 			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\CatUtils\:\:segment_raw_word_count\(\) expects string\|null, array\<string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29200,6 +26338,12 @@ parameters:
 			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\CatUtils\:\:segment_raw_word_count\(\) expects string\|null, array\<string, mixed\>\|null given\.$#'
 			identifier: argument.type
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
+
+		-
+			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
+			identifier: argument.type
+			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -30061,18 +27205,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:updateFields\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:updateFields\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:updateFields\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -30099,18 +27231,6 @@ parameters:
 		-
 			message: '#^Property Features\\Aligner\\Model\\Jobs_JobDao\:\:\$_sql_update_password has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Property Features\\Aligner\\Model\\Jobs_JobDao\:\:\$auto_increment_field type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Property Features\\Aligner\\Model\\Jobs_JobDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
@@ -30391,12 +27511,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Property Features\\Aligner\\Model\\Projects_ProjectDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
-
-		-
 			message: '#^Call to an undefined method Features\\Aligner\\Model\\Projects_ProjectDao\:\:getRemoteFileServiceName\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -30463,6 +27577,36 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
 
 		-
+			message: '#^Cannot access offset ''content_clean'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
+
+		-
+			message: '#^Cannot access offset ''id'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
+
+		-
+			message: '#^Cannot access offset ''id_job'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
+
+		-
+			message: '#^Cannot access offset ''raw_word_count'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
+
+		-
+			message: '#^Cannot access offset ''type'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
+
+		-
 			message: '#^Constant Segments_SegmentStruct not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -30501,18 +27645,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:countByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:createList\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:createList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
@@ -31201,7 +28333,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
-			message: '#^Part \$chunk \(non\-empty\-list\) of encapsed string cannot be cast to string\.$#'
+			message: '#^Part \$chunk \(non\-empty\-list\<Model\\DataAccess\\IDaoStruct\>\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
@@ -31209,12 +28341,6 @@ parameters:
 		-
 			message: '#^Property Features\\Aligner\\Model\\Segments_SegmentDao\:\:\$auto_increment_fields has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Property Features\\Aligner\\Model\\Segments_SegmentDao\:\:\$primary_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
@@ -31237,9 +28363,39 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
+			message: '#^Cannot access offset ''id_job'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Cannot access offset ''next'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Cannot access offset ''order'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Cannot access offset ''score'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Cannot access offset ''segment_id'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Cannot access offset ''type'' on Model\\DataAccess\\IDaoStruct\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -31765,18 +28921,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -31786,12 +28930,6 @@ parameters:
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateList\(\) has parameter \$obj_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -31873,7 +29011,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Part \$chunk \(non\-empty\-list\) of encapsed string cannot be cast to string\.$#'
+			message: '#^Part \$chunk \(non\-empty\-list\<Model\\DataAccess\\IDaoStruct\>\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
@@ -32488,6 +29626,12 @@ parameters:
 			message: '#^PHPDoc tag @var has invalid value \(\$redisClient ClientContextInterface\)\: Unexpected token "\$redisClient", expected type at offset 16 on line 2$#'
 			identifier: phpDoc.parseError
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
+
+		-
+			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, list\<array\<string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
 		-

@@ -18,6 +18,7 @@ use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use RuntimeException;
 use Model\LQA\EntryCommentDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
@@ -137,6 +138,7 @@ class QualityReportSegmentModel
     /**
      * @param                                     $seg
      * @param \Model\Comments\BaseCommentStruct[] $comments
+     * @throws RuntimeException
      */
     protected function _assignComments($seg, array $comments)
     {
@@ -160,30 +162,32 @@ class QualityReportSegmentModel
      */
     public function getSegmentsForQR(array $segment_ids, $isForUI = false)
     {
+        $segmentIds = array_values(array_map('intval', $segment_ids));
+
         $segmentsDao = new SegmentDao;
-        $data = $segmentsDao->getSegmentsForQr($segment_ids, $this->chunk->id, $this->chunk->password);
+        $data = $segmentsDao->getSegmentsForQr($segmentIds, $this->chunk->id, $this->chunk->password);
 
         $featureSet = new FeatureSet();
 
         $featureSet->loadForProject($this->chunk->getProject());
         $issue_comments = [];
 
-        $issues = QualityReportDao::getIssuesBySegments($segment_ids, $this->chunk->id);
-        if (!empty($issues)) {
-            $issue_comments = (new EntryCommentDao())->fetchCommentsGroupedByIssueIds(
-                array_map(function ($issue) {
-                    return $issue->issue_id;
-                }, $issues)
-            );
-        }
+         $issues = QualityReportDao::getIssuesBySegments($segmentIds, $this->chunk->id);
+         if (!empty($issues)) {
+             $issue_comments = (new EntryCommentDao())->fetchCommentsGroupedByIssueIds(
+                 array_values(array_map(function ($issue): int {
+                     return (int)$issue->issue_id;
+                 }, $issues))
+             );
+         }
 
         $commentsDao = new CommentDao;
-        $comments = $commentsDao->getThreadsBySegments($segment_ids, $this->chunk->id);
+        $comments = $commentsDao->getThreadsBySegments($segmentIds, $this->chunk->id);
 
         $all_events = [];
 
         $translationVersionDao = new TranslationVersionDao;
-        $all_events = $translationVersionDao->getAllRelevantEvents($segment_ids, $this->chunk->id);
+        $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $this->chunk->id);
 
         $segments = [];
 

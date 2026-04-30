@@ -49,6 +49,7 @@ class EngineController extends KleinController
     public function add(): void
     {
         $request = $this->validateTheRequest();
+        $uid = $this->user->uid ?? throw new AuthorizationError('User not authenticated', 403);
 
         $name = $request['name'];
         $engineData = $request['data'];
@@ -72,7 +73,7 @@ class EngineController extends KleinController
                 $newEngineStruct = DeepLStruct::getStruct();
 
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['DeepL-Auth-Key'] = $engineData['client_id'];
 
@@ -88,7 +89,7 @@ class EngineController extends KleinController
                 $newEngineStruct = ApertiumStruct::getStruct();
 
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
@@ -102,7 +103,7 @@ class EngineController extends KleinController
                 $newEngineStruct = AltlangStruct::getStruct();
 
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
@@ -118,7 +119,7 @@ class EngineController extends KleinController
                 $newEngineStruct = SmartMATEStruct::getStruct();
 
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['client_id'] = $engineData['client_id'];
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
@@ -133,7 +134,7 @@ class EngineController extends KleinController
                 $newEngineStruct = YandexTranslateStruct::getStruct();
 
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
@@ -147,7 +148,7 @@ class EngineController extends KleinController
                 $newEngineStruct = GoogleTranslateStruct::getStruct();
 
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
@@ -161,7 +162,7 @@ class EngineController extends KleinController
                  */
                 $newEngineStruct = IntentoStruct::getStruct();
                 $newEngineStruct->name = $name;
-                $newEngineStruct->uid = $this->user->uid;
+                $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['apikey'] = $engineData['secret'];
 
@@ -206,7 +207,7 @@ class EngineController extends KleinController
 
         $engineList = EngineConstants::getAvailableEnginesList();
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->get($this->user->uid, $newEngineStruct->class_load);
+        $engineEnabled = $UserMetadataDao->get($uid, $newEngineStruct->class_load ?? throw new \RuntimeException('Missing engine class_load'));
 
         if (!empty($engineEnabled)) {
             unset($engineList[$newEngineStruct->class_load]);
@@ -244,10 +245,10 @@ class EngineController extends KleinController
             }
         } elseif ($newEngineStruct instanceof LaraStruct) {
             $UserMetadataDao = new MetadataDao();
-            $UserMetadataDao->set($this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id);
+            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load, (string)$newCreatedDbRowStruct->id);
         } elseif ($newEngineStruct instanceof MMTStruct) {
             $UserMetadataDao = new MetadataDao();
-            $UserMetadataDao->set($this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id);
+            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load, (string)$newCreatedDbRowStruct->id);
         }
 
         $data = $newCreatedDbRowStruct->arrayRepresentation();
@@ -331,4 +332,3 @@ class EngineController extends KleinController
         $engineDAO->destroyCache($engineStruct);
     }
 }
-

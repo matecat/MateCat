@@ -47,6 +47,7 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
+use TypeError;
 
 class CreateProjectController extends AbstractStatefulKleinController
 {
@@ -69,6 +70,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -156,6 +158,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @return array An associative array containing sanitized and processed request data.
      * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -590,6 +593,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @return QAModelTemplateStruct|null
      * @throws Exception
+     * @throws TypeError
      */
     private function validateQaModelTemplate(
         $qa_model_template = null,
@@ -614,9 +618,10 @@ class CreateProjectController extends AbstractStatefulKleinController
 
             return $QAModelTemplateStruct;
         } elseif (!empty($qa_model_template_id) and $qa_model_template_id > 0) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
             $qaModelTemplate = QAModelTemplateDao::get([
                 'id' => $qa_model_template_id,
-                'uid' => $this->getUser()->uid
+                'uid' => $uid
             ]);
 
             // check if qa_model template exists

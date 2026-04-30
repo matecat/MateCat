@@ -156,10 +156,10 @@ class CategoryDao extends AbstractDao
 
         return array_map(function (array $element): array {
             return [
-                'label' => $element['label'],
-                'id' => $element['id'],
-                'severities' => $element['severities'],
-                'options' => $element['options'],
+                'label' => $element['label'] ?? null,
+                'id' => (int)($element['id'] ?? 0),
+                'severities' => $element['severities'] ?? [],
+                'options' => $element['options'] ?? [],
                 'subcategories' => $element['subcategories']
             ];
         }, array_values($out));

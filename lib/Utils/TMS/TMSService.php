@@ -7,6 +7,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
+use RuntimeException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
@@ -63,8 +64,12 @@ class TMSService
     public function __construct(?FeatureSet $featureSet = null)
     {
         //get MyMemory service
-        /** @var $mymemory_engine MyMemory */
         $mymemory_engine = EnginesFactory::getInstance(1);
+
+        if (!$mymemory_engine instanceof MyMemory) {
+            throw new RuntimeException('MyMemory engine instance is required');
+        }
+
         $this->mymemory_engine = $mymemory_engine;
 
         $this->output_type = 'translation';
@@ -200,11 +205,16 @@ class TMSService
     protected function getUserAdaptiveMTEngines(UserStruct $user): array
     {
         // load tmx in engines with adaptivity
+        /** @var list<string> $engineList */
         $engineList = EngineConstants::getAvailableEnginesList();
 
         $userAdaptiveEngines = [];
 
         foreach ($engineList as $engineName) {
+            if (!is_string($engineName)) {
+                continue;
+            }
+
             $struct = EngineStruct::getStruct();
             $struct->class_load = $engineName;
             $struct->type = EngineConstants::MT;
@@ -213,7 +223,9 @@ class TMSService
                 $engine = EnginesFactory::createTempInstance($struct);
                 if ($engine->isAdaptiveMT()) {
                     //retrieve OWNER EnginesFactory License
-                    $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($user->uid, $engine->getEngineRecord()->class_load); // engine_id
+                    $uid = $user->uid ?? throw new InvalidArgumentException('User uid is required to load adaptive MT metadata');
+                    $engineClassLoad = $engine->getEngineRecord()->class_load ?? throw new InvalidArgumentException('Engine class name is required to load adaptive MT metadata');
+                    $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
                         $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
                         $userAdaptiveEngines[] = $engine;
@@ -406,7 +418,7 @@ class TMSService
      * @throws ReflectionException
      * @throws Exception
      */
-    public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null): SplFileInfo
+    public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, ?int $uid = null): SplFileInfo
     {
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
 

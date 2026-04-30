@@ -69,6 +69,7 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
+use TypeError;
 
 class NewController extends KleinController
 {
@@ -90,6 +91,7 @@ class NewController extends KleinController
      * @throws NotFoundException
      * @throws EndQueueException
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -301,6 +303,7 @@ class NewController extends KleinController
      * @return array
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -1005,13 +1008,15 @@ class NewController extends KleinController
      *
      * @return QAModelTemplateStruct|null
      * @throws Exception
+     * @throws TypeError
      */
     private function validateQaModelTemplate($id_qa_model_template = null): ?QAModelTemplateStruct
     {
         if (!empty($id_qa_model_template)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
             $qaModelTemplate = QAModelTemplateDao::get([
                 'id' => $id_qa_model_template,
-                'uid' => $this->getUser()->uid
+                'uid' => $uid
             ]);
 
             // check if qa_model template exists
