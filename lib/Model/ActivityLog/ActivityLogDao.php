@@ -8,10 +8,12 @@
 
 namespace Model\ActivityLog;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class ActivityLogDao extends AbstractDao
@@ -20,6 +22,9 @@ class ActivityLogDao extends AbstractDao
     public string $epilogueString = "";
     public string $whereConditions = " id_project = :id_project ";
 
+    /**
+     * @throws PDOException
+     */
     public function getAllForProject($id_project): array
     {
         $conn = Database::obtain()->getConnection();
@@ -34,6 +39,9 @@ class ActivityLogDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function getLastActionInProject($id_project): array
     {
         $conn = Database::obtain()->getConnection();
@@ -50,6 +58,9 @@ class ActivityLogDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function create(ActivityLogStruct $activityStruct): int
     {
         $conn = Database::obtain()->getConnection();
@@ -87,6 +98,7 @@ class ActivityLogDao extends AbstractDao
      * @param array $whereKeys
      *
      * @return IDaoStruct[]
+     * @throws Exception
      * @throws ReflectionException
      * @see      \Utils\AsyncTasks\Workers\ActivityLogWorker
      * @see      ActivityLogStruct
@@ -121,6 +133,7 @@ class ActivityLogDao extends AbstractDao
      * @param $activity_id
      *
      * @return ActivityLogStruct|null
+     * @throws PDOException
      */
     public static function getByID($activity_id)
     {

@@ -3,10 +3,12 @@
 
 namespace Model\Translations;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
 use Model\Warnings\GlobalWarningStruct;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
 
@@ -24,6 +26,8 @@ class WarningDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getWarningsByProjectIds($projectIds): array
     {
@@ -60,6 +64,7 @@ class WarningDao extends AbstractDao
      * @param JobStruct $chunk
      *
      * @return int
+     * @throws PDOException
      */
     public function getErrorsByChunk(JobStruct $chunk): int
     {
@@ -85,6 +90,8 @@ class WarningDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getWarningsByJobIdAndPassword($jid, $jpassword): array
     {

@@ -5,6 +5,7 @@ namespace Model\RemoteFiles;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 
 class RemoteFileDao extends AbstractDao
 {
@@ -33,6 +34,7 @@ class RemoteFileDao extends AbstractDao
      * @param int $id_job
      *
      * @return RemoteFileStruct[]
+     * @throws PDOException
      */
     public static function getByJobId(int $id_job): array
     {
@@ -54,6 +56,7 @@ class RemoteFileDao extends AbstractDao
      * @param int $id_job
      *
      * @return RemoteFileStruct[]
+     * @throws PDOException
      */
     public static function getOriginalsByJobId(int $id_job): array
     {
@@ -78,6 +81,7 @@ class RemoteFileDao extends AbstractDao
      * @param int $is_original
      *
      * @return RemoteFileStruct[]
+     * @throws PDOException
      */
     public static function getByFileId(int $id_file, int $is_original = 0): array
     {
@@ -99,6 +103,7 @@ class RemoteFileDao extends AbstractDao
      * @param int $id_job
      *
      * @return RemoteFileStruct|null
+     * @throws PDOException
      */
     public static function getByFileAndJob(int $id_file, int $id_job): ?RemoteFileStruct
     {
@@ -120,6 +125,7 @@ class RemoteFileDao extends AbstractDao
      * @param int $id_job
      *
      * @return boolean
+     * @throws PDOException
      */
     public static function jobHasRemoteFiles(int $id_job): bool
     {
@@ -148,4 +154,3 @@ class RemoteFileDao extends AbstractDao
     {
     }
 }
-

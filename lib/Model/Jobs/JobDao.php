@@ -42,6 +42,7 @@ class JobDao extends AbstractDao
      * @param JobStruct $jobQuery
      *
      * @return JobStruct[]
+     * @throws Exception
      * @throws ReflectionException
      * @see \Utils\Contribution\SetContributionRequest
      *
@@ -101,6 +102,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getBySegmentTranslation(SegmentTranslationStruct $translation, int $ttl = 0): JobStruct
@@ -124,6 +127,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return int
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getSegmentsCount(int $id_job, string $password, int $ttl = 0): int
@@ -158,6 +163,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return null|int
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getOwnerUid(int $id_job, string $password, int $ttl = 86400): ?int
@@ -191,6 +198,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getByIdAndPassword(int $id_job, string $password, int $ttl = 0): ?JobStruct
@@ -202,21 +211,17 @@ class JobDao extends AbstractDao
             " id = :id_job AND password = :password "
         );
 
-        /**
-         * @var $res JobStruct
-         */
-        $res = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, [
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, [
             'id_job' => $id_job,
             'password' => $password
         ])[0] ?? null;
-
-        return $res;
     }
 
     /**
      * @param $project_id
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByProjectId($project_id): bool
@@ -234,6 +239,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getByProjectId(int $id_project, int $ttl = 0): array
@@ -251,6 +258,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      * @internal param $requestedWordsPerSplit
      *
@@ -306,6 +315,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getById(int $id_job, int $ttl = 0): array
@@ -324,6 +335,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getByIdProjectAndIdJob(int $id_project, int $id_job, int $ttl = 0): array
@@ -338,6 +351,8 @@ class JobDao extends AbstractDao
      * @param JobStruct $jobStruct
      *
      * @return JobStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function createFromStruct(JobStruct $jobStruct): JobStruct
@@ -384,6 +399,7 @@ class JobDao extends AbstractDao
      * @param UserStruct $user
      *
      * @return int the number of rows affected by the statement
+     * @throws PDOException
      */
     public function updateOwner(ProjectStruct $project, UserStruct $user): int
     {
@@ -436,6 +452,8 @@ class JobDao extends AbstractDao
      * @param JobStruct $jStruct
      *
      * @return EditLogSegmentStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getAllModifiedSegmentsForPee(JobStruct $jStruct): array
@@ -475,6 +493,7 @@ class JobDao extends AbstractDao
 
     /**
      * @param JobStruct $jStruct
+     * @throws PDOException
      */
     public function updateJobWeightedPeeAndTTE(JobStruct $jStruct): void
     {
@@ -501,6 +520,8 @@ class JobDao extends AbstractDao
      * @param string $password
      *
      * @return ShapelessConcreteStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getPeeStats(int $id_job, string $password): ShapelessConcreteStruct
@@ -536,6 +557,7 @@ class JobDao extends AbstractDao
      * @param JobStruct $jobStruct
      *
      * @return PDOStatement
+     * @throws PDOException
      */
     public function getSplitJobPreparedStatement(JobStruct $jobStruct): PDOStatement
     {
@@ -578,6 +600,8 @@ class JobDao extends AbstractDao
      * @param $source_page
      *
      * @return ShapelessConcreteStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getTimeToEdit($id_job, $source_page): ShapelessConcreteStruct
@@ -605,6 +629,7 @@ class JobDao extends AbstractDao
      * @param int $total_raw_wc
      *
      * @return int
+     * @throws PDOException
      */
     public function updateStdWcAndTotalWc(int $jobId, int $standard_analysis_wc, int $total_raw_wc): int
     {
@@ -664,6 +689,7 @@ class JobDao extends AbstractDao
      * @param JobStruct $first_job
      *
      * @return bool
+     * @throws PDOException
      */
     public static function deleteOnMerge(JobStruct $first_job): bool
     {
@@ -682,6 +708,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getFirstSegmentOfFilesInJob(JobStruct $chunkStruct, int $ttl = 0): array
@@ -718,6 +746,7 @@ class JobDao extends AbstractDao
      * @param                $id_project
      * @param                $new_status
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function updateAllJobsStatusesByProjectId($id_project, $new_status): void
@@ -753,6 +782,7 @@ class JobDao extends AbstractDao
      * @param JobStruct $jStruct
      * @param string $new_status
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function updateJobStatus(JobStruct $jStruct, string $new_status): void
@@ -776,6 +806,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getReviewedWordsCountGroupedByFileParts(int $id_job, string $password, int $revisionNumber, int $ttl = 0): array
@@ -822,6 +854,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return int|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getSegmentTranslationsCount(array $idJobs, int $ttl = 0): ?int
@@ -850,6 +884,8 @@ class JobDao extends AbstractDao
      * @param int $ttl
      *
      * @return bool
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function hasACustomPayableRate(int $id_job, int $ttl = 86400): bool

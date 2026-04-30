@@ -8,6 +8,7 @@ use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class CommentDao extends AbstractDao
@@ -31,6 +32,8 @@ class CommentDao extends AbstractDao
      * @return  OpenThreadsStruct[];
      *
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getOpenThreadsForProjects($projectIds): array
     {
@@ -64,6 +67,7 @@ class CommentDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function deleteComment(BaseCommentStruct $comment): bool
     {
@@ -83,6 +87,7 @@ class CommentDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroySegmentIdSegmentCache(int $idSegment): bool
     {
@@ -106,6 +111,7 @@ class CommentDao extends AbstractDao
      *
      * @return BaseCommentStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getBySegmentId(int $idSegment, int $ttl = 7200): array
     {
@@ -125,15 +131,19 @@ class CommentDao extends AbstractDao
      *
      * @return BaseCommentStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getById($id, int $ttl = 86400): ?BaseCommentStruct
     {
         $stmt = $this->_getStatementForQuery("SELECT * from comments WHERE id = :id");
 
-        /** @var $res BaseCommentStruct */
-        $res = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, BaseCommentStruct::class, [
+        /** @var BaseCommentStruct[] $results */
+        $results = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, BaseCommentStruct::class, [
             'id' => $id
-        ])[0] ?? null;
+        ]);
+
+        /** @var BaseCommentStruct|null $res */
+        $res = $results[0] ?? null;
 
         return $res;
     }
@@ -214,6 +224,9 @@ class CommentDao extends AbstractDao
         return $obj;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function getThreadContributorUids(CommentStruct $obj): array
     {
         $bind_values = [
@@ -238,6 +251,9 @@ class CommentDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function getThreadsBySegments($segments_id, $job_id): array
     {
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
@@ -263,6 +279,7 @@ class CommentDao extends AbstractDao
      * @param array $options
      *
      * @return BaseCommentStruct[]
+     * @throws PDOException
      */
 
     public static function getCommentsForChunk(JobStruct $chunk, array $options = []): array
@@ -319,6 +336,7 @@ class CommentDao extends AbstractDao
     }
 
     /**
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function placeholdContent($content)

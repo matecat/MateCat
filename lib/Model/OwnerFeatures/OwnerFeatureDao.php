@@ -2,10 +2,12 @@
 
 namespace Model\OwnerFeatures;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 
@@ -19,6 +21,7 @@ class OwnerFeatureDao extends AbstractDao
      * @param OwnerFeatureStruct $obj
      *
      * @return ?OwnerFeatureStruct
+     * @throws PDOException
      */
     public function create(IDaoStruct $obj): ?OwnerFeatureStruct
     {
@@ -57,6 +60,7 @@ class OwnerFeatureDao extends AbstractDao
      * @return OwnerFeatureStruct[]
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getByIdCustomer(string $id_customer, int $ttl = 3600): array
     {
@@ -89,6 +93,7 @@ class OwnerFeatureDao extends AbstractDao
      * @return OwnerFeatureStruct[]
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getByUserId(?int $uid, int $ttl = 3600): array
     {
@@ -122,6 +127,7 @@ class OwnerFeatureDao extends AbstractDao
      * @param int $id
      *
      * @return ?OwnerFeatureStruct
+     * @throws PDOException
      */
     public static function getById(int $id): ?OwnerFeatureStruct
     {

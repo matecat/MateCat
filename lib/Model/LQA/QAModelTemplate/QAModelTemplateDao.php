@@ -11,8 +11,10 @@ use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 use Utils\Registry\AppConfig;
 
@@ -32,6 +34,7 @@ class QAModelTemplateDao extends AbstractDao
      * @return QAModelTemplateStruct
      * @throws InvalidValue
      * @throws Exception
+     * @throws TypeError
      */
     public static function createFromJSON($json, $uid = null): QAModelTemplateStruct
     {
@@ -52,6 +55,7 @@ class QAModelTemplateDao extends AbstractDao
      * @return QAModelTemplateStruct
      * @throws InvalidValue
      * @throws Exception
+     * @throws TypeError
      */
     public static function editFromJSON(QAModelTemplateStruct $QAModelTemplateStruct, $json): QAModelTemplateStruct
     {
@@ -65,6 +69,8 @@ class QAModelTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @return int
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function remove(int $id, int $uid): int
@@ -336,6 +342,7 @@ class QAModelTemplateDao extends AbstractDao
      *
      * @return QAModelTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function save(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
@@ -428,6 +435,7 @@ class QAModelTemplateDao extends AbstractDao
      *
      * @return QAModelTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function update(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {

@@ -2,8 +2,10 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class SegmentOriginalDataDao extends AbstractDao
@@ -15,6 +17,8 @@ class SegmentOriginalDataDao extends AbstractDao
      *
      * @return SegmentOriginalDataStruct|null
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getBySegmentId(int $id_segment, int $ttl = 86400): ?SegmentOriginalDataStruct
     {
@@ -35,6 +39,7 @@ class SegmentOriginalDataDao extends AbstractDao
      *
      * @return array
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getSegmentDataRefMap(int $id_segment, int $ttl = 86400): array
     {
@@ -52,6 +57,7 @@ class SegmentOriginalDataDao extends AbstractDao
     /**
      * @param int $id_segment
      * @param array $map
+     * @throws PDOException
      */
     public static function insertRecord(int $id_segment, array $map): void
     {
@@ -73,4 +79,3 @@ class SegmentOriginalDataDao extends AbstractDao
         ]);
     }
 }
-

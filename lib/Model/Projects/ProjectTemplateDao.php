@@ -21,8 +21,10 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use PDO;
+use PDOException;
 use ReflectionException;
 use stdClass;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
@@ -42,6 +44,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @return ProjectTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function getDefaultTemplate($uid): ProjectTemplateStruct
     {
@@ -126,6 +129,7 @@ class ProjectTemplateDao extends AbstractDao
      * @return ProjectTemplateStruct
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public static function createFromJSON(object $decodedObject, UserStruct $user): ProjectTemplateStruct
     {
@@ -146,6 +150,7 @@ class ProjectTemplateDao extends AbstractDao
      * @return ProjectTemplateStruct
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public static function editFromJSON(ProjectTemplateStruct $projectTemplateStruct, object $json, int $id, UserStruct $user): ProjectTemplateStruct
     {
@@ -172,6 +177,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     private static function checkValues(ProjectTemplateStruct $projectTemplateStruct, UserStruct $user): void
     {
@@ -331,6 +337,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return ProjectTemplateStruct|null
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getTheDefaultProject(int $uid, int $ttl = 60 * 60 * 24): ?ProjectTemplateStruct
@@ -352,6 +359,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return ProjectTemplateStruct|null
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getById(int $id, int $ttl = 60): ?ProjectTemplateStruct
@@ -373,6 +381,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return ProjectTemplateStruct|null
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?ProjectTemplateStruct
@@ -394,6 +403,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @return ProjectTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function save(ProjectTemplateStruct $projectTemplateStruct): ProjectTemplateStruct
     {
@@ -585,6 +595,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $uid
      * @param int $excludeId
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function markAsNotDefault(int $uid, int $excludeId): void
@@ -622,6 +633,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @return int
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function remove(int $id, int $uid): int
@@ -638,6 +650,7 @@ class ProjectTemplateDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function removeSubTemplateByIdAndUser(int $id, int $uid, string $subTemplateField): int
@@ -661,6 +674,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param PDO $conn
      * @param int $id
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private
@@ -677,6 +691,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $id
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private
@@ -705,6 +720,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param PDO $conn
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function destroyDefaultTemplateCache(PDO $conn, int $uid): void

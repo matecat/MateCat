@@ -10,6 +10,7 @@
 namespace Model\MTQE\PayableRate;
 
 use DateTime;
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -17,7 +18,9 @@ use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use PDO;
+use PDOException;
 use ReflectionException;
+use TypeError;
 use Utils\Tools\Utils;
 
 class MTQEPayableRateTemplateDao extends AbstractDao
@@ -56,6 +59,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return array
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
@@ -101,6 +105,8 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return MTQEPayableRateStruct|null
+     * @throws Exception
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?MTQEPayableRateStruct
@@ -123,6 +129,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $id
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByIdAndUserCache(PDO $conn, int $id, int $uid): void
@@ -136,6 +143,8 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return MTQEPayableRateStruct[]
+     * @throws Exception
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getByUid(int $uid, int $ttl = 60): array
@@ -162,6 +171,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param PDO $conn
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByUidCache(PDO $conn, int $uid): void
@@ -177,6 +187,8 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return MTQEPayableRateStruct|null
+     * @throws Exception
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getById($id, int $ttl = 60): ?MTQEPayableRateStruct
@@ -197,6 +209,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param PDO $conn
      * @param int $id
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByIdCache(PDO $conn, int $id): void
@@ -210,6 +223,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @return int
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function remove(int $id, int $uid): int
@@ -237,6 +251,7 @@ class MTQEPayableRateTemplateDao extends AbstractDao
      * @param array $data
      *
      * @return MTQEPayableRateBreakdowns|null
+     * @throws TypeError
      */
     private static function hydrateTemplateStruct(array $data): ?MTQEPayableRateStruct
     {

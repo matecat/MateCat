@@ -5,6 +5,7 @@ namespace Model\ChunksCompletion;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 
 class ChunkCompletionUpdateDao extends AbstractDao
 {
@@ -13,6 +14,9 @@ class ChunkCompletionUpdateDao extends AbstractDao
     {
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updatePassword($id_job, $password, $old_password): int
     {
         $sql = "UPDATE chunk_completion_updates SET password = :new_password
@@ -37,6 +41,9 @@ class ChunkCompletionUpdateDao extends AbstractDao
         ];
     }
 
+    /**
+     * @throws PDOException
+     */
     public static function createOrUpdateFromStruct(ChunkCompletionUpdateStruct $struct): bool
     {
         $sql_update = "  " .

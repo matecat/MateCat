@@ -10,9 +10,11 @@
 namespace Model\Analysis;
 
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
+use PDOException;
 use ReflectionException;
 
 class AnalysisDao extends AbstractDao
@@ -72,6 +74,8 @@ class AnalysisDao extends AbstractDao
      * @param int $ttl
      *
      * @return array
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getProjectStatsVolumeAnalysis(int $pid, int $ttl = 0): array
@@ -90,6 +94,7 @@ class AnalysisDao extends AbstractDao
      * @param $project_id
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function destroyCacheByProjectId($project_id): bool

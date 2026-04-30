@@ -31,6 +31,7 @@ class WordCounterDao extends AbstractDao
      * @param WordCountStruct $wStruct
      *
      * @return int
+     * @throws PDOException
      */
     public static function updateWordCount(WordCountStruct $wStruct)
     {
@@ -128,6 +129,7 @@ class WordCounterDao extends AbstractDao
      * @param string|null $jPassword
      *
      * @return array
+     * @throws PDOException
      */
     public function getStatsForJob(int $id_job, ?int $id_file = null, ?string $jPassword = null): array
     {

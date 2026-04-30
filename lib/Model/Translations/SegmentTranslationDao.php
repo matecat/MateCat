@@ -43,6 +43,8 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $ttl
      *
      * @return array
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getAllSegmentsByIdListAndJobId(array $id_list, int $jobId, int $ttl = 0): array
@@ -124,6 +126,8 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $ttl
      *
      * @return SegmentTranslationStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findBySegmentAndJob(int $id_segment, int $id_job, int $ttl = 0): ?SegmentTranslationStruct
@@ -152,6 +156,8 @@ class SegmentTranslationDao extends AbstractDao
     /**
      * @param array $segmentIdList
      * @param string $date
+     *
+     * @throws PDOException
      */
     public static function updateLastTranslationDateByIdList(array $segmentIdList, string $date): void
     {
@@ -170,6 +176,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $id_job
      *
      * @return SegmentTranslationStruct[]
+     * @throws PDOException
      */
     public function getByJobId(int $id_job): array
     {
@@ -186,6 +193,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param FileStruct $file
      *
      * @return SegmentTranslationStruct[]
+     * @throws PDOException
      */
     public function getByFile(FileStruct $file): array
     {
@@ -210,6 +218,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param array $data
      *
      * @return int
+     * @throws PDOException
      */
     public static function setAnalysisValue(array $data): int
     {
@@ -324,6 +333,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param bool $is_revision
      *
      * @return int
+     * @throws PDOException
      */
     public static function addTranslation(SegmentTranslationStruct $translation_struct, bool $is_revision): int
     {
@@ -447,6 +457,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $source_page
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public
@@ -507,6 +518,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param JobStruct $jStruct
      *
      * @return array
+     * @throws PDOException
      */
     public
     static function getMaxSegmentIdsFromJob(
@@ -765,6 +777,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param array|null $estimation_seg_ids
      *
      * @return array
+     * @throws PDOException
      */
     public
     static function getWordsPerSecond(
@@ -801,6 +814,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param array $events
      *
      * @return int
+     * @throws PDOException
      */
     public
     static function rebuildFromReplaceEvents(
@@ -840,6 +854,8 @@ class SegmentTranslationDao extends AbstractDao
     /**
      * @param $id_segment
      * @param $suggestions
+     *
+     * @throws PDOException
      */
     public
     static function updateSuggestionsArray(

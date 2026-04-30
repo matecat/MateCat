@@ -9,8 +9,10 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use PDO;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\SourcePages;
 
 class ChunkReviewDao extends AbstractDao
@@ -32,6 +34,9 @@ class ChunkReviewDao extends AbstractDao
     {
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updatePassword(int $id_job, string $old_password, string $new_password): int
     {
         $sql = "UPDATE qa_chunk_reviews SET password = :new_password
@@ -48,6 +53,9 @@ class ChunkReviewDao extends AbstractDao
         return $stmt->rowCount();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updateReviewPassword(int $id_job, string $old_review_password, string $new_review_password, int $source_page): int
     {
         $sql = "UPDATE qa_chunk_reviews SET review_password = :new_review_password
@@ -69,6 +77,7 @@ class ChunkReviewDao extends AbstractDao
      * @param $id_job
      *
      * @return ChunkReviewStruct[]
+     * @throws PDOException
      */
     public static function findByIdJob($id_job): array
     {
@@ -88,6 +97,7 @@ class ChunkReviewDao extends AbstractDao
      * @param int|null $source_page
      *
      * @return ChunkReviewStruct|null
+     * @throws PDOException
      */
     public static function findByIdJobAndPasswordAndSourcePage(int $id_job, string $password, ?int $source_page): ?ChunkReviewStruct
     {
@@ -113,6 +123,7 @@ class ChunkReviewDao extends AbstractDao
      * @param int $id
      *
      * @return ?ChunkReviewStruct
+     * @throws PDOException
      */
     public static function findById(int $id): ?ChunkReviewStruct
     {
@@ -132,6 +143,7 @@ class ChunkReviewDao extends AbstractDao
      * @param int|null $source_page
      *
      * @return int
+     * @throws PDOException
      */
     public function getPenaltyPointsForChunk(JobStruct $chunk, ?int $source_page = null): int
     {
@@ -162,6 +174,9 @@ class ChunkReviewDao extends AbstractDao
         return $count[0] ?? 0;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function countTimeToEdit(JobStruct $chunk, $source_page)
     {
         $sql = "
@@ -195,6 +210,7 @@ class ChunkReviewDao extends AbstractDao
      * @param int|null $source_page
      *
      * @return int
+     * @throws PDOException
      */
     public function getReviewedWordsCountForSecondPass(JobStruct $chunk, ?int $source_page = null): int
     {
@@ -231,6 +247,8 @@ class ChunkReviewDao extends AbstractDao
      * @param int|null $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function findChunkReviews(JobStruct $chunkStruct, ?int $ttl = 0): array
@@ -244,6 +262,7 @@ class ChunkReviewDao extends AbstractDao
      * @param int $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public function findChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page = SourcePages::SOURCE_PAGE_REVISION, int $ttl = 60): array
@@ -259,6 +278,8 @@ class ChunkReviewDao extends AbstractDao
      * @param int|null $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     protected function _findChunkReviews(
@@ -279,6 +300,7 @@ class ChunkReviewDao extends AbstractDao
      * @param JobStruct $chunkStruct
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheForFindChunkReviews(JobStruct $chunkStruct): bool
@@ -294,6 +316,7 @@ class ChunkReviewDao extends AbstractDao
      * @param string|null $default_condition
      *
      * @return array
+     * @throws PDOException
      */
     private function _findChunkReviewsStatement(array $chunksArray, ?string $default_condition = ' WHERE 1 = 1 '): array
     {
@@ -331,6 +354,8 @@ class ChunkReviewDao extends AbstractDao
      * @param int $ttl
      *
      * @return IDaoStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function isTOrR1OrR2(int $jid, string $password, int $ttl = 3600): ?IDaoStruct
@@ -357,6 +382,8 @@ class ChunkReviewDao extends AbstractDao
      * @param int $ttl
      *
      * @return array
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findByProjectId(int $id_project, int $ttl = 60 * 60): array
@@ -369,6 +396,7 @@ class ChunkReviewDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function destroyCacheByProjectId(int $id_project): bool
@@ -384,6 +412,8 @@ class ChunkReviewDao extends AbstractDao
      * @param int $id_job
      * @param int $ttl
      * @return ?ChunkReviewStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findByReviewPasswordAndJobId(string $review_password, int $id_job, int $ttl = 0): ?ChunkReviewStruct
@@ -407,6 +437,7 @@ class ChunkReviewDao extends AbstractDao
      * @param $source_page
      *
      * @return ?ChunkReviewStruct
+     * @throws PDOException
      */
     public function findLastReviewByJobIdPasswordAndSourcePage($id_job, $password, $source_page): ?ChunkReviewStruct
     {
@@ -436,20 +467,19 @@ class ChunkReviewDao extends AbstractDao
      * @param int $ttl
      *
      * @return ChunkReviewStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function findByJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60): ?ChunkReviewStruct
     {
         $this->setCacheTTL($ttl);
         $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
-        /** @var $retValue ChunkReviewStruct */
-        $retValue = $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, [
+        return $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, [
             'review_password' => $review_password,
             'id_job' => $id_job,
             'source_page' => $source_page
         ])[0] ?? null;
-
-        return $retValue;
     }
 
     /**
@@ -457,6 +487,7 @@ class ChunkReviewDao extends AbstractDao
      * @param string $review_password
      * @param int $source_page
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheForJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page): bool
@@ -477,6 +508,7 @@ class ChunkReviewDao extends AbstractDao
      * @param int|null $source_page
      *
      * @return bool
+     * @throws PDOException
      */
     public function exists(int $id_job, string $password, ?int $source_page = null): bool
     {
@@ -511,6 +543,8 @@ class ChunkReviewDao extends AbstractDao
      * @param      $data array of data to use
      *
      * @return ChunkReviewStruct
+     * @throws PDOException
+     * @throws TypeError
      * @internal param bool $setDefaults
      */
     public static function createRecord(array $data): ChunkReviewStruct
@@ -554,6 +588,9 @@ class ChunkReviewDao extends AbstractDao
         return $struct;
     }
 
+    /**
+     * @throws PDOException
+     */
     public static function deleteByJobId(int $id_job): bool
     {
         $sql = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
@@ -566,15 +603,12 @@ class ChunkReviewDao extends AbstractDao
     /**
      *
      * @param int $chunkReviewID
-     * @param array $data
+     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: int, reviewed_words_count: int, total_tte: int} $data
      *
      * @throws Exception
      */
     public function passFailCountsAtomicUpdate(int $chunkReviewID, array $data = []): void
     {
-        /**
-         * @var $chunkReview ChunkReviewStruct
-         */
         $chunkReview = $data['chunkReview'];
         $data['force_pass_at'] = ReviewUtils::filterLQAModelLimit($chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page);
 

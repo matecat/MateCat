@@ -3,6 +3,7 @@
 namespace Model\Projects;
 
 use Exception;
+use DomainException;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
@@ -13,6 +14,7 @@ use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\LoggerFactory;
@@ -80,6 +82,7 @@ class ProjectDao extends AbstractDao
      * @param                        $value
      *
      * @return ProjectStruct
+     * @throws DomainException
      */
     public function updateField(ProjectStruct $project, string $field, $value): ProjectStruct
     {
@@ -101,6 +104,8 @@ class ProjectDao extends AbstractDao
      * @param string $newPass
      *
      * @return ProjectStruct
+     * @throws DomainException
+     * @throws PDOException
      * @throws ReflectionException
      * @internal param $pid
      */
@@ -117,6 +122,8 @@ class ProjectDao extends AbstractDao
      * @param string $name
      *
      * @return ProjectStruct
+     * @throws DomainException
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function changeName(ProjectStruct $project, string $name): ProjectStruct
@@ -127,6 +134,9 @@ class ProjectDao extends AbstractDao
         return $res;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function deleteFailedProject(?int $idProject): int
     {
         if (empty($idProject)) {
@@ -149,6 +159,7 @@ class ProjectDao extends AbstractDao
      * @param UserStruct $user
      *
      * @return int
+     * @throws PDOException
      */
     public function unassignProjects(TeamStruct $team, UserStruct $user): int
     {
@@ -162,6 +173,9 @@ class ProjectDao extends AbstractDao
         return $stmt->rowCount();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function assignToAssignee(int $pid, int $idAssignee)
     {
         $conn = Database::obtain()->getConnection();
@@ -174,6 +188,9 @@ class ProjectDao extends AbstractDao
         return $stmt->rowCount();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function assignToTeam(int $pid, int $idTeam)
     {
         $conn = Database::obtain()->getConnection();
@@ -190,6 +207,7 @@ class ProjectDao extends AbstractDao
      * @param TeamStruct $personalTeam
      *
      * @return int
+     * @throws PDOException
      */
     public function massiveSelfAssignment(TeamStruct $team, UserStruct $user, TeamStruct $personalTeam): int
     {
@@ -210,6 +228,8 @@ class ProjectDao extends AbstractDao
      * @param array $filter
      *
      * @return IDaoStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findByTeamId(int $id_team, array $filter = [], int $ttl = 0): array
@@ -255,6 +275,8 @@ class ProjectDao extends AbstractDao
      * @param int $ttl
      *
      * @return int
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getTotalCountByTeamId(int $id_team, array $filter = [], int $ttl = 0): int
@@ -295,6 +317,8 @@ class ProjectDao extends AbstractDao
      * @param int $ttl
      *
      * @return ProjectStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findByJobId(int $id_job, int $ttl = 0): ?ProjectStruct
@@ -317,6 +341,7 @@ class ProjectDao extends AbstractDao
      * @param $id_customer
      *
      * @return ProjectStruct[]
+     * @throws PDOException
      */
 
     static function findByIdCustomer($id_customer): array
@@ -337,6 +362,8 @@ class ProjectDao extends AbstractDao
      * @param int $ttl
      *
      * @return ?ProjectStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findById($id, int $ttl = 0): ?ProjectStruct
@@ -355,6 +382,7 @@ class ProjectDao extends AbstractDao
      * @param int $id
      *
      * @return bool
+     * @throws PDOException
      */
     public static function exists(int $id): bool
     {
@@ -371,6 +399,7 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function destroyCacheById(int $id): bool
@@ -386,6 +415,8 @@ class ProjectDao extends AbstractDao
      * @param array $id_list
      *
      * @return ProjectStruct[]|IDaoStruct[]|[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByIdList(array $id_list): array
@@ -407,6 +438,8 @@ class ProjectDao extends AbstractDao
      * @param int $ttl
      *
      * @return ProjectStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws NotFoundException|ReflectionException
      */
     static function findByIdAndPassword($id, $password, int $ttl = 0): ProjectStruct
@@ -425,6 +458,7 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     static function destroyCacheByIdAndPassword(int $id, string $password): bool
@@ -443,6 +477,7 @@ class ProjectDao extends AbstractDao
      * @return JobStruct[]
      *
      * @throws Exception
+     * @throws PDOException
      */
     static function uncompletedChunksByProjectId($id_project, $params = []): array
     {
@@ -481,6 +516,9 @@ class ProjectDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws PDOException
+     */
     static function isGDriveProject($id_project): bool
     {
         $conn = Database::obtain()->getConnection();
@@ -511,6 +549,8 @@ class ProjectDao extends AbstractDao
      * @param array $project_ids
      *
      * @return RemoteFileServiceNameStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getRemoteFileServiceName(array $project_ids): array
@@ -566,6 +606,7 @@ class ProjectDao extends AbstractDao
      * @param string|null $jpassword
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getProjectData(int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null): array
@@ -582,6 +623,7 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheForProjectData($pid, $project_password = null, $jid = null, $jpassword = null): bool
@@ -593,6 +635,9 @@ class ProjectDao extends AbstractDao
         return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, $values);
     }
 
+    /**
+     * @throws PDOException
+     */
     public static function updateAnalysisStatus($project_id, $status, $stWordCount): bool
     {
         $update_project_count = "
@@ -612,6 +657,9 @@ class ProjectDao extends AbstractDao
         ]);
     }
 
+    /**
+     * @throws DomainException
+     */
     public static function changeProjectStatus($pid, $status): int
     {
         $data = [];
@@ -625,6 +673,7 @@ class ProjectDao extends AbstractDao
      * @param int $pid Project ID
      *
      * @return array
+     * @throws PDOException
      */
     public static function getProjectAndJobData(int $pid): array
     {
@@ -665,6 +714,7 @@ class ProjectDao extends AbstractDao
      * @param $pid
      *
      * @return array
+     * @throws PDOException
      */
     public function getJobIds($pid): array
     {
@@ -688,6 +738,7 @@ class ProjectDao extends AbstractDao
      * @param $pid
      *
      * @return array
+     * @throws PDOException
      */
     public function getPasswordsMap($pid): array
     {

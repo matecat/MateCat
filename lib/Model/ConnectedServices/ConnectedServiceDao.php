@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDao;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
 use PDO;
+use PDOException;
 use Utils\Tools\Utils;
 
 class ConnectedServiceDao extends AbstractDao
@@ -23,6 +24,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param $id
      *
      * @return ConnectedServiceStruct|false
+     * @throws PDOException
      */
     public function findById($id): ConnectedServiceStruct|false
     {
@@ -70,6 +72,7 @@ class ConnectedServiceDao extends AbstractDao
     /**
      * Sets the default ConnectedService
      * @throws ValidationError
+     * @throws PDOException
      */
     public function setDefaultService(ConnectedServiceStruct $service): void
     {
@@ -95,6 +98,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param                  $id_service
      *
      * @return ?ConnectedServiceStruct
+     * @throws PDOException
      */
     public function findServiceByUserAndId(UserStruct $user, $id_service): ?ConnectedServiceStruct
     {
@@ -117,6 +121,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param UserStruct $user
      *
      * @return ConnectedServiceStruct[]
+     * @throws PDOException
      */
     public function findServicesByUser(UserStruct $user): array
     {
@@ -140,6 +145,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param string $name
      *
      * @return ConnectedServiceStruct|null
+     * @throws PDOException
      */
 
     public function findDefaultServiceByUserAndName(UserStruct $user, string $name): ?ConnectedServiceStruct
@@ -166,6 +172,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param string $email
      *
      * @return ?ConnectedServiceStruct
+     * @throws PDOException
      */
     public function findUserServicesByNameAndEmail(UserStruct $user, string $service, string $email): ?ConnectedServiceStruct
     {

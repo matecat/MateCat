@@ -9,6 +9,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use PDO;
+use PDOException;
 use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao
@@ -25,6 +26,9 @@ class ChunkCompletionEventDao extends AbstractDao
         ];
     }
 
+    /**
+     * @throws PDOException
+     */
     public function deleteEvent(ChunkCompletionEventStruct $event): int
     {
         $sql = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
@@ -35,6 +39,9 @@ class ChunkCompletionEventDao extends AbstractDao
         return $stmt->rowCount();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function getByIdAndChunk(int $id_event, JobStruct $chunk)
     {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
@@ -53,6 +60,9 @@ class ChunkCompletionEventDao extends AbstractDao
         return $stmt->fetch();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updatePassword(int $id_job, string $password, string $old_password): int
     {
         $sql = "UPDATE chunk_completion_events SET password = :new_password
@@ -74,6 +84,7 @@ class ChunkCompletionEventDao extends AbstractDao
      * @param CompletionEventStruct $params
      *
      * @return string
+     * @throws PDOException
      */
     public static function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
     {

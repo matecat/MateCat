@@ -2,6 +2,7 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDOException;
@@ -22,6 +23,7 @@ class SegmentMetadataDao extends AbstractDao
      *
      * @return SegmentMetadataCollection
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getAll(int $id_segment, int $ttl = 86400): SegmentMetadataCollection
     {
@@ -39,12 +41,13 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @param array $ids
+     * @param int[] $ids
      * @param string $key
      * @param int $ttl
      *
      * @return SegmentMetadataStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
     {
@@ -68,6 +71,7 @@ class SegmentMetadataDao extends AbstractDao
      *
      * @return SegmentMetadataStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function get(int $id_segment, string $key, int $ttl = 604800): ?SegmentMetadataStruct
     {
@@ -97,6 +101,7 @@ class SegmentMetadataDao extends AbstractDao
     /**
      * @param SegmentMetadataStruct $metadataStruct
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function save(SegmentMetadataStruct $metadataStruct): void
     {
@@ -120,6 +125,7 @@ class SegmentMetadataDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function upsert(int $id_segment, string $key, string $value): void
     {
@@ -144,6 +150,7 @@ class SegmentMetadataDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function destroyGetAllCache(int $id_segment): bool
     {
@@ -156,6 +163,7 @@ class SegmentMetadataDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function destroyGetCache(int $id_segment, string $key): bool
     {
@@ -173,12 +181,13 @@ class SegmentMetadataDao extends AbstractDao
      *
      * @return void
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function setTranslationDisabled(int $id_segment): void
     {
         $metadata = new SegmentMetadataStruct();
         $metadata->id_segment = $id_segment;
-        $metadata->meta_key = 'translation_disabled';
+        $metadata->meta_key = SegmentMetadataMarshaller::TRANSLATION_DISABLED->value;
         $metadata->meta_value = "1";
 
         SegmentMetadataDao::save($metadata);

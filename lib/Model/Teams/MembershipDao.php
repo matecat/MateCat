@@ -16,6 +16,7 @@ use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Utils\Tools\Utils;
 
@@ -54,6 +55,9 @@ class MembershipDao extends AbstractDao
         DELETE FROM teams_users WHERE uid = :uid AND id_team = :id_team
     ";
 
+    /**
+     * @throws PDOException
+     */
     public function findById($id)
     {
         $sql = " SELECT * FROM " . self::TABLE . " WHERE id = ? ";
@@ -72,6 +76,7 @@ class MembershipDao extends AbstractDao
      *
      * @return null|TeamStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findUserTeams(UserStruct $user): ?array
     {
@@ -91,6 +96,7 @@ class MembershipDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      * @see MembershipDao::findUserTeams
      *
      */
@@ -115,6 +121,7 @@ class MembershipDao extends AbstractDao
      *
      * @return null|TeamStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findTeamByIdAndUser(int $id, UserStruct $user): ?TeamStruct
     {
@@ -129,6 +136,7 @@ class MembershipDao extends AbstractDao
      *
      * @return TeamStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findTeamByIdAndName(int $id, string $name): ?TeamStruct
     {
@@ -144,6 +152,7 @@ class MembershipDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      * @see MembershipDao::findTeamByIdAndUser
      *
      */
@@ -160,6 +169,7 @@ class MembershipDao extends AbstractDao
      *
      * @return IDaoStruct[]|MembershipStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getMemberListByTeamId(int $id_team, bool $traverse = true): array
     {
@@ -204,6 +214,7 @@ class MembershipDao extends AbstractDao
      * @param int $id_team
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException  @see MembershipDao::getMemberListByTeamId()
      */
     public function destroyCacheForListByTeamId(int $id_team): bool
@@ -225,6 +236,8 @@ class MembershipDao extends AbstractDao
      *
      * @return UserStruct|null
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
      */
     public function deleteUserFromTeam(int $uid, int $teamId): ?UserStruct
     {

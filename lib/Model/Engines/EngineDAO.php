@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\NONEStruct;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
 
@@ -83,6 +84,7 @@ class EngineDAO extends AbstractDao
      *
      * @return EngineStruct
      * @throws Exception
+     * @throws TypeError
      */
     public function create(EngineStruct $obj): EngineStruct
     {
@@ -182,6 +184,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function updateByStruct(EngineStruct $obj): int
     {
@@ -211,6 +214,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function delete(EngineStruct $obj): ?EngineStruct
     {
@@ -236,6 +240,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function disable(EngineStruct $obj): ?EngineStruct
     {
@@ -263,6 +268,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function enable(EngineStruct $obj): ?EngineStruct
     {
@@ -336,6 +342,7 @@ class EngineDAO extends AbstractDao
      *
      * @return EngineStruct
      * @throws Exception
+     * @throws TypeError
      */
     public function sanitize(IDaoStruct $input): EngineStruct
     {
@@ -415,4 +422,3 @@ class EngineDAO extends AbstractDao
         }
     }
 }
-

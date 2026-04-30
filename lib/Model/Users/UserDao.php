@@ -7,7 +7,9 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
+use TypeError;
 
 /**
  * Created by PhpStorm.
@@ -40,6 +42,7 @@ class UserDao extends AbstractDao
      * @param UserStruct $userStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function delete(UserStruct $userStruct): int
     {
@@ -54,6 +57,8 @@ class UserDao extends AbstractDao
      * @param array $uids_array
      *
      * @return UserStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByUids(array $uids_array): array
@@ -106,6 +111,7 @@ class UserDao extends AbstractDao
      * @param $token
      *
      * @return ?UserStruct
+     * @throws PDOException
      */
     public function getByConfirmationToken($token): ?UserStruct
     {
@@ -121,6 +127,8 @@ class UserDao extends AbstractDao
      * @param UserStruct $obj
      *
      * @return UserStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function createUser(UserStruct $obj): ?UserStruct
@@ -161,6 +169,8 @@ class UserDao extends AbstractDao
      * @param UserStruct $obj
      *
      * @return UserStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function updateUser(UserStruct $obj): UserStruct
@@ -207,6 +217,8 @@ class UserDao extends AbstractDao
      * @param $id
      *
      * @return ?UserStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByUid($id): ?UserStruct
@@ -232,6 +244,7 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByUid($uid): bool
@@ -251,6 +264,8 @@ class UserDao extends AbstractDao
      * @param string $email
      *
      * @return ?UserStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByEmail(string $email): ?UserStruct
@@ -277,7 +292,9 @@ class UserDao extends AbstractDao
      * @param $email
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     public function destroyCacheByEmail($email): bool
     {
@@ -349,10 +366,12 @@ class UserDao extends AbstractDao
         return [sprintf($query, $where_string), $where_parameters];
     }
 
-    /***
+    /**
      * @param int $job_id
      *
      * @return ?UserStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getProjectOwner(int $job_id): ?UserStruct
@@ -376,6 +395,8 @@ class UserDao extends AbstractDao
     }
 
     /**
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getProjectAssignee(int $project_id): ?UserStruct
@@ -400,6 +421,7 @@ class UserDao extends AbstractDao
      * @param string[] $email_list
      *
      * @return UserStruct[]
+     * @throws PDOException
      */
     public function getByEmails(array $email_list): array
     {

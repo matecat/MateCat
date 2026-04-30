@@ -5,6 +5,7 @@ namespace Model\Files;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class FileDao extends AbstractDao
@@ -19,6 +20,8 @@ class FileDao extends AbstractDao
      * @param int $ttl
      *
      * @return FileStruct[]
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getByJobId($id_job, int $ttl = 60): array
@@ -41,6 +44,8 @@ class FileDao extends AbstractDao
      * @param int $ttl
      *
      * @return FileStruct[]
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getByProjectId(int $id_project, int $ttl = 600): array
@@ -53,6 +58,9 @@ class FileDao extends AbstractDao
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_project' => $id_project]);
     }
 
+    /**
+     * @throws PDOException
+     */
     public static function updateField($file, $field, $value): bool
     {
         $conn = Database::obtain()->getConnection();
@@ -72,6 +80,7 @@ class FileDao extends AbstractDao
      * @param int $id_project
      *
      * @return int
+     * @throws PDOException
      */
     public static function isFileInProject(int $id_file, int $id_project): int
     {
@@ -87,6 +96,8 @@ class FileDao extends AbstractDao
      * @param int|null $ttl
      *
      * @return FileStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getById(int $id, ?int $ttl = 0): ?FileStruct
@@ -104,6 +115,7 @@ class FileDao extends AbstractDao
      * @param array $idFiles
      *
      * @return int
+     * @throws PDOException
      */
     public function deleteFailedProjectFiles(array $idFiles = []): int
     {

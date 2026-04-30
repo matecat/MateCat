@@ -6,6 +6,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -18,6 +19,8 @@ class MetadataDao extends AbstractDao
     /**
      * @param int $id
      * @return MetadataStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function allByProjectId(int $id): array
@@ -40,6 +43,7 @@ class MetadataDao extends AbstractDao
      * @param string|null $metadataKey An optional metadata key to target specific metadata within the project's cache. If null, the entire project's metadata cache will be destroyed.
      *
      * @return bool Returns true if the metadata cache was successfully destroyed, otherwise false.
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyMetadataCache(int $project_id, ?string $metadataKey = null): bool
@@ -63,6 +67,8 @@ class MetadataDao extends AbstractDao
      * @param int $id_project
      * @param string $key
      * @return MetadataStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function get(int $id_project, string $key): ?MetadataStruct
@@ -88,6 +94,7 @@ class MetadataDao extends AbstractDao
      * @param string $value
      *
      * @return boolean
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function set(int $id_project, string $key, string $value): bool
@@ -118,6 +125,7 @@ class MetadataDao extends AbstractDao
      * @param int $id_project
      * @param array<string, string> $metadata key => value pairs to upsert
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function bulkSet(int $id_project, array $metadata): void
@@ -154,6 +162,7 @@ class MetadataDao extends AbstractDao
 
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function delete(int $id_project, string $key): void

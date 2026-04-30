@@ -25,6 +25,7 @@ class TMSServiceDao
      * @param string $jPassword
      *
      * @return array
+     * @throws PDOException
      */
     public static function getTranslationsForTMXExport(int $jid, string $jPassword): array
     {
@@ -62,6 +63,7 @@ class TMSServiceDao
      * @param string $jPassword
      *
      * @return array
+     * @throws RuntimeException
      */
     public static function getMTForTMXExport(int $jid, string $jPassword): array
     {
@@ -107,6 +109,7 @@ class TMSServiceDao
      * @param string $jPassword
      *
      * @return array
+     * @throws RuntimeException
      */
     public static function getTMForTMXExport(int $jid, string $jPassword): array
     {

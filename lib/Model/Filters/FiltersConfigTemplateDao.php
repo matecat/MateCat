@@ -12,7 +12,9 @@ use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;
 use Model\Projects\ProjectTemplateStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
+use TypeError;
 use Utils\Tools\Utils;
 
 class FiltersConfigTemplateDao extends AbstractDao
@@ -48,6 +50,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function createFromJSON(string $json, int $uid): FiltersConfigTemplateStruct
     {
@@ -81,6 +84,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      *
      * @return array
      * @throws ReflectionException
+     * @throws TypeError
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -117,6 +121,8 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return FiltersConfigTemplateStruct|null
+     * @throws Exception
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getById(int $id, int $ttl = 60): ?FiltersConfigTemplateStruct
@@ -139,6 +145,8 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return FiltersConfigTemplateStruct|null
+     * @throws Exception
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?FiltersConfigTemplateStruct
@@ -162,6 +170,8 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $ttl
      *
      * @return FiltersConfigTemplateStruct|null
+     * @throws Exception
+     * @throws TypeError
      * @throws ReflectionException
      */
     public static function getByUidAndName(int $uid, string $name, int $ttl = 60): ?FiltersConfigTemplateStruct
@@ -184,6 +194,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @return int
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function remove(int $id, int $uid): int
@@ -210,6 +221,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param PDO $conn
      * @param int $id
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByIdCache(PDO $conn, int $id): void
@@ -223,6 +235,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $id
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByIdAndUserCache(PDO $conn, int $id, int $uid): void
@@ -236,6 +249,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $uid
      * @param string $name
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByUidAndNameCache(PDO $conn, int $uid, string $name): void
@@ -258,6 +272,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param array $data
      *
      * @return FiltersConfigTemplateStruct|null
+     * @throws TypeError
      */
     private static function hydrateTemplateStruct(array $data): ?FiltersConfigTemplateStruct
     {
@@ -287,6 +302,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function save(FiltersConfigTemplateStruct $templateStruct): FiltersConfigTemplateStruct
     {

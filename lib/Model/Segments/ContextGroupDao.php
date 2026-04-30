@@ -9,6 +9,7 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
@@ -31,6 +32,7 @@ class ContextGroupDao extends AbstractDao
      *
      * @return ProjectStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getAllByProject(ProjectStruct $project): array
     {
@@ -47,6 +49,7 @@ class ContextGroupDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getBySegmentID($sid): ?ContextStruct
     {
@@ -64,6 +67,7 @@ class ContextGroupDao extends AbstractDao
     /**
      * @return ContextStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getByFileID($fid): array
     {
@@ -84,6 +88,7 @@ class ContextGroupDao extends AbstractDao
      *
      * @return ContextStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getBySIDRange($start, $stop): array
     {

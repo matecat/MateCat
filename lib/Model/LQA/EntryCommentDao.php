@@ -5,6 +5,8 @@ namespace Model\LQA;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
+use TypeError;
 
 class EntryCommentDao extends AbstractDao
 {
@@ -13,6 +15,7 @@ class EntryCommentDao extends AbstractDao
      * @param $id_issue
      *
      * @return EntryCommentStruct[]
+     * @throws PDOException
      */
     public function findByIssueId($id_issue): array
     {
@@ -30,6 +33,8 @@ class EntryCommentDao extends AbstractDao
      * @param array $data
      *
      * @return EntryCommentStruct
+     * @throws PDOException
+     * @throws TypeError
      */
     public function createComment(array $data): EntryCommentStruct
     {
@@ -64,6 +69,9 @@ class EntryCommentDao extends AbstractDao
         return $struct;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function findById($id): ?EntryCommentStruct
     {
         $sql = "SELECT * FROM qa_entry_comments WHERE id = ? ";
@@ -81,6 +89,7 @@ class EntryCommentDao extends AbstractDao
      * @param array $ids
      *
      * @return array
+     * @throws PDOException
      */
     public function fetchCommentsGroupedByIssueIds(array $ids): array
     {
@@ -101,6 +110,7 @@ class EntryCommentDao extends AbstractDao
      * @param int $from The ID of the QA entry from which the comments are to be moved.
      * @param int $to The ID of the QA entry to which the comments are to be moved.
      * @return int The number of rows affected by the operation.
+     * @throws PDOException
      */
     public function move(int $from, int $to): int
     {

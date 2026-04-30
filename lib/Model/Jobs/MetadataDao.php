@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\TransactionalTrait;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -26,6 +27,8 @@ class MetadataDao extends AbstractDao
      * @param int $ttl
      *
      * @return IDaoStruct[]|MetadataStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByIdJob(int $id_job, string $key, int $ttl = 0): array
@@ -39,6 +42,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobId(int $id_job, string $key): bool
@@ -54,6 +58,8 @@ class MetadataDao extends AbstractDao
      * @param int $ttl
      *
      * @return MetadataStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): array
@@ -73,6 +79,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobAndPassword(int $id_job, string $password): bool
@@ -89,6 +96,8 @@ class MetadataDao extends AbstractDao
      * @param int $ttl
      *
      * @return MetadataStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function get(int $id_job, string $password, string $key, int $ttl = 0): ?MetadataStruct
@@ -103,6 +112,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
@@ -123,6 +133,8 @@ class MetadataDao extends AbstractDao
      * @param string $value
      *
      * @return ?MetadataStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
@@ -157,6 +169,7 @@ class MetadataDao extends AbstractDao
      * @param string $password
      * @param array<string, string> $metadata
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function bulkSet(int $id_job, string $password, array $metadata): void
@@ -195,6 +208,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function delete($id_job, $password, $key): void

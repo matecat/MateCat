@@ -4,6 +4,7 @@ namespace Model\DataAccess;
 
 use Exception;
 use PDO;
+use PDOException;
 use PDOStatement;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
@@ -185,6 +186,7 @@ abstract class AbstractDao
      * @param $query
      *
      * @return PDOStatement
+     * @throws PDOException
      */
     protected function _getStatementForQuery($query): PDOStatement
     {
@@ -216,6 +218,7 @@ abstract class AbstractDao
      *
      * @return T[]
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _fetchObjectMap(PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null): array
     {

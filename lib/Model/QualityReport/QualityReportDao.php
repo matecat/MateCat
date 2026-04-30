@@ -8,6 +8,7 @@
 
 namespace Model\QualityReport;
 
+use PDOException;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -24,6 +25,9 @@ class QualityReportDao extends AbstractDao
     }
 
 
+    /**
+     * @throws PDOException
+     */
     public function getAverages(JobStruct $chunk)
     {
         $sql = <<<SQL
@@ -69,6 +73,7 @@ SQL;
      * @param JobStruct $chunk
      *
      * @return array
+     * @throws PDOException
      */
     public static function getSegmentsForQualityReport(JobStruct $chunk): array
     {
@@ -178,6 +183,7 @@ SQL;
      * @param $job_id      integer
      *
      * @return array
+     * @throws PDOException
      */
     public static function getIssuesBySegments(array $segments_id, int $job_id): array
     {
@@ -233,6 +239,7 @@ JOIN (
      * @param int|null $source_page
      *
      * @return ShapelessConcreteStruct[]
+     * @throws PDOException
      */
     public function getReviseIssuesByChunk(int $job_id, string $password, int $source_page = null): array
     {

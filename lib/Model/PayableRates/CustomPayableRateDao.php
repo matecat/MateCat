@@ -11,8 +11,10 @@ use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 use Utils\Tools\Utils;
 
@@ -95,6 +97,8 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $ttl
      *
      * @return CustomPayableRateStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getById(int $id, int $ttl = 60): ?CustomPayableRateStruct
@@ -116,6 +120,8 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $ttl
      *
      * @return CustomPayableRateStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?CustomPayableRateStruct
@@ -137,6 +143,7 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return CustomPayableRateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function save(CustomPayableRateStruct $customPayableRateStruct): CustomPayableRateStruct
     {
@@ -200,6 +207,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $uid
      *
      * @return int
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function remove(int $id, int $uid): int
@@ -232,6 +240,7 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return CustomPayableRateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function createFromJSON(string $json, int $uid = null): CustomPayableRateStruct
     {
@@ -264,6 +273,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param PDO $conn
      * @param int $id
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByIdCache(PDO $conn, int $id): void
@@ -277,6 +287,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $id
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private
@@ -309,6 +320,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param string $name
      *
      * @return string
+     * @throws PDOException
      */
     public static function assocModelToJob(int $modelId, int $idJob, int $version, string $name): string
     {

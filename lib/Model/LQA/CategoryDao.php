@@ -5,6 +5,8 @@ namespace Model\LQA;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
+use TypeError;
 
 class CategoryDao extends AbstractDao
 {
@@ -14,6 +16,7 @@ class CategoryDao extends AbstractDao
      * @param $id
      *
      * @return CategoryStruct|null
+     * @throws PDOException
      */
     public static function findById($id): ?CategoryStruct
     {
@@ -31,6 +34,7 @@ class CategoryDao extends AbstractDao
      * @param $id_parent
      *
      * @return CategoryStruct[]
+     * @throws PDOException
      */
     public function findByIdModelAndIdParent($id_model, $id_parent): array
     {
@@ -47,6 +51,8 @@ class CategoryDao extends AbstractDao
      * @param $data
      *
      * @return CategoryStruct
+     * @throws PDOException
+     * @throws TypeError
      */
     public static function createRecord($data): CategoryStruct
     {
@@ -80,6 +86,7 @@ class CategoryDao extends AbstractDao
      * @param ModelStruct $model
      *
      * @return CategoryStruct[]
+     * @throws PDOException
      */
     public static function getCategoriesByModel(ModelStruct $model): array
     {
@@ -104,6 +111,7 @@ class CategoryDao extends AbstractDao
      * @param $id_model
      *
      * @return array
+     * @throws PDOException
      */
     public static function getCategoriesAndSeverities($id_model): array
     {

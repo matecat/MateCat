@@ -2,9 +2,11 @@
 
 namespace Model\Users;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -15,6 +17,8 @@ class MetadataDao extends AbstractDao
     const string _query_metadata_by_uid_key = "SELECT * FROM user_metadata WHERE uid = :uid AND `key` = :key ";
 
     /**
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getAllByUidList(array $UIDs): array
@@ -28,14 +32,13 @@ class MetadataDao extends AbstractDao
             " uid IN( " . str_repeat('?,', count($UIDs) - 1) . '?' . " ) "
         );
 
-        /**
-         * @var $rs MetadataStruct[]
-         */
         $rs = $this->_fetchObjectMap(
             $stmt,
             MetadataStruct::class,
             $UIDs
         );
+
+        /** @var MetadataStruct[] $rs */
 
         $resultSet = [];
         foreach ($rs as $metaDataRow) {
@@ -45,6 +48,9 @@ class MetadataDao extends AbstractDao
         return $resultSet;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function getAllByUid($uid): array
     {
         $conn = Database::obtain()->getConnection();
@@ -63,6 +69,8 @@ class MetadataDao extends AbstractDao
      * @param $key
      *
      * @return MetadataStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function get($uid, $key): ?MetadataStruct
@@ -78,6 +86,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheKey($uid, $key): bool
@@ -93,6 +102,7 @@ class MetadataDao extends AbstractDao
      * @param array|string $value
      *
      * @return MetadataStruct
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function set(int $uid, string $key, array|string $value): MetadataStruct
@@ -126,6 +136,7 @@ class MetadataDao extends AbstractDao
      * @param int $uid
      * @param string $key
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function delete(int $uid, string $key): void

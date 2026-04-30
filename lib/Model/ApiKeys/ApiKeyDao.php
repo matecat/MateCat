@@ -5,6 +5,7 @@ namespace Model\ApiKeys;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 
 class ApiKeyDao extends AbstractDao
 {
@@ -13,6 +14,7 @@ class ApiKeyDao extends AbstractDao
      * @param       $key
      *
      * @return ApiKeyStruct|null
+     * @throws PDOException
      */
     static function findByKey($key): ?ApiKeyStruct
     {
@@ -25,6 +27,9 @@ class ApiKeyDao extends AbstractDao
         return $stmt->fetch() ?? null;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function create($obj): ApiKeyStruct
     {
         $conn = $this->database->getConnection();
@@ -53,6 +58,7 @@ class ApiKeyDao extends AbstractDao
      * @param $id
      *
      * @return ApiKeyStruct[]
+     * @throws PDOException
      */
     public function getById($id): array
     {
@@ -68,6 +74,7 @@ class ApiKeyDao extends AbstractDao
      * @param $uid
      *
      * @return ApiKeyStruct|null
+     * @throws PDOException
      */
     public function getByUid($uid): ?ApiKeyStruct
     {
@@ -80,6 +87,9 @@ class ApiKeyDao extends AbstractDao
         return $stmt->fetch() ?: null;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function deleteByUid($uid): int
     {
         $apiKey = $this->getByUid($uid);

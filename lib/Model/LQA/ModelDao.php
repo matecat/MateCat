@@ -2,9 +2,12 @@
 
 namespace Model\LQA;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
+use TypeError;
 
 class ModelDao extends AbstractDao
 {
@@ -23,6 +26,8 @@ class ModelDao extends AbstractDao
      * @param int $ttl
      *
      * @return ModelStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findById(int $id, int $ttl = 0): ?ModelStruct
@@ -41,6 +46,8 @@ class ModelDao extends AbstractDao
      * @param array $data
      *
      * @return ModelStruct
+     * @throws PDOException
+     * @throws TypeError
      */
     public static function createRecord(array $data): ModelStruct
     {
@@ -124,7 +131,9 @@ class ModelDao extends AbstractDao
      * @param array $json
      *
      * @return ModelStruct
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     public static function createModelFromJsonDefinition(array $json): ModelStruct
     {
@@ -142,7 +151,9 @@ class ModelDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      */
     private static function insertCategory(array $category, int $model_id, array $default_severities, ?int $parent_id): void
     {

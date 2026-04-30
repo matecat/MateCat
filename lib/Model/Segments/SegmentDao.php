@@ -52,6 +52,9 @@ class SegmentDao extends AbstractDao
                     GROUP BY translation, id_job
             ";
 
+    /**
+     * @throws PDOException
+     */
     public function countByFile(FileStruct $file): int
     {
         $conn = $this->database->getConnection();
@@ -70,6 +73,8 @@ class SegmentDao extends AbstractDao
      * @param int $ttl (default 86400 = 24 hours)
      *
      * @return SegmentStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     function getByChunkIdAndSegmentId(int $id_job, string $password, int $id_segment, int $ttl = 86400): ?SegmentStruct
@@ -87,7 +92,7 @@ class SegmentDao extends AbstractDao
         $stmt = $conn->prepare($query);
 
         /**
-         * @var $fetched SegmentStruct[]
+         * @var SegmentStruct[] $fetched
          */
         $fetched = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, SegmentStruct::class, [
             'id_job' => $id_job,
@@ -103,6 +108,7 @@ class SegmentDao extends AbstractDao
      * @param string $password
      *
      * @return SegmentStruct[]
+     * @throws PDOException
      */
     function getByChunkId(int $id_job, string $password): array
     {
@@ -134,6 +140,7 @@ class SegmentDao extends AbstractDao
      * @param int $id_segment
      *
      * @return SegmentStruct|null
+     * @throws PDOException
      */
     public function getById(int $id_segment): ?SegmentStruct
     {
@@ -162,19 +169,21 @@ class SegmentDao extends AbstractDao
      * @param array $id_list
      *
      * @return object
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getContextAndSegmentByIDs(array $id_list): object
     {
         $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ";
         $stmt = $this->_getStatementForQuery($query);
-        /** @var $res SegmentStruct[] */
+        /** @var SegmentStruct[] $res */
         $res = $this->_fetchObjectMap(
             $stmt,
             SegmentStruct::class,
             $id_list
         );
 
+        /** @var iterable $res */
         $reverse_id_list = @array_flip($id_list);
         foreach ($res as $element) {
             $id_list[$reverse_id_list[$element->id]] = $element;
@@ -394,6 +403,7 @@ class SegmentDao extends AbstractDao
      * @param $job_password
      *
      * @return QualityReportSegmentStruct[]
+     * @throws PDOException
      */
 
     public function getSegmentsForQr($segments_id, $job_id, $job_password): array
@@ -538,6 +548,8 @@ class SegmentDao extends AbstractDao
      * @param array $options
      *
      * @return SegmentUIStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getPaginationSegments(JobStruct $jStruct, int $step, int $ref_segment, ?string $where = 'center', array $options = []): array
@@ -671,6 +683,7 @@ class SegmentDao extends AbstractDao
      * @param int $id_file
      *
      * @return array
+     * @throws PDOException
      */
     public function getSegmentsDownload(JobStruct $jStruct, int $id_file): array
     {
@@ -717,6 +730,7 @@ class SegmentDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheForGlobalTranslationMismatches(JobStruct $job): bool
@@ -737,6 +751,7 @@ class SegmentDao extends AbstractDao
      * @param int|null $sid
      *
      * @return array
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getTranslationsMismatches(int $jid, string $jpassword, int $sid = null): array
@@ -876,6 +891,7 @@ class SegmentDao extends AbstractDao
      * @param bool $getTranslatedInstead
      *
      * @return array
+     * @throws PDOException
      */
     public static function getNextSegment(int $sid, int $jid, string $password = '', bool $getTranslatedInstead = false): array
     {
@@ -925,6 +941,8 @@ class SegmentDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdJobAndPassword(int $idJob, string $password, int $limit, int $offset, int $ttl = 0): array
@@ -1021,6 +1039,8 @@ class SegmentDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdProjectAndPassword(int $idProject, string $password, int $limit, int $offset, int $ttl = 0): array
