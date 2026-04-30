@@ -10537,12 +10537,6 @@ parameters:
 			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
 
 		-
-			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
 			message: '#^Parameter \#1 \$dita of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setDita\(\) expects Model\\Filters\\DTO\\Dita\|null, object given\.$#'
 			identifier: argument.type
 			count: 1
@@ -11071,42 +11065,6 @@ parameters:
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateCategoryStruct.php
 
 		-
-			message: '#^Cannot access property \$id on Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Cannot access property \$id_template on Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Cannot access property \$passfail_type on Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Cannot access property \$thresholds on Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
-
-		-
 			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11158,12 +11116,6 @@ parameters:
 			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
 
 		-
@@ -11485,12 +11437,6 @@ parameters:
 			path: lib/Model/Pagination/PaginationParameters.php
 
 		-
-			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
-
-		-
 			message: '#^Parameter \#1 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryPaginated\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -11578,12 +11524,6 @@ parameters:
 			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:validateLanguage\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string given\.$#'
-			identifier: argument.type
-			count: 2
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
@@ -13285,84 +13225,6 @@ parameters:
 			path: lib/Model/Teams/TeamStruct.php
 
 		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$tm_key\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Cannot access property \$glos on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Cannot access property \$key on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Cannot access property \$name on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Cannot access property \$tm on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:sanitize\(\) should return Model\\TmKeyManagement\\MemoryKeyStruct but returns Model\\DataAccess\\IDaoStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:sanitizeArray\(\) has parameter \$input with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:sanitizeArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$chunk MemoryKeyStruct\[\]\)\: Unexpected token "\$chunk", expected type at offset 24 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$obj MemoryKeyStruct\)\: Unexpected token "\$obj", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Parameter \#2 \$length of function array_chunk expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Template type T of method Model\\TmKeyManagement\\MemoryKeyDao\:\:sanitize\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
 			message: '#^Method Model\\TmKeyManagement\\MemoryKeyStruct\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -14347,12 +14209,6 @@ parameters:
 			path: lib/Model/Xliff/XliffConfigTemplateStruct.php
 
 		-
-			message: '#^Parameter \#1 \$date of static method Utils\\Date\\DateTimeUtil\:\:formatIsoDate\(\) expects null, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Xliff/XliffConfigTemplateStruct.php
-
-		-
 			message: '#^Cannot call method isDeleted\(\) on Model\\Jobs\\JobStruct\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -15187,52 +15043,10 @@ parameters:
 			path: lib/Plugins/Features/SegmentFilter/Model/FilterDefinition.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$count\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$limit\.$#'
-			identifier: property.notFound
-			count: 3
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$sql\.$#'
-			identifier: property.notFound
-			count: 11
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:__getData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:__getLimit\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:findSegmentIdsBySimpleFilter\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterModel\:\:getSegmentList\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:findSegmentIdsBySimpleFilter\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterDao\:\:getSqlForRegularIntervals\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php
+			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterModel.php
 
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEvent\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'

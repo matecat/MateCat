@@ -152,6 +152,10 @@ final class QAModelTemplateDao extends AbstractDao
     public static function getDefaultTemplate(int $uid): array
     {
         $defaultTemplate = file_get_contents(AppConfig::$ROOT . '/inc/qa_model.json');
+        if ($defaultTemplate === false) {
+            throw new Exception("Cannot read QA model configuration file: " . AppConfig::$ROOT . '/inc/qa_model.json');
+        }
+
         $defaultTemplateModel = json_decode($defaultTemplate, true);
 
         $categories = [];
@@ -353,6 +357,8 @@ final class QAModelTemplateDao extends AbstractDao
      */
     public static function save(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
+        $passfail = $modelTemplateStruct->passfail ?? throw new Exception("QAModelTemplateStruct::passfail must not be null when saving");
+
         $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
@@ -366,17 +372,17 @@ final class QAModelTemplateDao extends AbstractDao
 
             $QAModelTemplateId = (int)$conn->lastInsertId();
 
-            $modelTemplateStruct->passfail->id_template = $QAModelTemplateId;
+            $passfail->id_template = $QAModelTemplateId;
             $stmt = $conn->prepare("INSERT INTO qa_model_template_passfails ( id_template, passfail_type) VALUES ( :id_template, :passfail_type) ");
             $stmt->execute([
-                'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
-                'id_template' => $modelTemplateStruct->passfail->id_template
+                'passfail_type' => $passfail->passfail_type,
+                'id_template' => $passfail->id_template
             ]);
 
             $QAModelTemplatePassfailId = (int)$conn->lastInsertId();
-            $modelTemplateStruct->passfail->id = $QAModelTemplatePassfailId;
+            $passfail->id = $QAModelTemplatePassfailId;
 
-            foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct) {
+            foreach ($passfail->thresholds as $thresholdStruct) {
                 $thresholdStruct->id_passfail = $QAModelTemplatePassfailId;
                 $stmt = $conn->prepare("INSERT INTO qa_model_template_passfail_options (id_passfail, passfail_label, passfail_value) VALUES (:id_passfail, :passfail_label, :passfail_value) ");
                 $stmt->execute([
@@ -446,6 +452,8 @@ final class QAModelTemplateDao extends AbstractDao
      */
     public static function update(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
+        $passfail = $modelTemplateStruct->passfail ?? throw new Exception("QAModelTemplateStruct::passfail must not be null when updating");
+
         $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
@@ -472,14 +480,14 @@ final class QAModelTemplateDao extends AbstractDao
 
             $stmt = $conn->prepare("INSERT INTO qa_model_template_passfails (id_template, passfail_type) VALUES (:id_template,:passfail_type )");
             $stmt->execute([
-                'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
+                'passfail_type' => $passfail->passfail_type,
                 'id_template' => $modelTemplateStruct->id,
             ]);
 
             $idPassfail = (int)$conn->lastInsertId();
-            $modelTemplateStruct->passfail->id = $idPassfail;
+            $passfail->id = $idPassfail;
 
-            foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct) {
+            foreach ($passfail->thresholds as $thresholdStruct) {
                 $stmt = $conn->prepare(
                     "INSERT INTO qa_model_template_passfail_options (id_passfail,passfail_label,passfail_value) 
                     VALUES (:id_passfail,:passfail_label,:passfail_value) "
