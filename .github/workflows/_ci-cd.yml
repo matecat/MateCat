@@ -227,6 +227,11 @@ jobs:
   slack-notification:
     name: Slack Notification
     runs-on: ubuntu-24.04
+    needs:
+      - tests
+      - deploy
+      - test-guard
+    if: always()
     permissions: {}
     steps:
       - name: Slack Notification
