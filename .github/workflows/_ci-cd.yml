@@ -227,6 +227,7 @@ jobs:
   slackNotification:
     name: Slack Notification
     runs-on: ubuntu-24.04
+    permissions: {}
     steps:
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
