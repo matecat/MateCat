@@ -10471,42 +10471,6 @@ parameters:
 			path: lib/Model/Filters/DTO/Yaml.php
 
 		-
-			message: '#^Parameter \#1 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryPaginated\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$id of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$id of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByIdCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByUidAndNameCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Parameter \#3 \$name of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByUidAndNameCache\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Parameter \#3 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByIdAndUserCache\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
 			message: '#^Call to an undefined method object\:\:fromArray\(\)\.$#'
 			identifier: method.notFound
 			count: 1

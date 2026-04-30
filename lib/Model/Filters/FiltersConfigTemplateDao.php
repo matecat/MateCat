@@ -306,6 +306,9 @@ class FiltersConfigTemplateDao extends AbstractDao
      */
     public static function save(FiltersConfigTemplateStruct $templateStruct): FiltersConfigTemplateStruct
     {
+        $uid = $templateStruct->uid ?? throw new Exception("FiltersConfigTemplateStruct::uid must not be null when saving");
+        $name = $templateStruct->name ?? throw new Exception("FiltersConfigTemplateStruct::name must not be null when saving");
+
         $sql = "INSERT INTO " . self::TABLE .
             " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `created_at` ) " .
             " VALUES " .
@@ -316,8 +319,8 @@ class FiltersConfigTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            "uid" => $templateStruct->uid,
-            "name" => $templateStruct->name,
+            "uid" => $uid,
+            "name" => $name,
             "json" => json_encode($templateStruct->getJson()),
             "xml" => json_encode($templateStruct->getXml()),
             "yaml" => json_encode($templateStruct->getYaml()),
@@ -325,16 +328,16 @@ class FiltersConfigTemplateDao extends AbstractDao
             "ms_word" => json_encode($templateStruct->getMsWord()),
             "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
             "dita" => json_encode($templateStruct->getDita()),
-            'now' => (new DateTime())->format('Y-m-d H:i:s'),
+            'now' => $now,
         ]);
 
         $templateStruct->id = (int)$conn->lastInsertId();
         $templateStruct->created_at = $now;
 
         self::destroyQueryByIdCache($conn, $templateStruct->id);
-        self::destroyQueryByIdAndUserCache($conn, $templateStruct->id, $templateStruct->uid);
-        self::destroyQueryByUidAndNameCache($conn, $templateStruct->uid, $templateStruct->name);
-        self::destroyQueryPaginated($templateStruct->uid);
+        self::destroyQueryByIdAndUserCache($conn, $templateStruct->id, $uid);
+        self::destroyQueryByUidAndNameCache($conn, $uid, $name);
+        self::destroyQueryPaginated($uid);
 
         return $templateStruct;
     }
@@ -347,6 +350,10 @@ class FiltersConfigTemplateDao extends AbstractDao
      */
     public static function update(FiltersConfigTemplateStruct $templateStruct): FiltersConfigTemplateStruct
     {
+        $id = $templateStruct->id ?? throw new Exception("FiltersConfigTemplateStruct::id must not be null when updating");
+        $uid = $templateStruct->uid ?? throw new Exception("FiltersConfigTemplateStruct::uid must not be null when updating");
+        $name = $templateStruct->name ?? throw new Exception("FiltersConfigTemplateStruct::name must not be null when updating");
+
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,
@@ -363,9 +370,9 @@ class FiltersConfigTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            "id" => $templateStruct->id,
-            "uid" => $templateStruct->uid,
-            "name" => $templateStruct->name,
+            "id" => $id,
+            "uid" => $uid,
+            "name" => $name,
             "json" => json_encode($templateStruct->getJson()),
             "xml" => json_encode($templateStruct->getXml()),
             "yaml" => json_encode($templateStruct->getYaml()),
@@ -376,10 +383,10 @@ class FiltersConfigTemplateDao extends AbstractDao
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        self::destroyQueryByIdCache($conn, $templateStruct->id);
-        self::destroyQueryByUidAndNameCache($conn, $templateStruct->uid, $templateStruct->name);
-        self::destroyQueryByIdAndUserCache($conn, $templateStruct->id, $templateStruct->uid);
-        self::destroyQueryPaginated($templateStruct->uid);
+        self::destroyQueryByIdCache($conn, $id);
+        self::destroyQueryByUidAndNameCache($conn, $uid, $name);
+        self::destroyQueryByIdAndUserCache($conn, $id, $uid);
+        self::destroyQueryPaginated($uid);
 
         return $templateStruct;
     }
