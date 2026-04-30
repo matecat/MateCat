@@ -46,8 +46,6 @@
     <tal:block  tal:repeat="js_source footer_js">
         <script tal:attributes="src js_source; nonce x_nonce_unique_id"></script>
     </tal:block>
-    <tal:block  tal:repeat="css_url css_resources">
-        <link rel="stylesheet" tal:attributes="href css_url; nonce x_nonce_unique_id"/>
-    </tal:block>
+    ${structure vite_html}
     <div id="modal" style="z-index: 999999999"></div>
 </div>
