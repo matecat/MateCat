@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9a02c3d4f948eafb0fd45a71f0a516a5",
+    "content-hash": "6d943db4811810bd9562248961cc6aa5",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.379.8",
+            "version": "3.379.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "856ddf3d241c29132fe1eb946e112351ab043542"
+                "reference": "aaa9aab5d077018dbc9af63338b2c5aa44a5add3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/856ddf3d241c29132fe1eb946e112351ab043542",
-                "reference": "856ddf3d241c29132fe1eb946e112351ab043542",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/aaa9aab5d077018dbc9af63338b2c5aa44a5add3",
+                "reference": "aaa9aab5d077018dbc9af63338b2c5aa44a5add3",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.379.8"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.379.9"
             },
-            "time": "2026-04-27T19:13:21+00:00"
+            "time": "2026-04-29T18:07:13+00:00"
         },
         {
             "name": "composer/pcre",
@@ -1797,16 +1797,16 @@
         },
         {
             "name": "matecat/klein",
-            "version": "v3.2.3",
+            "version": "v3.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/klein.php.git",
-                "reference": "9ac9ab83ead3fe0061a7d30e417ed842fcbf8e5c"
+                "reference": "9afcba43a4af1bc5f428c421d2f46268f08683a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/klein.php/zipball/9ac9ab83ead3fe0061a7d30e417ed842fcbf8e5c",
-                "reference": "9ac9ab83ead3fe0061a7d30e417ed842fcbf8e5c",
+                "url": "https://api.github.com/repos/matecat/klein.php/zipball/9afcba43a4af1bc5f428c421d2f46268f08683a7",
+                "reference": "9afcba43a4af1bc5f428c421d2f46268f08683a7",
                 "shasum": ""
             },
             "require": {
@@ -1860,9 +1860,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/klein.php/issues",
-                "source": "https://github.com/matecat/klein.php/tree/v3.2.3"
+                "source": "https://github.com/matecat/klein.php/tree/v3.2.4"
             },
-            "time": "2026-04-28T16:58:49+00:00"
+            "time": "2026-04-30T11:56:18+00:00"
         },
         {
             "name": "matecat/lara-php",
@@ -1976,16 +1976,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.6",
+            "version": "v4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "85bf1605302eddaa850478186d9dd13688d25a3b"
+                "reference": "7d4074abe5b96f5aa67a7adb36daa9f302ea72d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/85bf1605302eddaa850478186d9dd13688d25a3b",
-                "reference": "85bf1605302eddaa850478186d9dd13688d25a3b",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/7d4074abe5b96f5aa67a7adb36daa9f302ea72d6",
+                "reference": "7d4074abe5b96f5aa67a7adb36daa9f302ea72d6",
                 "shasum": ""
             },
             "require": {
@@ -2032,9 +2032,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.6"
+                "source": "https://github.com/matecat/subfiltering/tree/v4.0.4"
             },
-            "time": "2026-04-28T15:28:09+00:00"
+            "time": "2026-04-30T12:20:26+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -3283,11 +3283,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.53",
+            "version": "2.1.54",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ef67586798c003274797b288a68b221e4270dca7",
-                "reference": "ef67586798c003274797b288a68b221e4270dca7",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/8be50c3992107dc837b17da4d140fbbdf9a5c5bd",
+                "reference": "8be50c3992107dc837b17da4d140fbbdf9a5c5bd",
                 "shasum": ""
             },
             "require": {
@@ -3332,7 +3332,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-28T16:09:00+00:00"
+            "time": "2026-04-29T13:31:09+00:00"
         },
         {
             "name": "phptal/phptal",

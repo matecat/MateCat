@@ -2,9 +2,11 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class SegmentNoteDao extends AbstractDao
@@ -16,6 +18,8 @@ class SegmentNoteDao extends AbstractDao
      *
      * @return SegmentNoteStruct[]
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getBySegmentId(int $id_segment, int $ttl = 86400): array
     {
@@ -31,11 +35,13 @@ class SegmentNoteDao extends AbstractDao
     }
 
     /**
-     * @param array $ids
+     * @param list<int> $ids
      * @param int $ttl
      *
-     * @return SegmentNoteStruct[]
+     * @return list<SegmentNoteStruct>
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getBySegmentIds(array $ids = [], int $ttl = 86400): array
     {
@@ -43,18 +49,19 @@ class SegmentNoteDao extends AbstractDao
         $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_notes WHERE id_segment IN ( " . implode(', ', $ids) . " ) ");
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        return array_values($thisDao->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentNoteStruct::class,
             []
-        );
+        ));
     }
 
     /**
      * @param $start int start segment
      * @param $stop  int stop segment
      *
-     * @return array array aggregated by id_segment
+     * @return array<int, list<array{id_segment: int, id: int, note: string}>> array aggregated by id_segment
+     * @throws PDOException
      */
 
     public static function getAggregatedBySegmentIdInInterval(int $start, int $stop): array
@@ -73,7 +80,8 @@ class SegmentNoteDao extends AbstractDao
      * @param int $start
      * @param int $stop
      *
-     * @return array
+     * @return array<int, list<array{id_segment: int, id: int, note: string|null, json: string|null}>>
+     * @throws PDOException
      */
     public static function getAllAggregatedBySegmentIdInInterval(int $start, int $stop): array
     {
@@ -95,6 +103,8 @@ class SegmentNoteDao extends AbstractDao
      *
      * @return SegmentNoteStruct[]
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getJsonNotesByRange(int $id_segment_start, int $id_segment_stop, int $ttl = 0): array
     {
@@ -112,9 +122,4 @@ class SegmentNoteDao extends AbstractDao
         );
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
 }
-

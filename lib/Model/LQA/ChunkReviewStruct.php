@@ -48,7 +48,7 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     public function getUndoData()
     {
-        return json_decode($this->undo_data, true);
+        return $this->undo_data !== null ? json_decode($this->undo_data, true) : null;
     }
 
 }

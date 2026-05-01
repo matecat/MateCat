@@ -6,6 +6,7 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use ReflectionException;
+use RuntimeException;
 
 class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {
@@ -30,10 +31,11 @@ class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, J
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function templateMessage(): void
     {
-        $this->message = CommentDao::placeholdContent($this->message);
+        $this->message = CommentDao::placeholdContent($this->message ?? throw new RuntimeException('Comment message must be set before templating'));
     }
 
     /**

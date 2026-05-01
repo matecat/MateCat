@@ -125,14 +125,11 @@ class SegmentStorageAuditTest extends AbstractTest
     }
 
     /**
-     * Make features->filter return its second argument (pass-through).
+     * Keep legacy helper for backward-compatible tests.
      */
     private function stubFeaturesPassThrough(): void
     {
-        $this->features->method('filter')
-            ->willReturnCallback(function (string $name, mixed $arg1) {
-                return $arg1;
-            });
+        // no-op: FeatureSet no longer exposes filter()
     }
 
     /**

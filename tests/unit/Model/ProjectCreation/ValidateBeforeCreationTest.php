@@ -5,6 +5,7 @@ namespace unit\Model\ProjectCreation;
 use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\ValidateProjectCreationEvent;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
@@ -18,7 +19,7 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
  *
  * Verifies:
  * - Calls checkForProjectAssignment
- * - Calls features->run('validateProjectCreation', ...)
+ * - Calls features->dispatchRun(new ValidateProjectCreationEvent(...))
  * - Throws EndQueueException when errors exist after validation
  * - Does not throw when no errors
  */
@@ -46,10 +47,6 @@ class ValidateBeforeCreationTest extends AbstractTest
     #[Test]
     public function doesNotThrowWhenNoErrors(): void
     {
-        // features->run is a stub (no-op), checkForProjectAssignment will skip (uid is null)
-        // SecondPassReview::loadAndValidateQualityFramework is static but should not add errors
-        // for empty projectStructure
-
         $features = $this->createStub(FeatureSet::class);
 
         $this->pm->initForTest(
@@ -72,11 +69,9 @@ class ValidateBeforeCreationTest extends AbstractTest
     {
         // Set up features to inject an error during validateProjectCreation
         $features = $this->createStub(FeatureSet::class);
-        $features->method('run')
-            ->willReturnCallback(function (string $method, $ps) {
-                if ($method === 'validateProjectCreation') {
-                    $ps->result['errors'][] = ['code' => -99, 'message' => 'Validation failed'];
-                }
+        $features->method('dispatchRun')
+            ->willReturnCallback(function (ValidateProjectCreationEvent $event) {
+                $event->projectStructure->result['errors'][] = ['code' => -99, 'message' => 'Validation failed'];
             });
 
         $this->pm->initForTest(
@@ -107,7 +102,7 @@ class ValidateBeforeCreationTest extends AbstractTest
         ]);
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
+        
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -134,6 +129,7 @@ class ValidateBeforeCreationTest extends AbstractTest
     public function skipsAssignmentWhenUidEmpty(): void
     {
         $features = $this->createStub(FeatureSet::class);
+        
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),

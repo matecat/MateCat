@@ -209,14 +209,16 @@ class CounterModel
         $_job_details = array_pop($_details); //get the row
         $job_details = [];
 
-        foreach ($_job_details as $key => $value) {
-            $k = explode("_", $key); // EX: split TOTAL_RAW
-            if (!empty($k[1])) {
-                $job_details[$k[0]]['raw'] = $value;
-            } elseif ($k[0] != 'id') {
-                $job_details[$k[0]]['weighted'] = $value;
-            } else {
-                $job_details[$key] = $value;
+        if (is_array($_job_details)) {
+            foreach ($_job_details as $key => $value) {
+                $k = explode("_", $key); // EX: split TOTAL_RAW
+                if (!empty($k[1])) {
+                    $job_details[$k[0]]['raw'] = $value;
+                } elseif ($k[0] != 'id') {
+                    $job_details[$k[0]]['weighted'] = $value;
+                } else {
+                    $job_details[$key] = $value;
+                }
             }
         }
 

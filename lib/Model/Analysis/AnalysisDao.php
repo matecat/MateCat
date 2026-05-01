@@ -10,12 +10,14 @@
 namespace Model\Analysis;
 
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
+use PDOException;
 use ReflectionException;
 
-class AnalysisDao extends AbstractDao
+final class AnalysisDao extends AbstractDao
 {
 
 
@@ -71,7 +73,9 @@ class AnalysisDao extends AbstractDao
      * @param int $pid
      * @param int $ttl
      *
-     * @return array
+     * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getProjectStatsVolumeAnalysis(int $pid, int $ttl = 0): array
@@ -87,12 +91,13 @@ class AnalysisDao extends AbstractDao
     }
 
     /**
-     * @param $project_id
+     * @param int $project_id
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException
      */
-    public static function destroyCacheByProjectId($project_id): bool
+    public static function destroyCacheByProjectId(int $project_id): bool
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_project_Stats_volume_analysis);

@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
+use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -46,6 +47,7 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
+use TypeError;
 
 class CreateProjectController extends AbstractStatefulKleinController
 {
@@ -68,6 +70,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -155,6 +158,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @return array An associative array containing sanitized and processed request data.
      * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -589,6 +593,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @return QAModelTemplateStruct|null
      * @throws Exception
+     * @throws TypeError
      */
     private function validateQaModelTemplate(
         $qa_model_template = null,
@@ -613,9 +618,10 @@ class CreateProjectController extends AbstractStatefulKleinController
 
             return $QAModelTemplateStruct;
         } elseif (!empty($qa_model_template_id) and $qa_model_template_id > 0) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
             $qaModelTemplate = QAModelTemplateDao::get([
                 'id' => $qa_model_template_id,
-                'uid' => $this->getUser()->uid
+                'uid' => $uid
             ]);
 
             // check if qa_model template exists
@@ -731,12 +737,10 @@ class CreateProjectController extends AbstractStatefulKleinController
     {
         $projectFeatures = [];
 
-        return $this->featureSet->filter(
-            'filterCreateProjectFeatures',
-            $projectFeatures,
-            $this,
-            $mt_engine
-        );
+        $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
+        $this->featureSet->dispatchFilter($filterCreateProjectFeaturesEvent);
+
+        return $filterCreateProjectFeaturesEvent->getProjectFeatures();
     }
 
     /**

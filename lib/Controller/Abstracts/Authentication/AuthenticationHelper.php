@@ -13,6 +13,7 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use Utils\Logger\LoggerFactory;
 use View\API\App\Json\UserProfile;
@@ -141,6 +142,7 @@ class AuthenticationHelper
     /**
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws RuntimeException
      */
     protected function setUserSession(): void
     {
@@ -156,6 +158,7 @@ class AuthenticationHelper
     /**
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws RuntimeException
      */
     protected static function getUserProfile(UserStruct $user): array
     {
@@ -197,7 +200,8 @@ class AuthenticationHelper
     protected function validKeys(?string $api_key = null, ?string $api_secret = null): bool
     {
         if ($api_key || $api_secret) {
-            $this->api_record = ApiKeyDao::findByKey($api_key);
+            $apiKey = $api_key ?? '';
+            $this->api_record = ApiKeyDao::findByKey($apiKey);
             if ($this->api_record) {
                 return $this->api_record->validSecret($api_secret);
             }

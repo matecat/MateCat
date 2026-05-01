@@ -5,11 +5,15 @@ parameters:
     level: 8
     paths:
         - lib
+        - plugins
     scanFiles:
         - router.php
     excludePaths:
         - lib/View/APIDoc.php (?)
         - lib/View/templates/_APIDoc.php
+        - vendor
+        - plugins/translated/tests
+        - plugins/uber/tests
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
     # Flag @throws \Exception on public/protected methods when only
@@ -23,3 +27,4 @@ parameters:
             # Report when @throws declares a broader type than
             # what is actually thrown (applies to all methods)
             tooWideThrowType: true
+    treatPhpDocTypesAsCertain: false

@@ -10,6 +10,7 @@ use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
@@ -300,7 +301,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
     /**
      * @param array{
-     *     queryParams: string,
+     *     queryParams: SearchQueryParamsStruct,
      *     source?: string,
      *     target?: string,
      *     status_only?: bool,
@@ -313,7 +314,9 @@ class GetSearchController extends AbstractStatefulKleinController
      */
     private function doSearch(array $request): array
     {
-        $queryParams = $request['queryParams'];
+        $queryParams = $request['queryParams'] instanceof SearchQueryParamsStruct
+            ? $request['queryParams']
+            : new SearchQueryParamsStruct($request['queryParams']);
 
         if (!empty($request['source']) and !empty($request['target'])) {
             $queryParams['key'] = 'coupled';
@@ -458,7 +461,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             // setTranslationCommitted
             try {
-                $this->featureSet->run('setTranslationCommitted', [
+                $this->featureSet->dispatchRun(new SetTranslationCommittedEvent([
                     'translation' => $new_translation,
                     'old_translation' => $old_translation,
                     'propagated_ids' => $propagationTotal['propagated_ids'],
@@ -466,7 +469,7 @@ class GetSearchController extends AbstractStatefulKleinController
                     'segment' => $segment,
                     'user' => $this->user,
                     'source_page_code' => ReviewUtils::revisionNumberToSourcePage($revisionNumber)
-                ]);
+                ]));
             } catch (Exception $e) {
                 $this->logger->debug("Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString());
 

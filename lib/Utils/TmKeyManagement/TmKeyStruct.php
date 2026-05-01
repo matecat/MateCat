@@ -141,7 +141,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     }
 
     /**
-     * @param array|TmKeyStruct|null $params An associative array with the following keys:<br/>
+     * @param array<string, mixed>|TmKeyStruct|null $params An associative array with the following keys:<br/>
      *                                                       <pre>
      *                                                       tm         : boolean - Tm key
      *                                                       glos       : boolean - Glossary key
@@ -171,7 +171,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
         }
     }
 
-    public function __set($name, $value)
+    public function __set($name, $_value)
     {
         if (!property_exists($this, $name)) {
             throw new DomainException('Unknown property ' . $name);
@@ -180,7 +180,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
 
     /**
      * Converts the current object into an associative array
-     * @return array
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {
@@ -208,6 +208,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
 
     /**
      * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

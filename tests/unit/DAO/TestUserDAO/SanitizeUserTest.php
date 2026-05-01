@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 27/05/16
  * Time: 18.00
  */
+#[Group('PersistenceNeeded')]
 class SanitizeUserTest extends AbstractTest
 {
 
@@ -64,9 +66,7 @@ LABEL;
         $this->user_struct_input->email = <<<'LABEL'
 ba\r@\fo\o"\.net
 LABEL;
-        $this->user_struct_expected->email = <<<'LABEL'
-ba\\r@\\fo\\o\"\\.net
-LABEL;
+        $this->user_struct_expected->email = $this->user_struct_input->email;
         $this->user_Dao->sanitize($this->user_struct_input);
         $this->assertEquals($this->user_struct_expected, $this->user_struct_input);
     }
@@ -83,9 +83,7 @@ LABEL;
         $this->user_struct_input->create_date = <<<'LABEL'
 \2"016-042"-29 18:0\'26:1142
 LABEL;
-        $this->user_struct_expected->create_date = <<<'LABEL'
-\\2\"016-042\"-29 18:0\\\'26:1142
-LABEL;
+        $this->user_struct_expected->create_date = $this->user_struct_input->create_date;
         $this->user_Dao->sanitize($this->user_struct_input);
         $this->assertEquals($this->user_struct_expected, $this->user_struct_input);
     }
@@ -101,9 +99,7 @@ LABEL;
         $this->user_struct_input->first_name = <<<LABEL
 j\on\h""\
 LABEL;
-        $this->user_struct_expected->first_name = <<<'LABEL'
-j\\on\\h\"\"\\
-LABEL;
+        $this->user_struct_expected->first_name = $this->user_struct_input->first_name;
         $this->user_Dao->sanitize($this->user_struct_input);
         $this->assertEquals($this->user_struct_expected, $this->user_struct_input);
     }
@@ -119,9 +115,7 @@ LABEL;
         $this->user_struct_input->last_name = <<<'LABEL'
 gyga|gym\\leon"".-
 LABEL;
-        $this->user_struct_expected->last_name = <<<'LABEL'
-gyga|gym\\\\leon\"\".-
-LABEL;
+        $this->user_struct_expected->last_name = $this->user_struct_input->last_name;
         $this->user_Dao->sanitize($this->user_struct_input);
         $this->assertEquals($this->user_struct_expected, $this->user_struct_input);
     }

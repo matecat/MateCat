@@ -35,7 +35,7 @@ class GoogleTranslateStruct extends EngineStruct
     public ?string $translate_relative_url = "language/translate/v2";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'client_secret' => ""
@@ -57,13 +57,10 @@ class GoogleTranslateStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return GoogleTranslateStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new GoogleTranslateStruct();
+        return new static();
     }
 
 }

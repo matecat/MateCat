@@ -5,6 +5,7 @@ namespace unit\Model\ProjectCreation;
 use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
@@ -55,9 +56,14 @@ class InstructionsAndAssignmentTest extends AbstractTest
     {
         $features = $this->createMock(FeatureSet::class);
         $features->expects($this->once())
-            ->method('filter')
-            ->with('decodeInstructions', 'raw instructions')
-            ->willReturn('decoded instructions');
+            ->method('dispatchFilter')
+            ->with($this->callback(function (DecodeInstructionsEvent $event): bool {
+                return $event->getValue() === 'raw instructions';
+            }))
+            ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
+                $event->setValue('decoded instructions');
+                return $event;
+            });
 
         $dao = $this->createMock(MetadataDao::class);
         $dao->expects($this->once())
@@ -78,7 +84,10 @@ class InstructionsAndAssignmentTest extends AbstractTest
     public function insertInstructionsUsesProjectIdFromStructure(): void
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
+        $features->method('dispatchFilter')
+            ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
+                return $event;
+            });
 
         $dao = $this->createMock(MetadataDao::class);
         $dao->expects($this->once())
@@ -99,10 +108,14 @@ class InstructionsAndAssignmentTest extends AbstractTest
     #[Test]
     public function insertInstructionsFilterReturnsTransformedValue(): void
     {
-        $features = $this->createMock(FeatureSet::class);
-        $features->method('filter')
-            ->with('decodeInstructions', 'base64data')
-            ->willReturn('plain text result');
+        $features = $this->createStub(FeatureSet::class);
+        $features->method('dispatchFilter')
+            ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
+                if ($event->getValue() === 'base64data') {
+                    $event->setValue('plain text result');
+                }
+                return $event;
+            });
 
         $dao = $this->createMock(MetadataDao::class);
         $dao->expects($this->once())
@@ -154,7 +167,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $team = $this->makeTeam(10);
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
+        $features->method('dispatchFilter')->willReturnArgument(0);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -175,15 +188,12 @@ class InstructionsAndAssignmentTest extends AbstractTest
     }
 
     #[Test]
-    public function checkForProjectAssignmentNormalizesTeamThroughFeatureFilter(): void
+    public function checkForProjectAssignmentNormalizesTeamToStruct(): void
     {
         $team = $this->makeTeam(7, 'Original');
 
-        // Feature filter modifies the team array
-        $features = $this->createMock(FeatureSet::class);
-        $features->method('filter')
-            ->with('filter_team_for_project_creation', $this->anything())
-            ->willReturn(['id' => 7, 'name' => 'Filtered', 'created_by' => 1, 'created_at' => '2025-01-01 00:00:00', 'type' => 'personal']);
+        $features = $this->createStub(FeatureSet::class);
+        $features->method('dispatchFilter')->willReturnArgument(0);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -202,7 +212,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
         $resultTeam = $ps->team;
         $this->assertInstanceOf(TeamStruct::class, $resultTeam);
-        $this->assertSame('Filtered', $resultTeam->name);
+        $this->assertSame('Original', $resultTeam->name);
         $this->assertSame(7, $resultTeam->id);
     }
 
@@ -212,7 +222,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $team = $this->makeTeam(3, 'Cache Team');
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
+        $features->method('dispatchFilter')->willReturnArgument(0);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -247,7 +257,6 @@ class InstructionsAndAssignmentTest extends AbstractTest
         ]);
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),

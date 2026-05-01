@@ -8,12 +8,15 @@
 
 namespace Model\Teams;
 
+use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Users\UserStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\Teams;
 use Utils\Tools\Utils;
 
@@ -50,6 +53,7 @@ class TeamDao extends AbstractDao
      * @param TeamStruct $teamStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function delete(TeamStruct $teamStruct): int
     {
@@ -61,16 +65,17 @@ class TeamDao extends AbstractDao
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
-     * @return TeamStruct
+     * @return TeamStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function findById($id): ?TeamStruct
+    public function findById(int $id): ?TeamStruct
     {
         $stmt = $this->_getStatementForQuery(self::$_query_find_by_id);
 
-        /** @var $res TeamStruct */
+        /** @var TeamStruct|null $res */
         $res = $this->_fetchObjectMap(
             $stmt,
             TeamStruct::class,
@@ -87,6 +92,8 @@ class TeamDao extends AbstractDao
      *
      * @return TeamStruct
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function createPersonalTeam(UserStruct $user): TeamStruct
     {
@@ -98,13 +105,14 @@ class TeamDao extends AbstractDao
 
     /**
      * @param UserStruct $orgCreatorUser
-     * @param array $params
+     * @param array{name: string, type: string, members?: array<int, string|null>} $params
      *
      * @return  TeamStruct
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function createUserTeam(UserStruct $orgCreatorUser, array $params = []): TeamStruct
+    public function createUserTeam(UserStruct $orgCreatorUser, array $params): TeamStruct
     {
         $teamStruct = new TeamStruct([
             'name' => $params['name'],
@@ -114,7 +122,7 @@ class TeamDao extends AbstractDao
         ]);
 
         $orgId = TeamDao::insertStruct($teamStruct);
-        $teamStruct->id = $orgId;
+        $teamStruct->id = (int)$orgId;
 
 
         //add the creator to the list of members
@@ -128,9 +136,11 @@ class TeamDao extends AbstractDao
         // get fresh cache from the primary database
         (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($teamStruct->id);
 
+        $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
+
         $membersList = (new MembershipDao)->createList([
             'team' => $teamStruct,
-            'members' => $params['members']
+            'members' => $members
         ]);
         $teamStruct->setMembers($membersList);
 
@@ -146,6 +156,7 @@ class TeamDao extends AbstractDao
      *
      * @return MembershipStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getAssigneeWithProjectsByTeam(TeamStruct $team): array
     {
@@ -165,6 +176,7 @@ class TeamDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyCacheAssignee(TeamStruct $team): bool
     {
@@ -184,6 +196,7 @@ class TeamDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyCacheById(int $id): bool
     {
@@ -205,10 +218,13 @@ class TeamDao extends AbstractDao
      *
      * @return TeamStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getPersonalByUser(UserStruct $user): TeamStruct
     {
-        return $this->getPersonalByUid($user->uid);
+        $uid = $user->uid ?? throw new DomainException("User UID must not be null");
+
+        return $this->getPersonalByUid($uid);
     }
 
     /**
@@ -216,6 +232,7 @@ class TeamDao extends AbstractDao
      *
      * @return TeamStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getPersonalByUid(int $uid): TeamStruct
     {
@@ -239,6 +256,7 @@ class TeamDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyCachePersonalByUid(int $uid): bool
     {
@@ -261,6 +279,7 @@ class TeamDao extends AbstractDao
      *
      * @return TeamStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findUserCreatedTeams(UserStruct $user): ?TeamStruct
     {
@@ -280,13 +299,15 @@ class TeamDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws TypeError
      */
     public function destroyCacheUserCreatedTeams(UserStruct $user): bool
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
 
         $teamQuery = new TeamStruct();
-        $teamQuery->created_by = $user->uid;
+        $teamQuery->created_by = (int)$user->uid;
 
         return $this->_destroyObjectCache(
             $stmt,
@@ -301,6 +322,7 @@ class TeamDao extends AbstractDao
      * @param TeamStruct $org
      *
      * @return TeamStruct
+     * @throws PDOException
      */
     public function updateTeamName(TeamStruct $org): TeamStruct
     {
@@ -321,6 +343,7 @@ class TeamDao extends AbstractDao
      * @param TeamStruct $team
      *
      * @return int
+     * @throws PDOException
      */
     public function deleteTeam(TeamStruct $team): int
     {

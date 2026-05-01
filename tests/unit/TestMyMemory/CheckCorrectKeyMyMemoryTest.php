@@ -19,6 +19,7 @@ use Utils\Registry\AppConfig;
  * Date: 19/05/16
  * Time: 16.09
  */
+#[Group('PersistenceNeeded')]
 class CheckCorrectKeyMyMemoryTest extends AbstractTest
 {
 

@@ -116,7 +116,7 @@ class GetTagProjectionController extends KleinController
         }
 
         if (empty($id_job)) {
-            $msg = "\n\n Critical. Quit. \n\n " . var_export($_POST, true);
+            $msg = "\n\n Critical. Quit. \n\n " . var_export($this->request->paramsPost()->all(), true);
             $this->logger->debug($msg);
             Utils::sendErrMailReport($msg);
 

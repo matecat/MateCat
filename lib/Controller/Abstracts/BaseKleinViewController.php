@@ -4,6 +4,7 @@ namespace Controller\Abstracts;
 
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Exception;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
@@ -88,7 +89,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'user_plugins'} = new PHPTalMap($this->featureSet->getCodes());
         $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
         $this->view->{'userMail'} = $this->getUser()->email;
-        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->filter("isAnInternalUser", $this->getUser()->email ?? ''));
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->dispatchFilter(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];

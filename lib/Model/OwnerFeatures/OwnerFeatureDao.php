@@ -2,10 +2,12 @@
 
 namespace Model\OwnerFeatures;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 
@@ -19,6 +21,7 @@ class OwnerFeatureDao extends AbstractDao
      * @param OwnerFeatureStruct $obj
      *
      * @return ?OwnerFeatureStruct
+     * @throws PDOException
      */
     public function create(IDaoStruct $obj): ?OwnerFeatureStruct
     {
@@ -44,7 +47,7 @@ class OwnerFeatureDao extends AbstractDao
         $values = array_diff_key($obj->toArray(), ['id' => null]);
 
         $stmt->execute($values);
-        $record = $this->getById($conn->lastInsertId());
+        $record = $this->getById((int) $conn->lastInsertId());
         $conn->commit();
 
         return $record;
@@ -52,11 +55,12 @@ class OwnerFeatureDao extends AbstractDao
 
     /**
      * @param string $id_customer
-     *
      * @param int $ttl
      *
-     * @return IDaoStruct[]|OwnerFeatureStruct[]
+     * @return OwnerFeatureStruct[]
+     *
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getByIdCustomer(string $id_customer, int $ttl = 3600): array
     {
@@ -66,18 +70,19 @@ class OwnerFeatureDao extends AbstractDao
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, OwnerFeatureStruct::class, [
             'id_customer' => $id_customer
-        ]) ?? [];
+        ]);
     }
 
     /**
      * Destroy a cached object
      *
-     * @param $id_customer
+     * @param string $id_customer
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
-    public static function destroyCacheByIdCustomer($id_customer): bool
+    public static function destroyCacheByIdCustomer(string $id_customer): bool
     {
         $thisDao = new self();
         $stmt = $thisDao->_getStatementForQuery(self::query_by_user_email);
@@ -86,7 +91,10 @@ class OwnerFeatureDao extends AbstractDao
     }
 
     /**
+     * @return OwnerFeatureStruct[]
+     *
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getByUserId(?int $uid, int $ttl = 3600): array
     {
@@ -100,11 +108,12 @@ class OwnerFeatureDao extends AbstractDao
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, OwnerFeatureStruct::class, [
             'uid' => $uid
-        ]) ?? [];
+        ]);
     }
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function destroyCacheByUserId(int $uid): bool
     {
@@ -120,6 +129,7 @@ class OwnerFeatureDao extends AbstractDao
      * @param int $id
      *
      * @return ?OwnerFeatureStruct
+     * @throws PDOException
      */
     public static function getById(int $id): ?OwnerFeatureStruct
     {

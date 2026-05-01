@@ -3,9 +3,11 @@
 
 use Model\DataAccess\Database;
 use Model\Projects\MetadataDao;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
+#[Group('PersistenceNeeded')]
 class ProjectsMetadataDaoTest extends AbstractTest
 {
 

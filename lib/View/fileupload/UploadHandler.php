@@ -21,11 +21,14 @@ class UploadHandler
      */
     protected array $options;
 
+    private array $files;
+
     protected MatecatLogger $logger;
 
-    function __construct()
+    function __construct(array $files = [])
     {
         $this->logger = LoggerFactory::getLogger("upload_handler");
+        $this->files  = $files;
 
         $this->options = [
             'script_url' => $this->getFullUrl() . '/',
@@ -433,12 +436,12 @@ class UploadHandler
             $this->flush($info);
         }
 
-        $upload = $_FILES[$this->options['param_name']] ?? null;
+        $upload = $this->files[$this->options['param_name']] ?? null;
 
         $info = [];
         if ($upload && is_array($upload['tmp_name'])) {
             // param_name is an array identifier like "files[]",
-            // $_FILES is a multi-dimensional array:
+            // $this->files is a multi-dimensional array:
             foreach ($upload['tmp_name'] as $index => $value) {
                 $info[] = $this->handle_file_upload(
                     $upload['tmp_name'][$index],
@@ -449,7 +452,7 @@ class UploadHandler
             }
         } elseif ($upload || isset($_SERVER['HTTP_X_FILE_NAME'])) {
             // param_name is a single object identifier like "file",
-            // $_FILES is a one-dimensional array:
+            // $this->files is a one-dimensional array:
             $info[] = $this->handle_file_upload(
                 $upload['tmp_name'] ?? null,
                 $upload['name'] ?? null,

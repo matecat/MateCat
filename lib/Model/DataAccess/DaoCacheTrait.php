@@ -11,6 +11,7 @@ namespace Model\DataAccess;
 
 use Exception;
 use Predis\Client;
+use Random\RandomException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
@@ -31,6 +32,50 @@ trait DaoCacheTrait
     protected int $cacheTTL = 0;
 
     /**
+     * XFetch β (beta) tuning parameter.
+     * Controls how aggressively early recomputation triggers.
+     * 1.0 is the theoretically optimal value per Vattani et al. (2015).
+     */
+    protected const float XFETCH_BETA = 1.0;
+
+    /**
+     * Minimum TTL (seconds) for XFetch to activate.
+     * Below this threshold, XFetch auto-disables because the early
+     * recomputation window could exceed the remaining TTL.
+     */
+    protected const int XFETCH_MIN_TTL_THRESHOLD = 10;
+
+    /**
+     * Fallback δ (seconds) when no measured recomputation time is available.
+     * Used by callers that bypass _fetchObjectMap (e.g., Pager).
+     */
+    protected const float XFETCH_FALLBACK_DELTA = 0.05;
+
+    /**
+     * Whether XFetch probabilistic early expiration is active for this class.
+     * Override to false in classes that use DaoCacheTrait for non-query storage
+     * (e.g., SessionTokenStoreHandler).
+     */
+    protected bool $xFetchEnabled = true;
+
+    /**
+     * Last measured recomputation time (δ) in seconds.
+     * Set via _setLastComputeDelta() from AbstractDao::_fetchObjectMap().
+     * Consumed-and-reset internally by _setInCacheMap() when building the envelope.
+     */
+    private float $lastComputeDelta = 0.0;
+
+    /**
+     * Set the last measured recomputation time (δ).
+     *
+     * @param float $delta Recomputation time in seconds
+     */
+    protected function _setLastComputeDelta(float $delta): void
+    {
+        $this->lastComputeDelta = $delta;
+    }
+
+    /**
      * Cache Initialization
      *
      * @return void
@@ -49,6 +94,17 @@ trait DaoCacheTrait
         }
     }
 
+    /**
+     * Sets the cache connection instance.
+     *
+     * @param Client|null $connection The cache connection instance to set, or null to unset.
+     * @return void
+     */
+    public static function setCacheConnection(?Client $connection): void
+    {
+        self::$cache_con = $connection;
+    }
+
 
     /** @noinspection PhpUnusedParameterInspection */
     protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
@@ -61,6 +117,32 @@ trait DaoCacheTrait
                 //"result_set" => $value,
             ]
         );
+    }
+
+    /**
+     * XFetch probabilistic early expiration check.
+     *
+     * Returns true if the cache entry should be recomputed early to prevent stampede.
+     * Formula: now - δ · β · log(rand) ≥ storedAt + TTL
+     *
+     * @param float $storedAt Timestamp when the entry was cached
+     * @param float $delta Recomputation time (δ) in seconds
+     * @param int $ttl Cache TTL in seconds
+     *
+     * @return bool True if early recomputation should happen
+     *
+     * @throws RandomException
+     * @see https://en.wikipedia.org/wiki/Cache_stampede#Optimal_probabilistic_early_expiration
+     */
+    protected function _shouldRecompute(float $storedAt, float $delta, int $ttl): bool
+    {
+        if ($delta <= 0.0) {
+            return false;
+        }
+
+        // XFetch formula: recompute when now - δ · β · log(rand()) ≥ expiry
+        // log(rand()) is always ≤ 0 for rand() in (0, 1], so subtracting it adds a positive jitter window.
+        return (microtime(true) - $delta * static::XFETCH_BETA * log(random_int(1, PHP_INT_MAX) / PHP_INT_MAX)) >= ($storedAt + $ttl);
     }
 
     /**
@@ -80,14 +162,32 @@ trait DaoCacheTrait
 
         $this->_cacheSetConnection();
 
-        $value = null;
-        if (isset(self::$cache_con) && !empty(self::$cache_con)) {
-            $key = md5($query);
-            $value = unserialize(self::$cache_con->hget($keyMap, $key) ?? '');
-            $this->_logCache("GETMAP: " . $keyMap, $key, $value, $query);
+        $key = md5($query);
+        $raw = self::$cache_con->hget($keyMap, $key);
+
+        if ($raw === null) {
+            $this->_logCache("GETMAP_MISS: " . $keyMap, $key, null, $query);
+            return null;
         }
 
-        return !is_bool($value) ? $value : null;
+        $unserialized = unserialize($raw);
+
+        if ($unserialized instanceof XFetchEnvelope) {
+            if (
+                $this->xFetchEnabled
+                && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD
+                && $this->_shouldRecompute($unserialized->storedAt, $unserialized->delta, $this->cacheTTL)
+            ) {
+                $this->_logCache("GETMAP_XFETCH_RECOMPUTE: " . $keyMap, $key, null, $query);
+                return null;
+            }
+
+            $unserialized = $unserialized->value;
+        }
+
+        $this->_logCache("GETMAP: " . $keyMap, $key, $unserialized, $query);
+
+        return is_array($unserialized) ? $unserialized : null;
     }
 
     /**
@@ -101,6 +201,7 @@ trait DaoCacheTrait
      * @param        $value T[]
      *
      * @return void|null
+     * @throws Exception
      */
     protected function _setInCacheMap(string $keyMap, string $query, array $value)
     {
@@ -110,7 +211,17 @@ trait DaoCacheTrait
 
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             $key = md5($query);
-            self::$cache_con->hset($keyMap, $key, serialize($value));
+
+            if ($this->xFetchEnabled && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD) {
+                $delta = $this->lastComputeDelta > 0.0 ? $this->lastComputeDelta : static::XFETCH_FALLBACK_DELTA;
+                $this->lastComputeDelta = 0.0;
+                $storable = serialize(new XFetchEnvelope($value, microtime(true), $delta));
+            } else {
+                $this->lastComputeDelta = 0.0;
+                $storable = serialize($value);
+            }
+
+            self::$cache_con->hset($keyMap, $key, $storable);
             self::$cache_con->expire($keyMap, $this->cacheTTL);
             self::$cache_con->setex($key, $this->cacheTTL, $keyMap);
             $this->_logCache("SETMAP: " . $keyMap, $key, $value, $query);

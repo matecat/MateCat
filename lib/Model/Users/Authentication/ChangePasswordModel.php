@@ -14,6 +14,7 @@ use Exception;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Tools\Utils;
 
 class ChangePasswordModel
@@ -60,8 +61,8 @@ class ChangePasswordModel
         }
 
         UserDao::updateStruct($this->user, $fieldsToUpdate);
-        (new UserDao)->destroyCacheByEmail($this->user->email);
-        (new UserDao)->destroyCacheByUid($this->user->uid);
+        (new UserDao)->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        (new UserDao)->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
     }
 
 }

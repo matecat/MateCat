@@ -92,7 +92,8 @@ class LoginController extends AbstractStatefulKleinController
             $user->clearAuthToken();
 
             $dao->updateUser($user);
-            $dao->destroyCacheByUid($user->uid);
+            $uid = $user->uid ?? throw new Exception('User not authenticated');
+            $dao->destroyCacheByUid($uid);
 
             $project = new RedeemableProject($user, $_SESSION);
             $project->tryToRedeem();

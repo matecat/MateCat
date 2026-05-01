@@ -156,6 +156,12 @@ class QualityReportModel
         $dao = new QualityReportDao();
         $avgs = $dao->getAverages($this->getChunk());
 
+        if ($avgs === false) {
+            $this->avg_edit_distance = 0.0;
+            $this->avg_time_to_edit = 0.0;
+            return;
+        }
+
         $this->avg_edit_distance = round($avgs['avg_edit_distance'] / 1000, 2);
         $this->avg_time_to_edit = round($avgs['avg_time_to_edit'] / 1000, 2);
     }

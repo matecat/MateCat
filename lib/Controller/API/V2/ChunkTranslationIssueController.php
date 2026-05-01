@@ -14,11 +14,15 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\LQA\EntryDao;
 use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
+use RuntimeException;
 
 class ChunkTranslationIssueController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
+    /**
+     * @throws RuntimeException
+     */
     public function index(): void
     {
         $this->return404IfTheJobWasDeleted();

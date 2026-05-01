@@ -8,6 +8,7 @@
 
 namespace Model\QualityReport;
 
+use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
@@ -63,6 +64,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public string $match_type;
 
+    /** @var list<array<string, mixed>> */
     public array $warnings;
 
     public int $pee;
@@ -71,14 +73,18 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public int $secs_per_word;
 
+    /** @var list<string|int> */
     public array $parsed_time_to_edit;
 
+    /** @var list<array<string, mixed>> */
     public array $comments = [];
 
+    /** @var list<array<string, mixed>> */
     public array $issues = [];
 
     public string $last_translation = '';
 
+    /** @var list<array{translation: string, source_page?: int}> */
     public array $last_revisions = [];
 
     public int $pee_translation_revise;
@@ -91,6 +97,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public bool $is_pre_translated = false;
 
+    /** @var array<string, string> */
     public array $dataRefMap = [];
 
     protected string $tm_analysis_status;
@@ -103,10 +110,11 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
         return $this->tm_analysis_status;
     }
 
-    /**
-     * @return float
-     */
-    public function getSecsPerWord(): float
+     /**
+      * @return float
+      * @throws DivisionByZeroError
+      */
+     public function getSecsPerWord(): float
     {
         $val = @round(($this->time_to_edit / 1000) / $this->raw_word_count, 1);
 
@@ -157,6 +165,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
+     * @return list<array<string, mixed>>
      * @throws Exception
      */
     public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array

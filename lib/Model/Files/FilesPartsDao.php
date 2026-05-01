@@ -2,9 +2,11 @@
 
 namespace Model\Files;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
+use PDOException;
 use ReflectionException;
 
 class FilesPartsDao extends AbstractDao
@@ -14,6 +16,7 @@ class FilesPartsDao extends AbstractDao
      * @param FilesPartsStruct $filesPartsStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function insert(FilesPartsStruct $filesPartsStruct): int
     {
@@ -31,7 +34,7 @@ class FilesPartsDao extends AbstractDao
         ]);
 
         if ($stmt->rowCount() === 1) {
-            return $conn->lastInsertId();
+            return (int)$conn->lastInsertId();
         }
 
         return 0;
@@ -46,6 +49,8 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getFirstAndLastSegment(int $id, int $ttl = 86400): ?ShapelessConcreteStruct
@@ -76,6 +81,8 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return FilesPartsStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getById(int $id, int $ttl = 0): ?FilesPartsStruct
@@ -96,6 +103,8 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return FilesPartsStruct[]
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getByFileId(int $fileId, int $ttl = 86400): array
@@ -113,6 +122,8 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return FilesPartsStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getBySegmentId(int $segmentId, int $ttl = 86400): ?FilesPartsStruct

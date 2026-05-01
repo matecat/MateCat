@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
@@ -16,6 +17,7 @@ use Utils\Registry\AppConfig;
  * Date: 14/04/16
  * Time: 20.27
  */
+#[Group('PersistenceNeeded')]
 class CreateEngineTest extends AbstractTest
 {
 

@@ -15,6 +15,7 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -76,12 +77,12 @@ class ProjectCompletionStatusModel
 
             $featureSet = new FeatureSet();
             $featureSet->loadForProject($this->project);
-
-            $revise['password'] = $featureSet->filter(
-                'filter_job_password_to_review_password',
+            $filterJobPasswordToReviewPasswordEvent = new FilterJobPasswordToReviewPasswordEvent(
                 $chunk->password,
                 $chunk->id
             );
+            $featureSet->dispatchFilter($filterJobPasswordToReviewPasswordEvent);
+            $revise['password'] = $filterJobPasswordToReviewPasswordEvent->getPassword();
 
             $response['translate'][] = $translate;
             $response['revise'][] = $revise;

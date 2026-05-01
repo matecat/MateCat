@@ -3,10 +3,12 @@
 namespace Model\ProjectCreation;
 
 use Exception;
+use InvalidArgumentException;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -55,7 +57,7 @@ class ProjectManagerModel
 
         try {
             $projectId = $this->dbHandler->insert('projects', $data);
-            $project = ProjectDao::findById($projectId);
+            $project = ProjectDao::findById((int)$projectId);
             $this->dbHandler->commit();
         } catch (Exception $e) {
             $this->dbHandler->rollback();
@@ -255,15 +257,7 @@ class ProjectManagerModel
      */
     private static function isAMetadata(string $metaKey): bool
     {
-        $metaDataKeys = [
-            'id_request',
-            'id_content',
-            'id_order',
-            'id_order_group',
-            'screenshot'
-        ];
-
-        return in_array($metaKey, $metaDataKeys);
+        return SegmentMetadataMarshaller::isAllowed($metaKey);
     }
 
     /**
@@ -312,13 +306,13 @@ class ProjectManagerModel
      * @param int $idProject
      * @param int $batchSize Max rows per batched DELETE (must be >= 1)
      *
-     * @throws \InvalidArgumentException if $batchSize < 1
+     * @throws InvalidArgumentException if $batchSize < 1
      * @throws PDOException
      */
     public function deleteProject(int $idProject, int $batchSize = 200): void
     {
         if ($batchSize < 1) {
-            throw new \InvalidArgumentException("batchSize must be >= 1, got $batchSize");
+            throw new InvalidArgumentException("batchSize must be >= 1, got $batchSize");
         }
 
         $conn = $this->dbHandler->getConnection();

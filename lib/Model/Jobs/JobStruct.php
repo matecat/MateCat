@@ -3,6 +3,8 @@
 namespace Model\Jobs;
 
 use ArrayAccess;
+use DomainException;
+use Exception;
 use Model\Comments\CommentDao;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
@@ -24,7 +26,10 @@ use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 use Utils\Constants\JobStatus;
 use Utils\Tools\CatUtils;
 
@@ -124,6 +129,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     /**
      * @return ?JobsTranslatorsStruct
+     * @throws TypeError
      */
     public function getTranslator(): ?JobsTranslatorsStruct
     {
@@ -139,6 +145,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     /**
      * @return ConfirmationStruct|null
      * @throws NotFoundException
+     * @throws TypeError
      */
     public function getOutsource(): ?ConfirmationStruct
     {
@@ -173,6 +180,9 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         return $this->_outsource;
     }
 
+    /**
+     * @throws TypeError
+     */
     public function getOpenThreadsCount()
     {
         $this->_openThreads = $this->cachable(__METHOD__, function () {
@@ -210,14 +220,16 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         });
     }
 
-    /**
-     * @return FileStruct[]
-     * @throws ReflectionException
-     */
-    public function getFiles(): array
-    {
-        return FileDao::getByJobId($this->id);
-    }
+      /**
+       * @return FileStruct[]
+       * @throws Exception
+       * @throws ReflectionException
+       * @throws RuntimeException
+       */
+      public function getFiles(): array
+     {
+         return FileDao::getByJobId($this->id ?? throw new RuntimeException('Missing job id'));
+     }
 
     /**
      * getProject
@@ -238,16 +250,20 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     /**
      * @return JobStruct[]
+     * @throws Exception
      */
     public function getChunks(): array
     {
-        return $this->cachable(__METHOD__, function () {
-            return ChunkDao::getByJobID($this->id);
+        $id = $this->id ?? throw new DomainException("Job ID must not be null");
+
+        return $this->cachable(__METHOD__, function () use ($id) {
+            return ChunkDao::getByJobID($id);
         });
     }
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function isSplitted(): bool
     {
@@ -259,6 +275,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @param                  $role
      *
      * @return array
+     * @throws Exception
      */
     public function getClientKeys(UserStruct $user, $role): array
     {
@@ -268,11 +285,14 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getPeeForTranslatedSegments(): ?float
     {
-        $pee = round((new JobDao())->setCacheTTL(60 * 15)->getPeeStats($this->id, $this->password)->avg_pee ?? 0, 2);
+        $id = $this->id ?? throw new DomainException("Job ID must not be null");
+        $password = $this->password ?? throw new DomainException("Job password must not be null");
+        $pee = round((new JobDao())->setCacheTTL(60 * 15)->getPeeStats($id, $password)->avg_pee ?? 0, 2);
         if ($pee >= 100) {
             $pee = null;
         }
@@ -283,6 +303,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     /**
      *
      * @return float
+     * @throws TypeError
      */
     public function totalWordsCount(): float
     {
@@ -309,6 +330,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @param bool|null $is_review
      *
      * @return $this
+     * @throws TypeError
      */
     public function setIsReview(?bool $is_review = false): JobStruct
     {
@@ -319,6 +341,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     /**
      * @param $_revisionNumber
+     * @throws TypeError
      */
     public function setSourcePage($_revisionNumber): void
     {
@@ -350,13 +373,15 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /** @return SegmentStruct[]
-     *
+     * @throws PDOException
      */
     public function getSegments(): array
     {
+        $id = $this->id ?? throw new DomainException("Job ID must not be null");
+        $password = $this->password ?? throw new DomainException("Job password must not be null");
         $dao = new SegmentDao(Database::obtain());
 
-        return $dao->getByChunkId($this->id, $this->password);
+        return $dao->getByChunkId($id, $password);
     }
 
     /**
@@ -367,6 +392,9 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         return CatUtils::getQualityOverallFromJobStruct($this, $chunkReviews);
     }
 
+    /**
+     * @throws PDOException
+     */
     public function getErrorsCount(): int
     {
         $dao = new WarningDao();

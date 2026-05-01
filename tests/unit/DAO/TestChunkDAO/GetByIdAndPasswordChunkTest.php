@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -14,6 +15,7 @@ use Utils\Registry\AppConfig;
  * Date: 22/06/16
  * Time: 12.47
  */
+#[Group('PersistenceNeeded')]
 class GetByIdAndPasswordChunkTest extends AbstractTest
 {
     /**

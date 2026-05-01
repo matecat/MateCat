@@ -36,7 +36,7 @@ class CategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct
         }
 
         $result['severities'] = $severitiesArray;
-        $result['options'] = json_decode($this->options, true);
+        $result['options'] = $this->options !== null ? json_decode($this->options, true) : null;
 
         return $result;
     }

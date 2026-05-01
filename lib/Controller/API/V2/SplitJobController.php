@@ -114,7 +114,7 @@ class SplitJobController extends KleinController
         $project = $projectStructure['project'];
         $count_type = $projectStructure['count_type'];
 
-        $this->checkSplitAccess($project, $request['job_id'], $request['job_pass'], $project->getJobs());
+        $this->checkSplitAccess($request['job_id'], $request['job_pass'], $project->getJobs());
 
         $data->jobToSplit = $request['job_id'];
         $data->jobToSplitPass = $request['job_pass'];
@@ -210,22 +210,19 @@ class SplitJobController extends KleinController
     }
 
     /**
-     * @param ProjectStruct $project_struct
      * @param int $jid
      * @param string $job_pass
      * @param array $jobList
      *
      * @throws AuthenticationError
      */
-    private function checkSplitAccess(ProjectStruct $project_struct, int $jid, string $job_pass, array $jobList): void
+    private function checkSplitAccess(int $jid, string $job_pass, array $jobList): void
     {
         $jobToSplit = $this->filterJobsById($jid, $jobList);
 
         if (array_shift($jobToSplit)->password != $job_pass) {
             throw new InvalidArgumentException("Access denied", -10);
         }
-
-        $project_struct->getFeaturesSet()->run('checkSplitAccess', $jobList);
     }
 
     /**

@@ -10,6 +10,7 @@ use DOMNodeList;
 use DOMXPath;
 use Exception;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\InjectExcludedTagsInQaEvent;
 
 /**
  * Handles DOM operations for XML/XLIFF segment analysis.
@@ -322,7 +323,9 @@ class DomHandler
         $tagsToBeExcludedFromChecks = [];
 
         if (null !== $this->featureSet) {
-            $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
+            $injectExcludedTagsInQaEvent = new InjectExcludedTagsInQaEvent([]);
+            $this->featureSet->dispatchFilter($injectExcludedTagsInQaEvent);
+            $tagsToBeExcludedFromChecks = $injectExcludedTagsInQaEvent->getExcludedTags();
         }
 
         if (empty($tagsToBeExcludedFromChecks)) {
@@ -425,4 +428,3 @@ class DomHandler
         return (($Node->length == 0 || !$Node) ? new DOMNode() : $Node->item(0));
     }
 }
-

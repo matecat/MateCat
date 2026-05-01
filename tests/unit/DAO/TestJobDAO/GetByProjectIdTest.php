@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 27/05/16
  * Time: 11.47
  */
+#[Group('PersistenceNeeded')]
 class GetByProjectIdTest extends AbstractTest
 {
     /**

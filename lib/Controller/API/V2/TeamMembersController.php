@@ -20,6 +20,7 @@ use Model\Teams\TeamModel;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Membership;
+use RuntimeException;
 
 class TeamMembersController extends KleinController
 {
@@ -33,6 +34,7 @@ class TeamMembersController extends KleinController
     /**
      * Get the team members list
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function index(): void
     {

@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -14,6 +15,7 @@ use Utils\Registry\AppConfig;
  * Date: 27/05/16
  * Time: 19.55
  */
+#[Group('PersistenceNeeded')]
 class GetStatementForCacheUserTest extends AbstractTest
 {
 

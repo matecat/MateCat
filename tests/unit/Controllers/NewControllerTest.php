@@ -12,6 +12,7 @@ use Model\DataAccess\IDatabase;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
@@ -21,6 +22,7 @@ use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
+#[Group('PersistenceNeeded')]
 class NewControllerTest extends AbstractTest
 {
     private NewController $controller;

@@ -9,6 +9,7 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use RuntimeException;
 use Model\DataAccess\TransactionalTrait;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
@@ -18,6 +19,7 @@ use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
+use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
@@ -316,7 +318,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                 continue;
             }
 
-            $user = (new UserDao())->getByUid($finalRevision->uid);
+            $uid = $finalRevision->uid ?? throw new RuntimeException('Final revision uid is required to send notifications');
+            $user = (new UserDao())->getByUid($uid);
             if ($user) {
                 $emails[] = [
                     'isPreviousChangeAuthor' => true,
@@ -333,7 +336,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $projectAssignee = (new UserDao())->getByUid($this->_chunk->getProject()->id_assignee);
+        $projectAssigneeId = $this->_chunk->getProject()->id_assignee;
+        $projectAssignee = $projectAssigneeId === null ? null : (new UserDao())->getByUid($projectAssigneeId);
         if ($projectAssignee) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,
@@ -341,7 +345,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $emails = $this->_chunk->getProject()->getFeaturesSet()->filter('filterRevisionChangeNotificationList', $emails);
+        $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
+        $this->_chunk->getProject()->getFeaturesSet()->dispatchFilter($filterRevisionChangeNotificationListEvent);
+        $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {
             $url = CanonicalRoutes::revise(

@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\TransactionalTrait;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -26,6 +27,8 @@ class MetadataDao extends AbstractDao
      * @param int $ttl
      *
      * @return IDaoStruct[]|MetadataStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByIdJob(int $id_job, string $key, int $ttl = 0): array
@@ -39,6 +42,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobId(int $id_job, string $key): bool
@@ -54,6 +58,8 @@ class MetadataDao extends AbstractDao
      * @param int $ttl
      *
      * @return MetadataStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): array
@@ -63,7 +69,7 @@ class MetadataDao extends AbstractDao
         $list = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_job' => $id_job,
             'password' => $password,
-        ]) ?? [];
+        ]);
 
         foreach ($list as $metadata) {
             $metadata->value = JobsMetadataMarshaller::unMarshall($metadata);
@@ -73,6 +79,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobAndPassword(int $id_job, string $password): bool
@@ -89,6 +96,8 @@ class MetadataDao extends AbstractDao
      * @param int $ttl
      *
      * @return MetadataStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function get(int $id_job, string $password, string $key, int $ttl = 0): ?MetadataStruct
@@ -103,6 +112,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
@@ -123,6 +133,8 @@ class MetadataDao extends AbstractDao
      * @param string $value
      *
      * @return ?MetadataStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
@@ -157,6 +169,7 @@ class MetadataDao extends AbstractDao
      * @param string $password
      * @param array<string, string> $metadata
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function bulkSet(int $id_job, string $password, array $metadata): void
@@ -195,9 +208,13 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @param int $id_job
+     * @param string $password
+     * @param string $key
+     * @throws PDOException
      * @throws ReflectionException
      */
-    public function delete($id_job, $password, $key): void
+    public function delete(int $id_job, string $password, string $key): void
     {
         $sql = "DELETE FROM job_metadata " .
             " WHERE id_job = :id_job AND password = :password " .
@@ -215,15 +232,11 @@ class MetadataDao extends AbstractDao
         $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
      * @param int $id_job
      * @param string $password
      *
-     * @return ?array empty array if the subfiltering_handlers metadata is not set,
+     * @return array<int|string, mixed>|null empty array if the subfiltering_handlers metadata is not set,
      *                  null when all handlers are disabled
      */
     public function getSubfilteringCustomHandlers(int $id_job, string $password): ?array
@@ -231,7 +244,7 @@ class MetadataDao extends AbstractDao
         try {
             $subfiltering = $this->get($id_job, $password, JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, 86400);
 
-            return json_decode($subfiltering?->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return json_decode($subfiltering->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }

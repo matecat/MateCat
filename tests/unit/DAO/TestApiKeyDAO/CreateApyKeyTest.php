@@ -3,6 +3,7 @@
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
@@ -16,6 +17,7 @@ use Utils\Registry\AppConfig;
  * Date: 16/06/16
  * Time: 18.57
  */
+#[Group('PersistenceNeeded')]
 class CreateApyKeyTest extends AbstractTest
 {
     /**

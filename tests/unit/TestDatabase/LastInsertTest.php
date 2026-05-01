@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -13,6 +14,7 @@ use Utils\Registry\AppConfig;
  * Date: 13/04/16
  * Time: 17.29
  */
+#[Group('PersistenceNeeded')]
 class LastInsertTest extends AbstractTest
 {
     protected $sql_create;

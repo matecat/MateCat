@@ -10,6 +10,7 @@ use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use TypeError;
 
 class QualityFrameworkController extends KleinController
 {
@@ -24,6 +25,7 @@ class QualityFrameworkController extends KleinController
      * Render a QF from project credentials
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws TypeError
      */
     public function project(): void
     {
@@ -40,6 +42,7 @@ class QualityFrameworkController extends KleinController
      * @return array
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws TypeError
      */
     private function renderQualityFramework(ProjectStruct $projectStruct): array
     {
@@ -59,7 +62,8 @@ class QualityFrameworkController extends KleinController
         $json['template_model'] = null;
 
         if ($qaModel->qa_model_template_id) {
-            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id, 'uid' => $this->getUser()->uid]);
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id, 'uid' => $uid]);
 
             if ($parentTemplate === null) {
                 return $json;

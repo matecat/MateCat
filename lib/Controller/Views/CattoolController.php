@@ -19,6 +19,7 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\JobStruct;
@@ -27,6 +28,7 @@ use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
+use RuntimeException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
@@ -266,8 +268,10 @@ class CattoolController extends BaseKleinViewController
 
         // reset the feature set and load only the features for the current project (plus the autoloaded ones)
         $this->featureSet->loadForProject($chunkStruct->getProject());
+        $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
+        $this->featureSet->dispatchFilter($appendInitialTemplateVarsEvent);
         $this->addParamsToView([
-            'project_plugins' => new PHPTalMap($this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes())),
+            'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes()),
         ]);
 
         $this->featureSet->appendDecorators(
@@ -343,6 +347,7 @@ class CattoolController extends BaseKleinViewController
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     private function findOwnerEmailAndTeam(ProjectStruct $project): array
     {
@@ -358,7 +363,8 @@ class CattoolController extends BaseKleinViewController
             if ($team->type == Teams::PERSONAL) {
                 $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
             } else {
-                $assignee = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid($project->id_assignee);
+                $idAssignee = $project->id_assignee ?? 0;
+                $assignee = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid((int)$idAssignee);
 
                 if ($assignee) {
                     $ownerMail = $assignee->getEmail();

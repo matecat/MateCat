@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 20/04/16
  * Time: 17.43
  */
+#[Group('PersistenceNeeded')]
 class CrudEngineTest extends AbstractTest
 {
     protected $reflector;

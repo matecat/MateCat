@@ -285,11 +285,10 @@ class AIAssistantWorker extends AbstractWorker
                         }
                     }
 
-                    // ✅ Continua lo stream
+                    // Continue the stream
                     return strlen($data);
                 }
             );
-
 
         } catch (Exception) {
         }

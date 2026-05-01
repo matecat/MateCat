@@ -36,7 +36,7 @@ class SmartMATEStruct extends EngineStruct
     public ?string $translate_relative_url = "translate";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $others = [
         'oauth_url' => 'https://api.smartmate.co/translate/oauth/token'
@@ -48,7 +48,7 @@ class SmartMATEStruct extends EngineStruct
     public ?string $contribute_relative_url = "";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'token' => null,
@@ -73,13 +73,10 @@ class SmartMATEStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return SmartMATEStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new SmartMATEStruct();
+        return new static();
     }
 
 }

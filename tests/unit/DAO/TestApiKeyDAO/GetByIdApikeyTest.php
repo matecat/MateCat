@@ -3,6 +3,7 @@
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 16/06/16
  * Time: 19.14
  */
+#[Group('PersistenceNeeded')]
 class GetByIdApikeyTest extends AbstractTest
 {
     /**

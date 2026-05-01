@@ -1,9 +1,13 @@
-import {forEach, isEqual, isUndefined} from 'lodash'
-import {fromJS} from 'immutable'
-import React from 'react'
+import {forEach, isUndefined} from 'lodash'
+import React, {
+  useState,
+  useRef,
+  useContext,
+  useEffect,
+  useCallback,
+} from 'react'
 import {union} from 'lodash/array'
 import $ from 'jquery'
-
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
 import SegmentStore from '../../stores/SegmentStore'
@@ -31,139 +35,95 @@ import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import {SegmentQAIcon} from './SegmentQAIcon'
 
-class Segment extends React.Component {
-  static contextType = ApplicationWrapperContext
+const SegmentComponent = ({
+  segment,
+  segImmutable,
+  fid,
+  isReview,
+  guessTagActive,
+  sideOpen,
+  clientConnected,
+  clientId,
+  speechToTextActive,
+  files,
+  speech2textEnabledFn,
+  multiMatchLangs,
+  setBulkSelection,
+  setLastSelectedSegment,
+}) => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
 
-  constructor(props) {
-    super(props)
+  // DOM refs
+  const sectionRef = useRef(null)
+  const $sectionRef = useRef(null)
+  const timeoutScrollRef = useRef(null)
 
-    this.createSegmentClasses = this.createSegmentClasses.bind(this)
-    this.hightlightEditarea = this.hightlightEditarea.bind(this)
-    this.addClass = this.addClass.bind(this)
-    this.removeClass = this.removeClass.bind(this)
-    this.setAsAutopropagated = this.setAsAutopropagated.bind(this)
-    this.setSegmentStatus = this.setSegmentStatus.bind(this)
-    this.handleChangeBulk = this.handleChangeBulk.bind(this)
-    this.openSegment = this.openSegment.bind(this)
-    this.openSegmentFromAction = this.openSegmentFromAction.bind(this)
-    this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this)
-    this.handleKeyDown = this.handleKeyDown.bind(this)
-    this.forceUpdateSegment = this.forceUpdateSegment.bind(this)
-    this.clientReconnection = this.clientReconnection.bind(this)
+  // Value refs — keep latest values for stable store-listener callbacks
+  const segmentRef = useRef(segment)
+  segmentRef.current = segment
+  const fidRef = useRef(fid)
+  fidRef.current = fid
+  const isReviewRef = useRef(isReview)
+  isReviewRef.current = isReview
+  const clientConnectedRef = useRef(clientConnected)
+  clientConnectedRef.current = clientConnected
+  const multiMatchLangsRef = useRef(multiMatchLangs)
+  multiMatchLangsRef.current = multiMatchLangs
 
-    let readonly = SegmentUtils.isReadonlySegment(this.props.segment)
-    this.secondPassLocked = SegmentUtils.isSecondPassLockedSegment(
-      this.props.segment,
+  // Derived values (recomputed each render)
+  const secondPassLocked = SegmentUtils.isSecondPassLockedSegment(segment)
+  const readonly = SegmentUtils.isReadonlySegment(segment)
+  const tagProjectionEnabled =
+    guessTagActive &&
+    segment &&
+    segment.status &&
+    (segment.status.toLowerCase() === 'draft' ||
+      segment.status.toLowerCase() === 'new') &&
+    !DraftMatecatUtils.checkXliffTagsInText(segment.translation) &&
+    DraftMatecatUtils.removeTagsFromText(segment.segment) !== ''
+  const dataAttrTagged =
+    tagProjectionEnabled && !segment.tagged ? 'nottagged' : 'tagged'
+
+  // State
+  const [segmentClasses, setSegmentClasses] = useState([])
+  const [autopropagated, setAutopropagated] = useState(
+    segment.autopropagated_from != 0,
+  )
+  const [selectedTextObj, setSelectedTextObj] = useState(null)
+  const [, setForceUpdate] = useState(0)
+
+  // ------------------------------------------------------------------
+  // Helpers (stable callbacks that use refs to read current values)
+  // ------------------------------------------------------------------
+
+  const checkIfCanOpenSegment = useCallback(() => {
+    const seg = segmentRef.current
+    return (
+      (isReviewRef.current &&
+        !(seg.status.toUpperCase() == SEGMENTS_STATUS.NEW) &&
+        !(seg.status.toUpperCase() == SEGMENTS_STATUS.DRAFT)) ||
+      !isReviewRef.current
     )
+  }, [])
 
-    this.state = {
-      segment_classes: [],
-      autopropagated: this.props.segment.autopropagated_from != 0,
-      unlocked: SegmentUtils.isUnlockedSegment(this.props.segment),
-      readonly: readonly,
-      inBulk: false,
-      tagProjectionEnabled:
-        this.props.guessTagActive &&
-        this.props.segment &&
-        this.props.segment.status &&
-        (this.props.segment.status.toLowerCase() === 'draft' ||
-          this.props.segment.status.toLowerCase() === 'new') &&
-        !DraftMatecatUtils.checkXliffTagsInText(
-          this.props.segment.translation,
-        ) &&
-        DraftMatecatUtils.removeTagsFromText(this.props.segment.segment) !== '',
-      selectedTextObj: null,
-      showActions: false,
-    }
-    this.timeoutScroll
-  }
-
-  checkOpenSegmentComment() {
+  const checkOpenSegmentComment = useCallback(() => {
+    const seg = segmentRef.current
     if (
       CommentsStore.db.getCommentsCountBySegment &&
-      SegmentStore.getCurrentSegmentId() === this.props.segment.sid
+      SegmentStore.getCurrentSegmentId() === seg.sid
     ) {
-      const comments_obj = CommentsStore.db.getCommentsCountBySegment(
-        this.props.segment.sid,
-      )
+      const comments_obj = CommentsStore.db.getCommentsCountBySegment(seg.sid)
       const panelClosed =
         localStorage.getItem(SegmentActions.localStorageCommentsClosed) ===
         'true'
       if (comments_obj.active > 0 && !panelClosed) {
-        SegmentActions.openSegmentComment(this.props.segment.sid)
-        SegmentActions.scrollToSegment(this.props.segment.sid)
+        SegmentActions.openSegmentComment(seg.sid)
+        SegmentActions.scrollToSegment(seg.sid)
       }
     }
-  }
+  }, [])
 
-  openSegment(wasOriginatedFromBrowserHistory) {
-    if (!this.$section.length) return
-    if (!this.checkIfCanOpenSegment()) {
-      const progress = CatToolStore.getProgress()
-      if (progress && progress.raw.translated === 0) {
-        this.alertNoTranslatedSegments()
-      } else {
-        this.alertNotTranslatedYet(this.props.segment.sid)
-      }
-    } else {
-      if (this.props.segment.translation?.length !== 0) {
-        SegmentActions.getSegmentsQa(this.props.segment)
-      }
-
-      // start old cache
-      SegmentActions.setCurrentSegmentId(this.props.segment.sid)
-
-      $('html').trigger('open') // used by ui.review to open tab Revise in the footer next-unapproved
-
-      //Used by Segment Filter, Comments, Footer, Review extended
-      setTimeout(() => {
-        const segmentId = this.props.segment.original_sid
-        //Segment Filter
-        if (SegmentFilterUtils.enabled()) {
-          SegmentFilterUtils.setStoredState({
-            lastSegmentId: segmentId,
-          })
-        }
-        //Review
-        if (config.isReview) {
-          const panelClosed =
-            localStorage.getItem(
-              SegmentActions.localStorageReviewPanelClosed,
-            ) === 'true'
-          if (!panelClosed) {
-            SegmentActions.openIssuesPanel({sid: segmentId}, false)
-          }
-          SegmentActions.getSegmentVersionsIssues(segmentId)
-        }
-      })
-      this.checkOpenSegmentComment()
-
-      /************/
-      if (this.props.clientConnected) {
-        SegmentActions.getGlossaryForSegment({
-          sid: this.props.segment.sid,
-          fid: this.props.fid,
-          text: this.props.segment.segment,
-        })
-      }
-
-      const hashUrl = document.location.pathname + '#' + this.props.segment.sid
-      if (wasOriginatedFromBrowserHistory) {
-        history.replaceState(null, null, hashUrl)
-      } else {
-        history.pushState(null, null, hashUrl)
-      }
-      var historyChangeStateEvent = new Event('historyChangeState')
-      window.dispatchEvent(historyChangeStateEvent)
-
-      // Update document title with hash segment id
-      document.title = `${document.title?.split('#')[0]} #${
-        this.props.segment.sid
-      }`
-    }
-  }
-
-  alertNotTranslatedYet = (sid) => {
+  const alertNotTranslatedYet = useCallback((sid) => {
     setTimeout(() =>
       ModalsActions.showModalComponent(ConfirmMessageModal, {
         cancelText: 'Close',
@@ -172,10 +132,10 @@ class Segment extends React.Component {
         text: 'This segment is not translated yet.<br /> Only translated segments can be revised.',
       }),
     )
-  }
+  }, [])
 
-  alertNoTranslatedSegments = () => {
-    var props = {
+  const alertNoTranslatedSegments = useCallback(() => {
+    const props = {
       text: 'There are no translated segments to revise in this job.',
       successText: 'Ok',
       successCallback: function () {
@@ -185,33 +145,357 @@ class Segment extends React.Component {
     setTimeout(() =>
       ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning'),
     )
-  }
+  }, [])
 
-  openSegmentFromAction(sid, wasOriginatedFromBrowserHistory) {
-    sid = sid + ''
+  const openSegment = useCallback(
+    (wasOriginatedFromBrowserHistory) => {
+      const seg = segmentRef.current
+
+      if (!$sectionRef.current || !$sectionRef.current.length) return
+
+      if (!checkIfCanOpenSegment()) {
+        const progress = CatToolStore.getProgress()
+        if (progress && progress.raw.translated === 0) {
+          alertNoTranslatedSegments()
+        } else {
+          alertNotTranslatedYet(seg.sid)
+        }
+      } else {
+        if (seg.translation?.length !== 0) {
+          SegmentActions.getSegmentsQa(seg)
+        }
+
+        SegmentActions.setCurrentSegmentId(seg.sid)
+        $('html').trigger('open')
+
+        setTimeout(() => {
+          const segmentId = segmentRef.current.original_sid
+          if (SegmentFilterUtils.enabled()) {
+            SegmentFilterUtils.setStoredState({lastSegmentId: segmentId})
+          }
+          if (config.isReview) {
+            const panelClosed =
+              localStorage.getItem(
+                SegmentActions.localStorageReviewPanelClosed,
+              ) === 'true'
+            if (!panelClosed) {
+              SegmentActions.openIssuesPanel({sid: segmentId}, false)
+            }
+            SegmentActions.getSegmentVersionsIssues(segmentId)
+          }
+        })
+
+        checkOpenSegmentComment()
+
+        if (clientConnectedRef.current) {
+          SegmentActions.getGlossaryForSegment({
+            sid: seg.sid,
+            fid: fidRef.current,
+            text: seg.segment,
+          })
+        }
+
+        const hashUrl = document.location.pathname + '#' + seg.sid
+        if (wasOriginatedFromBrowserHistory) {
+          history.replaceState(null, null, hashUrl)
+        } else {
+          history.pushState(null, null, hashUrl)
+        }
+        var historyChangeStateEvent = new Event('historyChangeState')
+        window.dispatchEvent(historyChangeStateEvent)
+
+        document.title = `${document.title?.split('#')[0]} #${seg.sid}`
+      }
+    },
+    [
+      checkIfCanOpenSegment,
+      alertNoTranslatedSegments,
+      alertNotTranslatedYet,
+      checkOpenSegmentComment,
+    ],
+  )
+
+  // Keep a ref so store listeners always call the latest version
+  const openSegmentRef = useRef(openSegment)
+  openSegmentRef.current = openSegment
+
+  const removeSelection = useCallback(() => {
+    const selection = document.getSelection()
     if (
-      (sid === this.props.segment.sid ||
-        (this.props.segment.original_sid === sid &&
-          this.props.segment.firstOfSplit)) &&
-      !this.props.segment.opened
+      sectionRef.current &&
+      sectionRef.current.contains(selection.anchorNode)
     ) {
-      this.openSegment(wasOriginatedFromBrowserHistory)
+      selection.removeAllRanges()
     }
-  }
+    setSelectedTextObj(null)
+  }, [])
 
-  createSegmentClasses() {
+  // ------------------------------------------------------------------
+  // Store-listener callbacks (stable — use refs for current values)
+  // ------------------------------------------------------------------
+
+  const addClass = useCallback((sid, newClass) => {
+    const seg = segmentRef.current
+    if (seg.sid == sid || sid === -1 || sid.split('-')[0] == seg.sid) {
+      setSegmentClasses((prev) => {
+        let classes = prev.slice()
+        if (newClass.indexOf(' ') > 0) {
+          forEach(newClass.split(' '), function (item) {
+            if (classes.indexOf(item) < 0) classes.push(item)
+          })
+        } else {
+          if (classes.indexOf(newClass) < 0) classes.push(newClass)
+        }
+        return classes
+      })
+    }
+  }, [])
+
+  const removeClass = useCallback((sid, className) => {
+    const seg = segmentRef.current
+    if (seg.sid == sid || sid === -1 || sid.indexOf(seg.sid) !== -1) {
+      setSegmentClasses((prev) => {
+        let classes = prev.slice()
+        const removeFn = function (item) {
+          let index = classes.indexOf(item)
+          if (index > -1) classes.splice(index, 1)
+        }
+        if (className.indexOf(' ') > 0) {
+          forEach(className.split(' '), function (item) {
+            removeFn(item)
+          })
+        } else {
+          removeFn(className)
+        }
+        return classes
+      })
+    }
+  }, [])
+
+  const setAsAutopropagated = useCallback((sid, propagation) => {
+    if (segmentRef.current.sid == sid) {
+      setAutopropagated(propagation)
+    }
+  }, [])
+
+  const setSegmentStatus = useCallback((sid) => {
+    if (segmentRef.current.sid == sid) {
+      setSegmentClasses((prev) => {
+        let classes = prev.slice(0)
+        let index = classes.findIndex(function (item) {
+          return item.indexOf('status-') > -1
+        })
+        if (index >= 0) classes.splice(index, 1)
+        return classes
+      })
+    }
+  }, [])
+
+  const openSegmentFromAction = useCallback(
+    (sid, wasOriginatedFromBrowserHistory) => {
+      sid = sid + ''
+      const seg = segmentRef.current
+      if (
+        (sid === seg.sid || (seg.original_sid === sid && seg.firstOfSplit)) &&
+        !seg.opened
+      ) {
+        openSegmentRef.current(wasOriginatedFromBrowserHistory)
+      }
+    },
+    [],
+  )
+
+  const openRevisionPanel = useCallback((data) => {
+    const seg = segmentRef.current
+    if (
+      parseInt(data.sid) === parseInt(seg.sid) &&
+      (!SegmentUtils.isIceSegment(seg) ||
+        (SegmentUtils.isIceSegment(seg) && seg.unlocked))
+    ) {
+      setSelectedTextObj(data.selection)
+    } else {
+      setSelectedTextObj(null)
+    }
+  }, [])
+
+  const forceUpdateSegment = useCallback((sid) => {
+    if (segmentRef.current.sid === sid) {
+      setForceUpdate((c) => c + 1)
+    }
+  }, [])
+
+  const clientReconnection = useCallback(() => {
+    const seg = segmentRef.current
+    if (seg.opened) {
+      SegmentActions.getGlossaryForSegment({
+        sid: seg.sid,
+        fid: fidRef.current,
+        text: seg.segment,
+      })
+      SegmentActions.getContributions(seg.sid, multiMatchLangsRef.current)
+    }
+  }, [])
+
+  const handleKeyDown = useCallback((event) => {
+    const seg = segmentRef.current
+    if (event.code === 'Escape' && !config.targetIsCJK) {
+      if (
+        seg.opened &&
+        !seg.openComments &&
+        !seg.openIssues &&
+        !SearchUtils.searchOpen
+      ) {
+        if (!seg.openSplit) {
+          SegmentActions.closeSegment(seg.sid)
+        } else {
+          SegmentActions.closeSplitSegment()
+        }
+      } else if (seg.openComments) {
+        SegmentActions.closeSegmentComment()
+      } else if (seg.openIssues) {
+        SegmentActions.closeIssuesPanel()
+      }
+    }
+  }, [])
+
+  // ------------------------------------------------------------------
+  // Effects
+  // ------------------------------------------------------------------
+
+  // Mount / Unmount — register store listeners & keydown handler
+  useEffect(() => {
+    $sectionRef.current = $(sectionRef.current)
+
+    document.addEventListener('keydown', handleKeyDown)
+    SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, addClass)
+    SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, removeClass)
+    SegmentStore.addListener(
+      SegmentConstants.SET_SEGMENT_PROPAGATION,
+      setAsAutopropagated,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.SET_SEGMENT_STATUS,
+      setSegmentStatus,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.OPEN_SEGMENT,
+      openSegmentFromAction,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.FORCE_UPDATE_SEGMENT,
+      forceUpdateSegment,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.CLIENT_RECONNECTION,
+      clientReconnection,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.OPEN_ISSUES_PANEL,
+      openRevisionPanel,
+    )
+
+    // If segment was already open on mount
+    if (segmentRef.current.opened) {
+      setTimeout(() => openSegmentRef.current())
+      setTimeout(
+        () => SegmentActions.setCurrentSegment(segmentRef.current.sid),
+        0,
+      )
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, addClass)
+      SegmentStore.removeListener(
+        SegmentConstants.REMOVE_SEGMENT_CLASS,
+        removeClass,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.SET_SEGMENT_PROPAGATION,
+        setAsAutopropagated,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.SET_SEGMENT_STATUS,
+        setSegmentStatus,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.OPEN_SEGMENT,
+        openSegmentFromAction,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.FORCE_UPDATE_SEGMENT,
+        forceUpdateSegment,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.CLIENT_RECONNECTION,
+        clientReconnection,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.OPEN_ISSUES_PANEL,
+        openRevisionPanel,
+      )
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Replaces getSnapshotBeforeUpdate — react to open/close transitions
+  const prevOpenedRef = useRef(segment.opened)
+  const prevSpeechToTextRef = useRef(speechToTextActive)
+
+  useEffect(() => {
+    const wasOpened = prevOpenedRef.current
+    const wasSpeechActive = prevSpeechToTextRef.current
+
+    if (!wasOpened && segment.opened) {
+      timeoutScrollRef.current = setTimeout(() => {
+        SegmentActions.scrollToSegment(segmentRef.current.sid)
+      }, 200)
+      setTimeout(() => {
+        SegmentActions.setCurrentSegment(segmentRef.current.sid)
+      }, 0)
+      setTimeout(() => {
+        const seg = segmentRef.current
+        if (
+          seg.opened &&
+          !config.isReview &&
+          !SegmentStore.segmentHasIssues(seg)
+        ) {
+          SegmentActions.closeSegmentIssuePanel(seg.sid)
+        }
+        if (seg.opened && !seg.openComments) {
+          SegmentActions.closeSegmentComment(seg.sid)
+        }
+      })
+    } else if (wasOpened && !segment.opened) {
+      clearTimeout(timeoutScrollRef.current)
+      setTimeout(() => {
+        SegmentActions.saveSegmentBeforeClose(segmentRef.current)
+      })
+    }
+
+    if (
+      Speech2Text.enabled() &&
+      ((!wasSpeechActive && speechToTextActive) ||
+        (!wasOpened && segment.opened))
+    ) {
+      setTimeout(() => Speech2Text.enableMicrophone($sectionRef.current))
+    }
+
+    prevOpenedRef.current = segment.opened
+    prevSpeechToTextRef.current = speechToTextActive
+  }, [segment.opened, speechToTextActive])
+
+  // ------------------------------------------------------------------
+  // Render helpers
+  // ------------------------------------------------------------------
+
+  const createSegmentClasses = () => {
     let classes = []
-    let splitGroup = this.props.segment.split_group || []
-    let readonly = this.state.readonly
-    if (readonly) {
-      classes.push('readonly')
-    }
+    let splitGroup = segment.split_group || []
 
-    if (
-      (SegmentUtils.isIceSegment(this.props.segment) && !readonly) ||
-      this.secondPassLocked
-    ) {
-      if (this.props.segment.unlocked) {
+    if (readonly) classes.push('readonly')
+
+    if ((SegmentUtils.isIceSegment(segment) && !readonly) || secondPassLocked) {
+      if (segment.unlocked) {
         classes.push('ice-unlocked')
       } else {
         classes.push('readonly')
@@ -219,207 +503,94 @@ class Segment extends React.Component {
       }
     }
 
-    if (this.props.segment.status) {
-      classes.push('status-' + this.props.segment.status.toLowerCase())
+    if (segment.status) {
+      classes.push('status-' + segment.status.toLowerCase())
     } else {
       classes.push('status-new')
     }
 
-    if (this.props.segment.sid == splitGroup[0]) {
+    if (segment.sid == splitGroup[0]) {
       classes.push('splitStart')
-    } else if (this.props.segment.sid == splitGroup[splitGroup.length - 1]) {
+    } else if (segment.sid == splitGroup[splitGroup.length - 1]) {
       classes.push('splitEnd')
     } else if (splitGroup.length) {
       classes.push('splitInner')
     }
-    if (this.state.tagProjectionEnabled && !this.props.segment.tagged) {
+
+    if (tagProjectionEnabled && !segment.tagged) {
       classes.push('enableTP')
-      this.dataAttrTagged = 'nottagged'
-    } else {
-      this.dataAttrTagged = 'tagged'
     }
-    if (this.props.segment.edit_area_locked) {
-      classes.push('editAreaLocked')
-    }
-    if (this.props.segment.inBulk) {
-      classes.push('segment-selected-inBulk')
-    }
-    if (this.props.segment.muted) {
-      classes.push('muted')
-    }
-    if (this.props.segment.opened && this.checkIfCanOpenSegment()) {
+    if (segment.edit_area_locked) classes.push('editAreaLocked')
+    if (segment.inBulk) classes.push('segment-selected-inBulk')
+    if (segment.muted) classes.push('muted')
+    if (segment.opened && checkIfCanOpenSegment()) {
       classes.push('editor')
       classes.push('opened')
     }
-    if (
-      this.props.segment.modified ||
-      this.props.segment.autopropagated_from !== 0
-    ) {
+    if (segment.modified || segment.autopropagated_from !== 0) {
       classes.push('modified')
     }
-    if (this.props.sideOpen) {
-      classes.push('slide-right')
-    }
-    if (this.props.segment.openSplit) {
-      classes.push('split-action')
-    }
+    if (sideOpen) classes.push('slide-right')
+    if (segment.openSplit) classes.push('split-action')
+    if (segment.selected) classes.push('segment-selected')
 
-    if (this.props.segment.selected) {
-      classes.push('segment-selected')
-    }
     return classes
   }
 
-  hightlightEditarea(sid) {
-    if (this.props.segment.sid == sid) {
-      /*  TODO REMOVE THIS CODE
-       *  The segment must know about his classes
-       */
-      let classes = this.state.segment_classes.slice()
-      if (classes.indexOf('modified')) {
-        classes.push('modified')
-        this.setState({
-          segment_classes: classes,
-        })
-      }
-    }
-  }
-
-  addClass(sid, newClass) {
-    if (
-      this.props.segment.sid == sid ||
-      sid === -1 ||
-      sid.split('-')[0] == this.props.segment.sid
-    ) {
-      let classes = this.state.segment_classes.slice()
-      if (newClass.indexOf(' ') > 0) {
-        let classesSplit = newClass.split(' ')
-        forEach(classesSplit, function (item) {
-          if (classes.indexOf(item) < 0) {
-            classes.push(item)
-          }
-        })
-      } else {
-        if (classes.indexOf(newClass) < 0) {
-          classes.push(newClass)
-        }
-      }
-      this.setState({
-        segment_classes: classes,
-      })
-    }
-  }
-
-  removeClass(sid, className) {
-    if (
-      this.props.segment.sid == sid ||
-      sid === -1 ||
-      sid.indexOf(this.props.segment.sid) !== -1
-    ) {
-      let classes = this.state.segment_classes.slice()
-      let removeFn = function (item) {
-        let index = classes.indexOf(item)
-        if (index > -1) {
-          classes.splice(index, 1)
-        }
-      }
-      if (className.indexOf(' ') > 0) {
-        let classesSplit = className.split(' ')
-        forEach(classesSplit, function (item) {
-          removeFn(item)
-        })
-      } else {
-        removeFn(className)
-      }
-      this.setState({
-        segment_classes: classes,
-      })
-    }
-  }
-
-  setAsAutopropagated(sid, propagation) {
-    if (this.props.segment.sid == sid) {
-      this.setState({
-        autopropagated: propagation,
-      })
-    }
-  }
-  setSegmentStatus(sid, status) {
-    if (this.props.segment.sid == sid) {
-      let classes = this.state.segment_classes.slice(0)
-      let index = classes.findIndex(function (item) {
-        return item.indexOf('status-') > -1
-      })
-
-      if (index >= 0) {
-        classes.splice(index, 1)
-      }
-
-      this.setState({
-        segment_classes: classes,
-        status: status,
-      })
-    }
-  }
-  checkSegmentStatus(classes) {
+  const checkSegmentStatus = (classes) => {
     if (classes.length === 0) return classes
-    // TODO: remove this
-    //To fix a problem: sometimes the section segment has two different status
     let statusMatches = classes.join(' ').match(/status-/g)
     if (statusMatches && statusMatches.length > 1) {
       let index = classes.findIndex(function (item) {
         return item.indexOf('status-new') > -1
       })
-
-      if (index >= 0) {
-        classes.splice(index, 1)
-      }
+      if (index >= 0) classes.splice(index, 1)
     }
     return classes
   }
-  isSplitted() {
-    return !isUndefined(this.props.segment.split_group)
+
+  const checkSegmentClasses = () => {
+    let classes = segmentClasses.slice()
+    classes = union(classes, createSegmentClasses())
+    classes = checkSegmentStatus(classes)
+    if (classes.indexOf('muted') > -1 && classes.indexOf('editor') > -1) {
+      let indexEditor = classes.indexOf('editor')
+      classes.splice(indexEditor, 1)
+      let indexOpened = classes.indexOf('opened')
+      classes.splice(indexOpened, 1)
+    }
+    return classes
   }
 
-  isFirstOfSplit() {
-    return (
-      !isUndefined(this.props.segment.split_group) &&
-      this.props.segment.split_group.indexOf(this.props.segment.sid) === 0
-    )
-  }
+  const isSplitted = () => !isUndefined(segment.split_group)
 
-  getTranslationIssues() {
+  const isFirstOfSplit = () =>
+    !isUndefined(segment.split_group) &&
+    segment.split_group.indexOf(segment.sid) === 0
+
+  const getTranslationIssues = () => {
     if (
-      ((this.props.sideOpen &&
-        (!this.props.segment.opened || !this.props.segment.openIssues)) ||
-        !this.props.sideOpen) &&
-      !this.props.segment.readonly &&
-      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit())) &&
-      this.props.segment.sid
+      ((sideOpen && (!segment.opened || !segment.openIssues)) || !sideOpen) &&
+      !segment.readonly &&
+      (!isSplitted() || (isSplitted() && isFirstOfSplit())) &&
+      segment.sid
     ) {
       return (
         <TranslationIssuesSideButton
-          sid={
-            this.props.segment.splitted
-              ? this.props.segment.sid.split('-')[0]
-              : this.props.segment.sid
-          }
-          segment={this.props.segment}
-          open={this.props.segment.openIssues}
+          sid={segment.splitted ? segment.sid.split('-')[0] : segment.sid}
+          segment={segment}
+          open={segment.openIssues}
         />
       )
     }
     return null
   }
 
-  lockUnlockSegment(event) {
+  const lockUnlockSegment = (event) => {
     event.preventDefault()
     event.stopPropagation()
-    if (
-      !this.props.segment.unlocked &&
-      SegmentUtils.isSecondPassLockedSegment(this.props.segment)
-    ) {
-      var props = {
+    if (!segment.unlocked && SegmentUtils.isSecondPassLockedSegment(segment)) {
+      const props = {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
@@ -432,460 +603,200 @@ class Segment extends React.Component {
         'Modify locked and approved segment ',
       )
     }
-    SegmentActions.setSegmentLocked(
-      this.props.segment,
-      this.props.fid,
-      !this.props.segment.unlocked,
-    )
+    SegmentActions.setSegmentLocked(segment, fid, !segment.unlocked)
   }
 
-  checkSegmentClasses() {
-    let classes = this.state.segment_classes.slice()
-    classes = union(classes, this.createSegmentClasses())
-    classes = this.checkSegmentStatus(classes)
-    if (classes.indexOf('muted') > -1 && classes.indexOf('editor') > -1) {
-      let indexEditor = classes.indexOf('editor')
-      classes.splice(indexEditor, 1)
-      let indexOpened = classes.indexOf('opened')
-      classes.splice(indexOpened, 1)
-    }
-    return classes
-  }
-
-  handleChangeBulk(event) {
+  const handleChangeBulk = (event) => {
     event.stopPropagation()
     if (event.shiftKey) {
-      this.props.setBulkSelection(this.props.segment.sid, this.props.fid)
+      setBulkSelection(segment.sid, fid)
     } else {
-      SegmentActions.toggleSegmentOnBulk(this.props.segment.sid, this.props.fid)
-      this.props.setLastSelectedSegment(this.props.segment.sid, this.props.fid)
+      SegmentActions.toggleSegmentOnBulk(segment.sid, fid)
+      setLastSelectedSegment(segment.sid, fid)
     }
   }
 
-  openRevisionPanel = (data) => {
-    if (
-      parseInt(data.sid) === parseInt(this.props.segment.sid) &&
-      (!SegmentUtils.isIceSegment(this.props.segment) ||
-        (SegmentUtils.isIceSegment(this.props.segment) &&
-          this.props.segment.unlocked))
-    ) {
-      this.setState({
-        selectedTextObj: data.selection,
-      })
-    } else {
-      this.setState({
-        selectedTextObj: null,
-      })
-    }
-  }
-  removeSelection = () => {
-    var selection = document.getSelection()
-    if (this.section.contains(selection.anchorNode)) {
-      selection.removeAllRanges()
-    }
-    this.setState({
-      selectedTextObj: null,
-    })
-  }
-
-  checkIfCanOpenSegment() {
-    return (
-      (this.props.isReview &&
-        !(this.props.segment.status.toUpperCase() == SEGMENTS_STATUS.NEW) &&
-        !(this.props.segment.status.toUpperCase() == SEGMENTS_STATUS.DRAFT)) ||
-      !this.props.isReview
-    )
-  }
-  onClickEvent = () => {
-    if (
-      this.state.readonly ||
-      (!this.props.segment.unlocked &&
-        SegmentUtils.isIceSegment(this.props.segment))
-    ) {
-      SegmentActions.handleClickOnReadOnly(this.props.segment)
-    } else if (this.props.segment.muted) {
+  const onClickEvent = () => {
+    if (readonly || (!segment.unlocked && SegmentUtils.isIceSegment(segment))) {
+      SegmentActions.handleClickOnReadOnly(segment)
+    } else if (segment.muted) {
       return
-    } else if (!this.props.segment.opened) {
-      this.openSegment()
-      if (this.checkIfCanOpenSegment())
-        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid)
-    }
-  }
-
-  handleKeyDown(event) {
-    if (event.code === 'Escape' && !config.targetIsCJK) {
-      if (
-        this.props.segment.opened &&
-        !this.props.segment.openComments &&
-        !this.props.segment.openIssues &&
-        !SearchUtils.searchOpen
-      ) {
-        if (!this.props.segment.openSplit) {
-          SegmentActions.closeSegment(this.props.segment.sid)
-        } else {
-          SegmentActions.closeSplitSegment()
-        }
-      } else if (this.props.segment.openComments) {
-        SegmentActions.closeSegmentComment()
-      } else if (this.props.segment.openIssues) {
-        SegmentActions.closeIssuesPanel()
+    } else if (!segment.opened) {
+      openSegmentRef.current()
+      if (checkIfCanOpenSegment()) {
+        SegmentActions.setOpenSegment(segment.sid, fid)
       }
     }
   }
 
-  clientReconnection() {
-    if (this.props.segment.opened) {
-      SegmentActions.getGlossaryForSegment({
-        sid: this.props.segment.sid,
-        fid: this.props.fid,
-        text: this.props.segment.segment,
-      })
-      SegmentActions.getContributions(
-        this.props.segment.sid,
-        this.props.multiMatchLangs,
-      )
-    }
+  // ------------------------------------------------------------------
+  // Render
+  // ------------------------------------------------------------------
+
+  const showLockIcon = SegmentUtils.isIceSegment(segment) || secondPassLocked
+  const segment_classes = checkSegmentClasses()
+  const split_group = segment.split_group || []
+  const autoPropagable = segment.repetitions_in_chunk !== 1
+  const originalId = segment.original_sid
+  const translationIssues = getTranslationIssues()
+  const locked =
+    !segment.unlocked &&
+    (SegmentUtils.isIceSegment(segment) || secondPassLocked)
+  const segmentHasIssues = SegmentStore.segmentHasIssues(segment)
+
+  const contextValue = {
+    enableTagProjection: guessTagActive && !segment.tagged,
+    isReview,
+    segImmutable,
+    segment,
+    files,
+    speech2textEnabledFn,
+    readonly,
+    locked,
+    removeSelection,
+    openSegment,
+    clientConnected,
+    clientId,
+    multiMatchLangs,
+    userInfo,
   }
 
-  forceUpdateSegment(sid) {
-    if (this.props.segment.sid === sid) {
-      this.forceUpdate()
-    }
-  }
+  return (
+    <SegmentContext.Provider value={contextValue}>
+      <section
+        ref={sectionRef}
+        id={'segment-' + segment.sid}
+        className={`${segment_classes.join(' ')} source-${config.source_code} target-${config.target_code} ${config.isSourceRTL ? 'rtl-source' : ''} ${config.isTargetRTL ? 'rtl-target' : ''}`}
+        data-autopropagated={autopropagated}
+        data-split-group={split_group}
+        data-split-original-id={originalId}
+        data-tagmode="crunched"
+        data-tagprojection={dataAttrTagged}
+        data-fid={segment.id_file}
+        data-modified={segment.modified}
+      >
+        <div className="sid" title={segment.sid}>
+          <div className="txt">{segment.sid}</div>
 
-  allowHTML(string) {
-    return {__html: string}
-  }
-
-  componentDidMount() {
-    this.$section = $(this.section)
-    document.addEventListener('keydown', this.handleKeyDown)
-    SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass)
-    SegmentStore.addListener(
-      SegmentConstants.REMOVE_SEGMENT_CLASS,
-      this.removeClass,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.SET_SEGMENT_PROPAGATION,
-      this.setAsAutopropagated,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.SET_SEGMENT_STATUS,
-      this.setSegmentStatus,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.OPEN_SEGMENT,
-      this.openSegmentFromAction,
-    )
-    SegmentStore.addListener(
-      SegmentConstants.FORCE_UPDATE_SEGMENT,
-      this.forceUpdateSegment,
-    )
-    CatToolStore.addListener(
-      CatToolConstants.CLIENT_RECONNECTION,
-      this.clientReconnection,
-    )
-
-    //Review
-    SegmentStore.addListener(
-      SegmentConstants.OPEN_ISSUES_PANEL,
-      this.openRevisionPanel,
-    )
-    if (this.props.segment.opened) {
-      setTimeout(() => {
-        this.openSegment()
-      })
-      setTimeout(() => {
-        SegmentActions.setCurrentSegment(this.props.segment.sid)
-      }, 0)
-    }
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleKeyDown)
-    SegmentStore.removeListener(
-      SegmentConstants.ADD_SEGMENT_CLASS,
-      this.addClass,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.REMOVE_SEGMENT_CLASS,
-      this.removeClass,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.SET_SEGMENT_PROPAGATION,
-      this.setAsAutopropagated,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.SET_SEGMENT_STATUS,
-      this.setSegmentStatus,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.OPEN_SEGMENT,
-      this.openSegmentFromAction,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.FORCE_UPDATE_SEGMENT,
-      this.forceUpdateSegment,
-    )
-
-    CatToolStore.removeListener(
-      CatToolConstants.CLIENT_RECONNECTION,
-      this.clientReconnection,
-    )
-
-    //Review
-    SegmentStore.removeListener(
-      SegmentConstants.OPEN_ISSUES_PANEL,
-      this.openRevisionPanel,
-    )
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      !nextProps.segImmutable.equals(this.props.segImmutable) ||
-      !fromJS(nextState.segment_classes).equals(
-        fromJS(this.state.segment_classes),
-      ) ||
-      nextState.autopropagated !== this.state.autopropagated ||
-      nextState.readonly !== this.state.readonly ||
-      nextState.selectedTextObj !== this.state.selectedTextObj ||
-      nextProps.sideOpen !== this.props.sideOpen ||
-      nextState.showActions !== this.state.showActions ||
-      nextProps.clientConnected !== this.props.clientConnected ||
-      nextProps.speechToTextActive !== this.props.speechToTextActive
-    )
-  }
-
-  getSnapshotBeforeUpdate(prevProps) {
-    if (!prevProps.segment.opened && this.props.segment.opened) {
-      this.timeoutScroll = setTimeout(() => {
-        SegmentActions.scrollToSegment(this.props.segment.sid)
-      }, 200)
-      setTimeout(() => {
-        SegmentActions.setCurrentSegment(this.props.segment.sid)
-      }, 0)
-      setTimeout(() => {
-        if (
-          this.props.segment.opened &&
-          !config.isReview &&
-          !SegmentStore.segmentHasIssues(this.props.segment)
-        ) {
-          SegmentActions.closeSegmentIssuePanel(this.props.segment.sid)
-        }
-        if (this.props.segment.opened && !this.props.segment.openComments) {
-          SegmentActions.closeSegmentComment(this.props.segment.sid)
-        }
-      })
-    } else if (prevProps.segment.opened && !this.props.segment.opened) {
-      clearTimeout(this.timeoutScroll)
-      setTimeout(() => {
-        SegmentActions.saveSegmentBeforeClose(this.props.segment)
-      })
-    }
-    if (
-      Speech2Text.enabled() &&
-      ((!prevProps.speechToTextActive && this.props.speechToTextActive) ||
-        (!prevProps.segment.opened && this.props.segment.opened))
-    ) {
-      setTimeout(() => Speech2Text.enableMicrophone(this.$section))
-    }
-    return null
-  }
-  componentDidUpdate(prevProps) {
-    if (!isEqual(prevProps.segment, this.props.segment)) {
-      const readonly = SegmentUtils.isReadonlySegment(this.props.segment)
-      if (readonly !== this.state.readonly) {
-        this.setState({
-          readonly,
-        })
-      }
-    }
-  }
-
-  render() {
-    let job_marker = ''
-
-    let readonly = this.state.readonly
-    let showLockIcon =
-      SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked
-    let segment_classes = this.checkSegmentClasses()
-
-    let split_group = this.props.segment.split_group || []
-    let autoPropagable = this.props.segment.repetitions_in_chunk !== 1
-    let originalId = this.props.segment.original_sid
-
-    let translationIssues = this.getTranslationIssues()
-    let locked =
-      !this.props.segment.unlocked &&
-      (SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked)
-    const segmentHasIssues = SegmentStore.segmentHasIssues(this.props.segment)
-
-    const getContextProps = () => {
-      const {
-        guessTagActive,
-        isReview,
-        segImmutable,
-        segment,
-        files,
-        speech2textEnabledFn,
-        multiMatchLangs,
-      } = this.props
-      return {
-        enableTagProjection: guessTagActive && !this.props.segment.tagged,
-        isReview,
-        segImmutable,
-        segment,
-        files,
-        speech2textEnabledFn,
-        readonly: this.state.readonly,
-        locked,
-        removeSelection: this.removeSelection.bind(this),
-        openSegment: this.openSegment,
-        clientConnected: this.props.clientConnected,
-        clientId: this.props.clientId,
-        multiMatchLangs,
-        userInfo: this.context.userInfo,
-      }
-    }
-
-    return (
-      <SegmentContext.Provider value={{...getContextProps()}}>
-        <section
-          ref={(section) => (this.section = section)}
-          id={'segment-' + this.props.segment.sid}
-          className={`${segment_classes.join(' ')} source-${config.source_code} target-${config.target_code} ${config.isSourceRTL ? 'rtl-source' : ''} ${config.isTargetRTL ? 'rtl-target' : ''}`}
-          data-autopropagated={this.state.autopropagated}
-          data-split-group={split_group}
-          data-split-original-id={originalId}
-          data-tagmode="crunched"
-          data-tagprojection={this.dataAttrTagged}
-          data-fid={this.props.segment.id_file}
-          data-modified={this.props.segment.modified}
-        >
-          <div className="sid" title={this.props.segment.sid}>
-            <div className="txt">{this.props.segment.sid}</div>
-
-            {showLockIcon ? (
-              !readonly ? (
-                this.props.segment.unlocked ? (
-                  <div
-                    className="ice-locked-icon"
-                    onClick={this.lockUnlockSegment.bind(this)}
-                  >
-                    <button className="unlock-button unlocked icon-unlocked3" />
-                  </div>
-                ) : (
-                  <div
-                    className="ice-locked-icon"
-                    onClick={this.lockUnlockSegment.bind(this)}
-                  >
-                    <button className="icon-lock unlock-button locked" />
-                  </div>
-                )
-              ) : null
-            ) : null}
-
-            <div className="txt segment-add-inBulk">
-              <input
-                type="checkbox"
-                ref={(node) => (this.bulk = node)}
-                checked={this.props.segment.inBulk}
-                onClick={this.handleChangeBulk}
-              />
-            </div>
-
-            {!this.props.segment.ice_locked &&
-            config.splitSegmentEnabled &&
-            this.props.segment.opened ? (
-              !this.props.segment.openSplit ? (
-                <div className="actions">
-                  <button
-                    className="split"
-                    title={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
-                    onClick={() =>
-                      SegmentActions.openSplitSegment(this.props.segment.sid)
-                    }
-                  >
-                    <i className="icon-split" />
-                  </button>
-                  <p className="split-shortcut">CTRL + S</p>
+          {showLockIcon ? (
+            !readonly ? (
+              segment.unlocked ? (
+                <div className="ice-locked-icon" onClick={lockUnlockSegment}>
+                  <button className="unlock-button unlocked icon-unlocked3" />
                 </div>
               ) : (
-                <div className="actions">
-                  <button
-                    className="split cancel"
-                    title="Click to close split segment"
-                    onClick={() => SegmentActions.closeSplitSegment()}
-                  >
-                    <i className="icon-split" />
-                  </button>
-                  {/*<p className="split-shortcut">CTRL + W</p>*/}
+                <div className="ice-locked-icon" onClick={lockUnlockSegment}>
+                  <button className="icon-lock unlock-button locked" />
                 </div>
               )
-            ) : null}
-          </div>
-          {job_marker}
+            ) : null
+          ) : null}
 
-          <div className="body">
-            <SegmentHeader
-              sid={this.props.segment.sid}
-              autopropagated={this.state.autopropagated}
-              segmentOpened={this.props.segment.opened}
-              repetition={autoPropagable}
-              splitted={this.props.segment.splitted}
-              saving={this.props.segment.saving}
+          <div className="txt segment-add-inBulk">
+            <input
+              type="checkbox"
+              checked={segment.inBulk}
+              onClick={handleChangeBulk}
             />
-            <SegmentBody onClick={this.onClickEvent} />
-            {SegmentFilter && SegmentFilter.enabled() ? (
-              <div className="edit-distance">
-                Edit Distance: {this.props.segment.edit_distance}
-              </div>
-            ) : null}
-
-            {this.props.segment.opened ? <SegmentFooter /> : null}
           </div>
 
-          {/*//!-- TODO: place this element here only if it's not a split --*/}
-          <div className="segment-side-buttons">
-            {config.comments_enabled &&
-            (!this.props.segment.openComments || !this.props.segment.opened) ? (
-              <SegmentsCommentsIcon />
-            ) : null}
-            <SegmentQAIcon sid={this.props.segment.sid} />
+          {!segment.ice_locked &&
+          config.splitSegmentEnabled &&
+          segment.opened ? (
+            !segment.openSplit ? (
+              <div className="actions">
+                <button
+                  className="split"
+                  title={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+                  onClick={() => SegmentActions.openSplitSegment(segment.sid)}
+                >
+                  <i className="icon-split" />
+                </button>
+                <p className="split-shortcut">CTRL + S</p>
+              </div>
+            ) : (
+              <div className="actions">
+                <button
+                  className="split cancel"
+                  title="Click to close split segment"
+                  onClick={() => SegmentActions.closeSplitSegment()}
+                >
+                  <i className="icon-split" />
+                </button>
+              </div>
+            )
+          ) : null}
+        </div>
 
-            {this.props.isReview && (
-              <div
-                data-mount="translation-issues-button"
-                className="translation-issues-button"
-                data-sid={this.props.segment.sid}
-              >
-                {translationIssues}
-              </div>
-            )}
-          </div>
-          <div className="segment-side-container">
-            {config.comments_enabled && this.props.segment.openComments ? (
-              <SegmentCommentsContainer />
-            ) : null}
-            {config.isReview &&
-            this.props.segment.openIssues &&
-            this.props.segment.opened &&
-            (config.isReview || (!config.isReview && segmentHasIssues)) ? (
-              <div className="review-balloon-container">
-                {!this.props.segment.versions ? null : (
-                  <ReviewExtendedPanel
-                    segment={this.props.segment}
-                    isReview={config.isReview}
-                    selectionObj={this.state.selectedTextObj}
-                  />
-                )}
-              </div>
-            ) : null}
-          </div>
-        </section>
-      </SegmentContext.Provider>
-    )
-  }
+        <div className="body">
+          <SegmentHeader
+            sid={segment.sid}
+            autopropagated={autopropagated}
+            segmentOpened={segment.opened}
+            repetition={autoPropagable}
+            splitted={segment.splitted}
+            saving={segment.saving}
+          />
+          <SegmentBody onClick={onClickEvent} />
+          {SegmentFilter && SegmentFilter.enabled() ? (
+            <div className="edit-distance">
+              Edit Distance: {segment.edit_distance}
+            </div>
+          ) : null}
+
+          {segment.opened ? <SegmentFooter /> : null}
+        </div>
+
+        <div className="segment-side-buttons">
+          {config.comments_enabled &&
+          (!segment.openComments || !segment.opened) ? (
+            <SegmentsCommentsIcon />
+          ) : null}
+          <SegmentQAIcon sid={segment.sid} />
+
+          {isReview && (
+            <div
+              data-mount="translation-issues-button"
+              className="translation-issues-button"
+              data-sid={segment.sid}
+            >
+              {translationIssues}
+            </div>
+          )}
+        </div>
+        <div className="segment-side-container">
+          {config.comments_enabled && segment.openComments ? (
+            <SegmentCommentsContainer />
+          ) : null}
+          {config.isReview &&
+          segment.openIssues &&
+          segment.opened &&
+          (config.isReview || (!config.isReview && segmentHasIssues)) ? (
+            <div className="review-balloon-container">
+              {!segment.versions ? null : (
+                <ReviewExtendedPanel
+                  segment={segment}
+                  isReview={config.isReview}
+                  selectionObj={selectedTextObj}
+                />
+              )}
+            </div>
+          ) : null}
+        </div>
+      </section>
+    </SegmentContext.Provider>
+  )
 }
+
+const Segment = React.memo(
+  SegmentComponent,
+  (prevProps, nextProps) =>
+    nextProps.segImmutable.equals(prevProps.segImmutable) &&
+    nextProps.sideOpen === prevProps.sideOpen &&
+    nextProps.clientConnected === prevProps.clientConnected &&
+    nextProps.speechToTextActive === prevProps.speechToTextActive,
+)
+
+Segment.displayName = 'Segment'
 
 export default Segment

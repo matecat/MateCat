@@ -35,15 +35,16 @@ class ChangeJobsStatusController extends KleinController
             try {
                 $project = ProjectDao::findByIdAndPassword($request['res_id'], $request['password']);
             } catch (Exception) {
-                $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export($_POST, true) . "\n";
+                $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
                 Utils::sendErrMailReport($msg);
                 throw new NotFoundException("Job not found");
             }
 
             $chunks = $project->getJobs();
+            $projectId = $project->id ?? throw new NotFoundException("Project not found");
 
-            JobDao::updateAllJobsStatusesByProjectId($project->id, $request['new_status']);
+            JobDao::updateAllJobsStatusesByProjectId((int)$projectId, $request['new_status']);
 
             foreach ($chunks as $chunk) {
                 $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);
@@ -53,7 +54,7 @@ class ChangeJobsStatusController extends KleinController
             try {
                 $firstChunk = ChunkDao::getByIdAndPassword($request['res_id'], $request['password']);
             } catch (Exception) {
-                $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export($_POST, true) . "\n";
+                $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
                 Utils::sendErrMailReport($msg);
                 throw new NotFoundException("Job not found");

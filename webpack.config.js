@@ -213,6 +213,15 @@ const matecatConfig = async ({env}, {mode}) => {
             filename: 'fonts/[name][ext]',
           },
         },
+        {
+          test: /\.html$/i,
+          include: [path.resolve(__dirname)],
+          exclude: [
+            path.resolve(__dirname, 'lib/View'),
+            path.resolve(__dirname, 'node_modules'),
+          ],
+          type: 'asset/source',
+        },
       ],
     },
     entry: {
@@ -271,6 +280,13 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/ActivityLogPage.scss',
+        ),
+      ],
+      contextPreview: [
+        path.resolve(__dirname, 'public/js/pages/ContextPreview.js'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/ContextPreviewPage.scss',
         ),
       ],
       commonCss: [
@@ -387,6 +403,16 @@ const matecatConfig = async ({env}, {mode}) => {
           './lib/View/templates/_activity_log.html',
         ),
         chunks: ['activityLog', 'allPagesPlugins'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/context_preview.html'),
+        template: path.resolve(
+          __dirname,
+          './lib/View/templates/_context_preview.html',
+        ),
+        chunks: ['contextPreview', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

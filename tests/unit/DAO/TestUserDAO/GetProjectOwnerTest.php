@@ -5,6 +5,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
@@ -18,6 +19,7 @@ use Utils\Registry\AppConfig;
  * Date: 27/05/16
  * Time: 18.21
  */
+#[Group('PersistenceNeeded')]
 class GetProjectOwnerTest extends AbstractTest
 {
     /**

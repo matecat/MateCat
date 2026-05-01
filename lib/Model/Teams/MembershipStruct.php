@@ -8,10 +8,14 @@
 
 namespace Model\Teams;
 
+use DomainException;
+use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Users\MetadataStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use RuntimeException;
 use ReflectionException;
 
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
@@ -33,9 +37,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
     private ?TeamStruct $team = null;
 
 
-    /**
-     * @var array
-     */
+    /** @var list<MetadataStruct> */
     private array $user_metadata = [];
 
     /**
@@ -48,6 +50,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
         $this->user = $user;
     }
 
+    /** @param list<MetadataStruct> $user_metadata */
     public function setUserMetadata(array $user_metadata): void
     {
         if ($user_metadata == null) {
@@ -56,32 +59,43 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
         $this->user_metadata = $user_metadata;
     }
 
+    /** @return list<MetadataStruct> */
     public function getUserMetadata(): array
     {
         return $this->user_metadata;
     }
 
-    /**
-     * @return UserStruct
-     * @throws ReflectionException
-     */
-    public function getUser(): UserStruct
+     /**
+      * @return UserStruct
+      * @throws ReflectionException
+      * @throws RuntimeException
+      * @throws Exception
+      */
+     public function getUser(): UserStruct
     {
         if (is_null($this->user)) {
-            $this->user = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid($this->uid);
+            if ($this->uid === null) {
+                throw new RuntimeException('Membership user uid must be set before loading user');
+            }
+
+            $this->user = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid($this->uid)
+                ?? throw new RuntimeException("User not found for uid: $this->uid");
         }
 
         return $this->user;
     }
 
-    /**
-     * @return TeamStruct
-     * @throws ReflectionException
-     */
-    public function getTeam(): TeamStruct
+     /**
+      * @return TeamStruct
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getTeam(): TeamStruct
     {
         if (is_null($this->team)) {
-            $this->team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($this->id_team);
+            $id_team = $this->id_team ?? throw new DomainException("Membership team id must be set before loading team");
+            $this->team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($id_team)
+                ?? throw new RuntimeException("Team not found for id: $id_team");
         }
 
         return $this->team;

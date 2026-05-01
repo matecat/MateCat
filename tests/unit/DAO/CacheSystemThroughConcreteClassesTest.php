@@ -11,10 +11,12 @@ namespace unit\DAO;
 
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\XFetchEnvelope;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use TestHelpers\AbstractTest;
@@ -22,6 +24,7 @@ use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
+#[Group('PersistenceNeeded')]
 class CacheSystemThroughConcreteClassesTest extends AbstractTest
 {
     private static string $email;
@@ -90,7 +93,15 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
         $this->assertTrue(is_array($map));
 
         $value = array_values($map)[0];
-        $this->assertEquals(serialize([$user]), $value);
+        $envelope = unserialize($value);
+
+        // Value is now wrapped in XFetch envelope
+        $this->assertInstanceOf(XFetchEnvelope::class, $envelope);
+        $this->assertEquals([$user], $envelope->value);
+        $this->assertIsFloat($envelope->storedAt);
+        $this->assertGreaterThan(0, $envelope->storedAt);
+        $this->assertIsFloat($envelope->delta);
+        $this->assertGreaterThanOrEqual(0.0, $envelope->delta);
 
         $key = array_keys($map)[0];
         $keyMap = $client->get($key);

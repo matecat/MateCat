@@ -2,6 +2,7 @@
 
 namespace Model\Jobs;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Exceptions\NotFoundException;
 use Model\Translations\SegmentTranslationStruct;
@@ -16,6 +17,7 @@ class ChunkDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct
+     * @throws Exception
      * @throws NotFoundException
      * @throws ReflectionException
      */
@@ -35,6 +37,7 @@ class ChunkDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getBySegmentTranslation(SegmentTranslationStruct $translation, int $ttl = 0): JobStruct
@@ -48,6 +51,7 @@ class ChunkDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getByJobID(int $id_job, int $ttl = 0): array
@@ -60,6 +64,7 @@ class ChunkDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getByProjectID(int $id_project, int $ttl = 0): array
@@ -73,6 +78,7 @@ class ChunkDao extends AbstractDao
      * @param int $ttl
      *
      * @return JobStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public static function getByIdProjectAndIdJob(int $id_project, int $id_job, int $ttl = 0): array

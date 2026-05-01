@@ -98,8 +98,6 @@ class QA
     public const string WARNING = ErrorManager::WARNING;
     public const string INFO = ErrorManager::INFO;
 
-    public const string SIZE_RESTRICTION = SizeRestrictionChecker::SIZE_RESTRICTION;
-
     // ========== Component Instances ==========
 
     /** @var ErrorManager Manages error codes, messages, and exception lists */

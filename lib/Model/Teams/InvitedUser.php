@@ -63,13 +63,14 @@ class InvitedUser
         FlashMessage::set('signup_email', $this->jwt['email'], FlashMessage::SERVICE);
     }
 
-    /**
-     * @param UserStruct $user
-     * @param array $invitation
-     *
-     * @throws ReflectionException
-     */
-    public static function completeTeamSignUp(UserStruct $user, array $invitation): void
+     /**
+      * @param UserStruct $user
+      * @param array $invitation
+      *
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public static function completeTeamSignUp(UserStruct $user, array $invitation): void
     {
         $teamStruct = (new TeamDao)->findById($invitation['team_id']);
 
@@ -84,10 +85,11 @@ class InvitedUser
         unset($_SESSION['invited_to_team']);
     }
 
-    /**
-     * @throws ReflectionException
-     */
-    public static function hasPendingInvitations(): bool
+     /**
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public static function hasPendingInvitations(): bool
     {
         if (!isset($_SESSION['invited_to_team']) || empty($_SESSION['invited_to_team']['team_id'])) { // check if this is the right session caller
             return false;

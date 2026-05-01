@@ -46,6 +46,7 @@ enum ProjectsMetadataMarshaller: string
 
     case SEGMENTATION_RULE = 'segmentation_rule';
     case WPML = 'WPML';
+    case CONTEXT_URL = 'context-url';
 
     public static function unMarshall(MetadataStruct $struct): mixed
     {
@@ -69,7 +70,8 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::INTENTO_PROVIDER->value,
             ProjectsMetadataMarshaller::DEEPL_FORMALITY->value,
             ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
-            ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value => fn() => (string)$struct->value,
+            ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value,
+            ProjectsMetadataMarshaller::CONTEXT_URL->value => fn() => (string)$struct->value,
             // backward compatibility, old projects could have JSON glossaries encoded as HTML entities
             ProjectsMetadataMarshaller::LARA_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,

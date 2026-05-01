@@ -2,6 +2,7 @@
 
 namespace Model\Search;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
 use Predis\Client;
@@ -28,6 +29,7 @@ class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      *
      * @param IDatabase|null $con
      *
+     * @throws Exception
      * @throws ReflectionException
      */
     public function __construct(?IDatabase $con = null)

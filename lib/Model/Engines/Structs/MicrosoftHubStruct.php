@@ -36,7 +36,7 @@ class MicrosoftHubStruct extends EngineStruct
     public ?string $translate_relative_url = "Translate";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $others = [
         'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
@@ -49,7 +49,7 @@ class MicrosoftHubStruct extends EngineStruct
 
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'token' => null,
@@ -69,14 +69,9 @@ class MicrosoftHubStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     *  An empty struct
-     *
-     * @return static
-     */
     public static function getStruct(): static
     {
-        return new MicrosoftHubStruct();
+        return new static();
     }
 
 }

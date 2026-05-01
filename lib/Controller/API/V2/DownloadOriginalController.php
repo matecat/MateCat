@@ -44,10 +44,6 @@ class DownloadOriginalController extends AbstractDownloadController
 
         $__postInput = filter_var_array($this->request->params(), $filterArgs);
 
-        //NOTE: This is for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI Test scripts
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
-
         $this->_user_provided_filename = $__postInput['filename'];
         $this->id_job = $__postInput['id_job'];
         $this->password = $__postInput['password'];
@@ -63,7 +59,7 @@ class DownloadOriginalController extends AbstractDownloadController
 
         // check for Password correctness
         if (empty($jobData)) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export($_POST, true) . "\n";
+            $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
             $this->logger->debug($msg);
 
             return null;

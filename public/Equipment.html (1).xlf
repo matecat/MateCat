@@ -1,0 +1,3712 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:okp="okapi-framework:xliff-extensions" version="1.2">
+<file datatype="html" original="Equipment.html" source-language="en-US" target-language="fr-FR">
+<body>
+<trans-unit id="tu1" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment</mrk></target>
+</trans-unit>
+<trans-unit id="tu3" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">English</source>
+<seg-source><mrk mid="0" mtype="seg">English</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">English</mrk></target>
+</trans-unit>
+<trans-unit id="tu2" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1"><g id="2"/> en</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> en</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> en</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu4" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Account</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Account</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Account</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu5" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Profile</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Profile</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Profile</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu6" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+</source>
+<seg-source><mrk mid="0" mtype="seg">
+</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+</mrk></target>
+</trans-unit>
+<trans-unit id="tu7" xml:space="preserve">
+<source xml:lang="en-US">
+    <g id="1">
+        <g id="2"/> Wishlist <g id="3">{{smartlistEntriesSize}}</g>
+    </g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    <g id="1">
+        <g id="2"/> Wishlist <g id="3">{{smartlistEntriesSize}}</g>
+    </g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    <g id="1">
+        <g id="2"/> Wishlist <g id="3">{{smartlistEntriesSize}}</g>
+    </g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu8" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">
+                        <g id="2"/>
+                    </g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">
+                        <g id="2"/>
+                    </g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">
+                        <g id="2"/>
+                    </g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu9" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">{{smartlistEntriesSize}}</g> items in your wish list
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">{{smartlistEntriesSize}}</g> items in your wish list
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">{{smartlistEntriesSize}}</g> items in your wish list
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu10" restype="x-h4" xml:space="preserve">
+<source xml:lang="en-US">{{smartlist.name}}</source>
+<seg-source><mrk mid="0" mtype="seg">{{smartlist.name}}</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">{{smartlist.name}}</mrk></target>
+</trans-unit>
+<trans-unit id="tu12" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">{{ smartlistEntry.title }}</source>
+<seg-source><mrk mid="0" mtype="seg">{{ smartlistEntry.title }}</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">{{ smartlistEntry.title }}</mrk></target>
+</trans-unit>
+<trans-unit id="tu11" xml:space="preserve">
+<source xml:lang="en-US">
+    
+                        <x id="1"/>
+    
+                        </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+                        <x id="1"/>
+    
+                        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+                        <x id="1"/>
+    
+                        </mrk></target>
+</trans-unit>
+<trans-unit id="tu13" xml:space="preserve">
+<source xml:lang="en-US">
+                                <g id="1">
+                                    <g id="2">{{ smartlistEntry.title }}</g>
+                                </g>
+    
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <g id="1">
+                                    <g id="2">{{ smartlistEntry.title }}</g>
+                                </g>
+    
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <g id="1">
+                                    <g id="2">{{ smartlistEntry.title }}</g>
+                                </g>
+    
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu14" xml:space="preserve">
+<source xml:lang="en-US">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                    <x id="4"/>
+                                    <x id="5"/>
+                                    <g id="6">
+                                        <g id="7"/> Add to cart
+                                    </g>
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                    <x id="4"/>
+                                    <x id="5"/>
+                                    <g id="6">
+                                        <g id="7"/> Add to cart
+                                    </g>
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                    <x id="4"/>
+                                    <x id="5"/>
+                                    <g id="6">
+                                        <g id="7"/> Add to cart
+                                    </g>
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu15" xml:space="preserve">
+<source xml:lang="en-US">
+                                    <g id="1">
+                                        {{ smartlistEntry.description }}
+                                    </g>
+                                    </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                    <g id="1">
+                                        {{ smartlistEntry.description }}
+                                    </g>
+                                    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                    <g id="1">
+                                        {{ smartlistEntry.description }}
+                                    </g>
+                                    </mrk></target>
+</trans-unit>
+<trans-unit id="tu16" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+                                            <g id="1">{{ key }}</g>: {{ val }}
+                                        </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                            <g id="1">{{ key }}</g>: {{ val }}
+                                        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                            <g id="1">{{ key }}</g>: {{ val }}
+                                        </mrk></target>
+</trans-unit>
+<trans-unit id="tu17" xml:space="preserve">
+<source xml:lang="en-US">
+                                <g id="1">Qty:</g>
+                                <g id="2">{{smartlistEntry.quantity}}</g>
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <g id="1">Qty:</g>
+                                <g id="2">{{smartlistEntry.quantity}}</g>
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <g id="1">Qty:</g>
+                                <g id="2">{{smartlistEntry.quantity}}</g>
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu18" xml:space="preserve">
+<source xml:lang="en-US">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                    <x id="4"/>
+                                    <x id="5"/>
+                                    <x id="6"/>
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                    <x id="4"/>
+                                    <x id="5"/>
+                                    <x id="6"/>
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                    <x id="4"/>
+                                    <x id="5"/>
+                                    <x id="6"/>
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu19" xml:space="preserve">
+<source xml:lang="en-US">
+                                <g id="1">{{ smartlistEntry.priceFormatted }}</g>
+                            </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <g id="1">{{ smartlistEntry.priceFormatted }}</g>
+                            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <g id="1">{{ smartlistEntry.priceFormatted }}</g>
+                            </mrk></target>
+</trans-unit>
+<trans-unit id="tu20" xml:space="preserve">
+<source xml:lang="en-US">
+                                <x id="1"/>
+                                <x id="2"/>
+                                <x id="3"/>
+                                <x id="4"/>
+                                <x id="5"/>
+                                <g id="6">
+                                    <g id="7"/>
+                                </g>
+                            </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <x id="1"/>
+                                <x id="2"/>
+                                <x id="3"/>
+                                <x id="4"/>
+                                <x id="5"/>
+                                <g id="6">
+                                    <g id="7"/>
+                                </g>
+                            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <x id="1"/>
+                                <x id="2"/>
+                                <x id="3"/>
+                                <x id="4"/>
+                                <x id="5"/>
+                                <g id="6">
+                                    <g id="7"/>
+                                </g>
+                            </mrk></target>
+</trans-unit>
+<trans-unit id="tu21" xml:space="preserve">
+<source xml:lang="en-US">
+                            <x id="1"/>
+                            <x id="2"/>
+                            <x id="3"/>
+                            <x id="4"/>
+                            <g id="5">
+                                <g id="6"/> Add all products to cart
+                            </g>
+                        </source>
+<seg-source><mrk mid="0" mtype="seg">
+                            <x id="1"/>
+                            <x id="2"/>
+                            <x id="3"/>
+                            <x id="4"/>
+                            <g id="5">
+                                <g id="6"/> Add all products to cart
+                            </g>
+                        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                            <x id="1"/>
+                            <x id="2"/>
+                            <x id="3"/>
+                            <x id="4"/>
+                            <g id="5">
+                                <g id="6"/> Add all products to cart
+                            </g>
+                        </mrk></target>
+</trans-unit>
+<trans-unit id="tu22" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">You do not have any products on your wish list.</g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">You do not have any products on your wish list.</g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">You do not have any products on your wish list.</g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu23" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1"><g id="2"/> Messages
+                <g id="3">0</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> Messages
+                <g id="3">0</g></g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> Messages
+                <g id="3">0</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="tu24" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1"><g id="2"/> Notifications
+                <g id="3">0</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> Notifications
+                <g id="3">0</g></g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> Notifications
+                <g id="3">0</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="tu25" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+</source>
+<seg-source><mrk mid="0" mtype="seg">
+</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+</mrk></target>
+</trans-unit>
+<trans-unit id="tu26" xml:space="preserve">
+<source xml:lang="en-US">
+
+    <g id="1">
+        <g id="2"/> My cart <g id="3">{{cartEntriesSize}}</g>
+    </g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+
+    <g id="1">
+        <g id="2"/> My cart <g id="3">{{cartEntriesSize}}</g>
+    </g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+
+    <g id="1">
+        <g id="2"/> My cart <g id="3">{{cartEntriesSize}}</g>
+    </g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu27" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">
+                        <g id="2"/>
+                    </g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">
+                        <g id="2"/>
+                    </g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">
+                        <g id="2"/>
+                    </g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu28" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">{{cartEntriesSize}}</g> items in cart
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">{{cartEntriesSize}}</g> items in cart
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">{{cartEntriesSize}}</g> items in cart
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu29" xml:space="preserve">
+<source xml:lang="en-US">The cart is empty.</source>
+<seg-source><mrk mid="0" mtype="seg">The cart is empty.</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">The cart is empty.</mrk></target>
+</trans-unit>
+<trans-unit id="tu31" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">{{ cartEntry.title }}</source>
+<seg-source><mrk mid="0" mtype="seg">{{ cartEntry.title }}</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">{{ cartEntry.title }}</mrk></target>
+</trans-unit>
+<trans-unit id="tu30" xml:space="preserve">
+<source xml:lang="en-US">
+
+                        <x id="1"/>
+
+                        </source>
+<seg-source><mrk mid="0" mtype="seg">
+
+                        <x id="1"/>
+
+                        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+
+                        <x id="1"/>
+
+                        </mrk></target>
+</trans-unit>
+<trans-unit id="tu32" xml:space="preserve">
+<source xml:lang="en-US">
+                                <g id="1">
+                                    <g id="2">{{ cartEntry.title }}</g>
+                                </g>
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <g id="1">
+                                    <g id="2">{{ cartEntry.title }}</g>
+                                </g>
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <g id="1">
+                                    <g id="2">{{ cartEntry.title }}</g>
+                                </g>
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu33" xml:space="preserve">
+<source xml:lang="en-US">
+                                    <g id="1">
+                                        <g id="2"/>
+                                    </g>
+                                    <g id="3">
+                                        {{ cartEntry.description }}
+                                    </g>
+                                    </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                    <g id="1">
+                                        <g id="2"/>
+                                    </g>
+                                    <g id="3">
+                                        {{ cartEntry.description }}
+                                    </g>
+                                    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                    <g id="1">
+                                        <g id="2"/>
+                                    </g>
+                                    <g id="3">
+                                        {{ cartEntry.description }}
+                                    </g>
+                                    </mrk></target>
+</trans-unit>
+<trans-unit id="tu34" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+                                            <g id="1">{{ key }}</g>: {{ val }}
+                                        </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                            <g id="1">{{ key }}</g>: {{ val }}
+                                        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                            <g id="1">{{ key }}</g>: {{ val }}
+                                        </mrk></target>
+</trans-unit>
+<trans-unit id="tu35" xml:space="preserve">
+<source xml:lang="en-US">
+                                <g id="1">Qty:</g>
+                                
+                                
+                                
+                                <g id="2">{{ cartEntry.quantity }}</g>
+                                
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <g id="1">Qty:</g>
+                                
+                                
+                                
+                                <g id="2">{{ cartEntry.quantity }}</g>
+                                
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <g id="1">Qty:</g>
+                                
+                                
+                                
+                                <g id="2">{{ cartEntry.quantity }}</g>
+                                
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu36" xml:space="preserve">
+<source xml:lang="en-US">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                    <x id="1"/>
+                                    <x id="2"/>
+                                    <x id="3"/>
+                                </mrk></target>
+</trans-unit>
+<trans-unit id="tu37" xml:space="preserve">
+<source xml:lang="en-US">
+                                <g id="1">{{ cartEntry.priceFormatted }}</g>
+                            </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <g id="1">{{ cartEntry.priceFormatted }}</g>
+                            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <g id="1">{{ cartEntry.priceFormatted }}</g>
+                            </mrk></target>
+</trans-unit>
+<trans-unit id="tu38" xml:space="preserve">
+<source xml:lang="en-US">
+                                <x id="1"/>
+                                <x id="2"/>
+                                <g id="3"><g id="4"/></g>
+                            </source>
+<seg-source><mrk mid="0" mtype="seg">
+                                <x id="1"/>
+                                <x id="2"/>
+                                <g id="3"><g id="4"/></g>
+                            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                                <x id="1"/>
+                                <x id="2"/>
+                                <g id="3"><g id="4"/></g>
+                            </mrk></target>
+</trans-unit>
+<trans-unit id="tu39" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1"/>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1"/>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1"/>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu40" xml:space="preserve">
+<source xml:lang="en-US">
+                        sub-total: <g id="1">{{cartTotalPrice}}</g>
+                    </source>
+<seg-source><mrk mid="0" mtype="seg">
+                        sub-total: <g id="1">{{cartTotalPrice}}</g>
+                    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                        sub-total: <g id="1">{{cartTotalPrice}}</g>
+                    </mrk></target>
+</trans-unit>
+<trans-unit id="tu41" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">Checkout</g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">Checkout</g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">Checkout</g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu42" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Moderation</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Moderation</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Moderation</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu43" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Log out</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Log out</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Log out</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu44" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">
+                <g id="2">Toggle navigation</g>
+                <g id="3"/> <g id="4"/>
+            </g>
+
+            <g id="5">
+                <g id="6">Toggle navigation</g>
+                <g id="7"/>
+            </g>
+
+            <g id="8">we.<g id="9">Retail</g></g>
+            </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">
+                <g id="2">Toggle navigation</g>
+                <g id="3"/> <g id="4"/>
+            </g>
+
+            <g id="5">
+                <g id="6">Toggle navigation</g>
+                <g id="7"/>
+            </g>
+
+            <g id="8">we.<g id="9">Retail</g></g>
+            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">
+                <g id="2">Toggle navigation</g>
+                <g id="3"/> <g id="4"/>
+            </g>
+
+            <g id="5">
+                <g id="6">Toggle navigation</g>
+                <g id="7"/>
+            </g>
+
+            <g id="8">we.<g id="9">Retail</g></g>
+            </mrk></target>
+</trans-unit>
+<trans-unit id="tu45" xml:space="preserve">
+<source xml:lang="en-US">
+    <g id="1">
+        <g id="2"/> <g id="3">{{cartEntriesSize}}</g>
+    </g>
+</source>
+<seg-source><mrk mid="0" mtype="seg">
+    <g id="1">
+        <g id="2"/> <g id="3">{{cartEntriesSize}}</g>
+    </g>
+</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    <g id="1">
+        <g id="2"/> <g id="3">{{cartEntriesSize}}</g>
+    </g>
+</mrk></target>
+</trans-unit>
+<trans-unit id="tu46" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">we.<g id="2">Retail</g></g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">we.<g id="2">Retail</g></g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">we.<g id="2">Retail</g></g></mrk></target>
+</trans-unit>
+<trans-unit id="tu48" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Experience</source>
+<seg-source><mrk mid="0" mtype="seg">Experience</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Experience</mrk></target>
+</trans-unit>
+<trans-unit id="tu47" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Experience</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Experience</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Experience</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu50" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Arctic Surfing In Lofoten</source>
+<seg-source><mrk mid="0" mtype="seg">Arctic Surfing In Lofoten</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Arctic Surfing In Lofoten</mrk></target>
+</trans-unit>
+<trans-unit id="tu49" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Arctic Surfing In Lofoten</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Arctic Surfing In Lofoten</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Arctic Surfing In Lofoten</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu52" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">48 hours of Wilderness</source>
+<seg-source><mrk mid="0" mtype="seg">48 hours of Wilderness</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">48 hours of Wilderness</mrk></target>
+</trans-unit>
+<trans-unit id="tu51" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">48 hours of Wilderness</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">48 hours of Wilderness</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">48 hours of Wilderness</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu54" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Fly-fishing the Amazon</source>
+<seg-source><mrk mid="0" mtype="seg">Fly-fishing the Amazon</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Fly-fishing the Amazon</mrk></target>
+</trans-unit>
+<trans-unit id="tu53" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Fly-fishing the Amazon</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Fly-fishing the Amazon</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Fly-fishing the Amazon</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu56" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Skitouring</source>
+<seg-source><mrk mid="0" mtype="seg">Skitouring</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Skitouring</mrk></target>
+</trans-unit>
+<trans-unit id="tu55" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Skitouring</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Skitouring</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Skitouring</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu58" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Steelhead and Spines in Alaska</source>
+<seg-source><mrk mid="0" mtype="seg">Steelhead and Spines in Alaska</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Steelhead and Spines in Alaska</mrk></target>
+</trans-unit>
+<trans-unit id="tu57" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Steelhead and Spines in Alaska</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Steelhead and Spines in Alaska</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Steelhead and Spines in Alaska</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu60" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Camping in Western Australia</source>
+<seg-source><mrk mid="0" mtype="seg">Camping in Western Australia</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Camping in Western Australia</mrk></target>
+</trans-unit>
+<trans-unit id="tu59" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Camping in Western Australia</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Camping in Western Australia</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Camping in Western Australia</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu62" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu61" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu64" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Women</source>
+<seg-source><mrk mid="0" mtype="seg">Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu63" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu66" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment</mrk></target>
+</trans-unit>
+<trans-unit id="tu65" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu68" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us</source>
+<seg-source><mrk mid="0" mtype="seg">About Us</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us</mrk></target>
+</trans-unit>
+<trans-unit id="tu67" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu70" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Products</source>
+<seg-source><mrk mid="0" mtype="seg">Products</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Products</mrk></target>
+</trans-unit>
+<trans-unit id="tu69" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Products</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu72" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Women</source>
+<seg-source><mrk mid="0" mtype="seg">Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu71" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu74" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu73" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu76" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment</mrk></target>
+</trans-unit>
+<trans-unit id="tu75" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu78" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu77" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu80" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</source>
+<seg-source><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></target>
+</trans-unit>
+<trans-unit id="tu79" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu82" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us 2.0</source>
+<seg-source><mrk mid="0" mtype="seg">About Us 2.0</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us 2.0</mrk></target>
+</trans-unit>
+<trans-unit id="tu81" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu84" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us &amp; Others</source>
+<seg-source><mrk mid="0" mtype="seg">About Us &amp; Others</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us &amp; Others</mrk></target>
+</trans-unit>
+<trans-unit id="tu83" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us &amp; Others</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us &amp; Others</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us &amp; Others</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu86" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men &amp; Women</source>
+<seg-source><mrk mid="0" mtype="seg">Men &amp; Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men &amp; Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu85" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men &amp; Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men &amp; Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men &amp; Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu88" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Products &amp; Items</source>
+<seg-source><mrk mid="0" mtype="seg">Products &amp; Items</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Products &amp; Items</mrk></target>
+</trans-unit>
+<trans-unit id="tu87" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Products &amp; Items</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products &amp; Items</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products &amp; Items</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu90" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Women</source>
+<seg-source><mrk mid="0" mtype="seg">Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu89" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu92" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu91" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu94" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us</source>
+<seg-source><mrk mid="0" mtype="seg">About Us</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us</mrk></target>
+</trans-unit>
+<trans-unit id="tu93" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu96" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment</mrk></target>
+</trans-unit>
+<trans-unit id="tu95" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu98" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</source>
+<seg-source><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></target>
+</trans-unit>
+<trans-unit id="tu97" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu100" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</source>
+<seg-source><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></target>
+</trans-unit>
+<trans-unit id="tu99" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu102" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment-2</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment-2</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment-2</mrk></target>
+</trans-unit>
+<trans-unit id="tu101" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu104" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us 2.0</source>
+<seg-source><mrk mid="0" mtype="seg">About Us 2.0</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us 2.0</mrk></target>
+</trans-unit>
+<trans-unit id="tu103" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu106" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment-2</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment-2</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment-2</mrk></target>
+</trans-unit>
+<trans-unit id="tu105" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu108" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu107" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu110" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment-2</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment-2</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment-2</mrk></target>
+</trans-unit>
+<trans-unit id="tu109" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu111" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"/>
+<target xml:lang="fr-FR"/>
+</trans-unit>
+<trans-unit id="tu112" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Log out</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Log out</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Log out</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu113" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Profile</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Profile</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Profile</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu114" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">Messages
+                        <g id="2">0</g>
+                    </g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">Messages
+                        <g id="2">0</g>
+                    </g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">Messages
+                        <g id="2">0</g>
+                    </g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu115" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">Notifications
+                        <g id="2">0</g>
+                    </g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">Notifications
+                        <g id="2">0</g>
+                    </g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">Notifications
+                        <g id="2">0</g>
+                    </g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu116" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+<g id="1">
+    Wishlist <g id="2">{{smartlistEntriesSize}}</g>
+</g><x id="3"/>
+</source>
+<seg-source><mrk mid="0" mtype="seg">
+<g id="1">
+    Wishlist <g id="2">{{smartlistEntriesSize}}</g>
+</g><x id="3"/>
+</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+<g id="1">
+    Wishlist <g id="2">{{smartlistEntriesSize}}</g>
+</g><x id="3"/>
+</mrk></target>
+</trans-unit>
+<trans-unit id="tu117" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US"><g id="1"><g id="2"/> en</g></source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> en</g></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1"><g id="2"/> en</g></mrk></target>
+</trans-unit>
+<trans-unit id="tu118" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">
+                <g id="2">Search</g><g id="3"/>
+            </g>
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">
+                <g id="2">Search</g><g id="3"/>
+            </g>
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">
+                <g id="2">Search</g><g id="3"/>
+            </g>
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu119" xml:space="preserve">
+<source xml:lang="en-US">
+
+        <g id="1"/>
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+
+        <g id="1"/>
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+
+        <g id="1"/>
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu120" xml:space="preserve">
+<source xml:lang="en-US">
+                <g id="1"><g id="2"/>Search anything</g>
+                <g id="3"><g id="4">Close search</g><g id="5"/>
+                </g>
+            </source>
+<seg-source><mrk mid="0" mtype="seg">
+                <g id="1"><g id="2"/>Search anything</g>
+                <g id="3"><g id="4">Close search</g><g id="5"/>
+                </g>
+            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                <g id="1"><g id="2"/>Search anything</g>
+                <g id="3"><g id="4">Close search</g><g id="5"/>
+                </g>
+            </mrk></target>
+</trans-unit>
+<trans-unit id="tu122" restype="x-placeholder" xml:space="preserve">
+<source xml:lang="en-US">Search</source>
+<seg-source><mrk mid="0" mtype="seg">Search</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Search</mrk></target>
+</trans-unit>
+<trans-unit id="tu121" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1"/>
+            <g id="2"/>
+            <x id="3"/>
+            <g id="4">
+                <g id="5"/>
+            </g>
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1"/>
+            <g id="2"/>
+            <x id="3"/>
+            <g id="4">
+                <g id="5"/>
+            </g>
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1"/>
+            <g id="2"/>
+            <x id="3"/>
+            <g id="4">
+                <g id="5"/>
+            </g>
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu123" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">CHOOSE YOUR COUNTRY</source>
+<seg-source><mrk mid="0" mtype="seg">CHOOSE YOUR COUNTRY</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">CHOOSE YOUR COUNTRY</mrk></target>
+</trans-unit>
+<trans-unit id="tu125" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">United States</source>
+<seg-source><mrk mid="0" mtype="seg">United States</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">United States</mrk></target>
+</trans-unit>
+<trans-unit id="tu124" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu127" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">English</source>
+<seg-source><mrk mid="0" mtype="seg">English</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">English</mrk></target>
+</trans-unit>
+<trans-unit id="tu126" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">English</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">English</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">English</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu129" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Español</source>
+<seg-source><mrk mid="0" mtype="seg">Español</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Español</mrk></target>
+</trans-unit>
+<trans-unit id="tu128" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Español</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Español</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Español</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu131" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">French</source>
+<seg-source><mrk mid="0" mtype="seg">French</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">French</mrk></target>
+</trans-unit>
+<trans-unit id="tu130" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">French</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">French</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">French</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu133" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Italian</source>
+<seg-source><mrk mid="0" mtype="seg">Italian</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Italian</mrk></target>
+</trans-unit>
+<trans-unit id="tu132" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Italian</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Italian</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Italian</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu135" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">German</source>
+<seg-source><mrk mid="0" mtype="seg">German</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">German</mrk></target>
+</trans-unit>
+<trans-unit id="tu134" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">German</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">German</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">German</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu137" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Canada</source>
+<seg-source><mrk mid="0" mtype="seg">Canada</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Canada</mrk></target>
+</trans-unit>
+<trans-unit id="tu136" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu139" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">English</source>
+<seg-source><mrk mid="0" mtype="seg">English</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">English</mrk></target>
+</trans-unit>
+<trans-unit id="tu138" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">English</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">English</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">English</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu141" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Français</source>
+<seg-source><mrk mid="0" mtype="seg">Français</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Français</mrk></target>
+</trans-unit>
+<trans-unit id="tu140" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu143" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Switzerland</source>
+<seg-source><mrk mid="0" mtype="seg">Switzerland</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Switzerland</mrk></target>
+</trans-unit>
+<trans-unit id="tu142" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu145" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Deutsch</source>
+<seg-source><mrk mid="0" mtype="seg">Deutsch</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Deutsch</mrk></target>
+</trans-unit>
+<trans-unit id="tu144" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Deutsch</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Deutsch</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Deutsch</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu147" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Français</source>
+<seg-source><mrk mid="0" mtype="seg">Français</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Français</mrk></target>
+</trans-unit>
+<trans-unit id="tu146" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu149" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Italiano</source>
+<seg-source><mrk mid="0" mtype="seg">Italiano</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Italiano</mrk></target>
+</trans-unit>
+<trans-unit id="tu148" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Italiano</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Italiano</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Italiano</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu151" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Germany</source>
+<seg-source><mrk mid="0" mtype="seg">Germany</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Germany</mrk></target>
+</trans-unit>
+<trans-unit id="tu150" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu153" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Deutsch</source>
+<seg-source><mrk mid="0" mtype="seg">Deutsch</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Deutsch</mrk></target>
+</trans-unit>
+<trans-unit id="tu152" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Deutsch</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Deutsch</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Deutsch</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu155" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">France</source>
+<seg-source><mrk mid="0" mtype="seg">France</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">France</mrk></target>
+</trans-unit>
+<trans-unit id="tu154" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu157" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Français</source>
+<seg-source><mrk mid="0" mtype="seg">Français</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Français</mrk></target>
+</trans-unit>
+<trans-unit id="tu156" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Français</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu159" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Spain</source>
+<seg-source><mrk mid="0" mtype="seg">Spain</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Spain</mrk></target>
+</trans-unit>
+<trans-unit id="tu158" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu161" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Español</source>
+<seg-source><mrk mid="0" mtype="seg">Español</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Español</mrk></target>
+</trans-unit>
+<trans-unit id="tu160" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Español</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Español</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Español</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu163" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Italy</source>
+<seg-source><mrk mid="0" mtype="seg">Italy</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Italy</mrk></target>
+</trans-unit>
+<trans-unit id="tu162" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu165" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Italiano</source>
+<seg-source><mrk mid="0" mtype="seg">Italiano</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Italiano</mrk></target>
+</trans-unit>
+<trans-unit id="tu164" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    
+    <g id="1">Italiano</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Italiano</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    
+    <g id="1">Italiano</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu167" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">[Page] Navigation Title &amp;</source>
+<seg-source><mrk mid="0" mtype="seg">[Page] Navigation Title &amp;</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">[Page] Navigation Title &amp;</mrk></target>
+</trans-unit>
+<trans-unit id="tu168" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">[Page] Navigation Title &amp;</source>
+<seg-source><mrk mid="0" mtype="seg">[Page] Navigation Title &amp;</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">[Page] Navigation Title &amp;</mrk></target>
+</trans-unit>
+<trans-unit id="tu166" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1"/>
+    <g id="2">[Page] Navigation Title &amp;</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    <g id="2">[Page] Navigation Title &amp;</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1"/>
+    <g id="2">[Page] Navigation Title &amp;</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu169" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1"><g id="2"/> Close</g>
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1"><g id="2"/> Close</g>
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1"><g id="2"/> Close</g>
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu170" restype="x-paragraph" xml:space="preserve">
+<source xml:lang="en-US"/>
+<target xml:lang="fr-FR"/>
+</trans-unit>
+<trans-unit id="tu171" xml:space="preserve">
+<source xml:lang="en-US">
+                <g id="1">Equipment</g>
+
+                
+            </source>
+<seg-source><mrk mid="0" mtype="seg">
+                <g id="1">Equipment</g>
+
+                
+            </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                <g id="1">Equipment</g>
+
+                
+            </mrk></target>
+</trans-unit>
+<trans-unit id="tu172" restype="x-h2" xml:space="preserve">
+<source xml:lang="en-US">Welcome our finest equipment (8:17 AM)</source>
+<seg-source><mrk mid="0" mtype="seg">Welcome our finest equipment (8:17 AM)</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Welcome our finest equipment (8:17 AM)</mrk></target>
+</trans-unit>
+<trans-unit id="tu174" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Hiker on the trek in Himalayas, Anapurna valley, Nepal</source>
+<seg-source><mrk mid="0" mtype="seg">Hiker on the trek in Himalayas, Anapurna valley, Nepal</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Hiker on the trek in Himalayas, Anapurna valley, Nepal</mrk></target>
+</trans-unit>
+<trans-unit id="tu175" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Hiker Anapurna</source>
+<seg-source><mrk mid="0" mtype="seg">Hiker Anapurna</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Hiker Anapurna</mrk></target>
+</trans-unit>
+<trans-unit id="tu173" xml:space="preserve">
+<source xml:lang="en-US">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu176" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Hiking</g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Hiking</g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Hiking</g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu178" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Trail running man exercising outdoors for fitness</source>
+<seg-source><mrk mid="0" mtype="seg">Trail running man exercising outdoors for fitness</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Trail running man exercising outdoors for fitness</mrk></target>
+</trans-unit>
+<trans-unit id="tu179" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Running Trail Man</source>
+<seg-source><mrk mid="0" mtype="seg">Running Trail Man</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Running Trail Man</mrk></target>
+</trans-unit>
+<trans-unit id="tu177" xml:space="preserve">
+<source xml:lang="en-US">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu180" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Running</g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Running</g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Running</g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu182" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Enduro mountain biking in the forest</source>
+<seg-source><mrk mid="0" mtype="seg">Enduro mountain biking in the forest</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Enduro mountain biking in the forest</mrk></target>
+</trans-unit>
+<trans-unit id="tu183" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Enduro Trail Jump</source>
+<seg-source><mrk mid="0" mtype="seg">Enduro Trail Jump</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Enduro Trail Jump</mrk></target>
+</trans-unit>
+<trans-unit id="tu181" xml:space="preserve">
+<source xml:lang="en-US">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu184" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Biking</g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Biking</g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Biking</g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu186" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Surfing in Nicaragua</source>
+<seg-source><mrk mid="0" mtype="seg">Surfing in Nicaragua</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Surfing in Nicaragua</mrk></target>
+</trans-unit>
+<trans-unit id="tu187" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Wave Nicaragua</source>
+<seg-source><mrk mid="0" mtype="seg">Wave Nicaragua</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Wave Nicaragua</mrk></target>
+</trans-unit>
+<trans-unit id="tu185" xml:space="preserve">
+<source xml:lang="en-US">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu188" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Surfing</g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Surfing</g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Surfing</g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu190" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Steep skiing above valley</source>
+<seg-source><mrk mid="0" mtype="seg">Steep skiing above valley</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Steep skiing above valley</mrk></target>
+</trans-unit>
+<trans-unit id="tu191" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Freeride Steep</source>
+<seg-source><mrk mid="0" mtype="seg">Freeride Steep</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Freeride Steep</mrk></target>
+</trans-unit>
+<trans-unit id="tu189" xml:space="preserve">
+<source xml:lang="en-US">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu192" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Snow Sports</g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Snow Sports</g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Snow Sports</g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu193" restype="x-h2" xml:space="preserve">
+<source xml:lang="en-US">Featured products (8:17 AM)</source>
+<seg-source><mrk mid="0" mtype="seg">Featured products (8:17 AM)</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Featured products (8:17 AM)</mrk></target>
+</trans-unit>
+<trans-unit id="tu194" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu196" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Marin</source>
+<seg-source><mrk mid="0" mtype="seg">Marin</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Marin</mrk></target>
+</trans-unit>
+<trans-unit id="tu197" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Marin</source>
+<seg-source><mrk mid="0" mtype="seg">Marin</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Marin</mrk></target>
+</trans-unit>
+<trans-unit id="tu195" xml:space="preserve">
+<source xml:lang="en-US"><x id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><x id="1"/></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><x id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="tu198" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">Marin Mountain Bike Shoes</source>
+<seg-source><mrk mid="0" mtype="seg">Marin Mountain Bike Shoes</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Marin Mountain Bike Shoes</mrk></target>
+</trans-unit>
+<trans-unit id="tu199" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">footwear</g>
+
+            <g id="2">
+                <g id="3">$110.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">footwear</g>
+
+            <g id="2">
+                <g id="3">$110.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">footwear</g>
+
+            <g id="2">
+                <g id="3">$110.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu200" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu202" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Fleet Shoe</source>
+<seg-source><mrk mid="0" mtype="seg">Fleet Shoe</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Fleet Shoe</mrk></target>
+</trans-unit>
+<trans-unit id="tu203" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Fleet Shoe</source>
+<seg-source><mrk mid="0" mtype="seg">Fleet Shoe</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Fleet Shoe</mrk></target>
+</trans-unit>
+<trans-unit id="tu201" xml:space="preserve">
+<source xml:lang="en-US"><x id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><x id="1"/></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><x id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="tu204" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">Fleet Cross-Training Shoe</source>
+<seg-source><mrk mid="0" mtype="seg">Fleet Cross-Training Shoe</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Fleet Cross-Training Shoe</mrk></target>
+</trans-unit>
+<trans-unit id="tu205" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">footwear</g>
+
+            <g id="2">
+                <g id="3">$65.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">footwear</g>
+
+            <g id="2">
+                <g id="3">$65.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">footwear</g>
+
+            <g id="2">
+                <g id="3">$65.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu206" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu208" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Sequoia</source>
+<seg-source><mrk mid="0" mtype="seg">Sequoia</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Sequoia</mrk></target>
+</trans-unit>
+<trans-unit id="tu209" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Sequoia</source>
+<seg-source><mrk mid="0" mtype="seg">Sequoia</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Sequoia</mrk></target>
+</trans-unit>
+<trans-unit id="tu207" xml:space="preserve">
+<source xml:lang="en-US"><x id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><x id="1"/></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><x id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="tu210" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">Sequoia Bike Helmet</source>
+<seg-source><mrk mid="0" mtype="seg">Sequoia Bike Helmet</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Sequoia Bike Helmet</mrk></target>
+</trans-unit>
+<trans-unit id="tu211" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">helmet</g>
+
+            <g id="2">
+                <g id="3">$75.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">helmet</g>
+
+            <g id="2">
+                <g id="3">$75.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">helmet</g>
+
+            <g id="2">
+                <g id="3">$75.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu212" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu214" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Rios</source>
+<seg-source><mrk mid="0" mtype="seg">Rios</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Rios</mrk></target>
+</trans-unit>
+<trans-unit id="tu215" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Rios</source>
+<seg-source><mrk mid="0" mtype="seg">Rios</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Rios</mrk></target>
+</trans-unit>
+<trans-unit id="tu213" xml:space="preserve">
+<source xml:lang="en-US"><x id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><x id="1"/></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><x id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="tu216" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">Rios T Shirt</source>
+<seg-source><mrk mid="0" mtype="seg">Rios T Shirt</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Rios T Shirt</mrk></target>
+</trans-unit>
+<trans-unit id="tu217" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">shirt</g>
+
+            <g id="2">
+                <g id="3">$39.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">shirt</g>
+
+            <g id="2">
+                <g id="3">$39.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">shirt</g>
+
+            <g id="2">
+                <g id="3">$39.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu218" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu220" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">stretch_side</source>
+<seg-source><mrk mid="0" mtype="seg">stretch_side</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">stretch_side</mrk></target>
+</trans-unit>
+<trans-unit id="tu221" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">stretch_side</source>
+<seg-source><mrk mid="0" mtype="seg">stretch_side</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">stretch_side</mrk></target>
+</trans-unit>
+<trans-unit id="tu219" xml:space="preserve">
+<source xml:lang="en-US"><x id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><x id="1"/></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><x id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="tu222" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">The Stretch Longboard</source>
+<seg-source><mrk mid="0" mtype="seg">The Stretch Longboard</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">The Stretch Longboard</mrk></target>
+</trans-unit>
+<trans-unit id="tu223" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">equipment</g>
+
+            <g id="2">
+                <g id="3">$900.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">equipment</g>
+
+            <g id="2">
+                <g id="3">$900.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">equipment</g>
+
+            <g id="2">
+                <g id="3">$900.00</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu224" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu226" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">116138647</source>
+<seg-source><mrk mid="0" mtype="seg">116138647</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">116138647</mrk></target>
+</trans-unit>
+<trans-unit id="tu227" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">116138647</source>
+<seg-source><mrk mid="0" mtype="seg">116138647</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">116138647</mrk></target>
+</trans-unit>
+<trans-unit id="tu225" xml:space="preserve">
+<source xml:lang="en-US"><x id="1"/></source>
+<seg-source><mrk mid="0" mtype="seg"><x id="1"/></mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><x id="1"/></mrk></target>
+</trans-unit>
+<trans-unit id="tu228" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">Faba Running Pants</source>
+<seg-source><mrk mid="0" mtype="seg">Faba Running Pants</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Faba Running Pants</mrk></target>
+</trans-unit>
+<trans-unit id="tu229" xml:space="preserve">
+<source xml:lang="en-US">
+            <g id="1">pants</g>
+
+            <g id="2">
+                <g id="3">$39.99</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </source>
+<seg-source><mrk mid="0" mtype="seg">
+            <g id="1">pants</g>
+
+            <g id="2">
+                <g id="3">$39.99</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+            <g id="1">pants</g>
+
+            <g id="2">
+                <g id="3">$39.99</g>
+                <g id="4"/>
+                <g id="5"/>
+            </g>
+
+            <g id="6"><g id="7"/>off</g>
+            <g id="8"/>
+
+        </mrk></target>
+</trans-unit>
+<trans-unit id="tu230" xml:space="preserve">
+<source xml:lang="en-US">
+<g id="1">All equipment</g>
+<x id="2"/>
+</source>
+<seg-source><mrk mid="0" mtype="seg">
+<g id="1">All equipment</g>
+<x id="2"/>
+</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+<g id="1">All equipment</g>
+<x id="2"/>
+</mrk></target>
+</trans-unit>
+<trans-unit id="tu231" restype="x-h2" xml:space="preserve">
+<source xml:lang="en-US">Winter is coming, get ready</source>
+<seg-source><mrk mid="0" mtype="seg">Winter is coming, get ready</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Winter is coming, get ready</mrk></target>
+</trans-unit>
+<trans-unit id="tu233" restype="x-alt" xml:space="preserve">
+<source xml:lang="en-US">Aggressive powder skiing</source>
+<seg-source><mrk mid="0" mtype="seg">Aggressive powder skiing</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Aggressive powder skiing</mrk></target>
+</trans-unit>
+<trans-unit id="tu234" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Freeride Extreme</source>
+<seg-source><mrk mid="0" mtype="seg">Freeride Extreme</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Freeride Extreme</mrk></target>
+</trans-unit>
+<trans-unit id="tu232" xml:space="preserve">
+<source xml:lang="en-US">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+    
+        
+            
+            <x id="1"/>
+            
+        
+    
+    
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu235" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Snow Sports</g>
+
+    
+        
+    <g id="2">Skiing</g>
+
+    
+        
+    <g id="3">Snowboarding</g>
+
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Snow Sports</g>
+
+    
+        
+    <g id="2">Skiing</g>
+
+    
+        
+    <g id="3">Snowboarding</g>
+
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Snow Sports</g>
+
+    
+        
+    <g id="2">Skiing</g>
+
+    
+        
+    <g id="3">Snowboarding</g>
+
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu236" restype="x-h3" xml:space="preserve">
+<source xml:lang="en-US">Test Translation Section</source>
+<seg-source><mrk mid="0" mtype="seg">Test Translation Section</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Test Translation Section</mrk></target>
+</trans-unit>
+<trans-unit id="tu237" restype="x-paragraph" xml:space="preserve">
+<source xml:lang="en-US">This is a test <g id="1">Experience Fragment</g>. It should appear on every page where it is added.</source>
+<seg-source><mrk mid="0" mtype="seg">This is a test <g id="1">Experience Fragment</g>. </mrk><mrk mid="1" mtype="seg">It should appear on every page where it is added.</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">This is a test <g id="1">Experience Fragment</g>. </mrk><mrk mid="1" mtype="seg">It should appear on every page where it is added.</mrk></target>
+</trans-unit>
+<trans-unit id="tu238" restype="x-paragraph" xml:space="preserve">
+<source xml:lang="en-US"><g id="1">Special Characters:</g> !@#$%^&amp;*()_+-=;':",./&lt;&gt;?`~</source>
+<seg-source><mrk mid="0" mtype="seg"><g id="1">Special Characters:</g> !</mrk><mrk mid="1" mtype="seg">@#$%^&amp;*()_+-=;':",.</mrk><mrk mid="2" mtype="seg">/&lt;&gt;?</mrk><mrk mid="3" mtype="seg">`~</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg"><g id="1">Special Characters:</g> !</mrk><mrk mid="1" mtype="seg">@#$%^&amp;*()_+-=;':",.</mrk><mrk mid="2" mtype="seg">/&lt;&gt;?</mrk><mrk mid="3" mtype="seg">`~</mrk></target>
+</trans-unit>
+<trans-unit id="tu239" xml:space="preserve">
+<source xml:lang="en-US">
+                        we.<g id="1">Retail</g>
+                    </source>
+<seg-source><mrk mid="0" mtype="seg">
+                        we.<g id="1">Retail</g>
+                    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                        we.<g id="1">Retail</g>
+                    </mrk></target>
+</trans-unit>
+<trans-unit id="tu241" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Experience</source>
+<seg-source><mrk mid="0" mtype="seg">Experience</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Experience</mrk></target>
+</trans-unit>
+<trans-unit id="tu240" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Experience</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Experience</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Experience</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu243" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu242" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu245" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Women</source>
+<seg-source><mrk mid="0" mtype="seg">Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu244" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu247" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment</mrk></target>
+</trans-unit>
+<trans-unit id="tu246" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu249" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us</source>
+<seg-source><mrk mid="0" mtype="seg">About Us</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us</mrk></target>
+</trans-unit>
+<trans-unit id="tu248" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu251" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Products</source>
+<seg-source><mrk mid="0" mtype="seg">Products</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Products</mrk></target>
+</trans-unit>
+<trans-unit id="tu250" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Products</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu253" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu252" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu255" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</source>
+<seg-source><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></target>
+</trans-unit>
+<trans-unit id="tu254" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu257" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us 2.0</source>
+<seg-source><mrk mid="0" mtype="seg">About Us 2.0</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us 2.0</mrk></target>
+</trans-unit>
+<trans-unit id="tu256" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu259" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us &amp; Others</source>
+<seg-source><mrk mid="0" mtype="seg">About Us &amp; Others</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us &amp; Others</mrk></target>
+</trans-unit>
+<trans-unit id="tu258" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us &amp; Others</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us &amp; Others</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us &amp; Others</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu261" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men &amp; Women</source>
+<seg-source><mrk mid="0" mtype="seg">Men &amp; Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men &amp; Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu260" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men &amp; Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men &amp; Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men &amp; Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu263" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Products &amp; Items</source>
+<seg-source><mrk mid="0" mtype="seg">Products &amp; Items</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Products &amp; Items</mrk></target>
+</trans-unit>
+<trans-unit id="tu262" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Products &amp; Items</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products &amp; Items</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Products &amp; Items</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu265" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Women</source>
+<seg-source><mrk mid="0" mtype="seg">Women</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Women</mrk></target>
+</trans-unit>
+<trans-unit id="tu264" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Women</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Women</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu267" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu266" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu269" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us</source>
+<seg-source><mrk mid="0" mtype="seg">About Us</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us</mrk></target>
+</trans-unit>
+<trans-unit id="tu268" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu271" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment</mrk></target>
+</trans-unit>
+<trans-unit id="tu270" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu273" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</source>
+<seg-source><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></target>
+</trans-unit>
+<trans-unit id="tu272" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu275" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</source>
+<seg-source><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</mrk></target>
+</trans-unit>
+<trans-unit id="tu274" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">NSX Distributed IDS/IPS | Intrusion Detection &amp; Prevention System | VMware</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu277" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment-2</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment-2</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment-2</mrk></target>
+</trans-unit>
+<trans-unit id="tu276" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu279" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">About Us 2.0</source>
+<seg-source><mrk mid="0" mtype="seg">About Us 2.0</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">About Us 2.0</mrk></target>
+</trans-unit>
+<trans-unit id="tu278" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">About Us 2.0</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu281" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment-2</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment-2</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment-2</mrk></target>
+</trans-unit>
+<trans-unit id="tu280" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu283" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Men</source>
+<seg-source><mrk mid="0" mtype="seg">Men</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Men</mrk></target>
+</trans-unit>
+<trans-unit id="tu282" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Men</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Men</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu285" restype="x-title" xml:space="preserve">
+<source xml:lang="en-US">Equipment-2</source>
+<seg-source><mrk mid="0" mtype="seg">Equipment-2</mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">Equipment-2</mrk></target>
+</trans-unit>
+<trans-unit id="tu284" restype="x-li" xml:space="preserve">
+<source xml:lang="en-US">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </source>
+<seg-source><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+        
+    <g id="1">Equipment-2</g>
+
+        
+    </mrk></target>
+</trans-unit>
+<trans-unit id="tu286" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">© 2025 All rights reserved</g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">© 2025 All rights reserved</g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">© 2025 All rights reserved</g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu287" xml:space="preserve">
+<source xml:lang="en-US">
+                    <g id="1">Terms of use &amp; privacy policy</g>
+                </source>
+<seg-source><mrk mid="0" mtype="seg">
+                    <g id="1">Terms of use &amp; privacy policy</g>
+                </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                    <g id="1">Terms of use &amp; privacy policy</g>
+                </mrk></target>
+</trans-unit>
+<trans-unit id="tu288" xml:space="preserve">
+<source xml:lang="en-US">
+                        <g id="1">Ride to the top</g>
+                    </source>
+<seg-source><mrk mid="0" mtype="seg">
+                        <g id="1">Ride to the top</g>
+                    </mrk></seg-source>
+<target xml:lang="fr-FR"><mrk mid="0" mtype="seg">
+                        <g id="1">Ride to the top</g>
+                    </mrk></target>
+</trans-unit>
+</body>
+</file>
+</xliff>

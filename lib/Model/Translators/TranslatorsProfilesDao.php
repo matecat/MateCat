@@ -10,7 +10,9 @@
 namespace Model\Translators;
 
 
+use Exception;
 use Model\DataAccess\AbstractDao;
+use PDOException;
 use ReflectionException;
 
 class TranslatorsProfilesDao extends AbstractDao
@@ -35,6 +37,8 @@ class TranslatorsProfilesDao extends AbstractDao
      * @param TranslatorProfilesStruct $profile
      *
      * @return TranslatorProfilesStruct
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      * @internal param $id
      *

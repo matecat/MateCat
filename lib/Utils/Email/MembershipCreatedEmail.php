@@ -12,6 +12,7 @@ use Exception;
 use Model\Teams\MembershipStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Url\CanonicalRoutes;
 
 class MembershipCreatedEmail extends AbstractEmail
@@ -41,6 +42,7 @@ class MembershipCreatedEmail extends AbstractEmail
      * @param MembershipStruct $membership
      *
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function __construct(UserStruct $sender, MembershipStruct $membership)
     {

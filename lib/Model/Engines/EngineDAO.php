@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\NONEStruct;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
 
@@ -24,7 +25,9 @@ class EngineDAO extends AbstractDao
 
     const string STRUCT_TYPE = EngineStruct::class;
 
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
+    /** @var list<string> */
     protected static array $primary_keys = ['id'];
 
     /**
@@ -33,7 +36,7 @@ class EngineDAO extends AbstractDao
      *
      * @param EngineStruct $obj
      *
-     * @return array
+     * @return array{0: string, 1: array<string, int|string>}
      * @throws Exception
      */
     protected function _buildQueryForEngine(EngineStruct $obj): array
@@ -49,9 +52,7 @@ class EngineDAO extends AbstractDao
         }
 
         if ($obj->uid !== null) {
-            if ($obj->uid == 'NULL') {
-                $where_conditions[] = "uid IS NULL";
-            } elseif (empty($obj->uid) || $obj->uid <= 0) {
+            if (empty($obj->uid) || $obj->uid <= 0) {
                 throw new DomainException("Anonymous User."); //do not perform any query on anonymous user requests
             } elseif (is_numeric($obj->uid)) {
                 $bind_values['uid'] = (int)$obj->uid;
@@ -60,7 +61,7 @@ class EngineDAO extends AbstractDao
         }
 
         if ($obj->active) {
-            $bind_values['active'] = $obj->active;
+            $bind_values['active'] = (int)$obj->active;
             $where_conditions[] = "active = :active";
         }
 
@@ -83,6 +84,7 @@ class EngineDAO extends AbstractDao
      *
      * @return EngineStruct
      * @throws Exception
+     * @throws TypeError
      */
     public function create(EngineStruct $obj): EngineStruct
     {
@@ -120,11 +122,15 @@ class EngineDAO extends AbstractDao
         $stmt->execute($bind_values);
 
         //return the inserted object on success
-        $obj->id = $this->database->last_insert();
+        $obj->id = (int)$this->database->last_insert();
 
         // revert internal JSON fields to arrays
-        $obj->others = json_decode($obj->others, true);
-        $obj->extra_parameters = json_decode($obj->extra_parameters, true);
+        if (is_string($obj->others)) {
+            $obj->others = json_decode($obj->others, true);
+        }
+        if (is_string($obj->extra_parameters)) {
+            $obj->extra_parameters = json_decode($obj->extra_parameters, true);
+        }
 
         return $obj;
     }
@@ -182,6 +188,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function updateByStruct(EngineStruct $obj): int
     {
@@ -211,6 +218,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function delete(EngineStruct $obj): ?EngineStruct
     {
@@ -236,6 +244,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function disable(EngineStruct $obj): ?EngineStruct
     {
@@ -253,7 +262,7 @@ class EngineDAO extends AbstractDao
 
         if ($stmt->rowCount() > 0) {
             $tmpEng = $this->setCacheTTL(60 * 60 * 5)->read($obj)[0];
-            $tmpEng->active = 0; // avoid slave replication delay
+            $tmpEng->active = false; // avoid slave replication delay
 
             return $tmpEng;
         }
@@ -263,6 +272,7 @@ class EngineDAO extends AbstractDao
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function enable(EngineStruct $obj): ?EngineStruct
     {
@@ -288,9 +298,9 @@ class EngineDAO extends AbstractDao
     /**
      * Needed to decode json fields
      *
-     * @param array $array_result
+     * @param list<EngineStruct> $array_result
      *
-     * @return EngineStruct[]
+     * @return list<EngineStruct>
      */
     protected function _buildResult(array $array_result): array
     {
@@ -348,9 +358,9 @@ class EngineDAO extends AbstractDao
         $input->contribute_relative_url = ($input->contribute_relative_url !== null) ? $input->contribute_relative_url : null;
         $input->update_relative_url = ($input->update_relative_url !== null) ? $input->update_relative_url : null;
         $input->delete_relative_url = ($input->delete_relative_url !== null) ? $input->delete_relative_url : null;
-        $input->others = !empty($input->others) ? json_encode($input->others) : '{}';
+        $input->others = !empty($input->others) ? (json_encode($input->others) ?: null) : '{}';
         $input->class_load = ($input->class_load !== null) ? $input->class_load : null;
-        $input->extra_parameters = !empty($input->extra_parameters) ? json_encode($input->extra_parameters) : '{}';
+        $input->extra_parameters = !empty($input->extra_parameters) ? (json_encode($input->extra_parameters) ?: null) : '{}';
         $input->penalty = ($input->penalty !== null) ? $input->penalty : null;
         $input->active = ($input->active !== null) ? $input->active : null;
         $input->uid = ($input->uid !== null) ? $input->uid : null;
@@ -366,9 +376,7 @@ class EngineDAO extends AbstractDao
      */
     protected function _validateNotNullFields(IDaoStruct $obj): void
     {
-        /**
-         * @var $obj EngineStruct
-         */
+        /** @var EngineStruct $obj */
         if (empty($obj->base_url)) {
             throw new Exception("Base URL cannot be null");
         }
@@ -386,7 +394,7 @@ class EngineDAO extends AbstractDao
      */
     protected function _validatePrimaryKey(IDaoStruct $obj): void
     {
-        /** @var $obj EngineStruct */
+        /** @var EngineStruct $obj */
         if ($obj->id === null) {
             throw new Exception("Engine ID required");
         }
@@ -415,4 +423,3 @@ class EngineDAO extends AbstractDao
         }
     }
 }
-

@@ -4,6 +4,7 @@ namespace Utils\Validator\JSONSchema;
 
 use Exception;
 use RuntimeException;
+use stdClass;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRefProvider;
@@ -67,7 +68,7 @@ class JSONValidator extends AbstractValidator
     /**
      * @param string $jsonSchema
      *
-     * @return object
+     * @return stdClass
      */
     public static function getValidJSONSchema(string $jsonSchema): object
     {

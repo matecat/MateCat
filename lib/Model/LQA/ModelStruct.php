@@ -5,6 +5,8 @@ namespace Model\LQA;
 use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use PDOException;
+use RuntimeException;
 
 class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface
 {
@@ -20,25 +22,31 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     public ?int $qa_model_template_id = null;
     public ?int $uid = null; // nullable for backward compatibility
 
-    /**
-     * Returns the serialized representation of categories and subcategories.
-     *
-     * @return array
-     */
-    public function getSerializedCategories(): array
-    {
-        return ['categories' => CategoryDao::getCategoriesAndSeverities($this->id)];
-    }
+      /**
+       * Returns the serialized representation of categories and subcategories.
+       *
+       * @return array{categories: list<array<string, mixed>>}
+       * @throws RuntimeException
+       */
+      public function getSerializedCategories(): array
+     {
+         return ['categories' => CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'))];
+     }
 
-    public function getCategoriesAndSeverities(): array
-    {
-        return CategoryDao::getCategoriesAndSeverities($this->id);
-    }
+      /**
+       * @return list<array<string, mixed>>
+       * @throws RuntimeException
+       */
+      public function getCategoriesAndSeverities(): array
+     {
+         return CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
+     }
 
-    /**
-     * @return CategoryStruct[]
-     */
-    public function getCategories(): array
+     /**
+      * @return CategoryStruct[]
+      * @throws PDOException
+      */
+     public function getCategories(): array
     {
         return CategoryDao::getCategoriesByModel($this);
     }
@@ -71,9 +79,9 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      *
      * Ex: {"limit":{"1":"8","2":"5"}} is normalized to [0 => 8, 1 => 5]
      *
-     * @param array $limits
+     * @param list<int|string> $limits
      *
-     * @return array
+     * @return list<int>
      */
     private function normalizeLimits(array $limits): array
     {
@@ -86,10 +94,11 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
         return $normalized;
     }
 
-    /**
-     * @return array
-     */
-    public function getDecodedModel(): array
+     /**
+      * @return array{model: array<string, mixed>}
+      * @throws PDOException
+      */
+     public function getDecodedModel(): array
     {
         $categoriesArray = [];
         foreach ($this->getCategories() as $categoryStruct) {

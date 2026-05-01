@@ -5,16 +5,19 @@ namespace Model\LQA;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
+use TypeError;
 
 class EntryCommentDao extends AbstractDao
 {
 
     /**
-     * @param $id_issue
+     * @param int $id_issue
      *
-     * @return EntryCommentStruct[]
+     * @return list<EntryCommentStruct>
+     * @throws PDOException
      */
-    public function findByIssueId($id_issue): array
+    public function findByIssueId(int $id_issue): array
     {
         $sql = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
             " ORDER BY create_date DESC ";
@@ -23,13 +26,20 @@ class EntryCommentDao extends AbstractDao
         $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
         $stmt->execute([$id_issue]);
 
-        return $stmt->fetchAll();
+        return array_values($stmt->fetchAll());
     }
 
     /**
-     * @param array $data
+     * @param array{
+     *     uid: int,
+     *     id_qa_entry: int,
+     *     comment: string,
+     *     source_page: int
+     * } $data
      *
      * @return EntryCommentStruct
+     * @throws PDOException
+     * @throws TypeError
      */
     public function createComment(array $data): EntryCommentStruct
     {
@@ -52,7 +62,7 @@ class EntryCommentDao extends AbstractDao
                 ['uid', 'id_qa_entry', 'create_date', 'comment', 'source_page']
             )
         );
-        $lastId = $conn->lastInsertId();
+        $lastId = (int)$conn->lastInsertId();
 
         if ($result) {
             EntryDao::updateRepliesCount($struct->id_qa_entry);
@@ -64,7 +74,11 @@ class EntryCommentDao extends AbstractDao
         return $struct;
     }
 
-    public function findById($id): ?EntryCommentStruct
+    /**
+     * @param int $id
+     * @throws PDOException
+     */
+    public function findById(int $id): ?EntryCommentStruct
     {
         $sql = "SELECT * FROM qa_entry_comments WHERE id = ? ";
         $conn = Database::obtain()->getConnection();
@@ -78,9 +92,10 @@ class EntryCommentDao extends AbstractDao
     /**
      * Fetches comments grouped by issue IDs.
      *
-     * @param array $ids
+     * @param list<int> $ids
      *
-     * @return array
+     * @return array<int, list<array<string, scalar|null>>>
+     * @throws PDOException
      */
     public function fetchCommentsGroupedByIssueIds(array $ids): array
     {
@@ -101,6 +116,7 @@ class EntryCommentDao extends AbstractDao
      * @param int $from The ID of the QA entry from which the comments are to be moved.
      * @param int $to The ID of the QA entry to which the comments are to be moved.
      * @return int The number of rows affected by the operation.
+     * @throws PDOException
      */
     public function move(int $from, int $to): int
     {
@@ -115,10 +131,6 @@ class EntryCommentDao extends AbstractDao
         ]);
 
         return $stmt->rowCount();
-    }
-
-    protected function _buildResult(array $array_result)
-    {
     }
 
 }

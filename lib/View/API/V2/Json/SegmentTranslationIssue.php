@@ -7,6 +7,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
+use RuntimeException;
 use SplFileObject;
 
 class SegmentTranslationIssue
@@ -21,11 +22,14 @@ class SegmentTranslationIssue
     {
     }
 
-    public function renderItem(IdaoStruct $record): array
-    {
-        $dao = new EntryCommentDao();
-        /** @var EntryStruct $record */
-        $comments = $dao->findByIssueId($record->id);
+      /**
+       * @throws RuntimeException
+       */
+      public function renderItem(IdaoStruct $record): array
+     {
+         $dao = new EntryCommentDao();
+         /** @var EntryStruct $record */
+         $comments = $dao->findByIssueId($record->id ?? throw new RuntimeException('Missing issue id'));
         $record = new EntryStruct($record->getArrayCopy());
 
         return [
@@ -96,6 +100,7 @@ class SegmentTranslationIssue
      * @param AbstractDaoObjectStruct[] $array
      *
      * @return array
+     * @throws RuntimeException
      */
     public function render(array $array): array
     {

@@ -106,6 +106,10 @@ class GDriveUserAuthorizationModel
 
         $lastId = $dao->insertStruct($service);
 
+        if ($lastId === false) {
+            throw new Exception('Unable to insert connected service');
+        }
+
         return $dao->findById($lastId);
     }
 

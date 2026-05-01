@@ -6,6 +6,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -17,6 +18,7 @@ use Utils\Registry\AppConfig;
  * Date: 14/06/16
  * Time: 18.31
  */
+#[Group('PersistenceNeeded')]
 class UpdateDBTest extends AbstractTest
 {
     /**

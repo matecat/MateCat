@@ -265,7 +265,7 @@ class Database implements IDatabase
      */
     public function insert(string $table, array $data, array &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = []): string
     {
-        $query = static::buildInsertStatement($table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey);
+        [$query, $dupBindValues] = static::buildInsertStatement($table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey);
 
         $preparedStatement = $this->getConnection()->prepare($query);
 
@@ -273,6 +273,7 @@ class Database implements IDatabase
             return isset($mask[$key]);
         }, ARRAY_FILTER_USE_KEY);
 
+        $valuesToBind = array_merge($valuesToBind, $dupBindValues);
 
         // Execute it
         $preparedStatement->execute($valuesToBind);
@@ -293,11 +294,11 @@ class Database implements IDatabase
      *
      * @param array $on_duplicate_fields
      *
-     * @return string
+     * @return array{0: string, 1: array} [sql, dupBindValues]
      * @throws Exception
      * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): string
+    public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): array
     {
         if (empty($table)) {
             throw new Exception('TABLE constant is not defined');
@@ -312,6 +313,7 @@ class Database implements IDatabase
 
         $sql_ignore = $ignore ? " IGNORE " : "";
 
+        $valuesToBind = [];
         $duplicate_statement = "";
         if (!empty($on_duplicate_fields)) {
             $duplicate_statement = " ON DUPLICATE KEY UPDATE ";
@@ -344,7 +346,7 @@ class Database implements IDatabase
                 } else {
                     //bind to PDO
                     $duplicate_statement .= ":dupUpdate_" . $key;
-                    $valuesToBind[":dupUpdate_" . $key] = $value; //TODO this is a bug: bind values are not returned and not inserted in the mask
+                    $valuesToBind[":dupUpdate_" . $key] = $value;
                 }
                 $duplicate_statement .= ", ";
             }
@@ -368,7 +370,7 @@ class Database implements IDatabase
             }
         }
 
-        return "INSERT $sql_ignore INTO " . $table .
+        $sql = "INSERT $sql_ignore INTO " . $table .
             " (" .
             implode(', ', $first) .
             ") VALUES (" .
@@ -376,6 +378,8 @@ class Database implements IDatabase
             ")
                 $duplicate_statement ;
         ";
+
+        return [$sql, $valuesToBind];
     }
 
     /**
@@ -385,18 +389,6 @@ class Database implements IDatabase
     public function last_insert(): false|string
     {
         return $this->getConnection()->lastInsertId();
-    }
-
-
-    /**
-     * TODO this trim should be removed and ALL codebase migrated from $db->escape() to prepared Statements
-     * @deprecated
-     * @Override
-     * {@inheritdoc}
-     */
-    public function escape(string $string): string
-    {
-        return substr($this->getConnection()->quote($string), 1, -1);
     }
 
     /**

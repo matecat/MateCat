@@ -115,15 +115,19 @@ class SplitDAO extends AbstractDao
 
 
     /**
-     * @param $array_result SegmentSplitStruct[]
+     * @param list<SegmentSplitStruct> $array_result
      *
-     * @return SegmentSplitStruct[]
+     * @return list<SegmentSplitStruct>
      */
     protected function _buildResult(array $array_result): array
     {
         foreach ($array_result as $item) {
-            $item->source_chunk_lengths = json_decode($item->source_chunk_lengths, true);
-            $item->target_chunk_lengths = json_decode($item->target_chunk_lengths, true);
+            if (is_string($item->source_chunk_lengths)) {
+                $item->source_chunk_lengths = json_decode($item->source_chunk_lengths, true);
+            }
+            if (is_string($item->target_chunk_lengths)) {
+                $item->target_chunk_lengths = json_decode($item->target_chunk_lengths, true);
+            }
         }
 
         return $array_result;

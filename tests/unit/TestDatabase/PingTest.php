@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -14,6 +15,7 @@ use Utils\Registry\AppConfig;
  * Date: 12/04/16
  * Time: 16.26
  */
+#[Group('PersistenceNeeded')]
 class PingTest extends AbstractTest
 {
 

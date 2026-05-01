@@ -12,6 +12,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -325,7 +326,10 @@ class GetContributionController extends KleinController
             ]
         );
 
-        $featureSet->filter('rewriteContributionContexts', $segmentsList, $request);
+        $rewriteContributionContextsEvent = new RewriteContributionContextsEvent($segmentsList, $request);
+        $featureSet->dispatchFilter($rewriteContributionContextsEvent);
+        $segmentsList = $rewriteContributionContextsEvent->getSegmentsList();
+        $request = $rewriteContributionContextsEvent->getRequestData();
 
         if ($segmentsList->id_before) {
             $request['context_before'] = $Filter->fromLayer0ToLayer1($segmentsList->id_before->segment);

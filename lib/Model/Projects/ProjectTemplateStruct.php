@@ -8,6 +8,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use stdClass;
+use TypeError;
 
 class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {
@@ -47,6 +48,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      * @param int|null $id
      *
      * @return $this
+     * @throws TypeError
      */
     public function hydrateFromJSON(object $decodedObject, int $uid, ?int $id = null): ProjectTemplateStruct
     {

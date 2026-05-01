@@ -5,6 +5,7 @@ namespace unit\Model\ProjectCreation;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\PopulatePreTranslationsEvent;
 use Model\Files\MetadataDao;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Xliff\DTO\XliffRuleInterface;
@@ -49,7 +50,11 @@ class DetectPreTranslationTest extends AbstractTest
     public function returnsNullWhenPreTranslationsDisabled(): void
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturn(false);
+        $features->method('dispatchFilter')
+            ->willReturnCallback(function (PopulatePreTranslationsEvent $event): PopulatePreTranslationsEvent {
+                $event->setDefault(false);
+                return $event;
+            });
 
         $extractor = $this->buildExtractor(features: $features);
 
@@ -325,7 +330,7 @@ class DetectPreTranslationTest extends AbstractTest
     private function createDefaultFeaturesStub(): FeatureSet
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
+        $features->method('dispatchFilter')->willReturnArgument(0);
 
         return $features;
     }

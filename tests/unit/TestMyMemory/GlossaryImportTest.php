@@ -30,6 +30,7 @@ use Utils\Tools\Utils;
 
 error_reporting(~E_DEPRECATED);
 
+#[Group('PersistenceNeeded')]
 class GlossaryImportTest extends AbstractTest
 {
     protected $engine_struct_param;

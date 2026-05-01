@@ -27,6 +27,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -177,7 +178,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
-
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
@@ -414,19 +414,33 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   // set width and height of area
   useEffect(() => {
-    const onWindowResize = () => {
+    const recalcHeight = () => {
       const headerHeight =
         document.getElementsByTagName('header')[0].offsetHeight
       const footerHeight =
         document.getElementsByTagName('footer')[0].offsetHeight
+      const wrapperEl = document.getElementById('context-preview-wrapper')
+      const wrapperHeight = wrapperEl ? wrapperEl.offsetHeight : 0
 
-      setHeightArea(window.innerHeight - (headerHeight + footerHeight))
+      setHeightArea(
+        window.innerHeight - (headerHeight + footerHeight + wrapperHeight),
+      )
     }
 
-    onWindowResize()
-    window.addEventListener('resize', onWindowResize)
+    recalcHeight()
+    window.addEventListener('resize', recalcHeight)
 
-    return () => window.removeEventListener('resize', onWindowResize)
+    const wrapperEl = document.getElementById('context-preview-wrapper')
+    let observer
+    if (wrapperEl) {
+      observer = new ResizeObserver(recalcHeight)
+      observer.observe(wrapperEl)
+    }
+
+    return () => {
+      window.removeEventListener('resize', recalcHeight)
+      if (observer) observer.disconnect()
+    }
   }, [])
 
   // add actions listener
@@ -447,6 +461,10 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
       setScrollToSelected(false)
+      ContextPreviewChannel.sendMessage({
+        type: 'highlight',
+        sid,
+      })
     }
     const scrollToSelectedSegment = (sid) => {
       setScrollToSid(sid)

@@ -17,7 +17,7 @@ use Utils\Tools\Utils;
  * <pre>
  *   if( 'requestMethod' == 'POST' ) {
  *       $uploadInstance = new Upload();
- *       $uploadInstance->uploadFiles( $_FILES );
+ *       $uploadInstance->uploadFiles( $request->files()->all() );
  *   }
  * </pre>
  *
@@ -132,7 +132,7 @@ class Upload
     }
 
     /**
-     * Upload File from $_FILES
+     * Upload File from request files array
      * $RegistryKeyIndex MUST BE form name Element
      *
      * @param UploadElement $fileUp

@@ -1,0 +1,41 @@
+<?php
+
+namespace Model\Segments;
+
+enum SegmentMetadataMarshaller: string
+{
+    case ID_REQUEST = 'id_request';
+    case ID_CONTENT = 'id_content';
+    case ID_ORDER = 'id_order';
+    case ID_ORDER_GROUP = 'id_order_group';
+    case SCREENSHOT = 'screenshot';
+    case SIZE_RESTRICTION = 'sizeRestriction';
+    case RESNAME = 'resname';
+    case RESTYPE = 'restype';
+    case CONTEXT_URL = 'context-url';
+    case X_CLIENT_NAME = 'x-client-name';
+    case TRANSLATION_DISABLED = 'translation_disabled';
+
+    public static function isAllowed(string $key): bool
+    {
+        return self::tryFrom($key) !== null;
+    }
+
+    public function marshall(mixed $value): ?string
+    {
+        return match ($this) {
+            self::SIZE_RESTRICTION => ((int)$value > 0) ? (string)(int)$value : null,
+            self::RESTYPE => ContextResType::tryFrom($value) !== null ? (string)$value : null,
+            default => (string)$value,
+        };
+    }
+
+    public static function unMarshall(SegmentMetadataStruct $struct): mixed
+    {
+        return match ($struct->meta_key) {
+            self::TRANSLATION_DISABLED => (bool)$struct->meta_value,
+            self::SIZE_RESTRICTION->value => (int)$struct->meta_value,
+            default => $struct->meta_value,
+        };
+    }
+}

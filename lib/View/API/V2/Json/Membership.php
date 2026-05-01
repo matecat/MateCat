@@ -11,6 +11,7 @@ namespace View\API\V2\Json;
 
 use Model\Teams\MembershipStruct;
 use ReflectionException;
+use RuntimeException;
 
 class Membership
 {
@@ -27,6 +28,7 @@ class Membership
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function renderItem(MembershipStruct $membership): array
     {
@@ -51,6 +53,7 @@ class Membership
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function render(): array
     {
@@ -64,6 +67,7 @@ class Membership
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function renderPublic(): array
     {
@@ -80,6 +84,7 @@ class Membership
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function renderItemPublic(MembershipStruct $membership): false|array
     {

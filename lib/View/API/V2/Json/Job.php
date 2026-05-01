@@ -17,6 +17,8 @@ use Matecat\Locales\Languages;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
+use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ManageModel;
@@ -139,7 +141,9 @@ class Job
         $chunkReviews = (new ChunkReviewDao())->findChunkReviews($chunk, 60 * 5);
 
         // is outsource available?
-        $outsourceAvailableInfo = $featureSet->filter('outsourceAvailableInfo', $chunk->target, $chunk->getProject()->id_customer, $chunk->id);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($chunk->target, (string)$chunk->getProject()->id_customer, (int)$chunk->id);
+        $featureSet->dispatchFilter($outsourceAvailableInfoEvent);
+        $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin doesn't trigger the hook
         if (!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)) {
@@ -224,8 +228,12 @@ class Job
 
         $formatted = new ProjectUrls($projectData);
 
-        /** @var $formatted ProjectUrls */
-        $formatted = $featureSet->filter('projectUrls', $formatted);
+        $projectUrlsEvent = new ProjectUrlsEvent($formatted);
+        $featureSet->dispatchFilter($projectUrlsEvent);
+        $formatted = $projectUrlsEvent->getFormatted();
+        if (!$formatted instanceof ProjectUrls) {
+            throw new Exception('Invalid projectUrls hook payload');
+        }
 
         $urlsObject = $formatted->render(true);
         $result['urls'] = $urlsObject['jobs'][$chunk->id]['chunks'][$chunk->password] ?? [];

@@ -61,13 +61,17 @@ class SearchModel
     {
         switch ($this->queryParams->key) {
             case 'source':
-                $results = $this->_getQuery($this->_loadSearchInSourceQuery($inCurrentChunkOnly));
+                [$sql, $params] = $this->_loadSearchInSourceQuery($inCurrentChunkOnly);
+                $results = $this->_getQuery($sql, $params);
                 break;
             case 'target':
-                $results = $this->_getQuery($this->_loadSearchInTargetQuery($inCurrentChunkOnly));
+                [$sql, $params] = $this->_loadSearchInTargetQuery($inCurrentChunkOnly);
+                $results = $this->_getQuery($sql, $params);
                 break;
             case 'coupled':
-                $rawResults = array_merge_recursive($this->_getQuery($this->_loadSearchInSourceQuery($inCurrentChunkOnly)), $this->_getQuery($this->_loadSearchInTargetQuery($inCurrentChunkOnly)));
+                [$sqlSrc, $paramsSrc] = $this->_loadSearchInSourceQuery($inCurrentChunkOnly);
+                [$sqlTrg, $paramsTrg] = $this->_loadSearchInTargetQuery($inCurrentChunkOnly);
+                $rawResults = array_merge_recursive($this->_getQuery($sqlSrc, $paramsSrc), $this->_getQuery($sqlTrg, $paramsTrg));
                 $results = [];
 
                 // in this case, $results is the merge of two queries results,
@@ -78,7 +82,8 @@ class SearchModel
 
                 break;
             case 'status_only':
-                $results = $this->_getQuery($this->_loadSearchStatusOnlyQuery());
+                [$sql, $params] = $this->_loadSearchStatusOnlyQuery();
+                $results = $this->_getQuery($sql, $params);
                 break;
             default:
                 $results = [];
@@ -174,16 +179,17 @@ class SearchModel
     }
 
     /**
-     * @param $sql
+     * @param string $sql
+     * @param array $params
      *
      * @return array
      * @throws Exception
      */
-    protected function _getQuery($sql): array
+    protected function _getQuery(string $sql, array $params = []): array
     {
         try {
             $stmt = $this->db->getConnection()->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($params);
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             LoggerFactory::doJsonLog($e->getMessage());
@@ -206,8 +212,7 @@ class SearchModel
 
         $this->queryParams->where_status = "";
         if ($this->queryParams->status != 'all') {
-            $this->queryParams->status = $this->db->escape($this->queryParams->status); //escape: hardcoded
-            $this->queryParams->where_status = "AND st.status = '{$this->queryParams->status}'";
+            $this->queryParams->where_status = "AND st.status = :status";
         }
 
         $this->queryParams->matchCase = new stdClass();
@@ -229,79 +234,93 @@ class SearchModel
             $this->queryParams->exactMatch->Space_Left = $this->queryParams->exactMatch->Space_Right = ""; // we want to search for all occurrences in a string: the word mod will take two matches: "mod" and "mod modifier"
         }
 
-        /**
-         * Escape Meta-characters to use in regular expression (LIKE STATEMENT is treated inside MySQL as a Regexp pattern)
-         *
-         */
-        if (isset($this->queryParams->source)) {
-            $escaped = preg_quote((string)$this->queryParams->source, '#');
-            $this->queryParams->_regexpNotEscapedSrc = $escaped;
-            $this->queryParams->regexpEscapedSrc = $this->db->escape($escaped);
-        }
-
-        if (isset($this->queryParams->target)) {
-            $escaped = preg_quote((string)$this->queryParams->target, '#');
-            $this->queryParams->_regexpEscapedTrg = $escaped;
-            $this->queryParams->regexpEscapedTrg = $this->db->escape($escaped);
-        }
     }
 
     /**
      * @param bool $inCurrentChunkOnly
      *
-     * @return string
+     * @return array
      */
-    protected function _loadSearchInTargetQuery(bool $inCurrentChunkOnly = false): string
+    protected function _loadSearchInTargetQuery(bool $inCurrentChunkOnly = false): array
     {
         $this->_loadParams();
-        $password_where = ($inCurrentChunkOnly) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
+        $params = ['job' => $this->queryParams->job];
+        $password_where = '';
+        if ($inCurrentChunkOnly) {
+            $password_where = ' AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment AND j.password = :password';
+            $params['password'] = $this->queryParams->password;
+        }
 
-        return "
+        if ($this->queryParams->status != 'all') {
+            $params['status'] = $this->queryParams->status;
+        }
+
+        $sql = "
         SELECT  st.id_segment as id, st.translation as text, od.map as original_map
 			FROM segment_translations st
 			INNER JOIN jobs j ON j.id = st.id_job
 			LEFT JOIN segment_original_data od on od.id_segment = st.id_segment
-			WHERE st.id_job = {$this->queryParams->job} 
+			WHERE st.id_job = :job 
 			{$password_where}
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
 			GROUP BY st.id_segment";
+
+        return [$sql, $params];
     }
 
     /**
      * @param bool $inCurrentChunkOnly
      *
-     * @return string
+     * @return array
      */
-    protected function _loadSearchInSourceQuery(?bool $inCurrentChunkOnly = false): string
+    protected function _loadSearchInSourceQuery(?bool $inCurrentChunkOnly = false): array
     {
         $this->_loadParams();
-        $password_where = ($inCurrentChunkOnly) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
+        $params = ['job' => $this->queryParams->job];
+        $password_where = '';
+        if ($inCurrentChunkOnly) {
+            $password_where = ' AND s.id BETWEEN j.job_first_segment AND j.job_last_segment AND j.password = :password';
+            $params['password'] = $this->queryParams->password;
+        }
 
-        return "
+        if ($this->queryParams->status != 'all') {
+            $params['status'] = $this->queryParams->status;
+        }
+
+        $sql = "
         SELECT s.id, s.segment as text, od.map as original_map
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			INNER JOIN jobs j ON j.id = fj.id_job
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			LEFT JOIN segment_original_data od on od.id_segment = s.id
-			WHERE fj.id_job = {$this->queryParams->job}
+			WHERE fj.id_job = :job
 			{$password_where}
 			AND show_in_cattool = 1
 			{$this->queryParams->where_status}
 			GROUP BY s.id";
+
+        return [$sql, $params];
     }
 
-    protected function _loadSearchStatusOnlyQuery(): string
+    protected function _loadSearchStatusOnlyQuery(): array
     {
         $this->_loadParams();
+        $params = ['job' => $this->queryParams->job];
 
-        return "
+        if ($this->queryParams->status != 'all') {
+            $params['status'] = $this->queryParams->status;
+        }
+
+        $sql = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
-			WHERE st.id_job = {$this->queryParams->job}
+			WHERE st.id_job = :job
 		    {$this->queryParams->where_status}
 		";
+
+        return [$sql, $params];
     }
 
 }
