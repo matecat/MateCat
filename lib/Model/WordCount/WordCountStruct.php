@@ -13,6 +13,7 @@ use JsonSerializable;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
+use TypeError;
 
 class WordCountStruct implements JsonSerializable
 {
@@ -39,12 +40,13 @@ class WordCountStruct implements JsonSerializable
 
     protected float $total = 0;
 
-    /**
-     * @param JobStruct $jobOrChunk
-     *
-     * @return WordCountStruct
-     */
-    public static function loadFromJob(JobStruct $jobOrChunk): WordCountStruct
+     /**
+      * @param JobStruct $jobOrChunk
+      *
+      * @return WordCountStruct
+      * @throws TypeError
+      */
+     public static function loadFromJob(JobStruct $jobOrChunk): WordCountStruct
     {
         $wordCountStruct = new WordCountStruct();
         $wordCountStruct->id_job = (int)$jobOrChunk->id;

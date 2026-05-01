@@ -5,6 +5,7 @@ namespace Model\LQA;
 use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use PDOException;
 use RuntimeException;
 
 class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface
@@ -40,10 +41,11 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
          return CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
      }
 
-    /**
-     * @return CategoryStruct[]
-     */
-    public function getCategories(): array
+     /**
+      * @return CategoryStruct[]
+      * @throws PDOException
+      */
+     public function getCategories(): array
     {
         return CategoryDao::getCategoriesByModel($this);
     }
@@ -91,10 +93,11 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
         return $normalized;
     }
 
-    /**
-     * @return array
-     */
-    public function getDecodedModel(): array
+     /**
+      * @return array
+      * @throws PDOException
+      */
+     public function getDecodedModel(): array
     {
         $categoriesArray = [];
         foreach ($this->getCategories() as $categoryStruct) {

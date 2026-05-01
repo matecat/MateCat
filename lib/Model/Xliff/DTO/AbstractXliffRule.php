@@ -58,15 +58,16 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      */
     protected string $matchCategory = 'ice';
 
-    /**
-     * AbstractXliffRule constructor.
-     *
-     * @param array $states
-     * @param string $analysis
-     * @param string|null $editor
-     * @param string|null $matchCategory
-     */
-    public function __construct(array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null)
+     /**
+      * AbstractXliffRule constructor.
+      *
+      * @param array $states
+      * @param string $analysis
+      * @param string|null $editor
+      * @param string|null $matchCategory
+      * @throws DomainException
+      */
+     public function __construct(array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null)
     {
         // follow exact assignment order
         $this->setStates($states);
@@ -76,9 +77,10 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param array $states
-     */
-    protected function setStates(array $states): void
+      * @param array $states
+      * @throws DomainException
+      */
+     protected function setStates(array $states): void
     {
         foreach ($states as $state) {
             if (!in_array($state, array_merge(static::$_STATES, static::$_STATE_QUALIFIERS)) && empty(preg_match('/^x-.+$/', $state))) {
@@ -96,10 +98,11 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         }
     }
 
-    /**
-     * @param string $analysis
-     */
-    protected function setAnalysis(string $analysis): void
+     /**
+      * @param string $analysis
+      * @throws DomainException
+      */
+     protected function setAnalysis(string $analysis): void
     {
         if (!in_array($analysis, static::ALLOWED_ANALYSIS_VALUES)) {
             throw new DomainException("Wrong analysis value", 400);
@@ -108,10 +111,11 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         $this->analysis = strtolower($analysis);
     }
 
-    /**
-     * @param string|null $editor
-     */
-    protected function setEditor(?string $editor = null): void
+     /**
+      * @param string|null $editor
+      * @throws DomainException
+      */
+     protected function setEditor(?string $editor = null): void
     {
         if ($this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty($editor)) {
             throw new DomainException("Wrong editor value. A `new` rule can not have an assigned editor value.", 400);
@@ -122,14 +126,15 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         $this->editor = strtolower($editor ?? '');
     }
 
-    /**
-     * Accept null values and keep the default ICE
-     *
-     * @param string|null $matchCategory
-     *
-     * @return void
-     */
-    protected function setMatchCategory(?string $matchCategory = null): void
+     /**
+      * Accept null values and keep the default ICE
+      *
+      * @param string|null $matchCategory
+      *
+      * @return void
+      * @throws DomainException
+      */
+     protected function setMatchCategory(?string $matchCategory = null): void
     {
         if (!empty($matchCategory) && !in_array($matchCategory, StandardMatchTypeNamesConstants::forValue())) {
             throw new DomainException("Wrong match_category value", 400);
@@ -140,12 +145,13 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         }
     }
 
-    /**
-     * @param array{states: string[], analysis: string, editor?: string|null, match_category?: string|null} $structure
-     *
-     * @return AbstractXliffRule
-     */
-    public static function fromArray(array $structure): AbstractXliffRule
+     /**
+      * @param array{states: string[], analysis: string, editor?: string|null, match_category?: string|null} $structure
+      *
+      * @return AbstractXliffRule
+      * @throws DomainException
+      */
+     public static function fromArray(array $structure): AbstractXliffRule
     {
         return new static($structure['states'], $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null);
     }

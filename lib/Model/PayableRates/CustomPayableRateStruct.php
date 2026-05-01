@@ -9,6 +9,7 @@ use Matecat\Locales\Languages;
 use Model\Analysis\PayableRates;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
@@ -29,6 +30,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
 
     /**
      * @return string
+     * @throws TypeError
      */
     public function breakdownsToJson(): string
     {
@@ -37,6 +39,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
 
     /**
      * @return array
+     * @throws TypeError
      */
     public function getBreakdownsArray(): array
     {
@@ -62,6 +65,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      * @param string $target
      *
      * @return array
+     * @throws DomainException
+     * @throws TypeError
      */
     public function getPayableRates(string $source, string $target): array
     {
@@ -79,6 +84,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      * @return $this
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function hydrateFromJSON(string $json): CustomPayableRateStruct
     {
@@ -133,6 +139,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
 
     /**
      * @param $lang
+     * @throws DomainException
      */
     private function validateLanguage($lang): void
     {
@@ -147,6 +154,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     /**
      * @return array
      * @throws Exception
+     * @throws TypeError
      */
     public function jsonSerialize(): array
     {

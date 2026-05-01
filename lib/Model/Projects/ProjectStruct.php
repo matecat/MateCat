@@ -3,6 +3,8 @@
 namespace Model\Projects;
 
 use ArrayAccess;
+use DomainException;
+use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\Database;
@@ -16,6 +18,7 @@ use Model\LQA\ModelStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
 
@@ -60,8 +63,10 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function getJobs(int $ttl = 0): array
     {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
-            return JobDao::getByProjectId($this->id, $ttl);
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
+            return JobDao::getByProjectId($id, $ttl);
         });
     }
 
@@ -77,20 +82,22 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         return count($this->getJobs());
     }
 
-    /**
-     * Proxy to set metadata for the current project
-     *
-     * @param string $key
-     * @param string $value
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    public function setMetadata(string $key, string $value): bool
+     /**
+      * Proxy to set metadata for the current project
+      *
+      * @param string $key
+      * @param string $value
+      *
+      * @return bool
+      * @throws ReflectionException
+      * @throws PDOException
+      */
+     public function setMetadata(string $key, string $value): bool
     {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
         $dao = new MetadataDao(Database::obtain());
 
-        return $dao->set($this->id, $key, $value);
+        return $dao->set($id, $key, $value);
     }
 
     /**
@@ -116,10 +123,12 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function getMetadataValue(string $key): mixed
     {
-        return $this->cachable(__METHOD__ . ":" . $key, function () use ($key) {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__ . ":" . $key, function () use ($id, $key) {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL(60 * 60)->get($this->id, $key)?->value;
+            return $mDao->setCacheTTL(60 * 60)->get($id, $key)?->value;
         });
     }
 
@@ -128,10 +137,12 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function getAllMetadata(): array
     {
-        return $this->cachable(__METHOD__, function () {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__, function () use ($id) {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL(60 * 60)->allByProjectId($this->id);
+            return $mDao->setCacheTTL(60 * 60)->allByProjectId($id);
         });
     }
 
@@ -150,11 +161,12 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         });
     }
 
-    /**
-     * @return null|TeamStruct
-     * @throws ReflectionException
-     */
-    public function getTeam(): ?TeamStruct
+     /**
+      * @return null|TeamStruct
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getTeam(): ?TeamStruct
     {
         if (is_null($this->id_team)) {
             return null;
@@ -195,10 +207,12 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function getChunks(int $ttl = 0): array
     {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
             $dao = new ChunkDao(Database::obtain());
 
-            return $dao->setCacheTTL($ttl)->getByProjectID($this->id);
+            return $dao->setCacheTTL($ttl)->getByProjectID($id);
         });
     }
 

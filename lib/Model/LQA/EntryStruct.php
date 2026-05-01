@@ -2,12 +2,14 @@
 
 namespace Model\LQA;
 
+use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
+use TypeError;
 
 class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
@@ -86,12 +88,14 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return $this;
     }
 
-    /**
-     * @throws ValidationError
-     * @throws NotFoundException
-     * @throws ReflectionException
-     */
-    public function setDefaults(): void
+     /**
+      * @throws ValidationError
+      * @throws NotFoundException
+      * @throws ReflectionException
+      * @throws Exception
+      * @throws TypeError
+      */
+     public function setDefaults(): void
     {
         $this->validator->ensureValid();
 

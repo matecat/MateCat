@@ -729,7 +729,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\ConvertFileController\:\:validateFiltersExtractionParametersTemplateId\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/App/ConvertFileController.php
 
 		-
@@ -997,6 +997,12 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validatePayableRateTemplate\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/App/CreateProjectController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validatePublicTMPenalty\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -1041,7 +1047,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validateXliffParameters\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
@@ -1617,7 +1623,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\GetProjectsController\:\:filterAssignee\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/App/GetProjectsController.php
 
 		-
@@ -2377,6 +2383,12 @@ parameters:
 			path: lib/Controller/API/App/QualityFrameworkController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\QualityFrameworkController\:\:renderQualityFramework\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/QualityFrameworkController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\RequestExportTMXController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -2522,6 +2534,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildNewTranslation\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildResult\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
@@ -2977,6 +2995,12 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
 
 		-
+			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkFromRevisePassword\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
+
+		-
 			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkFromTranslatePassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -3255,7 +3279,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:changeConversionParameters\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
@@ -3273,7 +3297,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:open\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
@@ -4387,6 +4411,12 @@ parameters:
 			path: lib/Controller/API/V2/JobsTranslatorsController.php
 
 		-
+			message: '#^Method Controller\\API\\V2\\JobsTranslatorsController\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/V2/JobsTranslatorsController.php
+
+		-
 			message: '#^Parameter \#1 \$delivery_date of method Model\\Translators\\TranslatorsModel\:\:setDeliveryDate\(\) expects int\|string, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -4539,13 +4569,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:checkLoggedUserPermissions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:checkLoggedUserPermissions\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
+			count: 3
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
 
 		-
@@ -4563,7 +4587,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V2\\SegmentTranslationIssueController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 3
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
 
 		-
@@ -4683,6 +4707,12 @@ parameters:
 		-
 			message: '#^Cannot call method getProject\(\) on Model\\Jobs\\JobStruct\|null\.$#'
 			identifier: method.nonObject
+			count: 1
+			path: lib/Controller/API/V2/StatsController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/StatsController.php
 
@@ -5253,7 +5283,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\MetaDataController\:\:getJobFilesMetaData\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/V3/MetaDataController.php
 
 		-
@@ -5473,6 +5503,12 @@ parameters:
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\PayableRateController\:\:validate\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/PayableRateController.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\PayableRateController\:\:validateJSON\(\) throws checked exception Swaggest\\JsonSchema\\Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -5654,6 +5690,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/QualityReportControllerAPI.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/QualityReportControllerAPI.php
@@ -6897,7 +6939,7 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\CattoolController\:\:findOwnerEmailAndTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 3
 			path: lib/Controller/Views/CattoolController.php
 
 		-
@@ -6909,6 +6951,12 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\CattoolController\:\:getCategoriesAsJson\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/Views/CattoolController.php
+
+		-
+			message: '#^Method Controller\\Views\\CattoolController\:\:getCategoriesAsJson\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/CattoolController.php
 
@@ -10459,6 +10507,12 @@ parameters:
 			path: lib/Model/Filters/DTO/Yaml.php
 
 		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
 			message: '#^Call to an undefined method object\:\:fromArray\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -10474,18 +10528,6 @@ parameters:
 			message: '#^Method Model\\Filters\\FiltersConfigTemplateStruct\:\:hydrateDtoFromArray\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 6
 			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
 
 		-
@@ -10549,6 +10591,12 @@ parameters:
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
+			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:mergeALL\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
+
+		-
 			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:get\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10603,44 +10651,8 @@ parameters:
 			path: lib/Model/Jobs/JobStruct.php
 
 		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getClientKeys\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getErrorsCount\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getFiles\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
 			message: '#^Method Model\\Jobs\\JobStruct\:\:getOpenThreadsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getOpenThreadsCount\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getOutsource\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getPeeForTranslatedSegments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Jobs/JobStruct.php
 
@@ -10651,20 +10663,14 @@ parameters:
 			path: lib/Model/Jobs/JobStruct.php
 
 		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getSegments\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Jobs\\JobStruct\:\:getSegments\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Model/Jobs/JobStruct.php
 
 		-
 			message: '#^Method Model\\Jobs\\JobStruct\:\:getTMProps\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:getTranslator\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Jobs/JobStruct.php
 
@@ -10687,50 +10693,8 @@ parameters:
 			path: lib/Model/Jobs/JobStruct.php
 
 		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:setIsReview\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
 			message: '#^Method Model\\Jobs\\JobStruct\:\:setSourcePage\(\) has parameter \$_revisionNumber with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:setSourcePage\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\JobDao\:\:getPeeStats\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Segments\\SegmentDao\:\:getByChunkId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\ChunkDao\:\:getByJobID\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Jobs\\JobDao\:\:getPeeStats\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Segments\\SegmentDao\:\:getByChunkId\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Model/Jobs/JobStruct.php
 
@@ -10765,20 +10729,8 @@ parameters:
 			path: lib/Model/LQA/CategoryStruct.php
 
 		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/LQA/CategoryStruct.php
-
-		-
 			message: '#^Method Model\\LQA\\ChunkReviewStruct\:\:getUndoData\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: lib/Model/LQA/ChunkReviewStruct.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Model/LQA/ChunkReviewStruct.php
 
@@ -10787,6 +10739,24 @@ parameters:
 			identifier: closure.unusedUse
 			count: 1
 			path: lib/Model/LQA/EntryCommentStruct.php
+
+		-
+			message: '#^Method Model\\LQA\\EntryDao\:\:createEntry\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/EntryDao.php
+
+		-
+			message: '#^Method Model\\LQA\\EntryDao\:\:modifyEntry\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/EntryDao.php
+
+		-
+			message: '#^Method Model\\LQA\\EntryDao\:\:modifyEntry\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/EntryDao.php
 
 		-
 			message: '#^Cannot access property \$id on Model\\LQA\\CategoryStruct\|null\.$#'
@@ -10816,18 +10786,6 @@ parameters:
 			message: '#^Method Model\\LQA\\EntryStruct\:\:addComments\(\) has parameter \$comments with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryStruct\:\:setDefaults\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryStruct\:\:setDefaults\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: lib/Model/LQA/EntryStruct.php
 
 		-
@@ -10915,12 +10873,6 @@ parameters:
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:getCategories\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
 			message: '#^Method Model\\LQA\\ModelStruct\:\:getCategoriesAndSeverities\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11005,12 +10957,6 @@ parameters:
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
 
 		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 15
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
-
-		-
 			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11047,18 +10993,6 @@ parameters:
 			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
 
 		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateStruct\:\:hydrateFromJSON\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 7
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
-
-		-
 			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11080,18 +11014,6 @@ parameters:
 			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\:\:__toString\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php
-
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php
-
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 6
 			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php
 
 		-
@@ -11335,6 +11257,18 @@ parameters:
 			path: lib/Model/Pagination/PaginationParameters.php
 
 		-
+			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/PayableRates/CustomPayableRateDao.php
+
+		-
+			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/PayableRates/CustomPayableRateDao.php
+
+		-
 			message: '#^Argument of an invalid type array\|string supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -11359,21 +11293,9 @@ parameters:
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getBreakdownsArray\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
 			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getPayableRates\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
@@ -11391,12 +11313,6 @@ parameters:
 		-
 			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:validateLanguage\(\) has parameter \$lang with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:validateLanguage\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
@@ -11422,6 +11338,12 @@ parameters:
 			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:insertJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
+			path: lib/Model/ProjectCreation/JobCreationService.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:resolvePayableRates\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 3
 			path: lib/Model/ProjectCreation/JobCreationService.php
 
 		-
@@ -11737,13 +11659,31 @@ parameters:
 			path: lib/Model/Projects/ProjectStruct.php
 
 		-
+			message: '#^Method Model\\Projects\\ProjectStruct\:\:getAllMetadata\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Projects/ProjectStruct.php
+
+		-
 			message: '#^Method Model\\Projects\\ProjectStruct\:\:getAllMetadataAsKeyValue\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Projects/ProjectStruct.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:getTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Projects\\ProjectStruct\:\:getChunks\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Projects/ProjectStruct.php
+
+		-
+			message: '#^Method Model\\Projects\\ProjectStruct\:\:getJobs\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Projects/ProjectStruct.php
+
+		-
+			message: '#^Method Model\\Projects\\ProjectStruct\:\:getMetadataValue\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Projects/ProjectStruct.php
@@ -11779,38 +11719,8 @@ parameters:
 			path: lib/Model/Projects/ProjectStruct.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:setMetadata\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Projects\\ProjectStruct\:\:setMetadata\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Model\\Projects\\MetadataDao\:\:allByProjectId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Jobs\\ChunkDao\:\:getByProjectID\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Projects\\MetadataDao\:\:get\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Projects\\MetadataDao\:\:set\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of static method Model\\Jobs\\JobDao\:\:getByProjectId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Model/Projects/ProjectStruct.php
 
@@ -11944,12 +11854,6 @@ parameters:
 			message: '#^Method Model\\Projects\\ProjectTemplateStruct\:\:getTm\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Model/Projects/ProjectTemplateStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 24
 			path: lib/Model/Projects/ProjectTemplateStruct.php
 
 		-
@@ -12241,6 +12145,12 @@ parameters:
 			path: lib/Model/QualityReport/QualityReportSegmentModel.php
 
 		-
+			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_commonSegmentAssignments\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/QualityReport/QualityReportSegmentModel.php
+
+		-
 			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_commonSegmentAssignments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -12333,12 +12243,6 @@ parameters:
 		-
 			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getPEEBwtTranslationSuggestion\(\) should return int but returns float\.$#'
 			identifier: return.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
 
@@ -12559,20 +12463,8 @@ parameters:
 			path: lib/Model/Segments/SegmentOriginalDataStruct.php
 
 		-
-			message: '#^Method Model\\Segments\\SegmentOriginalDataStruct\:\:setMap\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataStruct.php
-
-		-
 			message: '#^Property Model\\Segments\\SegmentOriginalDataStruct\:\:\$decoded_map type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentOriginalDataStruct\:\:\$map \(string\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/Segments/SegmentOriginalDataStruct.php
 
@@ -12667,18 +12559,6 @@ parameters:
 			path: lib/Model/Teams/InvitedUser.php
 
 		-
-			message: '#^Method Model\\Teams\\InvitedUser\:\:completeTeamSignUp\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Teams/InvitedUser.php
-
-		-
-			message: '#^Method Model\\Teams\\InvitedUser\:\:hasPendingInvitations\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/InvitedUser.php
-
-		-
 			message: '#^Parameter \#1 \$struct of class Model\\Teams\\TeamModel constructor expects Model\\Teams\\TeamStruct, Model\\Teams\\TeamStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12689,30 +12569,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Teams/InvitedUser.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipStruct\:\:getTeam\(\) should return Model\\Teams\\TeamStruct but returns Model\\Teams\\TeamStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipStruct\:\:getTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipStruct\:\:getUser\(\) should return Model\\Users\\UserStruct but returns Model\\Users\\UserStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipStruct\:\:getUser\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
 
 		-
 			message: '#^Method Model\\Teams\\MembershipStruct\:\:getUserMetadata\(\) return type has no value type specified in iterable type array\.$#'
@@ -12805,7 +12661,13 @@ parameters:
 			path: lib/Model/Teams/TeamModel.php
 
 		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_getInvitedEmails\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Teams\\TeamModel\:\:_getInvitedEmails\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/TeamModel.php
+
+		-
+			message: '#^Method Model\\Teams\\TeamModel\:\:_getNewMembershipEmailList\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Teams/TeamModel.php
@@ -13453,12 +13315,6 @@ parameters:
 			path: lib/Model/Users/RedeemableProject.php
 
 		-
-			message: '#^Argument of an invalid type array\<Model\\Teams\\TeamStruct\>\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
 			message: '#^Cannot call method decrypt\(\) on Model\\ConnectedServices\\Oauth\\OauthTokenEncryption\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -13477,18 +13333,6 @@ parameters:
 			path: lib/Model/Users/UserStruct.php
 
 		-
-			message: '#^Method Model\\Users\\UserStruct\:\:getPersonalTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
-			message: '#^Method Model\\Users\\UserStruct\:\:getUserTeams\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
 			message: '#^Method Model\\Users\\UserStruct\:\:passwordMatch\(\) has parameter \$password with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -13498,12 +13342,6 @@ parameters:
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_substr expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: lib/Model/Users/UserStruct.php
 
 		-
@@ -13657,12 +13495,6 @@ parameters:
 			path: lib/Model/WordCount/WordCountStruct.php
 
 		-
-			message: '#^Method Model\\WordCount\\WordCountStruct\:\:loadFromJob\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/WordCount/WordCountStruct.php
-
-		-
 			message: '#^Method Model\\WordCount\\WordCountStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -13723,32 +13555,8 @@ parameters:
 			path: lib/Model/Xliff/DTO/AbstractXliffRule.php
 
 		-
-			message: '#^Method Model\\Xliff\\DTO\\AbstractXliffRule\:\:setAnalysis\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Xliff/DTO/AbstractXliffRule.php
-
-		-
-			message: '#^Method Model\\Xliff\\DTO\\AbstractXliffRule\:\:setEditor\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Xliff/DTO/AbstractXliffRule.php
-
-		-
-			message: '#^Method Model\\Xliff\\DTO\\AbstractXliffRule\:\:setMatchCategory\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Xliff/DTO/AbstractXliffRule.php
-
-		-
 			message: '#^Method Model\\Xliff\\DTO\\AbstractXliffRule\:\:setStates\(\) has parameter \$states with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Xliff/DTO/AbstractXliffRule.php
-
-		-
-			message: '#^Method Model\\Xliff\\DTO\\AbstractXliffRule\:\:setStates\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Xliff/DTO/AbstractXliffRule.php
 
@@ -13885,10 +13693,10 @@ parameters:
 			path: lib/Model/Xliff/DTO/XliffRulesModel.php
 
 		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateStruct\:\:hydrateFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 6
-			path: lib/Model/Xliff/XliffConfigTemplateStruct.php
+			count: 1
+			path: lib/Model/Xliff/XliffConfigTemplateDao.php
 
 		-
 			message: '#^Method Model\\Xliff\\XliffConfigTemplateStruct\:\:hydrateRulesFromDataArray\(\) has parameter \$rules with no value type specified in iterable type array\.$#'
@@ -14294,6 +14102,12 @@ parameters:
 
 		-
 			message: '#^Method Plugins\\Features\\ReviewExtended\\BatchReviewProcessor\:\:getOrCreateChunkReviews\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Plugins/Features/ReviewExtended/BatchReviewProcessor.php
+
+		-
+			message: '#^Method Plugins\\Features\\ReviewExtended\\BatchReviewProcessor\:\:setChunk\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Plugins/Features/ReviewExtended/BatchReviewProcessor.php
@@ -16913,6 +16727,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/Email/InvitedToTeamEmail.php
+
+		-
+			message: '#^Method Utils\\Email\\MembershipCreatedEmail\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Email/MembershipCreatedEmail.php
 
 		-
 			message: '#^Method Utils\\Email\\MembershipCreatedEmail\:\:_getDefaultMailConf\(\) return type has no value type specified in iterable type array\.$#'
@@ -22453,6 +22273,12 @@ parameters:
 			path: lib/Utils/Tools/CatUtils.php
 
 		-
+			message: '#^Method Utils\\Tools\\CatUtils\:\:getWStructFromJobArray\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Tools/CatUtils.php
+
+		-
 			message: '#^Method Utils\\Tools\\CatUtils\:\:htmlentitiesFromUnicode\(\) has parameter \$str with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -23803,9 +23629,21 @@ parameters:
 			path: lib/View/API/V2/Json/Job.php
 
 		-
+			message: '#^Method View\\API\\V2\\Json\\Job\:\:getKeyList\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/View/API/V2/Json/Job.php
+
+		-
 			message: '#^Method View\\API\\V2\\Json\\Job\:\:renderItem\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/View/API/V2/Json/Job.php
+
+		-
+			message: '#^Method View\\API\\V2\\Json\\Job\:\:renderItem\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 4
 			path: lib/View/API/V2/Json/Job.php
 
 		-
@@ -23869,9 +23707,21 @@ parameters:
 			path: lib/View/API/V2/Json/Membership.php
 
 		-
+			message: '#^Method View\\API\\V2\\Json\\Membership\:\:renderItem\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/View/API/V2/Json/Membership.php
+
+		-
 			message: '#^Method View\\API\\V2\\Json\\Membership\:\:renderItemPublic\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/View/API/V2/Json/Membership.php
+
+		-
+			message: '#^Method View\\API\\V2\\Json\\Membership\:\:renderItemPublic\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/View/API/V2/Json/Membership.php
 
 		-
@@ -24379,6 +24229,12 @@ parameters:
 			path: lib/View/API/V3/Json/Chunk.php
 
 		-
+			message: '#^Method View\\API\\V3\\Json\\Chunk\:\:renderItem\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 4
+			path: lib/View/API/V3/Json/Chunk.php
+
+		-
 			message: '#^Method View\\API\\V3\\Json\\Chunk\:\:renderOne\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -24446,6 +24302,12 @@ parameters:
 
 		-
 			message: '#^Method View\\API\\V3\\Json\\QualitySummary\:\:populateQualitySummarySection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/View/API/V3/Json/QualitySummary.php
+
+		-
+			message: '#^Method View\\API\\V3\\Json\\QualitySummary\:\:populateQualitySummarySection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/View/API/V3/Json/QualitySummary.php

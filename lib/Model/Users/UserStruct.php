@@ -84,7 +84,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     public function shortName(): string
     {
-        return trim(mb_substr($this->first_name, 0, 1) . mb_substr($this->last_name, 0, 1));
+        return trim(mb_substr($this->first_name ?? '', 0, 1) . mb_substr($this->last_name ?? '', 0, 1));
     }
 
     public function getEmail(): ?string
@@ -116,11 +116,12 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return $this->last_name;
     }
 
-    /**
-     * @return TeamStruct
-     * @throws ReflectionException
-     */
-    public function getPersonalTeam(): TeamStruct
+     /**
+      * @return TeamStruct
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getPersonalTeam(): TeamStruct
     {
         $oDao = new TeamDao();
         $oDao->setCacheTTL(60 * 60 * 24);
@@ -128,11 +129,12 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return $oDao->getPersonalByUser($this);
     }
 
-    /**
-     * @return TeamStruct[]|null
-     * @throws ReflectionException
-     */
-    public function getUserTeams(): ?array
+     /**
+      * @return TeamStruct[]|null
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getUserTeams(): ?array
     {
         $mDao = new MembershipDao();
         $mDao->setCacheTTL(60 * 60 * 24);
@@ -140,15 +142,16 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return $mDao->findUserTeams($this);
     }
 
-    /**
-     * @param $teamId
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    public function belongsToTeam($teamId): bool
+     /**
+      * @param $teamId
+      *
+      * @return bool
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function belongsToTeam($teamId): bool
     {
-        foreach ($this->getUserTeams() as $team) {
+        foreach ($this->getUserTeams() ?? [] as $team) {
             if ($team->id === $teamId) {
                 return true;
             }

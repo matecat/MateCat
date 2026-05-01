@@ -12,6 +12,7 @@ use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
+use TypeError;
 use Model\Filters\DTO\Yaml;
 use Utils\Date\DateTimeUtil;
 
@@ -280,6 +281,8 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * @param int|null $uid Optional user id to use if not present in JSON.
      *
      * @return FiltersConfigTemplateStruct
+     * @throws DomainException
+     * @throws TypeError
      *
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): FiltersConfigTemplateStruct

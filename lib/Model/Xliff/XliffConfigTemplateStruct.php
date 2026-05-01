@@ -10,6 +10,7 @@ use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\Xliff20Rule;
 use Model\Xliff\DTO\XliffRulesModel;
 use stdClass;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
@@ -33,6 +34,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
      *
      * @return $this
      * @throws Exception
+     * @throws TypeError
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): XliffConfigTemplateStruct
     {
