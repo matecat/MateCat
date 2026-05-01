@@ -51,7 +51,7 @@ class MMTStruct extends EngineStruct
     public ?string $update_relative_url = "memories/content";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $others = [
         "tmx_import_relative_url" => "memories/content",
@@ -67,7 +67,7 @@ class MMTStruct extends EngineStruct
 
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'MMT-License' => "",
@@ -83,12 +83,9 @@ class MMTStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return MMTStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new MMTStruct();
+        return new static();
     }
 }

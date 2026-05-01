@@ -1327,37 +1327,37 @@ parameters:
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Cannot assign offset ''DeepL\-Auth\-Key'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''DeepL\-Auth\-Key'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Cannot assign offset ''Lara\-AccessKeyId'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''Lara\-AccessKeyId'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Cannot assign offset ''MMT\-License'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''MMT\-License'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Cannot assign offset ''apikey'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''apikey'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Cannot assign offset ''client_id'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''client_id'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Controller/API/App/EngineController.php
 
 		-
-			message: '#^Cannot assign offset ''client_secret'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''client_secret'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 4
 			path: lib/Controller/API/App/EngineController.php
@@ -5011,7 +5011,7 @@ parameters:
 			path: lib/Controller/API/V3/DeepLGlossaryController.php
 
 		-
-			message: '#^Offset ''DeepL\-Auth\-Key'' might not exist on array\|string\|null\.$#'
+			message: '#^Offset ''DeepL\-Auth\-Key'' might not exist on array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAccess.notFound
 			count: 5
 			path: lib/Controller/API/V3/DeepLGlossaryController.php
@@ -9073,268 +9073,10 @@ parameters:
 			path: lib/Model/EditLog/EditLogSegmentStruct.php
 
 		-
-			message: '#^Method Model\\Engines\\Structs\\AltlangStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\AltlangStruct\) but returns Model\\Engines\\Structs\\AltlangStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/AltlangStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\AltlangStruct is not subtype of native type static\(Model\\Engines\\Structs\\AltlangStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/AltlangStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\ApertiumStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\ApertiumStruct\) but returns Model\\Engines\\Structs\\ApertiumStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/ApertiumStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\ApertiumStruct is not subtype of native type static\(Model\\Engines\\Structs\\ApertiumStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/ApertiumStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\DeepLStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\DeepLStruct\) but returns Model\\Engines\\Structs\\DeepLStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/DeepLStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\DeepLStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/DeepLStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\DeepLStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/DeepLStruct.php
-
-		-
-			message: '#^Class Model\\Engines\\Structs\\EngineStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\EngineStruct\:\:arrayRepresentation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\EngineStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\EngineStruct\) but returns Model\\Engines\\Structs\\EngineStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\EngineStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\EngineStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\EngineStruct is not subtype of native type static\(Model\\Engines\\Structs\\EngineStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Template type T of method Model\\Engines\\Structs\\EngineStruct\:\:getStruct\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Model/Engines/Structs/EngineStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\GoogleTranslateStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\GoogleTranslateStruct\) but returns Model\\Engines\\Structs\\GoogleTranslateStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/GoogleTranslateStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\GoogleTranslateStruct is not subtype of native type static\(Model\\Engines\\Structs\\GoogleTranslateStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/GoogleTranslateStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\GoogleTranslateStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/GoogleTranslateStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\IntentoStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\IntentoStruct\) but returns Model\\Engines\\Structs\\IntentoStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/IntentoStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\IntentoStruct is not subtype of native type static\(Model\\Engines\\Structs\\IntentoStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/IntentoStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\IntentoStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/IntentoStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\LaraStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\LaraStruct\) but returns Model\\Engines\\Structs\\LaraStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/LaraStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\LaraStruct is not subtype of native type static\(Model\\Engines\\Structs\\LaraStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/LaraStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\LaraStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/LaraStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\LaraStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/LaraStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\MMTStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\MMTStruct\) but returns Model\\Engines\\Structs\\MMTStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/MMTStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\MMTStruct is not subtype of native type static\(Model\\Engines\\Structs\\MMTStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/MMTStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\MMTStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/MMTStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\MMTStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/MMTStruct.php
-
-		-
 			message: '#^Class Utils\\Engines\\MicrosoftHub not found\.$#'
 			identifier: class.notFound
 			count: 1
 			path: lib/Model/Engines/Structs/MicrosoftHubStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\MicrosoftHubStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\MicrosoftHubStruct\) but returns Model\\Engines\\Structs\\MicrosoftHubStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/MicrosoftHubStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\MicrosoftHubStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/MicrosoftHubStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\MicrosoftHubStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/MicrosoftHubStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\NONEStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/NONEStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\NONEStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/NONEStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\SmartMATEStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\SmartMATEStruct\) but returns Model\\Engines\\Structs\\SmartMATEStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/SmartMATEStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\SmartMATEStruct is not subtype of native type static\(Model\\Engines\\Structs\\SmartMATEStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/SmartMATEStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\SmartMATEStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/SmartMATEStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\SmartMATEStruct\:\:\$others type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/SmartMATEStruct.php
-
-		-
-			message: '#^Method Model\\Engines\\Structs\\YandexTranslateStruct\:\:getStruct\(\) should return static\(Model\\Engines\\Structs\\YandexTranslateStruct\) but returns Model\\Engines\\Structs\\YandexTranslateStruct\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Engines/Structs/YandexTranslateStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type Model\\Engines\\Structs\\YandexTranslateStruct is not subtype of native type static\(Model\\Engines\\Structs\\YandexTranslateStruct\)\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Engines/Structs/YandexTranslateStruct.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\YandexTranslateStruct\:\:\$extra_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Engines/Structs/YandexTranslateStruct.php
 
 		-
 			message: '#^Template type T of method Model\\FeaturesBase\\FeatureSet\:\:dispatchRun\(\) is not referenced in a parameter\.$#'
@@ -16741,7 +16483,7 @@ parameters:
 			path: lib/Utils/Email/WelcomeEmail.php
 
 		-
-			message: '#^Cannot assign offset ''client_secret'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''client_secret'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Utils/Engines/AbstractEngine.php
@@ -16945,7 +16687,7 @@ parameters:
 			path: lib/Utils/Engines/AbstractEngine.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_key_exists expects array, array\|string\|null given\.$#'
+			message: '#^Parameter \#2 \$array of function array_key_exists expects array, array\<string, mixed\>\|string\|null given\.$#'
 			identifier: argument.type
 			count: 4
 			path: lib/Utils/Engines/AbstractEngine.php
@@ -18433,7 +18175,7 @@ parameters:
 			path: lib/Utils/Engines/MyMemory.php
 
 		-
-			message: '#^Cannot assign offset ''tags_projection'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''tags_projection'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: lib/Utils/Engines/MyMemory.php
@@ -18565,7 +18307,7 @@ parameters:
 			path: lib/Utils/Engines/MyMemory.php
 
 		-
-			message: '#^Offset ''tags_projection'' might not exist on array\|string\|null\.$#'
+			message: '#^Offset ''tags_projection'' might not exist on array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: lib/Utils/Engines/MyMemory.php
@@ -19411,7 +19153,7 @@ parameters:
 			path: lib/Utils/Engines/Validators/Contracts/EngineValidatorObject.php
 
 		-
-			message: '#^Offset ''DeepL\-Auth\-Key'' might not exist on array\|string\|null\.$#'
+			message: '#^Offset ''DeepL\-Auth\-Key'' might not exist on array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: lib/Utils/Engines/Validators/DeepLEngineOptionsValidator.php
@@ -30061,7 +29803,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
-			message: '#^Cannot assign offset ''client_secret'' to array\|string\|null\.$#'
+			message: '#^Cannot assign offset ''client_secret'' to array\<string, mixed\>\|string\|null\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php

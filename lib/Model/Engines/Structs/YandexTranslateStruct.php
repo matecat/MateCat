@@ -29,7 +29,7 @@ class YandexTranslateStruct extends EngineStruct
     public ?string $translate_relative_url = "translate";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'client_secret' => ""
@@ -51,13 +51,10 @@ class YandexTranslateStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return YandexTranslateStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new YandexTranslateStruct();
+        return new static();
     }
 
 }
