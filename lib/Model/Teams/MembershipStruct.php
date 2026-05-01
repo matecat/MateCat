@@ -12,6 +12,7 @@ use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Users\MetadataStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use RuntimeException;
@@ -36,9 +37,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
     private ?TeamStruct $team = null;
 
 
-    /**
-     * @var array
-     */
+    /** @var list<MetadataStruct> */
     private array $user_metadata = [];
 
     /**
@@ -51,6 +50,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
         $this->user = $user;
     }
 
+    /** @param list<MetadataStruct> $user_metadata */
     public function setUserMetadata(array $user_metadata): void
     {
         if ($user_metadata == null) {
@@ -59,6 +59,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
         $this->user_metadata = $user_metadata;
     }
 
+    /** @return list<MetadataStruct> */
     public function getUserMetadata(): array
     {
         return $this->user_metadata;

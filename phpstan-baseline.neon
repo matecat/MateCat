@@ -11029,66 +11029,6 @@ parameters:
 			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php
 
 		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$create_date has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$currency has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$delivery_date has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$id_job has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$id_vendor has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$password has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$price has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$quote_pid has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
-			message: '#^Property Model\\Outsource\\ConfirmationStruct\:\:\$vendor_name has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/Outsource/ConfirmationStruct.php
-
-		-
 			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureStruct\:\:getOptions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11893,72 +11833,6 @@ parameters:
 			path: lib/Model/Projects/ProjectTemplateStruct.php
 
 		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:getAllToPropagate\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:getPropagatedIds\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:getPropagatedIdsToUpdateVersion\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:getSegmentsForPropagation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:getTotals\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Method Model\\Propagation\\PropagationTotalStruct\:\:setTotals\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Property Model\\Propagation\\PropagationTotalStruct\:\:\$propagated_ids type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Property Model\\Propagation\\PropagationTotalStruct\:\:\$propagated_ids_to_update_version type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Property Model\\Propagation\\PropagationTotalStruct\:\:\$segments_for_propagation type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
-			message: '#^Property Model\\Propagation\\PropagationTotalStruct\:\:\$totals type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Propagation/PropagationTotalStruct.php
-
-		-
 			message: '#^Cannot call method fullName\(\) on Model\\Users\\UserStruct\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -12493,12 +12367,6 @@ parameters:
 			path: lib/Model/Segments/SegmentStruct.php
 
 		-
-			message: '#^Class Model\\Segments\\SegmentUIStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
 			message: '#^Method Model\\Segments\\SegmentUIStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -12513,42 +12381,6 @@ parameters:
 		-
 			message: '#^Method Model\\Segments\\SegmentUIStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentUIStruct\:\:\$data_ref_map type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentUIStruct\:\:\$metadata type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentUIStruct\:\:\$notes type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentUIStruct\:\:\$parsed_time_to_edit type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentUIStruct\:\:\$source_chunk_lengths type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentUIStruct\:\:\$target_chunk_lengths type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Segments/SegmentUIStruct.php
 
@@ -12569,24 +12401,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Teams/InvitedUser.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipStruct\:\:getUserMetadata\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
-
-		-
-			message: '#^Method Model\\Teams\\MembershipStruct\:\:setUserMetadata\(\) has parameter \$user_metadata with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
-
-		-
-			message: '#^Property Model\\Teams\\MembershipStruct\:\:\$user_metadata type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/MembershipStruct.php
 
 		-
 			message: '#^Method Model\\Teams\\PendingInvitations\:\:hasPendingInvitation\(\) has parameter \$id_team with no type specified\.$#'

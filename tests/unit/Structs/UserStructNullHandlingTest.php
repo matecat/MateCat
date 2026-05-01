@@ -29,10 +29,7 @@ class UserStructNullHandlingTest extends AbstractTest
     #[Test]
     public function belongsToTeam_returns_false_when_getUserTeams_returns_null(): void
     {
-        $struct = $this->getMockBuilder(UserStruct::class)
-            ->onlyMethods(['getUserTeams'])
-            ->getMock();
-
+        $struct = $this->createStub(UserStruct::class);
         $struct->method('getUserTeams')->willReturn(null);
 
         $this->assertFalse($struct->belongsToTeam(123));
