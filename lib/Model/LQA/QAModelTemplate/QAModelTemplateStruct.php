@@ -101,7 +101,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getDecodedModel(): array
     {
@@ -161,7 +161,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function jsonSerialize(): array

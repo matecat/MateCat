@@ -191,7 +191,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * Instantiate and hydrate a DTO from array data, then assign it to the proper property.
      *
      * @param class-string $dtoClass Fully qualified DTO class name.
-     * @param array $data DTO payload.
+     * @param array<string, mixed> $data DTO payload.
      *
      * @return void
      */
@@ -229,7 +229,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * Hydrate all known DTOs from the provided associative array.
      * Values may be arrays or JSON-encoded strings.
      *
-     * @param array $json Input data keyed by dto name.
+     * @param array<string, mixed> $json Input data keyed by dto name.
      *
      * @return void
      */

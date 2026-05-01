@@ -5047,6 +5047,24 @@ parameters:
 			path: lib/Controller/API/V3/DeepLGlossaryController.php
 
 		-
+			message: '#^Cannot access property \$comments on array\<string, mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: lib/Controller/API/V3/DownloadQRController.php
+
+		-
+			message: '#^Cannot access property \$issue_category on array\<string, mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: lib/Controller/API/V3/DownloadQRController.php
+
+		-
+			message: '#^Cannot access property \$issue_severity on array\<string, mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: lib/Controller/API/V3/DownloadQRController.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\DownloadQRController\:\:buildArrayOfSegmentIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7265,18 +7283,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: lib/Controller/Views/XliffToTargetController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$actionsStrings type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogStruct.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$cached_results type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogStruct.php
 
 		-
 			message: '#^Method Model\\Analysis\\AbstractStatus\:\:__construct\(\) has parameter \$_project_data with no value type specified in iterable type array\.$#'
@@ -10261,18 +10267,6 @@ parameters:
 			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
 
 		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateStruct\:\:hydrateAllDto\(\) has parameter \$json with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateStruct\:\:hydrateDtoFromArray\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
 			message: '#^Parameter \#1 \$dita of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setDita\(\) expects Model\\Filters\\DTO\\Dita\|null, object given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10615,36 +10609,6 @@ parameters:
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:getCategoriesAndSeverities\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:getDecodedModel\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:getSerializedCategories\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:normalizeLimits\(\) has parameter \$limits with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\ModelStruct\:\:normalizeLimits\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/ModelStruct.php
-
-		-
 			message: '#^Method Model\\LQA\\QAModelInterface\:\:getDecodedModel\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -10687,20 +10651,8 @@ parameters:
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
 
 		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:getDecodedModel\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
-
-		-
 			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:hydrateFromJSON\(\) has parameter \$json with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php
 
@@ -10963,32 +10915,8 @@ parameters:
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getBreakdownsArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getBreakdownsArray\(\) should return array but returns array\|string\.$#'
+			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getBreakdownsArray\(\) should return array\<string, array\<string, array\<string, int\>\>\> but returns array\|string\.$#'
 			identifier: return.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getPayableRates\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:validateBreakdowns\(\) has parameter \$breakdowns with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
@@ -11001,12 +10929,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function mb_strlen expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Property Model\\PayableRates\\CustomPayableRateStruct\:\:\$breakdowns type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
@@ -11821,7 +11743,25 @@ parameters:
 			path: lib/Model/QualityReport/QualityReportSegmentModel.php
 
 		-
+			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_revisions \(list\<array\{translation\: string, source_page\?\: int\}\>\) does not accept non\-empty\-list\<array\{revision_number\: 1, translation\: string\|null\}\|array\{translation\: string, source_page\?\: int\}\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Model/QualityReport/QualityReportSegmentModel.php
+
+		-
+			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_revisions \(list\<array\{translation\: string, source_page\?\: int\}\>\) does not accept non\-empty\-list\<array\{revision_number\: 2, translation\: string\|null\}\|array\{translation\: string, source_page\?\: int\}\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Model/QualityReport/QualityReportSegmentModel.php
+
+		-
 			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_translation \(string\) does not accept string\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Model/QualityReport/QualityReportSegmentModel.php
+
+		-
+			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$parsed_time_to_edit \(list\<int\|string\>\) does not accept array\<string\>\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/QualityReport/QualityReportSegmentModel.php
@@ -11839,8 +11779,8 @@ parameters:
 			path: lib/Model/QualityReport/QualityReportSegmentModel.php
 
 		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getLocalWarning\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
+			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getLocalWarning\(\) should return list\<array\<string, mixed\>\> but returns array\.$#'
+			identifier: return.type
 			count: 1
 			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
 
@@ -11877,42 +11817,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$comments type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$dataRefMap type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$issues type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_revisions type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$parsed_time_to_edit type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$warnings type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
 
@@ -12007,12 +11911,6 @@ parameters:
 			path: lib/Model/Segments/ContextStruct.php
 
 		-
-			message: '#^Method Model\\Segments\\ContextStruct\:\:__construct\(\) has parameter \$array_params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/ContextStruct.php
-
-		-
 			message: '#^Method Model\\Segments\\ContextStruct\:\:__construct\(\) has parameter \$decode with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -12037,14 +11935,8 @@ parameters:
 			path: lib/Model/Segments/ContextStruct.php
 
 		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, array\|string given\.$#'
+			message: '#^Parameter \#1 \$json of function json_decode expects string, array\<string, mixed\>\|string given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Model/Segments/ContextStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\ContextStruct\:\:\$context_json type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Segments/ContextStruct.php
 
@@ -12061,26 +11953,8 @@ parameters:
 			path: lib/Model/Segments/SegmentMetadataMarshaller.php
 
 		-
-			message: '#^Method Model\\Segments\\SegmentOriginalDataStruct\:\:getMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataStruct.php
-
-		-
 			message: '#^Method Model\\Segments\\SegmentOriginalDataStruct\:\:getMap\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentOriginalDataStruct\:\:setMap\(\) has parameter \$map with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Segments/SegmentOriginalDataStruct.php
-
-		-
-			message: '#^Property Model\\Segments\\SegmentOriginalDataStruct\:\:\$decoded_map type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Segments/SegmentOriginalDataStruct.php
 
@@ -21631,14 +21505,14 @@ parameters:
 			path: lib/Utils/TmKeyManagement/TmKeyManager.php
 
 		-
-			message: '#^Argument of an invalid type array\|Utils\\TmKeyManagement\\TmKeyStruct supplied for foreach, only iterables are supported\.$#'
+			message: '#^Argument of an invalid type array\<string, mixed\>\|Utils\\TmKeyManagement\\TmKeyStruct supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
 			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
 
 		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__construct\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
+			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__set\(\) has parameter \$_value with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
 
@@ -21649,26 +21523,8 @@ parameters:
 			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
 
 		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__set\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
 			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__set\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
 

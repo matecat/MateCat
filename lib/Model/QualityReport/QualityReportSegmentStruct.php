@@ -64,6 +64,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public string $match_type;
 
+    /** @var list<array<string, mixed>> */
     public array $warnings;
 
     public int $pee;
@@ -72,14 +73,18 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public int $secs_per_word;
 
+    /** @var list<string|int> */
     public array $parsed_time_to_edit;
 
+    /** @var list<array<string, mixed>> */
     public array $comments = [];
 
+    /** @var list<array<string, mixed>> */
     public array $issues = [];
 
     public string $last_translation = '';
 
+    /** @var list<array{translation: string, source_page?: int}> */
     public array $last_revisions = [];
 
     public int $pee_translation_revise;
@@ -92,6 +97,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public bool $is_pre_translated = false;
 
+    /** @var array<string, string> */
     public array $dataRefMap = [];
 
     protected string $tm_analysis_status;
@@ -159,6 +165,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
+     * @return list<array<string, mixed>>
      * @throws Exception
      */
     public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array

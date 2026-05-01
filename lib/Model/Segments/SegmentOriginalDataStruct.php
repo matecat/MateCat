@@ -11,9 +11,11 @@ class SegmentOriginalDataStruct extends AbstractDaoSilentStruct implements IDaoS
     public ?int $id = null;
     public int $id_segment;
     protected string $map = '';
+    /** @var array<string, string> */
     protected array $decoded_map = [];
 
 
+    /** @param array<string, string> $map */
     public function setMap(array $map): SegmentOriginalDataStruct
     {
         $this->decoded_map = $map;
@@ -22,6 +24,7 @@ class SegmentOriginalDataStruct extends AbstractDaoSilentStruct implements IDaoS
         return $this;
     }
 
+    /** @return array<string, string> */
     public function getMap(): array
     {
         if (empty($this->decoded_map)) {

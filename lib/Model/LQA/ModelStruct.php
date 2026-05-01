@@ -25,7 +25,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
       /**
        * Returns the serialized representation of categories and subcategories.
        *
-       * @return array
+       * @return array{categories: list<array<string, mixed>>}
        * @throws RuntimeException
        */
       public function getSerializedCategories(): array
@@ -34,6 +34,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      }
 
       /**
+       * @return list<array<string, mixed>>
        * @throws RuntimeException
        */
       public function getCategoriesAndSeverities(): array
@@ -78,9 +79,9 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      *
      * Ex: {"limit":{"1":"8","2":"5"}} is normalized to [0 => 8, 1 => 5]
      *
-     * @param array $limits
+     * @param list<int|string> $limits
      *
-     * @return array
+     * @return list<int>
      */
     private function normalizeLimits(array $limits): array
     {
@@ -94,7 +95,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     }
 
      /**
-      * @return array
+      * @return array{model: array<string, mixed>}
       * @throws PDOException
       */
      public function getDecodedModel(): array

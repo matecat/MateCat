@@ -21,7 +21,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     public int $version;
     public string $name;
     /**
-     * @var string|array
+     * @var array<string, array<string, array<string, int>>>|string
      */
     public string|array $breakdowns;
     public ?string $created_at = null;
@@ -38,7 +38,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, array<string, int>>>
      * @throws TypeError
      */
     public function getBreakdownsArray(): array
@@ -64,7 +64,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      * @param string $source
      * @param string $target
      *
-     * @return array
+     * @return array<string, int>
      * @throws DomainException
      * @throws TypeError
      */
@@ -110,7 +110,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     }
 
     /**
-     * @param array $breakdowns
+     * @param array<string, mixed> $breakdowns
      *
      * @throws Exception
      */
@@ -131,7 +131,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
         foreach ($breakdowns as $language => $breakdown) {
             $this->validateLanguage($language);
 
-            foreach ($breakdown as $targetLanguage => $rates) {
+            foreach ($breakdown as $targetLanguage => $_rates) {
                 $this->validateLanguage($targetLanguage);
             }
         }
@@ -152,7 +152,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      * @throws TypeError
      */
