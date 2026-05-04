@@ -211,6 +211,18 @@ parameters:
 			path: lib/Controller/API/App/Authentication/LaraAuthController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:socketToken\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/LoginController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:token\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/LoginController.php
+
+		-
 			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -2289,6 +2301,12 @@ parameters:
 		-
 			message: '#^Cannot access property \$password on Model\\Jobs\\JobStruct\|null\.$#'
 			identifier: property.nonObject
+			count: 1
+			path: lib/Controller/API/App/OutsourceConfirmationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\OutsourceConfirmationController\:\:confirm\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/OutsourceConfirmationController.php
 
@@ -6241,6 +6259,18 @@ parameters:
 			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
 
 		-
+			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:generateSignedAuthCookie\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
+
+		-
+			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:generateSignedAuthCookie\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
+
+		-
 			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getCredentials\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6255,6 +6285,12 @@ parameters:
 		-
 			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
+
+		-
+			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getData\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
 
@@ -7100,6 +7136,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:afterConstruct\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Views/OutsourceTo/AbstractController.php
+
+		-
+			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:setTemplateVars\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OutsourceTo/AbstractController.php
@@ -11699,6 +11741,18 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Segments/SegmentUIStruct.php
+
+		-
+			message: '#^Method Model\\Teams\\InvitedUser\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/InvitedUser.php
+
+		-
+			message: '#^Method Model\\Teams\\InvitedUser\:\:__construct\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/InvitedUser.php
 
 		-
 			message: '#^Method Model\\Teams\\InvitedUser\:\:completeTeamSignUp\(\) has parameter \$invitation with no value type specified in iterable type array\.$#'
@@ -20473,180 +20527,6 @@ parameters:
 			path: lib/Utils/Tools/PostEditing.php
 
 		-
-			message: '#^Class Utils\\Tools\\SimpleJWT implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:__construct\(\) has parameter \$hashMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:base64url_decode\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:base64url_decode\(\) never returns false so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:getInstanceFromString\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:getInstanceFromString\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:getInstanceFromString\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:getPayload\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:isValid\(\) has parameter \$_storage with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:offsetSet\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:parseJWTString\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:sign\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Method Utils\\Tools\\SimpleJWT\:\:sign\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(int exp\)\: Unexpected token "exp", expected variable at offset 216 on line 10$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(int iat\)\: Unexpected token "iat", expected variable at offset 258 on line 12$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(int nbf\)\: Unexpected token "nbf", expected variable at offset 237 on line 11$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(mixed simple\.jwt\.claims\)\: Unexpected token "simple", expected variable at offset 305 on line 14$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(string aud\)\: Unexpected token "aud", expected variable at offset 195 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(string iss\)\: Unexpected token "iss", expected variable at offset 147 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(string jti\)\: Unexpected token "jti", expected variable at offset 282 on line 13$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^PHPDoc tag @property has invalid value \(string sub\)\: Unexpected token "sub", expected variable at offset 171 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Utils\\Tools\\SimpleJWT\:\:base64url_encode\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 6
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Parameter \#3 \$key of function hash_hmac expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Property Utils\\Tools\\SimpleJWT\:\:\$customClaimsNamespace on left side of \?\? is not nullable nor uninitialized\.$#'
-			identifier: nullCoalesce.initializedProperty
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Property Utils\\Tools\\SimpleJWT\:\:\$privateClaims type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Property Utils\\Tools\\SimpleJWT\:\:\$secretKey \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
-			identifier: property.unusedType
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Property Utils\\Tools\\SimpleJWT\:\:\$storage type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
-			message: '#^Unsafe call to private method Utils\\Tools\\SimpleJWT\:\:parseJWTString\(\) through static\:\:\.$#'
-			identifier: staticClassAccess.privateMethod
-			count: 1
-			path: lib/Utils/Tools/SimpleJWT.php
-
-		-
 			message: '#^Cannot access property \$name on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -20889,6 +20769,12 @@ parameters:
 		-
 			message: '#^Method Utils\\Url\\CanonicalRoutes\:\:inviteToTeamConfirm\(\) has parameter \$requestInfo with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/Url/CanonicalRoutes.php
+
+		-
+			message: '#^Method Utils\\Url\\CanonicalRoutes\:\:inviteToTeamConfirm\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Url/CanonicalRoutes.php
 
@@ -22509,6 +22395,24 @@ parameters:
 		-
 			message: '#^Call to an undefined method Controller\\Views\\TemplateDecorator\\Arguments\\ArgumentInterface\:\:isRevision\(\)\.$#'
 			identifier: method.notFound
+			count: 1
+			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
+
+		-
+			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
+
+		-
+			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
+
+		-
+			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
 

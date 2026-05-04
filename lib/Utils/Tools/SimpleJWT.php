@@ -6,6 +6,7 @@ use ArrayAccess;
 use DomainException;
 use JsonSerializable;
 use Stringable;
+use TypeError;
 use UnexpectedValueException;
 
 /**
@@ -14,20 +15,24 @@ use UnexpectedValueException;
  * Date: 16/02/17
  * Time: 20.12
  *
- * @property string iss
- * @property string sub
- * @property string aud
- * @property int exp
- * @property int nbf
- * @property int iat
- * @property string jti
- * @property mixed simple.jwt.claims
+ * @property string $iss
+ * @property string $sub
+ * @property string $aud
+ * @property int $exp
+ * @property int $nbf
+ * @property int $iat
+ * @property string $jti
+ * @property mixed $simpleJwtClaims
+ *
+ * @implements ArrayAccess<string, mixed>
  */
 class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
 {
 
+    /** @var array<int, string> */
     private array $privateClaims = ['iss', 'sub', 'aud', 'exp', 'nbf', 'iat', 'jti'];
 
+    /** @var array{header: array<string, string>, payload: array<string, mixed>, signature: string|null} */
     private array $storage =
         [
             // Set the JWT header: HMAC-SHA256 algorithm and JWT type.
@@ -45,7 +50,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
             'signature' => null
         ];
 
-    private ?string $secretKey;
+    private string $secretKey;
     private int $timeToLive;
     private int $now;
     private string $customClaimsNamespace;
@@ -53,10 +58,11 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     /**
      * SimpleJWT constructor.
      *
-     * @param array $hashMap
+     * @param array<string, mixed> $hashMap
      * @param string $issuer
      * @param string $authSecret
      * @param int $ttl
+     * @throws TypeError
      */
     public function __construct(
         array $hashMap = [],
@@ -79,7 +85,8 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     /**
      * Generates a signed JWT (JSON Web Token) based on the current storage values.
      *
-     * @return array The assembled JWT components, including the header, payload, and signature.
+     * @return array{header: array<string, string>, payload: array<string, mixed>, signature: string}
+     * @throws UnexpectedValueException
      */
     public function sign(): array
     {
@@ -119,9 +126,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         // Compute the HMAC-SHA256 signature over base64url-encoded header.payload.
         $_hash = hash_hmac(
             'sha256',
-            self::base64url_encode(json_encode($_storage['header'])) .
+            self::base64url_encode(self::jsonEncode($_storage['header'])) .
             "." .
-            self::base64url_encode(json_encode($_storage['payload'])),
+            self::base64url_encode(self::jsonEncode($_storage['payload'])),
             $this->secretKey,
             true
         );
@@ -138,6 +145,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
      *
      * @param string $jwtString The JWT string to be parsed and validated.
      * @return SimpleJWT       A SimpleJWT object initialized with the JWT data.
+     * @throws UnexpectedValueException
+     * @throws TypeError
+     * @throws DomainException
      */
     private static function getInstanceFromString(string $jwtString, string $secretKey = ''): SimpleJWT
     {
@@ -159,7 +169,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         $that->now = $that->storage['payload']['iat'] ?? time();
 
         // Set the token expiration time (exp)
-        $that->timeToLive = $that->storage['payload']['exp'] ?? null;
+        $that->timeToLive = isset($that->storage['payload']['exp']) && is_int($that->storage['payload']['exp'])
+            ? $that->storage['payload']['exp']
+            : 0;
 
         // Set the namespace for custom claims
         $that->customClaimsNamespace = $that->storage['payload']['iss'] ?? 'simple.jwt.claims';
@@ -175,6 +187,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
      * @param string $jwtString The JSON Web Token as a string to be validated and parsed into an instance.
      * @param string $secretKey Optional secret key for validating the token.
      * @return SimpleJWT Validated instance of the SimpleJWT class created from the given token string.
+     * @throws UnexpectedValueException
+     * @throws TypeError
+     * @throws DomainException
      */
     public static function getValidatedInstanceFromString(string $jwtString, string $secretKey): SimpleJWT
     {
@@ -184,6 +199,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     /**
      * @param string $jwtString The JWT string to create an instance from.
      * @return SimpleJWT An instance of SimpleJWT created from the given JWT string without validation.
+     * @throws UnexpectedValueException
+     * @throws TypeError
+     * @throws DomainException
      */
     public static function getNotValidatedInstanceFromString(string $jwtString): SimpleJWT
     {
@@ -193,7 +211,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     /**
      * Validates the provided JWT token either as a compact string or as a parsed array.
      *
-     * @param array|string $_storage The JWT token to be validated, either as an array
+     * @param array<string, mixed>|string $_storage The JWT token to be validated, either as an array
      * containing `header`, `payload`, and `signature` fields, or as a compact JWT string.
      *
      * @return bool Returns true if the token is valid; otherwise, exceptions are thrown for invalid tokens.
@@ -205,7 +223,19 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     {
         // If a compact JWT string is passed, decode it into header/payload/signature array.
         if (is_string($_storage)) {
-            $_storage = static::parseJWTString($_storage);
+            $_storage = self::parseJWTString($_storage);
+        }
+
+        if (!isset($_storage['header']) || !is_array($_storage['header'])) {
+            throw new UnexpectedValueException('Invalid JWT header');
+        }
+
+        if (!isset($_storage['payload']) || !is_array($_storage['payload'])) {
+            throw new UnexpectedValueException('Invalid JWT payload');
+        }
+
+        if (!isset($_storage['signature']) || !is_string($_storage['signature'])) {
+            throw new UnexpectedValueException('Invalid JWT signature');
         }
 
         // Signature taken from the provided token.
@@ -214,9 +244,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         // Recompute the expected HMAC-SHA256 signature from header and payload using the shared secret key.
         $expected_hash = hash_hmac(
             'sha256',
-            self::base64url_encode(json_encode($_storage['header'])) .
+            self::base64url_encode(self::jsonEncode($_storage['header'])) .
             "." .
-            self::base64url_encode(json_encode($_storage['payload'])),
+            self::base64url_encode(self::jsonEncode($_storage['payload'])),
             $secretKey,
             true // return raw binary output
         );
@@ -244,15 +274,32 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     /**
      * @param string $jwtString
      *
-     * @return array
+     * @return array{header: array<string, mixed>, payload: array<string, mixed>, signature: string}
+     * @throws UnexpectedValueException
      */
     private static function parseJWTString(string $jwtString): array
     {
-        [$header, $payload, $signature] = explode(".", $jwtString);
+        $parts = explode('.', $jwtString);
+
+        if (count($parts) !== 3) {
+            throw new UnexpectedValueException('Wrong number of segments');
+        }
+
+        [$header, $payload, $signature] = $parts;
+
+        $decodedHeader = json_decode(self::base64url_decode($header), true);
+        if (!is_array($decodedHeader)) {
+            throw new UnexpectedValueException('Invalid JWT header');
+        }
+
+        $decodedPayload = json_decode(self::base64url_decode($payload), true);
+        if (!is_array($decodedPayload)) {
+            throw new UnexpectedValueException('Invalid JWT payload');
+        }
 
         return [
-            'header' => json_decode(self::base64url_decode($header), true),
-            'payload' => json_decode(self::base64url_decode($payload), true),
+            'header' => $decodedHeader,
+            'payload' => $decodedPayload,
             'signature' => self::base64url_decode($signature)
         ];
     }
@@ -303,11 +350,11 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
 
     /**
      * Returns the payload of the JWT.
-     * @return array
+     * @return array<string, mixed>
      */
     public function getPayload(): array
     {
-        return $this->storage['payload'][$this->customClaimsNamespace ?? 'simple.jwt.claims'] ?? [];
+        return $this->storage['payload'][$this->customClaimsNamespace] ?? [];
     }
 
     /**
@@ -336,6 +383,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
      * @param mixed $offset The key or offset where the value should be stored.
      * @param mixed $value The value to set at the specified offset.
      * @return void
+     * @throws TypeError
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -370,22 +418,31 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         unset($this->storage['payload'][$this->customClaimsNamespace][$offset]);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function __toString(): string
     {
         $data = $this->sign();
 
-        return self::base64url_encode(json_encode($data['header'])) .
+        return self::base64url_encode(self::jsonEncode($data['header'])) .
             "." .
-            self::base64url_encode(json_encode($data['payload'])) .
+            self::base64url_encode(self::jsonEncode($data['payload'])) .
             "." .
             self::base64url_encode($data['signature']);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function jsonSerialize(): string
     {
         return $this->__toString();
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function encode(): string
     {
         return $this->__toString();
@@ -397,13 +454,36 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
     }
 
     /**
-     * @param $data
+     * @param string $data
      *
-     * @return false|string
+     * @return string
+     * @throws UnexpectedValueException
      */
-    private static function base64url_decode($data): false|string
+    private static function base64url_decode(string $data): string
     {
-        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '='));
+        $decoded = base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '='), true);
+
+        if ($decoded === false) {
+            throw new UnexpectedValueException('Invalid base64url encoding');
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return string
+     * @throws UnexpectedValueException
+     */
+    private static function jsonEncode(array $payload): string
+    {
+        $json = json_encode($payload);
+
+        if ($json === false) {
+            throw new UnexpectedValueException('Unable to encode JWT payload');
+        }
+
+        return $json;
     }
 
 }
