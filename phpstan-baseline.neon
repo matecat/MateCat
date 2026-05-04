@@ -14227,6 +14227,12 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
+			message: '#^Cannot access offset ''error'' on array\{\}\|Utils\\Engines\\Results\\TMSAbstractResponse\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
 			message: '#^Cannot access property \$analysis_ignore_100 on Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -14289,6 +14295,18 @@ parameters:
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) should return array but returns array\|Utils\\Engines\\Results\\TMSAbstractResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
@@ -14655,6 +14673,12 @@ parameters:
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_getMatches\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_getMatches\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
 
@@ -15837,8 +15861,20 @@ parameters:
 		-
 			message: '#^Method Utils\\Engines\\AbstractEngine\:\:_composeMTResponseAsMatch\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Utils/Engines/AbstractEngine.php
+
+		-
+			message: '#^Method Utils\\Engines\\Altlang\:\:get\(\) should return array\<string, mixed\>\|Utils\\Engines\\Results\\TMSAbstractResponse\|void but returns array\<int, array\<string, mixed\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: lib/Utils/Engines/Altlang.php
+
+		-
+			message: '#^Method Utils\\Engines\\Altlang\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/Altlang.php
 
 		-
 			message: '#^Method Utils\\Engines\\EngineInterface\:\:delete\(\) has parameter \$_config with no type specified\.$#'
@@ -15943,314 +15979,38 @@ parameters:
 			path: lib/Utils/Engines/MyMemory.php
 
 		-
+			message: '#^Method Utils\\Engines\\NONE\:\:delete\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/NONE.php
+
+		-
+			message: '#^Method Utils\\Engines\\NONE\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/NONE.php
+
+		-
+			message: '#^Method Utils\\Engines\\NONE\:\:set\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/NONE.php
+
+		-
+			message: '#^Method Utils\\Engines\\NONE\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/NONE.php
+
+		-
 			message: '#^Return type \(Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\) of method Utils\\Engines\\NONE\:\:delete\(\) should be compatible with return type \(bool\) of method Utils\\Engines\\EngineInterface\:\:delete\(\)$#'
 			identifier: method.childReturnType
 			count: 2
 			path: lib/Utils/Engines/NONE.php
 
 		-
-			message: '#^Method Utils\\Engines\\Results\\ErrorResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:getInstance\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Engines/Results/ErrorResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\ErrorResponse\:\:get_as_array\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/ErrorResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MTResponse\:\:__construct\(\) has parameter \$result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MTResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MTResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Engines/Results/MTResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MTResponse\:\:get_as_array\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MTResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\AnalyzeResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/AnalyzeResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\AnalyzeResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/AnalyzeResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\AuthKeyResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/AuthKeyResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\CheckGlossaryResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CheckGlossaryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\CheckGlossaryResponse\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CheckGlossaryResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\CheckGlossaryResponse\:\:\$matches has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CheckGlossaryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\CreateUserResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CreateUserResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\CreateUserResponse\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CreateUserResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\CreateUserResponse\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CreateUserResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\CreateUserResponse\:\:\$key has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CreateUserResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\CreateUserResponse\:\:\$pass has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/CreateUserResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\DomainsResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/DomainsResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\DomainsResponse\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/DomainsResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\DomainsResponse\:\:\$entries has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/DomainsResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\ExportResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/ExportResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\ExportResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/ExportResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\ExportResponse\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/ExportResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\ExportResponse\:\:\$resourceLink has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/ExportResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\FileImportAndStatusResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/FileImportAndStatusResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\FileImportAndStatusResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/FileImportAndStatusResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\FileImportAndStatusResponse\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/FileImportAndStatusResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetGlossaryResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetGlossaryResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\GetGlossaryResponse\:\:\$matches has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetGlossaryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:__construct\(\) has parameter \$result with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:buildMyMemoryMatch\(\) has parameter \$match with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:buildMyMemoryMatch\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) has parameter \$dataRefMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) has parameter \$subfiltering_handlers with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\KeysGlossaryResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/KeysGlossaryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\KeysGlossaryResponse\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/KeysGlossaryResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\KeysGlossaryResponse\:\:\$entries has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/KeysGlossaryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\SetContributionResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/SetContributionResponse.php
-
-		-
-			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer1ToLayer2\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/TagProjectionResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\TagProjectionResponse\:\:__construct\(\) has parameter \$dataRefMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/TagProjectionResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\TagProjectionResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/TagProjectionResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\UpdateContributionResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/UpdateContributionResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:getInstance\(\) has parameter \$dataRefMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:getInstance\(\) has parameter \$result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\TMSAbstractResponse\:\:\$responseDetails type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
-
-		-
-			message: '#^Template type T of method Utils\\Engines\\Results\\TMSAbstractResponse\:\:getInstance\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
 
@@ -18103,15 +17863,21 @@ parameters:
 			path: lib/Utils/TMS/TMSService.php
 
 		-
-			message: '#^Parameter \#1 \$message of class InvalidArgumentException constructor expects string, array\|string given\.$#'
+			message: '#^Parameter \#1 \$message of class InvalidArgumentException constructor expects string, array\<string, mixed\>\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/TMS/TMSService.php
 
 		-
-			message: '#^Parameter \#1 \$message of method Utils\\TMS\\TMSService\:\:formatErrorMessage\(\) expects string, array\|string given\.$#'
+			message: '#^Parameter \#1 \$message of method Utils\\TMS\\TMSService\:\:formatErrorMessage\(\) expects string, array\<string, mixed\>\|string given\.$#'
 			identifier: argument.type
 			count: 1
+			path: lib/Utils/TMS/TMSService.php
+
+		-
+			message: '#^Parameter \#1 \$uuid of method Utils\\TMS\\TMSFile\:\:setUuid\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
 			path: lib/Utils/TMS/TMSService.php
 
 		-

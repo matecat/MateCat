@@ -2,6 +2,8 @@
 
 namespace Utils\Engines\Results;
 
+use TypeError;
+
 class ErrorResponse
 {
 
@@ -12,6 +14,11 @@ class ErrorResponse
      */
     public ?string $http_code = null;
 
+    /**
+     * @param mixed $result
+     *
+     * @throws TypeError
+     */
     public function __construct(mixed $result = [])
     {
         if (!empty($result)) {
@@ -21,6 +28,9 @@ class ErrorResponse
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function get_as_array(): array
     {
         return (array)$this;

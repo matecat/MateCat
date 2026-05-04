@@ -13,7 +13,10 @@ use Utils\Engines\Results\TMSAbstractResponse;
 class UpdateContributionResponse extends TMSAbstractResponse
 {
 
-    public function __construct($response)
+    /**
+     * @param array<string, mixed> $response
+     */
+    public function __construct(array $response)
     {
         /*
          * deprecated response:

@@ -83,7 +83,7 @@ class Matches
      *     source?: string|null,
      *     penalty?: mixed,
      *     score?: mixed,
-     *     prop?: array
+     *     prop?: array<string, mixed>
      * } $data
      * @throws TypeError
      */
@@ -122,16 +122,16 @@ class Matches
     }
 
     /**
+     * @param int $layerNum
      * @param array<string, mixed> $dataRefMap
-     * @param null $source
-     * @param null $target
+     * @param string|null $source
+     * @param string|null $target
      * @param array<string, mixed>|null $subfiltering_handlers
      *
      * @return array<string, mixed>
      * @throws Exception
-     * @throws TypeError
      */
-    public function getMatches(int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null, ?array $subfiltering_handlers = []): array
+    public function getMatches(int $layerNum = 2, array $dataRefMap = [], ?string $source = null, ?string $target = null, ?array $subfiltering_handlers = []): array
     {
         if ($source and $target) {
             $this->source = $source;
@@ -147,13 +147,15 @@ class Matches
     }
 
     /**
+     * @param string $string
+     * @param int $layerNum
      * @param array<string, mixed> $dataRefMap
      * @param array<string, mixed>|null $subfiltering_handlers
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    protected function getLayer(string $string, int $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = []): mixed
+    protected function getLayer(string $string, int $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = []): string
     {
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
 

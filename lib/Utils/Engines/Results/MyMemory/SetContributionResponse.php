@@ -2,6 +2,7 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
+use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
@@ -13,7 +14,12 @@ use Utils\Engines\Results\TMSAbstractResponse;
 class SetContributionResponse extends TMSAbstractResponse
 {
 
-    public function __construct(mixed $response)
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
     {
         $this->responseData = $response['responseData'] ?? '';
         $this->responseDetails = $response['responseDetails'] ?? '';
