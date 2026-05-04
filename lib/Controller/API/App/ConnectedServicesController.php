@@ -17,6 +17,7 @@ use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\NotFoundException;
+use PDOException;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use View\API\App\Json\ConnectedService;
@@ -98,6 +99,9 @@ class ConnectedServicesController extends AbstractStatefulKleinController
 
     /**
      * @throws NotFoundException
+     * @throws PDOException
+     *
+     * @phpstan-assert !null $this->connectedServiceStruct
      */
     private function __validateOwnership(): void
     {

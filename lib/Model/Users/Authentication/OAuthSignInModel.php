@@ -57,9 +57,8 @@ class OAuthSignInModel
      */
     public function setAccessToken(string $token): void
     {
-        $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
-            json_encode($token)
-        );
+        $encoded = json_encode($token) ?: $token;
+        $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt($encoded);
     }
 
     public function getUser(): UserStruct

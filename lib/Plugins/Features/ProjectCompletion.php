@@ -40,7 +40,7 @@ class ProjectCompletion extends BaseFeature
             $chunk_completion_update_struct->uid = $params['logged_user']->uid;
         }
 
-        $chunk_completion_update_struct->setTimestamp('last_translation_at', strtotime('now'));
+        $chunk_completion_update_struct->setTimestamp('last_translation_at', time());
 
         $dao = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase($chunk);

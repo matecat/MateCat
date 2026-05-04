@@ -219,9 +219,11 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function getDecryptedOauthAccessToken(): ?string
     {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        if ($this->oauth_access_token === null) {
+            return null;
+        }
 
-        return $oauthTokenEncryption->decrypt($this->oauth_access_token);
+        return OauthTokenEncryption::getInstance()->decrypt($this->oauth_access_token);
     }
 
     /**
@@ -233,7 +235,12 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function getDecodedOauthAccessToken(?string $field = null): mixed
     {
-        $decoded = json_decode($this->getDecryptedOauthAccessToken(), true);
+        $decrypted = $this->getDecryptedOauthAccessToken();
+        if ($decrypted === null) {
+            return null;
+        }
+
+        $decoded = json_decode($decrypted, true);
 
         if ($field) {
             if (array_key_exists($field, $decoded)) {

@@ -20,8 +20,12 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
 
     use RecursiveArrayCopy;
 
+    /** @var array<string, mixed> */
     protected array $cached_results = [];
 
+    /**
+     * @param array<string, mixed> $array_params
+     */
     public function __construct(array $array_params = [])
     {
         if ($array_params != null) {
@@ -84,10 +88,8 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      */
     protected function cachable(string $cache_key_name, callable $function)
     {
-        /** @var  $resultset ?T */
         $resultset = $this->cached_results[$cache_key_name] ?? null;
         if ($resultset == null) {
-            /** @var  $resultset ?T */
             $resultset = $this->cached_results[$cache_key_name] = call_user_func($function);
         }
 
@@ -95,7 +97,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     }
 
     /**
-     * @param $name
+     * @param string $name
      *
      * @return mixed
      * @throws DomainException
@@ -109,7 +111,14 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
         return $this->$name;
     }
 
-    public function setTimestamp($attribute, $timestamp)
+    /**
+     * @param string $attribute
+     * @param int    $timestamp
+     *
+     * @return void
+     * @throws DomainException
+     */
+    public function setTimestamp(string $attribute, int $timestamp): void
     {
         $this->$attribute = date('c', $timestamp);
     }
@@ -117,9 +126,9 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     /**
      * Compatibility with ArrayObject
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getArrayCopy()
+    public function getArrayCopy(): array
     {
         return $this->toArray();
     }

@@ -685,24 +685,6 @@ parameters:
 			path: lib/Controller/API/App/CompletionEventController.php
 
 		-
-			message: '#^Cannot access property \$disabled_at on Model\\ConnectedServices\\ConnectedServiceStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
-			message: '#^Cannot access property \$service on Model\\ConnectedServices\\ConnectedServiceStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\ConnectedServicesController\:\:__validateOwnership\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
 			message: '#^Parameter \#1 \$item of method View\\API\\App\\Json\\ConnectedService\:\:renderItem\(\) expects Model\\ConnectedServices\\ConnectedServiceStruct, Model\\ConnectedServices\\ConnectedServiceStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -710,12 +692,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$service of class Model\\ConnectedServices\\GDrive\\GDriveTokenVerifyModel constructor expects Model\\ConnectedServices\\ConnectedServiceStruct, Model\\ConnectedServices\\ConnectedServiceStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
-			message: '#^Parameter \#1 \$struct of static method Model\\DataAccess\\AbstractDao\:\:updateStruct\(\) expects Model\\DataAccess\\AbstractDaoObjectStruct, Model\\ConnectedServices\\ConnectedServiceStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/ConnectedServicesController.php
@@ -7285,6 +7261,12 @@ parameters:
 			path: lib/Controller/Views/XliffToTargetController.php
 
 		-
+			message: '#^PHPDoc type list\<array\<string, mixed\>\> of property Model\\ActivityLog\\ActivityLogStruct\:\:\$cached_results is not covariant with PHPDoc type array\<string, mixed\> of overridden property Model\\DataAccess\\AbstractDaoObjectStruct\:\:\$cached_results\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: lib/Model/ActivityLog/ActivityLogStruct.php
+
+		-
 			message: '#^Method Model\\Analysis\\AbstractStatus\:\:__construct\(\) has parameter \$_project_data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7595,30 +7577,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Comments/CommentStruct.php
-
-		-
-			message: '#^Cannot call method decrypt\(\) on Model\\ConnectedServices\\Oauth\\OauthTokenEncryption\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceStruct.php
-
-		-
-			message: '#^Cannot call method encrypt\(\) on Model\\ConnectedServices\\Oauth\\OauthTokenEncryption\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceStruct.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\ConnectedServiceStruct\:\:getDecodedOauthAccessToken\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceStruct.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/ConnectedServiceStruct.php
 
 		-
 			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveTokenHandler\:\:accessTokenToJsonString\(\) has parameter \$token with no type specified\.$#'
@@ -8569,18 +8527,6 @@ parameters:
 			path: lib/Model/Conversion/UploadElement.php
 
 		-
-			message: '#^Method Model\\Conversion\\UploadElement\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/UploadElement.php
-
-		-
-			message: '#^Method Model\\Conversion\\UploadElement\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/UploadElement.php
-
-		-
 			message: '#^Binary operation "\." between array\|string and ''___SEP___'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -8761,74 +8707,8 @@ parameters:
 			path: lib/Model/DataAccess/AbstractDao.php
 
 		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:__construct\(\) has parameter \$array_params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
 			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:__construct\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:__get\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:getArrayCopy\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:setTimestamp\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:setTimestamp\(\) has parameter \$attribute with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:setTimestamp\(\) has parameter \$timestamp with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:setTimestamp\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$resultset \?T\)\: Unexpected token "\$resultset", expected type at offset 10 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
-
-		-
-			message: '#^Property Model\\DataAccess\\AbstractDaoObjectStruct\:\:\$cached_results type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
 
@@ -9033,18 +8913,6 @@ parameters:
 		-
 			message: '#^Class Model\\DataAccess\\ShapelessConcreteStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
-			count: 1
-			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\ShapelessConcreteStruct\:\:__get\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\ShapelessConcreteStruct\:\:getArrayCopy\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
 
@@ -10509,12 +10377,6 @@ parameters:
 		-
 			message: '#^Cannot call method getJsonSeverities\(\) on Model\\LQA\\CategoryStruct\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryStruct\:\:__construct\(\) has parameter \$array_params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/LQA/EntryStruct.php
 
@@ -12055,12 +11917,6 @@ parameters:
 			path: lib/Model/Teams/TeamStruct.php
 
 		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyStruct\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyStruct.php
-
-		-
 			message: '#^Method Model\\TmKeyManagement\\MemoryKeyStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -12367,12 +12223,6 @@ parameters:
 			path: lib/Model/Users/Authentication/ChangePasswordModel.php
 
 		-
-			message: '#^Cannot call method encrypt\(\) on Model\\ConnectedServices\\Oauth\\OauthTokenEncryption\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
 			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_createNewUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -12583,12 +12433,6 @@ parameters:
 			path: lib/Model/Users/RedeemableProject.php
 
 		-
-			message: '#^Cannot call method decrypt\(\) on Model\\ConnectedServices\\Oauth\\OauthTokenEncryption\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
 			message: '#^Method Model\\Users\\UserStruct\:\:belongsToTeam\(\) has parameter \$teamId with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -12603,12 +12447,6 @@ parameters:
 		-
 			message: '#^Method Model\\Users\\UserStruct\:\:passwordMatch\(\) has parameter \$password with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Users/UserStruct.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Model/Users/UserStruct.php
 
@@ -15565,19 +15403,19 @@ parameters:
 			path: lib/Utils/Contribution/GetContributionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$array_params of class Model\\Jobs\\JobStruct constructor expects array, array\|null given\.$#'
+			message: '#^Parameter \#1 \$array_params of class Model\\Jobs\\JobStruct constructor expects array\<string, mixed\>, array\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/Contribution/GetContributionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$array_params of class Model\\Projects\\ProjectStruct constructor expects array, array\|null given\.$#'
+			message: '#^Parameter \#1 \$array_params of class Model\\Projects\\ProjectStruct constructor expects array\<string, mixed\>, array\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/Contribution/GetContributionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$array_params of class Model\\Users\\UserStruct constructor expects array, array\|null given\.$#'
+			message: '#^Parameter \#1 \$array_params of class Model\\Users\\UserStruct constructor expects array\<string, mixed\>, array\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/Contribution/GetContributionRequest.php
@@ -15669,12 +15507,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @var has invalid value \(\$props Params\)\: Unexpected token "\$props", expected type at offset 24 on line 2$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Contribution/SetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\SetContributionRequest\:\:\$cached_results type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Contribution/SetContributionRequest.php
 
