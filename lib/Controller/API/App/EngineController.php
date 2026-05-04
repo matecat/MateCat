@@ -76,6 +76,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['DeepL-Auth-Key'] = $engineData['client_id'];
 
                 (new DeepLEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
@@ -92,6 +93,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
                 break;
@@ -106,6 +108,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
                 (new AltlangEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
@@ -122,6 +125,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_id'] = $engineData['client_id'];
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
@@ -137,6 +141,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
                 break;
@@ -151,6 +156,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
                 (new GoogleTranslateEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
@@ -165,6 +171,7 @@ class EngineController extends KleinController
                 $newEngineStruct->name = $name;
                 $newEngineStruct->uid = $uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['apikey'] = $engineData['secret'];
 
                 (new IntentoEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
@@ -196,6 +203,7 @@ class EngineController extends KleinController
 
                 $newEngineStruct->uid = $this->user->uid;
                 $newEngineStruct->type = EngineConstants::MT;
+                assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['MMT-License'] = $engineData['secret'];
                 $newEngineStruct->extra_parameters['MMT-context-analyzer'] = true;
 
@@ -232,10 +240,10 @@ class EngineController extends KleinController
 
         if ($newEngineStruct instanceof LaraStruct) {
             $UserMetadataDao = new MetadataDao();
-            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load, (string)$newCreatedDbRowStruct->id);
+            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load ?? throw new RuntimeException('Missing class_load'), (string)$newCreatedDbRowStruct->id);
         } elseif ($newEngineStruct instanceof MMTStruct) {
             $UserMetadataDao = new MetadataDao();
-            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load, (string)$newCreatedDbRowStruct->id);
+            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load ?? throw new RuntimeException('Missing class_load'), (string)$newCreatedDbRowStruct->id);
         }
 
         $data = $newCreatedDbRowStruct->arrayRepresentation();
@@ -249,6 +257,7 @@ class EngineController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function disable(): void
     {
@@ -260,7 +269,7 @@ class EngineController extends KleinController
         }
 
         $engineToBeDeleted = EngineStruct::getStruct();
-        $engineToBeDeleted->id = $id;
+        $engineToBeDeleted->id = (int)$id;
         $engineToBeDeleted->uid = $this->user->uid;
 
         $engineDAO = new EngineDAO(Database::obtain());
@@ -274,8 +283,9 @@ class EngineController extends KleinController
         $engine = EnginesFactory::createTempInstance($result);
 
         if ($engine->isAdaptiveMT()) {
-            //retrieve OWNER EnginesFactory License
-            (new MetadataDao())->delete($this->user->uid, $result->getEngineType()); // engine_id
+            $uid = $this->user->uid ?? throw new AuthorizationError('User not authenticated', 403);
+            $engineType = $result->getEngineType() ?? throw new RuntimeException('Missing engine type');
+            (new MetadataDao())->delete($uid, $engineType);
         }
 
         $this->response->json([
@@ -287,7 +297,7 @@ class EngineController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{id: string|null|false, name: string|null|false, data: mixed, provider: string|null|false}
      */
     private function validateTheRequest(): array
     {

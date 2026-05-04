@@ -19,28 +19,28 @@ interface EngineInterface
 {
 
     /**
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
      * @return TMSAbstractResponse
      */
     public function get(array $_config);
 
     /**
-     * @param $_config
+     * @param mixed $_config
      *
      * @return mixed
      */
     public function set($_config);
 
     /**
-     * @param $_config
+     * @param mixed $_config
      *
      * @return mixed
      */
     public function update($_config);
 
     /**
-     * @param $_config
+     * @param mixed $_config
      *
      * @return bool
      */
@@ -81,8 +81,8 @@ interface EngineInterface
     public function importMemory(string $filePath, string $memoryKey, UserStruct $user);
 
     /**
-     * @param array $projectRow
-     * @param array|null $segments
+     * @param array<string, mixed> $projectRow
+     * @param array<int, mixed>|null $segments
      *
      * @return void
      */
@@ -91,7 +91,7 @@ interface EngineInterface
     /**
      * @param MemoryKeyStruct $memoryKey
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws Exception
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array;
@@ -99,12 +99,11 @@ interface EngineInterface
     /**
      * Deletes a specific memory key.
      *
-     * @param array $memoryKey
+     * @param array<string, mixed> $memoryKey
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
-
     public function deleteMemory(array $memoryKey): array;
 
     /**
@@ -112,7 +111,7 @@ interface EngineInterface
      *
      * @param MemoryKeyStruct $memoryKey
      *
-     * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
+     * @return array<string, mixed>|null Returns the memory key if the caller owns the memory, null otherwise.
      * @throws Exception
      */
     public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array;

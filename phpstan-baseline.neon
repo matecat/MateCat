@@ -1267,66 +1267,6 @@ parameters:
 			path: lib/Controller/API/App/DownloadAnalysisReportController.php
 
 		-
-			message: '#^Cannot assign offset ''DeepL\-Auth\-Key'' to array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAssign.dimType
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Cannot assign offset ''MMT\-License'' to array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAssign.dimType
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Cannot assign offset ''apikey'' to array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAssign.dimType
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Cannot assign offset ''client_id'' to array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAssign.dimType
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Cannot assign offset ''client_secret'' to array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAssign.dimType
-			count: 4
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\EngineController\:\:disable\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\EngineController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Parameter \#1 \$uid of method Model\\Users\\MetadataDao\:\:delete\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Parameter \#2 \$key of method Model\\Users\\MetadataDao\:\:delete\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/EngineController.php
-
-		-
-			message: '#^Parameter \#2 \$key of method Model\\Users\\MetadataDao\:\:set\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/EngineController.php
-
-		-
 			message: '#^Cannot access property \$first_segment on Model\\DataAccess\\ShapelessConcreteStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -15861,7 +15801,7 @@ parameters:
 		-
 			message: '#^Method Utils\\Engines\\AbstractEngine\:\:_composeMTResponseAsMatch\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 2
 			path: lib/Utils/Engines/AbstractEngine.php
 
 		-
@@ -15875,66 +15815,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Engines/Altlang.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:delete\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:deleteMemory\(\) has parameter \$memoryKey with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:deleteMemory\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:get\(\) has parameter \$_config with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:getMemoryIfMine\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:memoryExists\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:set\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:syncMemories\(\) has parameter \$projectRow with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:syncMemories\(\) has parameter \$segments with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
-
-		-
-			message: '#^Method Utils\\Engines\\EngineInterface\:\:update\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/EngineInterface.php
 
 		-
 			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
@@ -15969,7 +15849,7 @@ parameters:
 		-
 			message: '#^Method Utils\\Engines\\MMT\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: lib/Utils/Engines/MMT.php
 
 		-
@@ -16015,62 +15895,8 @@ parameters:
 			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:get\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthAuthenticate\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthGet\(\) has parameter \$_config with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthGet\(\) should return Utils\\Engines\\Results\\TMSAbstractResponse but returns array\<string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthGet\(\) should return Utils\\Engines\\Results\\TMSAbstractResponse but returns array\<string, mixed\>\|Utils\\Engines\\Results\\TMSAbstractResponse\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthGet\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
 			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthGetAuthParameters\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_validate expects string, bool\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Parameter \#1 \$url of method Utils\\Engines\\AbstractEngine\:\:_call\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Utils/Engines/SmartMATE.php
 

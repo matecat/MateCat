@@ -163,10 +163,11 @@ class SmartMATE extends AbstractEngine
      *
      * @return array<string, mixed>|TMSAbstractResponse
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config): TMSAbstractResponse|array
+    public function get(array $_config, int $cycle = 0): TMSAbstractResponse|array
     {
-        return $this->oauthGet($_config);
+        return $this->oauthGet($_config, $cycle);
     }
 
     /**

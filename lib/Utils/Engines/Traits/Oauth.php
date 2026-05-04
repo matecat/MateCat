@@ -14,6 +14,9 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use RuntimeException;
+use TypeError;
+use Utils\Engines\Results\TMSAbstractResponse;
 
 trait Oauth
 {
@@ -34,18 +37,19 @@ trait Oauth
      *
      * @return void
      * @throws Exception
+     * @throws TypeError
      */
     protected function _authenticate(): void
     {
         $this->_auth_parameters['client_id'] = $this->client_id;
         $this->_auth_parameters['client_secret'] = $this->client_secret;
 
-        $url = $this->oauth_url;
+        $url = $this->oauth_url ?? throw new RuntimeException('OAuth URL not configured');
         $curl_opt = $this->getAuthParameters();
 
         $rawValue = $this->_call($url, $curl_opt);
 
-        if (json_validate($rawValue)) {
+        if (is_string($rawValue) && json_validate($rawValue)) {
             $objResponse = json_decode($rawValue, true);
         } else {
             $objResponse = $rawValue;
@@ -87,13 +91,14 @@ trait Oauth
     }
 
     /**
+     * @param array<string, mixed> $_config
+     *
+     * @return array<string, mixed>|TMSAbstractResponse
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config, int $cycle = 0)
     {
-        $numArgs = func_num_args();
-        $cycle = $numArgs > 0 ? ((int)func_get_arg(1) ?? 0) : 0;
-
         if ($cycle == 10) {
             return $this->_formatRecursionError();
         }
