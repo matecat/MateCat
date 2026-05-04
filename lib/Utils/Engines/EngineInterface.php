@@ -41,10 +41,8 @@ interface EngineInterface
 
     /**
      * @param mixed $_config
-     *
-     * @return bool
      */
-    public function delete($_config);
+    public function delete($_config): bool;
 
     /**
      * @return mixed
