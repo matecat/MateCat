@@ -19,8 +19,10 @@ class DeepLEngineValidator extends AbstractValidator
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
+        $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
+
         /** @var DeepL $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
         try {
             $config = $newTestCreatedMT->getConfigStruct();
             $config['segment'] = "Hello World";

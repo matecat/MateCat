@@ -22,6 +22,7 @@ class IntentoEngineOptionsValidator extends AbstractValidator
      * @param EngineValidatorObject $object
      * @return ValidatorObject|null
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {

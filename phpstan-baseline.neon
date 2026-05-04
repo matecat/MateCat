@@ -2875,30 +2875,6 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/EngineOwnershipValidator.php
 
 		-
-			message: '#^Parameter \#3 \$engineClass of static method Utils\\Engines\\EnginesFactory\:\:getInstanceByIdAndUser\(\) expects class\-string\<Utils\\Engines\\AbstractEngine\>\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/EngineOwnershipValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\EngineOwnershipValidator\:\:\$engineClass \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
-			identifier: property.unusedType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/EngineOwnershipValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\EngineOwnershipValidator\<T of Utils\\Engines\\AbstractEngine\>\:\:\$engine \(T of Utils\\Engines\\AbstractEngine\) does not accept Utils\\Engines\\AbstractEngine\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/EngineOwnershipValidator.php
-
-		-
-			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstanceByIdAndUser\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/EngineOwnershipValidator.php
-
-		-
 			message: '#^Parameter \#1 \$email of class Model\\FeaturesBase\\Hook\\Event\\Filter\\IsAnInternalUserEvent constructor expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -15817,36 +15793,6 @@ parameters:
 			path: lib/Utils/Engines/Altlang.php
 
 		-
-			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: lib/Utils/Engines/EnginesFactory.php
-
-		-
-			message: '#^Method Utils\\Engines\\EnginesFactory\:\:createTempInstance\(\) should return Utils\\Engines\\EngineInterface but returns object\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Engines/EnginesFactory.php
-
-		-
-			message: '#^Method Utils\\Engines\\EnginesFactory\:\:getInstance\(\) should return T of Utils\\Engines\\AbstractEngine but returns object\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Engines/EnginesFactory.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$engineRecord EngineStruct\)\: Unexpected token "\$engineRecord", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Engines/EnginesFactory.php
-
-		-
-			message: '#^Parameter \#1 \$_className of static method Utils\\Engines\\EnginesFactory\:\:getFullyQualifiedClassName\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/Engines/EnginesFactory.php
-
-		-
 			message: '#^Method Utils\\Engines\\MMT\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -15859,36 +15805,6 @@ parameters:
 			path: lib/Utils/Engines/MyMemory.php
 
 		-
-			message: '#^Method Utils\\Engines\\NONE\:\:delete\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:set\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Return type \(Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\) of method Utils\\Engines\\NONE\:\:delete\(\) should be compatible with return type \(bool\) of method Utils\\Engines\\EngineInterface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 2
-			path: lib/Utils/Engines/NONE.php
-
-		-
 			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:getInstance\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -15899,66 +15815,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Cannot access offset ''error'' on array\<string, mixed\>\|Utils\\Engines\\Results\\TMSAbstractResponse\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Utils/Engines/Validators/AltLangEngineValidator.php
-
-		-
-			message: '#^Parameter \#1 \$engineRecord of static method Utils\\Engines\\EnginesFactory\:\:createTempInstance\(\) expects Model\\Engines\\Structs\\EngineStruct, Model\\Engines\\Structs\\EngineStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/Validators/AltLangEngineValidator.php
-
-		-
-			message: '#^Parameter \#1 \$engineRecord of static method Utils\\Engines\\EnginesFactory\:\:createTempInstance\(\) expects Model\\Engines\\Structs\\EngineStruct, Model\\Engines\\Structs\\EngineStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/Validators/DeepLEngineValidator.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Validator\\Contracts\\ValidatorObject\:\:\$engineStruct\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Utils/Engines/Validators/GoogleTranslateEngineValidator.php
-
-		-
-			message: '#^Cannot access offset ''error'' on Utils\\Engines\\Results\\TMSAbstractResponse\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Utils/Engines/Validators/GoogleTranslateEngineValidator.php
-
-		-
-			message: '#^Method Utils\\Engines\\Validators\\IntentoEngineOptionsValidator\:\:validate\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Utils/Engines/Validators/IntentoEngineOptionsValidator.php
-
-		-
-			message: '#^Cannot access offset ''error'' on Utils\\Engines\\Results\\TMSAbstractResponse\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Utils/Engines/Validators/IntentoEngineValidator.php
-
-		-
-			message: '#^Parameter \#1 \$engineRecord of static method Utils\\Engines\\EnginesFactory\:\:createTempInstance\(\) expects Model\\Engines\\Structs\\EngineStruct, Model\\Engines\\Structs\\EngineStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/Validators/IntentoEngineValidator.php
-
-		-
-			message: '#^Parameter \#1 \$engineRecord of static method Utils\\Engines\\EnginesFactory\:\:createTempInstance\(\) expects Model\\Engines\\Structs\\EngineStruct, Model\\Engines\\Structs\\EngineStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/Validators/MMTEngineValidator.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/Validators/MMTGlossaryValidator.php
 
 		-
 			message: '#^Method Utils\\Files\\CSV\:\:extract\(\) throws checked exception PhpOffice\\PhpSpreadsheet\\Writer\\Exception but it''s missing from the PHPDoc @throws tag\.$#'

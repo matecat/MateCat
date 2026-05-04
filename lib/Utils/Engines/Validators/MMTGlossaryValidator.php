@@ -18,7 +18,8 @@ class MMTGlossaryValidator extends AbstractValidator
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
-        $mmtGlossariesArray = json_decode($object->glossaryString, true);
+        $glossaryString = $object->glossaryString ?? throw new Exception('Glossary string required');
+        $mmtGlossariesArray = json_decode($glossaryString, true);
 
         if (!is_array($mmtGlossariesArray)) {
             throw new Exception("mmt_glossaries is not a valid JSON");
