@@ -15955,6 +15955,12 @@ parameters:
 			path: lib/Utils/Engines/AbstractEngine.php
 
 		-
+			message: '#^Method Utils\\Engines\\AbstractEngine\:\:_composeMTResponseAsMatch\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Engines/AbstractEngine.php
+
+		-
 			message: '#^Method Utils\\Engines\\Altlang\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -16072,6 +16078,12 @@ parameters:
 			message: '#^Method Utils\\Engines\\DeepL\:\:_decode\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/Utils/Engines/DeepL.php
+
+		-
+			message: '#^Method Utils\\Engines\\DeepL\:\:_decode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/Utils/Engines/DeepL.php
 
 		-
@@ -16507,6 +16519,12 @@ parameters:
 			path: lib/Utils/Engines/Lara.php
 
 		-
+			message: '#^Method Utils\\Engines\\Lara\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Engines/Lara.php
+
+		-
 			message: '#^Method Utils\\Engines\\Lara\:\:getAvailableLanguages\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -16633,238 +16651,22 @@ parameters:
 			path: lib/Utils/Engines/Lara/LaraClient.php
 
 		-
+			message: '#^Method Utils\\Engines\\MMT\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Engines/MMT.php
+
+		-
 			message: '#^Access to an undefined property Utils\\Engines\\MyMemory\:\:\$contribute_relative_url\.$#'
 			identifier: property.notFound
 			count: 1
 			path: lib/Utils/Engines/MyMemory.php
 
 		-
-			message: '#^Cannot access offset ''code'' on 0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Cannot assign offset ''tags_projection'' to array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAssign.dimType
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:_decode\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:createMyMemoryKey\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:delete\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:fastAnalysis\(\) has parameter \$segs_array with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:get\(\) has parameter \$_config with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:getImportStatus\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:getImportStatus\(\) has parameter \$uuid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:getTagProjection\(\) has parameter \$config with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryCheck\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryDelete\(\) has parameter \$term with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryDomains\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryGet\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryImport\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryKeys\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossarySearch\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossarySet\(\) has parameter \$term with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:glossaryUpdate\(\) has parameter \$term with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:importMemory\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:set\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\MyMemory\:\:update\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Offset ''tags_projection'' might not exist on array\<string, mixed\>\|string\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Offset 0 on array\{non\-empty\-string, int\<\-1, max\>\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 2
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$match Matches\)\: Unexpected token "\$match", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^PHPDoc type array of property Utils\\Engines\\MyMemory\:\:\$_config is not covariant with PHPDoc type array\<string, mixed\> of overridden property Utils\\Engines\\AbstractEngine\:\:\$_config\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Parameter \#1 \$url of function parse_url expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Parameter \#2 \$parameters of method Utils\\Engines\\AbstractEngine\:\:call\(\) expects array\<string, mixed\>, list given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Property Utils\\Engines\\MyMemory\:\:\$_config type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and '''' will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: lib/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:delete\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:get\(\) has parameter \$_config with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:set\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\NONE\:\:update\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/NONE.php
-
-		-
 			message: '#^Return type \(Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\) of method Utils\\Engines\\NONE\:\:delete\(\) should be compatible with return type \(bool\) of method Utils\\Engines\\EngineInterface\:\:delete\(\)$#'
 			identifier: method.childReturnType
 			count: 2
 			path: lib/Utils/Engines/NONE.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\ErrorResponse\:\:__construct\(\) has parameter \$result with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/ErrorResponse.php
 
 		-
 			message: '#^Method Utils\\Engines\\Results\\ErrorResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -17053,6 +16855,12 @@ parameters:
 			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
 
 		-
+			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:buildMyMemoryMatch\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
+
+		-
 			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) has parameter \$dataRefMap with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -17067,6 +16875,12 @@ parameters:
 		-
 			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
+
+		-
+			message: '#^Method Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\:\:get_matches_as_array\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php
 
@@ -17093,252 +16907,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:featureSet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getLayer\(\) has parameter \$dataRefMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getLayer\(\) has parameter \$layerNum with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getLayer\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getLayer\(\) has parameter \$subfiltering_handlers with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getMatches\(\) has parameter \$dataRefMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getMatches\(\) has parameter \$subfiltering_handlers with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:getMatches\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\Matches\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$ICE has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$create_date has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$created_by has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$data has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$id_project has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$id_project is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$last_update_date has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$last_updated_by has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$match has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$memory_key has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$penalty has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$prop has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$quality has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$raw_segment has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$raw_translation has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$reasoning is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$reference has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$score has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$segment has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$source has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$source_note has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$style has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$subject has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$target has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$target_note has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$tm_properties has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$translation has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\Matches\:\:\$usage_count has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/Matches.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\SearchGlossaryResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/SearchGlossaryResponse.php
-
-		-
-			message: '#^Property Utils\\Engines\\Results\\MyMemory\\SearchGlossaryResponse\:\:\$matches has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/SearchGlossaryResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\Results\\MyMemory\\SetContributionResponse\:\:__construct\(\) has parameter \$response with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Engines/Results/MyMemory/SetContributionResponse.php
 
 		-
 			message: '#^Method Utils\\Engines\\Results\\MyMemory\\SetContributionResponse\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -28539,7 +28107,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:translateSegments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
@@ -28717,6 +28285,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 
 		-
+			message: '#^Method Features\\Aligner\\Utils\\TMSService\:\:importTMXInTM\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
+
+		-
 			message: '#^Method Features\\Aligner\\Utils\\TMSService\:\:requestChunkTMXEmailDownload\(\) has parameter \$id_tmx with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -28743,6 +28317,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\TMSService\:\:requestChunkTMXEmailDownload\(\) has parameter \$userSurname with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\TMSService\:\:requestChunkTMXEmailDownload\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 

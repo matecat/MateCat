@@ -34,6 +34,8 @@ use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use RuntimeException;
+use TypeError;
 
 /**
  * Created by PhpStorm.
@@ -62,9 +64,7 @@ class MyMemory extends AbstractEngine
      */
     protected string $content_type = 'json';
 
-    /**
-     * @var array
-     */
+    /** @var array<string, mixed> */
     protected array $_config = [
         'dataRefMap' => [],
         'segment' => null,
@@ -86,6 +86,7 @@ class MyMemory extends AbstractEngine
      * @param $engineRecord
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -97,12 +98,12 @@ class MyMemory extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
-     * @param null $function
+     * @param array<string, mixed> $parameters
+     * @param string|null $function
      *
      * @return TMSAbstractResponse
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): TMSAbstractResponse
+    protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): TMSAbstractResponse
     {
         $functionName = $function;
 
@@ -173,6 +174,7 @@ class MyMemory extends AbstractEngine
                     foreach ($decoded['matches'] as $pos => $match) {
                         $decoded['matches'][$pos]['segment'] = $match['segment'];
                         $decoded['matches'][$pos]['translation'] = $match['translation'];
+                        $decoded['matches'][$pos]['target_note'] = $match['target_note'] ?? '';
                     }
                 }
 
@@ -186,7 +188,7 @@ class MyMemory extends AbstractEngine
     private function possiblyOverrideMtPenalty(): void
     {
         if (!empty($this->result->matches)) {
-            /** @var $match Matches */
+            /** @var Matches $match */
             foreach ($this->result->matches as $match) {
                 if (!$match instanceof Matches) {
                     continue;
@@ -201,7 +203,7 @@ class MyMemory extends AbstractEngine
 
 
     /**
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
      * @return GetMemoryResponse
      * @throws AuthenticationError
@@ -264,8 +266,10 @@ class MyMemory extends AbstractEngine
         ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
         $filterMyMemoryGetParametersEvent = new FilterMyMemoryGetParametersEvent($parameters, $_config);
-        $this->featureSet->dispatchFilter($filterMyMemoryGetParametersEvent);
-        $parameters = $filterMyMemoryGetParametersEvent->getParameters();
+        if ($this->featureSet !== null) {
+            $this->featureSet->dispatchFilter($filterMyMemoryGetParametersEvent);
+            $parameters = $filterMyMemoryGetParametersEvent->getParameters();
+        }
 
         $this->call("translate_relative_url", $parameters, true);
 
@@ -275,7 +279,7 @@ class MyMemory extends AbstractEngine
     }
 
     /**
-     * @param $_config
+     * @param array<string, mixed> $_config
      *
      * @return SetContributionResponse|null
      */
@@ -365,6 +369,8 @@ class MyMemory extends AbstractEngine
     }
 
     /**
+     * @param array<string, mixed> $_config
+     *
      * @throws Exception
      */
     public function update($_config): UpdateContributionResponse
@@ -400,7 +406,7 @@ class MyMemory extends AbstractEngine
     }
 
     /**
-     * @param $_config
+     * @param array<string, mixed> $_config
      *
      * @return bool
      */
@@ -469,6 +475,7 @@ class MyMemory extends AbstractEngine
      * @param string $name
      *
      * @return FileImportAndStatusResponse
+     * @throws RuntimeException
      */
     public function glossaryImport(string $file, string $key, string $name = ''): FileImportAndStatusResponse
     {
@@ -478,7 +485,7 @@ class MyMemory extends AbstractEngine
             'de' => AppConfig::$MYMEMORY_API_KEY,
         ];
 
-        if ($name and $name !== '') {
+        if ($name !== '') {
             $postFields['key_name'] = $name;
         }
 
@@ -515,7 +522,7 @@ class MyMemory extends AbstractEngine
      * @param string $target
      * @param string $sourceLanguage
      * @param string $targetLanguage
-     * @param array|null $keys
+     * @param array<string>|null $keys
      *
      * @return CheckGlossaryResponse
      */
@@ -535,7 +542,7 @@ class MyMemory extends AbstractEngine
     }
 
     /**
-     * @param array|null $keys
+     * @param array<string>|null $keys
      *
      * @return DomainsResponse
      */
@@ -554,7 +561,7 @@ class MyMemory extends AbstractEngine
      * @param string $idSegment
      * @param string $idJob
      * @param string $password
-     * @param array $term
+     * @param array<string, mixed> $term
      *
      * @return DeleteGlossaryResponse
      */
@@ -578,7 +585,7 @@ class MyMemory extends AbstractEngine
      * @param string $source
      * @param string $sourceLanguage
      * @param string $targetLanguage
-     * @param array|null $keys
+     * @param array<string>|null $keys
      *
      * @return GetGlossaryResponse
      */
@@ -603,7 +610,7 @@ class MyMemory extends AbstractEngine
      * @param string $source
      * @param string $sourceLanguage
      * @param string $targetLanguage
-     * @param array|null $keys
+     * @param array<string>|null $keys
      *
      * @return SearchGlossaryResponse
      */
@@ -625,7 +632,7 @@ class MyMemory extends AbstractEngine
     /**
      * @param string $sourceLanguage
      * @param string $targetLanguage
-     * @param array|null $keys
+     * @param array<string>|null $keys
      *
      * @return KeysGlossaryResponse
      */
@@ -646,7 +653,7 @@ class MyMemory extends AbstractEngine
      * @param string $idSegment
      * @param string $idJob
      * @param string $password
-     * @param array $term
+     * @param array<string, mixed> $term
      *
      * @return SetGlossaryResponse
      */
@@ -669,7 +676,7 @@ class MyMemory extends AbstractEngine
      * @param string $idSegment
      * @param string $idJob
      * @param string $password
-     * @param array $term
+     * @param array<string, mixed> $term
      *
      * @return UpdateGlossaryResponse
      */
@@ -694,6 +701,7 @@ class MyMemory extends AbstractEngine
      * @param UserStruct $user * Not used
      *
      * @return FileImportAndStatusResponse
+     * @throws RuntimeException
      */
     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
     {
@@ -707,7 +715,12 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    public function getImportStatus($uuid)
+    /**
+     * @param string $uuid
+     *
+     * @return FileImportAndStatusResponse
+     */
+    public function getImportStatus(string $uuid): FileImportAndStatusResponse
     {
         $parameters = ['uuid' => trim($uuid)];
         $this->call('tmx_status_relative_url', $parameters);
@@ -759,6 +772,7 @@ class MyMemory extends AbstractEngine
     /*****************************************/
     /**
      * @throws Exception
+     * @return mixed
      */
     public function createMyMemoryKey()
     {
@@ -766,9 +780,7 @@ class MyMemory extends AbstractEngine
         $this->call('api_key_create_user_url');
 
         if (!$this->result instanceof CreateUserResponse) {
-            if (empty($this->result) || $this->result['error'] || $this->result['error']['code'] != 200) {
-                throw new Exception("Private TM key .", -1);
-            }
+            throw new Exception("Private TM key .", -1);
         }
 
         unset($this->result->responseStatus);
@@ -814,7 +826,7 @@ class MyMemory extends AbstractEngine
     /**
      * Calls the MyMemory Fast Analysis endpoint to analyze a document
      *
-     * @param array $segs_array
+     * @param array<int, array<string, mixed>> $segs_array
      *
      * @return AnalyzeResponse
      * @throws Exception
@@ -828,15 +840,38 @@ class MyMemory extends AbstractEngine
 
         $this->getEngineRecord()['base_url'] = "https://analyze.mymemory.translated.net/api/v1";
 
-        $this->call("analyze_url", array_values($segs_array), true, true);
+        $this->callAnalyzeUrl(array_values($segs_array));
 
         return $this->result;
     }
 
     /**
+     * @param list<array<string, mixed>> $segments
+     *
+     * @throws RuntimeException
+     */
+    private function callAnalyzeUrl(array $segments): void
+    {
+        $analyzePath = $this->__get('analyze_url');
+        if (!is_string($analyzePath) || $analyzePath === '') {
+            throw new RuntimeException('Analyze endpoint is not configured');
+        }
+
+        $url = "{$this->engineRecord['base_url']}/" . $analyzePath;
+
+        $rawValue = $this->_call($url, [
+            CURLOPT_POSTFIELDS => json_encode($segments),
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120,
+        ]);
+
+        $this->result = $this->_decode($rawValue, [], 'analyze_url');
+    }
+
+    /**
      * MyMemory private endpoint
      *
-     * @param array $config
+     * @param array<string, mixed> $config
      *
      * @return TagProjectionResponse
      */
@@ -855,10 +890,14 @@ class MyMemory extends AbstractEngine
         //trim chars that would have been lost with the guess tag
         preg_match("/" . $re . '$/', $target_string, $r_matches, PREG_OFFSET_CAPTURE);
         preg_match("/^" . $re . '/', $target_string, $l_matches, PREG_OFFSET_CAPTURE);
-        $r_index = (isset($r_matches[0][1])) ? $r_matches[0][1] : mb_strlen($target_string);
-        $l_index = (isset($l_matches[0][1])) ? (int)$l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
-        $r_matches = (isset($r_matches[0][0])) ? $r_matches[0][0] : '';
-        $l_matches = (isset($l_matches[0][0])) ? $l_matches[0][0] : '';
+        $rightOffset = $r_matches[0][1] ?? null;
+        $leftOffset = $l_matches[0][1] ?? null;
+        $leftString = $l_matches[0][0] ?? '';
+
+        $r_index = is_int($rightOffset) ? $rightOffset : mb_strlen($target_string);
+        $l_index = is_int($leftOffset) ? $leftOffset + mb_strlen($leftString) : 0;
+        $r_matches = $r_matches[0][0] ?? '';
+        $l_matches = $leftString;
 
         $parameters = [];
         $parameters['s'] = $source_string;
@@ -869,8 +908,18 @@ class MyMemory extends AbstractEngine
             CURLOPT_FOLLOWLOCATION => true,
         ]);
 
-        $this->getEngineRecord()->base_url = parse_url($this->getEngineRecord()->base_url, PHP_URL_HOST) . ":10000";
-        $this->getEngineRecord()->others['tags_projection'] .= '/' . $config['source_lang'] . "/" . $config['target_lang'] . "/";
+        $engineRecord = $this->getEngineRecord();
+        $baseUrl = $engineRecord->base_url ?? '';
+        $parsedHost = parse_url($baseUrl, PHP_URL_HOST);
+        $host = is_string($parsedHost) && $parsedHost !== '' ? $parsedHost : $baseUrl;
+        $engineRecord->base_url = $host . ":10000";
+
+        $others = is_array($engineRecord->others) ? $engineRecord->others : [];
+        $tagsProjection = isset($others['tags_projection']) && is_string($others['tags_projection']) ? $others['tags_projection'] : '';
+        $sourceLang = (string)($config['source_lang'] ?? '');
+        $targetLang = (string)($config['target_lang'] ?? '');
+        $others['tags_projection'] = rtrim($tagsProjection, '/') . '/' . $sourceLang . '/' . $targetLang . '/';
+        $engineRecord->others = $others;
         $this->call('tags_projection', $parameters);
 
         if (!empty($this->result->responseData)) {

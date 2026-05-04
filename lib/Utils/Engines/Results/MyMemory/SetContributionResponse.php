@@ -13,7 +13,7 @@ use Utils\Engines\Results\TMSAbstractResponse;
 class SetContributionResponse extends TMSAbstractResponse
 {
 
-    public function __construct($response)
+    public function __construct(mixed $response)
     {
         $this->responseData = $response['responseData'] ?? '';
         $this->responseDetails = $response['responseDetails'] ?? '';

@@ -12,7 +12,7 @@ class ErrorResponse
      */
     public ?string $http_code = null;
 
-    public function __construct($result = [])
+    public function __construct(mixed $result = [])
     {
         if (!empty($result)) {
             $this->http_code = $result['http_code'] ?? null;

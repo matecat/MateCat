@@ -7,63 +7,89 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionObject;
 use ReflectionProperty;
+use TypeError;
 
 class Matches
 {
 
-    public $id;
-    public $style;
-    public $raw_segment;
-    public $segment;
-    public $translation;
-    public $target_note;
-    public $raw_translation;
-    public $quality;
-    public $reference;
-    public $usage_count;
-    public $subject;
-    public $created_by;
-    public $last_updated_by;
-    public $create_date;
-    public $last_update_date;
-    public $data;
+    public ?string $id = null;
+    public ?string $style = null;
+    public string $raw_segment = '';
+    public string $segment = '';
+    public string $translation = '';
+    public string $target_note = '';
+    public string $raw_translation = '';
+    public mixed $quality = 0;
+    public string $reference = '';
+    public mixed $usage_count = 0;
+    public string $subject = '';
+    public string $created_by = '';
+    public string $last_updated_by = '';
+    public string $create_date = '';
+    public string $last_update_date = '';
+    public mixed $data = null;
 
-    public $prop = [];
-    public $memory_key;
-    public $ICE;
-    public $tm_properties;
-    public $source_note;
+    /**
+     * @var array<string, mixed>
+     */
+    public array $prop = [];
+    public string $memory_key = '';
+    public bool $ICE = false;
+    /**
+     * @var array<string, mixed>|null
+     */
+    public ?array $tm_properties = [];
+    public ?string $source_note = null;
 
     /**
      * @var FeatureSet|null
      */
     protected ?FeatureSet $featureSet = null;
 
-    public $source;
-    public $target;
+    public ?string $source = null;
+    public ?string $target = null;
 
-    public $penalty;
+    public mixed $penalty = null;
 
-    public $score;
+    public mixed $score = null;
 
-    public $match;
-
-    private $id_project;
-
-    /**
-     * @var mixed|null
-     */
-    private $reasoning;
+    public mixed $match = 0;
 
     /**
      * MyMemory constructor.
      *
-     * @param array $data
+     * @param array{
+     *     id?: string|null,
+     *     style?: string|null,
+     *     create-date?: string,
+     *     segment?: string,
+     *     raw_segment?: string,
+     *     translation?: string,
+     *     source_note?: string|null,
+     *     target_note?: string,
+     *     raw_translation?: string,
+     *     quality?: int|string,
+     *     reference?: string,
+     *     usage-count?: int|string,
+     *     subject?: string,
+     *     created-by?: string,
+     *     last-updated-by?: string,
+     *     last-update-date?: string,
+     *     match?: int|string,
+     *     key?: string,
+     *     ICE?: bool,
+     *     tm_properties?: string,
+     *     target?: string|null,
+     *     source?: string|null,
+     *     penalty?: mixed,
+     *     score?: mixed,
+     *     prop?: array
+     * } $data
+     * @throws TypeError
      */
     public function __construct(array $data = [])
     {
         $this->id = array_key_exists('id', $data) ? $data['id'] : '0';
-        $this->reasoning = array_key_exists('reasoning', $data) ? $data['reasoning'] : null;
         $this->style = array_key_exists('style', $data) ? $data['style'] : null;
         $this->create_date = array_key_exists('create-date', $data) ? $data['create-date'] : '1970-01-01 00:00:00';
         $this->segment = array_key_exists('segment', $data) ? $data['segment'] : '';
@@ -90,20 +116,20 @@ class Matches
         $this->prop = array_key_exists('prop', $data) ? $data['prop'] : [];
     }
 
-    public function featureSet(FeatureSet $featureSet = null)
+    public function featureSet(?FeatureSet $featureSet = null): void
     {
         $this->featureSet = $featureSet;
     }
 
     /**
-     * @param int $layerNum
-     * @param array $dataRefMap
+     * @param array<string, mixed> $dataRefMap
      * @param null $source
      * @param null $target
-     * @param array|null $subfiltering_handlers
+     * @param array<string, mixed>|null $subfiltering_handlers
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws TypeError
      */
     public function getMatches(int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null, ?array $subfiltering_handlers = []): array
     {
@@ -121,16 +147,13 @@ class Matches
     }
 
     /**
-     * @param            $string
-     * @param            $layerNum
-     *
-     * @param array $dataRefMap
-     * @param array|null $subfiltering_handlers
+     * @param array<string, mixed> $dataRefMap
+     * @param array<string, mixed>|null $subfiltering_handlers
      *
      * @return mixed
      * @throws Exception
      */
-    protected function getLayer($string, $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = []): mixed
+    protected function getLayer(string $string, int $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = []): mixed
     {
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
 
@@ -138,12 +161,12 @@ class Matches
         $filter = MateCatFilter::getInstance($featureSet, $this->source, $this->target, $dataRefMap, $subfiltering_handlers);
         switch ($layerNum) {
             case 0:
-                return $filter->fromLayer1ToLayer0($string ?? '');
+                return $filter->fromLayer1ToLayer0($string);
             case 1:
             default:
                 return $string;
             case 2:
-                return $filter->fromLayer1ToLayer2($string ?? '');
+                return $filter->fromLayer1ToLayer2($string);
         }
     }
 
@@ -155,7 +178,7 @@ class Matches
      * This method is useful in conjunction with PDO execute, where only
      * a subset of the attributes may be required to be bound to the query.
      *
-     * @return array
+     * @return array<string, mixed>
      *
      */
     protected function toArray(): array
