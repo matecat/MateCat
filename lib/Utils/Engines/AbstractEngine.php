@@ -5,6 +5,8 @@ namespace Utils\Engines;
 use CURLFile;
 use DomainException;
 use Exception;
+use RuntimeException;
+use TypeError;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -36,13 +38,16 @@ abstract class AbstractEngine implements EngineInterface
     protected EngineStruct $engineRecord;
 
     protected string $className;
+
+    /** @var array<string, mixed> */
     protected array $_config = [];
-    /**
-     * @var mixed
-     */
-    protected mixed $result = []; // this cannot be forced to be an array, engines may use different types
+
+    protected mixed $result = [];
+
+    /** @var array<string, mixed> */
     protected array $error = [];
 
+    /** @var array<int, mixed> */
     protected array $curl_additional_params = [];
 
     protected bool $_isAnalysis = false;
@@ -65,7 +70,13 @@ abstract class AbstractEngine implements EngineInterface
     const int GET_REQUEST_TIMEOUT = 10;
     protected MatecatLogger $logger;
 
-    public function __construct($engineRecord)
+    /**
+     * @param EngineStruct $engineRecord
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function __construct(EngineStruct $engineRecord)
     {
         $this->engineRecord = $engineRecord;
         $this->className = get_class($this);
@@ -108,7 +119,7 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param ?bool $bool
+     * @param bool $bool
      *
      * @return $this
      */
@@ -154,17 +165,17 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param $key
+     * @param string $key
      *
-     * @return null
+     * @return mixed
      */
-    public function __get($key)
+    public function __get(string $key)
     {
         if (property_exists($this->engineRecord, $key)) {
             return $this->engineRecord->$key;
-        } elseif (array_key_exists($key, $this->engineRecord->others)) {
+        } elseif (is_array($this->engineRecord->others) && array_key_exists($key, $this->engineRecord->others)) {
             return $this->engineRecord->others[$key];
-        } elseif (array_key_exists($key, $this->engineRecord->extra_parameters)) {
+        } elseif (is_array($this->engineRecord->extra_parameters) && array_key_exists($key, $this->engineRecord->extra_parameters)) {
             return $this->engineRecord->extra_parameters[$key];
         } else {
             return null;
@@ -172,16 +183,18 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws DomainException
      */
-    public function __set($key, $value)
+    public function __set(string $key, mixed $value)
     {
         if (property_exists($this->engineRecord, $key)) {
             $this->engineRecord->$key = $value;
-        } elseif (array_key_exists($key, $this->engineRecord->others)) {
+        } elseif (is_array($this->engineRecord->others) && array_key_exists($key, $this->engineRecord->others)) {
             $this->engineRecord->others[$key] = $value;
-        } elseif (array_key_exists($key, $this->engineRecord->extra_parameters)) {
+        } elseif (is_array($this->engineRecord->extra_parameters) && array_key_exists($key, $this->engineRecord->extra_parameters)) {
             $this->engineRecord->extra_parameters[$key] = $value;
         } else {
             throw new DomainException("Property $key does not exists in " . get_class($this));
@@ -189,22 +202,22 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     abstract public static function getConfigurationParameters(): array;
 
     /**
-     * @param mixed $rawValue
-     * @param array $parameters
-     * @param null $function
+     * @param mixed                $rawValue
+     * @param array<string, mixed> $parameters
+     * @param string|null          $function
      *
-     * @return array|TMSAbstractResponse
+     * @return array<string, mixed>|TMSAbstractResponse
      */
-    abstract protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array|TMSAbstractResponse;
+    abstract protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): array|TMSAbstractResponse;
 
     /**
-     * @param string $url
-     * @param array $curl_options
+     * @param string           $url
+     * @param array<int, mixed> $curl_options
      *
      * @return string|bool|null
      */
@@ -226,6 +239,12 @@ abstract class AbstractEngine implements EngineInterface
             $uniq_uid
         );
 
+        if ($resourceHash === null) {
+            $mh->multiCurlCloseAll();
+
+            return null;
+        }
+
         $mh->multiExec();
 
         if ($mh->hasError($resourceHash)) {
@@ -235,10 +254,10 @@ abstract class AbstractEngine implements EngineInterface
                 'error' => [
                     'code' => -(int)$curl_error['errno'],
                     'message' => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error['http_code'] . ")",
-                    'response' => $responseRawValue // Some useful info might still be contained in the response body
+                    'response' => $responseRawValue
                 ],
                 'responseStatus' => (int)$curl_error['http_code']
-            ]); //return a negative number
+            ]);
         } else {
             $rawValue = $mh->getSingleContent($resourceHash);
         }
@@ -247,7 +266,7 @@ abstract class AbstractEngine implements EngineInterface
 
         if ($this->logging) {
             $log = $mh->getSingleLog($resourceHash);
-            if ($this->content_type == 'json' && !$mh->hasError($resourceHash)) {
+            if ($this->content_type == 'json' && !$mh->hasError($resourceHash) && is_string($rawValue)) {
                 $log['response'] = json_decode($rawValue, true);
             } else {
                 $log['response'] = $rawValue;
@@ -259,10 +278,10 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param string $function
-     * @param array $parameters
-     * @param bool $isPostRequest
-     * @param bool $isJsonRequest
+     * @param string               $function
+     * @param array<string, mixed> $parameters
+     * @param bool                 $isPostRequest
+     * @param bool                 $isJsonRequest
      *
      * @return void
      */
@@ -316,6 +335,9 @@ abstract class AbstractEngine implements EngineInterface
         $this->result = $this->_decode($rawValue, $parameters, $function);
     }
 
+    /**
+     * @param array<int, mixed> $curlOptParams
+     */
     public function _setAdditionalCurlParams(array $curlOptParams = []): void
     {
         /*
@@ -332,6 +354,9 @@ abstract class AbstractEngine implements EngineInterface
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getConfigStruct(): array
     {
         return $this->_config;
@@ -352,7 +377,7 @@ abstract class AbstractEngine implements EngineInterface
 
     public function getName(): string
     {
-        return $this->engineRecord->name;
+        return $this->engineRecord->name ?? '';
     }
 
     public function getMTName(string $forceName = ''): string
@@ -374,21 +399,26 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * This function is PHP7 compatible
-     *
-     * @param $file
+     * @param string $file
      *
      * @return CURLFile
+     *
+     * @throws RuntimeException
      */
-    protected function getCurlFile($file): CURLFile
+    protected function getCurlFile(string $file): CURLFile
     {
-        return new CURLFile(realpath($file));
+        $resolved = realpath($file);
+        if ($resolved === false) {
+            throw new RuntimeException("File not found: $file");
+        }
+
+        return new CURLFile($resolved);
     }
 
     /**
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
-     * @return array|TMSAbstractResponse
+     * @return array<string, mixed>|TMSAbstractResponse
      * @throws Exception
      */
     protected function GoogleTranslateFallback(array $_config): TMSAbstractResponse|array
@@ -407,9 +437,7 @@ abstract class AbstractEngine implements EngineInterface
 
             $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);
 
-            /**
-             * @var $gtEngine GoogleTranslate
-             */
+            /** @var GoogleTranslate $gtEngine */
             return $gtEngine->get($_config);
         } catch (Exception) {
             return [];
@@ -428,8 +456,8 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param array $projectRow
-     * @param array|null $segments
+     * @param array<string, mixed> $projectRow
+     * @param array<string, mixed>|null $segments
      *
      * @return void
      */
@@ -438,10 +466,9 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     * @param MemoryKeyStruct $memoryKey
      *
-     * @return ?array Returns the memory, otherwise null.
-     * @throws Exception
+     * @return array<string, mixed>|null
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
     {
@@ -449,10 +476,9 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param array $memoryKey
+     * @param array<string, mixed> $memoryKey
      *
-     * @return array
-     * @throws Exception
+     * @return array<string, mixed>
      */
     public function deleteMemory(array $memoryKey): array
     {
@@ -460,12 +486,9 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * Determines if the provided memory belongs to the caller.
+     * @param MemoryKeyStruct $memoryKey
      *
-     *
-     * @param MemoryKeyStruct $memoryKey *
-     *
-     * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
+     * @return array<string, mixed>|null
      */
     public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array
     {
@@ -487,11 +510,11 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param string $raw_segment
-     * @param array $decoded
-     * @param int $layerNum
+     * @param string               $raw_segment
+     * @param array<string, mixed> $decoded
+     * @param int                  $layerNum
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _composeMTResponseAsMatch(string $raw_segment, array $decoded, int $layerNum = 1): array
