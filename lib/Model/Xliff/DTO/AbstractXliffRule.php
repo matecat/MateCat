@@ -9,9 +9,14 @@ use LogicException;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 use Utils\Constants\TranslationStatus;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 {
+    /** @var list<string> */
     protected static array $_STATE_QUALIFIERS = [];
+    /** @var list<string> */
     protected static array $_STATES = [];
 
     // analysis behavior
@@ -38,7 +43,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     ];
 
     /**
-     * @var string[]
+     * @var array{states: list<string>, state-qualifiers: list<string>}
      */
     protected array $states = [
         'states' => [],
@@ -59,9 +64,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     protected string $matchCategory = 'ice';
 
      /**
-      * AbstractXliffRule constructor.
-      *
-      * @param array $states
+      * @param string[] $states
       * @param string $analysis
       * @param string|null $editor
       * @param string|null $matchCategory
@@ -77,7 +80,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-      * @param array $states
+      * @param string[] $states
       * @throws DomainException
       */
      protected function setStates(array $states): void
@@ -157,7 +160,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {
@@ -177,6 +180,9 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         return $result;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getArrayCopy(): array
     {
         return $this->jsonSerialize();
@@ -185,7 +191,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @param string|null $type
      *
-     * @return array
+     * @return list<string>
      */
     public function getStates(?string $type = null): array
     {
@@ -264,7 +270,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 
     /**
      * @param int $raw_word_count
-     * @param array $payable_rates
+     * @param array<string, int|float> $payable_rates
      *
      * @return float
      * @throws Exception
@@ -280,7 +286,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 
     /**
      * @param int $raw_word_count
-     * @param array $payable_rates
+     * @param array<string, int|float> $payable_rates
      *
      * @return float
      * @throws Exception
