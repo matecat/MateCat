@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\Response;
 use Model\Projects\ProjectTemplateDao;
+use Model\Projects\ProjectTemplateStruct;
 use PDOException;
 use ReflectionException;
 use stdClass;
@@ -19,6 +20,9 @@ use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 use TypeError;
 
+/**
+ * @phpstan-import-type HydrationInput from ProjectTemplateStruct
+ */
 class ProjectTemplateController extends KleinController
 {
     protected function afterConstruct(): void
@@ -30,6 +34,7 @@ class ProjectTemplateController extends KleinController
     /**
      * @param $json
      *
+     * @phpstan-return HydrationInput
      * @return object
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException

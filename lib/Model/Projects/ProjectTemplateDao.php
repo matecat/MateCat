@@ -29,6 +29,9 @@ use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
 
+/**
+ * @phpstan-import-type HydrationInput from ProjectTemplateStruct
+ */
 class ProjectTemplateDao extends AbstractDao
 {
     const string TABLE = 'project_templates';
@@ -123,7 +126,7 @@ class ProjectTemplateDao extends AbstractDao
     }
 
     /**
-     * @param object $decodedObject
+     * @phpstan-param HydrationInput $decodedObject
      * @param UserStruct $user
      *
      * @return ProjectTemplateStruct
@@ -145,7 +148,7 @@ class ProjectTemplateDao extends AbstractDao
 
     /**
      * @param ProjectTemplateStruct $projectTemplateStruct
-     * @param object $json
+     * @phpstan-param HydrationInput $json
      * @param int $id
      * @param UserStruct $user
      *
