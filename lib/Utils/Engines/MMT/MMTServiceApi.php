@@ -9,6 +9,7 @@
 namespace Utils\Engines\MMT;
 
 use CURLFile;
+use RuntimeException;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
@@ -32,9 +33,9 @@ class MMTServiceApi
      */
     public static function newInstance(?string $baseUrl = null): MMTServiceApi
     {
-        $baseUrl = $baseUrl == null ? self::DEFAULT_BASE_URL : rtrim($baseUrl, "/");
+        $baseUrl = $baseUrl === null ? self::DEFAULT_BASE_URL : rtrim($baseUrl, "/");
 
-        return new static($baseUrl);
+        return new self($baseUrl);
     }
 
     /**
@@ -89,7 +90,7 @@ class MMTServiceApi
     /* - Instance --------------------------------------------------------------------------------------------------- */
 
     /**
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      */
     public function getAvailableLanguages(): ?array
@@ -100,14 +101,14 @@ class MMTServiceApi
     /* - User ------------------------------------------------------------------------------------------------------- */
 
     /**
-     * @param $name
-     * @param $email
-     * @param $stripeToken
+     * @param string $name
+     * @param string $email
+     * @param string $stripeToken
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      */
-    public function signup($name, $email, $stripeToken): ?array
+    public function signup(string $name, string $email, string $stripeToken): ?array
     {
         return $this->send('POST', "$this->baseUrl/users", [
             'name' => $name,
@@ -117,7 +118,7 @@ class MMTServiceApi
     }
 
     /**
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      */
     public function me(): ?array
@@ -134,7 +135,7 @@ class MMTServiceApi
      * @param string $translation
      * @param string $mt_qe_engine_id
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      */
     public function qualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id): ?array
@@ -152,7 +153,7 @@ class MMTServiceApi
     /* Memory ------------------------------------------------------------------------------------------------------- */
 
     /**
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      */
     public function getAllMemories(): ?array
@@ -163,7 +164,7 @@ class MMTServiceApi
     /**
      * @param string $id
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -177,7 +178,7 @@ class MMTServiceApi
      * @param string|null $description
      * @param string|null $externalId
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -193,7 +194,7 @@ class MMTServiceApi
     /**
      * @param string $id
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -204,9 +205,9 @@ class MMTServiceApi
 
     /**
      * @param string $id
-     * @param array $data
+     * @param array<string, mixed> $data
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -217,9 +218,9 @@ class MMTServiceApi
 
     /**
      * @param string $id
-     * @param array $data
+     * @param array<string, mixed> $data
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -231,7 +232,7 @@ class MMTServiceApi
     /**
      * @param string $uuid
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -243,7 +244,7 @@ class MMTServiceApi
     /**
      * @param string $id
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -257,7 +258,7 @@ class MMTServiceApi
      * @param string $name
      * @param string|null $description
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -270,9 +271,9 @@ class MMTServiceApi
     }
 
     /**
-     * @param array $externalIds
+     * @param array<string> $externalIds
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -284,7 +285,7 @@ class MMTServiceApi
     }
 
     /**
-     * @param array|string $id
+     * @param array<string>|string $id
      * @param string $source
      * @param string $target
      * @param string $sentence
@@ -292,7 +293,7 @@ class MMTServiceApi
      *
      * @param string $session
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -331,7 +332,7 @@ class MMTServiceApi
 
     /**
      * @param string $tuid
-     * @param array $memory_keys
+     * @param array<string> $memory_keys
      * @param string $source
      * @param string $target
      * @param string $sentence
@@ -360,9 +361,10 @@ class MMTServiceApi
      * @param string $tmx
      * @param string|null $compression
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws RuntimeException
      */
     public function importIntoMemoryContent(string $id, string $tmx, ?string $compression = null): ?array
     {
@@ -375,7 +377,7 @@ class MMTServiceApi
     /**
      * @param string $uuid
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -388,12 +390,12 @@ class MMTServiceApi
 
     /**
      * @param string $source
-     * @param array $targets
+     * @param array<string> $targets
      * @param string $text
-     * @param array|null $hints
-     * @param mixed $limit
+     * @param array<string>|null $hints
+     * @param int|null $limit
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -410,15 +412,16 @@ class MMTServiceApi
 
     /**
      * @param string $source
-     * @param array $targets
+     * @param array<string> $targets
      * @param string $file
      * @param string|null $compression
-     * @param array|null $hints
-     * @param mixed $limit
+     * @param array<string>|null $hints
+     * @param int|null $limit
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws RuntimeException
      */
     public function getContextVectorFromFile(string $source, array $targets, string $file, ?string $compression = null, ?array $hints = null, ?int $limit = null): ?array
     {
@@ -437,7 +440,7 @@ class MMTServiceApi
      * @param string $target
      * @param string $text
      * @param string|null $contextVector
-     * @param array|null $hints
+     * @param array<string>|null $hints
      * @param string|null $projectId
      * @param int|null $timeout
      * @param string|null $priority
@@ -447,7 +450,7 @@ class MMTServiceApi
      * @param bool|null $include_score
      * @param string|null $mt_qe_engine_id
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -490,7 +493,7 @@ class MMTServiceApi
         }
 
         if ($ignoreGlossaryCase) {
-            $params['ignore_glossary_case'] = ($ignoreGlossaryCase == 1) ? 'true' : 'false';
+            $params['ignore_glossary_case'] = 'true';
         }
 
         if ($include_score) {
@@ -507,20 +510,26 @@ class MMTServiceApi
      * @param string $file
      *
      * @return CURLFile
+     * @throws RuntimeException
      */
     protected function _setCulFileUpload(string $file): CURLFile
     {
-        return new CURLFile(realpath($file));
+        $realPath = realpath($file);
+        if ($realPath === false) {
+            throw new RuntimeException("File not found: $file");
+        }
+
+        return new CURLFile($realPath);
     }
 
     /**
      * @param string $method
      * @param string $url
-     * @param array|null $params
+     * @param array<string, mixed>|null $params
      * @param bool $multipart
      * @param int|null $timeout
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
@@ -537,14 +546,20 @@ class MMTServiceApi
         }
 
         $headers = ["X-HTTP-Method-Override: $method"];
+        $postFields = $params;
 
         if ($multipart) {
             $headers[] = 'Content-Type: multipart/form-data';
         } else {
             $headers[] = 'Content-Type: application/json';
             if ($params) {
-                $params = json_encode($params);
-                $headers[] = strlen($params);
+                $encoded = json_encode($params);
+                if ($encoded === false) {
+                    throw new MMTServiceApiException("ConnectionException", 500, "Unable to encode request parameters");
+                }
+
+                $postFields = $encoded;
+                $headers[] = 'Content-Length: ' . strlen($postFields);
             }
         }
 
@@ -579,8 +594,8 @@ class MMTServiceApi
         // (X-HTTP-Method-Override will override the method)
         $options[CURLOPT_POST] = 1;
 
-        if ($params) {
-            $options[CURLOPT_POSTFIELDS] = $params;
+        if ($postFields !== null) {
+            $options[CURLOPT_POSTFIELDS] = $postFields;
         }
 
         if ($timeout !== null) {
@@ -588,20 +603,28 @@ class MMTServiceApi
         }
 
         $resourceHashId = $handler->createResource($url, $options);
+        if ($resourceHashId === null) {
+            throw new MMTServiceApiException("ConnectionException", 500, "Unable to create connection resource");
+        }
+
         $handler->multiExec();
         $handler->multiCurlCloseAll();
 
         if ($handler->hasError($resourceHashId)) {
-            if ($handler->getError($resourceHashId)['errno'] == 28) {
+            if ($handler->getError($resourceHashId)['errno'] === 28) {
                 throw new MMTServiceApiException("TimeoutException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})");
             } elseif ($handler->getError($resourceHashId)['http_code']) {
-                throw new MMTServiceApiRequestException("ServiceException", $handler->getError($resourceHashId)['http_code'], "Get denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})");
+                throw new MMTServiceApiRequestException("ServiceException", (int)$handler->getError($resourceHashId)['http_code'], "Get denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})");
             } else {
                 throw new MMTServiceApiException("ConnectionException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})");
             }
         }
 
         $result = $handler->getSingleContent($resourceHashId);
+        if (!is_string($result)) {
+            throw new MMTServiceApiException("ConnectionException", 500, "Empty or invalid response from server");
+        }
+
         $log = $handler->getSingleLog($resourceHashId);
         $log['response'] = $result;
 
@@ -613,7 +636,7 @@ class MMTServiceApi
     /**
      * @param string $body
      *
-     * @return mixed|null
+     * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      */
     private function parse(string $body): ?array

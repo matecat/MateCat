@@ -13,6 +13,9 @@ use Exception;
 class MMTServiceApiException extends Exception
 {
 
+    /**
+     * @param array<string, mixed> $json
+     */
     public static function fromJSONResponse(array $json): MMTServiceApiException
     {
         $code = isset($json['status']) ? intval($json['status']) : 500;
@@ -22,18 +25,18 @@ class MMTServiceApiException extends Exception
         return new self($type, $code, $message);
     }
 
-    private $type;
+    private ?string $type;
 
-    public function __construct(?string $type = '', ?int $code = 0, ?string $message = "")
+    public function __construct(?string $type = '', int $code = 0, ?string $message = "")
     {
         parent::__construct("($type) $message", $code);
         $this->type = $type;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }

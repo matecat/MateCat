@@ -26,7 +26,7 @@ class MetadataDao extends AbstractDao
      * @param string $key
      * @param int $ttl
      *
-     * @return IDaoStruct[]|MetadataStruct[]
+     * @return MetadataStruct[]
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
