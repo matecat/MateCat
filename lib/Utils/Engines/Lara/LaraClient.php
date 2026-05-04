@@ -39,7 +39,7 @@ class LaraClient extends Translator
     {
         $this->client = new class('https://api.laratranslate.com', $credentials) extends HttpClient implements HttpClientInterface {
 
-            public function __construct(?string $baseUrl = null, AccessKey|AuthToken|null $credentials = null)
+            public function __construct(string $baseUrl, AccessKey|AuthToken|null $credentials = null)
             {
                 parent::__construct($baseUrl, $credentials);
             }

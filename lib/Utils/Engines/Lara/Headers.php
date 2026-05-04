@@ -19,6 +19,8 @@ use Iterator;
  *
  * This class implements the Iterator interface to manage HTTP headers for the LARA engine.
  * It provides methods to set and retrieve specific headers, such as the TUID and translation origin.
+ *
+ * @implements Iterator<string, HeaderField>
  */
 class Headers implements Iterator
 {
@@ -57,7 +59,7 @@ class Headers implements Iterator
     /**
      * Stores the keys of the headers for iteration.
      *
-     * @var array
+     * @var array<int, string>
      */
     private array $keys;
 
@@ -204,7 +206,7 @@ class Headers implements Iterator
      * whose `getValue()` method returns a non-empty value. The result is an array
      * where each key is the header name and each value is the corresponding header value.
      *
-     * @return array An associative array of header keys and their non-empty values.
+     * @return array<string, string> An associative array of header keys and their non-empty values.
      */
     public function getArrayCopy(): array
     {

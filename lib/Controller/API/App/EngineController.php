@@ -17,7 +17,6 @@ use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\Engines\Structs\IntentoStruct;
 use Model\Engines\Structs\LaraStruct;
-use Model\Engines\Structs\MicrosoftHubStruct;
 use Model\Engines\Structs\MMTStruct;
 use Model\Engines\Structs\SmartMATEStruct;
 use Model\Engines\Structs\YandexTranslateStruct;
@@ -33,6 +32,7 @@ use Utils\Engines\Validators\GoogleTranslateEngineValidator;
 use Utils\Engines\Validators\IntentoEngineValidator;
 use Utils\Engines\Validators\LaraEngineValidator;
 use Utils\Engines\Validators\MMTEngineValidator;
+use TypeError;
 
 class EngineController extends KleinController
 {
@@ -45,6 +45,7 @@ class EngineController extends KleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function add(): void
     {
@@ -175,6 +176,7 @@ class EngineController extends KleinController
                  * Create a record of type Lara
                  */
                 $newEngineStruct = LaraStruct::getStruct();
+                assert(is_array($newEngineStruct->extra_parameters));
 
                 $newEngineStruct->uid = $this->user->uid;
                 $newEngineStruct->type = EngineConstants::MT;
@@ -228,22 +230,7 @@ class EngineController extends KleinController
             throw new AuthorizationError("Creation failed. Only one $engine_type engine is allowed.", 403);
         }
 
-        if ($newEngineStruct instanceof MicrosoftHubStruct) {
-            $newTestCreatedMT = EnginesFactory::createTempInstance($newCreatedDbRowStruct);
-            $config = $newTestCreatedMT->getConfigStruct();
-            $config['segment'] = "Hello World";
-            $config['source'] = "en-US";
-            $config['target'] = "it-IT";
-
-            $mt_result = $newTestCreatedMT->get($config);
-
-            if (isset($mt_result['error']['code'])) {
-                $engineDAO->delete($newCreatedDbRowStruct);
-                $this->destroyUserEnginesCache();
-
-                throw new DomainException($mt_result['error']);
-            }
-        } elseif ($newEngineStruct instanceof LaraStruct) {
+        if ($newEngineStruct instanceof LaraStruct) {
             $UserMetadataDao = new MetadataDao();
             $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load, (string)$newCreatedDbRowStruct->id);
         } elseif ($newEngineStruct instanceof MMTStruct) {

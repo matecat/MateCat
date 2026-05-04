@@ -2,6 +2,7 @@
 
 namespace Controller\API\V3;
 
+use Exception;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\EngineOwnershipValidator;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -18,7 +19,7 @@ class LaraController extends KleinController
         parent::afterConstruct();
 
         $loginValidator = new LoginValidator($this);
-        $engineOwnerValidator = new EngineOwnershipValidator($this, filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT), Lara::class);
+        $engineOwnerValidator = new EngineOwnershipValidator($this, (int)filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT), Lara::class);
 
         $loginValidator->onSuccess(function () use ($engineOwnerValidator) {
             $engineOwnerValidator->validate();
@@ -32,6 +33,7 @@ class LaraController extends KleinController
     /**
      * Get all the customer's Lara glossaries
      * @throws LaraException
+     * @throws Exception
      */
     public function glossaries(): void
     {

@@ -11,7 +11,9 @@ namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Lara\LaraException;
+use Model\Engines\Structs\EngineStruct;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
@@ -21,6 +23,7 @@ use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Registry\AppConfig;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
+use TypeError;
 
 class LaraEngineValidator extends AbstractValidator
 {
@@ -30,12 +33,15 @@ class LaraEngineValidator extends AbstractValidator
      * @return ValidatorObject|null
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
-        /**
-         * @var $newTestCreatedMT Lara
-         */
+        if (!$object instanceof EngineValidatorObject || !$object->engineStruct instanceof EngineStruct) {
+            throw new InvalidArgumentException('Invalid Lara engine validator object');
+        }
+
+        /** @var Lara $newTestCreatedMT */
         $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";

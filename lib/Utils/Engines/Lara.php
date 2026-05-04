@@ -24,6 +24,7 @@ use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara\Headers;
@@ -32,6 +33,7 @@ use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -80,6 +82,7 @@ class Lara extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -151,7 +154,7 @@ class Lara extends AbstractEngine
     /**
      * Get the available languages in MMT
      *
-     * @return array
+     * @return array<int, string>
      * @throws LaraException
      * @throws ReflectionException
      * @throws Exception
@@ -163,7 +166,10 @@ class Lara extends AbstractEngine
         $value = [];
 
         try {
-            $value = unserialize($cache->get("lara_languages"));
+            $cached = $cache->get("lara_languages");
+            if (is_string($cached)) {
+                $value = unserialize($cached);
+            }
         } catch (Throwable) {
         }
 
@@ -195,8 +201,8 @@ class Lara extends AbstractEngine
     }
 
     /**
-     * @param array $config
-     * @return array
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
      */
     private function configureContribution(array $config = []): array
     {
@@ -214,14 +220,15 @@ class Lara extends AbstractEngine
     /**
      * @inheritDoc
      *
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
-     * @return array
+     * @return array<string, mixed>|TMSAbstractResponse
      * @throws ReflectionException
      * @throws LaraException
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config): array
+    public function get(array $_config): TMSAbstractResponse|array
     {
         // temporary disable ur-Latn-PK
         if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
@@ -267,6 +274,7 @@ class Lara extends AbstractEngine
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
+                        $laraGlossariesArray = $laraGlossaries->value;
                         $translateOptions->setGlossaries($laraGlossariesArray);
                     }
                 }
@@ -299,10 +307,12 @@ class Lara extends AbstractEngine
 
                 $translation = "";
                 $tList = $translationResponse->getTranslation();
-                foreach ($tList as $t) {
-                    if ($t->isTranslatable()) {
-                        $translation = $t->getText();
-                        break;
+                if (is_array($tList)) {
+                    foreach ($tList as $t) {
+                        if ($t instanceof TextBlock && $t->isTranslatable()) {
+                            $translation = $t->getText();
+                            break;
+                        }
                     }
                 }
 
@@ -347,6 +357,10 @@ class Lara extends AbstractEngine
                             ]
                         ]
                     ]);
+
+                    if ($message === false) {
+                        return [];
+                    }
 
                     $queueHandler = AMQHandler::getNewInstanceForDaemons();
                     $queueHandler->publishToNodeJsClients(
@@ -463,6 +477,8 @@ class Lara extends AbstractEngine
 
     /**
      * @inheritDoc
+     *
+     * @param mixed $_config
      */
     public function set($_config)
     {
@@ -470,6 +486,8 @@ class Lara extends AbstractEngine
 
     /**
      * @inheritDoc
+     *
+     * @param array<string, mixed> $_config
      * @throws Exception
      */
     public function update($_config)
@@ -535,14 +553,14 @@ class Lara extends AbstractEngine
     /**
      * @param MemoryKeyStruct $memoryKey
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      * @throws LaraException
      * @throws Exception
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
     {
         $clientMemories = $this->_getClient()->memories;
-        $memory = $clientMemories->get('ext_my_' . trim($memoryKey->tm_key->key));
+        $memory = $clientMemories->get('ext_my_' . trim($memoryKey->tm_key->key ?? ''));
         return $memory?->jsonSerialize();
     }
 
@@ -588,6 +606,7 @@ class Lara extends AbstractEngine
      * In 'Lara', there is no need to check the ownership of the memory because if a memory exists within an account, it definitely ALSO belongs to me and can be safely deleted (unlinked from my account).
      * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
      * @throws LaraException
+     * @throws Exception
      */
     public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array
     {
@@ -634,8 +653,8 @@ class Lara extends AbstractEngine
     }
 
     /**
-     * @param array $projectRow
-     * @param array|null $segments
+     * @param array<string, mixed> $projectRow
+     * @param array<int, array<string, mixed>>|null $segments
      *
      * @return void
      */
@@ -644,7 +663,14 @@ class Lara extends AbstractEngine
         try {
             // get jobs keys
             $project = ProjectDao::findById($projectRow['id']);
+            if ($project === null) {
+                return;
+            }
+
             $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            if ($user === null) {
+                return;
+            }
 
             foreach ($project->getJobs() as $job) {
                 $keyIds = [];
@@ -653,7 +679,9 @@ class Lara extends AbstractEngine
                 $jobKeyList = array_merge($jobKeyListRead, $jobKeyListWrite);
 
                 foreach ($jobKeyList as $memKey) {
-                    $keyIds[] = $memKey->key;
+                    if ($memKey->key !== null) {
+                        $keyIds[] = $memKey->key;
+                    }
                 }
 
                 $keyIds = $this->reMapKeyList(array_values(array_unique($keyIds)));
@@ -669,15 +697,18 @@ class Lara extends AbstractEngine
 
     /**
      * @inheritDoc
+     *
+     * @param mixed $_config
      */
-    public function delete($_config)
+    public function delete($_config): bool
     {
+        return true;
     }
 
     /**
-     * @param array $_keys
+     * @param array<string> $_keys
      *
-     * @return array
+     * @return array<string>
      */
     public function reMapKeyList(array $_keys = []): array
     {
@@ -718,6 +749,7 @@ class Lara extends AbstractEngine
     /**
      * @param string $lara_style
      * @return string
+     * @throws InvalidArgumentException
      */
     public static function validateLaraStyle(string $lara_style): string
     {

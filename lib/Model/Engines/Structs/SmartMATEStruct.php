@@ -12,9 +12,9 @@ namespace Model\Engines\Structs;
 use Utils\Engines\SmartMATE;
 
 /**
- * Class Engine_MicrosoftHubStruct
+ * Class SmartMATEStruct
  *
- * This class contains the default parameters for a Moses Engine CREATION
+ * This class contains the default parameters for a SmartMATE Engine CREATION
  *
  */
 class SmartMATEStruct extends EngineStruct

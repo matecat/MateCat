@@ -30,6 +30,7 @@ use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
 
 class LaraAuthController extends AbstractStatefulKleinController
@@ -130,11 +131,12 @@ class LaraAuthController extends AbstractStatefulKleinController
             $tm_keys = implode(
                 ",",
                 $laraEngine->reMapKeyList(
-                    array_map(function ($tm_key) {
-                        // expected element type; we only use its ->key value
-                        /** @var $tm_key MemoryKeyStruct */
-                        return $tm_key->key;
-                    }, $tm_keys)
+                    array_filter(
+                        array_map(function (TmKeyStruct $tm_key): ?string {
+                            return $tm_key->key;
+                        }, $tm_keys),
+                        fn(?string $key): bool => $key !== null
+                    )
                 )
             );
 

@@ -13,13 +13,13 @@ use Model\Engines\Structs\EngineStruct;
 use Utils\Validator\Contracts\ValidatorObject;
 
 /**
- * @property ?EngineStruct engineStruct
- * @property ?string deepl_engine_type
- * @property ?string deepl_formality
- * @property ?string deepl_id_glossary
- * @property ?string glossaryString
- * @property ?string intento_provider
- * @property ?string intento_routing
+ * @property ?EngineStruct $engineStruct
+ * @property ?string $deepl_engine_type
+ * @property ?string $deepl_formality
+ * @property ?string $deepl_id_glossary
+ * @property ?string $glossaryString
+ * @property ?string $intento_provider
+ * @property ?string $intento_routing
  */
 class EngineValidatorObject extends ValidatorObject
 {

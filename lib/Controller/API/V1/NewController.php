@@ -1132,11 +1132,14 @@ class NewController extends KleinController
     }
 
     /**
-     * @param null $lara_glossaries
+     * Validate `lara_glossaries` string
+     *
+     * @param string|false|null $lara_glossaries
      *
      * @return string|null
+     * @throws InvalidArgumentException
      */
-    private function validateLaraGlossaries($lara_glossaries = null): ?string
+    private function validateLaraGlossaries(string|false|null $lara_glossaries = null): ?string
     {
         if (!empty($lara_glossaries)) {
             try {
