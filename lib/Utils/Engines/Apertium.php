@@ -3,11 +3,12 @@
 namespace Utils\Engines;
 
 use Exception;
+use TypeError;
 use Utils\Constants\EngineConstants;
 
 /**
  * Created by PhpStorm.
- * @property string client_secret
+ * @property string $client_secret
  * @author egomez-prompsit egomez@prompsit.com
  * Date: 29/07/15
  * Time: 12.17
@@ -25,6 +26,7 @@ class Apertium extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -46,14 +48,15 @@ class Apertium extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
+        $original = ['text' => ''];
         $all_args = func_get_args();
 
         if (is_string($rawValue)) {
@@ -73,6 +76,9 @@ class Apertium extends AbstractEngine
         return $this->_composeMTResponseAsMatch($original["text"], $decoded);
     }
 
+    /**
+     * @param array<string, mixed> $_config
+     */
     public function get(array $_config)
     {
         $param_data = json_encode([
@@ -99,18 +105,27 @@ class Apertium extends AbstractEngine
         return $this->result;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit

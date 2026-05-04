@@ -4,12 +4,17 @@ namespace Utils\Engines;
 
 use Exception;
 use Model\Engines\Structs\SmartMATEStruct;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Traits\Oauth;
+use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
  * Created by PhpStorm.
- * @property string client_secret
+ * @property string|null $client_id
+ * @property string|null $client_secret
+ * @property string|null $oauth_url
+ * @property string|null $token
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 02/03/15
  * Time: 12.10
@@ -18,9 +23,14 @@ use Utils\Engines\Traits\Oauth;
 class SmartMATE extends AbstractEngine
 {
 
-    use Oauth;
+    use Oauth {
+        get as private oauthGet;
+        _authenticate as private oauthAuthenticate;
+        getAuthParameters as private oauthGetAuthParameters;
+    }
 
-    protected $_auth_parameters = [
+    /** @var array<string, mixed> */
+    protected array $_auth_parameters = [
         'client_id' => null,
         'client_secret' => null,
 
@@ -41,6 +51,7 @@ class SmartMATE extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -57,10 +68,34 @@ class SmartMATE extends AbstractEngine
         return $l[0];
     }
 
+    /**
+     * @return array<int, mixed>
+     */
+    protected function getAuthParameters(): array
+    {
+        return $this->oauthGetAuthParameters();
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function _authenticate(): void
+    {
+        $this->oauthAuthenticate();
+    }
+
+    /**
+     * @param array<string, mixed> $objResponse
+     *
+     * @return array<string, mixed>
+     */
     protected function _formatAuthenticateError(array $objResponse): array
     {
         //format as a normal Translate Response and send to decoder to output the data
-        $objResponse['error_description'] = json_decode($objResponse['error']['response'])->error;
+        $errorResponse = $objResponse['error']['response'] ?? null;
+        $decodedResponse = is_string($errorResponse) ? json_decode($errorResponse) : null;
+        $objResponse['error_description'] = (is_object($decodedResponse) && isset($decodedResponse->error)) ? (string)$decodedResponse->error : '';
 
         return $objResponse;
     }
@@ -70,21 +105,20 @@ class SmartMATE extends AbstractEngine
      */
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
-        $all_args = func_get_args();
-
         if (is_string($rawValue)) {
             $decoded = json_decode($rawValue, true);
+            $translation = is_array($decoded) ? (string)($decoded['translation'] ?? '') : '';
             $decoded = [
                 'data' => [
                     "translations" => [
-                        ['translatedText' => $decoded["translation"]]
+                        ['translatedText' => $translation]
                     ]
                 ]
             ];
 
-            return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
+            return $this->_composeMTResponseAsMatch((string)($parameters['text'] ?? ''), $decoded);
         } else {
-            if ($rawValue['error']['code'] == 0 && $rawValue['responseStatus'] >= 400) {
+            if (is_array($rawValue) && ($rawValue['error']['code'] ?? null) == 0 && ($rawValue['responseStatus'] ?? 0) >= 400) {
                 $rawValue['error']['code'] = -$rawValue['responseStatus'];
             }
 
@@ -117,25 +151,45 @@ class SmartMATE extends AbstractEngine
 
     protected function _checkAuthFailure(): bool
     {
-        $expiration = (stripos($this->result['error']['message'] ?? '', 'token is expired') !== false);
+        $message = (string)($this->result['error']['message']);
+        $expiration = (stripos($message, 'token is expired') !== false);
         $auth_failure = $this->result['error']['code'] < 0;
 
-        return $expiration | $auth_failure;
+        return $expiration || $auth_failure;
     }
 
+    /**
+     * @param array<string, mixed> $_config
+     *
+     * @return array<string, mixed>|TMSAbstractResponse
+     * @throws Exception
+     */
+    public function get(array $_config): TMSAbstractResponse|array
+    {
+        return $this->oauthGet($_config);
+    }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         // SmartMATE does not have this method
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         // SmartMATE does not have this method
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         // SmartMATE does not have this method
@@ -144,6 +198,8 @@ class SmartMATE extends AbstractEngine
 
     /**
      * @throws Exception
+     *
+     * @return array<string, mixed>
      */
     protected function _formatRecursionError(): array
     {
@@ -161,6 +217,11 @@ class SmartMATE extends AbstractEngine
         );
     }
 
+    /**
+     * @param array<string, mixed> $_config
+     *
+     * @return array<string, mixed>
+     */
     protected function _fillCallParameters(array $_config): array
     {
         $parameters = [];

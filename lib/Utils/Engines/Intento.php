@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use Exception;
 use Model\Projects\MetadataDao;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -22,13 +23,11 @@ class Intento extends AbstractEngine
         'target' => null
     ];
 
-    private $apiKey;
-    private $provider = [];
-    private $providerKey;
-    private $providerCategory;
+    private ?string $apiKey;
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -41,9 +40,6 @@ class Intento extends AbstractEngine
         $extra = $engineRecord->getExtraParamsAsArray();
 
         $this->apiKey = $extra['apikey'] ?? null;
-        $this->provider = $extra['provider'] ?? [];
-        $this->providerKey = $extra['providerkey'] ?? null;
-        $this->providerCategory = $extra['providercategory'] ?? null;
     }
 
     /**
@@ -60,13 +56,13 @@ class Intento extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param null $parameters
-     * @param null $function
+     * @param array<string, mixed> $parameters
+     * @param string|null $function
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
-    protected function _decode(mixed $rawValue, $parameters = null, $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): array
     {
         if (is_string($rawValue)) {
             $result = json_decode($rawValue, false);
@@ -122,8 +118,14 @@ class Intento extends AbstractEngine
                     ]
                 ];
             }
-        } elseif ($rawValue and array_key_exists('responseStatus', $rawValue) and array_key_exists('error', $rawValue)) {
-            $_response_error = json_decode($rawValue['error']["response"], true);
+        } elseif (
+            is_array($rawValue)
+            && array_key_exists('responseStatus', $rawValue)
+            && array_key_exists('error', $rawValue)
+        ) {
+            $errorResponse = $rawValue['error']['response'] ?? null;
+            $_response_error = is_string($errorResponse) ? json_decode($errorResponse, true) : null;
+            $_response_error = is_array($_response_error) ? $_response_error : [];
             $decoded = [
                 'error' => [
                     'code' => array_key_exists('error', $_response_error) ? array_key_exists('code', $_response_error['error']) ? -$_response_error['error']['code'] : '-1' : '-1',
@@ -139,10 +141,14 @@ class Intento extends AbstractEngine
             ];
         }
 
-        return $this->_composeMTResponseAsMatch($parameters['context']['text'], $decoded);
+        $rawSegment = is_string($parameters['context']['text'] ?? null) ? $parameters['context']['text'] : '';
+
+        return $this->_composeMTResponseAsMatch($rawSegment, $decoded);
     }
 
     /**
+     * @param array<string, mixed> $_config
+     *
      * @throws Exception
      */
     public function get(array $_config)
@@ -191,11 +197,16 @@ class Intento extends AbstractEngine
     }
 
     /**
+     * @param array<string, mixed> $config
+     * @param array<string, mixed> $parameters
+     * @param string|null $function
+     *
+     * @return array<string, mixed>
      * @throws Exception
      */
-    protected function _curl_async($config, $parameters = null, $function = null)
+    protected function _curl_async(array $config, array $parameters = [], ?string $function = null): array
     {
-        $id = $config['id'];
+        $id = (string)($config['id'] ?? '');
 
         if (!empty($this->apiKey)) {
             $_headers = ['apikey: ' . $this->apiKey, 'Content-Type: application/json'];
@@ -219,18 +230,27 @@ class Intento extends AbstractEngine
         return $this->_decode($rawValue, $parameters, $function);
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit
@@ -240,7 +260,7 @@ class Intento extends AbstractEngine
     /**
      *  Set Matecat + Intento user agent
      */
-    private function _setIntentoUserAgent()
+    private function _setIntentoUserAgent(): void
     {
         $this->curl_additional_params[CURLOPT_USERAGENT] = self::INTENTO_USER_AGENT . ' ' . AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
     }
@@ -250,9 +270,9 @@ class Intento extends AbstractEngine
      *
      * Get user's routing list
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getRoutingList()
+    public function getRoutingList(): array
     {
         if (empty($this->apiKey)) {
             return [];
@@ -282,7 +302,7 @@ class Intento extends AbstractEngine
 
             curl_setopt_array($curl, $_params);
             $response = curl_exec($curl);
-            $result = json_decode($response);
+            $result = is_string($response) ? json_decode($response) : null;
             curl_close($curl);
             $_routing = [];
 
@@ -318,9 +338,12 @@ class Intento extends AbstractEngine
      * Fixed response (NOT PER USER) a generic Intento API key is valid
      *
      * Get provider list
+     *
+     * @return array<string, mixed>
+     * @throws Exception
      * @throws ReflectionException
      */
-    public static function getProviderList()
+    public static function getProviderList(): array
     {
         $redisHandler = new RedisHandler();
         $conn = $redisHandler->getConnection();
@@ -342,7 +365,7 @@ class Intento extends AbstractEngine
         ];
         curl_setopt_array($curl, $_params);
         $response = curl_exec($curl);
-        $result = json_decode($response);
+        $result = is_string($response) ? json_decode($response) : null;
         curl_close($curl);
         $_providers = [];
 

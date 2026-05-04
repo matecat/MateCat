@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use TypeError;
 use Utils\Constants\EngineConstants;
 
 /**
@@ -19,6 +20,7 @@ class YandexTranslate extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -42,10 +44,10 @@ class YandexTranslate extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
@@ -83,6 +85,7 @@ class YandexTranslate extends AbstractEngine
     }
 
     /**
+     * @param array<string, mixed> $_config
      * @throws Exception
      */
     public function get(array $_config)
@@ -111,18 +114,27 @@ class YandexTranslate extends AbstractEngine
         return $this->result;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit

@@ -6,6 +6,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -30,6 +31,7 @@ class Altlang extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -53,14 +55,15 @@ class Altlang extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
+        $original = ['text' => ''];
         $all_args = func_get_args();
 
         if (is_string($rawValue)) {
@@ -91,9 +94,9 @@ class Altlang extends AbstractEngine
     }
 
     /**
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
-     * @return array|TMSAbstractResponse|void
+     * @return array<string, mixed>|TMSAbstractResponse|void
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
@@ -106,7 +109,7 @@ class Altlang extends AbstractEngine
         // Fallback on MyMemory in case of not supported source/target combination
         if (!$this->checkLanguageCombination($_config['source'], $_config['target'])) {
             /** @var MyMemory $myMemory */
-            $myMemory = EnginesFactory::getInstance(1);
+            $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
 
             $result = $myMemory->get($_config);
             $this->result = $result->get_matches_as_array();
@@ -144,18 +147,27 @@ class Altlang extends AbstractEngine
         return $this->result;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit
