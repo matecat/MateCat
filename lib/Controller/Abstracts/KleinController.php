@@ -50,14 +50,14 @@ abstract class KleinController implements IController
     protected ?ApiKeyStruct $api_record = null;
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     public array $params = [];
 
     /**
-     * @var ?FeatureSet
+     * @var FeatureSet
      */
-    protected ?FeatureSet $featureSet = null;
+    protected FeatureSet $featureSet;
 
     protected MatecatLogger $logger;
 
@@ -82,7 +82,7 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getParams(): array
     {
@@ -165,9 +165,17 @@ abstract class KleinController implements IController
         return $this->request;
     }
 
-    public function getPutParams()
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getPutParams(): ?array
     {
-        return json_decode(file_get_contents('php://input'), true);
+        $input = file_get_contents('php://input');
+        if ($input === false) {
+            return null;
+        }
+
+        return json_decode($input, true);
     }
 
     /**
@@ -199,7 +207,7 @@ abstract class KleinController implements IController
         $this->logPageCall();
     }
 
-    protected function afterValidate()
+    protected function afterValidate(): void
     {
     }
 
@@ -212,11 +220,9 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @param $id_segment
-     *
-     * @return array
+     * @return array{id_segment: string, split_num: string|null}
      */
-    protected function parseIdSegment($id_segment): array
+    protected function parseIdSegment(string $id_segment): array
     {
         $parsedSegment = explode("-", $id_segment);
 

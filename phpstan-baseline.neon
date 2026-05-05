@@ -13,6 +13,12 @@ parameters:
 			path: lib/Bootstrap.php
 
 		-
+			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Bootstrap.php
+
+		-
 			message: '#^Method Bootstrap\:\:getConfigurationForEnvironment\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -141,7 +147,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\AjaxUtilsController\:\:ping\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Controller/API/App/AjaxUtilsController.php
 
 		-
@@ -164,6 +170,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception Stomp\\Exception\\ConnectionException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
@@ -679,18 +691,6 @@ parameters:
 			path: lib/Controller/API/App/CommentController.php
 
 		-
-			message: '#^Cannot call method dispatchRun\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/CompletionEventController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/CompletionEventController.php
-
-		-
 			message: '#^Parameter \#1 \$item of method View\\API\\App\\Json\\ConnectedService\:\:renderItem\(\) expects Model\\ConnectedServices\\ConnectedServiceStruct, Model\\ConnectedServices\\ConnectedServiceStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -701,12 +701,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/ConvertFileController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\ConvertFileController\:\:validateFiltersExtractionParametersTemplateId\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -727,13 +721,13 @@ parameters:
 			path: lib/Controller/API/App/ConvertFileController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/ConvertFileController.php
 
 		-
-			message: '#^Parameter \#9 \$featureSet of class Model\\Conversion\\FilesConverter constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/ConvertFileController.php
@@ -775,21 +769,9 @@ parameters:
 			path: lib/Controller/API/App/CopyAllSourceToTargetController.php
 
 		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/CreateProjectController.php
-
-		-
 			message: '#^Cannot call method getArrayCopy\(\) on Model\\Xliff\\DTO\\XliffRulesModel\|null\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: lib/Controller/API/App/CreateProjectController.php
-
-		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
@@ -1033,6 +1015,12 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
+			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/CreateProjectController.php
+
+		-
 			message: '#^Parameter \#1 \$id_team of method Controller\\API\\App\\CreateProjectController\:\:setTeam\(\) expects null, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1137,12 +1125,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$suggestions_array on Model\\Translations\\SegmentTranslationStruct\|null\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/App/DeleteContributionController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/App/DeleteContributionController.php
 
@@ -1297,12 +1279,6 @@ parameters:
 			path: lib/Controller/API/App/FilesController.php
 
 		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/GetContributionController.php
-
-		-
 			message: '#^Cannot call method toArray\(\) on string\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1447,12 +1423,6 @@ parameters:
 			path: lib/Controller/API/App/GetProjectsController.php
 
 		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/GetProjectsController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\GetProjectsController\:\:filterAssignee\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -1479,6 +1449,12 @@ parameters:
 		-
 			message: '#^PHPDoc tag @var has invalid value \(\$users MembershipStruct\[\]\)\: Unexpected token "\$users", expected type at offset 20 on line 2$#'
 			identifier: phpDoc.parseError
+			count: 1
+			path: lib/Controller/API/App/GetProjectsController.php
+
+		-
+			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/GetProjectsController.php
 
@@ -1546,12 +1522,6 @@ parameters:
 			message: '#^Cannot access property \$warning on Model\\Translations\\SegmentTranslationStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: lib/Controller/API/App/GetSearchController.php
-
-		-
-			message: '#^Cannot call method dispatchRun\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: lib/Controller/API/App/GetSearchController.php
 
 		-
@@ -1771,12 +1741,6 @@ parameters:
 			path: lib/Controller/API/App/GetSegmentsController.php
 
 		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/GetSegmentsController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\GetSegmentsController\:\:attachContexts\(\) has parameter \$contexts with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1867,6 +1831,12 @@ parameters:
 			path: lib/Controller/API/App/GetSegmentsController.php
 
 		-
+			message: '#^Parameter \#3 \$ref_segment of method Model\\Segments\\SegmentDao\:\:getPaginationSegments\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/GetSegmentsController.php
+
+		-
 			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -1875,12 +1845,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Utils\\Engines\\AbstractEngine\:\:getTagProjection\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/App/GetTagProjectionController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/App/GetTagProjectionController.php
 
@@ -1903,8 +1867,14 @@ parameters:
 			path: lib/Controller/API/App/GetTagProjectionController.php
 
 		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
+			message: '#^Parameter \#1 \$project of method Model\\FeaturesBase\\FeatureSet\:\:loadForProject\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/GetTranslationMismatchesController.php
+
+		-
+			message: '#^Parameter \#3 \$sid of method Model\\Segments\\SegmentDao\:\:getTranslationsMismatches\(\) expects int\|null, int\|string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/GetTranslationMismatchesController.php
 
@@ -1912,12 +1882,6 @@ parameters:
 			message: '#^Method Controller\\API\\App\\GetVolumeAnalysisController\:\:validateTheRequest\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Controller/API/App/GetVolumeAnalysisController.php
-
-		-
-			message: '#^Parameter \#2 \$features of class Model\\Analysis\\Status constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Controller/API/App/GetVolumeAnalysisController.php
 
 		-
@@ -1952,12 +1916,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method getProject\(\) on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/GetWarningController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/App/GetWarningController.php
@@ -2129,12 +2087,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/JobMetadataController.php
-
-		-
-			message: '#^Parameter \#1 \$featureSet of method Controller\\API\\App\\MyMemoryEntryStatusController\:\:getMMEngine\(\) expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/MyMemoryEntryStatusController.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
@@ -2407,6 +2359,12 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:getOldTranslation\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:getOldTranslation\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -2432,6 +2390,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:translate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:translate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
@@ -2477,12 +2441,6 @@ parameters:
 			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/SplitSegmentController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\SplitSegmentController\:\:split\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -3139,12 +3097,6 @@ parameters:
 			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
-			message: '#^Parameter \#2 \$value of static method Controller\\Abstracts\\Authentication\\CookieManager\:\:setCookie\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
 			message: '#^Property Controller\\API\\GDrive\\GDriveController\:\:\$error type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3193,19 +3145,7 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Controller/API/V1/NewController.php
-
-		-
 			message: '#^Cannot call method getArrayCopy\(\) on Model\\Xliff\\DTO\\XliffRulesModel\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V1/NewController.php
-
-		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/V1/NewController.php
@@ -3463,6 +3403,12 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
+			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V1/NewController.php
+
+		-
 			message: '#^Parameter \#1 \$id_qa_model of method Controller\\API\\V1\\NewController\:\:validateQaModel\(\) expects null, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3577,12 +3523,6 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
-			message: '#^Parameter \#9 \$featureSet of class Model\\Conversion\\FilesConverter constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V1/NewController.php
-
-		-
 			message: '#^Property Model\\ProjectCreation\\ProjectStructure\:\:\$id_customer \(string\) does not accept string\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -3685,12 +3625,6 @@ parameters:
 			path: lib/Controller/API/V2/ChangeProjectNameController.php
 
 		-
-			message: '#^Cannot call method dispatchRun\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/ChangeProjectNameController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\ChangeProjectNameController\:\:changeProjectName\(\) has parameter \$id with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3733,12 +3667,6 @@ parameters:
 			path: lib/Controller/API/V2/ChunkTranslationIssueController.php
 
 		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/ChunkTranslationVersionController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\ChunkTranslationVersionController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -3771,12 +3699,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$id on Model\\RemoteFiles\\RemoteFileStruct\|null\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
 
@@ -3867,12 +3789,6 @@ parameters:
 		-
 			message: '#^Offset ''output_filename'' might not exist on array\{document_content\: string\|false, output_filename\?\: mixed, out_xliff_name\: non\-falsy\-string, source\: mixed, target\: mixed\}\|array\{document_content\: string\|false, output_filename\?\: mixed\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$featureSet of class Utils\\XliffReplacer\\XliffReplacerCallback constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
 
@@ -4249,12 +4165,6 @@ parameters:
 			path: lib/Controller/API/V2/ProjectCompletionStatus.php
 
 		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/ProjectsController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\ProjectsController\:\:changeStatus\(\) has parameter \$status with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -4307,12 +4217,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/API/V2/ReviewsController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/ReviseTranslationIssuesController.php
 
 		-
 			message: '#^Method Controller\\API\\V2\\ReviseTranslationIssuesController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
@@ -4603,25 +4507,19 @@ parameters:
 			path: lib/Controller/API/V2/UrlsController.php
 
 		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/UrlsController.php
-
-		-
 			message: '#^Cannot call method getJobs\(\) on Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: lib/Controller/API/V2/UrlsController.php
 
 		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
+			message: '#^Parameter \#1 \$pid of method Model\\Projects\\ProjectDao\:\:getProjectData\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/UrlsController.php
 
 		-
-			message: '#^Parameter \#1 \$pid of method Model\\Projects\\ProjectDao\:\:getProjectData\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#1 \$project of method Model\\FeaturesBase\\FeatureSet\:\:loadForProject\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/UrlsController.php
@@ -4747,12 +4645,6 @@ parameters:
 			path: lib/Controller/API/V3/CountWordController.php
 
 		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\CountWordController\:\:afterConstruct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -4765,13 +4657,7 @@ parameters:
 			path: lib/Controller/API/V3/CountWordController.php
 
 		-
-			message: '#^Parameter \#1 \$featureSet of static method Matecat\\SubFiltering\\AbstractFilter\:\:getInstance\(\) expects Matecat\\SubFiltering\\Contracts\\FeatureSetInterface, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
-
-		-
-			message: '#^Parameter \#2 \$featureSet of class Utils\\LQA\\SizeRestriction\\SizeRestriction constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
+			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/CountWordController.php
@@ -4955,12 +4841,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Controller/API/V3/DownloadQRController.php
-
-		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V3/FileInfoController.php
 
 		-
 			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
@@ -5761,12 +5641,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Parameter \#1 \$featureSet of static method Matecat\\SubFiltering\\AbstractFilter\:\:getInstance\(\) expects Matecat\\SubFiltering\\Contracts\\FeatureSetInterface, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Parameter \#1 \$idJob of static method Model\\Segments\\SegmentDao\:\:getSegmentsForAnalysisFromIdJobAndPassword\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -5827,21 +5701,9 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Parameter \#2 \$features of class Model\\Analysis\\Status constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/StatusController.php
-
-		-
 			message: '#^Cannot access offset ''path'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
-			path: lib/Controller/API/V3/TeamsProjectsController.php
-
-		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: lib/Controller/API/V3/TeamsProjectsController.php
 
 		-
@@ -5871,6 +5733,12 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\TeamsProjectsController\:\:setTeam\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/TeamsProjectsController.php
+
+		-
+			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/TeamsProjectsController.php
 
@@ -6271,322 +6139,10 @@ parameters:
 			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
 
 		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$ajaxDomainsNumber\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$basepath\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$build_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$config_js\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$css_resources\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$enableMultiDomainApi\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$facebookAuthUrl\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$flashMessages\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$footer_js\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$gdriveAuthURL\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$githubAuthUrl\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$googleAuthURL\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$googleDriveEnabled\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$hostpath\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$isAnInternalUser\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$isLoggedIn\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$linkedInAuthUrl\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$maxFileSize\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$maxTMXFileSize\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$microsoftAuthUrl\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$support_mail\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$userMail\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$user_plugins\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$x_nonce_unique_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$x_self_ajax_location_hosts\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Cannot call method getCodes\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Cannot call method loadFromUserEmail\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\BaseKleinViewController\:\:addParamsToView\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\BaseKleinViewController\:\:render\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\BaseKleinViewController\:\:setView\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\FlashMessage\:\:flush\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/FlashMessage.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\FlashMessage\:\:set\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/FlashMessage.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\FlashMessage\:\:set\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Abstracts/FlashMessage.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\FlashMessage\:\:set\(\) has parameter \$type with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Abstracts/FlashMessage.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\FlashMessage\:\:set\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Abstracts/FlashMessage.php
-
-		-
 			message: '#^Method Controller\\Abstracts\\IController\:\:getFeatureSet\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Controller/Abstracts/IController.php
-
-		-
-			message: '#^Cannot access offset ''query'' on \$this\(Controller\\Abstracts\\KleinController\)\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:afterValidate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:broadcastLogout\(\) throws checked exception Stomp\\Exception\\ConnectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:getFeatureSet\(\) should return Model\\FeaturesBase\\FeatureSet but returns Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:getParams\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:getPutParams\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:parseIdSegment\(\) has parameter \$id_segment with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:parseIdSegment\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:setAuthKeysIfExists\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:startTimer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^PHPDoc tag @var with type \$this\(Controller\\Abstracts\\KleinController\) is not subtype of native type array\|int\|string\|false\|null\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Parameter \#1 \$body of class Stomp\\Transport\\Message constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\KleinController\:\:\$params type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\KleinController\:\:\$timingCustomObject type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
 
 		-
 			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has no return type specified\.$#'
@@ -6655,24 +6211,6 @@ parameters:
 			path: lib/Controller/Views/ActivityLogController.php
 
 		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
-			message: '#^Cannot call method getCodes\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 1
@@ -6709,40 +6247,10 @@ parameters:
 			path: lib/Controller/Views/AnalyzeController.php
 
 		-
-			message: '#^Parameter \#2 \$features of class Model\\Analysis\\Status constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
 			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/Views/AnalyzeController.php
-
-		-
-			message: '#^Cannot call method appendDecorators\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Cannot call method dispatchFilter\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Cannot call method getCodes\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Cannot call method loadForProject\(\) on Model\\FeaturesBase\\FeatureSet\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
 
 		-
 			message: '#^Method Controller\\Views\\CattoolController\:\:_saveActivity\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -6919,6 +6427,12 @@ parameters:
 			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 		-
+			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Views/OauthResponseHandlerController.php
+
+		-
 			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) has parameter \$code with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -6926,6 +6440,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/Views/OauthResponseHandlerController.php
+
+		-
+			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
 			path: lib/Controller/Views/OauthResponseHandlerController.php
@@ -7091,12 +6611,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
-
-		-
-			message: '#^Parameter \#2 \$value of static method Controller\\Abstracts\\Authentication\\CookieManager\:\:setCookie\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Views/UploadPageController.php
 
 		-
 			message: '#^Method Controller\\Views\\XliffToTargetController\:\:renderView\(\) has no return type specified\.$#'
@@ -7415,6 +6929,12 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: lib/Model/Comments/BaseCommentStruct.php
+
+		-
+			message: '#^Method Model\\Comments\\CommentDao\:\:resolveThread\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/Comments/CommentDao.php
 
 		-
 			message: '#^Method Model\\Comments\\CommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -8311,12 +7831,6 @@ parameters:
 			path: lib/Model/Conversion/Upload.php
 
 		-
-			message: '#^Method Model\\Conversion\\Upload\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
 			message: '#^Method Model\\Conversion\\Upload\:\:_filesAreTooMuch\(\) has parameter \$filesToUpload with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -8343,12 +7857,6 @@ parameters:
 		-
 			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Property Model\\Conversion\\Upload\:\:\$uploadToken \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/Conversion/Upload.php
 
@@ -8527,6 +8035,12 @@ parameters:
 			path: lib/Model/DataAccess/AbstractDao.php
 
 		-
+			message: '#^Method Model\\DataAccess\\AbstractDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/DataAccess/AbstractDao.php
+
+		-
 			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -8557,174 +8071,6 @@ parameters:
 			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
 
 		-
-			message: '#^Method Model\\DataAccess\\Database\:\:begin\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:buildInsertStatement\(\) has parameter \$attrs with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:buildInsertStatement\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:buildInsertStatement\(\) has parameter \$on_duplicate_fields with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:buildInsertStatement\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:commit\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:getConnection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:insert\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:insert\(\) has parameter \$ignore with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:insert\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:insert\(\) has parameter \$no_nulls with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:insert\(\) has parameter \$onDuplicateKey with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:insert\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:last_insert\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:nextSequence\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:nextSequence\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 9
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:rollback\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:update\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:update\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\Database\:\:useDb\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Parameter \#1 \$server of class Model\\DataAccess\\Database constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Parameter \#2 \$user of class Model\\DataAccess\\Database constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Parameter \#3 \$password of class Model\\DataAccess\\Database constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Parameter \#4 \$database of class Model\\DataAccess\\Database constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Property Model\\DataAccess\\Database\:\:\$SEQUENCES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/Database.php
-
-		-
-			message: '#^Method Model\\DataAccess\\IDaoStruct\:\:count\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/DataAccess/IDaoStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\IDaoStruct\:\:getArrayCopy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/DataAccess/IDaoStruct.php
-
-		-
 			message: '#^Method Model\\DataAccess\\IDaoStruct\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -8735,24 +8081,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/DataAccess/IDaoStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\IDatabase\:\:insert\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/IDatabase.php
-
-		-
-			message: '#^Method Model\\DataAccess\\IDatabase\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/IDatabase.php
-
-		-
-			message: '#^Method Model\\DataAccess\\IDatabase\:\:update\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/IDatabase.php
 
 		-
 			message: '#^Class Model\\DataAccess\\ShapelessConcreteStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
@@ -9219,7 +8547,7 @@ parameters:
 		-
 			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:getFilesForJob\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: lib/Model/FilesStorage/AbstractFilesStorage.php
 
 		-
@@ -9967,6 +9295,12 @@ parameters:
 			path: lib/Model/Filters/FiltersConfigTemplateDao.php
 
 		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
 			message: '#^Call to an undefined method object\:\:fromArray\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -10013,6 +9347,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
+
+		-
+			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:beginTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
 			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:deleteOnMerge\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -10157,6 +9497,24 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Jobs/LexiQaAndTagProjectionLanguages.php
+
+		-
+			message: '#^Method Model\\Jobs\\MetadataDao\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Jobs/MetadataDao.php
+
+		-
+			message: '#^Method Model\\Jobs\\MetadataDao\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/Jobs/MetadataDao.php
+
+		-
+			message: '#^Method Model\\Jobs\\MetadataDao\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Jobs/MetadataDao.php
 
 		-
 			message: '#^Unsafe access to private property Model\\Jobs\\MetadataDao\:\:\$__transactionStarted through static\:\:\.$#'
@@ -10393,6 +9751,12 @@ parameters:
 			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
 
 		-
+			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
+
+		-
 			message: '#^Method Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\:\:__toString\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -10403,6 +9767,12 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/MTQE/Templates/DTO/MTQEWorkflowParams.php
+
+		-
+			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
 		-
 			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\:\:__toString\(\) should return string but returns string\|false\.$#'
@@ -10597,6 +9967,12 @@ parameters:
 			path: lib/Model/PayableRates/CustomPayableRateDao.php
 
 		-
+			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/PayableRates/CustomPayableRateDao.php
+
+		-
 			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -10773,7 +10149,7 @@ parameters:
 		-
 			message: '#^Method Model\\Projects\\ManageModel\:\:_getProjects\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: lib/Model/Projects/ManageModel.php
 
 		-
@@ -10833,7 +10209,7 @@ parameters:
 		-
 			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: lib/Model/Projects/ManageModel.php
 
 		-
@@ -11629,6 +11005,12 @@ parameters:
 			path: lib/Model/Teams/TeamModel.php
 
 		-
+			message: '#^Method Model\\Teams\\TeamModel\:\:_createTeamWithMatecatUsers\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/Teams/TeamModel.php
+
+		-
 			message: '#^Method Model\\Teams\\TeamModel\:\:_createTeamWithMatecatUsers\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -11917,6 +11299,12 @@ parameters:
 			path: lib/Model/Translators/TranslatorsModel.php
 
 		-
+			message: '#^Method Model\\Translators\\TranslatorsModel\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Translators/TranslatorsModel.php
+
+		-
 			message: '#^Method Model\\Translators\\TranslatorsModel\:\:getTranslator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11924,6 +11312,18 @@ parameters:
 
 		-
 			message: '#^Method Model\\Translators\\TranslatorsModel\:\:getTranslator\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Translators/TranslatorsModel.php
+
+		-
+			message: '#^Method Model\\Translators\\TranslatorsModel\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/Translators/TranslatorsModel.php
+
+		-
+			message: '#^Method Model\\Translators\\TranslatorsModel\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Translators/TranslatorsModel.php
@@ -13183,6 +12583,12 @@ parameters:
 			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
 
 		-
+			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
+
+		-
 			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:deleteIssues\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -13190,6 +12596,18 @@ parameters:
 
 		-
 			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:flagIssuesToBeDeleted\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
+
+		-
+			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
+
+		-
+			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
@@ -13425,7 +12843,7 @@ parameters:
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getAllFinalRevisionsForSegment\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
 
 		-
@@ -13443,13 +12861,13 @@ parameters:
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getLatestEventForSegment\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
 
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getLatestEventsInSegmentInterval\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
 
 		-
@@ -13485,7 +12903,7 @@ parameters:
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:unsetFinalRevisionFlag\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php
 
 		-
@@ -13495,9 +12913,27 @@ parameters:
 			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
 
 		-
+			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
+
+		-
+			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
+
+		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:prepareEventStruct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 6
+			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
+
+		-
+			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
 
 		-
@@ -13873,6 +13309,12 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
 
 		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\ActivityLogWorker\:\:_checkDatabaseConnection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
+
+		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\ActivityLogWorker\:\:_writeLog\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -13947,6 +13389,12 @@ parameters:
 		-
 			message: '#^Cannot call method publishToQueues\(\) on Utils\\ActiveMQ\\AMQHandler\|null\.$#'
 			identifier: method.nonObject
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\FastAnalysis\:\:_checkDatabaseConnection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
@@ -14119,6 +13567,12 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/Health.php
 
 		-
+			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
 			message: '#^Binary operation "\-" between non\-falsy\-string and string\|null results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -14128,6 +13582,24 @@ parameters:
 			message: '#^Binary operation "/" between string\|null and 1000 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Cannot access property \$analysis_ignore_100 on Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Cannot access property \$analysis_ignore_101 on Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Cannot access property \$qe_model_version on Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\|null\.$#'
+			identifier: property.nonObject
+			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
@@ -14149,6 +13621,72 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:__filterTMMatches\(\) has parameter \$matches with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:__filterTMMatches\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_endQueueCallback\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) has parameter \$_config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) should return array but returns array\<string, mixed\>\|Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMT\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMatches\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getNewMatchTypeAndEquivalentWordDiscount\(\) has parameter \$bestMatch with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getNewMatchTypeAndEquivalentWordDiscount\(\) has parameter \$equivalentWordMapping with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getNewMatchTypeAndEquivalentWordDiscount\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getTM\(\) has parameter \$_config with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -14157,6 +13695,12 @@ parameters:
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getTM\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getTM\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
@@ -14175,6 +13719,24 @@ parameters:
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_incrementAnalyzedCount\(\) has parameter \$standard_words with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_initializeTMAnalysis\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_lockAndPreTranslateStatusCheck\(\) has parameter \$tm_data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_lockAndPreTranslateStatusCheck\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
@@ -14217,7 +13779,7 @@ parameters:
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_tryToCloseProject\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 6
+			count: 8
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
@@ -14239,19 +13801,79 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:initPostProcess\(\) has parameter \$source_lang with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:initPostProcess\(\) has parameter \$source_seg with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:initPostProcess\(\) has parameter \$target_lang with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:initPostProcess\(\) has parameter \$target_seg with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:isMtMatch\(\) has parameter \$match with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
-			message: '#^PHPDoc tag @var has invalid value \(\$tms_match GetMemoryResponse\)\: Unexpected token "\$tms_match", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
+			message: '#^Offset 0 might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Parameter \#1 \$matches of method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:__filterTMMatches\(\) expects array, array\|Utils\\Engines\\Results\\MyMemory\\GetMemoryResponse\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
 			message: '#^Parameter \#1 \$mt_penalty of method Utils\\Engines\\AbstractEngine\:\:setMTPenalty\(\) expects int\|null, float\|int\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Parameter \#1 \$queueElement of method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_checkWordCount\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Parameter \#1 \$queueElement of method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_getMatches\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Parameter \#1 \$queueElement of method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_initializeTMAnalysis\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Parameter \#1 \$queueElement of method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:_updateRecord\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
@@ -14260,6 +13882,18 @@ parameters:
 			message: '#^Property Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:\$_matches type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Property Utils\\Engines\\Results\\TMSAbstractResponse\:\:\$responseStatus \(int\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
+			identifier: argument.templateType
+			count: 4
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
@@ -16957,12 +16591,6 @@ parameters:
 			path: lib/Utils/Redis/RedisHandler.php
 
 		-
-			message: '#^Method Utils\\Redis\\RedisHandler\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
 			message: '#^Method Utils\\Redis\\RedisHandler\:\:formatDSN\(\) has parameter \$dsnString with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -16977,12 +16605,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(never\)\: mixed\)\|null, array\{''Utils\\\\Redis\\\\RedisHandler'', ''formatDSN''\} given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Property Utils\\Redis\\RedisHandler\:\:\$instanceUUID \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Utils/Redis/RedisHandler.php
 
@@ -17445,6 +17067,12 @@ parameters:
 		-
 			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
 			identifier: method.notFound
+			count: 1
+			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
+
+		-
+			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkDatabaseConnection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
 
@@ -20331,7 +19959,7 @@ parameters:
 		-
 			message: '#^Method Features\\Airbnb\\Model\\SegmentDelivery\\SegmentDeliveryDao\:\:isAJobDeliverable\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: plugins/airbnb/lib/Features/Airbnb/Model/SegmentDelivery/SegmentDeliveryDao.php
 
 		-
@@ -20409,18 +20037,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$template_base_path\.$#'
 			identifier: property.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/HomeController.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$x_nonce_unique_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/HomeController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\HomeController\:\:setView\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/HomeController.php
 
@@ -20775,7 +20391,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:addGap\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20799,7 +20415,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:delete\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20823,7 +20439,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:hide\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20847,7 +20463,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:merge\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20871,7 +20487,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:mergeAndAlign\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20913,7 +20529,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:moveInEmpty\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20943,7 +20559,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:moveInFill\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20967,7 +20583,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:show\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -20991,7 +20607,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:split\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -21015,7 +20631,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:switchAction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -21177,7 +20793,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoDelete\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21201,7 +20817,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoHide\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21261,7 +20877,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMerge\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21285,7 +20901,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMergeAndAlign\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 6
+			count: 9
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21321,7 +20937,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMoveEmpty\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21345,7 +20961,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMoveFull\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21369,7 +20985,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoShow\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21393,7 +21009,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoSplit\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21417,7 +21033,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoSwitchAction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -21919,7 +21535,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:setOrGetGuid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:setOrGetGuid\(\) throws checked exception Random\\RandomException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
@@ -21950,12 +21566,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$segmentation_rule of static method Utils\\Constants\\Constants\:\:validateSegmentationRules\(\) expects string\|null, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
-
-		-
-			message: '#^Parameter \#9 \$featureSet of class Model\\Conversion\\FilesConverter constructor expects Model\\FeaturesBase\\FeatureSet, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
@@ -22041,7 +21651,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:createFromStruct\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -22059,7 +21669,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getById\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -22083,7 +21693,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -22101,7 +21711,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getByProjectId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -22137,7 +21747,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:updateField\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -22221,7 +21831,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:changePassword\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -22239,7 +21849,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:createFromStruct\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -22251,7 +21861,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:getById\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -22281,7 +21891,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:getByIdAndPassword\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -22311,7 +21921,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:getByProjectId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -22323,7 +21933,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -22359,7 +21969,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobExportedDao\:\:createFromStruct\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedDao.php
 
 		-
@@ -22495,12 +22105,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobStruct.php
 
 		-
-			message: '#^Property Features\\Aligner\\Model\\NewDatabase\:\:\$SEQUENCES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/NewDatabase.php
-
-		-
 			message: '#^Call to an undefined method Features\\Aligner\\Model\\Projects_ProjectDao\:\:destroyCacheById\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -22527,7 +22131,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:createFromStruct\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
@@ -22557,7 +22161,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:deleteFailedProject\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
@@ -22569,7 +22173,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:findById\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
@@ -22599,7 +22203,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:updateField\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
@@ -22755,7 +22359,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:countByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -22779,7 +22383,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:deleteSegmentsByIds\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -22803,7 +22407,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:findById\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -22839,7 +22443,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getByJobIdAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -22875,7 +22479,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getDataForAlignment\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -22917,7 +22521,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getFromOrderArrayJobIdAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -22965,7 +22569,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getFromOrderInterval\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23007,7 +22611,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getFromOrderJobIdAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23049,7 +22653,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getNextFromNonExistentOrderJobIdAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23079,7 +22683,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getOrderedByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23121,7 +22725,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getPreviousFromNonExistentOrderJobIdAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23163,7 +22767,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getPreviousFromOrderJobIdAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23217,7 +22821,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTMForTMXExport\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 6
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23271,7 +22875,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTranslationsForTMXExport\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 6
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23307,7 +22911,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTypeOrderedByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23361,7 +22965,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTypeOrderedByJobIdWithPagination\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23409,7 +23013,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:updateField\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23439,7 +23043,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:updateSegmentContent\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -23529,7 +23133,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:deleteByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23565,7 +23169,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:deleteMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23601,7 +23205,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getLastSegmentMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23643,7 +23247,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMatchesFromOrderArray\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23679,7 +23283,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMisalignmentCount\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23709,7 +23313,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMisalignments\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23751,7 +23355,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getNextMatchOfNonExistent\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23793,7 +23397,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getPreviousMatchOfNonExistent\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23835,7 +23439,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getPreviousSegmentMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23877,7 +23481,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getSegmentMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23913,7 +23517,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:hideByOrderAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23949,7 +23553,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:nullifySegmentsInMatches\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -23991,7 +23595,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:setSegmentInMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -24027,7 +23631,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:showByOrderAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -24039,7 +23643,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -24075,7 +23679,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateMatchBeforeDeletion\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -24117,7 +23721,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateNextSegmentMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-

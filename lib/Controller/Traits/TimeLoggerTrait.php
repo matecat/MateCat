@@ -10,7 +10,6 @@
 namespace Controller\Traits;
 
 
-use Controller\Abstracts\IController;
 use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
@@ -18,10 +17,14 @@ trait TimeLoggerTrait
 {
 
     protected string $timingLogFileName = 'fallback_calls_time.log';
+
+    /**
+     * @var array<string, mixed>
+     */
     protected array $timingCustomObject = [];
     protected float $startExecutionTime = 0;
 
-    protected function startTimer()
+    protected function startTimer(): void
     {
         $this->startExecutionTime = microtime(true);
     }
@@ -36,10 +39,8 @@ trait TimeLoggerTrait
      */
     protected function logPageCall()
     {
-        /** @var $this IController|TimeLoggerTrait */
-
         $_request_uri = parse_url($_SERVER['REQUEST_URI']);
-        if (isset($_request_uri['query'])) {
+        if (is_array($_request_uri) && isset($_request_uri['query'])) {
             parse_str($_request_uri['query'], $str);
             $_request_uri['query'] = $str;
         }

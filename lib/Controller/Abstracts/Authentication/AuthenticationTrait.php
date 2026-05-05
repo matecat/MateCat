@@ -6,6 +6,7 @@ use Exception;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Registry\AppConfig;
@@ -58,14 +59,19 @@ trait AuthenticationTrait
     /**
      * @return void
      */
+    /**
+     * @return void
+     */
     protected function setAuthKeysIfExists(): void
     {
+        /** @var array<string, string> $headers */
         $headers = array_change_key_case(getallheaders());
 
-        $this->api_key = $headers['x-matecat-key'] ?? base64_decode(explode('Bearer ', $headers['authorization'] ?? '')[1] ?? '');
+        $decoded = base64_decode(explode('Bearer ', $headers['authorization'] ?? '')[1] ?? '');
+        $this->api_key = $headers['x-matecat-key'] ?? ($decoded !== false ? $decoded : null);
         $this->api_secret = $headers['x-matecat-secret'] ?? null;
 
-        if (str_contains($this->api_key, '-')) {
+        if ($this->api_key !== null && str_contains($this->api_key, '-')) {
             [$this->api_key, $this->api_secret] = explode('-', $this->api_key);
         }
     }
@@ -85,6 +91,7 @@ trait AuthenticationTrait
 
     /**
      * @throws ReflectionException
+     * @throws ConnectionException
      */
     public function broadcastLogout(): void
     {
@@ -99,6 +106,11 @@ trait AuthenticationTrait
                 ]
             ]
         ]);
+
+        if ($message === false) {
+            return;
+        }
+
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }
 

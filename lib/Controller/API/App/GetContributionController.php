@@ -11,7 +11,6 @@ use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
@@ -77,10 +76,9 @@ class GetContributionController extends KleinController
         }
 
         $contributionRequest = new GetContributionRequest();
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
         $subfiltering_handlers = (new MetadataDao())->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance($featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
+        $Filter = MateCatFilter::getInstance($this->featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
 
         $context_list_before = [];
         $context_list_after = [];
@@ -315,8 +313,6 @@ class GetContributionController extends KleinController
      */
     private function rewriteContributionContexts(array &$request, MateCatFilter $Filter): void
     {
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
-
         //Get contexts
         $segmentsList = (new SegmentDao)->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
             [
@@ -327,7 +323,7 @@ class GetContributionController extends KleinController
         );
 
         $rewriteContributionContextsEvent = new RewriteContributionContextsEvent($segmentsList, $request);
-        $featureSet->dispatchFilter($rewriteContributionContextsEvent);
+        $this->featureSet->dispatchFilter($rewriteContributionContextsEvent);
         $segmentsList = $rewriteContributionContextsEvent->getSegmentsList();
         $request = $rewriteContributionContextsEvent->getRequestData();
 

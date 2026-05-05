@@ -36,7 +36,7 @@ class GetTranslationMismatchesController extends KleinController
      */
     public function get(): void
     {
-        $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
+        $id_segment = (string) filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
 
         $this->featureSet->loadForProject(ProjectDao::findByJobId($this->params['id_job'], 60 * 60));
         $parsedIdSegment = $this->parseIdSegment($id_segment);
