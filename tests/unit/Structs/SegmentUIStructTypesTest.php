@@ -38,7 +38,7 @@ class SegmentUIStructTypesTest extends AbstractTest
     {
         $result = CatUtils::parse_time_to_edit(0);
 
-        self::assertSame(['00', '00', '00', '00'], $result);
+        self::assertSame(['00', '00', '00', 0], $result);
     }
 
     #[Test]

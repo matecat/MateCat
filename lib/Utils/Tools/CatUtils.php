@@ -2,8 +2,8 @@
 
 namespace Utils\Tools;
 
+use DivisionByZeroError;
 use Exception;
-use InvalidArgumentException;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -20,7 +20,9 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
@@ -52,15 +54,17 @@ class CatUtils
     const string nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
 
     // CJK and CJ languages
+    /** @var array<string, float> */
     public static array $cjk = ['zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5];
+    /** @var array<string, float> */
     public static array $cj = ['zh' => 1.8, 'ja' => 2.5];
 
     /**
-     * @param $langCode
+     * @param string $langCode
      *
      * @return bool
      */
-    public static function isCJK($langCode): bool
+    public static function isCJK(string $langCode): bool
     {
         return array_key_exists(explode('-', $langCode)[0], self::$cjk);
     }
@@ -106,31 +110,25 @@ class CatUtils
     /**
      * @param int $ms
      *
-     * @return array|string[]
+     * @return array{string, string, string, int}
      */
     public static function parse_time_to_edit(int $ms): array
     {
         if ($ms <= 0) {
-            return ["00", "00", "00", "00"];
+            return ["00", "00", "00", 0];
         }
 
         $usec = $ms % 1000;
 
-        if (!is_numeric($ms)) {
-            throw new InvalidArgumentException("Wrong DataType provided: " . var_export($ms, true) . "\n Expected integer.");
-        }
+        $ms = intdiv($ms, 1000);
 
-        $ms = (int)$ms;
+        $seconds = str_pad((string)($ms % 60), 2, "0", STR_PAD_LEFT);
+        $ms = intdiv($ms, 60);
 
-        $ms = floor($ms / 1000);
+        $minutes = str_pad((string)($ms % 60), 2, "0", STR_PAD_LEFT);
+        $ms = intdiv($ms, 60);
 
-        $seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        $minutes = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        $hours = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
+        $hours = str_pad((string)($ms % 60), 2, "0", STR_PAD_LEFT);
 
         return [$hours, $minutes, $seconds, $usec];
     }
@@ -143,7 +141,7 @@ class CatUtils
      *
      * @param MateCatFilter $Filter
      *
-     * @return array Returns [$reconstructed_segment, $chunk_positions] where chunk_positions is an array of cumulative character lengths
+     * @return array{string, list<int>} Returns [$reconstructed_segment, $chunk_positions] where chunk_positions is an array of cumulative character lengths
      * @throws Exception
      */
     public static function parseSegmentSplit(string $segment, string $separateWithChar, MateCatFilter $Filter): array
@@ -192,26 +190,30 @@ class CatUtils
      * Create a string with placeholders in the right position based on the struct
      *
      * @param string|null $segment
-     * @param array|null $chunk_positions
+     * @param array<int, int>|null $chunk_positions
      *
      * @return ?string
      */
     public static function reApplySegmentSplit(?string $segment, ?array $chunk_positions = []): ?string
     {
+        if ($chunk_positions === null || $chunk_positions === []) {
+            return $segment;
+        }
+
         $string_chunks = [];
         $last_sum = 0;
         foreach ($chunk_positions as $pos => $value) {
             if (isset($chunk_positions[$pos + 1])) {
-                $string_chunks[] = substr($segment, $value + $last_sum, $chunk_positions[$pos + 1]);
+                $string_chunks[] = substr($segment ?? '', $value + $last_sum, $chunk_positions[$pos + 1]);
                 $last_sum += $value;
             }
         }
 
         if (empty($string_chunks)) {
             return $segment;
-        } else {
-            return implode(self::splitPlaceHolder, $string_chunks);
         }
+
+        return implode(self::splitPlaceHolder, $string_chunks);
     }
 
     /**
@@ -229,10 +231,12 @@ class CatUtils
     /**
      * Make an estimation on performance
      *
-     * @param array $job_stats
+     * @param array<string, mixed> $job_stats
      * @param int $id_job
      *
-     * @return array
+     * @return array<string, mixed>
+     * @throws PDOException
+     * @throws DivisionByZeroError
      */
     protected static function _performanceEstimationTime(array $job_stats, int $id_job): array
     {
@@ -268,7 +272,9 @@ class CatUtils
      * @param WordCountStruct $wCount
      * @param bool $performanceEstimation
      *
-     * @return array
+     * @return array<string, mixed>
+     * @throws PDOException
+     * @throws DivisionByZeroError
      */
     public static function getFastStatsForJob(WordCountStruct $wCount, bool $performanceEstimation = true): array
     {
@@ -344,16 +350,16 @@ class CatUtils
             html_entity_decode($string, ENT_HTML401 | ENT_QUOTES, 'UTF-8')
         );
 
-        $string = preg_replace($linkRegexp, $link_placeholder, $string);
+        $string = preg_replace($linkRegexp, $link_placeholder, $string) ?? $string;
 
         //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
-        $string = preg_replace('#[a-z]+://\S+#u', $link_placeholder, $string);
+        $string = preg_replace('#[a-z]+://\S+#u', $link_placeholder, $string) ?? $string;
 
         $string = $Filter->fromLayer0ToLayer1($string);
         $string = self::replacePlaceholders($string, $variables_placeholder);
 
         // replace all numbers with a placeholder, so they will be counted as 1 word
-        $string = preg_replace('/\b[0-9]+(?:[.,][0-9]+)*\b/', $number_placeholder, $string);
+        $string = preg_replace('/\b[0-9]+(?:[.,][0-9]+)*\b/', $number_placeholder, $string) ?? $string;
 
         /**
          * Lock Hyphenated Words and underscore composed word; count them as one word
@@ -361,7 +367,7 @@ class CatUtils
          * https://regex101.com/r/t5AG6a/3
          *
          */
-        $string = preg_replace('#(?![.\s])\p{L}+[_\p{Pd}]\p{L}+(?:[_\p{Pd}]\p{L}+)*\S+#u', $word_placeholder, $string); // W count as one
+        $string = preg_replace('#(?![.\s])\p{L}+[_\p{Pd}]\p{L}+(?:[_\p{Pd}]\p{L}+)*\S+#u', $word_placeholder, $string) ?? $string; // W count as one
 
         /**
          * Remove Unicode:
@@ -370,7 +376,7 @@ class CatUtils
          * Z -> Separator (but not spaces)
          * C -> Other
          */
-        $string = preg_replace('#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', $space_placeholder, $string);
+        $string = preg_replace('#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', $space_placeholder, $string) ?? $string;
 
         /**
          * Remove english possessive word count
@@ -380,7 +386,7 @@ class CatUtils
         }
 
         //check for a string made of spaces only, after the string was cleaned
-        $no_spaces_string = preg_replace('#[\p{Z}\p{C}]+#u', "", $string);
+        $no_spaces_string = preg_replace('#[\p{Z}\p{C}]+#u', "", $string) ?? "";
         if ($no_spaces_string == "") {
             return "";
         }
@@ -434,7 +440,7 @@ class CatUtils
      */
     public static function segment_raw_word_count(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
     {
-        if (empty($string) && strlen(trim($string)) === 0) {
+        if ($string === null || $string === '' || trim($string) === '') {
             return 0;
         }
 
@@ -446,7 +452,7 @@ class CatUtils
         if (array_key_exists($source_lang_two_letter, self::$cjk)) {
             $res = mb_strlen($string, 'UTF-8');
         } else {
-            $words_array = preg_split('/\s+/u', $string);
+            $words_array = preg_split('/\s+/u', $string) ?: [];
             $words_array = array_filter($words_array, function ($word) {
                 return trim($word) != "";
             });
@@ -467,7 +473,7 @@ class CatUtils
      * @param string $toEncoding
      * @param string $documentContent Reference to the string document
      *
-     * @return array( $charset, $converted )
+     * @return array{string, string|false}
      * @throws Exception
      */
     public static function convertEncoding(string $toEncoding, string $documentContent): array
@@ -481,8 +487,12 @@ class CatUtils
         LoggerFactory::doJsonLog($cmd);
 
         $file_info = shell_exec($cmd);
-        [, $charset] = explode("=", $file_info);
-        $charset = trim($charset);
+        if ($file_info === null || $file_info === false) {
+            return ['unknown', $documentContent];
+        }
+
+        $parts = explode("=", $file_info);
+        $charset = trim($parts[1] ?? 'unknown');
 
         if ($charset == 'utf-16le') {
             $charset = 'Unicode';
@@ -527,7 +537,12 @@ class CatUtils
 
     }
 
-    public static function htmlentitiesFromUnicode($str): string
+    /**
+     * @param array<int, string> $str Matches array from preg_replace_callback
+     *
+     * @return string
+     */
+    public static function htmlentitiesFromUnicode(array $str): string
     {
         return "&#" . self::fastUnicode2ord($str[1]) . ";";
     }
@@ -560,7 +575,7 @@ class CatUtils
         ];
 
         foreach ($entities as $entity) {
-            $value = self::unicode2chr($entity);
+            $value = self::unicode2chr((int)$entity);
             $str = str_replace("&#" . $entity . ";", $value, $str);
         }
 
@@ -581,7 +596,7 @@ class CatUtils
         // parse and extract CDATA
         preg_match_all('/<!\[CDATA\[((?:[^]]|](?!]>))*)]]>/', $entityDecoded, $cdataMatches);
 
-        if (isset($cdataMatches[1]) and !empty($cdataMatches[1])) {
+        if (!empty($cdataMatches[1])) {
             foreach ($cdataMatches[1] as $k => $m) {
                 $entityDecoded = str_replace($cdataMatches[0][$k], $m, $entityDecoded);
             }
@@ -597,6 +612,7 @@ class CatUtils
      *
      * @return WordCountStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function getWStructFromJobArray(JobStruct $job, ProjectStruct $projectStruct): WordCountStruct
     {
@@ -619,10 +635,11 @@ class CatUtils
      *
      * @param JobStruct $job
      *
-     * @param array $chunkReviews
+     * @param array<ChunkReviewStruct> $chunkReviews
      *
      * @return string|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getQualityOverallFromJobStruct(JobStruct $job, array $chunkReviews = []): ?string
     {
@@ -647,10 +664,11 @@ class CatUtils
 
     /**
      * @param JobStruct $job
-     * @param array $chunkReviews
+     * @param array<ChunkReviewStruct> $chunkReviews
      *
      * @return ChunkReviewStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getChunkReviewStructFromJobStruct(JobStruct $job, array $chunkReviews = []): ?ChunkReviewStruct
     {
@@ -659,7 +677,7 @@ class CatUtils
 
     /**
      * @param int $sid
-     * @param        $results array The resultset from previous getNextSegment()
+     * @param array<int, array<string, mixed>> $results The resultset from previous getNextSegment()
      * @param string $status
      *
      * @return null|int
@@ -741,6 +759,10 @@ class CatUtils
 
         $_from_url = parse_url($_SERVER['REQUEST_URI']);
 
+        if ($_from_url === false || !isset($_from_url['path'])) {
+            return false;
+        }
+
         return self::isARevisePath($_from_url['path']);
     }
 
@@ -762,6 +784,10 @@ class CatUtils
         // Parse the referer URL to extract its components
         $_from_url = parse_url($_SERVER['HTTP_REFERER']);
 
+        if ($_from_url === false || !isset($_from_url['path'])) {
+            return false;
+        }
+
         // Check if the path corresponds to a "revise" operation
         return self::isARevisePath($_from_url['path']);
     }
@@ -779,19 +805,20 @@ class CatUtils
     /**
      * Get a job from a combination of ID and ANY password (t,r1 or r2)
      *
-     * @param $jobId
-     * @param $jobPassword
+     * @param int    $jobId
+     * @param string $jobPassword
      *
      * @return null|JobStruct
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getJobFromIdAndAnyPassword($jobId, $jobPassword): ?JobStruct
+    public static function getJobFromIdAndAnyPassword(int $jobId, string $jobPassword): ?JobStruct
     {
         $job = JobDao::getByIdAndPassword($jobId, $jobPassword);
 
         if (!$job) {
             $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($jobPassword, $jobId);
-            $job = $chunkReview->getChunk();
+            $job = $chunkReview?->getChunk();
         }
 
         return $job;
@@ -809,11 +836,16 @@ class CatUtils
      * @param int $sourcePage
      *
      * @return string|null
+     * @throws PDOException
      */
     public static function getJobPassword(JobStruct $job, int $sourcePage = 1): ?string
     {
         if ($sourcePage <= 1) {
             return $job->password;
+        }
+
+        if ($job->id === null || $job->password === null) {
+            return null;
         }
 
         $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
@@ -825,11 +857,11 @@ class CatUtils
      * get last character from a string
      * (excluding html tags)
      *
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    public static function getLastCharacter($string): string
+    public static function getLastCharacter(string $string): string
     {
         return mb_substr(strip_tags($string), -1);
     }
@@ -839,6 +871,7 @@ class CatUtils
      *
      * @return int|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getSegmentTranslationsCount(ProjectStruct $projectStruct): ?int
     {
@@ -859,14 +892,14 @@ class CatUtils
      * This function is used to strip malicious content from
      * user's first_name and last_name
      *
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    public static function stripMaliciousContentFromAName($string): string
+    public static function stripMaliciousContentFromAName(string $string): string
     {
-        $string = preg_replace('/\P{L}+/u', ' ', $string); //replace all not letters (Unicode is valid) with a space
-        $string = preg_replace('/ {2,}/u', ' ', $string); // replace all double spaces with a single space
+        $string = preg_replace('/\P{L}+/u', ' ', $string) ?? $string; //replace all not letters (Unicode is valid) with a space
+        $string = preg_replace('/ {2,}/u', ' ', $string) ?? $string; // replace all double spaces with a single space
         $string = mb_substr($string, 0, 50); // max allowed characters are 50
 
         return trim($string);
@@ -882,6 +915,7 @@ class CatUtils
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public static function deleteSha(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0): void
     {
@@ -897,19 +931,21 @@ class CatUtils
 
         $segmentationRule = Constants::validateSegmentationRules($segmentationRule);
 
+        $fileSha = sha1_file($file_path);
+        if ($fileSha === false) {
+            return;
+        }
+
         $hash_name_for_disk =
-            sha1_file($file_path)
+            $fileSha
             . "_" .
             sha1(($segmentationRule ?? '') . ($extraction_parameters ? json_encode($extraction_parameters) : ''))
             . "|" .
             $source;
 
-        if (!$hash_name_for_disk) {
-            return;
-        }
-
         $path_parts = pathinfo($file_path);
-        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+        $dirname = $path_parts['dirname'] ?? '.';
+        $hash_file_path = $dirname . DIRECTORY_SEPARATOR . $hash_name_for_disk;
 
         if (!file_exists($hash_file_path)) {
             return;
@@ -930,12 +966,30 @@ class CatUtils
         while (!flock($fp, LOCK_EX | LOCK_NB)) {  // acquire an exclusive lock
             $i++;
             if ($i == 40) {
+                fclose($fp);
+
                 return;
             } //exit the loop after 2 seconds, can not acquire the lock
             usleep(50000);
         }
 
-        $file_content = fread($fp, filesize($hash_file_path));
+        $fileSize = filesize($hash_file_path);
+        if ($fileSize === false || $fileSize < 1) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+            @unlink($hash_file_path);
+
+            return;
+        }
+
+        $file_content = fread($fp, $fileSize);
+        if ($file_content === false) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+
+            return;
+        }
+
         $file_content_array = explode("\n", $file_content);
 
         //remove the last line ( is an empty string )
@@ -1027,7 +1081,7 @@ class CatUtils
      */
     public static function sanitizeProjectName(string $name): string
     {
-        return preg_replace('/[^.\-_\p{L}\p{N}\s]/u', '', $name);
+        return preg_replace('/[^.\-_\p{L}\p{N}\s]/u', '', $name) ?? '';
     }
 
     /**
@@ -1041,7 +1095,7 @@ class CatUtils
      *   The file name is sanitized to ensure it meets the project name criteria.
      *
      * @param string $name The project name to validate. An empty string is treated as missing.
-     * @param array $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
+     * @param array<int, array<string, string>> $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
      *                         If the array contains exactly one file, its name is used as the fallback.
      *
      * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
@@ -1058,7 +1112,8 @@ class CatUtils
             $file = end($arrFiles); // Get the only file entry
             // Extract the filename (without extension) in a cross-platform safe way.
             // Equivalent to pathinfo($file['name'], PATHINFO_FILENAME) but using a helper with fixes.
-            $name = AbstractFilesStorage::pathinfo_fix($file['name'], PATHINFO_FILENAME);
+            $pathResult = AbstractFilesStorage::pathinfo_fix($file['name'], PATHINFO_FILENAME);
+            $name = is_string($pathResult) ? $pathResult : '';
         }
 
         // Sanitize the candidate project name (e.g., strip invalid chars, trim, etc.).

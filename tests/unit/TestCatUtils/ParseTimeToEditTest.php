@@ -40,7 +40,8 @@ class ParseTimeToEditTest extends AbstractTest
     public function test_parse_time_to_edit_bigger_than_maxInt_input_truncate_to_max_int()
     {
         $this->source_time = PHP_INT_MAX;
-        $this->expected_time = [55, 12, 56, 807];
+        // intdiv is precise; floor() introduced floating-point drift on PHP_INT_MAX
+        $this->expected_time = ["55", "12", "55", 807];
         $this->assertEquals($this->expected_time, CatUtils::parse_time_to_edit($this->source_time));
 
         $this->source_time = 346543847623214134341343498008990;

@@ -2245,6 +2245,12 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildResult\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildResult\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3337,6 +3343,12 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
+			message: '#^Parameter \#2 \$arrFiles of static method Utils\\Tools\\CatUtils\:\:sanitizeOrFallbackProjectName\(\) expects array\<int, array\<string, string\>\>, array\<string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V1/NewController.php
+
+		-
 			message: '#^Parameter \#2 \$filters_extraction_parameters_template_id of method Controller\\API\\V1\\NewController\:\:validateFiltersExtractionParameters\(\) expects null, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3565,6 +3577,12 @@ parameters:
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
+			message: '#^Method Controller\\API\\V2\\DownloadController\:\:ifGlobalSightXliffRemoveTargetMarks\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
 			message: '#^Offset ''basename'' might not exist on array\|string\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -3601,7 +3619,31 @@ parameters:
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
+			message: '#^Parameter \#1 \$string of function substr expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\Utils\:\:stripFileBOM\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
 			message: '#^Parameter \#2 \$data of method Matecat\\XliffParser\\XliffParser\:\:replaceTranslation\(\) expects array\<int\|string, array\<string, mixed\>\>, array\<int\|string, array\<int\|string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Parameter \#2 \$documentContent of static method Utils\\Tools\\CatUtils\:\:convertEncoding\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
@@ -4005,6 +4047,18 @@ parameters:
 		-
 			message: '#^Cannot call method getProject\(\) on Model\\Jobs\\JobStruct\|null\.$#'
 			identifier: method.nonObject
+			count: 1
+			path: lib/Controller/API/V2/StatsController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/StatsController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/StatsController.php
 
@@ -5509,6 +5563,12 @@ parameters:
 			path: lib/Controller/Views/CattoolController.php
 
 		-
+			message: '#^Method Controller\\Views\\CattoolController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Views/CattoolController.php
+
+		-
 			message: '#^Method Controller\\Views\\CattoolController\:\:searchableStatuses\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6344,6 +6404,12 @@ parameters:
 
 		-
 			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:removeFile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ConnectedServices/GDrive/Session.php
+
+		-
+			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:removeFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ConnectedServices/GDrive/Session.php
@@ -8575,6 +8641,12 @@ parameters:
 			path: lib/Model/Jobs/JobStruct.php
 
 		-
+			message: '#^Method Model\\Jobs\\JobStruct\:\:getQualityOverall\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Jobs/JobStruct.php
+
+		-
 			message: '#^Method Model\\Jobs\\JobStruct\:\:getSegments\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -9770,12 +9842,6 @@ parameters:
 
 		-
 			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_translation \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$parsed_time_to_edit \(list\<int\|string\>\) does not accept array\<string\>\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/QualityReport/QualityReportSegmentModel.php
@@ -11380,6 +11446,12 @@ parameters:
 			message: '#^Cannot call method isRevision\(\) on Controller\\Views\\TemplateDecorator\\Arguments\\CatDecoratorArguments\|null\.$#'
 			identifier: method.nonObject
 			count: 3
+			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
+
+		-
+			message: '#^Method Plugins\\Features\\ProjectCompletion\\Decorator\\CatDecorator\:\:decorate\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
 
 		-
@@ -13861,7 +13933,19 @@ parameters:
 			path: lib/Utils/Email/ProjectAssignedEmail.php
 
 		-
+			message: '#^Method Utils\\Email\\ProjectAssignedEmail\:\:_getTemplateVariables\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Email/ProjectAssignedEmail.php
+
+		-
 			message: '#^Method Utils\\Email\\ProjectAssignedEmail\:\:_getTemplateVariables\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Email/ProjectAssignedEmail.php
+
+		-
+			message: '#^Method Utils\\Email\\ProjectAssignedEmail\:\:_getTemplateVariables\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Email/ProjectAssignedEmail.php
@@ -16327,330 +16411,6 @@ parameters:
 			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
 
 		-
-			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Call to function is_numeric\(\) with int\<1, max\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Cannot access offset ''path'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Cannot call method getChunk\(\) on Model\\LQA\\ChunkReviewStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:_performanceEstimationTime\(\) has parameter \$job_stats with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:_performanceEstimationTime\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:_performanceEstimationTime\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:_performanceEstimationTime\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:clean_raw_string_4_word_count\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:convertEncoding\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:deleteSha\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:fetchStatus\(\) has parameter \$results with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getChunkReviewStructFromJobStruct\(\) has parameter \$chunkReviews with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getChunkReviewStructFromJobStruct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getFastStatsForJob\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getJobFromIdAndAnyPassword\(\) has parameter \$jobId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getJobFromIdAndAnyPassword\(\) has parameter \$jobPassword with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getJobFromIdAndAnyPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getJobPassword\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getLastCharacter\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getQualityOverallFromJobStruct\(\) has parameter \$chunkReviews with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getSegmentTranslationsCount\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:getWStructFromJobArray\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:htmlentitiesFromUnicode\(\) has parameter \$str with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:isCJK\(\) has parameter \$langCode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:parseSegmentSplit\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:parse_time_to_edit\(\) should return array\<string\> but returns array\<int, int\<0, 999\>\|string\>\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:parse_time_to_edit\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:reApplySegmentSplit\(\) has parameter \$chunk_positions with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:sanitizeOrFallbackProjectName\(\) has parameter \$arrFiles with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:sanitizeProjectName\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Method Utils\\Tools\\CatUtils\:\:stripMaliciousContentFromAName\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Offset ''dirname'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Offset 1 on array\{list\<string\>, list\<string\>\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(array\( \$charset, \$converted \)\)\: Unexpected token "\(", expected TOKEN_HORIZONTAL_WS at offset 339 on line 11$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$array of function array_filter expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\LQA\\ChunkReviewDao\:\:findByIdJobAndPasswordAndSourcePage\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$name of static method Utils\\Tools\\CatUtils\:\:sanitizeProjectName\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$o of static method Utils\\Tools\\CatUtils\:\:unicode2chr\(\) expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$segment of method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer1\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_substr expects string, array\<string\>\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<\-59, 59\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\CatUtils\:\:clean_raw_string_4_word_count\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#2 \$length of function fread expects int\<1, max\>, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#2 \$password of static method Model\\LQA\\ChunkReviewDao\:\:findByIdJobAndPasswordAndSourcePage\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 4
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Property Utils\\Tools\\CatUtils\:\:\$cj type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
-			message: '#^Property Utils\\Tools\\CatUtils\:\:\$cjk type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/CatUtils.php
-
-		-
 			message: '#^Cannot access offset int\<0, max\> on list\<non\-empty\-string\>\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
@@ -16851,6 +16611,12 @@ parameters:
 		-
 			message: '#^Method Utils\\Url\\JobUrlBuilder\:\:createFromJobStructAndProjectName\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/Url/JobUrlBuilder.php
+
+		-
+			message: '#^Method Utils\\Url\\JobUrlBuilder\:\:createFromJobStructAndProjectName\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Url/JobUrlBuilder.php
 
@@ -18235,6 +18001,12 @@ parameters:
 			path: lib/View/fileupload/UploadHandler.php
 
 		-
+			message: '#^Method UploadHandler\:\:normalFileDelete\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/View/fileupload/UploadHandler.php
+
+		-
 			message: '#^Method UploadHandler\:\:set_file_delete_url\(\) has parameter \$file with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -18302,6 +18074,12 @@ parameters:
 
 		-
 			message: '#^Method UploadHandler\:\:zipInternalFileDelete\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/View/fileupload/UploadHandler.php
+
+		-
+			message: '#^Method UploadHandler\:\:zipInternalFileDelete\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/View/fileupload/UploadHandler.php
