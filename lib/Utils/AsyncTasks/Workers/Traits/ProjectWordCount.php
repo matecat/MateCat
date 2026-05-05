@@ -23,11 +23,13 @@ trait ProjectWordCount
      *
      * (Used in TMAnalysisWorker and FastAnalysis)
      *
-     * @param $pid
+     * @param int $pid
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws RuntimeException
      */
-    protected function getProjectSegmentsTranslationSummary($pid): array
+    protected function getProjectSegmentsTranslationSummary(int $pid): array
     {
         //TOTAL and eq_word should be equals, BUT
         //tm Analysis can fail on some rows because of external service nature, so use TOTAL field instead of eq_word
