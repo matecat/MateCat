@@ -3,7 +3,8 @@ import {mountPage} from './mountPage'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {findSegmentSidsByClick, tagSegments} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
-import IconDown from '../components/icons/IconDown'
+import IconChevronLeft from '../components/icons/IconChevronLeft'
+import IconChevronRight from '../components/icons/IconChevronRight'
 import useContextDocument from '../hooks/useContextDocument'
 import useContextHighlight from '../hooks/useContextHighlight'
 import useContextPreviewMessages from '../hooks/useContextPreviewMessages'
@@ -20,8 +21,8 @@ const VIEW_MODES = {
 
 const VIEW_OPTIONS = [
   {id: VIEW_MODES.SOURCE, name: 'Source'},
-  {id: VIEW_MODES.TARGET, name: 'Translation'},
-  {id: VIEW_MODES.BOTH, name: 'Both'},
+  {id: VIEW_MODES.TARGET, name: 'Target'},
+  {id: VIEW_MODES.BOTH, name: 'Split view'},
 ]
 
 const CONTENT_VIEWS = {
@@ -30,7 +31,7 @@ const CONTENT_VIEWS = {
 }
 
 const CONTENT_VIEW_OPTIONS = [
-  {id: CONTENT_VIEWS.LIVE_PREVIEW, name: 'Live preview'},
+  {id: CONTENT_VIEWS.LIVE_PREVIEW, name: 'HTML'},
   {id: CONTENT_VIEWS.SCREENSHOT, name: 'Screenshot'},
 ]
 
@@ -363,78 +364,86 @@ const ContextPreview = () => {
   return (
     <div className="context-preview-container">
       <div className="context-preview-toolbar">
-        {hasScreenshots && (
-          <SegmentedControl
-            name="context-preview-content-view"
-            options={CONTENT_VIEW_OPTIONS}
-            selectedId={contentView}
-            onChange={handleContentViewChange}
-            compact
-          />
-        )}
-        {contentView === CONTENT_VIEWS.LIVE_PREVIEW && (
-          <SegmentedControl
-            name="context-preview-view-mode"
-            options={VIEW_OPTIONS}
-            selectedId={viewMode}
-            onChange={setViewMode}
-            compact
-          />
-        )}
-
-        <div className="context-preview-zoom">
-          <button
-            className="context-preview-zoom__button"
-            onClick={handleZoomOut}
-            disabled={zoomLevel <= 50}
-            aria-label="Zoom out"
-          >
-            −
-          </button>
-          <span className="context-preview-zoom__level">{zoomLevel}%</span>
-          <button
-            className="context-preview-zoom__button"
-            onClick={handleZoomIn}
-            disabled={zoomLevel >= 200}
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-          <button
-            className="context-preview-zoom__reset"
-            onClick={handleZoomReset}
-            disabled={zoomLevel === 100}
-            aria-label="Reset zoom"
-          >
-            Reset
-          </button>
+        <div className="context-preview-toolbar__left">
+          {hasScreenshots && (
+            <SegmentedControl
+              name="context-preview-content-view"
+              className="context-preview-content-view"
+              options={CONTENT_VIEW_OPTIONS}
+              selectedId={contentView}
+              onChange={handleContentViewChange}
+              compact
+              autoWidth
+            />
+          )}
+          {contentView === CONTENT_VIEWS.LIVE_PREVIEW && (
+            <SegmentedControl
+              name="context-preview-view-mode"
+              className="context-preview-view-mode"
+              options={VIEW_OPTIONS}
+              selectedId={viewMode}
+              onChange={setViewMode}
+              compact
+              autoWidth
+            />
+          )}
         </div>
 
-        {highlight &&
-          ((highlight.mode === 'segment' && highlight.total > 1) ||
-            (highlight.mode === 'node' && highlight.sids.length > 1)) && (
-            <div className="context-preview-nav">
-              <button
-                className="context-preview-nav__button"
-                onClick={handlePrev}
-                aria-label="Previous"
-              >
-                <IconDown size={16} />
-              </button>
-              <span className="context-preview-nav__counter">
-                {highlight.mode === 'segment'
-                  ? `${highlight.activeIndex + 1} of ${highlight.total}`
-                  : `Segment ${highlight.activeSegIdx + 1} of ${highlight.sids.length}`}
-              </span>
-              <button
-                className="context-preview-nav__button"
-                onClick={handleNext}
-                aria-label="Next"
-              >
-                <IconDown size={16} />
-              </button>
-            </div>
-          )}
+        <div className="context-preview-toolbar__right">
+          {highlight &&
+            ((highlight.mode === 'segment' && highlight.total > 1) ||
+              (highlight.mode === 'node' && highlight.sids.length > 1)) && (
+              <div className="context-preview-nav">
+                <button
+                  className="context-preview-nav__button"
+                  onClick={handlePrev}
+                  aria-label="Previous"
+                >
+                  <IconChevronLeft size={16} />
+                </button>
+                <span className="context-preview-nav__counter">
+                  {highlight.mode === 'segment'
+                    ? `${highlight.activeIndex + 1} of ${highlight.total}`
+                    : `Segment ${highlight.activeSegIdx + 1} of ${highlight.sids.length}`}
+                </span>
+                <button
+                  className="context-preview-nav__button"
+                  onClick={handleNext}
+                  aria-label="Next"
+                >
+                  <IconChevronRight size={16} />
+                </button>
+              </div>
+            )}
+
+          <div className="context-preview-zoom">
+            <button
+              className="context-preview-zoom__button"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 50}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="context-preview-zoom__level">{zoomLevel}%</span>
+            <button
+              className="context-preview-zoom__button"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 200}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+            <button
+              className="context-preview-zoom__reset"
+              onClick={handleZoomReset}
+              disabled={zoomLevel === 100}
+              aria-label="Reset zoom"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
       </div>
       <div className="context-preview-panels">
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) &&

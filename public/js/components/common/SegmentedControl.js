@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useRef, useState, useLayoutEffect, useCallback} from 'react'
 import PropTypes from 'prop-types'
 
 export const SegmentedControl = ({
@@ -10,9 +10,29 @@ export const SegmentedControl = ({
   className,
   compact = false,
   disabled = false,
+  autoWidth = false,
 }) => {
+  const optionRefs = useRef([])
+  const [cursorStyle, setCursorStyle] = useState(null)
+
   const selectedIndex = options.findIndex((option) => option.id === selectedId)
   const optionWidth = 100 / options.length
+
+  const updateCursor = useCallback(() => {
+    const el = optionRefs.current[selectedIndex]
+    if (el) {
+      setCursorStyle({
+        width: `${el.offsetWidth}px`,
+        transform: `translateX(${el.offsetLeft}px)`,
+      })
+    }
+  }, [selectedIndex])
+
+  useLayoutEffect(() => {
+    if (autoWidth) {
+      updateCursor()
+    }
+  }, [autoWidth, updateCursor])
 
   const handleChange = (event) => {
     onChange(event.target.value)
@@ -20,7 +40,12 @@ export const SegmentedControl = ({
 
   const renderOption = (option, index) => {
     return (
-      <div key={index} style={{width: `${optionWidth}%`}}>
+      <div
+        key={option.id}
+        ref={autoWidth ? (el) => (optionRefs.current[index] = el) : undefined}
+        className="segmented-control__option"
+        style={!autoWidth ? {width: `${optionWidth}%`} : undefined}
+      >
         <input
           type="radio"
           name={name}
@@ -39,20 +64,24 @@ export const SegmentedControl = ({
     )
   }
 
+  const defaultCursorStyle = {
+    width: `${optionWidth}%`,
+    transform: `translateX(${100 * selectedIndex}%)`,
+  }
+
   return (
     <div className={`segmented-control__wrapper ${className}`}>
       {label && <label htmlFor={name}>{label}</label>}
       <div
         className={`segmented-control ${
           compact ? 'segmented-control--compact' : ''
-        } ${options.length === 1 ? 'segmented-control--single' : ''}`}
+        } ${options.length === 1 ? 'segmented-control--single' : ''} ${
+          autoWidth ? 'segmented-control--auto-width' : ''
+        }`}
       >
         <div
           className="segmented-control__cursor"
-          style={{
-            width: `${optionWidth}%`,
-            transform: `translateX(${100 * selectedIndex}%)`,
-          }}
+          style={autoWidth ? cursorStyle : defaultCursorStyle}
         ></div>
         {options.map(renderOption)}
       </div>
@@ -74,4 +103,5 @@ SegmentedControl.propTypes = {
   className: PropTypes.string,
   compact: PropTypes.bool,
   disabled: PropTypes.bool,
+  autoWidth: PropTypes.bool,
 }
