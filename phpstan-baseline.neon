@@ -1021,6 +1021,12 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
+			message: '#^Parameter \#1 \$time of static method Utils\\Tools\\Utils\:\:mysqlTimestamp\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/CreateProjectController.php
+
+		-
 			message: '#^Parameter \#2 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3843,6 +3849,12 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V2\\ProjectsController\:\:updateDueDate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/ProjectsController.php
+
+		-
+			message: '#^Parameter \#1 \$time of static method Utils\\Tools\\Utils\:\:mysqlTimestamp\(\) expects int, float\|int\<2, max\>\|string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/ProjectsController.php
 
@@ -10321,6 +10333,12 @@ parameters:
 			path: lib/Model/Teams/InvitedUser.php
 
 		-
+			message: '#^Parameter \#1 \$params of static method Utils\\Tools\\Utils\:\:ensure_keys\(\) expects array\<string, mixed\>, array\<int\|string, list\<string\>\|Model\\DataAccess\\IDaoStruct\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/Teams/MembershipDao.php
+
+		-
 			message: '#^Method Model\\Teams\\PendingInvitations\:\:hasPendingInvitation\(\) has parameter \$id_team with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -10849,6 +10867,24 @@ parameters:
 			path: lib/Model/Users/Authentication/ChangePasswordModel.php
 
 		-
+			message: '#^Parameter \#2 \$salt of static method Utils\\Tools\\Utils\:\:encryptPass\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/Users/Authentication/ChangePasswordModel.php
+
+		-
+			message: '#^Parameter \#2 \$salt of static method Utils\\Tools\\Utils\:\:verifyPass\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/Users/Authentication/ChangePasswordModel.php
+
+		-
+			message: '#^Parameter \#3 \$db_hashed_pass of static method Utils\\Tools\\Utils\:\:verifyPass\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/Users/Authentication/ChangePasswordModel.php
+
+		-
 			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_authenticateUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -10886,6 +10922,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$datetime of function strtotime expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/Users/Authentication/PasswordResetModel.php
+
+		-
+			message: '#^Parameter \#2 \$salt of static method Utils\\Tools\\Utils\:\:encryptPass\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Users/Authentication/PasswordResetModel.php
@@ -11079,6 +11121,18 @@ parameters:
 		-
 			message: '#^Method Model\\Users\\UserStruct\:\:passwordMatch\(\) has parameter \$password with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: lib/Model/Users/UserStruct.php
+
+		-
+			message: '#^Parameter \#2 \$salt of static method Utils\\Tools\\Utils\:\:verifyPass\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/Users/UserStruct.php
+
+		-
+			message: '#^Parameter \#3 \$db_hashed_pass of static method Utils\\Tools\\Utils\:\:verifyPass\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Model/Users/UserStruct.php
 
@@ -17345,198 +17399,6 @@ parameters:
 			identifier: argument.type
 			count: 6
 			path: lib/Utils/Tools/PostEditing.php
-
-		-
-			message: '#^Cannot access property \$name on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Cannot access property \$parentNode on DOMElement\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Cannot call method getAttribute\(\) on DOMElement\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Cannot call method replaceChild\(\) on DOMNode\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Loose comparison using \=\= between non\-empty\-string and '''' will always evaluate to false\.$#'
-			identifier: equal.alwaysFalse
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:api_timestamp\(\) has parameter \$date_string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:changeMemorySuggestionSource\(\) has parameter \$match with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:encryptPass\(\) has parameter \$clear_pass with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:encryptPass\(\) has parameter \$salt with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:ensure_keys\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:ensure_keys\(\) has parameter \$required_keys with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:ensure_keys\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:getBrowser\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:mysqlTimestamp\(\) has parameter \$time with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:removeEmptyStringFromTail\(\) has parameter \$array with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:removeEmptyStringFromTail\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:returnSourcePageAsInt\(\) has parameter \$url with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:trimAndLowerCase\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:underscoreToCamelCase\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:upCountName\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:upCountNameCallback\(\) has parameter \$matches with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:validateEmailList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:verifyPass\(\) has parameter \$clear_pass with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:verifyPass\(\) has parameter \$db_hashed_pass with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Method Utils\\Tools\\Utils\:\:verifyPass\(\) has parameter \$salt with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Offset ''browser'' might not exist on array\{\}\|array\{0\: list\<string\>, browser\: list\<non\-falsy\-string\>, 1\: list\<non\-falsy\-string\>, version\: list\<string\>, 2\: list\<string\>\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Offset ''line'' might not exist on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Parameter \#1 \$number of static method Plugins\\Features\\ReviewExtended\\ReviewUtils\:\:revisionNumberToSourcePage\(\) expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strip_tags expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Parameter \#1 \$url of static method Utils\\Tools\\Utils\:\:returnSourcePageAsInt\(\) expects array, array\<string, int\|string\>\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/Tools/Utils.php
-
-		-
-			message: '#^Parameter \#2 \.\.\.\$arrays of function array_merge expects array, array\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Tools/Utils.php
 
 		-
 			message: '#^Method Utils\\Url\\CanonicalRoutes\:\:analyze\(\) has parameter \$options with no value type specified in iterable type array\.$#'
