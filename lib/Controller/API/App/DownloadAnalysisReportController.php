@@ -13,6 +13,7 @@ use Model\Analysis\XTRFStatus;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use ReflectionException;
+use TypeError;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
@@ -28,6 +29,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function download(): void
     {
@@ -37,7 +39,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         $_project_data = ProjectDao::getProjectAndJobData($projectId);
         $this->id_job = (int)$_project_data[0]['jid'];
 
-        $this->featureSet->loadForProject(ProjectDao::findById($projectId, 60 * 60 * 24));
+        $this->featureSet->loadForProject(ProjectDao::findById($projectId, 60 * 60 * 24) ?? throw new Exception("Project not found"));
 
         $analysisStatus = new XTRFStatus($_project_data, $this->featureSet);
         $outputContent = $analysisStatus->fetchData()->getResultArray();
@@ -67,8 +69,10 @@ class DownloadAnalysisReportController extends AbstractDownloadController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
@@ -83,7 +87,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         $project = ProjectDao::findById((int)$id_project);
 
         if (empty($project)) {
-            throw new InvalidArgumentException(-10, "Wrong Id project provided");
+            throw new InvalidArgumentException("Wrong Id project provided", -10);
         }
 
         $this->project = $project;

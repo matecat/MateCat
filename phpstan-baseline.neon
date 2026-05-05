@@ -1201,54 +1201,6 @@ parameters:
 			path: lib/Controller/API/App/DeleteContributionController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\DownloadAnalysisReportController\:\:download\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\DownloadAnalysisReportController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\DownloadAnalysisReportController\:\:validateTheRequest\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\DownloadAnalysisReportController\:\:validateTheRequest\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Parameter \#1 \$message of class InvalidArgumentException constructor expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Parameter \#1 \$project of method Model\\FeaturesBase\\FeatureSet\:\:loadForProject\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Parameter \#2 \$code of class InvalidArgumentException constructor expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/App/DownloadAnalysisReportController.php
-
-		-
 			message: '#^Cannot access property \$first_segment on Model\\DataAccess\\ShapelessConcreteStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -3679,81 +3631,9 @@ parameters:
 			path: lib/Controller/API/V2/CommentsController.php
 
 		-
-			message: '#^Binary operation "\." between ''/tmp/'' and array\|string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Cannot access property \$connected_service_id on Model\\RemoteFiles\\RemoteFileStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Cannot access property \$create_date on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\RemoteFiles\\RemoteFileStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:_saveActivity\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:_saveActivity\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:anyRemoteFile\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\DownloadController\:\:downloadFile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:downloadFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 6
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:getOutputContentsWithZipFiles\(\) has parameter \$output_content with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:getOutputContentsWithZipFiles\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:ifGlobalSightXliffRemoveTargetMarks\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:startRemoteFileService\(\) has parameter \$output_content with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
+			count: 3
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
@@ -3793,220 +3673,10 @@ parameters:
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
-			message: '#^Parameter \#1 \$id_file of static method Model\\RemoteFiles\\RemoteFileDao\:\:getByFileAndJob\(\) expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$remoteFile of method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:updateFile\(\) expects Model\\RemoteFiles\\RemoteFileStruct, Model\\RemoteFiles\\RemoteFileStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$search of function str_replace expects array\<string\>\|string, array\<int, array\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strtoupper expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
 			message: '#^Parameter \#2 \$data of method Matecat\\XliffParser\\XliffParser\:\:replaceTranslation\(\) expects array\<int\|string, array\<string, mixed\>\>, array\<int\|string, array\<int\|string, mixed\>\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#2 \$id_job of static method Model\\RemoteFiles\\RemoteFileDao\:\:getByFileAndJob\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#3 \$transUnits of method Matecat\\XliffParser\\XliffParser\:\:replaceTranslation\(\) expects array\<int\|string, array\<int, int\>\>, array\<string, list\<int\|string\>\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\DownloadController\:\:\$downloadToken has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\DownloadController\:\:\$download_type \(string\|null\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\DownloadController\:\:\$id_file \(int\|null\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$_user_provided_filename \(string\|null\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$id_job \(int\) does not accept string\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$id_job \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$password \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Variable \$jobData in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Argument of an invalid type SplFileInfo supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadJobTMXController\:\:_saveActivity\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadJobTMXController\:\:index\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$tmx SplTempFileObject\)\: Unexpected token "\$tmx", expected type at offset 28 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Parameter \#2 \$jPassword of method Utils\\TMS\\TMSService\:\:exportJobAsTMX\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Parameter \#2 \$password of static method Model\\Jobs\\ChunkDao\:\:getByIdAndPassword\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\DownloadJobTMXController\:\:\$errors type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\DownloadJobTMXController\:\:\$jobID \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
-			message: '#^Cannot call method getChunk\(\) on Model\\LQA\\ChunkReviewStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadOriginalController\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadOriginalController\:\:index\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 6
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Offset ''basename'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Offset ''extension'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$_user_provided_filename \(string\|null\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$id_job \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$password \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/DownloadOriginalController.php
 
 		-
 			message: '#^Variable \$jobData in empty\(\) always exists and is not falsy\.$#'
@@ -5827,96 +5497,6 @@ parameters:
 			path: lib/Controller/API/V3/XliffConfigTemplateController.php
 
 		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:composeZip\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:finalize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:finalize\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:getDefaultFileName\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:nocache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:setMimeType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:unlockToken\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\AbstractDownloadController\:\:unlockToken\(\) has parameter \$tokenContent with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Offset ''basename'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Offset ''extension'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of static method Model\\Files\\FileDao\:\:getByProjectId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strtolower expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Parameter \#2 \$value of static method Controller\\Abstracts\\Authentication\\CookieManager\:\:setCookie\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\AbstractDownloadController\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Abstracts/AbstractDownloadController.php
-
-		-
 			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:destroyAuthentication\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6229,12 +5809,6 @@ parameters:
 			path: lib/Controller/Views/AnalyzeController.php
 
 		-
-			message: '#^Method Controller\\Views\\AnalyzeController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
 			message: '#^Method Controller\\Views\\AnalyzeController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6245,18 +5819,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/Views/AnalyzeController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:_saveActivity\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
 
 		-
 			message: '#^Method Controller\\Views\\CattoolController\:\:archived\(\) has parameter \$jobOwnership with no value type specified in iterable type array\.$#'
@@ -6379,12 +5941,6 @@ parameters:
 			path: lib/Controller/Views/CattoolController.php
 
 		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
 			message: '#^Cannot access offset ''id_project'' on array\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -6405,18 +5961,6 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\ManageController\:\:renderView\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/ManageController.php
-
-		-
-			message: '#^Method Controller\\Views\\ManageController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/ManageController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/Views/ManageController.php
 
@@ -6499,12 +6043,6 @@ parameters:
 			path: lib/Controller/Views/QualityReportController.php
 
 		-
-			message: '#^Method Controller\\Views\\QualityReportController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/QualityReportController.php
-
-		-
 			message: '#^Method Controller\\Views\\QualityReportController\:\:searchableStatuses\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6513,12 +6051,6 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\QualityReportController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/QualityReportController.php
-
-		-
-			message: '#^Property Model\\ActivityLog\\ActivityLogStruct\:\:\$ip \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/Views/QualityReportController.php
 

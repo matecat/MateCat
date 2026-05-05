@@ -9,8 +9,8 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
-use SplFileInfo;
 use SplTempFileObject;
+use TypeError;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 
@@ -18,15 +18,17 @@ class DownloadJobTMXController extends AbstractDownloadController
 {
 
     private int $jobID;
-    private SplFileInfo $tmx;
+    private SplTempFileObject $tmx;
     private string $fileName;
 
+    /** @var array<int, array{code: int, message: string}> */
     protected array $errors;
 
     public JobStruct $jobInfo;
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function index(): void
     {
@@ -44,9 +46,9 @@ class DownloadJobTMXController extends AbstractDownloadController
 
         $this->errors = [];
 
-        $this->jobID = $getInput['id_job'];
-        $jobPass = $getInput['password'];
-        $type = $getInput['type'];
+        $this->jobID = (int)($getInput['id_job'] ?? 0);
+        $jobPass = (string)($getInput['password'] ?? '');
+        $type = (string)($getInput['type'] ?? '');
 
         if (empty($this->jobID)) {
             $this->errors [] = [
@@ -86,16 +88,10 @@ class DownloadJobTMXController extends AbstractDownloadController
 
         switch ($type) {
             case 'csv':
-                /**
-                 * @var $tmx SplTempFileObject
-                 */
                 $this->tmx = $tmsService->exportJobAsCSV($this->jobID, $jobPass, $source, $target);
                 $this->fileName = $projectData['name'] . "-" . $this->jobID . ".csv";
                 break;
             default:
-                /**
-                 * @var $tmx SplTempFileObject
-                 */
                 $this->tmx = $tmsService->exportJobAsTMX($this->jobID, $jobPass, $source, $target);
                 $this->fileName = $projectData['name'] . "-" . $this->jobID . ".tmx";
                 break;
@@ -105,6 +101,9 @@ class DownloadJobTMXController extends AbstractDownloadController
         $this->finalize();
     }
 
+    /**
+     * @throws TypeError
+     */
     protected function _saveActivity(): void
     {
         $activity = new ActivityLogStruct();
@@ -138,7 +137,9 @@ class DownloadJobTMXController extends AbstractDownloadController
 
         //read file and output it
         foreach ($this->tmx as $line) {
-            echo $line;
+            if (is_string($line)) {
+                echo $line;
+            }
         }
 
         exit;

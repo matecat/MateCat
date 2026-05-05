@@ -103,10 +103,7 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public int $action;
 
-    /**
-     * @var string
-     */
-    public string $ip;
+    public ?string $ip = null;
 
     /**
      * @var ?int
