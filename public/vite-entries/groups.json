@@ -27,5 +27,6 @@
   "503.html": ["errorPage"],
   "oauth_response_handler.html": [],
   "redirectFailurePage.html": [],
-  "redirectSuccessPage.html": []
+  "redirectSuccessPage.html": [],
+  "context_preview.html": ["contextPreview", "allPagesPlugins"]
 }
