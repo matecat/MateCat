@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use Exception;
 use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 /**
  * @property ?string $client_secret
@@ -47,10 +48,11 @@ class YandexTranslate extends AbstractEngine
      * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array<string, mixed>
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         $all_args = func_get_args();
 
@@ -87,8 +89,9 @@ class YandexTranslate extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         $_config['source'] = $this->_fixLangCode($_config['source']);
         $_config['target'] = $this->_fixLangCode($_config['target']);
@@ -111,7 +114,7 @@ class YandexTranslate extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**

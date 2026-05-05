@@ -365,7 +365,7 @@ class TMAnalysisWorker extends AbstractWorker
         }
 
         $sourceValidator = new MessagePatternValidator($sourceLang, $rawSource);
-        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu($sourceValidator, $icuEnabled);
+        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu($sourceValidator, true);
 
         if (!$sourceContainsIcu) {
             return [null, false];
@@ -797,18 +797,15 @@ class TMAnalysisWorker extends AbstractWorker
 
             $mt_result = $mtEngine->get($config);
 
-            // handle GetMemoryResponse instead of having directly Matches
-            if ($mt_result instanceof GetMemoryResponse) {
-                if (isset($mt_result->responseStatus) && $mt_result->responseStatus >= 400) {
-                    return [];
-                }
-                $mt_result = $mt_result->get_matches_as_array(1);
-                $mt_result = $mt_result['matches'][0] ?? [];
-            }
-
-            if (isset($mt_result['error']['code'])) {
+            if (isset($mt_result->responseStatus) && $mt_result->responseStatus >= 400) {
                 return [];
             }
+
+            if ($mt_result->error !== null) {
+                return [];
+            }
+
+            $mt_result = $mt_result->get_matches_as_array(1)[0] ?? [];
         } catch (Exception $e) {
             $this->_doLog($e->getMessage());
         }
@@ -844,7 +841,6 @@ class TMAnalysisWorker extends AbstractWorker
             $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null
         ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102);
 
-        /** @var $tms_match GetMemoryResponse */
         $tms_match = $tmsEngine->get($config);
 
         /**
@@ -863,12 +859,12 @@ class TMAnalysisWorker extends AbstractWorker
         }
 
         // Strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT (the returned record cannot be empty). Try again
-        if (empty($tms_match) && $_config['get_mt']) {
+        if (empty($tms_match->matches) && $_config['get_mt']) {
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.");
             throw new ReQueueException("--- (Worker " . $this->_workerPid . ") : Error from Matches. Empty field received even if MT was requested.", self::ERR_REQUEUE);
         }
 
-        if (!empty($tms_match)) {
+        if (!empty($tms_match->matches)) {
             $tms_match = $tms_match->get_matches_as_array(1);
         }
 

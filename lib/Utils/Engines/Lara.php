@@ -32,6 +32,7 @@ use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Redis\RedisHandler;
@@ -222,21 +223,21 @@ class Lara extends AbstractEngine
      *
      * @param array<string, mixed> $_config
      *
-     * @return array<string, mixed>|TMSAbstractResponse
+     * @return GetMemoryResponse
      * @throws ReflectionException
      * @throws LaraException
      * @throws Exception
      * @throws TypeError
      */
-    public function get(array $_config): TMSAbstractResponse|array
+    public function get(array $_config): GetMemoryResponse
     {
         // temporary disable ur-Latn-PK
         if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
-            return [];
+            return new GetMemoryResponse(null);
         }
 
         if ($this->_isAnalysis && $this->_skipAnalysis) {
-            return [];
+            return new GetMemoryResponse(null);
         }
 
         $metadataDao = new MetadataDao();
@@ -359,7 +360,7 @@ class Lara extends AbstractEngine
                     ]);
 
                     if ($message === false) {
-                        return [];
+                        return new GetMemoryResponse(null);
                     }
 
                     $queueHandler = AMQHandler::getNewInstanceForDaemons();
@@ -368,7 +369,7 @@ class Lara extends AbstractEngine
                         new Message($message)
                     );
 
-                    return [];
+                    return new GetMemoryResponse(null);
                 } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
                     $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
                     throw new LaraException(
@@ -410,7 +411,7 @@ class Lara extends AbstractEngine
             ]);
         }
 
-        return (new Matches([
+        $match = new Matches([
             'style' => $laraStyle ?? null,
             'source' => $_config['source'],
             'target' => $_config['target'],
@@ -420,13 +421,13 @@ class Lara extends AbstractEngine
             'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning ? ' Think' : '')),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
-        ]))->getMatches(
-            1,
-            [],
-            $_config['source'],
-            $_config['target'],
-            $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null
-        );
+        ]);
+        $match->featureSet($this->featureSet);
+
+        $response = new GetMemoryResponse(null);
+        $response->matches = [$match];
+
+        return $response;
     }
 
     /**

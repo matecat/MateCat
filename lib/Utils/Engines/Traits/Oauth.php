@@ -16,7 +16,7 @@ use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use RuntimeException;
 use TypeError;
-use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 trait Oauth
 {
@@ -93,11 +93,11 @@ trait Oauth
     /**
      * @param array<string, mixed> $_config
      *
-     * @return array<string, mixed>|TMSAbstractResponse
+     * @return GetMemoryResponse
      * @throws Exception
      * @throws TypeError
      */
-    public function get(array $_config, int $cycle = 0)
+    public function get(array $_config, int $cycle = 0): GetMemoryResponse
     {
         if ($cycle == 10) {
             return $this->_formatRecursionError();
@@ -109,7 +109,7 @@ trait Oauth
                 $this->_authenticate();
             }
         } catch (Exception) {
-            return $this->result;
+            return $this->_getResultAsGetMemoryResponse();
         }
 
         $parameters = $this->_fillCallParameters($_config);
@@ -123,7 +123,7 @@ trait Oauth
                 //Check for time to live and refresh cache and token info
                 $this->_authenticate();
             } catch (Exception) {
-                return $this->result;
+                return $this->_getResultAsGetMemoryResponse();
             }
 
             /**
@@ -134,10 +134,10 @@ trait Oauth
 
         }
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
-    abstract protected function _formatRecursionError(): array;
+    abstract protected function _formatRecursionError(): GetMemoryResponse;
 
     abstract protected function _checkAuthFailure(): bool;
 

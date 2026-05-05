@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use Exception;
 use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 /**
  * Created by PhpStorm.
@@ -38,10 +39,11 @@ class GoogleTranslate extends AbstractEngine
      * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array<string, mixed>
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         $all_args = func_get_args();
         $all_args[1]['text'] = $all_args[1]['q'];
@@ -61,8 +63,9 @@ class GoogleTranslate extends AbstractEngine
 
     /**
      * @param array<string, mixed> $_config
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         $parameters = [];
 
@@ -80,7 +83,7 @@ class GoogleTranslate extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**

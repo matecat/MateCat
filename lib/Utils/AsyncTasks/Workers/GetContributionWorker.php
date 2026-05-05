@@ -11,6 +11,7 @@ namespace Utils\AsyncTasks\Workers;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use TypeError;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -344,19 +345,18 @@ class GetContributionWorker extends AbstractWorker
         return $regularExpressions;
     }
 
-    /**
-     * @param GetContributionRequest $contributionStruct
-     * @param JobStruct $jobStruct
-     * @param string $targetLang
-     * @param FeatureSet $featureSet
-     * @param bool $isCrossLang
-     *
-     * @return array
-     * @throws EndQueueException
-     * @throws ReQueueException
-     * @throws Exception
-     */
-    protected function _getMatches(GetContributionRequest $contributionStruct, JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false): array
+     /**
+      * @param string $targetLang
+      * @param FeatureSet $featureSet
+      * @param bool $isCrossLang
+      *
+      * @return array
+      * @throws EndQueueException
+      * @throws ReQueueException
+      * @throws Exception
+      * @throws TypeError
+      */
+     protected function _getMatches(GetContributionRequest $contributionStruct, JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false): array
     {
         $_config = [];
         $_config['segment'] = $contributionStruct->getContexts()->segment;
@@ -517,7 +517,10 @@ class GetContributionWorker extends AbstractWorker
                 ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 try {
-                    $mt_result = $mt_engine->get($config);
+                    $mtResponse = $mt_engine->get($config);
+                    if (!empty($mtResponse->matches)) {
+                        $mt_result = $mtResponse->get_matches_as_array(1)[0] ?? [];
+                    }
                 } catch (Exception $e) {
                     $this->_doLog($e->getMessage());
                 }

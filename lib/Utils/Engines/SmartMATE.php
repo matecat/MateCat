@@ -6,8 +6,9 @@ use Exception;
 use Model\Engines\Structs\SmartMATEStruct;
 use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Traits\Oauth;
-use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
  * Created by PhpStorm.
@@ -102,8 +103,9 @@ class SmartMATE extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         if (is_string($rawValue)) {
             $decoded = json_decode($rawValue, true);
@@ -124,7 +126,13 @@ class SmartMATE extends AbstractEngine
 
             $this->logger->debug($rawValue);
 
-            return $rawValue; // already decoded in case of error
+            $response = new GetMemoryResponse(null);
+            if (is_array($rawValue) && isset($rawValue['error'])) {
+                $response->responseStatus = abs((int)($rawValue['error']['code'] ?? 500));
+                $response->error = new ErrorResponse($rawValue['error']);
+            }
+
+            return $response;
         }
     }
 
@@ -161,11 +169,11 @@ class SmartMATE extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      *
-     * @return array<string, mixed>|TMSAbstractResponse
+     * @return GetMemoryResponse
      * @throws Exception
      * @throws TypeError
      */
-    public function get(array $_config, int $cycle = 0): TMSAbstractResponse|array
+    public function get(array $_config, int $cycle = 0): GetMemoryResponse
     {
         return $this->oauthGet($_config, $cycle);
     }
@@ -199,10 +207,9 @@ class SmartMATE extends AbstractEngine
 
     /**
      * @throws Exception
-     *
-     * @return array<string, mixed>
+     * @throws TypeError
      */
-    protected function _formatRecursionError(): array
+    protected function _formatRecursionError(): GetMemoryResponse
     {
         return $this->_composeMTResponseAsMatch(
             '',

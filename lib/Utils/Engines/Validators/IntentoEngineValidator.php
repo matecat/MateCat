@@ -35,12 +35,12 @@ class IntentoEngineValidator extends AbstractValidator
 
         $mt_result = $newTestCreatedMT->get($config);
 
-        if (is_array($mt_result) && isset($mt_result['error']['code'])) {
-            switch ($mt_result['error']['code']) {
+        if ($mt_result->error !== null) {
+            switch ($mt_result->error->code) {
                 // wrong provider credentials
                 case -2:
-                    $code = $mt_result['error']['http_code'] ?? 413;
-                    $message = $mt_result['error']['message'];
+                    $code = $mt_result->error->http_code ?? 413;
+                    $message = $mt_result->error->message;
                     break;
 
                 // not valid license
@@ -55,7 +55,7 @@ class IntentoEngineValidator extends AbstractValidator
                     break;
             }
 
-            throw new DomainException($message, $code);
+            throw new DomainException($message ?? 'Unknown error', (int)$code);
         }
 
         return null;

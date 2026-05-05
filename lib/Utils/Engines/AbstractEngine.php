@@ -14,7 +14,9 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use stdClass;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\LoggerFactory;
@@ -418,10 +420,11 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @param array<string, mixed> $_config
      *
-     * @return array<string, mixed>|TMSAbstractResponse
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function GoogleTranslateFallback(array $_config): TMSAbstractResponse|array
+    protected function GoogleTranslateFallback(array $_config): GetMemoryResponse
     {
         try {
             /**
@@ -440,7 +443,7 @@ abstract class AbstractEngine implements EngineInterface
             /** @var GoogleTranslate $gtEngine */
             return $gtEngine->get($_config);
         } catch (Exception) {
-            return [];
+            return new GetMemoryResponse(null);
         }
     }
 
@@ -514,18 +517,23 @@ abstract class AbstractEngine implements EngineInterface
      * @param array<string, mixed> $decoded
      * @param int                  $layerNum
      *
-     * @return array<string, mixed>
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _composeMTResponseAsMatch(string $raw_segment, array $decoded, int $layerNum = 1): array
+    protected function _composeMTResponseAsMatch(string $raw_segment, array $decoded, int $layerNum = 1): GetMemoryResponse
     {
         $mt_result = new MTResponse($decoded);
 
         if ($mt_result->error->code < 0) {
-            $mt_result = $mt_result->get_as_array();
-            $mt_result['error'] = (array)$mt_result['error'];
+            $response = new GetMemoryResponse(null);
+            $response->responseStatus = (int)abs($mt_result->error->code);
+            $response->error = new ErrorResponse([
+                'code' => $mt_result->error->code,
+                'message' => $mt_result->error->message ?? '',
+            ]);
 
-            return $mt_result;
+            return $response;
         }
 
         $mt_match_res = new Matches([
@@ -535,8 +543,38 @@ abstract class AbstractEngine implements EngineInterface
             'created-by' => $this->getMTName(),
             'create-date' => date("Y-m-d")
         ]);
+        $mt_match_res->featureSet($this->featureSet);
 
-        return $mt_match_res->getMatches($layerNum);
+        $response = new GetMemoryResponse(null);
+        $response->matches = [$mt_match_res];
+
+        return $response;
+    }
+
+    /**
+     * Wraps $this->result as GetMemoryResponse.
+     *
+     * Handles three cases from AbstractEngine::call():
+     * - $this->result is already GetMemoryResponse (normal _decode() path)
+     * - $this->result is an error array (bad method call early-exit)
+     * - $this->result is empty array (skip analysis early-exit)
+     *
+     * @throws TypeError
+     */
+    protected function _getResultAsGetMemoryResponse(): GetMemoryResponse
+    {
+        if ($this->result instanceof GetMemoryResponse) {
+            return $this->result;
+        }
+
+        $response = new GetMemoryResponse(null);
+
+        if (is_array($this->result) && isset($this->result['error'])) {
+            $response->responseStatus = abs((int)($this->result['error']['code'] ?? 500));
+            $response->error = new ErrorResponse($this->result['error']);
+        }
+
+        return $response;
     }
 
     /**

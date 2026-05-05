@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use Exception;
 use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 /**
  * Created by PhpStorm.
@@ -51,10 +52,11 @@ class Apertium extends AbstractEngine
      * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array<string, mixed>
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         $original = ['text' => ''];
         $all_args = func_get_args();
@@ -78,8 +80,9 @@ class Apertium extends AbstractEngine
 
     /**
      * @param array<string, mixed> $_config
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         $param_data = json_encode([
             "mtsystem" => "apertium",
@@ -102,7 +105,7 @@ class Apertium extends AbstractEngine
         );
         $this->call("translate_relative_url", $parameters, false);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**

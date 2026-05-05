@@ -7,6 +7,7 @@ use Model\Projects\MetadataDao;
 use ReflectionException;
 use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -54,15 +55,16 @@ class Intento extends AbstractEngine
         return $r[0];
     }
 
-    /**
-     * @param mixed $rawValue
-     * @param array<string, mixed> $parameters
-     * @param string|null $function
-     *
-     * @return array<string, mixed>
-     * @throws Exception
-     */
-    protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): array
+     /**
+      * @param mixed $rawValue
+      * @param array<string, mixed> $parameters
+      * @param string|null $function
+      *
+      * @return GetMemoryResponse
+      * @throws Exception
+      * @throws TypeError
+      */
+     protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): GetMemoryResponse
     {
         if (is_string($rawValue)) {
             $result = json_decode($rawValue, false);
@@ -146,12 +148,13 @@ class Intento extends AbstractEngine
         return $this->_composeMTResponseAsMatch($rawSegment, $decoded);
     }
 
-    /**
-     * @param array<string, mixed> $_config
-     *
-     * @throws Exception
-     */
-    public function get(array $_config)
+     /**
+      * @param array<string, mixed> $_config
+      *
+      * @throws Exception
+      * @throws TypeError
+      */
+     public function get(array $_config): GetMemoryResponse
     {
         $_config['source'] = $this->_fixLangCode($_config['source']);
         $_config['target'] = $this->_fixLangCode($_config['target']);
@@ -193,7 +196,7 @@ class Intento extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**
@@ -201,10 +204,10 @@ class Intento extends AbstractEngine
      * @param array<string, mixed> $parameters
      * @param string|null $function
      *
-     * @return array<string, mixed>
+     * @return GetMemoryResponse
      * @throws Exception
      */
-    protected function _curl_async(array $config, array $parameters = [], ?string $function = null): array
+    protected function _curl_async(array $config, array $parameters = [], ?string $function = null): GetMemoryResponse
     {
         $id = (string)($config['id'] ?? '');
 

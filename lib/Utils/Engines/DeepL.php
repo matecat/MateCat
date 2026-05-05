@@ -8,6 +8,7 @@ use Model\Projects\MetadataDao;
 use TypeError;
 use Utils\Engines\DeepL\DeepLApiClient;
 use Utils\Engines\DeepL\DeepLApiException;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 
 class DeepL extends AbstractEngine
@@ -41,11 +42,11 @@ class DeepL extends AbstractEngine
      * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array<string, mixed>
+     * @return GetMemoryResponse
      * @throws Exception
      * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         $rawValue = json_decode($rawValue, true);
 
@@ -71,7 +72,7 @@ class DeepL extends AbstractEngine
         $target = $parameters['target_lang'];
         $segment = $parameters['text'][0];
 
-        return (new Matches([
+        $match = new Matches([
             'source' => $source,
             'target' => $target,
             'raw_segment' => $segment,
@@ -79,15 +80,22 @@ class DeepL extends AbstractEngine
             'match' => "85%",
             'created-by' => $this->getMTName(),
             'create-date' => date("Y-m-d"),
-        ]))->getMatches(1);
+        ]);
+        $match->featureSet($this->featureSet);
+
+        $response = new GetMemoryResponse(null);
+        $response->matches = [$match];
+
+        return $response;
     }
 
     /**
      * @inheritDoc
      * @param array<string, mixed> $_config
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         $source = explode("-", $_config['source']);
         $target = explode("-", $_config['target']);
@@ -129,7 +137,7 @@ class DeepL extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**

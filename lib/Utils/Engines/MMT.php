@@ -20,8 +20,8 @@ use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\MMT\MMTServiceApiRequestException;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
-use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 
@@ -108,15 +108,15 @@ class MMT extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      *
-     * @return array<string, mixed>|TMSAbstractResponse
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config): TMSAbstractResponse|array
+    public function get(array $_config): GetMemoryResponse
     {
         // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
         if ($this->_isAnalysis && $this->_skipAnalysis) {
-            return [];
+            return new GetMemoryResponse(null);
         }
 
         $client = $this->_getClient();
@@ -165,7 +165,7 @@ class MMT extends AbstractEngine
                 return $this->GoogleTranslateFallback($_config);
             }
 
-            return (new Matches([
+            $match = new Matches([
                 'source' => $_config['source'],
                 'target' => $_config['target'],
                 'raw_segment' => $_config['segment'],
@@ -174,13 +174,13 @@ class MMT extends AbstractEngine
                 'created-by' => $this->getMTName(),
                 'create-date' => date("Y-m-d"),
                 'score' => $translation['score'] ?? null
-            ]))->getMatches(
-                1,
-                [],
-                $_config['source'],
-                $_config['target'],
-                array_key_exists(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $_config) ? $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] : []
-            );
+            ]);
+            $match->featureSet($this->featureSet);
+
+            $response = new GetMemoryResponse(null);
+            $response->matches = [$match];
+
+            return $response;
         } catch (Exception) {
             return $this->GoogleTranslateFallback($_config);
         }

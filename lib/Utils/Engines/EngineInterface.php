@@ -6,7 +6,7 @@ use Exception;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
-use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 /**
  * Created by PhpStorm.
@@ -20,10 +20,8 @@ interface EngineInterface
 
     /**
      * @param array<string, mixed> $_config
-     *
-     * @return TMSAbstractResponse
      */
-    public function get(array $_config);
+    public function get(array $_config): GetMemoryResponse;
 
     /**
      * @param mixed $_config

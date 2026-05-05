@@ -36,8 +36,8 @@ class GoogleTranslateEngineValidator extends AbstractValidator
 
         $mt_result = $newTestCreatedMT->get($config);
 
-        if (is_array($mt_result) && isset($mt_result['error']['code'])) {
-            throw new DomainException($mt_result['error']['message']);
+        if ($mt_result->error !== null) {
+            throw new DomainException($mt_result->error->message ?? 'Unknown error');
         }
         return null;
     }
