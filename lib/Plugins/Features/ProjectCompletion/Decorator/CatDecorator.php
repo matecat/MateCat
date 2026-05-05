@@ -8,6 +8,7 @@ use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Tools\CatUtils;
 
@@ -31,20 +32,20 @@ class CatDecorator extends AbstractDecorator
     public function decorate(?ArgumentInterface $arguments = null): void
     {
         $this->arguments = $arguments;
-        $job             = $this->arguments->getJob();
+        $job = $this->arguments->getJob();
 
         $this->stats = CatUtils::getFastStatsForJob($this->arguments->getWordCountStruct());
 
         $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord($job, ['is_review' => $this->arguments->isRevision()]);
 
-        $dao                 = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase($this->arguments->getJob());
 
         $this->template->{'project_completion_feature_enabled'} = new PHPTalBoolean(true);
-        $this->template->{'job_completion_current_phase'}       = $this->current_phase;
+        $this->template->{'job_completion_current_phase'} = $this->current_phase;
 
         if ($lastCompletionEvent) {
-            $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent[ 'id_event' ];
+            $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent['id_event'];
             $this->varsForComplete();
         } else {
             $this->varsForUncomplete();
@@ -64,30 +65,30 @@ class CatDecorator extends AbstractDecorator
 
     private function varsForComplete(): void
     {
-        $this->template->{'job_marked_complete'}             = new PHPTalBoolean(true);
+        $this->template->{'job_marked_complete'} = new PHPTalBoolean(true);
         $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean(false);
     }
 
     private function completable(): bool
     {
-        if ($this->arguments->getJob()->getProject()->getWordCountType() != MetadataDao::WORD_COUNT_RAW) {
+        if ($this->arguments->getJob()->getProject()->getWordCountType() != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             if ($this->arguments->isRevision()) {
                 $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
-                        $this->stats[ 'DRAFT' ] == 0 &&
-                        ($this->stats[ 'APPROVED' ] + $this->stats[ 'REJECTED' ]) > 0;
+                    $this->stats['DRAFT'] == 0 &&
+                    ($this->stats['APPROVED'] + $this->stats['REJECTED']) > 0;
             } else {
                 $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
-                        $this->stats[ 'DRAFT' ] == 0 && $this->stats[ 'REJECTED' ] == 0;
+                    $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0;
             }
         } elseif ($this->arguments->isRevision()) {
             $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
-                    $this->stats[ 'raw' ][ 'draft' ] == 0 && $this->stats[ 'raw' ][ 'new' ] == 0 &&
-                    ($this->stats[ 'raw' ][ 'approved' ] + $this->stats[ 'raw' ][ 'approved2' ] + $this->stats[ 'raw' ][ 'rejected' ]) > 0;
+                $this->stats['raw']['draft'] == 0 && $this->stats['raw']['new'] == 0 &&
+                ($this->stats['raw']['approved'] + $this->stats['raw']['approved2'] + $this->stats['raw']['rejected']) > 0;
         } else {
             $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
-                    $this->stats[ 'raw' ][ 'draft' ] == 0 &&
-                    $this->stats[ 'raw' ][ 'new' ] == 0 &&
-                    $this->stats[ 'raw' ][ 'rejected' ] == 0;
+                $this->stats['raw']['draft'] == 0 &&
+                $this->stats['raw']['new'] == 0 &&
+                $this->stats['raw']['rejected'] == 0;
         }
 
         return $completable;

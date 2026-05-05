@@ -20,14 +20,14 @@ class IssueCheckController extends KleinController
     public function segments(): void
     {
         $result = [
-                'modified_segments_count' => 0,
-                'issue_count'             => 0,
-                'modified_segments'       => []
+            'modified_segments_count' => 0,
+            'issue_count' => 0,
+            'modified_segments' => []
         ];
 
         // params
-        $id_job      = $this->request->param('id_job');
-        $password    = $this->request->param('password');
+        $id_job = $this->request->param('id_job');
+        $password = $this->request->param('password');
         $source_page = $this->request->param('source_page', 2);
 
         // find a job
@@ -41,19 +41,19 @@ class IssueCheckController extends KleinController
         $this->return404IfTheJobWasDeleted();
 
         $modifiedSegments = (new SegmentTranslationDao())
-                ->setCacheTTL(60 * 5)
-                ->getSegmentTranslationsModifiedByRevisorWithIssueCount($id_job, $job->password, $source_page);
+            ->setCacheTTL(60 * 5)
+            ->getSegmentTranslationsModifiedByRevisorWithIssueCount($id_job, $job->password, $source_page);
 
-        $result[ 'modified_segments_count' ] = count($modifiedSegments);
+        $result['modified_segments_count'] = count($modifiedSegments);
 
         foreach ($modifiedSegments as $modifiedSegment) {
             /** @var ShapelessConcreteStruct $modifiedSegment */
-            $result[ 'modified_segments' ][] = [
-                    'id_segment'  => (int)$modifiedSegment->id_segment,
-                    'issue_count' => (int)$modifiedSegment->q_count,
+            $result['modified_segments'][] = [
+                'id_segment' => (int)$modifiedSegment->id_segment,
+                'issue_count' => (int)$modifiedSegment->q_count,
             ];
 
-            $result[ 'issue_count' ] = (int)$result[ 'issue_count' ] + (int)$modifiedSegment->q_count;
+            $result['issue_count'] = (int)$result['issue_count'] + (int)$modifiedSegment->q_count;
         }
 
         $this->response->json($result);

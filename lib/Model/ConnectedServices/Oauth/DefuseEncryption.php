@@ -17,7 +17,7 @@ use Exception;
 class DefuseEncryption
 {
 
-    private ?Key   $key = null;
+    private ?Key $key = null;
     private string $keyFilePath;
 
     /**

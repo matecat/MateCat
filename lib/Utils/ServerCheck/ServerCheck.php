@@ -48,16 +48,16 @@ class ServerCheck
     {
         $regexp = '/([0-9]+)([GM])?/';
         preg_match($regexp, $value, $matches);
-        if (isset($matches[ 2 ])) {
-            switch ($matches[ 2 ]) {
+        if (isset($matches[2])) {
+            switch ($matches[2]) {
                 case "M":
-                    return (int)$matches[ 1 ] * 1024 * 1024;
+                    return (int)$matches[1] * 1024 * 1024;
                 case "G":
-                    return (int)$matches[ 1 ] * 1024 * 1024 * 1024;
+                    return (int)$matches[1] * 1024 * 1024 * 1024;
             }
         }
 
-        return (int)$matches[ 1 ];
+        return (int)$matches[1];
     }
 
     /**

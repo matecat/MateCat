@@ -54,9 +54,9 @@ class ChunkController extends KleinController
 
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $this->chunk         = $Validator->getChunk();
-            $this->project       = $Validator->getChunk()->getProject();
-            $this->featureSet    = $this->project->getFeaturesSet();
+            $this->chunk = $Validator->getChunk();
+            $this->project = $Validator->getChunk()->getProject();
+            $this->featureSet = $this->project->getFeaturesSet();
             $this->chunk_reviews = (new ChunkReviewDao())->findChunkReviews($Validator->getChunk());
         });
         $this->appendValidator($Validator);

@@ -27,37 +27,37 @@ class FilterDefinition
 
     public function isRevision(): bool
     {
-        return !empty($this->filter_data[ 'revision' ]) && $this->filter_data[ 'revision' ] == 1;
+        return !empty($this->filter_data['revision']) && $this->filter_data['revision'] == 1;
     }
 
     public function isSampled(): bool
     {
-        return array_key_exists('sample', $this->filter_data) && $this->filter_data[ 'sample' ] == true;
+        return array_key_exists('sample', $this->filter_data) && $this->filter_data['sample'] == true;
     }
 
     public function isFiltered(): bool
     {
-        return !empty($this->filter_data[ 'status' ]);
+        return !empty($this->filter_data['status']);
     }
 
     public function sampleData(): array
     {
-        return $this->filter_data[ 'sample' ] ?? [];
+        return $this->filter_data['sample'] ?? [];
     }
 
     public function sampleType(): string
     {
-        return $this->filter_data[ 'sample' ][ 'type' ] ?? '';
+        return $this->filter_data['sample']['type'] ?? '';
     }
 
     public function sampleSize(): int
     {
-        return $this->filter_data[ 'sample' ][ 'size' ] ?? 0;
+        return $this->filter_data['sample']['size'] ?? 0;
     }
 
     public function getSegmentStatus(): string
     {
-        return strtoupper($this->filter_data[ 'status' ]);
+        return strtoupper($this->filter_data['status']);
     }
 
     public function isValid(): bool

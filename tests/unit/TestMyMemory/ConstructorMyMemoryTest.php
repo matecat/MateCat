@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
@@ -15,57 +16,56 @@ use Utils\Registry\AppConfig;
  * Date: 28/04/16
  * Time: 15.45
  */
-class ConstructorMyMemoryTest extends AbstractTest {
-
+class ConstructorMyMemoryTest extends AbstractTest
+{
 
     /**
      * @var EngineStruct
      */
-    protected $engine_struct_param;
+    protected EngineStruct $engine_struct_param;
 
     /**
-     * @var array
+     * @throws Exception
      */
-    protected $others_param;
-    protected $reflector;
-    protected $property;
-
-    public function setUp(): void {
-        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $engine_struct     = EngineStruct::getStruct();
+    public function setUp(): void
+    {
+        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
-        $eng               = $engineDAO->read( $engine_struct );
+        $eng = $engineDAO->read($engine_struct);
 
         /**
          * @var $engineRecord EngineStruct
          */
-        $this->engine_struct_param = $eng[ 0 ];
+        $this->engine_struct_param = $eng[0];
         parent::setUp();
     }
 
     /**
-     * It construct an engine and it initialises some globals from the abstract constructor
+     * It constructs an engine, and it initializes some globals from the abstract constructor
      * @group   regression
      * @covers  Engines_Moses::__construct
+     * @throws Exception
      */
-    public function test___construct_of_sub_engine_of_moses() {
-        $this->databaseInstance = new MyMemory( $this->engine_struct_param );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->property         = $this->reflector->getProperty( "engineRecord" );
-        
+    #[Test]
+    public function test___construct_of_sub_engine_of_moses()
+    {
+        $myMemory = new MyMemory($this->engine_struct_param);
+        $reflector = new ReflectionClass($myMemory);
+        $property = $reflector->getProperty("engineRecord");
 
-        $this->assertEquals( $this->engine_struct_param, $this->property->getValue( $this->databaseInstance ) );
 
-        $this->property = $this->reflector->getProperty( "className" );
-        
+        $this->assertEquals($this->engine_struct_param, $property->getValue($myMemory));
 
-        $this->assertEquals( MyMemory::class, $this->property->getValue( $this->databaseInstance ) );
+        $property = $reflector->getProperty("className");
 
-        $this->property = $this->reflector->getProperty( "curl_additional_params" );
-        
 
-        $this->assertEquals( 6, count( $this->property->getValue( $this->databaseInstance ) ) );
+        $this->assertEquals(MyMemory::class, $property->getValue($myMemory));
 
+        $property = $reflector->getProperty("curl_additional_params");
+
+
+        $this->assertCount(6, $property->getValue($myMemory));
     }
 
 
@@ -74,9 +74,11 @@ class ConstructorMyMemoryTest extends AbstractTest {
      * @group   regression
      * @covers  Engines_Moses::__construct
      */
-    public function test___construct_failure() {
+    #[Test]
+    public function test___construct_failure()
+    {
         $this->engine_struct_param->type = "fooo";
-        $this->expectException( "Exception" );
-        new MyMemory( $this->engine_struct_param );
+        $this->expectException("Exception");
+        new MyMemory($this->engine_struct_param);
     }
 }

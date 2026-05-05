@@ -30,6 +30,7 @@ class ReviewExtendedPanel extends React.Component {
       issueInCreation: false,
       showAddIssueMessage: false,
       showAddIssueToSelectedTextMessage: false,
+      issueEditing: undefined,
     }
   }
 
@@ -40,6 +41,7 @@ class ReviewExtendedPanel extends React.Component {
       showAddIssueMessage: false,
       showAddIssueToSelectedTextMessage: false,
     })
+    SegmentActions.unlockEditArea(this.props.segment.sid)
   }
 
   getAllIssues() {
@@ -108,6 +110,9 @@ class ReviewExtendedPanel extends React.Component {
     )
   }
 
+  setIssueEditing(issue) {
+    this.setState({issueEditing: issue})
+  }
   render() {
     let issues = this.getAllIssues()
     let thereAreIssuesClass = issues.length > 0 ? 'thereAreIssues' : ''
@@ -129,6 +134,10 @@ class ReviewExtendedPanel extends React.Component {
           loader={this.state.issueInCreation}
           issues={issues}
           isReview={this.props.isReview}
+          issueEditing={this.state.issueEditing}
+          setIssueEditing={this.setIssueEditing.bind(this)}
+          selection={this.props.selectionObj}
+          segmentVersion={this.state.versionNumber}
         />
         {this.state.showAddIssueMessage ? (
           <div className="re-warning-not-added-issue">
@@ -175,6 +184,7 @@ class ReviewExtendedPanel extends React.Component {
             submitIssueCallback={this.removeSelection.bind(this)}
             newtranslation={this.state.newtranslation}
             setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
+            setIssueEditing={this.setIssueEditing.bind(this)}
           />
         ) : null}
       </div>

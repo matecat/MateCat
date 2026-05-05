@@ -1,0 +1,29 @@
+name: PHPStan
+
+on:
+  push:
+    branches: [ "develop", "master" ]
+  pull_request:
+    branches: [ "develop", "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  PHPStan:
+    name: Run PHPStan scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+
+      - name: Setup PHP project
+        uses: ./.github/actions/setup-php-project
+
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse

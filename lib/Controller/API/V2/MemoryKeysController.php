@@ -30,11 +30,11 @@ class MemoryKeysController extends KleinController
      */
     public function listKeys(): void
     {
-        $keyQuery      = new MemoryKeyStruct();
+        $keyQuery = new MemoryKeyStruct();
         $keyQuery->uid = $this->user->uid;
 
         $memoryKeyDao = new MemoryKeyDao();
-        $keyList      = $memoryKeyDao->read($keyQuery);
+        $keyList = $memoryKeyDao->read($keyQuery);
 
         $formatter = new MemoryKeys($keyList);
         $this->response->json($formatter->render());

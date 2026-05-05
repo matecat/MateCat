@@ -20,16 +20,16 @@ use Utils\Tools\Utils;
 class TeamDao extends AbstractDao
 {
 
-    const string TABLE       = "teams";
+    const string TABLE = "teams";
     const string STRUCT_TYPE = TeamStruct::class;
 
     protected static array $auto_increment_field = ['id'];
-    protected static array $primary_keys         = ['id'];
+    protected static array $primary_keys = ['id'];
 
-    protected static string $_query_find_by_id         = " SELECT * FROM teams WHERE id = :id ";
+    protected static string $_query_find_by_id = " SELECT * FROM teams WHERE id = :id ";
     protected static string $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";
-    protected static string $_query_get_user_teams     = " SELECT * FROM teams WHERE created_by = :created_by ";
-    protected static string $_update_team_by_id        = " UPDATE teams SET name = :name WHERE id = :id ";
+    protected static string $_query_get_user_teams = " SELECT * FROM teams WHERE created_by = :created_by ";
+    protected static string $_update_team_by_id = " UPDATE teams SET name = :name WHERE id = :id ";
 
     protected static string $_query_get_assignee_with_projects = "
         SELECT COUNT(1) AS projects, id_assignee AS uid
@@ -53,7 +53,7 @@ class TeamDao extends AbstractDao
      */
     public function delete(TeamStruct $teamStruct): int
     {
-        $sql  = " DELETE FROM teams WHERE id = ? ";
+        $sql = " DELETE FROM teams WHERE id = ? ";
         $stmt = $this->getDatabaseHandler()->getConnection()->prepare($sql);
         $stmt->execute([$teamStruct->id]);
 
@@ -72,12 +72,12 @@ class TeamDao extends AbstractDao
 
         /** @var $res TeamStruct */
         $res = $this->_fetchObjectMap(
-                $stmt,
-                TeamStruct::class,
-                [
-                        'id' => $id,
-                ]
-        )[ 0 ] ?? null;
+            $stmt,
+            TeamStruct::class,
+            [
+                'id' => $id,
+            ]
+        )[0] ?? null;
 
         return $res;
     }
@@ -91,14 +91,14 @@ class TeamDao extends AbstractDao
     public function createPersonalTeam(UserStruct $user): TeamStruct
     {
         return $this->createUserTeam($user, [
-                'name' => 'Personal',
-                'type' => Teams::PERSONAL
+            'name' => 'Personal',
+            'type' => Teams::PERSONAL
         ]);
     }
 
     /**
      * @param UserStruct $orgCreatorUser
-     * @param array      $params
+     * @param array $params
      *
      * @return  TeamStruct
      * @throws ReflectionException
@@ -107,18 +107,18 @@ class TeamDao extends AbstractDao
     public function createUserTeam(UserStruct $orgCreatorUser, array $params = []): TeamStruct
     {
         $teamStruct = new TeamStruct([
-                'name'       => $params[ 'name' ],
-                'created_by' => $orgCreatorUser->uid,
-                'created_at' => Utils::mysqlTimestamp(time()),
-                'type'       => $params[ 'type' ]
+            'name' => $params['name'],
+            'created_by' => $orgCreatorUser->uid,
+            'created_at' => Utils::mysqlTimestamp(time()),
+            'type' => $params['type']
         ]);
 
-        $orgId          = TeamDao::insertStruct($teamStruct);
+        $orgId = TeamDao::insertStruct($teamStruct);
         $teamStruct->id = $orgId;
 
 
         //add the creator to the list of members
-        $params[ 'members' ][] = $orgCreatorUser->email;
+        $params['members'][] = $orgCreatorUser->email;
 
         // wrap createList() in a transaction
         if (false === Database::obtain()->getConnection()->inTransaction()) {
@@ -129,8 +129,8 @@ class TeamDao extends AbstractDao
         (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($teamStruct->id);
 
         $membersList = (new MembershipDao)->createList([
-                'team'    => $teamStruct,
-                'members' => $params[ 'members' ]
+            'team' => $teamStruct,
+            'members' => $params['members']
         ]);
         $teamStruct->setMembers($membersList);
 
@@ -152,11 +152,11 @@ class TeamDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$_query_get_assignee_with_projects);
 
         return $this->_fetchObjectMap(
-                $stmt,
-                MembershipStruct::class,
-                [
-                        'id_team' => $team->id,
-                ]
+            $stmt,
+            MembershipStruct::class,
+            [
+                'id_team' => $team->id,
+            ]
         );
     }
 
@@ -171,11 +171,11 @@ class TeamDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$_query_get_assignee_with_projects);
 
         return $this->_destroyObjectCache(
-                $stmt,
-                MembershipStruct::class,
-                [
-                        'id_team' => $team->id,
-                ]
+            $stmt,
+            MembershipStruct::class,
+            [
+                'id_team' => $team->id,
+            ]
         );
     }
 
@@ -187,16 +187,16 @@ class TeamDao extends AbstractDao
      */
     public function destroyCacheById(int $id): bool
     {
-        $stmt          = $this->_getStatementForQuery(self::$_query_find_by_id);
-        $teamQuery     = new TeamStruct();
+        $stmt = $this->_getStatementForQuery(self::$_query_find_by_id);
+        $teamQuery = new TeamStruct();
         $teamQuery->id = $id;
 
         return $this->_destroyObjectCache(
-                $stmt,
-                TeamStruct::class,
-                [
-                        'id' => $teamQuery->id,
-                ]
+            $stmt,
+            TeamStruct::class,
+            [
+                'id' => $teamQuery->id,
+            ]
         );
     }
 
@@ -225,13 +225,13 @@ class TeamDao extends AbstractDao
          * @var TeamStruct
          */
         return $this->_fetchObjectMap(
-                $stmt,
-                TeamStruct::class,
-                [
-                        'created_by' => $uid,
-                        'type'       => Teams::PERSONAL
-                ]
-        )[ 0 ];
+            $stmt,
+            TeamStruct::class,
+            [
+                'created_by' => $uid,
+                'type' => Teams::PERSONAL
+            ]
+        )[0];
     }
 
     /**
@@ -242,17 +242,17 @@ class TeamDao extends AbstractDao
      */
     public function destroyCachePersonalByUid(int $uid): bool
     {
-        $stmt                  = $this->_getStatementForQuery(self::$_query_get_personal_by_id);
-        $teamQuery             = new TeamStruct();
+        $stmt = $this->_getStatementForQuery(self::$_query_get_personal_by_id);
+        $teamQuery = new TeamStruct();
         $teamQuery->created_by = $uid;
 
         return $this->_destroyObjectCache(
-                $stmt,
-                TeamStruct::class,
-                [
-                        'created_by' => $teamQuery->created_by,
-                        'type'       => Teams::PERSONAL
-                ]
+            $stmt,
+            TeamStruct::class,
+            [
+                'created_by' => $teamQuery->created_by,
+                'type' => Teams::PERSONAL
+            ]
         );
     }
 
@@ -267,12 +267,12 @@ class TeamDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
 
         return $this->_fetchObjectMap(
-                $stmt,
-                TeamStruct::class,
-                [
-                        'created_by' => $user->uid,
-                ]
-        )[ 0 ] ?? null;
+            $stmt,
+            TeamStruct::class,
+            [
+                'created_by' => $user->uid,
+            ]
+        )[0] ?? null;
     }
 
     /**
@@ -285,15 +285,15 @@ class TeamDao extends AbstractDao
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_user_teams);
 
-        $teamQuery             = new TeamStruct();
+        $teamQuery = new TeamStruct();
         $teamQuery->created_by = $user->uid;
 
         return $this->_destroyObjectCache(
-                $stmt,
-                TeamStruct::class,
-                [
-                        'created_by' => $teamQuery->created_by,
-                ]
+            $stmt,
+            TeamStruct::class,
+            [
+                'created_by' => $teamQuery->created_by,
+            ]
         );
     }
 
@@ -327,7 +327,7 @@ class TeamDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(static::$_sql_delete_empty_team);
         $stmt->execute([
-                'id_team' => $team->id
+            'id_team' => $team->id
         ]);
 
         return $stmt->rowCount();

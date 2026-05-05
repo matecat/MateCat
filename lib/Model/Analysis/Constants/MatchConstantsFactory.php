@@ -9,14 +9,16 @@
 
 namespace Model\Analysis\Constants;
 
-class MatchConstantsFactory {
+class MatchConstantsFactory
+{
 
     /**
      * @param bool|null $mt_we_workflow_enabled
      *
      * @return ConstantsInterface
      */
-    public static function getInstance( ?bool $mt_we_workflow_enabled = false ): ConstantsInterface {
+    public static function getInstance(?bool $mt_we_workflow_enabled = false): ConstantsInterface
+    {
         return !$mt_we_workflow_enabled ? new StandardMatchTypeNamesConstants : new MTQEMatchTypeNamesConstants;
     }
 

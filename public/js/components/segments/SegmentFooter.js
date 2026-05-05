@@ -23,16 +23,12 @@ import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
+import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
+import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
+import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
+import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 
-export const TAB = {
-  MATCHES: 'matches',
-  CONCORDANCES: 'concordances',
-  GLOSSARY: 'glossary',
-  ALTERNATIVES: 'alternatives',
-  MESSAGES: 'messages',
-  MULTIMATCHES: 'multiMatches',
-  AI_ASSISTANT: 'AiAssistant',
-}
+import {TAB} from '../../constants/SegmentTabConstants'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
@@ -48,7 +44,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.GLOSSARY]: {
-    label: 'Glossary',
+    label: 'Termbase',
     code: 'gl',
     tabClass: 'glossary',
     isLoading: false,
@@ -78,6 +74,33 @@ const TAB_ITEMS = {
     isLoading: false,
     isEnableCloseButton: true,
   },
+  [TAB.AI_FEEDBACK]: {
+    label: 'Lara feedback',
+    code: 'aifeedback',
+    tabClass: 'ai-feedback',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.LARA_STYLES]: {
+    label: 'Lara styles',
+    code: 'larastyles',
+    tabClass: 'lara-styles',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'Lara alternative translations',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.ICU]: {
+    label: 'ICU',
+    code: 'icu',
+    tabClass: 'icu-validator',
+    isLoading: false,
+  },
 }
 const DELAY_MESSAGE = 7000
 
@@ -87,13 +110,14 @@ function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
+  const currentSegment = SegmentStore.getCurrentSegment()
   const [tabItems, setTabItems] = useState(
     Object.entries(TAB_ITEMS).map(([key, value]) => ({
       ...value,
       name: key,
-      enabled: false,
-      visible: false,
-      open: false,
+      enabled: !!(key === TAB.ICU && currentSegment?.icu),
+      visible: !!(key === TAB.ICU && currentSegment?.icu),
+      open: !!(key === TAB.ICU && currentSegment?.icu),
       elements: [],
       label:
         value.code === 'tm'
@@ -130,6 +154,15 @@ function SegmentFooter() {
       prevState.map((tab) => ({
         ...tab,
         isLoading: tab.code === code ? isLoading : tab.isLoading,
+      })),
+    )
+  }, [])
+
+  const setTabLabel = useCallback(({code, label}) => {
+    setTabItems((prevState) =>
+      prevState.map((tab) => ({
+        ...tab,
+        label: tab.code === code ? label : tab.label,
       })),
     )
   }, [])
@@ -491,6 +524,46 @@ function SegmentFooter() {
             segment={segment}
           />
         )
+      case 'larastyles':
+        return (
+          <SegmentFooterTabLaraStyles
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'icu':
+        return (
+          <SegmentFooterTabIcu
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'aialternatives':
+        return (
+          <SegmentFooterTabAiAlternatives
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'aifeedback':
+        return (
+          <SegmentFooterTabAiFeedback
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
       default:
         return ''
     }
@@ -503,9 +576,9 @@ function SegmentFooter() {
         ? true
         : false
     const countResult = !isLoading && getTabIndex(tab)
-    const onClickRemoveTab = (event) => {
+    const onClickRemoveTab = ({event, tabName}) => {
       setTabStateChanges({
-        name: TAB.AI_ASSISTANT,
+        name: tabName,
         visible: false,
         enabled: false,
       })
@@ -540,8 +613,11 @@ function SegmentFooter() {
           )}
 
           {tab.isEnableCloseButton && (
-            <span className="icon-close" onClick={onClickRemoveTab}>
-              <IconCloseCircle />
+            <span
+              className="icon-close"
+              onClick={(event) => onClickRemoveTab({event, tabName: tab.name})}
+            >
+              <IconCloseCircle size={16} />
             </span>
           )}
         </a>

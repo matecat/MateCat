@@ -36,7 +36,7 @@ interface XliffRuleInterface
     public function asMatchType(): string;
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
@@ -45,7 +45,7 @@ interface XliffRuleInterface
     public function asStandardWordCount(int $raw_word_count, array $payable_rates): float;
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float

@@ -27,22 +27,22 @@ class JobPasswordValidator extends Base
     protected function _validate(): void
     {
         $filterArgs = [
-                'id_job'   => [
-                        'filter' => FILTER_SANITIZE_NUMBER_INT,
-                        ['filter' => FILTER_VALIDATE_INT]
-                ],
-                'password' => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
+            'id_job' => [
+                'filter' => FILTER_SANITIZE_NUMBER_INT,
+                ['filter' => FILTER_VALIDATE_INT]
+            ],
+            'password' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
         ];
 
         $postInput = (object)filter_var_array($this->controller->params, $filterArgs);
 
         $this->jStruct = ChunkDao::getByIdAndPassword($postInput->id_job, $postInput->password);
 
-        $this->controller->params[ 'id_job' ]   = $postInput->id_job;
-        $this->controller->params[ 'password' ] = $postInput->password;
+        $this->controller->params['id_job'] = $postInput->id_job;
+        $this->controller->params['password'] = $postInput->password;
     }
 
     /**

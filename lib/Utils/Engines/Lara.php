@@ -3,16 +3,19 @@
 namespace Utils\Engines;
 
 use Exception;
+use InvalidArgumentException;
+use Lara\AccessKey;
 use Lara\Glossary;
+use Lara\Internal\HttpClient;
 use Lara\LaraApiException;
-use Lara\LaraCredentials;
 use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -24,6 +27,7 @@ use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara\Headers;
+use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
@@ -42,6 +46,13 @@ use Utils\TmKeyManagement\TmKeyStruct;
  */
 class Lara extends AbstractEngine
 {
+    public const string DEFAULT_STYLE = "faithful";
+
+    private const array ALLOWED_STYLES = [
+        'faithful',
+        'fluid',
+        'creative',
+    ];
 
     /**
      * @inheritdoc
@@ -82,9 +93,22 @@ class Lara extends AbstractEngine
     }
 
     /**
+     * Retrieves the internal HTTP client instance used for making requests.
+     * This method abstracts the retrieval of the HttpClient from the underlying client structure.
+     *
+     * @return HttpClient & HttpClientInterface An instance of the HttpClient used internally for HTTP operations.
+     * @throws Exception
+     */
+    public function getInternalClient(): HttpClient & HttpClientInterface
+    {
+        return $this->_getClient()->getHttpClient();
+    }
+
+    /**
      * Get MMTServiceApi client
      *
      * @return LaraClient
+     * @throws LaraException
      * @throws Exception
      */
     protected function _getClient(): LaraClient
@@ -94,7 +118,7 @@ class Lara extends AbstractEngine
         }
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
-        $credentials = new LaraCredentials($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
+        $credentials = new AccessKey($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
 
         $mmtStruct = MMTStruct::getStruct();
         $mmtStruct->type = EngineConstants::MT;
@@ -121,7 +145,6 @@ class Lara extends AbstractEngine
         }
 
         $this->clientLoaded = new LaraClient($credentials);
-
         return $this->clientLoaded;
     }
 
@@ -179,10 +202,10 @@ class Lara extends AbstractEngine
     {
         // Branch-specific values
         if ($this->_isAnalysis) {
-            $config['keys'] = $this->_reMapKeyList($config['id_user'] ?? []);
+            $config['keys'] = $this->reMapKeyList($config['id_user'] ?? []);
         } else {
             //get the Owner Keys from the Job
-            $config['keys'] = $this->_reMapKeyList($config['keys'] ?? []);
+            $config['keys'] = $this->reMapKeyList($config['keys'] ?? []);
         }
 
         return $config;
@@ -200,74 +223,157 @@ class Lara extends AbstractEngine
      */
     public function get(array $_config): array
     {
-        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
+            return [];
+        }
+
         if ($this->_isAnalysis && $this->_skipAnalysis) {
             return [];
         }
 
-        // init lara client and mmt fallback
-        $client = $this->_getClient();
+        $metadataDao = new MetadataDao();
+        $laraStyle = $_config['lara_style'] ?? null;
 
-        $_config = $this->configureContribution($_config);
+        if (empty($_config['translation'])) {
+            // This is a normal request, not Lara Think
+            $reasoning = false;
 
-        try {
-            // call lara
-            $translateOptions = new TranslateOptions();
-            $translateOptions->setAdaptTo($_config['keys']);
-            $translateOptions->setMultiline(false);
-            $translateOptions->setContentType('application/xliff+xml');
-            $headers = new Headers();
+            // init lara client and mmt fallback
+            $client = $this->_getClient();
 
-            if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
-                $headers->setTuid($_config['tuid']);
-            }
+            $_config = $this->configureContribution($_config);
 
-            $translateOptions->setHeaders($headers->getArrayCopy());
+            // Send the selected memory IDs to Lara via a custom request header.
+            $laraClient = $client->getHttpClient();
+            $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_config['keys']));
 
-            if (!empty($_config['project_id'])) {
-                $metadataDao = new MetadataDao();
-                $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
+            try {
+                // call lara
+                $translateOptions = new TranslateOptions();
+                $translateOptions->setAdaptTo($_config['keys']);
+                $translateOptions->setMultiline(false);
+                $translateOptions->setContentType('application/xliff+xml');
+                $headers = new Headers();
 
-                if ($metadata !== null) {
-                    $metadata = html_entity_decode($metadata->value);
-                    $laraGlossariesArray = json_decode($metadata, true);
-                    $translateOptions->setGlossaries($laraGlossariesArray);
+                if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
+                    $headers->setTuid($_config['tuid']);
                 }
-            }
 
-            $request_translation = [];
+                $translateOptions->setHeaders($headers->getArrayCopy());
+                $laraGlossariesArray = [];
 
-            foreach ($_config['context_list_before'] ?? [] as $c) {
-                $request_translation[] = new TextBlock($c, false);
-            }
+                if (!empty($_config['id_project'])) {
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
-            $request_translation[] = new TextBlock($_config['segment']);
-
-            foreach ($_config['context_list_after'] ?? [] as $c) {
-                $request_translation[] = new TextBlock($c, false);
-            }
-
-            $time_start = microtime(true);
-            $translationResponse = $client->translate(
-                $request_translation,
-                $_config['source'],
-                $_config['target'],
-                $translateOptions
-            );
-            $time_end = microtime(true);
-            $time = $time_end - $time_start;
-
-            $translation = "";
-            $tList = $translationResponse->getTranslation();
-            foreach ($tList as $t) {
-                if ($t->isTranslatable()) {
-                    $translation = $t->getText();
-                    break;
+                    if ($laraGlossaries !== null) {
+                        $translateOptions->setGlossaries($laraGlossariesArray);
+                    }
                 }
-            }
 
+                if ($laraStyle !== null) {
+                    $translateOptions->setStyle($laraStyle);
+                }
+
+                $request_translation = [];
+
+                foreach ($_config['context_list_before'] ?? [] as $c) {
+                    $request_translation[] = new TextBlock($c, false);
+                }
+
+                $request_translation[] = new TextBlock($_config['segment']);
+
+                foreach ($_config['context_list_after'] ?? [] as $c) {
+                    $request_translation[] = new TextBlock($c, false);
+                }
+
+                $time_start = microtime(true);
+                $translationResponse = $client->translate(
+                    $request_translation,
+                    $_config['source'],
+                    $_config['target'],
+                    $translateOptions
+                );
+                $time_end = microtime(true);
+                $time = $time_end - $time_start;
+
+                $translation = "";
+                $tList = $translationResponse->getTranslation();
+                foreach ($tList as $t) {
+                    if ($t->isTranslatable()) {
+                        $translation = $t->getText();
+                        break;
+                    }
+                }
+
+                // Get score from MMT Quality Estimation
+                if (isset($_config['include_score']) && $_config['include_score']) {
+                    $score = $this->getQualityEstimation(
+                        $_config['source'],
+                        $_config['target'],
+                        $_config['segment'],
+                        $translation,
+                        $_config['mt_qe_engine_id'] ?? '2'
+                    );
+                }
+
+                $this->logger->debug([
+                    'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
+                    'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
+                    'q' => $request_translation,
+                    'adapt_to' => $_config['keys'],
+                    'source' => $_config['source'],
+                    'target' => $_config['target'],
+                    'content_type' => 'application/xliff+xml',
+                    'style' => $laraStyle,
+                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
+                    'multiline' => false,
+                    'translation' => $translation,
+                    'score' => $score ?? null,
+                    'extra_headers' => $headers->getArrayCopy(),
+                ]);
+            } catch (LaraException $t) {
+                if ($t->getCode() == 429) {
+                    $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
+                    $engine_type = $this->getEngineRecord()->getEngineType();
+                    $message = json_encode([
+                        '_type' => 'quota_exceeded',
+                        'data' => [
+                            'id_job' => $_config['job_id'],
+                            'payload' => [
+                                'engine' => $engine_type,
+                                'code' => $t->getCode(),
+                                'message' => "Lara quota exceeded. " . $t->getMessage()
+                            ]
+                        ]
+                    ]);
+
+                    $queueHandler = AMQHandler::getNewInstanceForDaemons();
+                    $queueHandler->publishToNodeJsClients(
+                        AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME,
+                        new Message($message)
+                    );
+
+                    return [];
+                } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
+                    $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
+                    throw new LaraException(
+                        "Lara credentials not valid, please verify their validity and try again",
+                        $t->getCode(),
+                        $t
+                    );
+                } else {
+                    $this->logger->error(["Lara API Exception.", $t->getMessage(), $t->getCode(), $t->getTrace()]);
+                }
+
+                // mmt fallback
+                return $this->mmt_GET_Fallback->get($_config);
+            }
+        } else {
+            $reasoning = !is_bool($_config['reasoning']) || $_config['reasoning'];
+            $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
-            if (isset($_config['include_score']) and $_config['include_score']) {
+            if (isset($_config['include_score']) && $_config['include_score']) {
                 $score = $this->getQualityEstimation(
                     $_config['source'],
                     $_config['target'],
@@ -278,63 +384,26 @@ class Lara extends AbstractEngine
             }
 
             $this->logger->debug([
-                'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
-                'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
-                'q' => $request_translation,
-                'adapt_to' => $_config['keys'],
+                'LARA THINK REQUEST' => 'from browser',
                 'source' => $_config['source'],
                 'target' => $_config['target'],
                 'content_type' => 'application/xliff+xml',
                 'multiline' => false,
                 'translation' => $translation,
                 'score' => $score ?? null,
-                'extra_headers' => $headers->getArrayCopy(),
+                'reasoning' => $reasoning,
+                'style' => $laraStyle ?? null,
             ]);
-        } catch (LaraException $t) {
-            if ($t->getCode() == 429) {
-                $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
-
-                $engine_type = explode("\\", self::class);
-                $engine_type = array_pop($engine_type);
-                $message = json_encode([
-                    '_type' => 'quota_exceeded',
-                    'data' => [
-                        'id_job' => $_config['job_id'],
-                        'payload' => [
-                            'engine' => $engine_type,
-                            'code' => $t->getCode(),
-                            'message' => "Lara quota exceeded. " . $t->getMessage()
-                        ]
-                    ]
-                ]);
-
-                $queueHandler = AMQHandler::getNewInstanceForDaemons();
-                $queueHandler->publishToNodeJsClients(
-                    AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME,
-                    new Message($message)
-                );
-
-                return [];
-            } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
-                $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
-                throw new LaraException(
-                    "Lara credentials not valid, please verify their validity and try again",
-                    $t->getCode(),
-                    $t
-                );
-            }
-
-            // mmt fallback
-            return $this->mmt_GET_Fallback->get($_config);
         }
 
         return (new Matches([
+            'style' => $laraStyle ?? null,
             'source' => $_config['source'],
             'target' => $_config['target'],
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName(),
+            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning ? ' Think' : '')),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
         ]))->getMatches(
@@ -342,7 +411,7 @@ class Lara extends AbstractEngine
             [],
             $_config['source'],
             $_config['target'],
-            $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] ?? null
+            $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null
         );
     }
 
@@ -406,13 +475,22 @@ class Lara extends AbstractEngine
     public function update($_config)
     {
         $client = $this->_getClient();
-        $_keys = $this->_reMapKeyList($_config['keys'] ?? []);
+        $_keys = $this->reMapKeyList($_config['keys'] ?? []);
 
         if (empty($_keys)) {
             $this->logger->debug(["LARA: update skipped. No keys provided."]);
 
             return true;
         }
+
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
+            return true;
+        }
+
+        // Send the selected memory IDs to Lara via a custom request header.
+        $laraClient = $client->getHttpClient();
+        $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_keys));
 
         try {
             $time_start = microtime(true);
@@ -452,7 +530,6 @@ class Lara extends AbstractEngine
 
 //         let MMT to have the last word on requeue
         return empty($this->mmt_SET_PrivateLicense) || $this->mmt_SET_PrivateLicense->update($_config);
-
     }
 
     /**
@@ -492,14 +569,13 @@ class Lara extends AbstractEngine
             $time_end = microtime(true);
             $time = $time_end - $time_start;
 
-            $this->logger->debug( [
-                'LARA REQUEST'    => "DELETE https://api.laratranslate.com/memories/{$memoryKey[ 'id' ]}",
-                'timing'          => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
-                'keys'            => $memoryKey,
-            ] );
+            $this->logger->debug([
+                'LARA REQUEST' => "DELETE https://api.laratranslate.com/memories/{$memoryKey[ 'id' ]}",
+                'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
+                'keys' => $memoryKey,
+            ]);
 
             return $res;
-
         } catch (LaraApiException $e) {
             if ($e->getCode() == 404) {
                 return [];
@@ -523,7 +599,7 @@ class Lara extends AbstractEngine
      * @throws LaraException
      * @throws Exception
      */
-    public function importMemory(string $filePath, string $memoryKey, UserStruct $user)
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user): void
     {
         $clientMemories = $this->_getClient()->memories;
 
@@ -580,7 +656,7 @@ class Lara extends AbstractEngine
                     $keyIds[] = $memKey->key;
                 }
 
-                $keyIds = $this->_reMapKeyList(array_values(array_unique($keyIds)));
+                $keyIds = $this->reMapKeyList(array_values(array_unique($keyIds)));
                 $client = $this->_getClient();
                 $res = $client->memories->connect($keyIds);
                 $this->logger->debug("Keys connected: " . implode(',', $keyIds) . " -> " . json_encode($res));
@@ -603,11 +679,11 @@ class Lara extends AbstractEngine
      *
      * @return array
      */
-    protected function _reMapKeyList(array $_keys = []): array
+    public function reMapKeyList(array $_keys = []): array
     {
         return array_map(function ($key) {
-                return 'ext_my_' . $key;
-            }, $_keys);
+            return 'ext_my_' . $key;
+        }, $_keys);
     }
 
     /**
@@ -630,11 +706,25 @@ class Lara extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array
+    public static function getConfigurationParameters(): array
     {
         return [
             'enable_mt_analysis',
+            'lara_style',
             'lara_glossaries',
         ];
+    }
+
+    /**
+     * @param string $lara_style
+     * @return string
+     */
+    public static function validateLaraStyle(string $lara_style): string
+    {
+        if (!in_array($lara_style, self::ALLOWED_STYLES)) {
+            throw new InvalidArgumentException("Invalid lara style.", -1);
+        }
+
+        return $lara_style;
     }
 }

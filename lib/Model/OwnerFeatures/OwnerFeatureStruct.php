@@ -7,17 +7,17 @@ use Model\FeaturesBase\BasicFeatureStruct;
 class OwnerFeatureStruct extends BasicFeatureStruct
 {
 
-    public int  $id;
-    public int  $uid;
+    public int $id;
+    public int $uid;
     public ?int $id_team = null;
 
     /**
-     * @var array|string
+     * @var array|string|null
      */
-    public         $options;
+    public string|array|null $options;
     public ?string $last_update = null;
     public ?string $create_date = null;
-    public bool    $enabled;
+    public bool $enabled;
 
     public function getOptions()
     {

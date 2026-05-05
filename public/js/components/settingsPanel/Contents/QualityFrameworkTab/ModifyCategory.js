@@ -9,12 +9,12 @@ import PropTypes from 'prop-types'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import usePortal from '../../../../hooks/usePortal'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {
   formatCategoryDescription,
   getCategoryLabelAndDescription,
   getCodeFromLabel,
-} from './CategoriesSeveritiesTable'
+} from './CategoriesSeveritiesTableUtils'
 
 export const ModifyCategory = ({target, category, setIsEditingName}) => {
   const {portalTarget} = useContext(SettingsPanelContext)

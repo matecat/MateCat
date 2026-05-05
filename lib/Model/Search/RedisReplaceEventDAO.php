@@ -65,7 +65,7 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
         // if not directly passed
         // try to assign the current version of the segment if it exists
         if (null === $eventStruct->segment_version) {
-            $segment                      = (new SegmentTranslationDao())->getByJobId($eventStruct->id_job)[ 0 ];
+            $segment = (new SegmentTranslationDao())->getByJobId($eventStruct->id_job)[0];
             $eventStruct->segment_version = $segment->version_number;
         }
 
@@ -73,7 +73,7 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
 
         // insert
         $redisKey = $this->getRedisKey($eventStruct->id_job, $eventStruct->replace_version);
-        $index    = (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) > 0) ? (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) + 1) : 0;
+        $index = (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) > 0) ? (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) + 1) : 0;
 
         $result = $this->redis->hset($redisKey, $index, serialize($eventStruct));
         $this->redis->expire($redisKey, $this->ttl);

@@ -1,3 +1,5 @@
+.*
+!/.gitignore
 # IDE stuffs
 .settings
 .idea
@@ -7,6 +9,7 @@ nbproject/
 webgrind/
 _dic_cache
 .phpunit.result.cache
+/docs
 
 # Configuration files
 .num_processes
@@ -78,3 +81,7 @@ certs
 /lib/View/*.html
 /lib/View/APIDoc.php
 /.phpunit.result.cache
+/.phpunit.cache
+/CallGraph
+/PHP-SQL-Parser
+/storage

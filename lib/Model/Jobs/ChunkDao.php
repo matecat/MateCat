@@ -11,9 +11,9 @@ class ChunkDao extends AbstractDao
 {
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return JobStruct
      * @throws NotFoundException
@@ -23,16 +23,16 @@ class ChunkDao extends AbstractDao
     {
         $fetched = JobDao::getByIdAndPassword($id_job, $password, $ttl);
 
-        if (empty($fetched)) {
+        if ($fetched === null) {
             throw new NotFoundException('Job not found');
-        } else {
-            return $fetched;
         }
+
+        return $fetched;
     }
 
     /**
      * @param SegmentTranslationStruct $translation
-     * @param int                      $ttl
+     * @param int $ttl
      *
      * @return JobStruct
      * @throws ReflectionException

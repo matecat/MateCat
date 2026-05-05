@@ -28,15 +28,15 @@ class ReplaceHistory
     /**
      * ReplaceHistory constructor.
      *
-     * @param int                           $idJob
-     * @param ReplaceEventDAOInterface      $replaceEventDAO
+     * @param int $idJob
+     * @param ReplaceEventDAOInterface $replaceEventDAO
      * @param ReplaceEventIndexDAOInterface $replaceEventIndexDAO
-     * @param int                           $ttl
+     * @param int $ttl
      */
     public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDAOInterface $replaceEventIndexDAO, int $ttl = 0)
     {
-        $this->idJob                = $idJob;
-        $this->replaceEventDAO      = $replaceEventDAO;
+        $this->idJob = $idJob;
+        $this->replaceEventDAO = $replaceEventDAO;
         $this->replaceEventIndexDAO = $replaceEventIndexDAO;
 
         if ($ttl) {

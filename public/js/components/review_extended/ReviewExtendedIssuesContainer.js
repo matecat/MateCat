@@ -1,6 +1,4 @@
 import React from 'react'
-import $ from 'jquery'
-import ReviewExtendedIssue from './ReviewExtendedIssue'
 import WrapperLoader from '../common/WrapperLoader'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentActions from '../../actions/SegmentActions'
@@ -14,6 +12,7 @@ import {each} from 'lodash/collection'
 import {findIndex} from 'lodash/array'
 import classnames from 'classnames'
 import ReviewExtendedIssuesTabGroup from './ReviewExtendedIssuesTabGroup'
+import {ReviewExtendedIssue} from './ReviewExtendedIssue'
 
 class ReviewExtendedIssuesContainer extends React.Component {
   static contextType = SegmentContext
@@ -94,6 +93,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
         (this.reviewType === 2 && htmlR2.length > 0) ||
         (htmlR2.length > 0 && htmlR1.length === 0)
 
+      const maxHeight = this.props.issueEditing ? '500px' : '200px'
+
       const tabs = [
         {
           id: 'r1',
@@ -108,7 +109,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
               style={{
                 padding: '0px',
                 width: '99.5%',
-                maxHeight: '200px',
+                maxHeight,
                 overflowY: 'auto',
                 marginBottom: 'unset',
               }}
@@ -130,7 +131,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
               style={{
                 padding: '0px',
                 width: '99.5%',
-                maxHeight: '200px',
+                maxHeight,
                 overflowY: 'auto',
                 margingBottom: 'unset',
               }}
@@ -165,6 +166,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
         (this.reviewType === 2 && issues.r2.length > 0) ||
         (issues.r2.length > 0 && issues.r1.length === 0)
 
+      const maxHeight = this.props.issueEditing ? '500px' : '200px'
+
       const tabs = [
         {
           id: 'r1',
@@ -179,7 +182,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
               style={{
                 padding: '0px',
                 width: '99.5%',
-                maxHeight: '200px',
+                maxHeight,
                 overflowY: 'auto',
                 marginBottom: 'unset',
               }}
@@ -201,7 +204,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
               style={{
                 padding: '0px',
                 width: '99.5%',
-                maxHeight: '200px',
+                maxHeight,
                 overflowY: 'auto',
                 margingBottom: 'unset',
               }}
@@ -220,7 +223,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     } else {
       return (
         <div>
-          <div className="re-item-head pad-left-1">Issues found</div>
+          <div className="re-item-head pad-left-1">Issues</div>
           {issues.r1}
         </div>
       )
@@ -252,6 +255,10 @@ class ReviewExtendedIssuesContainer extends React.Component {
               (SegmentUtils.isIceSegment(this.context.segment) &&
                 this.context.segment.unlocked)
             }
+            issueEditing={this.props.issueEditing}
+            setIssueEditing={this.props.setIssueEditing}
+            selection={this.props.selectionObj}
+            segmentVersion={this.props.versionNumber}
           />,
         )
       } else {
@@ -269,6 +276,10 @@ class ReviewExtendedIssuesContainer extends React.Component {
               (SegmentUtils.isIceSegment(this.context.segment) &&
                 this.context.segment.unlocked)
             }
+            issueEditing={this.props.issueEditing}
+            setIssueEditing={this.props.setIssueEditing}
+            selection={this.props.selectionObj}
+            segmentVersion={this.props.versionNumber}
           />,
         )
       }

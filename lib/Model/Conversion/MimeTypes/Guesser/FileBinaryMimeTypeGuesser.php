@@ -91,6 +91,6 @@ class FileBinaryMimeTypeGuesser implements MimeTypeGuesserInterface
             return null;
         }
 
-        return $match[ 1 ];
+        return $match[1];
     }
 }

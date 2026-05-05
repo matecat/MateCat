@@ -119,7 +119,7 @@ class JobsController extends KleinController
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $this->chunk   = $Validator->getChunk();
+            $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject(60 * 10);
         });
         $this->appendValidator($Validator);

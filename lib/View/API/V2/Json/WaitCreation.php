@@ -16,8 +16,8 @@ class WaitCreation
     public function render(): array
     {
         return [
-                'status'  => 202,
-                'message' => 'Project in queue. Wait.',
+            'status' => 202,
+            'message' => 'Project in queue. Wait.',
         ];
     }
 

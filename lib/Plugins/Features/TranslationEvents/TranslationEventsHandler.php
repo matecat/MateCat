@@ -118,29 +118,29 @@ class TranslationEventsHandler
     public function prepareEventStruct(TranslationEvent $event): void
     {
         if (
-                in_array($event->getWantedTranslation()[ 'status' ], TranslationStatus::$REVISION_STATUSES) &&
-                $event->getSourcePage() < SourcePages::SOURCE_PAGE_REVISION
+            in_array($event->getWantedTranslation()['status'], TranslationStatus::$REVISION_STATUSES) &&
+            $event->getSourcePage() < SourcePages::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError('Setting revised state from translation is not allowed.', -2000);
         }
 
         if (
-                in_array($event->getWantedTranslation()[ 'status' ], TranslationStatus::$TRANSLATION_STATUSES) &&
-                $event->getSourcePage() >= SourcePages::SOURCE_PAGE_REVISION
+            in_array($event->getWantedTranslation()['status'], TranslationStatus::$TRANSLATION_STATUSES) &&
+            $event->getSourcePage() >= SourcePages::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError('Setting translated state from revision is not allowed.', -2000);
         }
 
-        $eventStruct                 = new TranslationEventStruct();
-        $eventStruct->id_job         = $event->getWantedTranslation()[ 'id_job' ];
-        $eventStruct->id_segment     = $event->getWantedTranslation()[ 'id_segment' ];
-        $eventStruct->uid            = ($event->getUser() != null ? $event->getUser()->uid : 0);
-        $eventStruct->status         = $event->getWantedTranslation()[ 'status' ];
-        $eventStruct->version_number = $event->getWantedTranslation()[ 'version_number' ] ?? 0;
-        $eventStruct->source_page    = $event->getSourcePage();
+        $eventStruct = new TranslationEventStruct();
+        $eventStruct->id_job = $event->getWantedTranslation()['id_job'];
+        $eventStruct->id_segment = $event->getWantedTranslation()['id_segment'];
+        $eventStruct->uid = ($event->getUser() != null ? $event->getUser()->uid : 0);
+        $eventStruct->status = $event->getWantedTranslation()['status'];
+        $eventStruct->version_number = $event->getWantedTranslation()['version_number'] ?? 0;
+        $eventStruct->source_page = $event->getSourcePage();
 
         if ($event->isPropagationSource()) {
-            $eventStruct->time_to_edit = $event->getWantedTranslation()[ 'time_to_edit' ];
+            $eventStruct->time_to_edit = $event->getWantedTranslation()['time_to_edit'];
         }
 
         $eventStruct->setTimestamp('create_date', time());
@@ -173,9 +173,9 @@ class TranslationEventsHandler
     {
         if (!empty($event->getUnsetFinalRevision())) {
             (new TranslationEventDao())->unsetFinalRevisionFlag(
-                    (int)$this->getChunk()->id,
-                    [$event->getSegmentStruct()->id],
-                    $event->getUnsetFinalRevision()
+                (int)$this->getChunk()->id,
+                [$event->getSegmentStruct()->id],
+                $event->getUnsetFinalRevision()
             );
         }
     }

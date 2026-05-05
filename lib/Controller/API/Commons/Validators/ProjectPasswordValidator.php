@@ -22,29 +22,29 @@ class ProjectPasswordValidator extends Base
      */
     private ?ProjectStruct $project = null;
 
-    private int     $id_project;
+    private int $id_project;
     private ?string $password;
 
     public function __construct(KleinController $controller)
     {
         $filterArgs = [
-                'id_project' => [
-                        'filter' => FILTER_SANITIZE_NUMBER_INT,
-                        ['filter' => FILTER_VALIDATE_INT]
-                ],
-                'password'   => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
+            'id_project' => [
+                'filter' => FILTER_SANITIZE_NUMBER_INT,
+                ['filter' => FILTER_VALIDATE_INT]
+            ],
+            'password' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
         ];
 
         $postInput = (object)filter_var_array($controller->params, $filterArgs);
 
         $this->id_project = $postInput->id_project;
-        $this->password   = $postInput->password;
+        $this->password = $postInput->password;
 
-        $controller->params[ 'id_project' ] = $this->id_project;
-        $controller->params[ 'password' ]   = $this->password;
+        $controller->params['id_project'] = $this->id_project;
+        $controller->params['password'] = $this->password;
 
         parent::__construct($controller);
     }
@@ -61,8 +61,8 @@ class ProjectPasswordValidator extends Base
         }
 
         $this->project = ProjectDao::findByIdAndPassword(
-                $this->id_project,
-                $this->password
+            $this->id_project,
+            $this->password
         );
     }
 

@@ -37,15 +37,20 @@ import $ from 'jquery'
 
 import AppDispatcher from './AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
-import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
-import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {
   JOB_WORD_CONT_TYPE,
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
+
+import {transformTagsToText, removeTagsFromText, checkXliffTagsInText} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {checkTPEnabled, checkCurrentSegmentTPEnabled} from '../utils/tagProjectionUtils'
+// Lazy-loaded to break circular dependencies
+let _SegmentUtils
+const getSegmentUtils = () =>
+  _SegmentUtils || (_SegmentUtils = require('../utils/segmentUtils').default)
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -166,7 +171,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: false,
             segment: splittedSourceAr[i],
-            decodedSource: DraftMatecatUtils.transformTagsToText(
+            decodedSource: transformTagsToText(
               segment.segment,
             ),
             segment_hash: segment.segment_hash,
@@ -184,7 +189,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
             decodedTranslation:
-              DraftMatecatUtils.transformTagsToText(translation),
+              transformTagsToText(translation),
             warning: false,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -219,7 +224,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             : segment.status
         segment.splitted = false
         segment.original_translation = segment.translation
-        segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
+        segment.unlocked = getSegmentUtils().isUnlockedSegment(segment)
         segment.warnings = {}
         segment.tagged = !this.hasSegmentTagProjectionEnabled(segment)
         segment.edit_area_locked = false
@@ -233,16 +238,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = segment.translation
-        segment.decodedTranslation = DraftMatecatUtils.transformTagsToText(
+        segment.decodedTranslation = transformTagsToText(
           segment.translation,
         )
-        segment.decodedSource = DraftMatecatUtils.transformTagsToText(
+        segment.decodedSource = transformTagsToText(
           segment.segment,
         )
-        segment.updatedSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+        segment.updatedSource = checkCurrentSegmentTPEnabled(
           segment,
         )
-          ? DraftMatecatUtils.removeTagsFromText(segment.segment)
+          ? removeTagsFromText(segment.segment)
           : segment.segment
         segment.openComments = false
         segment.openSplit = false
@@ -356,7 +361,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.transformTagsToText(translation)
+    const newTrans = transformTagsToText(translation)
 
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
@@ -460,14 +465,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments = this._segments.setIn([index, 'versions'], fromJS(versions))
     return this._segments.get(index)
   },
-  lockUnlockEditArea(sid) {
+  lockUnlockEditArea(sid, value) {
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
     let segment = this._segments.get(index)
     let lockedEditArea = segment.get('edit_area_locked')
     this._segments = this._segments.setIn(
       [index, 'edit_area_locked'],
-      !lockedEditArea,
+      typeof value !== 'undefined' ? value : !lockedEditArea,
     )
   },
   setToggleBulkOption: function (sid) {
@@ -567,10 +572,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'contributions'],
-      fromJS({
-        matches: contributions,
-        errors: errors,
-      }),
+      Array.isArray(contributions)
+        ? fromJS({
+            matches: contributions,
+            errors: errors,
+          })
+        : undefined,
     )
   },
   setAlternatives: function (sid, alternatives) {
@@ -992,11 +999,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
   hasSegmentTagProjectionEnabled: function (segment) {
-    if (SegmentUtils.checkTPEnabled()) {
+    if (checkTPEnabled()) {
       if (
         (segment.status === 'NEW' || segment.status === 'DRAFT') &&
-        DraftMatecatUtils.checkXliffTagsInText(segment.segment) &&
-        !DraftMatecatUtils.checkXliffTagsInText(segment.translation)
+        checkXliffTagsInText(segment.segment) &&
+        !checkXliffTagsInText(segment.translation)
       ) {
         return true
       }
@@ -1031,6 +1038,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
    * @param revisionNumber
    * @param autopropagated
    * @param alsoMutedSegment
+   * @param lockedSegments
    */
   getNextSegment({
     current_sid = null,
@@ -1038,6 +1046,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     revisionNumber = null,
     autopropagated = false,
     alsoMutedSegment = false,
+    lockedSegments = true,
   } = {}) {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
@@ -1057,7 +1066,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.get('status').toUpperCase() ===
                   SEGMENTS_STATUS.TRANSLATED &&
                 segment.get('autopropagated_from') != 0)) &&
-            (alsoMutedSegment || (!alsoMutedSegment && !segment.get('muted')))
+            (alsoMutedSegment ||
+              (!alsoMutedSegment && !segment.get('muted'))) &&
+            (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
           ) {
             result = segment.toJS()
             return false
@@ -1083,7 +1094,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           } else if (
             ((status && segment.get('status').toUpperCase() === status) ||
               !status) &&
-            (alsoMutedSegment || (!alsoMutedSegment && !segment.get('muted')))
+            (alsoMutedSegment ||
+              (!alsoMutedSegment && !segment.get('muted'))) &&
+            (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
           ) {
             result = segment.toJS()
             return false
@@ -1115,7 +1128,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let currentSegment = this.getCurrentSegment()
     if (!sid && !currentSegment) return null
     sid = !sid ? this.getCurrentSegment().sid : sid
-    var index = this.getSegmentIndex(sid)
+    const index = this.getSegmentIndex(sid)
     let segment = index > 0 ? this._segments.get(index - 1).toJS() : null
     if (
       (segment && !alsoMutedSegments && !segment.muted) ||
@@ -1147,6 +1160,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return this._segments.find(function (seg) {
       return seg.get('sid') == sid
     })
+  },
+  getSegmentByIndex(index) {
+    return this._segments.get(index)
   },
   getSegmentIndex(sid) {
     const index = this._segments.findIndex(function (segment) {
@@ -1458,7 +1474,14 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.LOCK_EDIT_AREA:
-      SegmentStore.lockUnlockEditArea(action.id, action.fid)
+      SegmentStore.lockUnlockEditArea(action.id)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      break
+    case SegmentConstants.UNLOCK_EDIT_AREA:
+      SegmentStore.lockUnlockEditArea(action.id, false)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -2010,6 +2033,15 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
       SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
+      break
+    case SegmentConstants.LARA_STYLES:
+    case SegmentConstants.AI_ALTERNATIVES:
+    case SegmentConstants.AI_FEEDBACK:
+    case SegmentConstants.AI_ALTERNATIVES_SUGGESTION:
+    case SegmentConstants.AI_FEEDBACK_SUGGESTION:
+      SegmentStore.emitChange(action.actionType, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

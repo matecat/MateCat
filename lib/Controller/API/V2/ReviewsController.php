@@ -42,28 +42,28 @@ class ReviewsController extends KleinController
     {
         // create a new chunk revision password
         $records = RevisionFactory::initFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
-                [$this->chunk],
-                $this->project,
-                [
-                        'source_page' => $this->nextSourcePage
-                ]
+            [$this->chunk],
+            $this->project,
+            [
+                'source_page' => $this->nextSourcePage
+            ]
         );
 
         // destroy project data cache
         (new ProjectDao())->destroyCacheForProjectData($this->project->id, $this->project->password);
 
         // destroy the 5 minutes chunk review cache
-        $chunk = (new ChunkDao())->getByIdAndPassword($records[ 0 ]->id_job, $records[ 0 ]->password);
+        $chunk = (new ChunkDao())->getByIdAndPassword($records[0]->id_job, $records[0]->password);
         (new ChunkReviewDao())->destroyCacheForFindChunkReviews($chunk);
         ChunkReviewDao::destroyCacheByProjectId($this->project->id);
 
         $this->response->json([
-                        'chunk_review' => [
-                                'id'              => $records[ 0 ]->id,
-                                'id_job'          => $records[ 0 ]->id_job,
-                                'review_password' => $records[ 0 ]->review_password
-                        ]
+                'chunk_review' => [
+                    'id' => $records[0]->id,
+                    'id_job' => $records[0]->id_job,
+                    'review_password' => $records[0]->review_password
                 ]
+            ]
         );
     }
 
@@ -93,18 +93,18 @@ class ReviewsController extends KleinController
         $post = $this->request->paramsPost();
 
         $requiredParams = [
-                'id_job',
-                'password',
+            'id_job',
+            'password',
         ];
 
         foreach ($requiredParams as $requiredParam) {
-            if (!isset($post[ $requiredParam ])) {
+            if (!isset($post[$requiredParam])) {
                 throw new ValidationError($requiredParam . ' param is not provided');
             }
         }
 
-        $id_job          = $post[ 'id_job' ];
-        $password        = $post[ 'password' ];
+        $id_job = $post['id_job'];
+        $password = $post['password'];
         $revision_number = 2;
 
         $chunkReviewDao = new ChunkReviewDao();
@@ -119,7 +119,7 @@ class ReviewsController extends KleinController
             throw new ValidationError("Revision " . $revision_number . " link already exists.");
         }
 
-        $this->nextSourcePage    = $revision_number + 1;
+        $this->nextSourcePage = $revision_number + 1;
         $this->latestChunkReview = $chunkReviewDao->findLastReviewByJobIdPasswordAndSourcePage($id_job, $password, $revision_number);
 
         if ($this->latestChunkReview && $this->latestChunkReview->id_project != $this->project->id) {

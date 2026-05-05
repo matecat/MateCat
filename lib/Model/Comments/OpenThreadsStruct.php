@@ -16,9 +16,9 @@ use Model\DataAccess\IDaoStruct;
 class OpenThreadsStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public int    $id_project;
+    public int $id_project;
     public string $password;
-    public int    $id_job;
-    public int    $count;
+    public int $id_job;
+    public int $count;
 
 }

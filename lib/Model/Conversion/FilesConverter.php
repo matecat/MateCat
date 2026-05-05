@@ -4,36 +4,46 @@ namespace Model\Conversion;
 
 use DomainException;
 use Exception;
-use InvalidArgumentException;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
-use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
-use Utils\Langs\Languages;
-use Utils\Tools\Utils;
 
+/**
+ * Class FilesConverter
+ *
+ * Handles the conversion of files from a source language to a target language. The class supports
+ * various types of files, including handling ZIP files and extracting their contents for conversion.
+ * It manages the entire conversion process, including error handling, file warnings, and the accumulation
+ * of results.
+ *
+ * **No input validation is performed by this class.**
+ * Validation of the following inputs is intentionally outside the responsibility of this class
+ * and must be performed by the caller before instantiation:
+ *
+ *  - **File names**: must be validated (e.g. via Utils::isValidFileName()) before being passed in.
+ *  - **Upload token**: must be a valid, non-empty token (e.g. via Utils::isTokenValid()).
+ *  - **Source and target languages**: must be valid language codes (e.g. via Languages::validateLanguage()).
+ *  - **Segmentation rule**: must be a recognised rule or null (e.g. via Constants::validateSegmentationRules()).
+ *
+ * This class assumes all inputs are already sanitised and trusted.
+ */
 class FilesConverter
 {
-    private string  $source_lang;
-    private string  $target_lang;
-    private string  $fullUploadDirPath;
-    private string  $errDir;
-    private string  $uploadTokenValue;
+    private string $source_lang;
+    private string $target_lang;
+    private string $fullUploadDirPath;
+    private string $errDir;
+    private string $uploadTokenValue;
     private ?string $segmentation_rule;
-    private array   $files;
+    private array $files;
 
     /**
      * @var ConvertedFileList
      */
     private ConvertedFileList $resultStack;
-
-    /**
-     * @var Languages|null
-     */
-    private ?Languages $lang_handler;
 
     /**
      * @var FeatureSet
@@ -49,82 +59,71 @@ class FilesConverter
      * @var bool|null
      */
     private ?bool $legacy_icu;
+    private bool $icu_enabled;
 
     /**
      * FilesConverter constructor.
      *
-     * @param array                            $files
-     * @param string                           $source_lang
-     * @param string                           $target_lang
-     * @param string                           $intDir
-     * @param string                           $errDir
-     * @param string                           $uploadTokenValue
-     * @param string|null                      $segmentation_rule
-     * @param FeatureSet                       $featureSet
+     * @param array $files
+     * @param string $source_lang
+     * @param string $target_lang
+     * @param string $intDir
+     * @param string $errDir
+     * @param string $uploadTokenValue
+     * @param bool $icu_enabled
+     * @param string|null $segmentation_rule
+     * @param FeatureSet $featureSet
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
-     * @param bool|null                        $legacy_icu
+     * @param bool|null $legacy_icu
      */
     public function __construct(
-            array $files,
-            string $source_lang,
-            string $target_lang,
-            string $intDir,
-            string $errDir,
-            string $uploadTokenValue,
-            ?string $segmentation_rule,
-            FeatureSet $featureSet,
-            ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
-            ?bool $legacy_icu = false
+        array $files,
+        string $source_lang,
+        string $target_lang,
+        string $intDir,
+        string $errDir,
+        string $uploadTokenValue,
+        bool $icu_enabled,
+        ?string $segmentation_rule,
+        FeatureSet $featureSet,
+        ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
+        ?bool $legacy_icu = false
     ) {
-        $this->lang_handler = Languages::getInstance();
-        $this->files        = $files;
+        $this->files = $files;
         $this->setSourceLang($source_lang);
         $this->setTargetLangs($target_lang);
-        $this->fullUploadDirPath             = $intDir;
-        $this->errDir                        = $errDir;
-        $this->uploadTokenValue              = $uploadTokenValue;
-        $this->segmentation_rule             = $segmentation_rule;
-        $this->featureSet                    = $featureSet;
+        $this->fullUploadDirPath = $intDir;
+        $this->errDir = $errDir;
+        $this->uploadTokenValue = $uploadTokenValue;
+        $this->segmentation_rule = $segmentation_rule;
+        $this->featureSet = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
-        $this->legacy_icu                    = $legacy_icu;
-        $this->resultStack                   = new ConvertedFileList();
+        $this->legacy_icu = $legacy_icu;
+        $this->icu_enabled = $icu_enabled;
+        $this->resultStack = new ConvertedFileList();
     }
 
     /**
-     * @param $source_lang
+     * Sets the source language for the conversion.
+     * No validation is performed — the caller is responsible for passing a valid language code.
+     *
+     * @param string $source_lang The source language code (e.g. "en-US").
      */
-    private function setSourceLang($source_lang): void
+    private function setSourceLang(string $source_lang): void
     {
-        try {
-            $this->lang_handler->validateLanguage($source_lang);
-            $this->source_lang = $source_lang;
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::SOURCE_ERROR);
-        }
+        $this->source_lang = $source_lang;
     }
 
     /**
-     * @param $target_lang
+     * Sets the target language(s) for the conversion.
+     * Multiple languages can be passed as a comma-separated string (e.g. "it-IT,fr-FR").
+     * No validation is performed — the caller is responsible for passing valid language codes.
+     *
+     * @param string $target_lang A comma-separated list of target language codes.
      */
-    private function setTargetLangs($target_lang): void
+    private function setTargetLangs(string $target_lang): void
     {
-        $targets = explode(',', $target_lang);
-        $targets = array_map('trim', $targets);
-        $targets = array_unique($targets);
-
-        if (empty($targets)) {
-            throw new InvalidArgumentException("Missing target language.");
-        }
-
-        try {
-            foreach ($targets as $target) {
-                $this->lang_handler->validateLanguage($target);
-            }
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::TARGET_ERROR);
-        }
-
-        $this->target_lang = implode(',', $targets);
+        $this->target_lang = $target_lang;
     }
 
     /**
@@ -187,6 +186,7 @@ class FilesConverter
         $conversionHandler->setFeatures($this->featureSet);
         $conversionHandler->setFiltersExtractionParameters($this->filters_extraction_parameters);
         $conversionHandler->setFiltersLegacyIcu($this->legacy_icu);
+        $conversionHandler->setIcuEnabled($this->icu_enabled);
 
         return $conversionHandler;
     }
@@ -200,20 +200,6 @@ class FilesConverter
      */
     private function convertFile(string $fileName): ?ConvertedFileModel
     {
-        try {
-            $this->segmentation_rule = Constants::validateSegmentationRules($this->segmentation_rule);
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::INVALID_SEGMENTATION_RULE);
-        }
-
-        if (!Utils::isTokenValid($this->uploadTokenValue)) {
-            throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
-        }
-
-        if (!Utils::isValidFileName($fileName) || empty($fileName)) {
-            throw new InvalidArgumentException("Invalid File.", ConversionHandlerStatus::INVALID_FILE);
-        }
-
         $conversionHandler = $this->getConversionHandlerInstance($fileName);
         $conversionHandler->processConversion();
 
@@ -241,7 +227,7 @@ class FilesConverter
                     continue;
                 }
 
-                throw new RuntimeException($fileError->error[ 'message' ], $fileError->error[ 'code' ]);
+                throw new RuntimeException($fileError->error['message'], $fileError->error['code']);
             }
         }
 
@@ -253,6 +239,11 @@ class FilesConverter
         return $internalZipFileNames;
     }
 
+    /**
+     * Returns the accumulated conversion result list after processing.
+     *
+     * @return ConvertedFileList
+     */
     public function getResult(): ConvertedFileList
     {
         return $this->resultStack;

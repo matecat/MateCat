@@ -60,10 +60,10 @@ class ConnectedServicesController extends AbstractStatefulKleinController
         $this->__validateOwnership();
 
         $params = filter_var_array($this->request->params(), [
-                'disabled' => FILTER_VALIDATE_BOOLEAN
+            'disabled' => FILTER_VALIDATE_BOOLEAN
         ]);
 
-        if ($params[ 'disabled' ]) {
+        if ($params['disabled']) {
             $this->connectedServiceStruct->disabled_at = Utils::mysqlTimestamp(time());
         } else {
             $this->connectedServiceStruct->disabled_at = null;
@@ -101,7 +101,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
      */
     private function __validateOwnership(): void
     {
-        $serviceDao                   = new ConnectedServiceDao();
+        $serviceDao = new ConnectedServiceDao();
         $this->connectedServiceStruct = $serviceDao->findServiceByUserAndId($this->user, $this->request->param('id_service'));
 
         if (!$this->connectedServiceStruct) {

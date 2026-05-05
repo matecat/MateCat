@@ -24,10 +24,10 @@ class FacebookProvider extends AbstractProvider
     public static function getClient(?string $redirectUrl = null): Facebook
     {
         return new Facebook([
-                'clientId'        => AppConfig::$FACEBOOK_OAUTH_CLIENT_ID,
-                'clientSecret'    => AppConfig::$FACEBOOK_OAUTH_CLIENT_SECRET,
-                'redirectUri'     => $redirectUrl ?? AppConfig::$FACEBOOK_OAUTH_REDIRECT_URL,
-                'graphApiVersion' => 'v2.10',
+            'clientId' => AppConfig::$FACEBOOK_OAUTH_CLIENT_ID,
+            'clientSecret' => AppConfig::$FACEBOOK_OAUTH_CLIENT_SECRET,
+            'redirectUri' => $redirectUrl ?? AppConfig::$FACEBOOK_OAUTH_REDIRECT_URL,
+            'graphApiVersion' => 'v2.10',
         ]);
     }
 
@@ -40,10 +40,10 @@ class FacebookProvider extends AbstractProvider
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
         $options = [
-                'state' => $csrfTokenState,
-                'scope' => [
-                        'email',
-                ]
+            'state' => $csrfTokenState,
+            'scope' => [
+                'email',
+            ]
         ];
 
         $facebookClient = static::getClient($this->redirectUrl);
@@ -64,7 +64,7 @@ class FacebookProvider extends AbstractProvider
 
         /** @var AccessToken $token */
         $token = $facebookClient->getAccessToken('authorization_code', [
-                'code' => $code
+            'code' => $code
         ]);
 
         return $token;
@@ -83,13 +83,13 @@ class FacebookProvider extends AbstractProvider
 
         $fetched = $facebookClient->getResourceOwner($token);
 
-        $user            = new ProviderUser();
-        $user->email     = $fetched->getEmail();
-        $user->name      = $fetched->getFirstName();
-        $user->lastName  = $fetched->getLastName();
-        $user->picture   = $fetched->getPictureUrl();
+        $user = new ProviderUser();
+        $user->email = $fetched->getEmail();
+        $user->name = $fetched->getFirstName();
+        $user->lastName = $fetched->getLastName();
+        $user->picture = $fetched->getPictureUrl();
         $user->authToken = $token;
-        $user->provider  = self::PROVIDER_NAME;
+        $user->provider = self::PROVIDER_NAME;
 
         return $user;
     }

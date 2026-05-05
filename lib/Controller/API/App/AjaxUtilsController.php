@@ -20,15 +20,15 @@ class AjaxUtilsController extends KleinController
 
     public function ping(): void
     {
-        $db   = Database::obtain();
+        $db = Database::obtain();
         $stmt = $db->getConnection()->prepare("SELECT 1");
         $stmt->execute();
 
         $this->response->json([
-                'data' => [
-                        "OK",
-                        time()
-                ]
+            'data' => [
+                "OK",
+                time()
+            ]
         ]);
     }
 
@@ -45,14 +45,14 @@ class AjaxUtilsController extends KleinController
         }
 
         $tmxHandler = new TMSService();
-        $keyExists  = $tmxHandler->checkCorrectKey($tm_key);
+        $keyExists = $tmxHandler->checkCorrectKey($tm_key);
 
         if (!isset($keyExists) or $keyExists === false) {
             throw new InvalidArgumentException("TM key is not valid.", -9);
         }
 
         $this->response->json([
-                'success' => true
+            'success' => true
         ]);
     }
 
@@ -61,10 +61,10 @@ class AjaxUtilsController extends KleinController
      */
     public function clearNotCompletedUploads(): void
     {
-        (new Session())->cleanupSessionFiles();
+        (new Session())->clearSession();
 
         $this->response->json([
-                'success' => true
+            'success' => true
         ]);
     }
 }

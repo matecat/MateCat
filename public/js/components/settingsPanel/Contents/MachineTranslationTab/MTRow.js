@@ -42,7 +42,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         )}
         {row.engine_type === 'DeepL' && (
           <a
-            href="https://guides.matecat.com/machine-translation-engines#DeepL"
+            href="https://guides.matecat.com/deepl"
             target="_blank"
             rel="noreferrer"
           >
@@ -58,8 +58,26 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             <InfoIcon />
           </a>
         )}
+        {row.engine_type === 'Intento' && (
+          <a
+            href="https://guides.matecat.com/intento"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <InfoIcon />
+          </a>
+        )}
       </div>
-      <div className="settings-panel-mt-row-description">{row.description}</div>
+      <div
+        className="settings-panel-mt-row-description"
+        {...(typeof row.description === 'string'
+          ? {
+              dangerouslySetInnerHTML: {
+                __html: row.description,
+              },
+            }
+          : {children: row.description})}
+      ></div>
       {!row.default && !config.is_cattool && (
         <div>
           <button

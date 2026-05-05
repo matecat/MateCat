@@ -61,10 +61,10 @@ abstract class AbstractEmail
     protected function _enqueueEmailDelivery(array $mailConf): void
     {
         WorkerClient::enqueue(
-                'MAIL',
-                MailWorker::class,
-                $mailConf,
-                ['persistent' => WorkerClient::$_HANDLER->persistent]
+            'MAIL',
+            MailWorker::class,
+            $mailConf,
+            ['persistent' => WorkerClient::$_HANDLER->persistent]
         );
 
         LoggerFactory::doJsonLog('Message has been sent');
@@ -104,10 +104,10 @@ abstract class AbstractEmail
     protected function _getLayoutVariables(?string $messageBody = null): array
     {
         return [
-                'title'       => $this->title ?? 'Matecat',
-                'messageBody' => (!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
-                'closingLine' => "Kind regards, ",
-                'showTitle'   => false
+            'title' => $this->title ?? 'Matecat',
+            'messageBody' => (!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
+            'closingLine' => "Kind regards, ",
+            'showTitle' => false
         ];
     }
 
@@ -118,14 +118,14 @@ abstract class AbstractEmail
     {
         $mailConf = [];
 
-        $mailConf[ 'Host' ]     = AppConfig::$SMTP_HOST;
-        $mailConf[ 'port' ]     = AppConfig::$SMTP_PORT;
-        $mailConf[ 'sender' ]   = AppConfig::$SMTP_SENDER;
-        $mailConf[ 'hostname' ] = AppConfig::$SMTP_HOSTNAME;
+        $mailConf['Host'] = AppConfig::$SMTP_HOST;
+        $mailConf['port'] = AppConfig::$SMTP_PORT;
+        $mailConf['sender'] = AppConfig::$SMTP_SENDER;
+        $mailConf['hostname'] = AppConfig::$SMTP_HOSTNAME;
 
-        $mailConf[ 'from' ]       = AppConfig::$SMTP_SENDER;
-        $mailConf[ 'fromName' ]   = AppConfig::$MAILER_FROM_NAME;
-        $mailConf[ 'returnPath' ] = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf['from'] = AppConfig::$SMTP_SENDER;
+        $mailConf['fromName'] = AppConfig::$MAILER_FROM_NAME;
+        $mailConf['returnPath'] = AppConfig::$MAILER_RETURN_PATH;
 
         return $mailConf;
     }
@@ -138,10 +138,10 @@ abstract class AbstractEmail
         $recipient = [$address, $name];
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage($this->_buildMessageContent())
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
@@ -152,11 +152,11 @@ abstract class AbstractEmail
     {
         $mailConf = $this->_getDefaultMailConf();
 
-        $mailConf[ 'address' ] = $address;
-        $mailConf[ 'subject' ] = $subject;
+        $mailConf['address'] = $address;
+        $mailConf['subject'] = $subject;
 
-        $mailConf[ 'htmlBody' ] = $htmlBody;
-        $mailConf[ 'altBody' ]  = $altBody;
+        $mailConf['htmlBody'] = $htmlBody;
+        $mailConf['altBody'] = $altBody;
 
         $this->_enqueueEmailDelivery($mailConf);
 

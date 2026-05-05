@@ -113,6 +113,9 @@ class ConvertedFileModel
         return $this->message;
     }
 
+    /**
+     * @return string
+     */
     public function getName(): string
     {
         return $this->name;
@@ -120,7 +123,7 @@ class ConvertedFileModel
 
     /**
      * @param string $name
-     * @param bool   $isZipContent
+     * @param bool $isZipContent
      */
     public function setFileName(string $name, bool $isZipContent = false): void
     {
@@ -128,11 +131,17 @@ class ConvertedFileModel
         $this->zipContent($isZipContent);
     }
 
+    /**
+     * @return int
+     */
     public function getSize(): int
     {
         return $this->size;
     }
 
+    /**
+     * @return bool
+     */
     public function isZipContent(): bool
     {
         return $this->isZipContent;
@@ -190,26 +199,39 @@ class ConvertedFileModel
         return $this->_internal_conversion_hashes ?? new InternalHashPaths([]);
     }
 
+    /**
+     * @return bool
+     */
     public function hasConversionHashes(): bool
     {
         return !empty($this->_internal_conversion_hashes) && !$this->_internal_conversion_hashes->isEmpty();
     }
 
+    /**
+     * Returns a minimal error representation of this model as an array.
+     *
+     * @return array{code: int, message: string|null, name: string}
+     */
     public function asError(): array
     {
         return [
-                'code'    => $this->getCode(),
-                'message' => $this->getMessage(),
-                'name'    => $this->getName(),
+            'code' => $this->getCode(),
+            'message' => $this->getMessage(),
+            'name' => $this->getName(),
         ];
     }
 
+    /**
+     * Returns the result data of this file as an array, suitable for the API response.
+     *
+     * @return array{name: string, size: int, pdfAnalysis: array}
+     */
     public function getResult(): array
     {
         return [
-                'name'        => $this->getName(),
-                'size'        => $this->getSize(),
-                'pdfAnalysis' => $this->getPdfAnalysis(),
+            'name' => $this->getName(),
+            'size' => $this->getSize(),
+            'pdfAnalysis' => $this->getPdfAnalysis(),
         ];
     }
 

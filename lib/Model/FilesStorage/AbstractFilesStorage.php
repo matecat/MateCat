@@ -27,7 +27,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
 {
 
     const string ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
-    const string OBJECTS_SAFE_DELIMITER   = '__';
+    const string OBJECTS_SAFE_DELIMITER = '__';
 
     protected string $filesDir;
     protected string $cacheDir;
@@ -79,7 +79,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * </code>
      *
      * @param string $path
-     * @param int    $options
+     * @param int $options
      *
      * @return array|string
      */
@@ -87,26 +87,26 @@ abstract class AbstractFilesStorage implements IFilesStorage
     {
         $rawPath = explode(DIRECTORY_SEPARATOR, $path);
 
-        $basename         = array_pop($rawPath);
-        $dirname          = implode(DIRECTORY_SEPARATOR, $rawPath);
+        $basename = array_pop($rawPath);
+        $dirname = implode(DIRECTORY_SEPARATOR, $rawPath);
         $explodedFileName = explode(".", $basename);
-        $extension        = strtolower(array_pop($explodedFileName));
-        $filename         = implode(".", $explodedFileName);
+        $extension = strtolower(array_pop($explodedFileName));
+        $filename = implode(".", $explodedFileName);
 
         $return_array = [];
 
         $flagMap = [
-                'dirname'   => PATHINFO_DIRNAME,
-                'basename'  => PATHINFO_BASENAME,
-                'extension' => PATHINFO_EXTENSION,
-                'filename'  => PATHINFO_FILENAME
+            'dirname' => PATHINFO_DIRNAME,
+            'basename' => PATHINFO_BASENAME,
+            'extension' => PATHINFO_EXTENSION,
+            'filename' => PATHINFO_FILENAME
         ];
 
         $fieldValues = [
-                'dirname'   => $dirname,
-                'basename'  => $basename,
-                'extension' => $extension,
-                'filename'  => $filename
+            'dirname' => $dirname,
+            'basename' => $basename,
+            'extension' => $extension,
+            'filename' => $filename
         ];
 
         // foreach flag, add in $return_array the corresponding field,
@@ -115,7 +115,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             //binary AND
             if (($options & $i) > 0) {
                 //variable substitution: $field can be one between 'dirname', 'basename', 'extension', 'filename'
-                $return_array[ $field ] = $fieldValues[ $field ];
+                $return_array[$field] = $fieldValues[$field];
             }
         }
 
@@ -135,7 +135,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
     {
         //check if it actually exists
         $filePath = false;
-        $files    = [];
+        $files = [];
         try {
             $files = new DirectoryIterator($path);
         } catch (Exception) {
@@ -192,7 +192,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             // remove only the wrong languages, the same code|language must be
             // retained because of the file name append
             if ($fileInfo->getFilename() != $linkFile &&
-                    stripos($fileInfo->getFilename(), $shaSum) !== false) {
+                stripos($fileInfo->getFilename(), $shaSum) !== false) {
                 unlink($fileInfo->getPathname());
                 LoggerFactory::doJsonLog("Deleted Hash " . $fileInfo->getPathname());
 
@@ -229,9 +229,9 @@ abstract class AbstractFilesStorage implements IFilesStorage
     public static function composeCachePath(string $hash): array
     {
         return [
-                'firstLevel'  => $hash[ 0 ] . $hash[ 1 ],
-                'secondLevel' => $hash[ 2 ] . $hash[ 3 ],
-                'thirdLevel'  => substr($hash, 4)
+            'firstLevel' => $hash[0] . $hash[1],
+            'secondLevel' => $hash[2] . $hash[3],
+            'thirdLevel' => substr($hash, 4)
         ];
     }
 
@@ -279,8 +279,8 @@ abstract class AbstractFilesStorage implements IFilesStorage
      */
     protected function _linkToCache(string $dir, string $hash, string $realFileName): int
     {
-        $filePath     = $dir . DIRECTORY_SEPARATOR . $hash;
-        $content      = [];
+        $filePath = $dir . DIRECTORY_SEPARATOR . $hash;
+        $content = [];
         $bytesWritten = 0;
 
         $fp = fopen($filePath, "c+");
@@ -327,7 +327,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
     /**
      * Used when we take the files after the translation (Download)
      *
-     * @param int  $id_job
+     * @param int $id_job
      * @param bool $getXliffPath
      *
      * @return array
@@ -348,7 +348,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             WHERE files_job.id_job = :id_job 
             GROUP BY files_job.id_file";
 
-        $db   = Database::obtain();
+        $db = Database::obtain();
         $stmt = $db->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(['id_job' => $id_job]);
@@ -356,32 +356,32 @@ abstract class AbstractFilesStorage implements IFilesStorage
 
         foreach ($results as $k => $result) {
             //try fetching from files dir
-            $originalPath = $this->getOriginalFromFileDir($result[ 'id_file' ], $result[ 'sha1_original_file' ]);
+            $originalPath = $this->getOriginalFromFileDir($result['id_file'], $result['sha1_original_file']);
 
             if (!empty($originalPath)) {
-                $results[ $k ][ 'originalFilePath' ] = $originalPath;
+                $results[$k]['originalFilePath'] = $originalPath;
             }
 
             //we MUST have the originalFilePath
             if ($getXliffPath) {
                 //note that we trust this to succeed on the first try since, at this stage, we already built the file package
-                $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir($result[ 'id_file' ], $result[ 'sha1_original_file' ]);
+                $results[$k]['xliffFilePath'] = $this->getXliffFromFileDir($result['id_file'], $result['sha1_original_file']);
 
                 //when we ask for XliffPath ($getXliffPath == true), we are downloading translations
                 //  if the original file path is empty means that the file was already a supported xliff type (ex: trados sdlxliff)
                 //use the xliff as original
                 if (empty($originalPath)) {
-                    $results[ $k ][ 'originalFilePath' ] = $results[ $k ][ 'xliffFilePath' ];
+                    $results[$k]['originalFilePath'] = $results[$k]['xliffFilePath'];
                 }
             } elseif (empty($originalPath)) {
                 //when we do NOT ask for XliffPath ($getXliffPath == false), we are downloading original
                 // if the original file path is empty means that the file was already a supported xliff type (ex: trados sdlxliff)
                 //// get the original xliff
-                $results[ $k ][ 'originalFilePath' ] = $this->getXliffFromFileDir($result[ 'id_file' ], $result[ 'sha1_original_file' ]);
+                $results[$k]['originalFilePath'] = $this->getXliffFromFileDir($result['id_file'], $result['sha1_original_file']);
             }
 
             // this line creates a bug, if the file contains a space at the beginning, we can't download it anymore
-            $results[ $k ][ 'mime_type' ] = trim($results[ $k ][ 'mime_type' ]);
+            $results[$k]['mime_type'] = trim($results[$k]['mime_type']);
         }
 
         return $results;

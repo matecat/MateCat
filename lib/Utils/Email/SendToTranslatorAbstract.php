@@ -22,10 +22,10 @@ use ReflectionException;
 abstract class SendToTranslatorAbstract extends AbstractEmail
 {
 
-    protected UserStruct            $user;
-    protected string                $projectName;
+    protected UserStruct $user;
+    protected string $projectName;
     protected JobsTranslatorsStruct $translator;
-    protected array                 $_RoutesMethod;
+    protected array $_RoutesMethod;
 
     /**
      * @throws DateInvalidTimeZoneException
@@ -33,15 +33,15 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
      */
     public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, string $projectName)
     {
-        $this->user        = $user;
-        $this->translator  = $translator;
-        $this->title       = "Matecat - Translation Job";
+        $this->user = $user;
+        $this->translator = $translator;
+        $this->title = "Matecat - Translation Job";
         $this->projectName = $projectName;
 
         $translator->delivery_date =
-                (new Datetime($translator->delivery_date))
-                        ->setTimezone(new DateTimeZone($this->_offsetToTimeZone($translator->job_owner_timezone)))
-                        ->format(DateTimeInterface::RFC850);
+            (new Datetime($translator->delivery_date))
+                ->setTimezone(new DateTimeZone($this->_offsetToTimeZone($translator->job_owner_timezone)))
+                ->format(DateTimeInterface::RFC850);
 
         $this->_setLayout('skeleton.html');
     }
@@ -58,10 +58,10 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
         $bodyHtmlMessage = $this->_buildMessageContent();
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage($bodyHtmlMessage),
-                $this->_buildTxtMessage($bodyHtmlMessage)
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage($bodyHtmlMessage),
+            $this->_buildTxtMessage($bodyHtmlMessage)
         );
     }
 
@@ -71,36 +71,36 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     protected function _getTemplateVariables(): array
     {
         $userRecipient = $this->translator->getUser()->getArrayCopy();
-        if (!empty($userRecipient[ 'uid' ])) {
-            $userRecipient[ '_name' ] = $userRecipient[ 'first_name' ] . " " . $userRecipient[ 'last_name' ];
+        if (!empty($userRecipient['uid'])) {
+            $userRecipient['_name'] = $userRecipient['first_name'] . " " . $userRecipient['last_name'];
         } else {
-            $userRecipient[ '_name' ] = $this->translator->email;
+            $userRecipient['_name'] = $this->translator->email;
         }
 
         return [
-                'sender'        => $this->user->toArray(),
-                'user'          => $userRecipient,
-                'email'         => $this->translator->email,
-                'delivery_date' => $this->translator->delivery_date,
-                'project_url'   => call_user_func(
-                        $this->_RoutesMethod,
-                        $this->projectName,
-                        $this->translator->id_job,
-                        $this->translator->job_password,
-                        $this->translator->source,
-                        $this->translator->target
-                )
+            'sender' => $this->user->toArray(),
+            'user' => $userRecipient,
+            'email' => $this->translator->email,
+            'delivery_date' => $this->translator->delivery_date,
+            'project_url' => call_user_func(
+                $this->_RoutesMethod,
+                $this->projectName,
+                $this->translator->id_job,
+                $this->translator->job_password,
+                $this->translator->source,
+                $this->translator->target
+            )
         ];
     }
 
     protected function _offsetToTimeZone($offset)
     {
-        $offset             = $offset * 60 * 60;
+        $offset = $offset * 60 * 60;
         $abbreviations_list = array_reverse(timezone_abbreviations_list());
         foreach ($abbreviations_list as $abbreviation) {
             foreach ($abbreviation as $city) {
-                if ($city[ 'offset' ] == $offset && $city[ 'timezone_id' ] != null) {
-                    return $city[ 'timezone_id' ];
+                if ($city['offset'] == $offset && $city['timezone_id'] != null) {
+                    return $city['timezone_id'];
                 }
             }
         }

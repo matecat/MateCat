@@ -59,7 +59,7 @@ class JSONValidatorObject extends ValidatorObject
      *
      * Behavior:
      * - Uses json_decode with the configured associative mode.
-     * - Delegates error detection to Utils::raiseJsonExceptionError(), which throws on JSON errors.
+     * - Delegates error detection to JSON_THROW_ON_ERROR flag, which throws on JSON errors.
      * - Memoizes the decoded result and sets type flags for later inspection.
      *
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
@@ -75,7 +75,7 @@ class JSONValidatorObject extends ValidatorObject
             return $this->decoded;
         }
 
-        $this->decoded   = json_decode($this->json == '' ? 'null' : $this->json, false, 512, JSON_THROW_ON_ERROR);
+        $this->decoded = json_decode($this->json == '' ? 'null' : $this->json, false, 512, JSON_THROW_ON_ERROR);
         $this->isDecoded = true;
 
         return $this->decoded;
@@ -124,10 +124,10 @@ class JSONValidatorObject extends ValidatorObject
 
             if ($isStructured) {
                 // Recursively convert structured values into arrays.
-                $collector[ $key ] = $this->toArray((object)$value); // Force cast to object to respect the function signature.
+                $collector[$key] = $this->toArray((object)$value); // Force cast to an object to respect the function signature.
             } else {
                 // Add scalar values directly to the resulting array.
-                $collector[ $key ] = $value;
+                $collector[$key] = $value;
             }
         }
 

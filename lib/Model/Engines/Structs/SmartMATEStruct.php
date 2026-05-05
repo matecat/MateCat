@@ -39,7 +39,7 @@ class SmartMATEStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $others = [
-            'oauth_url' => 'https://api.smartmate.co/translate/oauth/token'
+        'oauth_url' => 'https://api.smartmate.co/translate/oauth/token'
     ];
 
     /**
@@ -51,10 +51,10 @@ class SmartMATEStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'token'         => null,
-            'token_endlife' => 0,
-            'client_id'     => "",
-            'client_secret' => ""
+        'token' => null,
+        'token_endlife' => 0,
+        'client_id' => "",
+        'client_secret' => ""
     ];
 
     /**

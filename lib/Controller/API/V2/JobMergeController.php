@@ -14,7 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Jobs\JobDao;
-use Model\ProjectManager\ProjectManager;
+use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\Projects\ProjectStruct;
 
 
@@ -22,7 +22,7 @@ class JobMergeController extends KleinController
 {
 
     private ProjectStruct $project;
-    private array         $jobList = [];
+    private array $jobList = [];
 
     /**
      * @throws NotFoundException
@@ -30,14 +30,12 @@ class JobMergeController extends KleinController
      */
     public function merge(): void
     {
-        $pManager = new ProjectManager();
-        $pManager->setProjectAndReLoadFeatures($this->project);
+        $pManager = new JobSplitMergeManager($this->project);
 
-        $pStruct                   = $pManager->getProjectStructure();
-        $pStruct[ 'id_customer' ]  = $this->project->id_customer;
-        $pStruct[ 'job_to_merge' ] = (int)$this->request->param('id_job');
+        $data = $pManager->getProjectData();
+        $data->jobToMerge = (int)$this->request->param('id_job');
 
-        $pManager->mergeALL($pStruct, $this->jobList);
+        $pManager->mergeALL($data, $this->jobList);
 
         $this->response->code(200);
         $this->response->json(['success' => true]);
@@ -72,7 +70,7 @@ class JobMergeController extends KleinController
             $this->jobList = JobDao::getById((int)$this->request->param('id_job'));
 
             // Validate the first job in the list.
-            $firstChunk = $this->jobList[ 0 ] ?? null;
+            $firstChunk = $this->jobList[0] ?? null;
             if (!$firstChunk || $firstChunk->id_project != $this->project->id || $firstChunk->isDeleted()) {
                 throw new NotFoundException();
             }

@@ -155,7 +155,7 @@ const NotificationItem = ({
 NotificationItem.propTypes = {
   position: PropTypes.string,
   title: PropTypes.string.isRequired,
-  text: PropTypes.string.isRequired,
+  text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   type: PropTypes.string,
   autoDismiss: PropTypes.bool,
   closeCallback: PropTypes.func,

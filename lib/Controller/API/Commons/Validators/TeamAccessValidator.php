@@ -27,17 +27,17 @@ class TeamAccessValidator extends Base
     public function _validate(): void
     {
         $id_team = $this->request->param('id_team');
-        $name    = (!empty($this->request->param('team_name'))) ? base64_decode($this->request->param('team_name')) : null;
+        $name = (!empty($this->request->param('team_name'))) ? base64_decode($this->request->param('team_name')) : null;
 
         if ($name !== null and strtolower($name) !== Teams::PERSONAL) {
             $this->team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndName(
-                    $id_team,
-                    $name
+                $id_team,
+                $name
             );
         } else {
             $this->team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndUser(
-                    $id_team,
-                    $this->controller->getUser()
+                $id_team,
+                $this->controller->getUser()
             );
         }
 

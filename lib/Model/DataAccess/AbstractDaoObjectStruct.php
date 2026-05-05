@@ -32,10 +32,15 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     }
 
     /**
-     * @param $name
-     * @param $value
+     * Strict setter: validates that the property exists, then assigns.
      *
-     * @return void
+     * Direct property writes (`$this->unknownProp = ...`) throw for
+     * undefined properties. Array-access writes use {@see offsetSet()}
+     * instead, which routes unknown keys to the overflow map.
+     *
+     * @param string $name
+     * @param mixed $value
+     *
      * @throws DomainException
      */
     public function __set($name, $value)
@@ -43,6 +48,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
         if (!property_exists($this, $name)) {
             throw new DomainException('Unknown property ' . $name);
         }
+        $this->$name = $value;
     }
 
     /**
@@ -70,7 +76,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * This method makes it possible to define methods on child classes
      * whose result is cached on the instance.
      *
-     * @param string   $cache_key_name
+     * @param string $cache_key_name
      * @param callable $function
      *
      * @return mixed
@@ -79,10 +85,10 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     protected function cachable(string $cache_key_name, callable $function)
     {
         /** @var  $resultset ?T */
-        $resultset = $this->cached_results[ $cache_key_name ] ?? null;
+        $resultset = $this->cached_results[$cache_key_name] ?? null;
         if ($resultset == null) {
             /** @var  $resultset ?T */
-            $resultset = $this->cached_results[ $cache_key_name ] = call_user_func($function);
+            $resultset = $this->cached_results[$cache_key_name] = call_user_func($function);
         }
 
         return $resultset;

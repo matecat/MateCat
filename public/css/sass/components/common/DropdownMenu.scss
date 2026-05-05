@@ -17,7 +17,19 @@
     background-color: colors.$white;
   }
   .dropdownMenuArrow {
-    fill: colors.$white
+    fill: colors.$white;
+  }
+}
+
+.dropdownmenu-popover {
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    pointer-events: auto;
   }
 }
 

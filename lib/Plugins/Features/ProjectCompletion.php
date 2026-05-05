@@ -26,27 +26,27 @@ class ProjectCompletion extends BaseFeature
         // from a "review" page or a "translate" page.
 
         /** @var JobStruct $chunk */
-        $chunk                                     = $params[ 'chunk' ];
-        $chunk_completion_update_struct            = new ChunkCompletionUpdateStruct($chunk->toArray());
-        $chunk_completion_update_struct->is_review = $params[ 'is_review' ];
-        $chunk_completion_update_struct->source    = 'user';
-        $chunk_completion_update_struct->id_job    = $chunk->id;
+        $chunk = $params['chunk'];
+        $chunk_completion_update_struct = new ChunkCompletionUpdateStruct($chunk->toArray());
+        $chunk_completion_update_struct->is_review = $params['is_review'];
+        $chunk_completion_update_struct->source = 'user';
+        $chunk_completion_update_struct->id_job = $chunk->id;
 
-        if (isset($params[ 'logged_user' ]) && $params[ 'logged_user' ]->uid) {
-            $chunk_completion_update_struct->uid = $params[ 'logged_user' ]->uid;
+        if (isset($params['logged_user']) && $params['logged_user']->uid) {
+            $chunk_completion_update_struct->uid = $params['logged_user']->uid;
         }
 
         $chunk_completion_update_struct->setTimestamp('last_translation_at', strtotime('now'));
 
-        $dao           = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase($chunk);
 
         /**
          * Only save the record if the current phase is compatible
          */
         if (
-                ($current_phase == ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review) ||
-                ($current_phase == ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review)
+            ($current_phase == ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review) ||
+            ($current_phase == ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review)
         ) {
             ChunkCompletionUpdateDao::createOrUpdateFromStruct($chunk_completion_update_struct);
         }

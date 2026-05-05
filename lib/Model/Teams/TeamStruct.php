@@ -15,9 +15,9 @@ use Utils\Constants\Teams;
 class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int   $id   = null;
+    public ?int $id = null;
     public string $name;
-    public int    $created_by;
+    public int $created_by;
     public string $created_at;
     public string $type = Teams::PERSONAL;
 

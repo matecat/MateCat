@@ -9,7 +9,6 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import UserActions from '../actions/UserActions'
 import {v4 as uuidV4} from 'uuid'
 import Cookies from 'js-cookie'
-import useAuth from '../hooks/useAuth'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
@@ -170,6 +169,18 @@ const SocketListener = ({isAuthenticated, userId}) => {
         suggestion: data.message,
         isCompleted: data.completed,
         hasError: Boolean(data?.has_error),
+      })
+    },
+    ai_assistant_alternative_translations: (data) => {
+      SegmentActions.aiAlternativeSuggestion({
+        sid: data.id_segment,
+        data,
+      })
+    },
+    ai_assistant_feedback: (data) => {
+      SegmentActions.aiFeedbackSuggestion({
+        sid: data.id_segment,
+        data,
       })
     },
     global_messages: (data) => {

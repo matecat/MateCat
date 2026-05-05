@@ -14,20 +14,22 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 
-abstract class AbstractStatefulKleinController extends KleinController implements IController {
+abstract class AbstractStatefulKleinController extends KleinController implements IController
+{
 
     protected bool $useSession = true;
 
     /**
-     * @param Request              $request
-     * @param Response             $response
+     * @param Request $request
+     * @param Response $response
      * @param ServiceProvider|null $service
-     * @param App|null             $app
+     * @param App|null $app
      *
      * @throws Exception
      */
-    public function __construct( Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null ) {
-        parent::__construct( $request, $response, $service, $app );
+    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
+    {
+        parent::__construct($request, $response, $service, $app);
     }
 
 }

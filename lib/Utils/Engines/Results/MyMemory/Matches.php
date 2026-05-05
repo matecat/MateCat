@@ -12,6 +12,7 @@ class Matches
 {
 
     public $id;
+    public $style;
     public $raw_segment;
     public $segment;
     public $translation;
@@ -50,13 +51,20 @@ class Matches
     private $id_project;
 
     /**
-     * Matches constructor.
+     * @var mixed|null
+     */
+    private $reasoning;
+
+    /**
+     * MyMemory constructor.
      *
      * @param array $data
      */
     public function __construct(array $data = [])
     {
         $this->id = array_key_exists('id', $data) ? $data['id'] : '0';
+        $this->reasoning = array_key_exists('reasoning', $data) ? $data['reasoning'] : null;
+        $this->style = array_key_exists('style', $data) ? $data['style'] : null;
         $this->create_date = array_key_exists('create-date', $data) ? $data['create-date'] : '1970-01-01 00:00:00';
         $this->segment = array_key_exists('segment', $data) ? $data['segment'] : '';
         $this->raw_segment = array_key_exists('raw_segment', $data) ? $data['raw_segment'] : '';

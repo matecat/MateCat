@@ -17,24 +17,24 @@ use Utils\Constants\TranslationStatus;
 class TranslationEventDao extends AbstractDao
 {
 
-    const string TABLE       = "segment_translation_events";
+    const string TABLE = "segment_translation_events";
     const string STRUCT_TYPE = TranslationEventStruct::class;
 
     protected static array $auto_increment_field = ['id'];
-    protected static array $primary_keys         = ['id'];
+    protected static array $primary_keys = ['id'];
 
     public function unsetFinalRevisionFlag(int $id_job, array $id_segments, array $source_pages): int
     {
         $sql = " UPDATE segment_translation_events SET final_revision = 0 " .
-                " WHERE id_job = :id_job " .
-                " AND id_segment IN ( " . implode(',', $id_segments) . " ) " .
-                " AND source_page IN ( " . implode(',', $source_pages) . " ) ";
+            " WHERE id_job = :id_job " .
+            " AND id_segment IN ( " . implode(',', $id_segments) . " ) " .
+            " AND source_page IN ( " . implode(',', $source_pages) . " ) ";
 
         $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare($sql);
 
         $stmt->execute([
-                'id_job' => $id_job,
+            'id_job' => $id_job,
         ]);
 
         return $stmt->rowCount();
@@ -62,9 +62,9 @@ class TranslationEventDao extends AbstractDao
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, TranslationEventStruct::class);
         $stmt->execute([
-                'id_job'      => $id_job,
-                'min_segment' => $min_segment,
-                'max_segment' => $max_segment
+            'id_job' => $id_job,
+            'min_segment' => $min_segment,
+            'max_segment' => $max_segment
         ]);
 
         return $stmt->fetchAll();
@@ -89,9 +89,9 @@ class TranslationEventDao extends AbstractDao
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, TranslationEventStruct::class);
         $stmt->execute([
-                'id_job'     => $id_job,
-                'id_segment' => $id_segment,
-                'draft'      => TranslationStatus::STATUS_DRAFT
+            'id_job' => $id_job,
+            'id_segment' => $id_segment,
+            'draft' => TranslationStatus::STATUS_DRAFT
         ]);
 
         return $stmt->fetchAll();
@@ -117,26 +117,26 @@ class TranslationEventDao extends AbstractDao
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, TranslationEventStruct::class);
         $stmt->execute([
-                'id_job'     => $id_job,
-                'id_segment' => $id_segment,
-                'draft'      => TranslationStatus::STATUS_DRAFT
+            'id_job' => $id_job,
+            'id_segment' => $id_segment,
+            'draft' => TranslationStatus::STATUS_DRAFT
         ]);
 
         $res = $stmt->fetchAll();
 
-        return $res[ 0 ] ?? null;
+        return $res[0] ?? null;
     }
 
     /**
      * @param array $id_segment_list
-     * @param int   $id_job
+     * @param int $id_job
      *
      * @return ShapelessConcreteStruct[]|null
      * @throws ReflectionException
      */
     public function getTteForSegments(array $id_segment_list, int $id_job): ?array
     {
-        $in  = str_repeat('?,', count($id_segment_list) - 1) . '?';
+        $in = str_repeat('?,', count($id_segment_list) - 1) . '?';
         $sql = "
             SELECT 
                     id_segment, 
@@ -151,7 +151,7 @@ class TranslationEventDao extends AbstractDao
                 ORDER BY id_segment, source_page
         ";
 
-        $stmt              = $this->_getStatementForQuery($sql);
+        $stmt = $this->_getStatementForQuery($sql);
         $id_segment_list[] = $id_job;
 
         return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $id_segment_list) ?? null;

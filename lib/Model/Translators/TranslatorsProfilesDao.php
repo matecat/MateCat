@@ -20,7 +20,7 @@ class TranslatorsProfilesDao extends AbstractDao
     const string STRUCT_TYPE = TranslatorProfilesStruct::class;
 
     protected static array $auto_increment_field = ['id'];
-    protected static array $primary_keys         = ['id'];
+    protected static array $primary_keys = ['id'];
 
     protected static string $_query_by_uid_src_trg_rev = "
         SELECT * FROM translator_profiles 
@@ -44,16 +44,16 @@ class TranslatorsProfilesDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$_query_by_uid_src_trg_rev);
 
         return $this->_fetchObjectMap(
-                $stmt,
-                TranslatorProfilesStruct::class,
-                [
-                        'uid_translator' => $profile->uid_translator,
-                        'source'         => $profile->source,
-                        'target'         => $profile->target,
-                        'is_revision'    => $profile->is_revision,
+            $stmt,
+            TranslatorProfilesStruct::class,
+            [
+                'uid_translator' => $profile->uid_translator,
+                'source' => $profile->source,
+                'target' => $profile->target,
+                'is_revision' => $profile->is_revision,
 
-                ]
-        )[ 0 ] ?? null;
+            ]
+        )[0] ?? null;
     }
 
 }

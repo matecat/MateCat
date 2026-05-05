@@ -57,8 +57,8 @@ class TranslationIssueModel
         $review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
 
         $this->chunk_review = $review;
-        $this->chunk        = $this->chunk_review->getChunk();
-        $this->project      = $this->chunk->getProject();
+        $this->chunk = $this->chunk_review->getChunk();
+        $this->project = $this->chunk->getProject();
     }
 
     /**
@@ -69,6 +69,36 @@ class TranslationIssueModel
     public function setDiff(?array $diff = null): void
     {
         $this->diff = $diff;
+    }
+
+    /**
+     * @param EntryStruct $oldStruct
+     *
+     * @return EntryStruct
+     * @throws Exception
+     */
+    public function editFrom(EntryStruct $oldStruct): EntryStruct
+    {
+        $this->setDefaultIssueValues();
+
+        if (!empty($this->diff)) {
+            $this->saveDiff();
+        }
+
+        EntryDao::modifyEntry($this->issue);
+
+        // update score
+        $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
+
+        $chunk_review_model = new ChunkReviewModel($this->chunk_review);
+
+        if($penaltyPointDiff < 0){
+            $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project);
+        } elseif($penaltyPointDiff > 0){
+            $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project);
+        }
+
+        return $this->issue;
     }
 
 
@@ -119,18 +149,18 @@ class TranslationIssueModel
         /**
          * in order to save diff we need to lookup for current version in segment_translations.
          */
-        $struct                 = new TranslationVersionStruct();
-        $struct->id_job         = $this->issue->id_job;
-        $struct->id_segment     = $this->issue->id_segment;
-        $struct->creation_date  = Utils::mysqlTimestamp(time());
-        $struct->is_review      = true;
+        $struct = new TranslationVersionStruct();
+        $struct->id_job = $this->issue->id_job;
+        $struct->id_segment = $this->issue->id_segment;
+        $struct->creation_date = Utils::mysqlTimestamp(time());
+        $struct->is_review = true;
         $struct->version_number = $this->issue->translation_version;
-        $struct->raw_diff       = $string_to_save;
+        $struct->raw_diff = $string_to_save;
 
         $version_record = (new TranslationVersionDao())->getVersionNumberForTranslation(
-                $struct->id_job,
-                $struct->id_segment,
-                $struct->version_number
+            $struct->id_job,
+            $struct->id_segment,
+            $struct->version_number
         );
 
         if (!$version_record) {

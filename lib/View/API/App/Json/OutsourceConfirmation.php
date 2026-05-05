@@ -12,22 +12,24 @@ namespace View\API\App\Json;
 
 use Model\Outsource\ConfirmationStruct;
 
-class OutsourceConfirmation {
+class OutsourceConfirmation
+{
 
     protected ConfirmationStruct $data;
 
-    public function __construct( ConfirmationStruct $confirmation ) {
+    public function __construct(ConfirmationStruct $confirmation)
+    {
         $this->data = $confirmation;
     }
 
     public function render(): array
     {
-        $result                         = $this->data->toArray();
-        $class                          = get_class( $this->data );
-        $result[ 'create_timestamp' ]   = strtotime( $result[ 'create_date' ] );
-        $result[ 'delivery_timestamp' ] = strtotime( $result[ 'delivery_date' ] );
-        $result[ 'quote_review_link' ]  = $class::REVIEW_ORDER_LINK . $this->data->quote_pid;
-        unset( $result[ 'id' ] );
+        $result = $this->data->toArray();
+        $class = get_class($this->data);
+        $result['create_timestamp'] = strtotime($result['create_date']);
+        $result['delivery_timestamp'] = strtotime($result['delivery_date']);
+        $result['quote_review_link'] = $class::REVIEW_ORDER_LINK . $this->data->quote_pid;
+        unset($result['id']);
 
         return $result;
     }

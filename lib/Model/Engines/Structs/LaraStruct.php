@@ -54,8 +54,8 @@ class LaraStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $others = [
-            "tmx_import_relative_url" => "memories/content",
-            "user_update_activate"    => "memories/connect",
+        "tmx_import_relative_url" => "memories/content",
+        "user_update_activate" => "memories/connect",
     ];
 
     /**
@@ -68,9 +68,9 @@ class LaraStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'Lara-AccessKeyId'     => "",
-            'Lara-AccessKeySecret' => "",
-            'MMT-License'          => ""
+        'Lara-AccessKeyId' => "",
+        'Lara-AccessKeySecret' => "",
+        'MMT-License' => ""
     ];
 
     /**

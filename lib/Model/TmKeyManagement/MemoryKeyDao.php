@@ -44,18 +44,18 @@ class MemoryKeyDao extends AbstractDao
         $this->_validateNotNullFields($obj);
 
         $query = "INSERT INTO " . self::TABLE .
-                " (uid, key_value, key_name, key_tm, key_glos, creation_date)
+            " (uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ( :uid, :key_value, :key_name, :key_tm, :key_glos, NOW())";
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute(
-                [
-                        "uid"       => $obj->uid,
-                        "key_value" => trim($obj->tm_key->key),
-                        "key_name"  => ($obj->tm_key->name == null) ? '' : trim($obj->tm_key->name),
-                        "key_tm"    => ($obj->tm_key->tm == null) ? 1 : $obj->tm_key->tm,
-                        "key_glos"  => ($obj->tm_key->glos == null) ? 1 : $obj->tm_key->glos
-                ]
+            [
+                "uid" => $obj->uid,
+                "key_value" => trim($obj->tm_key->key),
+                "key_name" => ($obj->tm_key->name == null) ? '' : trim($obj->tm_key->name),
+                "key_tm" => ($obj->tm_key->tm == null) ? 1 : $obj->tm_key->tm,
+                "key_glos" => ($obj->tm_key->glos == null) ? 1 : $obj->tm_key->glos
+            ]
         );
 
         //return the inserted object on success, null otherwise
@@ -91,8 +91,8 @@ class MemoryKeyDao extends AbstractDao
 
     /**
      * @param MemoryKeyStruct $obj
-     * @param bool            $traverse
-     * @param int             $ttl
+     * @param bool $traverse
+     * @param int $ttl
      *
      * @return MemoryKeyStruct[]
      * @throws ReflectionException
@@ -103,7 +103,7 @@ class MemoryKeyDao extends AbstractDao
         $obj = $this->sanitize($obj);
 
         $where_params = [];
-        $condition    = [];
+        $condition = [];
 
         $query = "SELECT  m1.uid, 
                                      m1.key_value, 
@@ -119,29 +119,29 @@ class MemoryKeyDao extends AbstractDao
 			                 ORDER BY m1.creation_date desc";
 
 
-        $condition[]           = "m1.uid = :uid";
-        $where_params[ 'uid' ] = $obj->uid;
+        $condition[] = "m1.uid = :uid";
+        $where_params['uid'] = $obj->uid;
 
         //tm_key conditions
         if ($obj->tm_key !== null) {
             if ($obj->tm_key->key !== null) {
-                $condition[]                 = "m1.key_value = :key_value";
-                $where_params[ 'key_value' ] = $obj->tm_key->key;
+                $condition[] = "m1.key_value = :key_value";
+                $where_params['key_value'] = $obj->tm_key->key;
             }
 
             if ($obj->tm_key->name !== null) {
-                $condition[]                = "m1.key_name = :key_name";
-                $where_params[ 'key_name' ] = $obj->tm_key->name;
+                $condition[] = "m1.key_name = :key_name";
+                $where_params['key_name'] = $obj->tm_key->name;
             }
 
             if ($obj->tm_key->tm !== null) {
-                $condition[]              = "m1.key_tm = :key_tm";
-                $where_params[ 'key_tm' ] = $obj->tm_key->tm;
+                $condition[] = "m1.key_tm = :key_tm";
+                $where_params['key_tm'] = $obj->tm_key->tm;
             }
 
             if ($obj->tm_key->glos !== null) {
-                $condition[]                = "m1.key_glos = :key_glos";
-                $where_params[ 'key_glos' ] = $obj->tm_key->glos;
+                $condition[] = "m1.key_glos = :key_glos";
+                $where_params['key_glos'] = $obj->tm_key->glos;
             }
         }
 
@@ -164,12 +164,12 @@ class MemoryKeyDao extends AbstractDao
             $userDao = new UserDao(Database::obtain());
 
             foreach ($arr_result as $k => $row) {
-                $users                          = $userDao->getByUids(explode(",", $row[ 'owner_uids' ]));
-                $arr_result[ $k ][ 'in_users' ] = $users;
+                $users = $userDao->getByUids(explode(",", $row['owner_uids']));
+                $arr_result[$k]['in_users'] = $users;
             }
         } else {
             foreach ($arr_result as $k => $row) {
-                $arr_result[ $k ][ 'in_users' ] = $row[ 'owner_uids' ];
+                $arr_result[$k]['in_users'] = $row['owner_uids'];
             }
         }
 
@@ -189,23 +189,23 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
-        $set_array        = [];
+        $set_array = [];
         $where_conditions = [];
-        $bind_params      = [];
+        $bind_params = [];
 
         $query = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
-        $where_conditions[]   = "uid = :uid";
-        $bind_params[ 'uid' ] = $obj->uid;
+        $where_conditions[] = "uid = :uid";
+        $bind_params['uid'] = $obj->uid;
 
-        $where_conditions[]         = "key_value = :key_value";
-        $bind_params[ 'key_value' ] = $obj->tm_key->key;
+        $where_conditions[] = "key_value = :key_value";
+        $bind_params['key_value'] = $obj->tm_key->key;
 
         //tm_key conditions
         if ($obj->tm_key !== null) {
             if ($obj->tm_key->name !== null) {
-                $set_array[]               = "key_name = :key_name";
-                $bind_params[ 'key_name' ] = $obj->tm_key->name;
+                $set_array[] = "key_name = :key_name";
+                $bind_params['key_name'] = $obj->tm_key->name;
             }
         }
 
@@ -243,8 +243,8 @@ class MemoryKeyDao extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                'uid'       => $obj->uid,
-                'key_value' => $obj->tm_key->key
+            'uid' => $obj->uid,
+            'key_value' => $obj->tm_key->key
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -268,8 +268,8 @@ class MemoryKeyDao extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                'uid'       => $obj->uid,
-                'key_value' => $obj->tm_key->key
+            'uid' => $obj->uid,
+            'key_value' => $obj->tm_key->key
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -293,8 +293,8 @@ class MemoryKeyDao extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                'uid'       => $obj->uid,
-                'key_value' => $obj->tm_key->key
+            'uid' => $obj->uid,
+            'key_value' => $obj->tm_key->key
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -315,7 +315,7 @@ class MemoryKeyDao extends AbstractDao
         $obj_arr = $this->sanitizeArray($obj_arr);
 
         $query = "INSERT INTO " . self::TABLE .
-                " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
+            " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ";
 
         $values = [];
@@ -439,20 +439,20 @@ class MemoryKeyDao extends AbstractDao
         $result = [];
 
         foreach ($array_result as $item) {
-            $owner_uids = explode(",", $item[ 'owner_uids' ]);
+            $owner_uids = explode(",", $item['owner_uids']);
 
             $build_arr = [
-                    'uid'    => $item[ 'uid' ],
-                    'tm_key' => new TmKeyStruct([
-                                    'key'       => (string)$item[ 'key_value' ],
-                                    'name'      => (string)$item[ 'key_name' ],
-                                    'tm'        => (bool)$item[ 'tm' ],
-                                    'glos'      => (bool)$item[ 'glos' ],
-                                    'is_shared' => ($item[ 'owners_tot' ] > 1),
-                                    'in_users'  => $item[ 'in_users' ],
-                                    'owner'     => in_array($item[ 'uid' ], $owner_uids),
-                            ]
-                    )
+                'uid' => $item['uid'],
+                'tm_key' => new TmKeyStruct([
+                        'key' => (string)$item['key_value'],
+                        'name' => (string)$item['key_name'],
+                        'tm' => (bool)$item['tm'],
+                        'glos' => (bool)$item['glos'],
+                        'is_shared' => ($item['owners_tot'] > 1),
+                        'in_users' => $item['in_users'],
+                        'owner' => in_array($item['uid'], $owner_uids),
+                    ]
+                )
             ];
 
             $obj = new MemoryKeyStruct($build_arr);

@@ -9,15 +9,18 @@ use TestHelpers\AbstractTest;
  * Date: 09/06/2017
  * Time: 16:51
  */
-class FeatureSetTest extends AbstractTest {
+class FeatureSetTest extends AbstractTest
+{
 
-    function test_getSortedFeatures() {
+    function test_getSortedFeatures()
+    {
         $featureSet = new FeatureSet();
-        $featureSet->loadFromString( "translation_versions,project_completion" );
+        $featureSet->loadFromString("translation_versions,project_completion");
 
         $this->assertEquals(
-                "translated,mmt,translation_versions,review_extended,second_pass_review,aligner,project_completion",
-                implode( ',', $featureSet->sortFeatures()->getCodes() ) );
+            "translated,mmt,translation_versions,review_extended,second_pass_review,aligner,project_completion",
+            implode(',', $featureSet->sortFeatures()->getCodes())
+        );
     }
 
 

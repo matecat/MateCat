@@ -33,9 +33,9 @@ class SegmentValidator extends Base
         $dao = new SegmentDao(\Model\DataAccess\Database::obtain());
 
         $segment = $dao->getByChunkIdAndSegmentId(
-                $this->controller->getParams()[ 'id_job' ],
-                $this->controller->getParams()[ 'password' ],
-                $this->controller->getParams()[ 'id_segment' ]
+            $this->controller->getParams()['id_job'],
+            $this->controller->getParams()['password'],
+            $this->controller->getParams()['id_segment']
         );
 
         if (!$segment) {

@@ -18,18 +18,18 @@ use Model\DataAccess\IDaoStruct;
 class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int    $id                 = null;
-    public int     $uid;
-    public string  $service;
-    public string  $email;
-    public string  $name;
-    public ?string $remote_id          = null;
+    public ?int $id = null;
+    public int $uid;
+    public string $service;
+    public string $email;
+    public string $name;
+    public ?string $remote_id = null;
     public ?string $oauth_access_token = null;
-    public string  $created_at;
-    public ?string $updated_at         = null;
-    public ?string $expired_at         = null;
-    public ?string $disabled_at        = null;
-    public int     $is_default         = 1;
+    public string $created_at;
+    public ?string $updated_at = null;
+    public ?string $expired_at = null;
+    public ?string $disabled_at = null;
+    public int $is_default = 1;
 
     /**
      * Returns the decoded access token.
@@ -53,7 +53,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      */
     public function setEncryptedAccessToken(string $token): void
     {
-        $oauthTokenEncryption     = OauthTokenEncryption::getInstance();
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
         $this->oauth_access_token = $oauthTokenEncryption->encrypt($token);
     }
 
@@ -69,7 +69,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
 
         if ($field) {
             if (array_key_exists($field, $decoded)) {
-                return $decoded[ $field ];
+                return $decoded[$field];
             } else {
                 throw new Exception('key not found on token: ' . $field);
             }

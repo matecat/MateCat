@@ -17,9 +17,9 @@ use ReflectionException;
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int  $id       = null;
-    public int   $id_team;
-    public ?int  $uid      = null; // this shouldn't be null, but it is in the database (old records)
+    public ?int $id = null;
+    public int $id_team;
+    public ?int $uid = null; // this shouldn't be null, but it is in the database (old records)
     public ?bool $is_admin = null; // this shouldn't be null, but this struct is used also for partial records
 
     /**

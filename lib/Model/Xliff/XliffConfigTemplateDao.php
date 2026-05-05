@@ -19,11 +19,11 @@ class XliffConfigTemplateDao extends AbstractDao
 
     const string TABLE = 'xliff_config_templates';
 
-    const string query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const string query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
     const string query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
-    const string query_by_uid        = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
-    const string query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
-    const string paginated_map_key   = __CLASS__ . "::getAllPaginated";
+    const string query_by_uid = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
+    const string query_paginated = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
+    const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
      * @var XliffConfigTemplateDao|null
@@ -49,11 +49,11 @@ class XliffConfigTemplateDao extends AbstractDao
      */
     public static function getDefaultTemplate(int $uid): XliffConfigTemplateStruct
     {
-        $default              = new XliffConfigTemplateStruct();
-        $default->id          = 0;
-        $default->uid         = $uid;
-        $default->name        = "Matecat original settings";
-        $default->created_at  = date("Y-m-d H:i:s");
+        $default = new XliffConfigTemplateStruct();
+        $default->id = 0;
+        $default->uid = $uid;
+        $default->name = "Matecat original settings";
+        $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");
 
         return $default;
@@ -61,7 +61,7 @@ class XliffConfigTemplateDao extends AbstractDao
 
     /**
      * @param string $json
-     * @param int    $uid
+     * @param int $uid
      *
      * @return XliffConfigTemplateStruct
      * @throws Exception
@@ -76,8 +76,8 @@ class XliffConfigTemplateDao extends AbstractDao
 
     /**
      * @param XliffConfigTemplateStruct $templateStruct
-     * @param string                    $json
-     * @param int                       $uid
+     * @param string $json
+     * @param int $uid
      *
      * @return XliffConfigTemplateStruct
      * @throws Exception
@@ -90,11 +90,11 @@ class XliffConfigTemplateDao extends AbstractDao
     }
 
     /**
-     * @param int    $uid
+     * @param int $uid
      * @param string $baseRoute
-     * @param int    $current
-     * @param int    $pagination
-     * @param int    $ttl
+     * @param int $current
+     * @param int $pagination
+     * @param int $ttl
      *
      * @return array
      * @throws ReflectionException
@@ -107,8 +107,8 @@ class XliffConfigTemplateDao extends AbstractDao
         $pager = new Pager($pdo);
 
         $totals = $pager->count(
-                "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
-                ['uid' => $uid]
+            "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
+            ['uid' => $uid]
         );
 
         $paginationParameters = new PaginationParameters(static::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
@@ -118,11 +118,11 @@ class XliffConfigTemplateDao extends AbstractDao
 
         $models = [];
 
-        foreach ($result[ 'items' ] as $item) {
+        foreach ($result['items'] as $item) {
             $models[] = self::hydrateTemplateStruct($item->getArrayCopy());
         }
 
-        $result[ 'items' ] = $models;
+        $result['items'] = $models;
 
         return $result;
     }
@@ -138,16 +138,16 @@ class XliffConfigTemplateDao extends AbstractDao
      */
     public static function getById($id, int $ttl = 60): ?XliffConfigTemplateStruct
     {
-        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_id);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
-                'id' => $id,
+            'id' => $id,
         ]);
 
         if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[ 0 ]);
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -160,17 +160,17 @@ class XliffConfigTemplateDao extends AbstractDao
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?XliffConfigTemplateStruct
     {
-        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
-                'id'  => $id,
-                'uid' => $uid,
+            'id' => $id,
+            'uid' => $uid,
         ]);
 
         if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[ 0 ]);
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -182,9 +182,9 @@ class XliffConfigTemplateDao extends AbstractDao
      */
     public static function getByUid(int $uid, int $ttl = 60): array
     {
-        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_uid);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_uid);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
-                'uid' => $uid,
+            'uid' => $uid,
         ]);
 
         if (empty($result)) {
@@ -212,10 +212,10 @@ class XliffConfigTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
         $stmt->execute([
-                'id'   => $id,
-                'uid'  => $uid,
-                'now'  => (new DateTime())->format('Y-m-d H:i:s'),
-                'name' => 'deleted_' . Utils::randomString()
+            'id' => $id,
+            'uid' => $uid,
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
+            'name' => 'deleted_' . Utils::randomString()
         ]);
 
         self::destroyQueryByIdCache($conn, $id);
@@ -285,23 +285,23 @@ class XliffConfigTemplateDao extends AbstractDao
     private static function hydrateTemplateStruct(array $data): ?XliffConfigTemplateStruct
     {
         if (
-                !isset($data[ 'id' ]) or
-                !isset($data[ 'uid' ]) or
-                !isset($data[ 'name' ]) or
-                !isset($data[ 'rules' ])
+            !isset($data['id']) or
+            !isset($data['uid']) or
+            !isset($data['name']) or
+            !isset($data['rules'])
         ) {
             return null;
         }
 
-        $struct       = new XliffConfigTemplateStruct();
-        $struct->id   = $data[ 'id' ];
-        $struct->uid  = $data[ 'uid' ];
-        $struct->name = $data[ 'name' ];
+        $struct = new XliffConfigTemplateStruct();
+        $struct->id = $data['id'];
+        $struct->uid = $data['uid'];
+        $struct->name = $data['name'];
 
-        $struct->created_at  = $data[ 'created_at' ];
-        $struct->modified_at = $data[ 'modified_at' ];
-        $struct->deleted_at  = $data[ 'deleted_at' ];
-        $struct->hydrateRulesFromJson($data[ 'rules' ]);
+        $struct->created_at = $data['created_at'];
+        $struct->modified_at = $data['modified_at'];
+        $struct->deleted_at = $data['deleted_at'];
+        $struct->hydrateRulesFromJson($data['rules']);
 
         return $struct;
     }
@@ -315,23 +315,23 @@ class XliffConfigTemplateDao extends AbstractDao
     public static function save(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
-                " VALUES " .
-                " ( :uid, :name, :rules, :now, :now ); ";
+            " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
+            " VALUES " .
+            " ( :uid, :name, :rules, :now, :now ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                "uid"   => $templateStruct->uid,
-                "name"  => $templateStruct->name,
-                "rules" => $templateStruct->rules,
-                'now'   => $now,
+            "uid" => $templateStruct->uid,
+            "name" => $templateStruct->name,
+            "rules" => $templateStruct->rules,
+            'now' => $now,
         ]);
 
-        $templateStruct->id          = $conn->lastInsertId();
-        $templateStruct->created_at  = $now;
+        $templateStruct->id = $conn->lastInsertId();
+        $templateStruct->created_at = $now;
         $templateStruct->modified_at = $now;
 
         self::destroyQueryByIdCache($conn, $templateStruct->id);
@@ -359,10 +359,10 @@ class XliffConfigTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                "id"    => $templateStruct->id,
-                "name"  => $templateStruct->name,
-                "rules" => $templateStruct->rules,
-                'now'   => (new DateTime())->format('Y-m-d H:i:s'),
+            "id" => $templateStruct->id,
+            "name" => $templateStruct->name,
+            "rules" => $templateStruct->rules,
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
         self::destroyQueryByIdCache($conn, $templateStruct->id);

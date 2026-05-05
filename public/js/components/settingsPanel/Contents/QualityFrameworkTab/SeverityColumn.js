@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import {SettingsPanelContext} from '../../SettingsPanelContext'

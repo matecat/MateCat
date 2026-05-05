@@ -126,10 +126,10 @@ function useImport({type, row, onClose}) {
           ModalsActions.showModalComponent(ConfirmMessageModal, {
             cancelText: 'Cancel',
             successCallback: () => upload(),
-            successText: 'Upload glossary',
+            successText: 'Upload termbase',
             text:
-              'You are uploading a glossary file containing more than 10 locale columns.<br/> Please note that locale ' +
-              'permutations are turned off for glossaries containing more than 10 locales.<br/><br/>You can find additional ' +
+              'You are uploading a termbase containing more than 10 locale columns.<br/> Please note that locale ' +
+              'permutations are turned off for termbases containing more than 10 locales.<br/><br/>You can find additional ' +
               "details on permutations inside <a href='https://guides.matecat.com/glossary-file-format' target='_blank'>Matecat's user guide</a>.",
           })
         } else {
@@ -174,7 +174,7 @@ function useImport({type, row, onClose}) {
     CatToolActions.addNotification({
       title: 'Error upload',
       type: 'error',
-      text: error.errors?.message ?? 'Error',
+      text: error?.errors?.[0]?.message ?? 'Error',
       position: 'br',
       allowHtml: true,
       timer: 5000,

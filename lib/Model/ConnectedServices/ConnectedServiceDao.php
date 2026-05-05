@@ -13,10 +13,10 @@ use Utils\Tools\Utils;
 class ConnectedServiceDao extends AbstractDao
 {
 
-    const string TABLE          = 'connected_services';
+    const string TABLE = 'connected_services';
     const string GDRIVE_SERVICE = 'gdrive';
 
-    protected static array $primary_keys         = ['id'];
+    protected static array $primary_keys = ['id'];
     protected static array $auto_increment_field = ['id'];
 
     /**
@@ -28,7 +28,7 @@ class ConnectedServiceDao extends AbstractDao
     {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE id = :id"
+            "SELECT * FROM connected_services WHERE id = :id"
         );
         $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(['id' => $id]);
@@ -37,7 +37,7 @@ class ConnectedServiceDao extends AbstractDao
     }
 
     /**
-     * @param string                 $token
+     * @param string $token
      * @param ConnectedServiceStruct $service
      *
      * @return ConnectedServiceStruct
@@ -80,18 +80,18 @@ class ConnectedServiceDao extends AbstractDao
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "UPDATE connected_services SET is_default = 0 WHERE uid = :uid AND service = :service"
+            "UPDATE connected_services SET is_default = 0 WHERE uid = :uid AND service = :service"
         );
         $stmt->execute(['uid' => $service->uid, 'service' => $service->service]);
 
         $stmt = $conn->prepare(
-                "UPDATE connected_services SET is_default = 1 WHERE uid = :uid AND service = :service AND id = :id"
+            "UPDATE connected_services SET is_default = 1 WHERE uid = :uid AND service = :service AND id = :id"
         );
         $stmt->execute(['uid' => $service->uid, 'service' => $service->service, 'id' => $service->id]);
     }
 
     /**
-     * @param UserStruct       $user
+     * @param UserStruct $user
      * @param                  $id_service
      *
      * @return ?ConnectedServiceStruct
@@ -101,13 +101,13 @@ class ConnectedServiceDao extends AbstractDao
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND id = :id "
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND id = :id "
         );
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(
-                ['uid' => $user->uid, 'id' => $id_service]
+            ['uid' => $user->uid, 'id' => $id_service]
         );
 
         return $stmt->fetch() ?: null;
@@ -123,13 +123,13 @@ class ConnectedServiceDao extends AbstractDao
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid "
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid "
         );
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(
-                ['uid' => $user->uid]
+            ['uid' => $user->uid]
         );
 
         return $stmt->fetchAll();
@@ -137,7 +137,7 @@ class ConnectedServiceDao extends AbstractDao
 
     /**
      * @param UserStruct $user
-     * @param string     $name
+     * @param string $name
      *
      * @return ConnectedServiceStruct|null
      */
@@ -147,13 +147,13 @@ class ConnectedServiceDao extends AbstractDao
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND service = :service AND is_default LIMIT 1"
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND service = :service AND is_default LIMIT 1"
         );
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(
-                ['uid' => $user->uid, 'service' => $name]
+            ['uid' => $user->uid, 'service' => $name]
         );
 
         return $stmt->fetch() ?: null;
@@ -162,23 +162,23 @@ class ConnectedServiceDao extends AbstractDao
 
     /**
      * @param UserStruct $user
-     * @param string     $service
-     * @param string     $email
+     * @param string $service
+     * @param string $email
      *
      * @return ?ConnectedServiceStruct
      */
     public function findUserServicesByNameAndEmail(UserStruct $user, string $service, string $email): ?ConnectedServiceStruct
     {
         $stmt = $this->database->getConnection()->prepare(
-                " SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND service = :service AND email = :email "
+            " SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND service = :service AND email = :email "
         );
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute([
-                'uid'     => $user->uid,
-                'service' => $service,
-                'email'   => $email
+            'uid' => $user->uid,
+            'service' => $service,
+            'email' => $email
         ]);
 
         return $stmt->fetch() ?: null;

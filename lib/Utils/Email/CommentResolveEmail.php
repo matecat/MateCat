@@ -15,10 +15,10 @@ class CommentResolveEmail extends BaseCommentEmail
 
     protected function _getTemplateVariables(): array
     {
-        $vars                 = parent::_getTemplateVariables();
-        $vars[ 'title' ]      = $this->title;
-        $vars[ 'action' ]     = "resolved a thread that you are following on";
-        $vars[ 'id_segment' ] = $this->comment->id_segment;
+        $vars = parent::_getTemplateVariables();
+        $vars['title'] = $this->title;
+        $vars['action'] = "resolved a thread that you are following on";
+        $vars['id_segment'] = $this->comment->id_segment;
 
         return $vars;
     }

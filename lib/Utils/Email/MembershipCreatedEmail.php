@@ -37,7 +37,7 @@ class MembershipCreatedEmail extends AbstractEmail
     /**
      * MembershipCreatedEmail constructor.
      *
-     * @param UserStruct       $sender
+     * @param UserStruct $sender
      * @param MembershipStruct $membership
      *
      * @throws ReflectionException
@@ -50,7 +50,7 @@ class MembershipCreatedEmail extends AbstractEmail
         $this->membership = $membership;
 
         $this->sender = $sender;
-        $this->title  = "You've been added to team " . $this->membership->getTeam()->name;
+        $this->title = "You've been added to team " . $this->membership->getTeam()->name;
     }
 
     /**
@@ -61,10 +61,10 @@ class MembershipCreatedEmail extends AbstractEmail
         $recipient = [$this->user->email, $this->user->fullName()];
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage($this->_buildMessageContent())
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
@@ -75,8 +75,8 @@ class MembershipCreatedEmail extends AbstractEmail
 
     public function _getLayoutVariables($messageBody = null): array
     {
-        $vars            = parent::_getLayoutVariables();
-        $vars[ 'title' ] = $this->title;
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title;
 
         return $vars;
     }
@@ -87,10 +87,10 @@ class MembershipCreatedEmail extends AbstractEmail
     public function _getTemplateVariables(): array
     {
         return [
-                'user'      => $this->user->toArray(),
-                'sender'    => $this->sender->toArray(),
-                'team'      => $this->membership->getTeam()->toArray(),
-                'manageUrl' => CanonicalRoutes::manage()
+            'user' => $this->user->toArray(),
+            'sender' => $this->sender->toArray(),
+            'team' => $this->membership->getTeam()->toArray(),
+            'manageUrl' => CanonicalRoutes::manage()
         ];
     }
 

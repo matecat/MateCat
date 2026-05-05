@@ -13,10 +13,12 @@ use Klein\Response;
  * Time: 12.08
  *
  */
-class CustomPageView extends BaseKleinViewController {
+class CustomPageView extends BaseKleinViewController
+{
 
-    public function __construct() {
-        parent::__construct( Request::createFromGlobals(), new Response() );
+    public function __construct()
+    {
+        parent::__construct(Request::createFromGlobals(), new Response());
     }
 
 }

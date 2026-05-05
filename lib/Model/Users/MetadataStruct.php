@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: fregini
- * Date: 07/12/2016
- * Time: 22:51
- */
 
 namespace Model\Users;
 
@@ -18,10 +12,8 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     public string $uid;
     public string $key;
 
-    /**
-     * @var int|object|string
-     */
-    public string|int|object $value;
+    /** @var string|int|object|array */
+    public string|int|object|array $value;
 
     /**
      * @inheritDoc
@@ -29,29 +21,59 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     public function jsonSerialize(): array
     {
         return [
-                'id'    => (int)$this->id,
-                'uid'   => (int)$this->uid,
-                'key'   => $this->key,
-                'value' => $this->getValue()
+            'id'    => (int)$this->id,
+            'uid'   => (int)$this->uid,
+            'key'   => $this->key,
+            'value' => $this->getValue(),
         ];
     }
 
     /**
-     * @return int|object|string
+     * @return int|float|object|string
      */
-    public function getValue(): object|int|string
+    public function getValue(): object|int|float|string
     {
-        // in case of numeric value, return a integer
+        // in the case of numeric value, return int or float
         if (is_numeric($this->value)) {
-            return (int)$this->value;
+            $float = (float)$this->value;
+
+            return floor($float) == $float ? (int)$this->value : $float;
+        }
+
+        // in case of array, return an object
+        if (is_array($this->value)) {
+            return (object)$this->value;
         }
 
         // in case of serialized data, return an object
-        if ((@unserialize($this->value) ?? false) !== false) {
-            return (object)unserialize($this->value);
+        if (is_string($this->value) && $this->looksSerialised($this->value)) {
+            $unserialized = @unserialize($this->value, ['allowed_classes' => false]);
+            if ($unserialized !== false) {
+                return (object)$unserialized;
+            }
         }
 
         // return a string
         return $this->value;
+    }
+
+    /**
+     * Cheap structural pre-check so unserialize() is only
+     * attempted on strings that look like PHP-serialised data.
+     */
+    private function looksSerialised(string $data): bool
+    {
+        $data = trim($data);
+
+        if (strlen($data) < 2) {
+            return false;
+        }
+
+        if ($data === 'N;') {
+            return true;
+        }
+
+        return $data[1] === ':'
+            && in_array($data[0], ['s', 'i', 'd', 'a', 'O', 'C', 'b'], true);
     }
 }

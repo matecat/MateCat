@@ -34,7 +34,7 @@ class TmKeyManager
      */
     public static function getTmKeyStructure(?array $tmKey_arr = null): TmKeyStruct
     {
-        $tmKeyStruct                  = new TmKeyStruct($tmKey_arr);
+        $tmKeyStruct = new TmKeyStruct($tmKey_arr);
         $tmKeyStruct->complete_format = true;
 
         return $tmKeyStruct;
@@ -82,7 +82,7 @@ class TmKeyManager
         $tmKeys = json_decode($jsonTmKeys, true, 512, JSON_THROW_ON_ERROR);
         $filter = new Filter($uid);
         $filter->setGrants($grant_level)
-                ->setTmType($type);
+            ->setTmType($type);
 
         $tmKeys = match ($user_role) {
             Filter::ROLE_TRANSLATOR => array_filter($tmKeys, [$filter, 'byTranslator']),
@@ -98,25 +98,25 @@ class TmKeyManager
     /**
      * Generates a list of penalty objects based on the provided translation memory keys.
      *
-     * @param string   $jsonTmKeys      A JSON string representing the translation memory keys.
-     * @param string   $grant_level     The permission level for accessing the translation memory keys.
+     * @param string $jsonTmKeys A JSON string representing the translation memory keys.
+     * @param string $grant_level The permission level for accessing the translation memory keys.
      *                                  Defaults to 'rw'.
-     * @param string   $type            The type of translation memory. Defaults to "tm".
-     * @param int|null $uid             The user ID associated with the translation memory keys.
+     * @param string $type The type of translation memory. Defaults to "tm".
+     * @param int|null $uid The user ID associated with the translation memory keys.
      *                                  If null, a default value may be considered.
-     * @param string   $user_role       The role of the user affecting the translation memory keys
+     * @param string $user_role The role of the user affecting the translation memory keys
      *
      * @return array
      * @throws Exception
      */
     public static function getPenaltyMap(string $jsonTmKeys, string $grant_level = 'rw', string $type = "tm", ?int $uid = null, string $user_role = Filter::ROLE_TRANSLATOR): array
     {
-        $tmKeys              = self::getJobTmKeys($jsonTmKeys, $grant_level, $type, $uid, $user_role);
+        $tmKeys = self::getJobTmKeys($jsonTmKeys, $grant_level, $type, $uid, $user_role);
         $penalty_key_objects = [];
         foreach ($tmKeys as $tmKey) {
             $penalty_key_objects[] = (object)[
-                    'key'     => $tmKey->key,
-                    'penalty' => $tmKey->penalty / 100 ?? 0
+                'key' => $tmKey->key,
+                'penalty' => $tmKey->penalty / 100 ?? 0
             ];
         }
 
@@ -148,7 +148,7 @@ class TmKeyManager
 
             $filter = new Filter();
             $filter->setGrants($grant_level)
-                    ->setTmType($type);
+                ->setTmType($type);
             $tmKey = array_filter($tmKey, [$filter, 'byOwner']);
 
             $result_arr[] = $tmKey;
@@ -267,7 +267,7 @@ class TmKeyManager
     /**
      * Merge the keys from CLIENT with those from DATABASE ( jobData )
      *
-     * @param string   $Json_clientKeys A json_encoded array of objects having the following structure:<br />
+     * @param string $Json_clientKeys A json_encoded array of objects having the following structure:<br />
      *                                  <pre>
      *                                  array(
      *                                  'key'  => &lt;private_tm_key>,
@@ -276,8 +276,8 @@ class TmKeyManager
      *                                  'w'    => true
      *                                  )
      *                                  </pre>
-     * @param string   $Json_jobKeys    A json_encoded array of TmKeyStruct objects
-     * @param string   $userRole        One of the following strings: "owner", "translator", "revisor"
+     * @param string $Json_jobKeys A json_encoded array of TmKeyStruct objects
+     * @param string $userRole One of the following strings: "owner", "translator", "revisor"
      * @param int|null $uid
      *
      * @return array TmKeyStruct[]
@@ -299,9 +299,9 @@ class TmKeyManager
 
         $client_tm_keys = array_map(self::getTmKeyStructure(...), $clientDecodedJson);
         $client_tm_keys = array_map(self::sanitize(...), $client_tm_keys);
-        $job_tm_keys    = array_map(self::getTmKeyStructure(...), $serverDecodedJson);
+        $job_tm_keys = array_map(self::getTmKeyStructure(...), $serverDecodedJson);
 
-        $server_reorder_position    = [];
+        $server_reorder_position = [];
         $reverse_lookup_client_json = ['pos' => [], 'elements' => [], 'unique' => []];
         foreach ($client_tm_keys as $_j => $_client_tm_key) {
             /**
@@ -309,9 +309,9 @@ class TmKeyManager
              */
 
             //create a reverse lookup
-            $reverse_lookup_client_json[ 'pos' ][ $_j ]      = $_client_tm_key->key;
-            $reverse_lookup_client_json[ 'elements' ][ $_j ] = $_client_tm_key;
-            $reverse_lookup_client_json[ 'unique' ][ $_j ]   = $_client_tm_key->getCrypt();
+            $reverse_lookup_client_json['pos'][$_j] = $_client_tm_key->key;
+            $reverse_lookup_client_json['elements'][$_j] = $_client_tm_key;
+            $reverse_lookup_client_json['unique'][$_j] = $_client_tm_key->getCrypt();
 
             if (empty($_client_tm_key->r) && empty($_client_tm_key->w)) {
                 throw new Exception("Please, select Lookup and/or Update to activate your TM in this project", 4);
@@ -322,9 +322,9 @@ class TmKeyManager
             }
         }
 
-        $uniq_num = count(array_unique($reverse_lookup_client_json[ 'unique' ]));
+        $uniq_num = count(array_unique($reverse_lookup_client_json['unique']));
 
-        if ($uniq_num != count($reverse_lookup_client_json[ 'pos' ])) {
+        if ($uniq_num != count($reverse_lookup_client_json['pos'])) {
             throw new Exception("A key is already present in this project.", 5);
         }
 
@@ -334,19 +334,19 @@ class TmKeyManager
              * @var $_job_Key TmKeyStruct
              */
 
-            $_index_position = array_search($_job_Key->key, $reverse_lookup_client_json[ 'pos' ]);
+            $_index_position = array_search($_job_Key->key, $reverse_lookup_client_json['pos']);
 
-            if (in_array($_job_Key->getCrypt(), $reverse_lookup_client_json[ 'pos' ])) {
+            if (in_array($_job_Key->getCrypt(), $reverse_lookup_client_json['pos'])) {
                 //DO NOTHING
                 //reduce the stack
-                $hashPosition = array_search($_job_Key->getCrypt(), $reverse_lookup_client_json[ 'pos' ]);
+                $hashPosition = array_search($_job_Key->getCrypt(), $reverse_lookup_client_json['pos']);
 
-                unset($reverse_lookup_client_json[ 'pos' ][ $hashPosition ]);
-                unset($reverse_lookup_client_json[ 'elements' ][ $hashPosition ]);
+                unset($reverse_lookup_client_json['pos'][$hashPosition]);
+                unset($reverse_lookup_client_json['elements'][$hashPosition]);
                 //PASS
 
                 //take the new order
-                $server_reorder_position[ $hashPosition ] = $_job_Key;
+                $server_reorder_position[$hashPosition] = $_job_Key;
             } elseif ($_index_position !== false) { // so, here the key exists in client
 
                 //this is an anonymous user, and a key exists in job
@@ -366,9 +366,9 @@ class TmKeyManager
                 }
 
                 //override the static values
-                $_job_key_element  = $reverse_lookup_client_json[ 'elements' ][ $_index_position ];
-                $_job_Key->tm      = filter_var($_job_key_element->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-                $_job_Key->glos    = filter_var($_job_key_element->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                $_job_key_element = $reverse_lookup_client_json['elements'][$_index_position];
+                $_job_Key->tm = filter_var($_job_key_element->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                $_job_Key->glos = filter_var($_job_key_element->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $_job_Key->penalty = filter_var($_job_key_element->penalty, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 
                 if ($userRole == Filter::OWNER) {
@@ -377,8 +377,8 @@ class TmKeyManager
                     $_job_Key->w = filter_var($_job_key_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 } elseif ($userRole == Filter::ROLE_REVISOR || $userRole == Filter::ROLE_TRANSLATOR) {
                     //override role specific grants
-                    $_job_Key->{Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var($_job_key_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-                    $_job_Key->{Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var($_job_key_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    $_job_Key->{Filter::$GRANTS_MAP[$userRole]['r']} = filter_var($_job_key_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    $_job_Key->{Filter::$GRANTS_MAP[$userRole]['w']} = filter_var($_job_key_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 }
 
                 //change name if modified
@@ -390,22 +390,22 @@ class TmKeyManager
 //                $_job_Key->owner = ( $userRole == Filter::OWNER );
 
                 //reduce the stack
-                unset($reverse_lookup_client_json[ 'pos' ][ $_index_position ]);
-                unset($reverse_lookup_client_json[ 'elements' ][ $_index_position ]);
+                unset($reverse_lookup_client_json['pos'][$_index_position]);
+                unset($reverse_lookup_client_json['elements'][$_index_position]);
 
                 //take the new order
-                $server_reorder_position[ $_index_position ] = $_job_Key;
+                $server_reorder_position[$_index_position] = $_job_Key;
             } else {
                 //the key must be deleted
                 if ($userRole == Filter::OWNER) {
                     //override grants
-                    $_job_Key->r     = null;
-                    $_job_Key->w     = null;
+                    $_job_Key->r = null;
+                    $_job_Key->w = null;
                     $_job_Key->owner = false;
                 } elseif (($uid !== null and ($uid == $_job_Key->uid_rev or $uid == $_job_Key->uid_transl)) and ($userRole == Filter::ROLE_REVISOR || $userRole == Filter::ROLE_TRANSLATOR)) {
                     //override role specific grants
-                    $_job_Key->{Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = null;
-                    $_job_Key->{Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = null;
+                    $_job_Key->{Filter::$GRANTS_MAP[$userRole]['r']} = null;
+                    $_job_Key->{Filter::$GRANTS_MAP[$userRole]['w']} = null;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
@@ -413,10 +413,10 @@ class TmKeyManager
                     if (!$_job_Key->owner) {
                         //take the new order, put the deleted key at the end of the array
                         //a position VERY LOW ( 1 Million )
-                        $server_reorder_position[ 1000000 + $i ] = $_job_Key;
+                        $server_reorder_position[1000000 + $i] = $_job_Key;
                     } elseif ($userRole != Filter::OWNER) {
                         //place on top of the owner keys, preserve the order of owner keys by adding it's normal index position
-                        $server_reorder_position[ -1000000 + $i ] = $_job_Key;
+                        $server_reorder_position[-1000000 + $i] = $_job_Key;
                     } else {
                         // Remove the key!!!
                         //only the owner can remove its keys
@@ -428,10 +428,10 @@ class TmKeyManager
         /*
          * There are some new keys from client? Add them
          */
-        if (!empty($reverse_lookup_client_json[ 'pos' ])) {
+        if (!empty($reverse_lookup_client_json['pos'])) {
             $justCreatedKey = new TmKeyStruct();
 
-            foreach ($reverse_lookup_client_json[ 'elements' ] as $_pos => $newClientKey) {
+            foreach ($reverse_lookup_client_json['elements'] as $_pos => $newClientKey) {
                 /**
                  * @var $newClientKey TmKeyStruct
                  */
@@ -440,12 +440,12 @@ class TmKeyManager
                 $justCreatedKey->key = $newClientKey->key;
 
                 //override the static values
-                $justCreatedKey->tm   = filter_var($newClientKey->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                $justCreatedKey->tm = filter_var($newClientKey->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $justCreatedKey->glos = filter_var($newClientKey->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
                 if ($userRole != Filter::OWNER) {
-                    $justCreatedKey->{Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var($newClientKey->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-                    $justCreatedKey->{Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var($newClientKey->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    $justCreatedKey->{Filter::$GRANTS_MAP[$userRole]['r']} = filter_var($newClientKey->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    $justCreatedKey->{Filter::$GRANTS_MAP[$userRole]['w']} = filter_var($newClientKey->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 } else {
                     //override grants
                     $justCreatedKey->r = filter_var($newClientKey->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -469,7 +469,7 @@ class TmKeyManager
                 //finally append to the job keys!!
                 //take the new order, put the new key at the end of the array
                 //a position VERY LOW, but BEFORE the deleted keys, so it goes not to the end ( 100 hundred thousand )
-                $server_reorder_position[ 100000 + $_pos ] = $justCreatedKey;
+                $server_reorder_position[100000 + $_pos] = $justCreatedKey;
 
                 if ($uid != null) {
                     //if uid is provided, check for key and try to add to it's memory key ring
@@ -478,18 +478,18 @@ class TmKeyManager
                          * Take the keys of the user
                          */
                         $_keyDao = new MemoryKeyDao(Database::obtain());
-                        $dh      = new MemoryKeyStruct([
-                                'uid'    => $uid,
-                                'tm_key' => new TmKeyStruct([
-                                        'key' => $justCreatedKey->key
-                                ])
+                        $dh = new MemoryKeyStruct([
+                            'uid' => $uid,
+                            'tm_key' => new TmKeyStruct([
+                                'key' => $justCreatedKey->key
+                            ])
                         ]);
 
                         $keyList = $_keyDao->read($dh);
 
                         if (empty($keyList)) {
                             // add the key to a new row struct
-                            $dh->uid    = $uid;
+                            $dh->uid = $uid;
                             $dh->tm_key = $justCreatedKey;
 
                             $_keyDao->create($dh);
@@ -518,7 +518,7 @@ class TmKeyManager
      * Exclude keys if r/w are null (which will be deleted)
      *
      * @param TmKeyStruct $_job_Key
-     * @param int|null    $uid
+     * @param int|null $uid
      *
      * @return bool
      */
@@ -548,7 +548,7 @@ class TmKeyManager
     }
 
     /**
-     * @param TmKeyStruct[]                 $tm_keys
+     * @param TmKeyStruct[] $tm_keys
      * @param                               $userEmail
      * @param                               $jobOwnerEmail
      *
@@ -558,9 +558,9 @@ class TmKeyManager
     {
         foreach ($tm_keys as $k => $tm_key) {
             if ($userEmail != $jobOwnerEmail && $tm_key->owner) {
-                unset($tm_keys[ $k ]);
+                unset($tm_keys[$k]);
             } elseif ($userEmail == $jobOwnerEmail && !$tm_key->owner) {
-                unset($tm_keys[ $k ]);
+                unset($tm_keys[$k]);
             }
         }
 
@@ -568,41 +568,41 @@ class TmKeyManager
     }
 
     /**
-     * @param array           $emailList
+     * @param array $emailList
      * @param MemoryKeyStruct $memoryKeyToUpdate
-     * @param UserStruct      $user
+     * @param UserStruct $user
      *
      * @throws Exception
      */
     public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user): void
     {
-        $mkDao   = new MemoryKeyDao();
+        $mkDao = new MemoryKeyDao();
         $userDao = new UserDao();
 
         foreach ($emailList as $email) {
-            $userQuery                  = UserStruct::getStruct();
-            $userQuery->email           = $email;
+            $userQuery = UserStruct::getStruct();
+            $userQuery->email = $email;
             $alreadyRegisteredRecipient = $userDao->setCacheTTL(60 * 10)->read($userQuery);
 
             if (!empty($alreadyRegisteredRecipient)) {
                 // do not send the email to myself
-                if ($memoryKeyToUpdate->uid == $alreadyRegisteredRecipient[ 0 ]->uid) {
+                if ($memoryKeyToUpdate->uid == $alreadyRegisteredRecipient[0]->uid) {
                     continue;
                 }
 
-                $memoryKeyToUpdate->uid = $alreadyRegisteredRecipient[ 0 ]->uid;
+                $memoryKeyToUpdate->uid = $alreadyRegisteredRecipient[0]->uid;
                 $this->_addToUserKeyRing($memoryKeyToUpdate, $mkDao);
 
                 /**
                  * @var UserStruct[] $alreadyRegisteredRecipient
                  */
                 $email = new ShareKeyEmail(
-                        $user,
-                        [
-                                $alreadyRegisteredRecipient[ 0 ]->email,
-                                $alreadyRegisteredRecipient[ 0 ]->fullName()
-                        ],
-                        $memoryKeyToUpdate
+                    $user,
+                    [
+                        $alreadyRegisteredRecipient[0]->email,
+                        $alreadyRegisteredRecipient[0]->fullName()
+                    ],
+                    $memoryKeyToUpdate
                 );
             } else {
                 $email = new ShareKeyEmail($user, [$email, ""], $memoryKeyToUpdate);
@@ -614,7 +614,7 @@ class TmKeyManager
 
     /**
      * @param MemoryKeyStruct $memoryKeyToUpdate
-     * @param MemoryKeyDao    $mkDao
+     * @param MemoryKeyDao $mkDao
      *
      * @return MemoryKeyStruct|null
      * @throws Exception

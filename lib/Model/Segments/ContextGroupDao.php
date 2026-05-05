@@ -16,14 +16,14 @@ use ReflectionException;
 class ContextGroupDao extends AbstractDao
 {
 
-    const string TABLE       = 'context_groups';
+    const string TABLE = 'context_groups';
     const string STRUCT_TYPE = ContextStruct::class;
     protected static array $auto_increment_field = ['id'];
-    protected static array $primary_keys         = ['id', 'id_project'];
+    protected static array $primary_keys = ['id', 'id_project'];
 
-    protected static string $query_get_all_by_project   = "SELECT * FROM context_groups WHERE id_project = :id_project";
-    protected static string $query_get_all_by_file_id   = "SELECT * FROM context_groups WHERE id_file = :id_file";
-    protected static string $query_get_by_segment_id    = "SELECT * FROM context_groups WHERE id_segment = :id_segment";
+    protected static string $query_get_all_by_project = "SELECT * FROM context_groups WHERE id_project = :id_project";
+    protected static string $query_get_all_by_file_id = "SELECT * FROM context_groups WHERE id_file = :id_file";
+    protected static string $query_get_by_segment_id = "SELECT * FROM context_groups WHERE id_segment = :id_segment";
     protected static string $query_get_by_segment_range = "SELECT * FROM context_groups WHERE id_segment BETWEEN :id_segment_start AND :id_segment_stop";
 
     /**
@@ -37,11 +37,11 @@ class ContextGroupDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$query_get_all_by_project);
 
         return $this->_fetchObjectMap(
-                $stmt,
-                ProjectStruct::class,
-                [
-                        'id_project' => $project->id
-                ]
+            $stmt,
+            ProjectStruct::class,
+            [
+                'id_project' => $project->id
+            ]
         );
     }
 
@@ -53,12 +53,12 @@ class ContextGroupDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$query_get_by_segment_id);
 
         return $this->_fetchObjectMap(
-                $stmt,
-                ContextStruct::class,
-                [
-                        'id_segment' => $sid
-                ]
-        )[ 0 ] ?? null;
+            $stmt,
+            ContextStruct::class,
+            [
+                'id_segment' => $sid
+            ]
+        )[0] ?? null;
     }
 
     /**
@@ -70,11 +70,11 @@ class ContextGroupDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::$query_get_all_by_file_id);
 
         return $this->_fetchObjectMap(
-                $stmt,
-                ContextStruct::class,
-                [
-                        'id_file' => $fid
-                ]
+            $stmt,
+            ContextStruct::class,
+            [
+                'id_file' => $fid
+            ]
         );
     }
 
@@ -89,17 +89,17 @@ class ContextGroupDao extends AbstractDao
     {
         $stmt = $this->_getStatementForQuery(self::$query_get_by_segment_range);
 
-        $resSet      = $this->_fetchObjectMap(
-                $stmt,
-                ContextStruct::class,
-                [
-                        'id_segment_start' => $start,
-                        'id_segment_stop'  => $stop
-                ]
+        $resSet = $this->_fetchObjectMap(
+            $stmt,
+            ContextStruct::class,
+            [
+                'id_segment_start' => $start,
+                'id_segment_stop' => $stop
+            ]
         );
         $_fetchGroup = [];
         foreach ($resSet as $cStruct) {
-            $_fetchGroup[ $cStruct->id_segment ] = $cStruct;
+            $_fetchGroup[$cStruct->id_segment] = $cStruct;
         }
         unset($resSet);
 

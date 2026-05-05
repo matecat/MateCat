@@ -1,7 +1,12 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
-import $ from 'jquery'
 
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
@@ -9,7 +14,6 @@ import UserActions from '../../actions/UserActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
-import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import UserStore from '../../stores/UserStore'
@@ -31,6 +35,13 @@ import {Input} from '../common/Input/Input'
 import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
+import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import FileLog from '../../../img/icons/FileLog'
+import Archive from '../../../img/icons/Archive'
+import Refresh from '../../../img/icons/Refresh'
+import Trash from '../../../img/icons/Trash'
+import FlipBackward from '../icons/FlipBackward'
 
 const ProjectContainer = ({
   project,
@@ -40,10 +51,16 @@ const ProjectContainer = ({
   changeStatusFn,
   downloadTranslationFn,
 }) => {
+  const {jobsBulk, onCheckedProject, onCheckedJob} = useContext(
+    ProjectsBulkActionsContext,
+  )
+
+  const idTeamProject = project.get('id_team')
+
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
-  const [idTeamSelected, setIdTeamSelected] = useState(project.get('id_team'))
-  const [shouldShowEditNameIcon, setShouldShowEditNameIcon] = useState(false)
+  const [idTeamSelected, setIdTeamSelected] = useState(idTeamProject)
+  const [shouldShowMoreActions, setShouldShowMoreActions] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
 
   const {handleSubmit, control, reset} = useForm()
@@ -54,43 +71,32 @@ const ProjectContainer = ({
     (team) => team.get('id') === project.get('id_team'),
   )
 
-  const hideProjectAfterChangeAssignee = useRef()
-  hideProjectAfterChangeAssignee.current = (projectCompare, user) => {
-    if (project.get('id') === projectCompare.get('id')) {
-      const uid = user ? user.get('uid') : -1
-      if (
-        (uid !== selectedUser &&
-          selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
-        (team.get('type') == 'personal' && uid !== UserStore.getUser().user.uid)
-      ) {
-        setTimeout(() => {
-          projectRef.current.style.transition = 'transform 0.5s ease-in-out'
-          projectRef.current.style.transform = 'translateX(-2000px)'
-        }, 500)
-        setTimeout(() => {
-          ManageActions.removeProject(project)
-        }, 1000)
-
-        const name = user?.toJS
-          ? user.get('first_name') + ' ' + user.get('last_name')
-          : 'Not assigned'
-
-        const notification = {
-          title: 'Assignee changed',
-          text:
-            'The project ' +
-            project.get('name') +
-            ' has been assigned to ' +
-            name,
-          type: 'success',
-          position: 'bl',
-          allowHtml: true,
-          timer: 3000,
+  const hideProjectAfterChangeAssignee = useCallback(
+    (projectCompare, user) => {
+      if (project.get('id') === projectCompare.get('id')) {
+        const uid = user ? user.get('uid') : -1
+        if (
+          (uid !== selectedUser &&
+            selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
+          (team.get('type') == 'personal' &&
+            uid !== UserStore.getUser().user.uid)
+        ) {
+          setTimeout(() => {
+            projectRef.current.style.transition = 'transform 0.5s ease-in-out'
+            projectRef.current.style.transform = 'translateX(-2000px)'
+          }, 500)
+          setTimeout(() => {
+            ManageActions.removeProject(project)
+          }, 1000)
         }
-        CatToolActions.addNotification(notification)
       }
-    }
-  }
+    },
+    [project, selectedUser, team],
+  )
+
+  useEffect(() => {
+    setIdTeamSelected(idTeamProject)
+  }, [idTeamProject])
 
   const thereIsChunkOutsourced = (idJob) => {
     const outsourceChunk = project.get('jobs').find(function (item) {
@@ -170,7 +176,7 @@ const ProjectContainer = ({
       {
         label: (
           <>
-            <i className="icon-download-logs icon" />
+            <FileLog size={18} />
             Activity Log
           </>
         ),
@@ -181,7 +187,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer icon" />
+                  <Archive size={18} />
                   Archive project
                 </>
               ),
@@ -190,7 +196,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel project
                 </>
               ),
@@ -203,7 +209,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <FlipBackward size={18} />
                   Unarchive project
                 </>
               ),
@@ -212,7 +218,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel project
                 </>
               ),
@@ -225,7 +231,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <FlipBackward size={18} />
                   Resume Project
                 </>
               ),
@@ -234,7 +240,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer icon-trash-o icon" />
+                  <Trash size={18} />
                   Delete project permanently
                 </>
               ),
@@ -289,6 +295,11 @@ const ProjectContainer = ({
     return date.toDateString()
   }
 
+  const jobsBulkForCurrentProject = project
+    .get('jobs')
+    .toJS()
+    .filter(({id}) => jobsBulk.some((value) => value === id))
+
   const getJobsList = (jobsLength) => {
     const jobsList = []
     let chunks = [],
@@ -318,6 +329,7 @@ const ProjectContainer = ({
 
       const lastAction = getLastJobAction(job.get('id'))
       const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
+
       let item = (
         <JobContainer
           key={job.get('id') + '-' + i}
@@ -331,6 +343,11 @@ const ProjectContainer = ({
           lastAction={lastAction}
           isChunkOutsourced={isChunkOutsourced}
           activityLogUrl={getActivityLogUrl()}
+          isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
+          onCheckedJob={onCheckedJob}
+          isCheckboxVisible={
+            shouldShowMoreActions || jobsBulkForCurrentProject.length
+          }
         />
       )
       chunks.push(item)
@@ -451,17 +468,17 @@ const ProjectContainer = ({
     ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, hideProject)
     ProjectsStore.addListener(
       ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-      hideProjectAfterChangeAssignee.current,
+      hideProjectAfterChangeAssignee,
     )
 
     return () => {
       ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, hideProject)
       ProjectsStore.removeListener(
         ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-        hideProjectAfterChangeAssignee.current,
+        hideProjectAfterChangeAssignee,
       )
     }
-  }, [project])
+  }, [project, hideProjectAfterChangeAssignee])
 
   const handleFormSubmit = (formData) => {
     const {name} = formData
@@ -528,8 +545,8 @@ const ProjectContainer = ({
     >
       <div
         className="sixteen wide column"
-        onMouseOver={() => setShouldShowEditNameIcon(true)}
-        onMouseLeave={() => setShouldShowEditNameIcon(false)}
+        onMouseOver={() => setShouldShowMoreActions(true)}
+        onMouseLeave={() => setShouldShowMoreActions(false)}
       >
         <div className="project-header ui grid">
           <div className="nine wide column">
@@ -538,6 +555,18 @@ const ProjectContainer = ({
                 className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
               >
                 <div className="ui ribbon label">
+                  <Checkbox
+                    className={`project-checkbox ${!shouldShowMoreActions && !jobsBulkForCurrentProject.length ? 'project-container-checkbox-hidden' : ''}`}
+                    onChange={() => onCheckedProject(project.get('id'))}
+                    value={
+                      jobsBulkForCurrentProject.length === 0
+                        ? CHECKBOX_STATE.UNCHECKED
+                        : jobsBulkForCurrentProject.length ===
+                            project.get('jobs').size
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.INDETERMINATE
+                    }
+                  />
                   <div className="project-id" title="Project id">
                     {'(' + project.get('id') + ')'}
                   </div>
@@ -553,7 +582,7 @@ const ProjectContainer = ({
                     </div>
                   )}
                 </div>
-                {shouldShowEditNameIcon && !isEditingName && (
+                {shouldShowMoreActions && !isEditingName && (
                   <Button
                     className="project-container-button-edit-name"
                     mode={BUTTON_MODE.GHOST}

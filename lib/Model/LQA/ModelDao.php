@@ -28,13 +28,13 @@ class ModelDao extends AbstractDao
     public static function findById(int $id, int $ttl = 0): ?ModelStruct
     {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare(self::$_sql_get_model_by_id);
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(self::$_sql_get_model_by_id);
 
         /** @var ModelStruct $result */
         $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ModelStruct::class, ['id' => $id]);
 
-        return $result[ 0 ] ?? null;
+        return $result[0] ?? null;
     }
 
     /**
@@ -47,24 +47,24 @@ class ModelDao extends AbstractDao
         $model_hash = static::_getModelHash($data);
 
         $sql = "INSERT INTO qa_models ( uid, label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
-                " VALUES ( :uid, :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
+            " VALUES ( :uid, :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
 
         $struct = new ModelStruct([
-                'uid'                  => $data[ 'uid' ],
-                'label'                => $data[ 'label' ] ?? null,
-                'pass_type'            => $data[ 'passfail' ][ 'type' ],
-                'pass_options'         => self::decodePassOptions($data[ 'passfail' ][ 'options' ]),
-                'hash'                 => $model_hash,
-                'qa_model_template_id' => (isset($data[ 'id_template' ])) ? $data[ 'id_template' ] : null,
+            'uid' => $data['uid'],
+            'label' => $data['label'] ?? null,
+            'pass_type' => $data['passfail']['type'],
+            'pass_options' => self::decodePassOptions($data['passfail']['options']),
+            'hash' => $model_hash,
+            'qa_model_template_id' => (isset($data['id_template'])) ? $data['id_template'] : null,
         ]);
 
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(
-                $struct->toArray(
-                        ['uid', 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id']
-                )
+            $struct->toArray(
+                ['uid', 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id']
+            )
         );
 
         $struct->id = $conn->lastInsertId();
@@ -81,17 +81,17 @@ class ModelDao extends AbstractDao
      */
     private static function decodePassOptions(array $options): false|string
     {
-        if (!isset($options[ 'limit' ])) {
+        if (!isset($options['limit'])) {
             return json_encode([]);
         }
 
         $limits = [];
 
-        foreach ($options[ 'limit' ] as $limit) {
+        foreach ($options['limit'] as $limit) {
             $limits[] = (int)$limit;
         }
 
-        $options[ 'limit' ] = $limits;
+        $options['limit'] = $limits;
 
         return json_encode($options);
     }
@@ -100,19 +100,19 @@ class ModelDao extends AbstractDao
     {
         $h_string = '';
 
-        $h_string .= $model_root[ 'version' ];
+        $h_string .= $model_root['version'];
 
-        foreach ($model_root[ 'categories' ] as $category) {
-            $h_string .= $category[ 'code' ];
+        foreach ($model_root['categories'] as $category) {
+            $h_string .= $category['code'];
         }
 
-        if (isset($model_root[ 'severities' ])) {
-            foreach ($model_root[ 'severities' ] as $severity) {
-                $h_string .= $severity[ 'penalty' ];
+        if (isset($model_root['severities'])) {
+            foreach ($model_root['severities'] as $severity) {
+                $h_string .= $severity['penalty'];
             }
         }
 
-        $h_string .= $model_root[ 'passfail' ][ 'type' ] . implode("", $model_root[ 'passfail' ][ 'options' ][ 'limit' ]);
+        $h_string .= $model_root['passfail']['type'] . implode("", $model_root['passfail']['options']['limit']);
 
         return crc32($h_string);
     }
@@ -128,11 +128,11 @@ class ModelDao extends AbstractDao
      */
     public static function createModelFromJsonDefinition(array $json): ModelStruct
     {
-        $model_root = $json[ 'model' ];
-        $model      = ModelDao::createRecord($model_root);
+        $model_root = $json['model'];
+        $model = ModelDao::createRecord($model_root);
 
-        $default_severities = $model_root[ 'severities' ] ?? [];
-        $categories         = $model_root[ 'categories' ];
+        $default_severities = $model_root['severities'] ?? [];
+        $categories = $model_root['categories'];
 
         foreach ($categories as $category) {
             self::insertCategory($category, $model->id, $default_severities, null);
@@ -147,7 +147,7 @@ class ModelDao extends AbstractDao
     private static function insertCategory(array $category, int $model_id, array $default_severities, ?int $parent_id): void
     {
         if (!array_key_exists('severities', $category)) {
-            $category[ 'severities' ] = $default_severities;
+            $category['severities'] = $default_severities;
         }
 
         /*
@@ -157,20 +157,20 @@ class ModelDao extends AbstractDao
 
         foreach (array_keys($category) as $key) {
             if (!in_array($key, ['label', 'severities', 'subcategories'])) {
-                $options[ $key ] = $category[ $key ];
+                $options[$key] = $category[$key];
             }
         }
 
         $category_record = CategoryDao::createRecord([
-                'id_model'   => $model_id,
-                'label'      => $category[ 'label' ],
-                'options'    => (empty($options) ? null : json_encode($options)),
-                'id_parent'  => $parent_id,
-                'severities' => json_encode($category[ 'severities' ])
+            'id_model' => $model_id,
+            'label' => $category['label'],
+            'options' => (empty($options) ? null : json_encode($options)),
+            'id_parent' => $parent_id,
+            'severities' => json_encode($category['severities'])
         ]);
 
-        if (array_key_exists('subcategories', $category) && !empty($category[ 'subcategories' ])) {
-            foreach ($category[ 'subcategories' ] as $sub) {
+        if (array_key_exists('subcategories', $category) && !empty($category['subcategories'])) {
+            foreach ($category['subcategories'] as $sub) {
                 self::insertCategory($sub, $model_id, $default_severities, $category_record->id);
             }
         }

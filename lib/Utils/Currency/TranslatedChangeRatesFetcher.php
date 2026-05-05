@@ -37,8 +37,8 @@ class TranslatedChangeRatesFetcher extends ChangeRatesFetcher
         //      ..... etc .....
         //  }
         // if everything went fine (code=1), unset the "code" key before returning to the client
-        if ($output[ "code" ] == 1) {
-            unset($output[ "code" ]);
+        if ($output["code"] == 1) {
+            unset($output["code"]);
             $this->changeRates = json_encode($output);
         }
     }

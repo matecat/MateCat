@@ -28,13 +28,13 @@ class EventModel
      * @var JobStruct
      */
     protected JobStruct $chunk;
-    protected ?int      $chunkCompletionEventId = null;
+    protected ?int $chunkCompletionEventId = null;
 
 
     public function __construct(JobStruct $chunk, CompletionEventStruct $eventStruct)
     {
         $this->eventStruct = $eventStruct;
-        $this->chunk       = $chunk;
+        $this->chunk = $chunk;
     }
 
     /**
@@ -46,8 +46,8 @@ class EventModel
         $this->_checkStatusIsValid();
 
         $this->chunkCompletionEventId = ChunkCompletionEventDao::createFromChunk(
-                $this->chunk,
-                $this->eventStruct
+            $this->chunk,
+            $this->eventStruct
         );
 
         $featureSet = new FeatureSet();
@@ -65,12 +65,12 @@ class EventModel
      */
     private function _checkStatusIsValid(): void
     {
-        $dao           = new ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase($this->chunk);
 
         if (
-                ($this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE) ||
-                (!$this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::TRANSLATE)
+            ($this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE) ||
+            (!$this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::TRANSLATE)
         ) {
             throw new Exception('Cannot save event, current status mismatch.');
         }

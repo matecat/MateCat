@@ -24,18 +24,18 @@ class ReplaceHistoryFactory
 
         if ($driver === 'redis') {
             return new ReplaceHistory(
-                    $id_job,
-                    new RedisReplaceEventDAO(),
-                    new RedisReplaceEventIndexDAO(),
-                    $ttl
+                $id_job,
+                new RedisReplaceEventDAO(),
+                new RedisReplaceEventIndexDAO(),
+                $ttl
             );
         }
 
         return new ReplaceHistory(
-                $id_job,
-                new MySQLReplaceEventDAO(),
-                new MySQLReplaceEventIndexDAO(),
-                $ttl
+            $id_job,
+            new MySQLReplaceEventDAO(),
+            new MySQLReplaceEventIndexDAO(),
+            $ttl
         );
     }
 

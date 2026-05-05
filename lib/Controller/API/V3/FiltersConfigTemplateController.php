@@ -32,7 +32,7 @@ class FiltersConfigTemplateController extends KleinController
     private function validateJSON($json): void
     {
         $validatorObject = new JSONValidatorObject($json);
-        $validator       = new JSONValidator('filters_extraction_parameters.json', true);
+        $validator = new JSONValidator('filters_extraction_parameters.json', true);
         $validator->validate($validatorObject);
     }
 
@@ -43,7 +43,7 @@ class FiltersConfigTemplateController extends KleinController
     {
         try {
             $currentPage = $this->request->param('page') ?? 1;
-            $pagination  = $this->request->param('perPage') ?? 20;
+            $pagination = $this->request->param('perPage') ?? 20;
 
             if ($pagination > 200) {
                 $pagination = 200;
@@ -59,7 +59,7 @@ class FiltersConfigTemplateController extends KleinController
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -86,7 +86,7 @@ class FiltersConfigTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -115,19 +115,23 @@ class FiltersConfigTemplateController extends KleinController
         } catch (JSONValidatorException|JsonValidatorGenericException $exception) {
             $this->response->code(400);
 
+            if ($exception instanceof JSONValidatorException) {
+                return $this->response->json(['error' => $exception->getFormattedError("filters-config-template")]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
                 $this->response->code(400);
 
                 return $this->response->json([
-                        'error' => "Invalid unique template name"
+                    'error' => "Invalid unique template name"
                 ]);
             } else {
                 $this->response->code(500);
 
                 return $this->response->json([
-                        'error' => $e->getMessage()
+                    'error' => $e->getMessage()
                 ]);
             }
         } catch (Exception $exception) {
@@ -135,7 +139,7 @@ class FiltersConfigTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -154,7 +158,7 @@ class FiltersConfigTemplateController extends KleinController
                 throw new Exception('Bad Get', 400);
             }
 
-            $id  = (int)$this->request->param('id');
+            $id = (int)$this->request->param('id');
             $uid = $this->getUser()->uid;
 
 
@@ -176,13 +180,17 @@ class FiltersConfigTemplateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
+            if ($exception instanceof JSONValidatorException) {
+                return $this->response->json(['error' => $exception->getFormattedError("filters-config-template")]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -193,7 +201,7 @@ class FiltersConfigTemplateController extends KleinController
     public function delete(): Response
     {
         try {
-            $id  = (int)$this->request->paramsNamed()->get('id');
+            $id = (int)$this->request->paramsNamed()->get('id');
             $uid = $this->getUser()->uid;
 
             $count = FiltersConfigTemplateDao::remove($id, $uid);
@@ -203,14 +211,14 @@ class FiltersConfigTemplateController extends KleinController
             }
 
             return $this->response->json([
-                    'id' => $id
+                'id' => $id
             ]);
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }

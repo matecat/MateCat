@@ -28,8 +28,8 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 abstract class AbstractWorker implements SplSubject
 {
 
-    const int ERR_REQUEUE_END   = 1;
-    const int ERR_REQUEUE       = 2;
+    const int ERR_REQUEUE_END = 1;
+    const int ERR_REQUEUE = 2;
     const int ERR_EMPTY_ELEMENT = 3;
 
     /**
@@ -145,7 +145,7 @@ abstract class AbstractWorker implements SplSubject
      */
     public function attach(SplObserver $observer): void
     {
-        $this->_observer[ spl_object_hash($observer) ] = $observer;
+        $this->_observer[spl_object_hash($observer)] = $observer;
     }
 
     /**
@@ -161,7 +161,7 @@ abstract class AbstractWorker implements SplSubject
      */
     public function detach(SplObserver $observer): void
     {
-        unset($this->_observer[ spl_object_hash($observer) ]);
+        unset($this->_observer[spl_object_hash($observer)]);
     }
 
     /**

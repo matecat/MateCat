@@ -55,11 +55,11 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $params = $queueElement->params->toArray();
 
-        $chunk       = new JobStruct($params[ 'chunk' ]);
-        $status      = $params[ 'destination_status' ];
-        $client_id   = $params[ 'client_id' ];
-        $user        = (new UserDao())->getByUid($params[ 'id_user' ]);
-        $source_page = ReviewUtils::revisionNumberToSourcePage($params[ 'revision_number' ]);
+        $chunk = new JobStruct($params['chunk']);
+        $status = $params['destination_status'];
+        $client_id = $params['client_id'];
+        $user = (new UserDao())->getByUid($params['id_user']);
+        $source_page = ReviewUtils::revisionNumberToSourcePage($params['revision_number']);
 
 
         $database = Database::obtain();
@@ -69,7 +69,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         $batchEventCreator->setFeatureSet($chunk->getProject()->getFeaturesSet());
         $batchEventCreator->setProject($chunk->getProject());
 
-        $old_translations = SegmentTranslationDao::getAllSegmentsByIdListAndJobId($params[ 'segment_ids' ], $chunk->id);
+        $old_translations = SegmentTranslationDao::getAllSegmentsByIdListAndJobId($params['segment_ids'], $chunk->id);
 
         $new_translations = [];
 
@@ -79,8 +79,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         }
 
         foreach ($old_translations as $old_translation) {
-            $new_translation                   = clone $old_translation;
-            $new_translation->status           = $status;
+            $new_translation = clone $old_translation;
+            $new_translation->status = $status;
             $new_translation->translation_date = date("Y-m-d H:i:s");
 
             $new_translations[] = $new_translation;
@@ -106,20 +106,20 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         $database->commit();
 
         if ($client_id) {
-            $segment_ids = $params[ 'segment_ids' ];
-            $payload     = [
-                    'segment_ids' => array_values($segment_ids),
-                    'status'      => $status
+            $segment_ids = $params['segment_ids'];
+            $payload = [
+                'segment_ids' => array_values($segment_ids),
+                'status' => $status
             ];
 
             $message = [
-                    '_type' => 'bulk_segment_status_change',
-                    'data'  => [
-                            'id_job'    => $chunk->id,
-                            'passwords' => $chunk->password,
-                            'id_client' => $client_id,
-                            'payload'   => $payload,
-                    ]
+                '_type' => 'bulk_segment_status_change',
+                'data' => [
+                    'id_job' => $chunk->id,
+                    'passwords' => $chunk->password,
+                    'id_client' => $client_id,
+                    'payload' => $payload,
+                ]
             ];
 
             $this->publishToNodeJsClients($message);

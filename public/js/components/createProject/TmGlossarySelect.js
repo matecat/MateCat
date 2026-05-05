@@ -4,6 +4,7 @@ import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 export const TmGlossarySelect = () => {
   const {
@@ -25,14 +26,14 @@ export const TmGlossarySelect = () => {
     <Select
       label={
         <div className="label-tmx-select">
-          <span>TM & Glossary</span>
+          <span>TM & TB</span>
           <span
             aria-label="By updating MyMemory, you are contributing to making MateCat better
         and helping fellow MateCat users improve their translations.
         For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel."
             tooltip-position="bottom"
           >
-            <span className="icon-info icon" />
+            <HelpCircle />
           </span>
         </div>
       }

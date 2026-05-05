@@ -108,7 +108,7 @@ class SmartMATE extends AbstractEngine
         }
 
         /**
-         * Gain 2 minutes to not fallback into a recursion
+         * Gain 2 minutes to not fall back into a recursion
          *
          * @see static::get
          */
@@ -174,7 +174,7 @@ class SmartMATE extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array
+    public static function getConfigurationParameters(): array
     {
         return [
             'enable_mt_analysis',

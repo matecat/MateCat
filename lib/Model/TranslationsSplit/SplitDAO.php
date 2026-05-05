@@ -30,7 +30,7 @@ class SplitDAO extends AbstractDao
     public function read(SegmentSplitStruct $obj): array
     {
         $where_conditions = [];
-        $values           = [];
+        $values = [];
 
         $query = "SELECT id_segment,
                                     id_job,
@@ -38,11 +38,11 @@ class SplitDAO extends AbstractDao
                                     target_chunk_lengths
                              FROM " . self::TABLE . " WHERE ";
 
-        $where_conditions[]     = "id_segment = :id_segment";
-        $values[ 'id_segment' ] = $obj->id_segment;
+        $where_conditions[] = "id_segment = :id_segment";
+        $values['id_segment'] = $obj->id_segment;
 
         $where_conditions[] = "id_job = :id_job";
-        $values[ 'id_job' ] = $obj->id_job;
+        $values['id_job'] = $obj->id_job;
 
         if (count($where_conditions)) {
             $query .= implode(" AND ", $where_conditions);
@@ -70,13 +70,13 @@ class SplitDAO extends AbstractDao
         $obj = $this->sanitize($obj);
 
         $res = self::insertStruct($obj, [
-                'no_nulls'            => true,
-                'on_duplicate_update' => [
-                        'id_segment'           => 'value',
-                        'id_job'               => 'value',
-                        'source_chunk_lengths' => 'value',
-                        'target_chunk_lengths' => 'value'
-                ]
+            'no_nulls' => true,
+            'on_duplicate_update' => [
+                'id_segment' => 'value',
+                'id_job' => 'value',
+                'source_chunk_lengths' => 'value',
+                'target_chunk_lengths' => 'value'
+            ]
         ]);
 
         if ($res > 0) {

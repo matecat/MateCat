@@ -102,15 +102,15 @@ export const Button = React.forwardRef(
         disabled={disabled || waiting}
         tabIndex={tabIndex}
         aria-label={tooltip}
-        tooltip-position={tooltipPosition}
         // eslint-disable-next-line react/no-unknown-property
+        tooltip-position={tooltipPosition}
         onClick={onClick}
         data-testid={testId}
         {...props}
       >
         {waiting ? (
           <>
-            <span className={styles.hiddenContent}>{children}</span>
+            <span>{children}</span>
             {/* <Spinner
                         className={styles.spinner}
                         size={

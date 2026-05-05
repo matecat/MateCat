@@ -1,6 +1,7 @@
 <?php
 
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -10,25 +11,28 @@ use TestHelpers\AbstractTest;
  * Date: 21/06/16
  * Time: 15.39
  */
-class ValidSecretTest extends AbstractTest {
+class ValidSecretTest extends AbstractTest
+{
 
     private $test_data;
 
-    public function setUp(): void {
-
-        $this->test_data          = new StdClass();
-        $this->test_data->api_key = Factory_ApiKey::create( [] );
+    public function setUp(): void
+    {
+        $this->test_data = new StdClass();
+        $this->test_data->api_key = Factory_ApiKey::create([]);
         parent::setUp();
     }
 
 
-    public function test_validSecret_success() {
-        $this->assertTrue( $this->test_data->api_key->validSecret( $this->test_data->api_key->api_secret ) );
-
+    #[Test]
+    public function test_validSecret_success()
+    {
+        $this->assertTrue($this->test_data->api_key->validSecret($this->test_data->api_key->api_secret));
     }
 
-    public function test_validSecret_failure() {
-        $this->assertFalse( $this->test_data->api_key->validSecret( $this->test_data->api_key->api_secret . "made_invalid" ) );
-
+    #[Test]
+    public function test_validSecret_failure()
+    {
+        $this->assertFalse($this->test_data->api_key->validSecret($this->test_data->api_key->api_secret . "made_invalid"));
     }
 }

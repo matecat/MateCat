@@ -22,7 +22,7 @@ trait ChunkNotFoundHandlerTrait
      * @return ?JobStruct
      * @throws ReflectionException
      */
-    protected function getJob($id_job, $password): ?JobStruct
+    protected function getJob(int $id_job, string $password): ?JobStruct
     {
         $job = JobDao::getByIdAndPassword($id_job, $password);
 
@@ -44,10 +44,10 @@ trait ChunkNotFoundHandlerTrait
         if ($this->chunk->isDeleted()) {
             $this->response->status()->setCode(404);
             $this->response->json([
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => 'No job found.'
-                    ]
+                'errors' => [
+                    'code' => 0,
+                    'message' => 'No job found.'
+                ]
             ]);
             exit();
         }

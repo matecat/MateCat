@@ -43,10 +43,10 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     protected int $httpCode;
 
     /**
-     * @param Request              $request
-     * @param Response             $response
+     * @param Request $request
+     * @param Response $response
      * @param ServiceProvider|null $service
-     * @param App|null             $app
+     * @param App|null $app
      *
      * @throws Exception
      */
@@ -59,57 +59,60 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     /**
      * @param string $template_name
-     * @param array  $params
-     * @param int    $code
+     * @param array $params
+     * @param int $code
      *
      * @return void
      * @throws Exception
      */
     public function setView(string $template_name, array $params = [], int $code = 200): void
     {
-        $this->view     = new PHPTALWithAppend(AppConfig::$TEMPLATE_ROOT . "/$template_name");
+        $this->view = new PHPTALWithAppend(AppConfig::$TEMPLATE_ROOT . "/$template_name");
         $this->httpCode = $code;
 
-        $this->view->{'basepath'}             = AppConfig::$BASEURL;
-        $this->view->{'hostpath'}             = AppConfig::$HTTPHOST;
-        $this->view->{'build_number'}         = AppConfig::$BUILD_NUMBER;
-        $this->view->{'support_mail'}         = AppConfig::$SUPPORT_MAIL;
+        $this->view->{'basepath'} = AppConfig::$BASEURL;
+        $this->view->{'hostpath'} = AppConfig::$HTTPHOST;
+        $this->view->{'build_number'} = AppConfig::$BUILD_NUMBER;
+        $this->view->{'support_mail'} = AppConfig::$SUPPORT_MAIL;
         $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean(AppConfig::$ENABLE_MULTI_DOMAIN_API);
-        $this->view->{'ajaxDomainsNumber'}    = AppConfig::$AJAX_DOMAINS;
-        $this->view->{'maxFileSize'}          = AppConfig::$MAX_UPLOAD_FILE_SIZE;
-        $this->view->{'maxTMXFileSize'}       = AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $this->view->{'flashMessages'}        = FlashMessage::flush();
+        $this->view->{'ajaxDomainsNumber'} = AppConfig::$AJAX_DOMAINS;
+        $this->view->{'maxFileSize'} = AppConfig::$MAX_UPLOAD_FILE_SIZE;
+        $this->view->{'maxTMXFileSize'} = AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->view->{'flashMessages'} = FlashMessage::flush();
 
         if ($this->isLoggedIn()) {
             // Load the feature set for the user (plus the autoloaded ones)
             $this->featureSet->loadFromUserEmail($this->user->email);
         }
 
-        $this->view->{'user_plugins'}     = new PHPTalMap($this->featureSet->getCodes());
-        $this->view->{'isLoggedIn'}       = new PHPTalBoolean($this->isLoggedIn());
-        $this->view->{'userMail'}         = $this->getUser()->email;
-        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->filter("isAnInternalUser", $this->getUser()->email));
+        $this->view->{'user_plugins'} = new PHPTalMap($this->featureSet->getCodes());
+        $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
+        $this->view->{'userMail'} = $this->getUser()->email;
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->filter("isAnInternalUser", $this->getUser()->email ?? ''));
 
-        $this->view->{'footer_js'}     = [];
-        $this->view->{'config_js'}     = [];
+        $this->view->{'footer_js'} = [];
+        $this->view->{'config_js'} = [];
         $this->view->{'css_resources'} = [];
 
         // init oauth clients
-        $this->view->{'googleAuthURL'}    = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'githubAuthUrl'}    = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'linkedInAuthUrl'}  = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
         $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'facebookAuthUrl'}  = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
 
         $this->view->{'googleDriveEnabled'} = new PHPTalBoolean(AppConfig::isGDriveConfigured());
-        $this->view->{'gdriveAuthURL'}      = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME, AppConfig::$HTTPHOST . "/gdrive/oauth/response")->getAuthorizationUrl($_SESSION, 'drive') : "";
+        $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
+            GoogleProvider::PROVIDER_NAME,
+            AppConfig::$HTTPHOST . "/gdrive/oauth/response"
+        )->getAuthorizationUrl($_SESSION, 'drive') : "";
 
         /**
          * This is a unique ID generated at runtime.
          * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
          */
-        $this->view->{'x_nonce_unique_id'}          = Utils::uuid4();
-        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url(AppConfig::$HTTPHOST)[ 'host' ] : null;
+        $this->view->{'x_nonce_unique_id'} = Utils::uuid4();
+        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url(AppConfig::$HTTPHOST)['host'] : null;
 
         $this->addParamsToView($params);
 
@@ -155,8 +158,8 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     public function redirectToWantedUrl(): never
     {
-        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $_SESSION[ 'wanted_url' ], false);
-        unset($_SESSION[ 'wanted_url' ]);
+        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $_SESSION['wanted_url'], false);
+        unset($_SESSION['wanted_url']);
         exit;
     }
 

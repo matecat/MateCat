@@ -27,10 +27,10 @@ class FeedbackDAO extends AbstractDao
                 ";
 
         $values = [
-                'id_job'          => $feedbackStruct->id_job,
-                'password'        => $feedbackStruct->password,
-                'revision_number' => $feedbackStruct->revision_number,
-                'feedback'        => $feedbackStruct->feedback,
+            'id_job' => $feedbackStruct->id_job,
+            'password' => $feedbackStruct->password,
+            'revision_number' => $feedbackStruct->revision_number,
+            'feedback' => $feedbackStruct->feedback,
         ];
 
         $stmt = $this->database->getConnection()->prepare($query);
@@ -40,10 +40,10 @@ class FeedbackDAO extends AbstractDao
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $old_password
      * @param string $new_password
-     * @param int    $revision_number
+     * @param int $revision_number
      *
      * @return int
      */
@@ -58,10 +58,10 @@ class FeedbackDAO extends AbstractDao
             ";
 
         $values = [
-                'id_job'          => $id_job,
-                'old_password'    => $old_password,
-                'new_password'    => $new_password,
-                'revision_number' => $revision_number
+            'id_job' => $id_job,
+            'old_password' => $old_password,
+            'new_password' => $new_password,
+            'revision_number' => $revision_number
         ];
 
         $stmt = $this->database->getConnection()->prepare($query);
@@ -88,14 +88,14 @@ class FeedbackDAO extends AbstractDao
             ";
 
         $values = [
-                'id_job'          => $id_job,
-                'password'        => $password,
-                'revision_number' => $revision_number
+            'id_job' => $id_job,
+            'password' => $password,
+            'revision_number' => $revision_number
         ];
 
-        $stmt   = $this->database->getConnection()->prepare($query);
+        $stmt = $this->database->getConnection()->prepare($query);
         $object = $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $values);
 
-        return $object[ 0 ] ?? null;
+        return $object[0] ?? null;
     }
 }

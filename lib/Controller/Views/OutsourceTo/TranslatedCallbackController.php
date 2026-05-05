@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  */
+
 namespace Controller\Views\OutsourceTo;
 
 use Model\Outsource\TranslatedConfirmationStruct;
@@ -17,7 +18,8 @@ use Model\Outsource\TranslatedConfirmationStruct;
  * Time: 12.23
  *
  */
-class TranslatedCallbackController extends AbstractController {
+class TranslatedCallbackController extends AbstractController
+{
 
     /**
      * Redirect page to review the order

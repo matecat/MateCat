@@ -28,7 +28,7 @@ class UserMetadata
         if (is_array($collection) and !empty($collection)) {
             foreach ($collection as $metadata) {
                 if (in_array($metadata->key, $returnable)) {
-                    $out[ $metadata->key ] = $metadata->value;
+                    $out[$metadata->key] = $metadata->value;
                 }
             }
         }

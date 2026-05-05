@@ -255,7 +255,7 @@ class TagEntity extends Component {
             suppressContentEditableWarning={true}
             onClick={(e) => {
               e.stopPropagation()
-              this.onClickBound(entityId, entityPlaceholder)
+              this.onClickBound()
               !openSplit &&
                 setTimeout(() => {
                   SegmentActions.highlightTags(
@@ -283,9 +283,18 @@ class TagEntity extends Component {
     )
   }
 
-  onClickBound = (entityId, entityPlaceholder) => {
-    const {start, end, onClick: onClickAction} = this.props
-    onClickAction(start, end, entityId, entityPlaceholder)
+  onClickBound = () => {
+    const {
+      start,
+      end,
+      onClick: onClickAction,
+      entityKey,
+      contentState,
+    } = this.props
+    const {
+      data: {name: entityName},
+    } = contentState.getEntity(entityKey)
+    onClickAction(start, end, entityName)
   }
 
   highlightTags = (tagId, tagPlaceholder, triggerEntityKey) => {

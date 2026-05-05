@@ -53,7 +53,7 @@ const getFilteredSchemaToCompare = (template) => {
   /* eslint-enable no-unused-vars */
 }
 
-export const XliffSettingsContext = createContext({})
+import {XliffSettingsContext} from './XliffSettingsContext'
 
 export const XliffSettings = () => {
   const {
@@ -172,7 +172,7 @@ export const XliffSettings = () => {
                 Customize how Matecat handles segments in XLIFF files based on
                 their states.{' '}
                 <a
-                  href="https://guides.matecat.com/file-import#:~:text=Xliff%20import%20settings"
+                  href="https://guides.matecat.com/file-import#xliff-import-settings"
                   target="_blank"
                 >
                   More details

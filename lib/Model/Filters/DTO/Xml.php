@@ -7,10 +7,10 @@ use JsonSerializable;
 class Xml implements IDto, JsonSerializable
 {
 
-    private bool  $preserve_whitespace       = false;
-    private array $translate_elements        = [];
+    private bool $preserve_whitespace = false;
+    private array $translate_elements = [];
     private array $do_not_translate_elements = [];
-    private array $translate_attributes      = [];
+    private array $translate_attributes = [];
 
     /**
      * @param bool|null $preserve_whitespace
@@ -49,20 +49,20 @@ class Xml implements IDto, JsonSerializable
      */
     public function fromArray(array $data): void
     {
-        if (isset($data[ 'preserve_whitespace' ])) {
-            $this->setPreserveWhitespace($data[ 'preserve_whitespace' ]);
+        if (isset($data['preserve_whitespace'])) {
+            $this->setPreserveWhitespace($data['preserve_whitespace']);
         }
 
-        if (isset($data[ 'translate_elements' ])) {
-            $this->setTranslateElements($data[ 'translate_elements' ]);
+        if (isset($data['translate_elements'])) {
+            $this->setTranslateElements($data['translate_elements']);
         }
 
-        if (isset($data[ 'do_not_translate_elements' ])) {
-            $this->setDoNotTranslateElements($data[ 'do_not_translate_elements' ]);
+        if (isset($data['do_not_translate_elements'])) {
+            $this->setDoNotTranslateElements($data['do_not_translate_elements']);
         }
 
-        if (isset($data[ 'translate_attributes' ])) {
-            $this->setTranslateAttributes($data[ 'translate_attributes' ]);
+        if (isset($data['translate_attributes'])) {
+            $this->setTranslateAttributes($data['translate_attributes']);
         }
     }
 
@@ -73,15 +73,15 @@ class Xml implements IDto, JsonSerializable
     {
         $format = [];
 
-        $format[ 'preserve_whitespace' ] = $this->preserve_whitespace;
-        $format[ 'translate_elements' ]  = $this->translate_elements;
+        $format['preserve_whitespace'] = $this->preserve_whitespace;
+        $format['translate_elements'] = $this->translate_elements;
 
         if (!empty($this->do_not_translate_elements)) {
-            $format[ 'do_not_translate_elements' ] = $this->do_not_translate_elements;
-            unset($format[ 'translate_elements' ]);
+            $format['do_not_translate_elements'] = $this->do_not_translate_elements;
+            unset($format['translate_elements']);
         }
 
-        $format[ 'translate_attributes' ] = $this->translate_attributes;
+        $format['translate_attributes'] = $this->translate_attributes;
 
         return $format;
     }

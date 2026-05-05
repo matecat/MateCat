@@ -68,8 +68,7 @@ export const formatText = (text, format) => {
   return text
 }
 
-export const regexWordDelimiter =
-  /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
+
 
 export const getCharactersCounter = (value) => {
   let cleanedContent = TEXT_UTILS.removeHiddenCharacters(

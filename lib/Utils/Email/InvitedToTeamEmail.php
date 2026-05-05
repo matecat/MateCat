@@ -17,17 +17,17 @@ use Utils\Url\CanonicalRoutes;
 class InvitedToTeamEmail extends AbstractEmail
 {
 
-    protected ?string    $title;
+    protected ?string $title;
     protected UserStruct $user;
-    protected string     $invited_email;
+    protected string $invited_email;
     protected TeamStruct $team;
 
     public function __construct(UserStruct $user, string $invited_email, TeamStruct $team)
     {
-        $this->user          = $user;
+        $this->user = $user;
         $this->invited_email = $invited_email;
-        $this->team          = $team;
-        $this->title         = "You've been invited to Matecat";
+        $this->team = $team;
+        $this->title = "You've been invited to Matecat";
 
         $this->_setLayout('skeleton.html');
         $this->_setTemplate('Team/email_invited_to_team.html');
@@ -39,14 +39,14 @@ class InvitedToTeamEmail extends AbstractEmail
     protected function _getTemplateVariables(): array
     {
         return [
-                'sender'     => $this->user->toArray(),
-                'email'      => $this->invited_email,
-                'team'       => $this->team->toArray(),
-                'signup_url' => CanonicalRoutes::inviteToTeamConfirm([
-                        'invited_by_uid' => $this->user->uid,
-                        'email'          => $this->invited_email,
-                        'team_id'        => $this->team->id
-                ])
+            'sender' => $this->user->toArray(),
+            'email' => $this->invited_email,
+            'team' => $this->team->toArray(),
+            'signup_url' => CanonicalRoutes::inviteToTeamConfirm([
+                'invited_by_uid' => $this->user->uid,
+                'email' => $this->invited_email,
+                'team_id' => $this->team->id
+            ])
         ];
     }
 
@@ -62,10 +62,10 @@ class InvitedToTeamEmail extends AbstractEmail
         $bodyHtmlMessage = $this->_buildMessageContent();
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage($bodyHtmlMessage),
-                $this->_buildTxtMessage($bodyHtmlMessage)
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage($bodyHtmlMessage),
+            $this->_buildTxtMessage($bodyHtmlMessage)
         );
     }
 }

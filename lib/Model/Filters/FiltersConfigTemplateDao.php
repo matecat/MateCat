@@ -19,11 +19,11 @@ class FiltersConfigTemplateDao extends AbstractDao
 {
     const string TABLE = 'filters_config_templates';
 
-    const string query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const string query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
     const string query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
-    const string query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
-    const string query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
-    const string paginated_map_key   = __CLASS__ . "::getAllPaginated";
+    const string query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
+    const string query_paginated = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
+    const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
      * @var FiltersConfigTemplateDao|null
@@ -44,7 +44,7 @@ class FiltersConfigTemplateDao extends AbstractDao
 
     /**
      * @param string $json
-     * @param int    $uid
+     * @param int $uid
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
@@ -59,8 +59,8 @@ class FiltersConfigTemplateDao extends AbstractDao
 
     /**
      * @param FiltersConfigTemplateStruct $templateStruct
-     * @param string                      $json
-     * @param int                         $uid
+     * @param string $json
+     * @param int $uid
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
@@ -73,11 +73,11 @@ class FiltersConfigTemplateDao extends AbstractDao
     }
 
     /**
-     * @param int    $uid
+     * @param int $uid
      * @param string $baseRoute
-     * @param int    $current
-     * @param int    $pagination
-     * @param int    $ttl
+     * @param int $current
+     * @param int $pagination
+     * @param int $ttl
      *
      * @return array
      * @throws ReflectionException
@@ -89,8 +89,8 @@ class FiltersConfigTemplateDao extends AbstractDao
         $pager = new Pager($conn);
 
         $totals = $pager->count(
-                "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
-                ['uid' => $uid]
+            "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
+            ['uid' => $uid]
         );
 
         $paginationParameters = new PaginationParameters(static::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
@@ -103,11 +103,11 @@ class FiltersConfigTemplateDao extends AbstractDao
         /**
          * @var FiltersConfigTemplateStruct $item
          */
-        foreach ($result[ 'items' ] as $item) {
+        foreach ($result['items'] as $item) {
             $models[] = self::hydrateTemplateStruct($item->getArrayCopy());
         }
 
-        $result[ 'items' ] = $models;
+        $result['items'] = $models;
 
         return $result;
     }
@@ -121,16 +121,16 @@ class FiltersConfigTemplateDao extends AbstractDao
      */
     public static function getById(int $id, int $ttl = 60): ?FiltersConfigTemplateStruct
     {
-        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_id);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
-                'id' => $id,
+            'id' => $id,
         ]);
 
         if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[ 0 ]);
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -143,40 +143,40 @@ class FiltersConfigTemplateDao extends AbstractDao
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?FiltersConfigTemplateStruct
     {
-        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
-                'id'  => $id,
-                'uid' => $uid,
+            'id' => $id,
+            'uid' => $uid,
         ]);
 
         if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[ 0 ]);
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
-     * @param int    $uid
+     * @param int $uid
      * @param string $name
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return FiltersConfigTemplateStruct|null
      * @throws ReflectionException
      */
     public static function getByUidAndName(int $uid, string $name, int $ttl = 60): ?FiltersConfigTemplateStruct
     {
-        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_uid_name);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_uid_name);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectTemplateStruct::class, [
-                'uid'  => $uid,
-                'name' => $name,
+            'uid' => $uid,
+            'name' => $name,
         ]);
 
         if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[ 0 ]);
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -191,10 +191,10 @@ class FiltersConfigTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
         $stmt->execute([
-                'id'   => $id,
-                'uid'  => $uid,
-                'now'  => (new DateTime())->format('Y-m-d H:i:s'),
-                'name' => 'deleted_' . Utils::randomString()
+            'id' => $id,
+            'uid' => $uid,
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
+            'name' => 'deleted_' . Utils::randomString()
         ]);
 
         self::destroyQueryByIdCache($conn, $id);
@@ -232,8 +232,8 @@ class FiltersConfigTemplateDao extends AbstractDao
     }
 
     /**
-     * @param PDO    $conn
-     * @param int    $uid
+     * @param PDO $conn
+     * @param int $uid
      * @param string $name
      *
      * @throws ReflectionException
@@ -262,20 +262,20 @@ class FiltersConfigTemplateDao extends AbstractDao
     private static function hydrateTemplateStruct(array $data): ?FiltersConfigTemplateStruct
     {
         if (
-                !isset($data[ 'id' ]) or
-                !isset($data[ 'uid' ]) or
-                !isset($data[ 'name' ])
+            !isset($data['id']) or
+            !isset($data['uid']) or
+            !isset($data['name'])
         ) {
             return null;
         }
 
-        $struct              = new FiltersConfigTemplateStruct();
-        $struct->id          = $data[ 'id' ];
-        $struct->uid         = $data[ 'uid' ];
-        $struct->name        = $data[ 'name' ];
-        $struct->created_at  = $data[ 'created_at' ];
-        $struct->modified_at = $data[ 'modified_at' ];
-        $struct->deleted_at  = $data[ 'deleted_at' ];
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->id = $data['id'];
+        $struct->uid = $data['uid'];
+        $struct->name = $data['name'];
+        $struct->created_at = $data['created_at'];
+        $struct->modified_at = $data['modified_at'];
+        $struct->deleted_at = $data['deleted_at'];
 
         $struct->hydrateAllDto($data);
 
@@ -291,28 +291,28 @@ class FiltersConfigTemplateDao extends AbstractDao
     public static function save(FiltersConfigTemplateStruct $templateStruct): FiltersConfigTemplateStruct
     {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `created_at` ) " .
-                " VALUES " .
-                " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :dita, :now ); ";
+            " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `created_at` ) " .
+            " VALUES " .
+            " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :dita, :now ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                "uid"           => $templateStruct->uid,
-                "name"          => $templateStruct->name,
-                "json"          => json_encode($templateStruct->getJson()),
-                "xml"           => json_encode($templateStruct->getXml()),
-                "yaml"          => json_encode($templateStruct->getYaml()),
-                "ms_excel"      => json_encode($templateStruct->getMsExcel()),
-                "ms_word"       => json_encode($templateStruct->getMsWord()),
-                "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
-                "dita"          => json_encode($templateStruct->getDita()),
-                'now'           => (new DateTime())->format('Y-m-d H:i:s'),
+            "uid" => $templateStruct->uid,
+            "name" => $templateStruct->name,
+            "json" => json_encode($templateStruct->getJson()),
+            "xml" => json_encode($templateStruct->getXml()),
+            "yaml" => json_encode($templateStruct->getYaml()),
+            "ms_excel" => json_encode($templateStruct->getMsExcel()),
+            "ms_word" => json_encode($templateStruct->getMsWord()),
+            "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
+            "dita" => json_encode($templateStruct->getDita()),
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        $templateStruct->id         = $conn->lastInsertId();
+        $templateStruct->id = $conn->lastInsertId();
         $templateStruct->created_at = $now;
 
         self::destroyQueryByIdCache($conn, $templateStruct->id);
@@ -347,17 +347,17 @@ class FiltersConfigTemplateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                "id"            => $templateStruct->id,
-                "uid"           => $templateStruct->uid,
-                "name"          => $templateStruct->name,
-                "json"          => json_encode($templateStruct->getJson()),
-                "xml"           => json_encode($templateStruct->getXml()),
-                "yaml"          => json_encode($templateStruct->getYaml()),
-                "ms_excel"      => json_encode($templateStruct->getMsExcel()),
-                "ms_word"       => json_encode($templateStruct->getMsWord()),
-                "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
-                "dita"          => json_encode($templateStruct->getDita()),
-                'now'           => (new DateTime())->format('Y-m-d H:i:s'),
+            "id" => $templateStruct->id,
+            "uid" => $templateStruct->uid,
+            "name" => $templateStruct->name,
+            "json" => json_encode($templateStruct->getJson()),
+            "xml" => json_encode($templateStruct->getXml()),
+            "yaml" => json_encode($templateStruct->getYaml()),
+            "ms_excel" => json_encode($templateStruct->getMsExcel()),
+            "ms_word" => json_encode($templateStruct->getMsWord()),
+            "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
+            "dita" => json_encode($templateStruct->getDita()),
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
         self::destroyQueryByIdCache($conn, $templateStruct->id);

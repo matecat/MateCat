@@ -22,8 +22,8 @@ class Dita implements IDto, JsonSerializable
      */
     public function fromArray(array $data): void
     {
-        if (isset($data[ 'do_not_translate_elements' ])) {
-            $this->setDoNotTranslateElements($data[ 'do_not_translate_elements' ]);
+        if (isset($data['do_not_translate_elements'])) {
+            $this->setDoNotTranslateElements($data['do_not_translate_elements']);
         }
     }
 
@@ -33,7 +33,7 @@ class Dita implements IDto, JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-                'do_not_translate_elements' => $this->do_not_translate_elements
+            'do_not_translate_elements' => $this->do_not_translate_elements
         ];
     }
 

@@ -30,14 +30,14 @@ class DeepLStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $others = [
-            "relative_glossaries_url" => "glossaries",
+        "relative_glossaries_url" => "glossaries",
     ];
 
     /**
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'DeepL-Auth-Key' => "",
+        'DeepL-Auth-Key' => "",
     ];
 
     /**

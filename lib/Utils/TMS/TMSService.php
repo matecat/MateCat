@@ -131,14 +131,16 @@ class TMSService
     /**
      * Saves the uploaded file and returns the file info.
      *
+     * @param bool $disable_upload_limit
+     *
      * @return UploadElement
      * @throws Exception
      */
-    public function uploadFile(): UploadElement
+    public function uploadFile(?bool $disable_upload_limit = false): UploadElement
     {
         $uploadManager = new Upload();
 
-        return $uploadManager->uploadFiles($_FILES);
+        return $uploadManager->uploadFiles($_FILES, $disable_upload_limit);
     }
 
     /**
@@ -178,8 +180,7 @@ class TMSService
                 } catch (Exception $e) {
                     //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
                     $this->logger->debug($e->getMessage());
-                    $engineName = explode("\\", get_class($engine));
-                    $engineName = end($engineName);
+                    $engineName = $engine->getEngineRecord()->getEngineType();
                     $warnings[] = ['engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName()];
                 }
             }
@@ -288,8 +289,8 @@ class TMSService
                 //wait for the daemon to process it
                 //LOADING
                 $this->logger->debug("waiting for \"" . $this->name . "\" to be loaded into MyMemory");
-            $result['data'] = $allMemories->responseData;
-            $result['completed'] = false;
+                $result['data'] = $allMemories->responseData;
+                $result['completed'] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)

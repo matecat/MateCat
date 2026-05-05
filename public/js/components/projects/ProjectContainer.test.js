@@ -9,6 +9,7 @@ import {mswServer} from '../../../mocks/mswServer'
 import userEvent from '@testing-library/user-event'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import userMock from '../../../mocks/userMock'
+import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
 
 // create modal div
 const modalElement = document.createElement('div')
@@ -422,6 +423,9 @@ class ResizeObserver {
   disconnect() {}
 }
 
+const onCheckedProject = jest.fn()
+const onCheckedJob = jest.fn()
+
 test('Rendering elements', async () => {
   window.ResizeObserver = ResizeObserver
 
@@ -433,7 +437,11 @@ test('Rendering elements', async () => {
     <ApplicationWrapperContext.Provider
       value={{isUserLogged: true, userInfo: userMock}}
     >
-      <ProjectContainer {...props} />
+      <ProjectsBulkActionsContext.Provider
+        value={{jobsBulk: [], onCheckedProject, onCheckedJob}}
+      >
+        <ProjectContainer {...props} />
+      </ProjectsBulkActionsContext.Provider>
     </ApplicationWrapperContext.Provider>,
   )
 

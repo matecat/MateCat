@@ -11,19 +11,19 @@ use Utils\Engines\Lara;
 class LaraController extends KleinController
 {
 
-    protected Lara $laraClient;
+    protected Lara $laraEngine;
 
     protected function afterConstruct(): void
     {
         parent::afterConstruct();
 
-        $loginValidator       = new LoginValidator($this);
+        $loginValidator = new LoginValidator($this);
         $engineOwnerValidator = new EngineOwnershipValidator($this, filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT), Lara::class);
 
         $loginValidator->onSuccess(function () use ($engineOwnerValidator) {
             $engineOwnerValidator->validate();
         })->onSuccess(function () use ($engineOwnerValidator) {
-            $this->laraClient = $engineOwnerValidator->getEngine();
+            $this->laraEngine = $engineOwnerValidator->getEngine();
         });
 
         $this->appendValidator($loginValidator);
@@ -35,7 +35,7 @@ class LaraController extends KleinController
      */
     public function glossaries(): void
     {
-        $glossaries = $this->laraClient->getGlossaries();
+        $glossaries = $this->laraEngine->getGlossaries();
 
         $this->response->status()->setCode(200);
         $this->response->json($glossaries);

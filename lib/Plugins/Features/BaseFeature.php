@@ -9,7 +9,6 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Utils\Logger\LoggerFactory;
-use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 
@@ -68,14 +67,12 @@ abstract class BaseFeature implements IBaseFeature
     }
 
     /**
-     * Warning: passing a $projectStructure prevents the possibility to pass
-     * a persisted project in the future. TODO: this is likely to be reworked
-     * in the future.
+     * Constructor method for the class.
      *
-     * The ideal solution would be to use a ProjectStruct for both persisted and
-     * unpersisted scenarios, so to work with the same input structure every time.
+     * @param BasicFeatureStruct $feature An instance of BasicFeatureStruct representing the feature data.
+     * @return void
      *
-     * @param BasicFeatureStruct $feature
+     * @throws LogicException If the plugin code is not defined.
      */
     public function __construct(BasicFeatureStruct $feature)
     {
@@ -83,7 +80,7 @@ abstract class BaseFeature implements IBaseFeature
         if (empty($fCode)) {
             throw new LogicException("Plugin code not defined.");
         }
-        $this->feature     = $feature;
+        $this->feature = $feature;
         $this->logger_name = $this->feature->feature_code . '_plugin';
     }
 

@@ -46,11 +46,11 @@ class ReviseTranslationIssuesController extends KleinController
     public function index(): void
     {
         $records = (new TranslationVersionDao())->setCacheTTL(0)->getVersionsForRevision(
-                $this->request->param('id_job'),
-                $this->request->param('id_segment')
+            $this->request->param('id_job'),
+            $this->request->param('id_segment')
         );
 
-        $chunk = ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+        $chunk = ChunkDao::getByIdAndPassword($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();

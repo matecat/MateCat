@@ -41,19 +41,19 @@ class BaseCommentEmail extends AbstractEmail
     /**
      * BaseCommentEmail constructor.
      *
-     * @param UserStruct              $user
-     * @param CommentStruct           $comment
-     * @param string                  $url
+     * @param UserStruct $user
+     * @param CommentStruct $comment
+     * @param string $url
      * @param ShapelessConcreteStruct $project
-     * @param JobStruct               $job
+     * @param JobStruct $job
      */
     public function __construct(UserStruct $user, CommentStruct $comment, string $url, ShapelessConcreteStruct $project, JobStruct $job)
     {
         $this->project = $project;
-        $this->user    = $user;
+        $this->user = $user;
         $this->comment = $comment;
-        $this->url     = $url;
-        $this->job     = $job;
+        $this->url = $url;
+        $this->job = $job;
         $this->_setLayout('skeleton.html');
         $this->_setTemplate('Comment/action_on_a_comment.html');
     }
@@ -66,10 +66,10 @@ class BaseCommentEmail extends AbstractEmail
         $recipient = [$this->user->email, $this->user->first_name];
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage($this->_buildMessageContent())
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
@@ -81,12 +81,12 @@ class BaseCommentEmail extends AbstractEmail
         $content = CommentDao::placeholdContent($this->comment->message);
 
         return [
-                'user'      => $this->user->toArray(),
-                'project'   => $this->project,
-                'job'       => $this->job,
-                'commenter' => $this->comment->getFullName(true),
-                'url'       => $this->url . ",comment",
-                'content'   => $content
+            'user' => $this->user->toArray(),
+            'project' => $this->project,
+            'job' => $this->job,
+            'commenter' => $this->comment->getFullName(true),
+            'url' => $this->url . ",comment",
+            'content' => $content
         ];
     }
 }

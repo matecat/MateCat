@@ -13,11 +13,11 @@ use ReflectionException;
 class CommentDao extends AbstractDao
 {
 
-    const string TABLE       = "comments";
+    const string TABLE = "comments";
     const string STRUCT_TYPE = "CommentStruct";
 
     protected static array $auto_increment_field = ['id'];
-    protected static array $primary_keys         = ['id'];
+    protected static array $primary_keys = ['id'];
 
     const int TYPE_COMMENT = 1;
     const int TYPE_RESOLVE = 2;
@@ -53,7 +53,7 @@ class CommentDao extends AbstractDao
         GROUP BY id_project, id_job, jobs.password
  ";
 
-        $con  = $this->database->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare($sql);
 
         return $this->_fetchObjectMap($stmt, OpenThreadsStruct::class, []);
@@ -67,14 +67,14 @@ class CommentDao extends AbstractDao
      */
     public function deleteComment(BaseCommentStruct $comment): bool
     {
-        $sql  = "DELETE from comments WHERE id = :id";
-        $con  = $this->database->getConnection();
+        $sql = "DELETE from comments WHERE id = :id";
+        $con = $this->database->getConnection();
         $stmt = $con->prepare($sql);
 
         $this->destroySegmentIdSegmentCache($comment->id_segment);
 
         return $stmt->execute([
-                'id' => $comment->id
+            'id' => $comment->id
         ]);
     }
 
@@ -86,17 +86,17 @@ class CommentDao extends AbstractDao
      */
     public function destroySegmentIdSegmentCache(int $idSegment): bool
     {
-        $con  = $this->database->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare("SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id");
 
         return $this->_destroyObjectCache(
-                $stmt,
-                BaseCommentStruct::class,
-                [
-                        'id_segment'           => $idSegment,
-                        'message_type_comment' => CommentDao::TYPE_COMMENT,
-                        'message_type_resolve' => CommentDao::TYPE_RESOLVE,
-                ]
+            $stmt,
+            BaseCommentStruct::class,
+            [
+                'id_segment' => $idSegment,
+                'message_type_comment' => CommentDao::TYPE_COMMENT,
+                'message_type_resolve' => CommentDao::TYPE_RESOLVE,
+            ]
         );
     }
 
@@ -109,13 +109,13 @@ class CommentDao extends AbstractDao
      */
     public function getBySegmentId(int $idSegment, int $ttl = 7200): array
     {
-        $sql  = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id";
+        $sql = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id";
         $stmt = $this->_getStatementForQuery($sql);
 
         return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, BaseCommentStruct::class, [
-                'id_segment'           => $idSegment,
-                'message_type_comment' => CommentDao::TYPE_COMMENT,
-                'message_type_resolve' => CommentDao::TYPE_RESOLVE,
+            'id_segment' => $idSegment,
+            'message_type_comment' => CommentDao::TYPE_COMMENT,
+            'message_type_resolve' => CommentDao::TYPE_RESOLVE,
         ]);
     }
 
@@ -132,8 +132,8 @@ class CommentDao extends AbstractDao
 
         /** @var $res BaseCommentStruct */
         $res = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, BaseCommentStruct::class, [
-                'id' => $id
-        ])[ 0 ] ?? null;
+            'id' => $id
+        ])[0] ?? null;
 
         return $res;
     }
@@ -150,25 +150,25 @@ class CommentDao extends AbstractDao
             $obj->message_type = self::TYPE_COMMENT;
         }
 
-        $obj->timestamp   = time();
+        $obj->timestamp = time();
         $obj->create_date = date('Y-m-d H:i:s', $obj->timestamp);
 
         $this->validateComment($obj);
 
         $this->database->insert("comments", [
-                'id_job'       => $obj->id_job,
-                'id_segment'   => $obj->id_segment,
-                'create_date'  => $obj->create_date,
-                'email'        => $obj->email,
-                'full_name'    => $obj->full_name,
-                'uid'          => $obj->uid,
-                'source_page'  => $obj->source_page,
-                'is_anonymous' => $obj->is_anonymous ?: 0,
-                'message_type' => $obj->message_type,
-                'message'      => $obj->message
+            'id_job' => $obj->id_job,
+            'id_segment' => $obj->id_segment,
+            'create_date' => $obj->create_date,
+            'email' => $obj->email,
+            'full_name' => $obj->full_name,
+            'uid' => $obj->uid,
+            'source_page' => $obj->source_page,
+            'is_anonymous' => $obj->is_anonymous ?: 0,
+            'message_type' => $obj->message_type,
+            'message' => $obj->message
         ]);
 
-        $id      = $this->database->last_insert();
+        $id = $this->database->last_insert();
         $obj->id = (int)$id;
 
         $this->destroySegmentIdSegmentCache($obj->id_segment);
@@ -192,19 +192,19 @@ class CommentDao extends AbstractDao
             $comment = $this->saveComment($obj);
 
             self::updateFields(
-                    ['resolve_date' => $obj->resolve_date],
-                    [
-                            'id_segment'   => $obj->id_segment,
-                            'id_job'       => $obj->id_job,
-                            'resolve_date' => null
-                    ]
+                ['resolve_date' => $obj->resolve_date],
+                [
+                    'id_segment' => $obj->id_segment,
+                    'id_job' => $obj->id_job,
+                    'resolve_date' => null
+                ]
             );
 
             $this->database->commit();
 
-            $obj->thread_id   = $obj->getThreadId();
+            $obj->thread_id = $obj->getThreadId();
             $obj->create_date = $comment->create_date;
-            $obj->timestamp   = $comment->timestamp;
+            $obj->timestamp = $comment->timestamp;
 
             $this->destroySegmentIdSegmentCache($obj->id_segment);
         } catch (Exception) {
@@ -217,18 +217,18 @@ class CommentDao extends AbstractDao
     public function getThreadContributorUids(CommentStruct $obj): array
     {
         $bind_values = [
-                'id_job'     => $obj->id_job,
-                'id_segment' => $obj->id_segment
+            'id_job' => $obj->id_job,
+            'id_segment' => $obj->id_segment
         ];
 
         $query = "SELECT DISTINCT(uid) FROM " . self::TABLE .
-                " WHERE id_job = :id_job 
+            " WHERE id_job = :id_job 
                   AND id_segment = :id_segment 
                   AND uid IS NOT NULL ";
 
         if ($obj->uid) {
-            $bind_values[ 'uid' ] = $obj->uid;
-            $query                .= " AND uid <> :uid ";
+            $bind_values['uid'] = $obj->uid;
+            $query .= " AND uid <> :uid ";
         }
 
         $stmt = $this->database->getConnection()->prepare($query);
@@ -242,7 +242,7 @@ class CommentDao extends AbstractDao
     {
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
 
-        $db             = Database::obtain()->getConnection();
+        $db = Database::obtain()->getConnection();
         $comments_query = "SELECT * FROM comments 
         JOIN ( 
                 SELECT ? as id_segment
@@ -260,7 +260,7 @@ class CommentDao extends AbstractDao
     /**
      *
      * @param JobStruct $chunk
-     * @param array     $options
+     * @param array $options
      *
      * @return BaseCommentStruct[]
      */
@@ -289,9 +289,9 @@ class CommentDao extends AbstractDao
 
         $params = ['id_job' => $chunk->id];
 
-        if (array_key_exists('from_id', $options) && $options[ 'from_id' ] != null) {
-            $sql                 = $sql . " AND id >= :from_id ";
-            $params[ 'from_id' ] = $options[ 'from_id' ];
+        if (array_key_exists('from_id', $options) && $options['from_id'] != null) {
+            $sql = $sql . " AND id >= :from_id ";
+            $params['from_id'] = $options['from_id'];
         }
 
         $conn = Database::obtain()->getConnection();
@@ -324,8 +324,8 @@ class CommentDao extends AbstractDao
     public static function placeholdContent($content)
     {
         $users_ids = self::getUsersIdFromContent($content);
-        $userDao   = new UserDao(Database::obtain());
-        $users     = $userDao->getByUids($users_ids);
+        $userDao = new UserDao(Database::obtain());
+        $users = $userDao->getByUids($users_ids);
         foreach ($users as $user) {
             $content = str_replace("{@" . $user->uid . "@}", "@" . $user->first_name, $content);
         }
@@ -338,8 +338,8 @@ class CommentDao extends AbstractDao
         $users = [];
 
         preg_match_all("/\{@(\d+)@}/", $content, $find_users);
-        if (isset($find_users[ 1 ])) {
-            $users = $find_users[ 1 ];
+        if (isset($find_users[1])) {
+            $users = $find_users[1];
         }
 
         return $users;

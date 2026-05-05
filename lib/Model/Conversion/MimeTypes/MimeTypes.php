@@ -43,7 +43,7 @@ use Model\Conversion\MimeTypes\Guesser\SimpleMarkupMimeTypeGuesser;
 class MimeTypes
 {
     private array $extensions = [];
-    private array $mimeTypes  = [];
+    private array $mimeTypes = [];
 
     /**
      * @var MimeTypeGuesserInterface[]
@@ -63,10 +63,10 @@ class MimeTypes
     public function __construct(array $map = [])
     {
         foreach ($map as $mimeType => $extensions) {
-            $this->extensions[ $mimeType ] = $extensions;
+            $this->extensions[$mimeType] = $extensions;
 
             foreach ($extensions as $extension) {
-                $this->mimeTypes[ $extension ][] = $mimeType;
+                $this->mimeTypes[$extension][] = $mimeType;
             }
         }
 
@@ -112,10 +112,10 @@ class MimeTypes
     public function getExtensions(string $mimeType): array
     {
         if ($this->extensions) {
-            $extensions = $this->extensions[ $mimeType ] ?? $this->extensions[ $lcMimeType = strtolower($mimeType) ] ?? null;
+            $extensions = $this->extensions[$mimeType] ?? $this->extensions[$lcMimeType = strtolower($mimeType)] ?? null;
         }
 
-        return $extensions ?? MimeTypesMap::MAP[ $mimeType ] ?? MimeTypesMap::MAP[ $lcMimeType ?? strtolower($mimeType) ] ?? [];
+        return $extensions ?? MimeTypesMap::MAP[$mimeType] ?? MimeTypesMap::MAP[$lcMimeType ?? strtolower($mimeType)] ?? [];
     }
 
     /**
@@ -126,10 +126,10 @@ class MimeTypes
     public function getMimeTypes(string $ext): array
     {
         if ($this->mimeTypes) {
-            $mimeTypes = $this->mimeTypes[ $ext ] ?? $this->mimeTypes[ $lcExt = strtolower($ext) ] ?? null;
+            $mimeTypes = $this->mimeTypes[$ext] ?? $this->mimeTypes[$lcExt = strtolower($ext)] ?? null;
         }
 
-        return $mimeTypes ?? MimeTypesMap::REVERSE_MAP[ $ext ] ?? MimeTypesMap::REVERSE_MAP[ $lcExt ?? strtolower($ext) ] ?? [];
+        return $mimeTypes ?? MimeTypesMap::REVERSE_MAP[$ext] ?? MimeTypesMap::REVERSE_MAP[$lcExt ?? strtolower($ext)] ?? [];
     }
 
     /**

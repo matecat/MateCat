@@ -17,6 +17,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getContributions = async ({
   idSegment,
   target,
+  translation,
   crossLanguages,
   idJob = config.id_job,
   password = config.password,
@@ -24,6 +25,8 @@ export const getContributions = async ({
   currentPassword = config.currentPassword,
   contextListBefore,
   contextListAfter,
+  laraStyle,
+  reasoning = true,
 }) => {
   const contextBefore = globalFunctions.getContextBefore(idSegment)
   const idBefore = globalFunctions.getIdBefore(idSegment)
@@ -35,8 +38,8 @@ export const getContributions = async ({
     is_concordance: 0,
     id_segment: idSegment,
     text: target,
+    translation,
     id_job: idJob,
-    num_results: NUM_CONTRIBUTION_RESULTS,
     context_before: contextBefore ? contextBefore : '',
     id_before: idBefore ? idBefore : '',
     context_after: contextAfter,
@@ -46,6 +49,8 @@ export const getContributions = async ({
     current_password: currentPassword,
     context_list_before: JSON.stringify(contextListBefore),
     context_list_after: JSON.stringify(contextListAfter),
+    ...(typeof laraStyle === 'string' && {lara_style: laraStyle}),
+    reasoning,
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),

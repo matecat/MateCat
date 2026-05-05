@@ -11,11 +11,12 @@ namespace Model\Analysis\Constants;
 
 use RuntimeException;
 
-interface ConstantsInterface {
+interface ConstantsInterface
+{
 
-    public static function toInternalMatchTypeName( string $match_type ): string;
+    public static function toInternalMatchTypeName(string $match_type): string;
 
-    public static function toExternalMatchTypeName( string $match_type ): string;
+    public static function toExternalMatchTypeName(string $match_type): string;
 
     /**
      * @param string $name
@@ -23,7 +24,7 @@ interface ConstantsInterface {
      * @return string
      * @throws RuntimeException
      */
-    public static function validate( string $name ): string;
+    public static function validate(string $name): string;
 
     public static function getWorkflowType(): string;
 
