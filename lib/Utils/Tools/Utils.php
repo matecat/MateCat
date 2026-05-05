@@ -459,15 +459,12 @@ class Utils
     }
 
     /**
-     * Generate a valid UUID Version 4
-     *
      * @see https://digitalbunker.dev/understanding-how-uuids-are-generated/
      * @see https://www.rfc-editor.org/rfc/rfc4122.html
      *
-     * @return string|void
-     * @throws Exception
+     * @throws \Random\RandomException
      */
-    public static function uuid4()
+    public static function uuid4(): string
     {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
         $data = random_bytes(16);

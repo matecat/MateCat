@@ -40,6 +40,7 @@ class Database implements IDatabase
     const string SEQ_ID_SEGMENT = 'id_segment';
     const string SEQ_ID_PROJECT = 'id_project';
 
+    /** @var list<string> */
     protected static array $SEQUENCES = [
         Database::SEQ_ID_SEGMENT,
         Database::SEQ_ID_PROJECT,
@@ -67,10 +68,10 @@ class Database implements IDatabase
      * @Override
      * {@inheritdoc}
      */
-    public static function obtain(string $server = null, string $user = null, string $password = null, string $database = null): IDatabase
+    public static function obtain(?string $server = null, ?string $user = null, ?string $password = null, ?string $database = null): IDatabase
     {
-        if (!self::$instance || $server != null && $user != null && $password != null && $database != null) {
-            self::$instance = new Database($server, $user, $password, $database);
+        if (!self::$instance || $server !== null && $user !== null && $password !== null && $database !== null) {
+            self::$instance = new Database($server ?? '', $user ?? '', $password ?? '', $database ?? '');
         }
 
         return self::$instance;
@@ -86,6 +87,8 @@ class Database implements IDatabase
 
     /**
      * @return PDO
+     *
+     * @throws PDOException
      */
     public function getConnection(): PDO
     {
@@ -105,6 +108,9 @@ class Database implements IDatabase
         return $this->connection;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function connect(): void
     {
         $this->getConnection();
@@ -139,6 +145,8 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @throws PDOException
      */
     public function useDb(string $name): void
     {
@@ -152,6 +160,8 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @throws PDOException
      */
     public function begin(): PDO
     {
@@ -166,6 +176,8 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @throws PDOException
      */
     public function commit(): void
     {
@@ -176,6 +188,8 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @throws PDOException
      */
     public function rollback(): void
     {
@@ -191,7 +205,7 @@ class Database implements IDatabase
      * @Override
      * {@inheritdoc}
      *
-     * @throws \Throwable Re-throws the original exception after rollback
+     * @throws Throwable Re-throws the original exception after rollback
      */
     public function transaction(callable $callback): mixed
     {
@@ -213,6 +227,14 @@ class Database implements IDatabase
      * @Warning This method does not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, nesting "AND ( .. OR .. ) AND ( .. )" is not supported
      * @Override
      * {@inheritdoc}
+     *
+     * @param string $table
+     * @param array<string, mixed> $data
+     * @param array<int|string, mixed> $where
+     *
+     * @return int
+     *
+     * @throws PDOException
      */
     public function update(string $table, array $data, array $where = ['1' => '0']): int
     {
@@ -261,9 +283,20 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @param string $table
+     * @param array<string, mixed> $data
+     * @param array<string> $mask
+     * @param bool $ignore
+     * @param bool $no_nulls
+     * @param array<string, string> $onDuplicateKey
+     *
+     * @return string
+     *
      * @throws Exception
+     * @throws PDOException
      */
-    public function insert(string $table, array $data, array &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = []): string
+    public function insert(string $table, array $data, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $onDuplicateKey = []): string
     {
         [$query, $dupBindValues] = static::buildInsertStatement($table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey);
 
@@ -279,7 +312,7 @@ class Database implements IDatabase
         $preparedStatement->execute($valuesToBind);
         $this->affected_rows = $preparedStatement->rowCount();
 
-        return $this->last_insert();
+        return $this->last_insert() ?: '0';
     }
 
     /**
@@ -287,15 +320,16 @@ class Database implements IDatabase
      * provided by the attribute array.
      *
      * @param string $table the table on which perform the insert
-     * @param array $attrs array of full attributes to update
-     * @param array $mask array of attributes to include in the update
+     * @param array<string, mixed> $attrs array of full attributes to update
+     * @param array<string> $mask array of attributes to include in the update
      * @param bool $ignore Use INSERT IGNORE query type
      * @param bool $no_nulls Exclude NULL fields when build the sql
+     * @param array<string, string> $on_duplicate_fields
      *
-     * @param array $on_duplicate_fields
+     * @return array{0: string, 1: array<string, mixed>}
      *
-     * @return array{0: string, 1: array} [sql, dupBindValues]
      * @throws Exception
+     *
      * @internal param array $options of options for the SQL statement
      */
     public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): array
@@ -385,6 +419,8 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @throws PDOException
      */
     public function last_insert(): false|string
     {
@@ -395,7 +431,9 @@ class Database implements IDatabase
      * @param string $sequence_name
      * @param int $seqIncrement
      *
-     * @return array
+     * @return list<int>
+     *
+     * @throws PDOException
      */
     public function nextSequence(string $sequence_name, int $seqIncrement = 1): array
     {

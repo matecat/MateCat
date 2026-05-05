@@ -231,7 +231,7 @@ class TestUpsertStruct implements IDaoStruct
     /**
      * Get array copy - required by IDaoStruct
      */
-    public function getArrayCopy()
+    public function getArrayCopy(): array
     {
         return $this->toArray();
     }

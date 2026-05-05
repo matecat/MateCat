@@ -43,14 +43,15 @@ class ConstructorDatabaseTest extends AbstractTest
     #[Test]
     public function test___construct_without_parameters()
     {
-        // get the singleton static instance reference
         $property = $this->reflector->getProperty('instance');
+        $property->setValue($this->databaseInstance, null);
 
-        $property->setValue($this->databaseInstance, null); // unset
+        $instance = $this->databaseInstance->obtain();
 
-        $this->expectException(TypeError::class);
+        $this->assertInstanceOf(Database::class, $instance);
 
-        $this->databaseInstance->obtain();
+        $this->expectException(\PDOException::class);
+        $instance->getConnection();
     }
 
 

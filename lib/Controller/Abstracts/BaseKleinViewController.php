@@ -9,6 +9,7 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\Oauth\Facebook\FacebookProvider;
 use Model\ConnectedServices\Oauth\Github\GithubProvider;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
@@ -60,7 +61,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     /**
      * @param string $template_name
-     * @param array $params
+     * @param array<string, mixed> $params
      * @param int $code
      *
      * @return void
@@ -82,14 +83,13 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'flashMessages'} = FlashMessage::flush();
 
         if ($this->isLoggedIn()) {
-            // Load the feature set for the user (plus the autoloaded ones)
-            $this->featureSet->loadFromUserEmail($this->user->email);
+            $this->getFeatureSet()->loadFromUserEmail($this->user->email ?? '');
         }
 
-        $this->view->{'user_plugins'} = new PHPTalMap($this->featureSet->getCodes());
+        $this->view->{'user_plugins'} = new PHPTalMap($this->getFeatureSet()->getCodes());
         $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
-        $this->view->{'userMail'} = $this->getUser()->email;
-        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->dispatchFilter(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
+        $this->view->{'userMail'} = $this->getUser()->email ?? '';
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->getFeatureSet()->dispatchFilter(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];
@@ -113,7 +113,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
          * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
          */
         $this->view->{'x_nonce_unique_id'} = Utils::uuid4();
-        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url(AppConfig::$HTTPHOST)['host'] : null;
+
+        $parsedHost = parse_url(AppConfig::$HTTPHOST);
+        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])
+            ? " *.ajax." . $parsedHost['host']
+            : null;
 
         $this->addParamsToView($params);
 
@@ -121,6 +125,8 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     }
 
     /**
+     * @param array<string, mixed> $params
+     *
      * @throws Exception
      */
     public function addParamsToView(array $params): void
@@ -146,6 +152,8 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      * @param int|null $code
      *
      * @return never
+     *
+     * @throws ResponseAlreadySentException
      */
     public function render(?int $code = null): never
     {
