@@ -460,7 +460,7 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param array<string, mixed> $projectRow
-     * @param array<string, mixed>|null $segments
+     * @param list<array<string, mixed>>|null $segments
      *
      * @return void
      */
