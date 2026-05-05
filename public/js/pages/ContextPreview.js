@@ -153,6 +153,9 @@ const ContextPreview = () => {
     segmentsRef.current = segments
   }, [segments])
 
+  // Track segment request deduplication per direction
+  const requestedAtRef = useRef({before: -1, after: -1})
+
   // Render the fetched HTML into panels once (or when viewMode changes)
   const htmlRenderedRef = useRef({source: '', target: ''})
 
@@ -233,65 +236,97 @@ const ContextPreview = () => {
     setHighlight,
   ])
 
-  // Scroll listener — detect untagged nodes and request more segments
+  // Detect untagged nodes and proactively request adjacent segments
   useEffect(() => {
-    const panel = sourceRef.current || targetRef.current
-    if (!panel || !segments.length) return
+    const container = sourceRef.current || targetRef.current
+    if (!container || !mappableSegments.length || !htmlReady) return
+    if (contentView !== CONTENT_VIEWS.LIVE_PREVIEW) return
 
-    const lastRequestRef = {before: 0, after: 0}
-    const THROTTLE_MS = 1000
+    const THROTTLE_MS = 2000
+    let lastCheckTime = 0
+    const segCount = mappableSegments.length
 
-    const hasUntaggedNodesInViewport = (region) => {
-      const container = sourceRef.current || targetRef.current
-      if (!container) return false
+    const checkForUntaggedNodes = () => {
+      const now = Date.now()
+      if (now - lastCheckTime < THROTTLE_MS) return
+      lastCheckTime = now
+
       const meaningfulEls = container.querySelectorAll(
         'p, li, td, th, h1, h2, h3, h4',
       )
-      const viewportMidY = window.innerHeight / 2
-      for (const el of meaningfulEls) {
-        const elRect = el.getBoundingClientRect()
-        if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue
-        const midY = (elRect.top + elRect.bottom) / 2
-        if (region === 'before' && midY > viewportMidY) continue
-        if (region === 'after' && midY < viewportMidY) continue
-        if (
-          !el.hasAttribute('data-context-sids') &&
-          !el.querySelector('[data-context-sids]')
-        ) {
-          return true
+      if (!meaningfulEls.length) return
+
+      let firstTaggedIdx = -1
+      let lastTaggedIdx = -1
+      for (let i = 0; i < meaningfulEls.length; i++) {
+        if (meaningfulEls[i].closest('[data-context-sids]')) {
+          if (firstTaggedIdx === -1) firstTaggedIdx = i
+          lastTaggedIdx = i
         }
       }
-      return false
-    }
 
-    const handleScroll = () => {
-      const now = Date.now()
-      const scrollTop = window.scrollY
-      const scrollBottom =
-        document.documentElement.scrollHeight - scrollTop - window.innerHeight
-      if (scrollTop < 200 && now - lastRequestRef.before > THROTTLE_MS) {
-        if (hasUntaggedNodesInViewport('before')) {
-          lastRequestRef.before = now
+      if (firstTaggedIdx === -1) {
+        if (requestedAtRef.current.before !== segCount) {
+          requestedAtRef.current.before = segCount
           ContextPreviewChannel.sendMessage({
             type: 'loadMoreSegments',
             where: 'before',
           })
         }
-      }
-      if (scrollBottom < 200 && now - lastRequestRef.after > THROTTLE_MS) {
-        if (hasUntaggedNodesInViewport('after')) {
-          lastRequestRef.after = now
+        if (requestedAtRef.current.after !== segCount) {
+          requestedAtRef.current.after = segCount
           ContextPreviewChannel.sendMessage({
             type: 'loadMoreSegments',
             where: 'after',
           })
         }
+        return
+      }
+
+      let hasUntaggedBefore = false
+      for (let i = 0; i < firstTaggedIdx; i++) {
+        if (!meaningfulEls[i].closest('[data-context-sids]')) {
+          hasUntaggedBefore = true
+          break
+        }
+      }
+
+      let hasUntaggedAfter = false
+      for (let i = lastTaggedIdx + 1; i < meaningfulEls.length; i++) {
+        if (!meaningfulEls[i].closest('[data-context-sids]')) {
+          hasUntaggedAfter = true
+          break
+        }
+      }
+
+      if (hasUntaggedBefore && requestedAtRef.current.before !== segCount) {
+        requestedAtRef.current.before = segCount
+        ContextPreviewChannel.sendMessage({
+          type: 'loadMoreSegments',
+          where: 'before',
+        })
+      }
+      if (hasUntaggedAfter && requestedAtRef.current.after !== segCount) {
+        requestedAtRef.current.after = segCount
+        ContextPreviewChannel.sendMessage({
+          type: 'loadMoreSegments',
+          where: 'after',
+        })
       }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [segments, viewMode])
+    checkForUntaggedNodes()
+
+    const scrollContainer =
+      container.getRootNode()?.host?.closest('.context-preview-content') ??
+      container.closest('.context-preview-content')
+
+    if (scrollContainer) {
+      const handleScroll = () => checkForUntaggedNodes()
+      scrollContainer.addEventListener('scroll', handleScroll, {passive: true})
+      return () => scrollContainer.removeEventListener('scroll', handleScroll)
+    }
+  }, [mappableSegments, htmlReady, contentView, viewMode])
 
   // Click listeners on both panels
   useEffect(() => {
