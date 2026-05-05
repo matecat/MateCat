@@ -6673,7 +6673,7 @@ parameters:
 			path: lib/Controller/Abstracts/BaseKleinViewController.php
 
 		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$css_resources\.$#'
+			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$vite_html\.$#'
 			identifier: property.notFound
 			count: 1
 			path: lib/Controller/Abstracts/BaseKleinViewController.php

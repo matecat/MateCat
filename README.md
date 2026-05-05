@@ -20,7 +20,7 @@ The following yarn commands are available for development and building:
 
 ### `yarn watch`
 
-Watches for changes in the source files and automatically rebuilds the project in development mode. Useful for local development as it provides live updates.
+Starts the Vite development server with Hot Module Replacement (HMR). Useful for local development as it provides instant updates without full page reloads.
 
 ### `yarn build:dev`
 
