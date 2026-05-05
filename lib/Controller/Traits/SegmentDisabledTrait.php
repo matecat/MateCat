@@ -2,10 +2,9 @@
 
 namespace Controller\Traits;
 
+use Exception;
 use Model\DataAccess\DaoCacheTrait;
 use Model\Segments\SegmentMetadataDao;
-use Exception;
-use PDOException;
 use ReflectionException;
 
 trait SegmentDisabledTrait
@@ -99,6 +98,7 @@ trait SegmentDisabledTrait
      *
      * @return void
      * @throws ReflectionException
+     * @throws Exception
      */
     private function cacheInit(): void
     {

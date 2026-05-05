@@ -37,11 +37,11 @@ final class XliffConfigTemplateDao extends AbstractDao
      */
     protected static function getInstance(): XliffConfigTemplateDao
     {
-        if (!isset(static::$instance)) {
-            static::$instance = new static();
+        if (!isset(XliffConfigTemplateDao::$instance)) {
+            XliffConfigTemplateDao::$instance = new XliffConfigTemplateDao();
         }
 
-        return static::$instance;
+        return XliffConfigTemplateDao::$instance;
     }
 
     /**
@@ -115,7 +115,7 @@ final class XliffConfigTemplateDao extends AbstractDao
             ['uid' => $uid]
         );
 
-        $paginationParameters = new PaginationParameters(static::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
+        $paginationParameters = new PaginationParameters(XliffConfigTemplateDao::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
         $paginationParameters->setCache(self::paginated_map_key . ":" . $uid, $ttl);
 
         $result = $pager->getPagination($totals, $paginationParameters);
@@ -134,12 +134,12 @@ final class XliffConfigTemplateDao extends AbstractDao
     /**
      * WARNING Use this method only when no user authentication is needed or when it is already performed
      *
-     * @param     $id
+     * @param int $id
      * @param int $ttl
      *
      * @return XliffConfigTemplateStruct|null
+     * @throws ReflectionException
      * @throws Exception
-     * @throws TypeError
      */
     public static function getById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
     {
@@ -214,6 +214,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return int
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function remove(int $id, int $uid): int
     {
@@ -280,6 +281,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private static function destroyQueryPaginated(int $uid): void
     {

@@ -210,6 +210,7 @@ class CustomPayableRateDao extends AbstractDao
      * @return int
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function remove(int $id, int $uid): int
     {
@@ -305,6 +306,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private
     static function destroyQueryPaginated(

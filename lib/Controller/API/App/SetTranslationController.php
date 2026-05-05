@@ -41,9 +41,9 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
-use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
@@ -649,7 +649,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         $this->id_job = (int)$id_job;
         $this->password = (string)$password;
-        $this->request_password = (string)$received_password;
+        $this->request_password = $received_password;
 
         $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString);
 
@@ -892,6 +892,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @return SegmentTranslationStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function getOldTranslation(): SegmentTranslationStruct
     {
@@ -971,6 +972,8 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @param array<string, mixed> $old_translation
      * @param array<string, mixed> $new_translation
+     *
+     * @throws PDOException
      */
     private function updateJobPEE(array $old_translation, array $new_translation): void
     {

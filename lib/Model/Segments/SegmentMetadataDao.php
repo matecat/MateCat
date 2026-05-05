@@ -102,6 +102,7 @@ class SegmentMetadataDao extends AbstractDao
      * @param SegmentMetadataStruct $metadataStruct
      * @throws ReflectionException
      * @throws PDOException
+     * @throws Exception
      */
     public static function save(SegmentMetadataStruct $metadataStruct): void
     {
@@ -126,6 +127,7 @@ class SegmentMetadataDao extends AbstractDao
     /**
      * @throws ReflectionException
      * @throws PDOException
+     * @throws Exception
      */
     public static function upsert(int $id_segment, string $key, string $value): void
     {
@@ -182,6 +184,7 @@ class SegmentMetadataDao extends AbstractDao
      * @return void
      * @throws ReflectionException
      * @throws PDOException
+     * @throws Exception
      */
     public static function setTranslationDisabled(int $id_segment): void
     {
@@ -200,6 +203,7 @@ class SegmentMetadataDao extends AbstractDao
      * we cannot reconstruct the exact cache key via _destroyObjectCache.
      * Instead, we delete the keyMap directly using _deleteCacheByKey.
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function destroyGetBySegmentIdsCache(string $key): bool
     {

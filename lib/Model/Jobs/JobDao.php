@@ -759,6 +759,7 @@ class JobDao extends AbstractDao
      * @param JobStruct $jStruct
      *
      * @return int
+     * @throws PDOException
      */
     public static function setJobComplete(JobStruct $jStruct): int
     {

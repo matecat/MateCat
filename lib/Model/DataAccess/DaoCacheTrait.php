@@ -80,13 +80,14 @@ trait DaoCacheTrait
      *
      * @return void
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _cacheSetConnection(): void
     {
         if (!isset(self::$cache_con) || empty(self::$cache_con)) {
             try {
                 self::$cache_con = (new RedisHandler())->getConnection();
-                self::$cache_con->get(1);
+                self::$cache_con->get('1');
             } catch (Exception $e) {
                 self::$cache_con = null;
                 throw $e;
@@ -146,11 +147,10 @@ trait DaoCacheTrait
     }
 
     /**
-     * @template T of IDaoStruct
      * @param string $keyMap
      * @param string $query A query
      *
-     * @return ?T[]
+     * @return ?list<mixed>
      * @throws ReflectionException
      * @throws Exception
      */
@@ -161,6 +161,10 @@ trait DaoCacheTrait
         }
 
         $this->_cacheSetConnection();
+
+        if (self::$cache_con === null) {
+            return null;
+        }
 
         $key = md5($query);
         $raw = self::$cache_con->hget($keyMap, $key);
@@ -187,7 +191,12 @@ trait DaoCacheTrait
 
         $this->_logCache("GETMAP: " . $keyMap, $key, $unserialized, $query);
 
-        return is_array($unserialized) ? $unserialized : null;
+        if (!is_array($unserialized)) {
+            return null;
+        }
+
+        /** @var list<mixed> $unserialized */
+        return $unserialized;
     }
 
     /**
@@ -195,10 +204,9 @@ trait DaoCacheTrait
      * This method uses a clean, human-readable key instead of a md5 hash.
      * It also allows grouping multiple queries under a single namespace (`$keyMap`).
      *
-     * @template T of IDaoStruct
      * @param string $keyMap
-     * @param        $query string
-     * @param        $value T[]
+     * @param string $query
+     * @param list<mixed> $value
      *
      * @return void|null
      * @throws Exception
@@ -245,7 +253,7 @@ trait DaoCacheTrait
     /**
      * Serialize params, ensuring values are always treated as strings.
      *
-     * @param array $params
+     * @param array<int|string, scalar|null> $params
      *
      * @return string
      */
@@ -266,6 +274,7 @@ trait DaoCacheTrait
      *
      * @return bool
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _removeObjectCacheMapElement(string $keyMap, string $keyElementName): bool
     {
@@ -287,6 +296,7 @@ trait DaoCacheTrait
      *
      * @return bool
      * @throws ReflectionException
+     * @throws Exception
      *
      */
     protected function _deleteCacheByKey(string $key, ?bool $isReverseKeyMap = true): bool
@@ -295,13 +305,18 @@ trait DaoCacheTrait
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             if ($isReverseKeyMap) {
                 $keyMap = self::$cache_con->get($key);
-                $res = self::$cache_con->del($keyMap);
+                if ($keyMap === null) {
+                    self::$cache_con->del($key);
+
+                    return false;
+                }
+                $res = (bool)self::$cache_con->del($keyMap);
                 self::$cache_con->del($key);
 
                 return $res;
             }
 
-            return self::$cache_con->del($key);
+            return (bool)self::$cache_con->del($key);
         }
 
         return false;

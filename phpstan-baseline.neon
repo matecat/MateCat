@@ -2227,32 +2227,8 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
-			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildNewTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
 
@@ -2275,6 +2251,12 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:destroySegmentDisabledCache\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:destroySegmentDisabledCache\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -2290,24 +2272,6 @@ parameters:
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:finalizeTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:getOldTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:getOldTranslation\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:getOldTranslation\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
@@ -2353,32 +2317,8 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
 			message: '#^Property Controller\\API\\App\\SetTranslationController\:\:\$icuEnabled \(bool\|null\) does not accept string\|false\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\App\\SetTranslationController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\App\\SetTranslationController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
 
@@ -3841,6 +3781,12 @@ parameters:
 			path: lib/Controller/API/V2/ProjectsController.php
 
 		-
+			message: '#^Method Controller\\API\\V2\\ProjectsController\:\:deleteDueDate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/ProjectsController.php
+
+		-
 			message: '#^Method Controller\\API\\V2\\ProjectsController\:\:updateDueDate\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3848,6 +3794,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\V2\\ProjectsController\:\:updateDueDate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/ProjectsController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\ProjectsController\:\:updateDueDate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/ProjectsController.php
@@ -4225,33 +4177,9 @@ parameters:
 			path: lib/Controller/API/V3/CancelRequestController.php
 
 		-
-			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:destroySegmentDisabledCache\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
 			count: 2
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: lib/Controller/API/V3/CancelRequestController.php
 
 		-
@@ -4270,30 +4198,6 @@ parameters:
 			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\CancelRequestController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\CancelRequestController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
 			path: lib/Controller/API/V3/CancelRequestController.php
 
 		-
@@ -5149,33 +5053,9 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:destroySegmentDisabledCache\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
 			count: 2
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
@@ -5311,18 +5191,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Parameter \#1 \$mt_we_workflow_enabled of static method Model\\Analysis\\Constants\\MatchConstantsFactory\:\:getInstance\(\) expects bool\|null, string\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -5343,18 +5211,6 @@ parameters:
 		-
 			message: '#^Parameter \#5 \$segmentsCount of method Controller\\API\\V3\\SegmentAnalysisController\:\:getSegmentsForAProject\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\SegmentAnalysisController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\SegmentAnalysisController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
@@ -5495,60 +5351,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Template type T of method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Template type T of method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
 
 		-
 			message: '#^Method Controller\\Abstracts\\IController\:\:getFeatureSet\(\) has no return type specified\.$#'
@@ -7393,66 +7195,6 @@ parameters:
 			path: lib/Model/Conversion/ZipArchiveHandler.php
 
 		-
-			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Template type T of method Model\\DataAccess\\AbstractDao\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Template type T of method Model\\DataAccess\\AbstractDao\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
 			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:__construct\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -7471,12 +7213,6 @@ parameters:
 			path: lib/Model/DataAccess/IDaoStruct.php
 
 		-
-			message: '#^Class Model\\DataAccess\\ShapelessConcreteStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
-
-		-
 			message: '#^Method Model\\DataAccess\\ShapelessConcreteStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -7493,12 +7229,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\XFetchEnvelope\:\:__construct\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/XFetchEnvelope.php
 
 		-
 			message: '#^Method Model\\EditLog\\EditLogSegmentStruct\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -8677,7 +8407,19 @@ parameters:
 			path: lib/Model/Filters/DTO/Yaml.php
 
 		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
 			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Filters/FiltersConfigTemplateDao.php
@@ -9067,6 +8809,12 @@ parameters:
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateCategoryStruct.php
 
 		-
+			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
+
+		-
 			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9139,6 +8887,18 @@ parameters:
 			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
 
 		-
+			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
+
+		-
+			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
+
+		-
 			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -9155,6 +8915,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/MTQE/Templates/DTO/MTQEWorkflowParams.php
+
+		-
+			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
+
+		-
+			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
 		-
 			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -9205,36 +8977,6 @@ parameters:
 			path: lib/Model/OwnerFeatures/OwnerFeatureStruct.php
 
 		-
-			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
 			message: '#^Method Model\\Pagination\\Pager\:\:count\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9271,45 +9013,9 @@ parameters:
 			path: lib/Model/Pagination/Pager.php
 
 		-
-			message: '#^Method Model\\Pagination\\Pager\:\:getPagination\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:getPagination\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
 			message: '#^Parameter \#3 \$pages of method Model\\Pagination\\Pager\:\:format\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 2
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Template type T of method Model\\Pagination\\Pager\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Template type T of method Model\\Pagination\\Pager\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
 			path: lib/Model/Pagination/Pager.php
 
 		-
@@ -9350,6 +9056,12 @@ parameters:
 
 		-
 			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/PayableRates/CustomPayableRateDao.php
+
+		-
+			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateDao.php
@@ -9493,13 +9205,7 @@ parameters:
 			path: lib/Model/ProjectCreation/SegmentStorageService.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\SegmentStorageService\:\:persistSegmentMetadata\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/SegmentStorageService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\SegmentStorageService\:\:persistSegmentMetadata\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\ProjectCreation\\SegmentStorageService\:\:persistSegmentMetadata\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ProjectCreation/SegmentStorageService.php
@@ -9791,6 +9497,12 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Projects/ProjectStruct.php
+
+		-
+			message: '#^Method Model\\Projects\\ProjectTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Projects/ProjectTemplateDao.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
@@ -11348,6 +11060,12 @@ parameters:
 
 		-
 			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Xliff/XliffConfigTemplateDao.php
+
+		-
+			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:getById\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Xliff/XliffConfigTemplateDao.php
@@ -19615,6 +19333,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
+			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoHideSingle\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
+
+		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMerge\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -22396,12 +22120,6 @@ parameters:
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-

@@ -11,6 +11,9 @@ namespace Model\DataAccess;
 
 use ArrayAccess;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess
 {
 

@@ -197,12 +197,19 @@ abstract class AbstractDao
 
     /**
      * @param array<int|string, scalar|null> $bindParams
-     *
-     * @throws ReflectionException
      */
     protected function _destroyObjectCache(PDOStatement $stmt, string $fetchClass, array $bindParams): bool
     {
-        return $this->_deleteCacheByKey(md5($stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass));
+        try {
+            return $this->_deleteCacheByKey(md5($stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass));
+        } catch (Exception $e) {
+            LoggerFactory::getLogger('query_cache')->error([
+                'destroyObjectCache failed' => $e->getMessage(),
+                'class'                     => static::class,
+            ]);
+
+            return false;
+        }
     }
 
     /**
@@ -364,6 +371,8 @@ abstract class AbstractDao
     /**
      * @param array<string, scalar|null> $data
      * @param array<string, scalar|null> $where
+     *
+     * @throws PDOException
      */
     public static function updateFields(array $data = [], array $where = []): int
     {

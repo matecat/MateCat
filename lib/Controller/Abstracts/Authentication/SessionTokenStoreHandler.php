@@ -116,6 +116,7 @@ class SessionTokenStoreHandler
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
      */
     public function removeLoginCookieFromStore(int $userId, string $loginCookieValue): void
     {

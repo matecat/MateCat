@@ -547,6 +547,8 @@ class SegmentTranslationDao extends AbstractDao
     /**
      * @param array<string, scalar|null> $data
      * @param array<string, scalar|null> $where
+     *
+     * @throws PDOException
      */
     public
     static function updateFirstTimeOpenedContribution(

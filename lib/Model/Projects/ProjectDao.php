@@ -85,6 +85,7 @@ class ProjectDao extends AbstractDao
      *
      * @return ProjectStruct
      * @throws DomainException
+     * @throws PDOException
      */
     public function updateField(ProjectStruct $project, string $field, int|float|string|bool|null $value): ProjectStruct
     {
@@ -139,23 +140,6 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * @throws PDOException
-     */
-    public function deleteFailedProject(?int $idProject): int
-    {
-        if (empty($idProject)) {
-            return 0;
-        }
-
-        $sql = "DELETE FROM projects WHERE id = :id_project";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(['id_project' => $idProject]);
-
-        return $stmt->rowCount();
-    }
-
-    /**
      *
      * This update can easily become massive in case of long lived teams.
      *
@@ -175,34 +159,6 @@ class ProjectDao extends AbstractDao
         ]);
 
         return $stmt->rowCount();
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public function assignToAssignee(int $pid, int $idAssignee): int
-    {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("UPDATE projects SET id_assignee = :id_assignee WHERE id = :id ;");
-        $stmt->execute([
-            'id' => $pid,
-            'id_assignee' => $idAssignee
-        ]);
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public function assignToTeam(int $pid, int $idTeam): void
-    {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("UPDATE projects SET id_team = :id_team WHERE id = :id ;");
-        $stmt->execute([
-            'id' => $pid,
-            'id_team' => $idTeam
-        ]);
     }
 
     /**
@@ -475,55 +431,6 @@ class ProjectDao extends AbstractDao
     }
 
     /**
-     * Returns uncompleted chunks by project ID. Requires 'is_review' to be passed
-     * as a param to filter the query.
-     *
-     * @param int $id_project
-     * @param array{is_review?: bool} $params
-     *
-     * @return JobStruct[]
-     *
-     * @throws Exception
-     * @throws PDOException
-     */
-    static function uncompletedChunksByProjectId(int $id_project, array $params = []): array
-    {
-        $params = Utils::ensure_keys($params, ['is_review']);
-        $is_review = $params['is_review'] ?: false;
-
-        $sql = " SELECT jobs.* FROM jobs INNER join ( " .
-            " SELECT j.id, j.password from jobs j
-                LEFT JOIN chunk_completion_events events
-                ON events.id_job = j.id and events.password = j.password
-                LEFT JOIN chunk_completion_updates updates
-                ON updates.id_job = j.id and updates.password = j.password
-                AND updates.is_review = events.is_review
-                WHERE
-                (events.is_review = :is_review OR events.is_review IS NULL )
-                AND
-                ( j.id_project = :id_project AND events.id IS NULL )
-                OR events.create_date < updates.last_translation_at
-                GROUP BY j.id, j.password
-            ) uncomplete ON jobs.id = uncomplete.id
-                AND jobs.password = uncomplete.password
-                AND jobs.id_project = :id_project
-                ";
-
-        LoggerFactory::doJsonLog($sql);
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            'is_review' => $is_review,
-            'id_project' => $id_project
-        ]);
-
-        $stmt->setFetchMode(PDO::FETCH_CLASS, JobStruct::class);
-
-        return $stmt->fetchAll();
-    }
-
-    /**
      * @throws PDOException
      */
     static function isGDriveProject(int $id_project): bool
@@ -669,6 +576,7 @@ class ProjectDao extends AbstractDao
 
     /**
      * @throws DomainException
+     * @throws PDOException
      */
     public static function changeProjectStatus(int $pid, string $status): int
     {

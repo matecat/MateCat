@@ -15,7 +15,7 @@ namespace Model\DataAccess;
 final readonly class XFetchEnvelope
 {
     /**
-     * @param array $value    The actual cached data (array of IDaoStruct objects)
+     * @param list<mixed> $value    The actual cached data (array of IDaoStruct objects)
      * @param float $storedAt Timestamp (microtime) when the entry was cached
      * @param float $delta    Measured recomputation time in seconds
      */
