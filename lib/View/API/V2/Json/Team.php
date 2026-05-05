@@ -63,14 +63,14 @@ class Team
     {
         $out = [];
 
-        if (empty($data)) {
+        if ($data === null) {
             $data = $this->data;
         }
 
         /**
          * @var $data TeamStruct[]
          */
-        foreach ($data as $team) {
+        foreach ($data ?? [] as $team) {
             $out[] = $this->renderItem($team);
         }
 

@@ -74,6 +74,7 @@ class SessionTokenStoreHandler
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
      */
     public function setCookieLoginTokenActive(int $userId, string $loginCookieValue): void
     {
@@ -96,6 +97,7 @@ class SessionTokenStoreHandler
      *
      * @return bool Returns true if the token is active, false otherwise.
      * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
      */
     public function isLoginCookieStillActive(int $userId, string $loginCookieValue): bool
     {

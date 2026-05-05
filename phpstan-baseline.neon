@@ -217,6 +217,24 @@ parameters:
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:directLogout\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/LoginController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:directLogout\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/LoginController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:login\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/LoginController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:socketToken\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -262,6 +280,12 @@ parameters:
 			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
+			path: lib/Controller/API/App/Authentication/SignupController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:confirm\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
@@ -5497,160 +5521,10 @@ parameters:
 			path: lib/Controller/API/V3/XliffConfigTemplateController.php
 
 		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:destroyAuthentication\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:generateSignedAuthCookie\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:generateSignedAuthCookie\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:generateSignedAuthCookie\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getCredentials\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getCredentials\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthCookie\:\:getData\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Parameter \#1 \$userId of method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:removeLoginCookieFromStore\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Parameter \#1 \$userId of method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:setCookieLoginTokenActive\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/Abstracts/Authentication/AuthCookie.php
-
-		-
-			message: '#^Anonymous function has an unused use \$membersDao\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Cannot call method getUser\(\) on Model\\ApiKeys\\ApiKeyStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:__construct\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:destroyAuthentication\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:getInstance\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:getUserProfile\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:getUserProfile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:refreshSession\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:validKeys\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$team TeamStruct\)\: Unexpected token "\$team", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$user UserStruct\)\: Unexpected token "\$user", expected type at offset 28 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\<Model\\Teams\\TeamStruct\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:\$logged \(true\) does not accept bool\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:\$session type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
 			message: '#^Property Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:\$user \(Model\\Users\\UserStruct\) does not accept Model\\Users\\UserStruct\|null\.$#'
 			identifier: assign.propertyType
-			count: 2
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\CookieManager\:\:setCookie\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Controller/Abstracts/Authentication/CookieManager.php
+			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
 
 		-
 			message: '#^Cannot call method hget\(\) on Predis\\Client\|null\.$#'
@@ -5683,18 +5557,6 @@ parameters:
 			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
 
 		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:isLoginCookieStillActive\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\Authentication\\SessionTokenStoreHandler\:\:setCookieLoginTokenActive\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php
-
-		-
 			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -5723,6 +5585,18 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: lib/Controller/Abstracts/IController.php
+
+		-
+			message: '#^Method Controller\\Abstracts\\KleinController\:\:broadcastLogout\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Abstracts/KleinController.php
+
+		-
+			message: '#^Method Controller\\Abstracts\\KleinController\:\:broadcastLogout\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Abstracts/KleinController.php
 
 		-
 			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has no return type specified\.$#'
@@ -11003,6 +10877,12 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Users/Authentication/ChangePasswordModel.php
+
+		-
+			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_authenticateUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Users/Authentication/OAuthSignInModel.php
 
 		-
 			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_createNewUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -18941,12 +18821,6 @@ parameters:
 			identifier: varTag.differentVariable
 			count: 1
 			path: lib/View/API/V2/Json/SegmentVersion.php
-
-		-
-			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
 
 		-
 			message: '#^Method View\\API\\V2\\Json\\Team\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'

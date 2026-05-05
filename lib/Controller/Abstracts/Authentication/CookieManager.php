@@ -13,27 +13,15 @@ class CookieManager
 {
 
     /**
-     * @param string $name
-     * @param string $value
-     * @param array $options
-     *
-     * @return bool
+     * @param array<string, mixed> $options
      */
     public static function setCookie(string $name, string $value = "", array $options = []): bool
     {
-        if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
-            return setcookie($name, $value, $options);
-        } else {
-            return setcookie(
-                $name,
-                $value,
-                $options['expires'],
-                $options['path'] . "; samesite=" . $options['samesite'],
-                $options['domain'],
-                $options['secure'],
-                $options['httponly']
-            );
+        if (headers_sent()) {
+            return false;
         }
+
+        return setcookie($name, $value, $options);
     }
 
 }

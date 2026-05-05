@@ -8,6 +8,7 @@ use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Registry\AppConfig;
 
@@ -116,6 +117,8 @@ trait AuthenticationTrait
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function logout(): void
     {
