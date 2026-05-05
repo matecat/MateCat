@@ -3,14 +3,14 @@
 use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
 /**
  * @group regression
  * @covers \Model\DataAccess\Database::buildInsertStatement
  */
 #[Group('PersistenceNeeded')]
-class BuildInsertStatementTest extends TestCase
+class BuildInsertStatementTest extends AbstractTest
 {
     /**
      * ON DUPLICATE KEY with all 'value' references should return empty bind array.

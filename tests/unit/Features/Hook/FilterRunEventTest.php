@@ -7,11 +7,11 @@ namespace Tests\Unit\Features\Hook;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionClass;
 use ReflectionMethod;
 
-class FilterRunEventTest extends TestCase
+class FilterRunEventTest extends AbstractTest
 {
     #[Test]
     public function filterEventDefinesAbstractStaticHookNameContract(): void

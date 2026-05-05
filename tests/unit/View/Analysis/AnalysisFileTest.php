@@ -6,10 +6,10 @@ namespace Tests\Unit\View\Analysis;
 
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use View\API\App\Json\Analysis\AnalysisFile;
 
-class AnalysisFileTest extends TestCase
+class AnalysisFileTest extends AbstractTest
 {
     private function makeFile(int $id = 1, ?string $idFilePart = null, array $metadata = []): AnalysisFile
     {

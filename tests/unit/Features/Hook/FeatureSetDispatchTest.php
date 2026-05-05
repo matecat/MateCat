@@ -13,11 +13,11 @@ use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
-class FeatureSetDispatchTest extends TestCase
+class FeatureSetDispatchTest extends AbstractTest
 {
     protected function setUp(): void
     {

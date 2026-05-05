@@ -6,9 +6,9 @@ use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class SegmentMetadataCollectionTest extends TestCase
+class SegmentMetadataCollectionTest extends AbstractTest
 {
     private function makeStruct(string $key, string $value): SegmentMetadataStruct
     {

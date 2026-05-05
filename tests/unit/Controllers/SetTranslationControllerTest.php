@@ -9,7 +9,7 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -42,7 +42,7 @@ class TestableSetTranslationController extends SetTranslationController
  * - Tasks 2-5: Unit-test each extracted private method
  * - Task 6: Update the guard to match the refactored orchestrator
  */
-class SetTranslationControllerTest extends TestCase
+class SetTranslationControllerTest extends AbstractTest
 {
     /**
      * @throws ReflectionException

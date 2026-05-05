@@ -11,10 +11,10 @@ use Model\QualityReport\QualityReportSegmentStruct;
 use Model\Segments\ContextStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\TmKeyManagement\TmKeyStruct;
 
-class IterableValueTypesTest extends TestCase
+class IterableValueTypesTest extends AbstractTest
 {
     #[Test]
     public function qualityReportSegmentIterablePropertiesMatchExpectedShapes(): void

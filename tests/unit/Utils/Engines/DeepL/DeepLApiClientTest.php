@@ -8,14 +8,14 @@ use DeepL\GlossaryEntries;
 use DeepL\GlossaryInfo;
 use DeepL\TextResult;
 use DeepL\Translator;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Engines\DeepL\DeepLApiClient;
 use Utils\Engines\DeepL\DeepLApiException;
 
 /**
  * @covers \Utils\Engines\DeepL\DeepLApiClient
  */
-class DeepLApiClientTest extends TestCase
+class DeepLApiClientTest extends AbstractTest
 {
     private Translator $translatorMock;
     private DeepLApiClient $client;

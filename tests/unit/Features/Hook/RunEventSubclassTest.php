@@ -29,10 +29,10 @@ use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionClass;
 
-class RunEventSubclassTest extends TestCase
+class RunEventSubclassTest extends AbstractTest
 {
     #[Test]
     #[DataProvider('hookNameProvider')]

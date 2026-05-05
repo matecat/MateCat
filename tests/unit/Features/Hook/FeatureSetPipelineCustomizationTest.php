@@ -4,9 +4,9 @@ namespace Tests\unit\Features\Hook;
 use Model\FeaturesBase\FeatureSet;
 use Matecat\SubFiltering\Commons\Pipeline;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class FeatureSetPipelineCustomizationTest extends TestCase
+class FeatureSetPipelineCustomizationTest extends AbstractTest
 {
     #[Test]
     public function customizeFromLayer0ToLayer1DispatchesAndReturnsPipeline(): void

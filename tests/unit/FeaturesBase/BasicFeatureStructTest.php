@@ -6,9 +6,9 @@ namespace Tests\Unit\FeaturesBase;
 
 use Model\FeaturesBase\BasicFeatureStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class BasicFeatureStructTest extends TestCase
+class BasicFeatureStructTest extends AbstractTest
 {
     #[Test]
     public function featureCodePropertyIsAccessible(): void

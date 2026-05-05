@@ -6,9 +6,9 @@ use Model\Files\FilesMetadataMarshaller;
 use Model\Files\MetadataStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class FilesMetadataMarshallerTest extends TestCase
+class FilesMetadataMarshallerTest extends AbstractTest
 {
 
     #[Test]

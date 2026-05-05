@@ -5,9 +5,9 @@ namespace unit\Model\Segments;
 use Model\Segments\ContextResType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class ContextResTypeTest extends TestCase
+class ContextResTypeTest extends AbstractTest
 {
     // ── valid cases ──
 

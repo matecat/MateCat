@@ -41,10 +41,10 @@ use Model\Projects\ProjectStruct;
 use Matecat\SubFiltering\Commons\Pipeline;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionClass;
 
-class FilterEventSubclassTest extends TestCase
+class FilterEventSubclassTest extends AbstractTest
 {
     #[Test]
     #[DataProvider('hookNameProvider')]

@@ -6,13 +6,13 @@ namespace unit\Engines;
 
 use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
-class EnginesFactoryTypeSafetyTest extends TestCase
+class EnginesFactoryTypeSafetyTest extends AbstractTest
 {
     #[Test]
     public function getFullyQualifiedClassNameResolvesKnownEngineClass(): void

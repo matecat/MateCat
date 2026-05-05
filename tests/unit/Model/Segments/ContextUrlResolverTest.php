@@ -6,9 +6,9 @@ use Model\Segments\ContextUrlResolver;
 use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class ContextUrlResolverTest extends TestCase
+class ContextUrlResolverTest extends AbstractTest
 {
     // --- Helpers ---
 

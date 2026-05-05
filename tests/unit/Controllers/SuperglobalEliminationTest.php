@@ -3,7 +3,7 @@
 namespace unit\Controllers;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -13,7 +13,7 @@ use SplFileInfo;
  * remains in controller files. All request data must go through Klein's request abstraction
  * ($this->request->paramsPost(), $this->request->paramsGet(), $this->params, etc.).
  */
-class SuperglobalEliminationTest extends TestCase
+class SuperglobalEliminationTest extends AbstractTest
 {
     private const CONTROLLER_DIR = __DIR__ . '/../../../lib/Controller';
 

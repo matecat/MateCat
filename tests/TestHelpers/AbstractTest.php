@@ -2,7 +2,6 @@
 
 namespace TestHelpers;
 
-use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;

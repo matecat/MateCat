@@ -6,9 +6,9 @@ namespace Tests\Unit\DataAccess;
 
 use Model\DataAccess\XFetchEnvelope;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class XFetchEnvelopeTest extends TestCase
+class XFetchEnvelopeTest extends AbstractTest
 {
     #[Test]
     public function constructorAssignsAllProperties(): void

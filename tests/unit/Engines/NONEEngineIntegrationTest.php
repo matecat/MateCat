@@ -6,13 +6,13 @@ namespace unit\Engines;
 
 use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
-class NONEEngineIntegrationTest extends TestCase
+class NONEEngineIntegrationTest extends AbstractTest
 {
     private NONE $engine;
 

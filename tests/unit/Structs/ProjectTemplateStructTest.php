@@ -6,10 +6,10 @@ namespace unit\Structs;
 
 use Model\Projects\ProjectTemplateStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use stdClass;
 
-class ProjectTemplateStructTest extends TestCase
+class ProjectTemplateStructTest extends AbstractTest
 {
     private function createFullInputObject(): stdClass
     {

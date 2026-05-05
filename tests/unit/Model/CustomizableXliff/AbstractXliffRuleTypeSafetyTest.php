@@ -9,9 +9,9 @@ use Model\Xliff\DTO\DefaultRule;
 use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\Xliff20Rule;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class AbstractXliffRuleTypeSafetyTest extends TestCase
+class AbstractXliffRuleTypeSafetyTest extends AbstractTest
 {
     // ── $states structure ─────────────────────────────────────────
 

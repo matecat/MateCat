@@ -233,7 +233,7 @@ abstract class AbstractDao
 
         if (!is_null($_cacheResult)) {
             $typedCachedResult = [];
-            foreach ((array)$_cacheResult as $item) {
+            foreach ($_cacheResult as $item) {
                 if ($item instanceof $fetchClass) {
                     $typedCachedResult[] = $item;
                 }

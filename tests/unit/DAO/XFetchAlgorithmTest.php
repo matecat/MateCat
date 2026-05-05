@@ -4,14 +4,14 @@ namespace unit\DAO;
 
 use Model\DataAccess\XFetchEnvelope;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionClass;
 
 /**
  * Tests for the XFetch probabilistic early expiration algorithm
  * implemented in DaoCacheTrait.
  */
-class XFetchAlgorithmTest extends TestCase
+class XFetchAlgorithmTest extends AbstractTest
 {
     /**
      * Concrete class that uses DaoCacheTrait for testing.

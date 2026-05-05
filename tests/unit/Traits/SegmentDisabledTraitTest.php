@@ -6,6 +6,9 @@ require_once __DIR__ . '/RateLimiterTraitTest.php';
 
 use Controller\Traits\SegmentDisabledTrait;
 use Model\DataAccess\DaoCacheTrait;
+use Model\DataAccess\Database;
+use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
@@ -57,18 +60,19 @@ class SegmentDisabledTraitTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->redis = new FakeRedisClient();
-        $this->consumer = new SegmentDisabledTraitConsumer();
-        $this->consumer->setFakeRedis($this->redis);
-    }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
+        // Clean slate: remove any leftover test data from prior runs
+        $conn = Database::obtain()->getConnection();
+        $conn->prepare("DELETE FROM segment_metadata WHERE id_segment = ?")->execute([888888]);
+
         // Reset static cache_con
         $ref = new ReflectionClass(SegmentDisabledTraitConsumer::class);
         $prop = $ref->getProperty('cache_con');
         $prop->setValue(null, null);
+
+        $this->redis = new FakeRedisClient();
+        $this->consumer = new SegmentDisabledTraitConsumer();
+        $this->consumer->setFakeRedis($this->redis);
     }
 
     // ─── isSegmentDisabled tests ─────────────────────────────────────
@@ -183,9 +187,33 @@ class SegmentDisabledTraitTest extends AbstractTest
     #[Test]
     public function destroySegmentDisabledCacheDeletesCacheKey(): void
     {
-        // destroySegmentDisabledCache calls SegmentMetadataDao::delete (static, hits DB)
-        // We verify only that the cache key format is correct and del would be called
-        $this->markTestSkipped('Requires database connection for SegmentMetadataDao::delete');
+        $idJob     = 999999;
+        $idSegment = 888888;
+
+        // Insert a row so SegmentMetadataDao::delete has something to remove
+        $conn = Database::obtain()->getConnection();
+        $conn->prepare(
+            "INSERT IGNORE INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (?, ?, ?)"
+        )->execute([$idSegment, 'translation_disabled', '1']);
+
+        // Pre-populate the Redis hash so we can verify it gets cleared
+        $expectedKeyMap = 'segment_is_disabled_' . $idJob . '_' . $idSegment;
+        $expectedQuery  = '__SEGMENT_IS_DISABLED__' . $idJob . '_' . $idSegment;
+        $expectedHash   = md5($expectedQuery);
+        $this->redis->setHashValue($expectedKeyMap, $expectedHash, serialize([1]));
+
+        // Act
+        $this->consumer->publicDestroySegmentDisabledCache($idJob, $idSegment);
+
+        // Assert DB row is gone
+        $row = $conn->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
+        $row->execute([$idSegment, 'translation_disabled']);
+        $this->assertEmpty($row->fetchAll(), 'DB row should be deleted');
+
+        // Assert Redis DEL was called on the cache key
+        $delCalls = array_filter($this->redis->calls, fn($c) => $c['method'] === 'del');
+        $deletedKeys = array_map(fn($c) => $c['args'][0], array_values($delCalls));
+        $this->assertContains($expectedKeyMap, $deletedKeys, 'Redis key should be deleted');
     }
 
     // ─── Cache key consistency tests ─────────────────────────────────

@@ -14,9 +14,9 @@ use Model\Engines\Structs\MMTStruct;
 use Model\Engines\Structs\SmartMATEStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class EngineStructTypeSafetyTest extends TestCase
+class EngineStructTypeSafetyTest extends AbstractTest
 {
     #[Test]
     public function getStructReturnsCorrectInstanceForParent(): void

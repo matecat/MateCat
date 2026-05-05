@@ -6,9 +6,9 @@ use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class SegmentMetadataMarshallerTest extends TestCase
+class SegmentMetadataMarshallerTest extends AbstractTest
 {
     // ── isAllowed ──
 

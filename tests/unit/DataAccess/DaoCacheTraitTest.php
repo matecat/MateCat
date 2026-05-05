@@ -7,7 +7,7 @@ namespace Tests\Unit\DataAccess;
 use Model\DataAccess\DaoCacheTrait;
 use Model\DataAccess\XFetchEnvelope;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Predis\Client;
 use Utils\Registry\AppConfig;
 
@@ -119,7 +119,7 @@ class FakeRedisClient extends Client
     }
 }
 
-class DaoCacheTraitTest extends TestCase
+class DaoCacheTraitTest extends AbstractTest
 {
     private DaoCacheTraitHarness $harness;
     private FakeRedisClient $redis;

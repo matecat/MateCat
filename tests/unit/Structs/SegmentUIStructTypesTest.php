@@ -6,14 +6,14 @@ namespace unit\Structs;
 
 use Model\Segments\SegmentUIStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
 /**
  * Tests that SegmentUIStruct array properties have correct PHPDoc types
  * matching the actual data structures used at runtime.
  */
-class SegmentUIStructTypesTest extends TestCase
+class SegmentUIStructTypesTest extends AbstractTest
 {
     #[Test]
     public function parsedTimeToEditReturnsExpectedStructure(): void

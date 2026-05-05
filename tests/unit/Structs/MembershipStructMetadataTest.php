@@ -7,9 +7,9 @@ namespace unit\Structs;
 use Model\Teams\MembershipStruct;
 use Model\Users\MetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class MembershipStructMetadataTest extends TestCase
+class MembershipStructMetadataTest extends AbstractTest
 {
     #[Test]
     public function setUserMetadataAcceptsListOfMetadataStruct(): void

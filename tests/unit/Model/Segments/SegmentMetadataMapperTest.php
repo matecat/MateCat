@@ -7,9 +7,9 @@ use Model\Segments\SegmentMetadataMapper;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class SegmentMetadataMapperTest extends TestCase
+class SegmentMetadataMapperTest extends AbstractTest
 {
     private SegmentMetadataMapper $mapper;
 

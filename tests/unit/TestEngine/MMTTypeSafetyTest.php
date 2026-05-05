@@ -5,7 +5,7 @@ namespace unit\TestEngine;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionMethod;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT;
@@ -18,7 +18,7 @@ use Utils\TmKeyManagement\TmKeyStruct;
  *
  * Does NOT require database — all engine construction uses in-memory EngineStruct.
  */
-class MMTTypeSafetyTest extends TestCase
+class MMTTypeSafetyTest extends AbstractTest
 {
     private function createEngineStruct(): EngineStruct
     {
