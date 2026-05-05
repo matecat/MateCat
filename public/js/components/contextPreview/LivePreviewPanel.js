@@ -60,7 +60,6 @@ export const LivePreviewPanel = ({panelRef, title, zoomLevel, ...props}) => {
 
   return (
     <div className="context-preview-panel" {...props}>
-      <div className="context-preview-panel-header">{title}</div>
       <div className="context-preview-content">
         <div
           ref={hostRef}

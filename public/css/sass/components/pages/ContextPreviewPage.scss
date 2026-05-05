@@ -26,7 +26,7 @@
     transition: all 0.15s ease;
     color: colors.$black;
     &:hover:not(:disabled) {
-      background-color: colors.$grey7;
+      background-color: colors.$white;
     }
 
     &:disabled {
@@ -49,11 +49,14 @@
   &__reset {
     border: 1px solid rgba(1, 1, 24, 0.13);
     border-radius: 8px;
-    padding: 2px 4px;
+    padding: 2px 8px;
     font-size: 14px;
     font-weight: 500;
-    line-height: 20px;
+    line-height: 18px;
     height: 22px;
+    &:hover:not(:disabled) {
+      background-color: colors.$grey4;
+    }
   }
 
   &__level {
@@ -141,7 +144,6 @@
   flex: 1;
   overflow: auto;
   cursor: default;
-  padding: 20px;
   transform: translateZ(0);
 
   &__scaler {
@@ -172,7 +174,7 @@
 .context-preview-view-mode {
   height: 24px;
   .segmented-control {
-    height: 28px;
+    height: 24px;
     padding: 4px;
   }
   .segmented-control__label {
@@ -226,7 +228,7 @@
   align-items: center;
   gap: 8px;
   padding: 4px;
-  background-color: colors.$grey8;
+  background-color: colors.$grey5;
   border: 1px solid rgba(13, 13, 28, 0.07);
   border-radius: 12px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -236,8 +238,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   border: none;
   border-radius: 8px;
