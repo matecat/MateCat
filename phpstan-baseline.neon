@@ -85,48 +85,6 @@ parameters:
 			path: lib/Bootstrap.php
 
 		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:alternative_translations\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:alternative_translations\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 13
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:alternative_translations\(\) throws checked exception Matecat\\Locales\\InvalidLanguageException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:enqueueWorker\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:feedback\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:feedback\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 8
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\AIAssistantController\:\:feedback\(\) throws checked exception Matecat\\Locales\\InvalidLanguageException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/AIAssistantController.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 3
@@ -7111,6 +7069,12 @@ parameters:
 			path: lib/Model/Conversion/Filters.php
 
 		-
+			message: '#^Method Model\\Conversion\\Filters\:\:sendToFilters\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/Conversion/Filters.php
+
+		-
 			message: '#^Method Model\\Conversion\\Filters\:\:xliffToTarget\(\) has parameter \$xliffsData with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7119,6 +7083,12 @@ parameters:
 		-
 			message: '#^Method Model\\Conversion\\Filters\:\:xliffToTarget\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Model/Conversion/Filters.php
+
+		-
+			message: '#^Parameter \#1 \$headers of method Model\\Conversion\\Filters\:\:extractInstanceInfoFromHeaders\(\) expects array, array\<string\>\|true given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Model/Conversion/Filters.php
 
@@ -12583,6 +12553,12 @@ parameters:
 			path: lib/Utils/ActiveMQ/AMQHandler.php
 
 		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getSingleContent\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/ActiveMQ/AMQHandler.php
+
+		-
 			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:getPublishedResults\(\) has parameter \$id_project with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -14629,10 +14605,22 @@ parameters:
 			path: lib/Utils/Engines/AbstractEngine.php
 
 		-
+			message: '#^Method Utils\\Engines\\AbstractEngine\:\:_call\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Engines/AbstractEngine.php
+
+		-
 			message: '#^Method Utils\\Engines\\Intento\:\:_curl_async\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Engines/Intento.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:send\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
 
 		-
 			message: '#^Access to an undefined property Utils\\Engines\\MyMemory\:\:\$contribute_relative_url\.$#'
@@ -15595,25 +15583,7 @@ parameters:
 			path: lib/Utils/Logger/MatecatLogger.php
 
 		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:_callbackExecute\(\) has parameter \$record with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
 			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:createResource\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getAllContents\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getAllHeaders\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Network/MultiCurlHandler.php
@@ -15621,96 +15591,6 @@ parameters:
 		-
 			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getAllInfo\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getAllLogs\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getError\(\) has parameter \$tokenHash with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getError\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getErrors\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getOptionRequest\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getOptionRequest\(\) has parameter \$tokenHash with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getSingleContent\(\) has parameter \$tokenHash with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getSingleInfo\(\) has parameter \$tokenHash with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getSingleInfo\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getSingleLog\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Method Utils\\Network\\MultiCurlHandler\:\:getSingleLog\(\) has parameter \$tokenHash with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Parameter \#1 \$multi_handle of function curl_multi_add_handle expects CurlMultiHandle, CurlMultiHandle\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Parameter \#1 \$multi_handle of function curl_multi_exec expects CurlMultiHandle, CurlMultiHandle\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Parameter \#1 \$multi_handle of function curl_multi_info_read expects CurlMultiHandle, CurlMultiHandle\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Parameter \#1 \$multi_handle of function curl_multi_select expects CurlMultiHandle, CurlMultiHandle\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Utils/Network/MultiCurlHandler.php
 
@@ -15729,36 +15609,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$value of function curl_setopt expects non\-empty\-string, string given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Property Utils\\Network\\MultiCurlHandler\:\:\$curl_headers_requests type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Property Utils\\Network\\MultiCurlHandler\:\:\$curl_options_requests type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Property Utils\\Network\\MultiCurlHandler\:\:\$multi_curl_info type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Property Utils\\Network\\MultiCurlHandler\:\:\$multi_curl_log type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Property Utils\\Network\\MultiCurlHandler\:\:\$multi_curl_results type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Network/MultiCurlHandler.php
 
@@ -15841,9 +15691,21 @@ parameters:
 			path: lib/Utils/OutsourceTo/Translated.php
 
 		-
+			message: '#^Method Utils\\OutsourceTo\\Translated\:\:__processNormalJobs\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/OutsourceTo/Translated.php
+
+		-
 			message: '#^Method Utils\\OutsourceTo\\Translated\:\:__processOutsourcedJobs\(\) has parameter \$volAnalysis with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/Utils/OutsourceTo/Translated.php
+
+		-
+			message: '#^Method Utils\\OutsourceTo\\Translated\:\:__processOutsourcedJobs\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/Utils/OutsourceTo/Translated.php
 
 		-
@@ -24343,6 +24205,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
 
 		-
+			message: '#^Method Features\\Aligner\\Utils\\GoogleTranslate\:\:_callMulti\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
+
+		-
 			message: '#^Method Features\\Aligner\\Utils\\GoogleTranslate\:\:_decodeMulti\(\) has parameter \$rawValues with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -24409,6 +24277,18 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
 
 		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getError\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
+
+		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getSingleContent\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
+
+		-
 			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:hasError\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -24454,6 +24334,12 @@ parameters:
 			message: '#^Method Features\\Aligner\\Utils\\Engines_MyMemory\:\:_callMulti\(\) has parameter \$url with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\Engines_MyMemory\:\:_callMulti\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
 
 		-
@@ -24544,6 +24430,18 @@ parameters:
 			message: '#^Method Features\\Aligner\\Utils\\Engines_MyMemory\:\:getMulti\(\) has parameter \$_configs with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
+
+		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getError\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
+
+		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getSingleContent\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
 
 		-
@@ -25927,8 +25825,32 @@ parameters:
 			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
 
 		-
+			message: '#^Method Features\\Translated\\Http\\TOSApiClient\:\:send\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
+
+		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getSingleContent\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
+
+		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getSingleLog\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
+
+		-
 			message: '#^Method Features\\Translated\\Utils\\SupportedLanguages\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
+			count: 1
+			path: plugins/translated/lib/Features/Translated/Utils/SupportedLanguages.php
+
+		-
+			message: '#^Parameter \#1 \$tokenHash of method Utils\\Network\\MultiCurlHandler\:\:getSingleContent\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: plugins/translated/lib/Features/Translated/Utils/SupportedLanguages.php
 
