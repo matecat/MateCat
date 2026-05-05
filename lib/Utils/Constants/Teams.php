@@ -13,11 +13,11 @@ class Teams
 {
 
     const string PERSONAL = 'personal';
-    const string GENERAL  = 'general';
+    const string GENERAL = 'general';
 
     protected static array $TYPES = [
-            self::PERSONAL,
-            self::GENERAL
+        self::PERSONAL,
+        self::GENERAL
     ];
 
 

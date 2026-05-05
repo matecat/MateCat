@@ -19,7 +19,8 @@ use ZipArchive;
  * Time: 11.58
  *
  */
-class DownloadOmegaTOutputDecorator extends AbstractDecorator {
+class DownloadOmegaTOutputDecorator extends AbstractDecorator
+{
 
     /**
      * @var AbstractDownloadController
@@ -29,133 +30,130 @@ class DownloadOmegaTOutputDecorator extends AbstractDecorator {
     /**
      * @throws Exception
      */
-    public function decorate( ?ArgumentInterface $arguments = null ): array {
-
+    public function decorate(?ArgumentInterface $arguments = null): array
+    {
         $output_content = [];
 
         //set the file Name
-        $pathinfo = AbstractFilesStorage::pathinfo_fix( $this->controller->getDefaultFileName( $this->controller->getProject() ) );
-        $this->controller->setFilename( $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "." . $pathinfo[ 'extension' ] );
+        $pathinfo = AbstractFilesStorage::pathinfo_fix($this->controller->getDefaultFileName($this->controller->getProject()));
+        $this->controller->setFilename($pathinfo['filename'] . "_" . $this->controller->getJob()->target . "." . $pathinfo['extension']);
 
 
-        if ( $pathinfo[ 'extension' ] != 'zip' ) {
-            $this->controller->setFilename( $this->controller->getFilename() . ".zip" );
+        if ($pathinfo['extension'] != 'zip') {
+            $this->controller->setFilename($this->controller->getFilename() . ".zip");
         }
 
         $tmsService = new TMSService();
-        $tmsService->setOutputType( 'tm' );
+        $tmsService->setOutputType('tm');
 
         $tmFile = $tmsService->exportJobAsTMX(
-                $this->controller->id_job,
-                $this->controller->password,
-                $this->controller->getJob()->source,
-                $this->controller->getJob()->target,
-                $this->controller->getUser()->uid
+            $this->controller->id_job,
+            $this->controller->password,
+            $this->controller->getJob()->source,
+            $this->controller->getJob()->target,
+            $this->controller->getUser()->uid
         );
 
-        $tmsService->setOutputType( 'mt' );
+        $tmsService->setOutputType('mt');
 
-        $mtFile = $tmsService->exportJobAsTMX( $this->controller->id_job, $this->controller->password, $this->controller->getJob()->source, $this->controller->getJob()->target );
+        $mtFile = $tmsService->exportJobAsTMX($this->controller->id_job, $this->controller->password, $this->controller->getJob()->source, $this->controller->getJob()->target);
 
-        $tm_id                    = uniqid( 'tm' );
-        $mt_id                    = uniqid( 'mt' );
-        $output_content[ $tm_id ] = [
-                'document_content' => '',
-                'output_filename'  => $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "_TM . tmx"
+        $tm_id = uniqid('tm');
+        $mt_id = uniqid('mt');
+        $output_content[$tm_id] = [
+            'document_content' => '',
+            'output_filename' => $pathinfo['filename'] . "_" . $this->controller->getJob()->target . "_TM . tmx"
         ];
 
-        foreach ( $tmFile as $content ) {
-            $output_content[ $tm_id ][ 'document_content' ] .= $content;
+        foreach ($tmFile as $content) {
+            $output_content[$tm_id]['document_content'] .= $content;
         }
 
-        $output_content[ $mt_id ] = [
-                'document_content' => '',
-                'output_filename'  => $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "_MT . tmx"
+        $output_content[$mt_id] = [
+            'document_content' => '',
+            'output_filename' => $pathinfo['filename'] . "_" . $this->controller->getJob()->target . "_MT . tmx"
         ];
 
-        foreach ( $mtFile as $content ) {
-            $output_content[ $mt_id ][ 'document_content' ] .= $content;
+        foreach ($mtFile as $content) {
+            $output_content[$mt_id]['document_content'] .= $content;
         }
 
         return $output_content;
-
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    public function createOmegaTZip( $output_content ) {
-
-        $file = tempnam( "/tmp", "zipmatecat" );
+    public function createOmegaTZip($output_content)
+    {
+        $file = tempnam("/tmp", "zipmatecat");
 
         $zip = new ZipArchive();
-        $zip->open( $file, ZipArchive::OVERWRITE );
+        $zip->open($file, ZipArchive::OVERWRITE);
 
-        $zip_baseDir   = $this->controller->getJob()->id . "/";
-        $zip_fileDir   = $zip_baseDir . "inbox/";
+        $zip_baseDir = $this->controller->getJob()->id . "/";
+        $zip_fileDir = $zip_baseDir . "inbox/";
         $zip_tm_mt_Dir = $zip_baseDir . "tm/";
 
-        $zip->addEmptyDir( $zip_baseDir );
-        $zip->addEmptyDir( $zip_baseDir . "glossary" );
-        $zip->addEmptyDir( $zip_baseDir . "inbox" );
-        $zip->addEmptyDir( $zip_baseDir . "omegat" );
-        $zip->addEmptyDir( $zip_baseDir . "target" );
-        $zip->addEmptyDir( $zip_baseDir . "terminology" );
-        $zip->addEmptyDir( $zip_baseDir . "tm" );
-        $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
+        $zip->addEmptyDir($zip_baseDir);
+        $zip->addEmptyDir($zip_baseDir . "glossary");
+        $zip->addEmptyDir($zip_baseDir . "inbox");
+        $zip->addEmptyDir($zip_baseDir . "omegat");
+        $zip->addEmptyDir($zip_baseDir . "target");
+        $zip->addEmptyDir($zip_baseDir . "terminology");
+        $zip->addEmptyDir($zip_baseDir . "tm");
+        $zip->addEmptyDir($zip_baseDir . "tm/auto");
 
         $rev_index_name = [];
 
         // Staff with content
-        foreach ( $output_content as $key => $f ) {
-
-            $f[ 'output_filename' ] = AbstractDownloadController::forceOcrExtension( $f[ 'output_filename' ] );
+        foreach ($output_content as $key => $f) {
+            $f['output_filename'] = AbstractDownloadController::forceOcrExtension($f['output_filename']);
 
             //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_.-]/u', "_", $f[ 'output_filename' ] );
-            $fName = preg_replace( '/_{2,}/', "_", $fName );
-            $fName = str_replace( '_.', ".", $fName );
-            $fName = str_replace( '._', ".", $fName );
-            $fName = str_replace( ".out.sdlxliff", ".sdlxliff", $fName );
+            $fName = preg_replace('/[^0-9a-zA-Z_.-]/u', "_", $f['output_filename']);
+            $fName = preg_replace('/_{2,}/', "_", $fName);
+            $fName = str_replace('_.', ".", $fName);
+            $fName = str_replace('._', ".", $fName);
+            $fName = str_replace(".out.sdlxliff", ".sdlxliff", $fName);
 
-            $nFinfo = AbstractFilesStorage::pathinfo_fix( $fName );
-            $_name  = $nFinfo[ 'filename' ];
-            if ( strlen( $_name ) < 3 ) {
-                $fName = substr( uniqid(), -5 ) . "_" . $fName;
+            $nFinfo = AbstractFilesStorage::pathinfo_fix($fName);
+            $_name = $nFinfo['filename'];
+            if (strlen($_name) < 3) {
+                $fName = substr(uniqid(), -5) . "_" . $fName;
             }
 
-            if ( array_key_exists( $fName, $rev_index_name ) ) {
+            if (array_key_exists($fName, $rev_index_name)) {
                 $fName = uniqid() . $fName;
             }
 
-            $rev_index_name[ $fName ] = $fName;
+            $rev_index_name[$fName] = $fName;
 
-            if ( substr( $key, 0, 2 ) == 'tm' || substr( $key, 0, 2 ) == 'mt' ) {
+            if (substr($key, 0, 2) == 'tm' || substr($key, 0, 2) == 'mt') {
                 $path = $zip_tm_mt_Dir;
             } else {
                 $path = $zip_fileDir;
             }
 
-            $zip->addFromString( $path . $fName, $f[ 'document_content' ] );
-
+            $zip->addFromString($path . $fName, $f['document_content']);
         }
 
-        $zip_prjFile = $this->getOmegatProjectFile( $this->controller->getJob()->source, $this->controller->getJob()->target );
-        $zip->addFromString( $zip_baseDir . "omegat.project", $zip_prjFile );
+        $zip_prjFile = $this->getOmegatProjectFile($this->controller->getJob()->source, $this->controller->getJob()->target);
+        $zip->addFromString($zip_baseDir . "omegat.project", $zip_prjFile);
 
         // Close and send to users
         $zip->close();
-        $zip_content                 = new ZipContentObject();
+        $zip_content = new ZipContentObject();
         $zip_content->input_filename = $file;
 
-        $this->controller->setOutputContent( $zip_content );
-
+        $this->controller->setOutputContent($zip_content);
     }
 
-    private function getOmegatProjectFile( $source, $target ) {
-        $source           = strtoupper( $source );
-        $target           = strtoupper( $target );
+    private function getOmegatProjectFile($source, $target)
+    {
+        $source = strtoupper($source);
+        $target = strtoupper($target);
         $defaultTokenizer = "LuceneEnglishTokenizer";
 
         $omegatFile = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -185,59 +183,58 @@ class DownloadOmegaTOutputDecorator extends AbstractDecorator {
 			</omegat>';
 
         $omegatTokenizerMap = [
-                "AR" => "LuceneArabicTokenizer",
-                "HY" => "LuceneArmenianTokenizer",
-                "EU" => "LuceneBasqueTokenizer",
-                "BG" => "LuceneBulgarianTokenizer",
-                "CA" => "LuceneCatalanTokenizer",
-                "ZH" => "LuceneSmartChineseTokenizer",
-                "CZ" => "LuceneCzechTokenizer",
-                "DK" => "LuceneDanishTokenizer",
-                "NL" => "LuceneDutchTokenizer",
-                "EN" => "LuceneEnglishTokenizer",
-                "FI" => "LuceneFinnishTokenizer",
-                "FR" => "LuceneFrenchTokenizer",
-                "GL" => "LuceneGalicianTokenizer",
-                "DE" => "LuceneGermanTokenizer",
-                "GR" => "LuceneGreekTokenizer",
-                "IN" => "LuceneHindiTokenizer",
-                "HU" => "LuceneHungarianTokenizer",
-                "ID" => "LuceneIndonesianTokenizer",
-                "IE" => "LuceneIrishTokenizer",
-                "IT" => "LuceneItalianTokenizer",
-                "JA" => "LuceneJapaneseTokenizer",
-                "KO" => "LuceneKoreanTokenizer",
-                "LV" => "LuceneLatvianTokenizer",
-                "NO" => "LuceneNorwegianTokenizer",
-                "FA" => "LucenePersianTokenizer",
-                "PT" => "LucenePortugueseTokenizer",
-                "RO" => "LuceneRomanianTokenizer",
-                "RU" => "LuceneRussianTokenizer",
-                "ES" => "LuceneSpanishTokenizer",
-                "SE" => "LuceneSwedishTokenizer",
-                "TH" => "LuceneThaiTokenizer",
-                "TR" => "LuceneTurkishTokenizer"
+            "AR" => "LuceneArabicTokenizer",
+            "HY" => "LuceneArmenianTokenizer",
+            "EU" => "LuceneBasqueTokenizer",
+            "BG" => "LuceneBulgarianTokenizer",
+            "CA" => "LuceneCatalanTokenizer",
+            "ZH" => "LuceneSmartChineseTokenizer",
+            "CZ" => "LuceneCzechTokenizer",
+            "DK" => "LuceneDanishTokenizer",
+            "NL" => "LuceneDutchTokenizer",
+            "EN" => "LuceneEnglishTokenizer",
+            "FI" => "LuceneFinnishTokenizer",
+            "FR" => "LuceneFrenchTokenizer",
+            "GL" => "LuceneGalicianTokenizer",
+            "DE" => "LuceneGermanTokenizer",
+            "GR" => "LuceneGreekTokenizer",
+            "IN" => "LuceneHindiTokenizer",
+            "HU" => "LuceneHungarianTokenizer",
+            "ID" => "LuceneIndonesianTokenizer",
+            "IE" => "LuceneIrishTokenizer",
+            "IT" => "LuceneItalianTokenizer",
+            "JA" => "LuceneJapaneseTokenizer",
+            "KO" => "LuceneKoreanTokenizer",
+            "LV" => "LuceneLatvianTokenizer",
+            "NO" => "LuceneNorwegianTokenizer",
+            "FA" => "LucenePersianTokenizer",
+            "PT" => "LucenePortugueseTokenizer",
+            "RO" => "LuceneRomanianTokenizer",
+            "RU" => "LuceneRussianTokenizer",
+            "ES" => "LuceneSpanishTokenizer",
+            "SE" => "LuceneSwedishTokenizer",
+            "TH" => "LuceneThaiTokenizer",
+            "TR" => "LuceneTurkishTokenizer"
 
         ];
 
-        $source_lang     = substr( $source, 0, 2 );
-        $target_lang     = substr( $target, 0, 2 );
-        $sourceTokenizer = $omegatTokenizerMap[ $source_lang ];
-        $targetTokenizer = $omegatTokenizerMap[ $target_lang ];
+        $source_lang = substr($source, 0, 2);
+        $target_lang = substr($target, 0, 2);
+        $sourceTokenizer = $omegatTokenizerMap[$source_lang];
+        $targetTokenizer = $omegatTokenizerMap[$target_lang];
 
-        if ( $sourceTokenizer == null ) {
+        if ($sourceTokenizer == null) {
             $sourceTokenizer = $defaultTokenizer;
         }
-        if ( $targetTokenizer == null ) {
+        if ($targetTokenizer == null) {
             $targetTokenizer = $defaultTokenizer;
         }
 
         return str_replace(
-                [ "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ],
-                [ $source, $target, $sourceTokenizer, $targetTokenizer ],
-                $omegatFile );
-
-
+            ["@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@"],
+            [$source, $target, $sourceTokenizer, $targetTokenizer],
+            $omegatFile
+        );
     }
 
 }

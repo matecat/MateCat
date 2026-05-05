@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\DeepL;
@@ -14,7 +15,8 @@ use Utils\Engines\EnginesFactory;
  * Date: 20/04/16
  * Time: 18.49
  */
-class CreateTempInstanceTest extends AbstractTest {
+class CreateTempInstanceTest extends AbstractTest
+{
 
     /**
      * @var EngineStruct
@@ -27,15 +29,16 @@ class CreateTempInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::createTempInstance
      */
-    public function test_createTempInstance_of_constructed_engine() {
-
+    #[Test]
+    public function test_createTempInstance_of_constructed_engine()
+    {
         $this->engine_struct_param = new EngineStruct();
 
-        $this->engine_struct_param->type       = EngineConstants::MT;
+        $this->engine_struct_param->type = EngineConstants::MT;
         $this->engine_struct_param->class_load = "DeepL";
 
 
-        $engine = EnginesFactory::createTempInstance( $this->engine_struct_param );
-        $this->assertTrue( $engine instanceof DeepL );
+        $engine = EnginesFactory::createTempInstance($this->engine_struct_param);
+        $this->assertTrue($engine instanceof DeepL);
     }
 }

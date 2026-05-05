@@ -14,8 +14,8 @@ use Stringable;
  * Time: 14.54
  */
 class EngineStruct
-        extends AbstractDaoObjectStruct
-        implements IDaoStruct, ArrayAccess, Stringable
+    extends AbstractDaoObjectStruct
+    implements IDaoStruct, ArrayAccess, Stringable
 {
 
     /**
@@ -68,7 +68,7 @@ class EngineStruct
     /**
      * @var string|array|null
      */
-    public string|array|null $others = '{}';
+    public string|array|null $others = [];
 
     /**
      * @var string|null
@@ -79,7 +79,7 @@ class EngineStruct
     /**
      * @var string|array|null
      */
-    public string|array|null $extra_parameters = '{}';
+    public string|array|null $extra_parameters = [];
 
     /**
      * @var int|null
@@ -155,7 +155,7 @@ class EngineStruct
      * @param mixed $offset <p>
      *                      The offset to assign the value to.
      *                      </p>
-     * @param mixed $value  <p>
+     * @param mixed $value <p>
      *                      The value to set.
      *                      </p>
      *
@@ -208,6 +208,31 @@ class EngineStruct
         }
 
         return json_decode($this->extra_parameters, true);
+    }
+
+    /**
+     * @return array
+     */
+    public function arrayRepresentation(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'type' => $this->type,
+            'extra' => $this->extra_parameters,
+            'engine_type' => $this->getEngineType(),
+        ];
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEngineType(): ?string
+    {
+        $engine_type = explode("\\", $this->class_load);
+
+        return array_pop($engine_type);
     }
 
 }

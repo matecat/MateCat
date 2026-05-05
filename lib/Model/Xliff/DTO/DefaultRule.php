@@ -13,7 +13,7 @@ class DefaultRule extends AbstractXliffRule
      * @see https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html
      * @see https://docs.oasis-open.org/xliff/xliff-core/v2.0/xliff-core-v2.0.html
      */
-    protected static array $_STATES           = XliffTranslationStatus::ALL_STATES;
+    protected static array $_STATES = XliffTranslationStatus::ALL_STATES;
     protected static array $_STATE_QUALIFIERS = XliffTranslationStatus::STATE_QUALIFIER_12;
 
     const array ALLOWED_EDITOR_VALUES = [null];
@@ -32,15 +32,15 @@ class DefaultRule extends AbstractXliffRule
     public function asEditorStatus(): string
     {
         // default behavior
-        if (!empty($this->getStates("state-qualifiers")[ 0 ])) {
-            if (XliffTranslationStatus::isStateQualifierNew($this->getStates("state-qualifiers")[ 0 ])) {
+        if (!empty($this->getStates("state-qualifiers")[0])) {
+            if (XliffTranslationStatus::isStateQualifierNew($this->getStates("state-qualifiers")[0])) {
                 return TranslationStatus::STATUS_NEW;
             }
         }
 
         // default behavior
-        if (!empty($this->getStates("states")[ 0 ])) {
-            $state = $this->getStates("states")[ 0 ];
+        if (!empty($this->getStates("states")[0])) {
+            $state = $this->getStates("states")[0];
 
             if (XliffTranslationStatus::isStatusNew($state)) {
                 return TranslationStatus::STATUS_NEW;
@@ -71,15 +71,15 @@ class DefaultRule extends AbstractXliffRule
      */
     public function isTranslated(string $source, string $target): bool
     {
-        if (!empty($this->getStates("state-qualifiers")[ 0 ])) { // default behavior
+        if (!empty($this->getStates("state-qualifiers")[0])) { // default behavior
             // Ignore translations for fuzzy matches (xliff 1.2)
             // fuzzy-match, mt-suggestion, leveraged-tm, leveraged-inherited, leveraged-mt
             // set those state-qualifiers as NEW
-            return !XliffTranslationStatus::isStateQualifierNew(strtolower($this->getStates("state-qualifiers")[ 0 ]));
+            return !XliffTranslationStatus::isStateQualifierNew(strtolower($this->getStates("state-qualifiers")[0]));
         }
 
-        if (!empty($this->getStates("states")[ 0 ])) { // default behaviour
-            return !XliffTranslationStatus::isStatusNew(strtolower($this->getStates("states")[ 0 ]));
+        if (!empty($this->getStates("states")[0])) { // default behaviour
+            return !XliffTranslationStatus::isStatusNew(strtolower($this->getStates("states")[0]));
         }
 
         if ($source != $target) {

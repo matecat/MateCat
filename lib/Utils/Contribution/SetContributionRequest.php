@@ -144,7 +144,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public function getProp(): array
     {
         $jobStruct = $this->getJobStruct();
-        $props     = $this->props;
+        $props = $this->props;
         if (!is_array($props)) {
             /**
              * @var $props Params

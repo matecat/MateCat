@@ -39,10 +39,10 @@ class SignupEmail extends AbstractEmail
         $recipient = [$this->user->email, $this->user->fullName()];
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage($this->_buildMessageContent())
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
@@ -52,16 +52,16 @@ class SignupEmail extends AbstractEmail
     protected function _getTemplateVariables(): array
     {
         return [
-                'user'           => $this->user->toArray(),
-                'activation_url' => CanonicalRoutes::signupConfirmation($this->user->confirmation_token),
-                'signup_url'     => CanonicalRoutes::appRoot()
+            'user' => $this->user->toArray(),
+            'activation_url' => CanonicalRoutes::signupConfirmation($this->user->confirmation_token),
+            'signup_url' => CanonicalRoutes::appRoot()
         ];
     }
 
     protected function _getLayoutVariables($messageBody = null): array
     {
-        $vars            = parent::_getLayoutVariables();
-        $vars[ 'title' ] = $this->title;
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title;
 
         return $vars;
     }
@@ -70,9 +70,9 @@ class SignupEmail extends AbstractEmail
     {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = AppConfig::$MAILER_RETURN_PATH;
-        $mailConf[ 'sender' ]     = AppConfig::$MAILER_RETURN_PATH;
-        $mailConf[ 'returnPath' ] = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf['from'] = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf['sender'] = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf['returnPath'] = AppConfig::$MAILER_RETURN_PATH;
 
         return $mailConf;
     }

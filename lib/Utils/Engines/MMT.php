@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -120,14 +121,14 @@ class MMT extends AbstractEngine
 
         $glossaries = null;
 
-        if (!empty($_config['project_id'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'mmt_glossaries');
+        if (!empty($_config['id_project'])) {
+            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'mmt_glossaries');
         }
 
         if ($glossaries !== null) {
             $mmtGlossariesArray = json_decode($glossaries->value, true);
             $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get(
-                $_config['project_id'],
+                $_config['id_project'],
                 'mmt_ignore_glossary_case'
             );
 
@@ -171,7 +172,7 @@ class MMT extends AbstractEngine
                 [],
                 $_config['source'],
                 $_config['target'],
-                $_config[MetadataDao::SUBFILTERING_HANDLERS]
+                array_key_exists(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $_config) ? $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] : []
             );
         } catch (Exception) {
             return $this->GoogleTranslateFallback($_config);
@@ -202,6 +203,10 @@ class MMT extends AbstractEngine
         }, $keyList);
     }
 
+    /**
+     * @param array $_config
+     * @return bool
+     */
     public function set($_config): bool
     {
         $client = $this->_getClient();
@@ -232,6 +237,7 @@ class MMT extends AbstractEngine
      * @param $_config
      *
      * @return bool
+     * @throws Exception
      */
     public function update($_config): bool
     {
@@ -324,10 +330,8 @@ class MMT extends AbstractEngine
         $pid = $projectRow['id'];
 
         $metadataDao = new ProjectsMetadataDao();
-        $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get(
-            $pid,
-            "mmt_activate_context_analyzer"
-        )->value : $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
+        $context = $metadataDao->setCacheTTL(86400)->get($pid, "mmt_activate_context_analyzer");
+        $context_analyzer = $context?->value ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
 
         if (!empty($context_analyzer)) {
             $source = $segments[0]['source'];
@@ -417,6 +421,7 @@ class MMT extends AbstractEngine
      * @return array|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      * @internal param array $langPairs
      */
     protected function getContext(SplFileObject $file, string $source, array $targets): ?array
@@ -475,6 +480,7 @@ class MMT extends AbstractEngine
      * @return array|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      */
     public function connectKeys(array $keyList): ?array
     {
@@ -510,6 +516,7 @@ class MMT extends AbstractEngine
      * @return ?array
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      */
     public function createMemory(string $name, ?string $description = null, ?string $externalId = null): ?array
     {
@@ -526,6 +533,7 @@ class MMT extends AbstractEngine
      *
      * @return array
      * @throws MMTServiceApiException
+     * @throws Exception
      */
     public function deleteMemory(array $memoryKey): array
     {
@@ -549,7 +557,7 @@ class MMT extends AbstractEngine
     }
 
     /**
-     * Get a memory associated to an MMT account
+     * Get a memory associated with an MMT account
      * (id can be an external account)
      *
      * @param string $id
@@ -557,6 +565,7 @@ class MMT extends AbstractEngine
      * @return array|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      */
     public function getMemory(string $id): ?array
     {
@@ -675,13 +684,15 @@ class MMT extends AbstractEngine
         $cacheTtl = 60 * 60 * 24 * 30;
 
         // Common metadata loading
-        $metadataDao = new MetadataDao();
-        $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
+        if (!empty($id_job)) {
+            $metadataDao = new MetadataDao();
+            $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
-        $mt_context = array_pop($contextRs);
+            $mt_context = array_pop($contextRs);
             if (!empty($mt_context)) {
                 $config['mt_context'] = $mt_context->value;
             }
+        }
 
         // Common config values
         $config['secret_key'] = self::getG2FallbackSecretKey();
@@ -715,7 +726,7 @@ class MMT extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array
+    public static function getConfigurationParameters(): array
     {
         return [
             'enable_mt_analysis',

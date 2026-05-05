@@ -108,7 +108,6 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
                   : KEY_PROVIDER
 
                 setValue(actualKey, option.id)
-                setValue(actualKey === KEY_ROUTING ? KEY_PROVIDER : KEY_ROUTING)
               }}
               isPortalDropdown={true}
               isActiveOptionOnTop={false}

@@ -45,9 +45,7 @@ export const EditorOtherTab = () => {
     <div className="editor-settings-options-box settings-panel-contentwrapper-tab-background">
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>General settings</h2>
-        <Tagging
-          previousCurrentProjectTemplate={previousCurrentProjectTemplate}
-        />
+        <Tagging />
       </div>
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>

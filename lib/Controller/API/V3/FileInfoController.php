@@ -38,7 +38,7 @@ class FileInfoController extends KleinController
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $this->chunk   = $Validator->getChunk();
+            $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject();
             $this->appendValidator(new ProjectAccessValidator($this, $this->project));
         });
@@ -63,9 +63,9 @@ class FileInfoController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $id_file          = $this->request->param('id_file');
+        $id_file = $this->request->param('id_file');
         $filesInfoUtility = new FilesInfoUtility($this->chunk);
-        $instructions     = $filesInfoUtility->getInstructions($id_file);
+        $instructions = $filesInfoUtility->getInstructions($id_file);
 
         if (!$instructions) {
             throw new NotFoundException('No instructions for this file');
@@ -81,10 +81,10 @@ class FileInfoController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $id_file          = $this->request->param('id_file');
-        $id_file_parts    = $this->request->param('id_file_parts');
+        $id_file = $this->request->param('id_file');
+        $id_file_parts = $this->request->param('id_file_parts');
         $filesInfoUtility = new FilesInfoUtility($this->chunk);
-        $instructions     = $filesInfoUtility->getInstructions($id_file, $id_file_parts);
+        $instructions = $filesInfoUtility->getInstructions($id_file, $id_file_parts);
 
         if (!$instructions) {
             throw new NotFoundException('No instructions for this file parts id');
@@ -108,8 +108,8 @@ class FileInfoController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $id_file          = $this->request->param('id_file');
-        $instructions     = $this->request->param('instructions');
+        $id_file = $this->request->param('id_file');
+        $instructions = $this->request->param('instructions');
         $filesInfoUtility = new FilesInfoUtility($this->chunk);
 
         $instructions = $this->featureSet->filter('decodeInstructions', $instructions);
@@ -120,7 +120,7 @@ class FileInfoController extends KleinController
 
         if ($filesInfoUtility->setInstructions($id_file, $instructions)) {
             $this->response->json([
-                    "success" => true,
+                "success" => true,
             ]);
         } else {
             throw new NotFoundException('File not found on this project');

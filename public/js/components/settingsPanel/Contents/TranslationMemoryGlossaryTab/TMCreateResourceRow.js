@@ -1,10 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {
-  SPECIAL_ROWS_ID,
-  TranslationMemoryGlossaryTabContext,
-  orderTmKeys,
-} from './TranslationMemoryGlossaryTab'
+import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
+import {SPECIAL_ROWS_ID, orderTmKeys} from './TranslationMemoryGlossaryTabUtils'
 import {tmCreateRandUser} from '../../../../api/tmCreateRandUser'
 import {createNewTmKey} from '../../../../api/createNewTmKey'
 import {checkTMKey} from '../../../../api/checkTMKey'

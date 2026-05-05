@@ -15,7 +15,7 @@ class SecondPassReview extends AbstractRevisionFeature
     const string FEATURE_CODE = 'second_pass_review';
 
     protected static array $dependencies = [
-            FeatureCodes::REVIEW_EXTENDED
+        FeatureCodes::REVIEW_EXTENDED
     ];
 
 }

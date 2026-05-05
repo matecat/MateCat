@@ -122,14 +122,20 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   getLanguages: function () {
     return this.languages
   },
-  emitChange: function () {
-    this.emit.apply(this, arguments)
-  },
   getCurrentProjectTemplate() {
     return this._currentProjectTemplate
   },
   setCurrentProjectTemplate: function (currentProjectTemplate) {
     this._currentProjectTemplate = currentProjectTemplate
+  },
+  setJobMetadata: function (jobMetadata) {
+    this.jobMetadata = jobMetadata
+  },
+  getJobMetadata: function () {
+    return this.jobMetadata
+  },
+  emitChange: function () {
+    this.emit.apply(this, arguments)
   },
 })
 
@@ -274,6 +280,7 @@ AppDispatcher.register(function (action) {
       })
       break
     case CatToolConstants.GET_JOB_METADATA:
+      CatToolStore.setJobMetadata(action.jobMetadata)
       CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })

@@ -60,7 +60,7 @@ abstract class AbstractDao
             $con = Database::obtain();
         }
 
-        $this->database             = $con;
+        $this->database = $con;
         self::$auto_increment_field = [];
     }
 
@@ -117,8 +117,8 @@ abstract class AbstractDao
     }
 
     /**
-     * @param array  $input The input array
-     * @param string $type  The expected type
+     * @param array $input The input array
+     * @param string $type The expected type
      *
      * @return array The input array if sanitize was successful, otherwise this function throws exception
      * @throws Exception This function throws exception if input is not:<br/>
@@ -131,7 +131,7 @@ abstract class AbstractDao
     protected static function _sanitizeInputArray(array $input, string $type): array
     {
         foreach ($input as $i => $elem) {
-            $input[ $i ] = self::_sanitizeInput($elem, $type);
+            $input[$i] = self::_sanitizeInput($elem, $type);
         }
 
         return $input;
@@ -139,7 +139,7 @@ abstract class AbstractDao
 
     /**
      * @param IDaoStruct $input The input to be sanitized
-     * @param string     $type  The expected type
+     * @param string $type The expected type
      *
      * @return IDaoStruct The input object if sanitize was successful, otherwise this function throws exception.
      * @throws Exception This function throws exception input is not an object of type $type
@@ -208,11 +208,11 @@ abstract class AbstractDao
      *
      * @template T of IDaoStruct
      *
-     * @param PDOStatement    $stmt
+     * @param PDOStatement $stmt
      * @param class-string<T> $fetchClass
-     * @param array           $bindParams
+     * @param array $bindParams
      *
-     * @param string|null     $keyMap
+     * @param string|null $keyMap
      *
      * @return T[]
      * @throws ReflectionException
@@ -220,8 +220,8 @@ abstract class AbstractDao
     protected function _fetchObjectMap(PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null): array
     {
         if (empty($keyMap)) {
-            $trace  = debug_backtrace(!DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode(":", $bindParams);
+            $trace = debug_backtrace(!DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+            $keyMap = $trace[1]['class'] . "::" . $trace[1]['function'] . "-" . implode(":", $bindParams);
         }
 
         $_cacheResult = $this->_getFromCacheMap($keyMap, $stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass);
@@ -254,8 +254,8 @@ abstract class AbstractDao
      *
      * @param       $attrs    array of full attributes to update
      * @param       $mask     array of attributes to include in the update
-     * @param bool  $ignore   Use INSERT IGNORE query type
-     * @param bool  $no_nulls Exclude NULL fields when build the sql
+     * @param bool $ignore Use INSERT IGNORE query type
+     * @param bool $no_nulls Exclude NULL fields when build the sql
      *
      * @param array $on_duplicate_fields
      *
@@ -274,7 +274,7 @@ abstract class AbstractDao
      * provided by the attributes array.
      *
      * @param            $attrs array of full attributes to update
-     * @param array|null $mask  array of attributes to include in the update
+     * @param array|null $mask array of attributes to include in the update
      *
      * @return string
      */
@@ -348,7 +348,7 @@ abstract class AbstractDao
      * key attributes provided by the struct.
      *
      * @param AbstractDaoObjectStruct $struct
-     * @param array                   $options
+     * @param array $options
      *
      * @return int
      * @throws Exception
@@ -359,11 +359,11 @@ abstract class AbstractDao
 
         $fields = [];
 
-        if (isset($options[ 'fields' ])) {
-            if (!is_array($options[ 'fields' ])) {
+        if (isset($options['fields'])) {
+            if (!is_array($options['fields'])) {
                 throw new Exception('`fields` must be an array');
             }
-            $fields = $options[ 'fields' ];
+            $fields = $options['fields'];
         }
 
         $sql = " UPDATE " . static::TABLE;
@@ -374,17 +374,17 @@ abstract class AbstractDao
         $stmt = $conn->prepare($sql);
 
         $data = array_merge(
-                $struct->toArray($fields),
-                self::structKeys($struct)
+            $struct->toArray($fields),
+            self::structKeys($struct)
         );
 
         LoggerFactory::getLogger('dao')->debug([
-                'table'  => static::TABLE,
-                'sql'    => $sql,
-                'attr'   => $attrs,
-                'fields' => $fields,
-                'struct' => $struct->toArray($fields),
-                'data'   => $data
+            'table' => static::TABLE,
+            'sql' => $sql,
+            'attr' => $attrs,
+            'fields' => $fields,
+            'struct' => $struct->toArray($fields),
+            'data' => $data
         ]);
 
         $stmt->execute($data);
@@ -412,9 +412,9 @@ abstract class AbstractDao
      */
     public static function insertStruct(IDaoStruct $struct, ?array $options = []): int|false
     {
-        $ignore              = isset($options[ 'ignore' ]) && $options[ 'ignore' ] == true;
-        $no_nulls            = isset($options[ 'no_nulls' ]) && $options[ 'no_nulls' ] == true;
-        $on_duplicate_fields = (!empty($options[ 'on_duplicate_update' ]) ? $options[ 'on_duplicate_update' ] : []);
+        $ignore = isset($options['ignore']) && $options['ignore'] == true;
+        $no_nulls = isset($options['no_nulls']) && $options['no_nulls'] == true;
+        $on_duplicate_fields = (!empty($options['on_duplicate_update']) ? $options['on_duplicate_update'] : []);
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys($struct->toArray());

@@ -58,8 +58,8 @@ SQL;
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
         $stmt->execute([
-                'id_job'   => $chunk->id,
-                'password' => $chunk->password
+            'id_job' => $chunk->id,
+            'password' => $chunk->password
         ]);
 
         return $stmt->fetch();
@@ -164,10 +164,10 @@ SQL;
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
         $stmt->execute([
-                'approved' => TranslationStatus::STATUS_APPROVED,
-                'rejected' => TranslationStatus::STATUS_REJECTED,
-                'id_job'   => $chunk->id,
-                'password' => $chunk->password
+            'approved' => TranslationStatus::STATUS_APPROVED,
+            'rejected' => TranslationStatus::STATUS_REJECTED,
+            'id_job' => $chunk->id,
+            'password' => $chunk->password
         ]);
 
         return $stmt->fetchAll();
@@ -228,8 +228,8 @@ JOIN (
     }
 
     /**
-     * @param int      $job_id
-     * @param string   $password
+     * @param int $job_id
+     * @param string $password
      * @param int|null $source_page
      *
      * @return ShapelessConcreteStruct[]

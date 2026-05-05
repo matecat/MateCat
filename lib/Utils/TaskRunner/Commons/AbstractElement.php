@@ -45,7 +45,7 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
      * __set() is run when writing data to inaccessible properties
      *
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set(string $name, mixed $value): void
     {
@@ -113,9 +113,9 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
         $nestedParamsObject = [];
         foreach ($this as $key => $item) {
             if ($item instanceof AbstractElement) {
-                $nestedParamsObject[ $key ] = $item->toArray();
+                $nestedParamsObject[$key] = $item->toArray();
             } else {
-                $nestedParamsObject[ $key ] = $item;
+                $nestedParamsObject[$key] = $item;
             }
         }
 

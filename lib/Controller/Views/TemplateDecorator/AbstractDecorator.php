@@ -6,7 +6,9 @@
  * Date: 05/11/15
  * Time: 11.56
  */
+
 namespace Controller\Views\TemplateDecorator;
+
 use Controller\Abstracts\IController;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Utils\Templating\PHPTALWithAppend;
@@ -19,7 +21,8 @@ use Utils\Templating\PHPTALWithAppend;
  * itself as parameter, and assigns instance variables to the view as needed.
  *
  */
-abstract class AbstractDecorator {
+abstract class AbstractDecorator
+{
 
     protected IController $controller;
 
@@ -28,10 +31,11 @@ abstract class AbstractDecorator {
      */
     protected PHPTALWithAppend $template;
 
-    public function __construct( IController $controller, PHPTALWithAppend $template = null ) {
+    public function __construct(IController $controller, PHPTALWithAppend $template = null)
+    {
         $this->controller = $controller;
-        $this->template   = $template;
+        $this->template = $template;
     }
 
-    public abstract function decorate( ?ArgumentInterface $arguments = null );
+    public abstract function decorate(?ArgumentInterface $arguments = null);
 }

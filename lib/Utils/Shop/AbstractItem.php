@@ -37,10 +37,10 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      * @var array
      */
     protected array $__storage = [
-            '_id_type_class' => null,
-            'id'             => null,
-            'quantity'       => null,
-            'price'          => null,
+        '_id_type_class' => null,
+        'id' => null,
+        'quantity' => null,
+        'price' => null,
     ];
 
     /**
@@ -51,7 +51,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      */
     public static function getInflate($storage): AbstractItem
     {
-        $obj = new $storage[ '_id_type_class' ]();
+        $obj = new $storage['_id_type_class']();
         foreach ($storage as $key => $value) {
             $obj->offsetSet($key, $value);
         }
@@ -71,7 +71,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
 
         //prepare the structure to accept  the value
         //this key is mandatory for Cart Class because of $calledClass::getInflate( $storage );
-        $this->__storage[ '_id_type_class' ] = $value;
+        $this->__storage['_id_type_class'] = $value;
 
         //set the value
         $this->offsetSet('_id_type_class', $value);
@@ -99,10 +99,10 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      *
      * Only items defined in the concrete Item class will be added and/or permitted
      *
-     * @param mixed $key    <p>
+     * @param mixed $key <p>
      *                      The offset to assign the value to.
      *                      </p>
-     * @param mixed $value  <p>
+     * @param mixed $value <p>
      *                      The value to set.
      *                      </p>
      *
@@ -133,7 +133,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      *
      * Only items defined in the concrete Item class will be accepted
      *
-     * @param mixed $key    <p>
+     * @param mixed $key <p>
      *                      The offset to unset.
      *                      </p>
      *

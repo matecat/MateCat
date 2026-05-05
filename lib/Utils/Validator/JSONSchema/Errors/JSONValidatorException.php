@@ -25,6 +25,21 @@ class JSONValidatorException extends Exception implements JsonSerializable
     }
 
     /**
+     * @param string $context
+     *
+     * @return array
+     */
+    public function getFormattedError(string $context): array
+    {
+        return [
+            'node' => $this->error->dataPointer,
+            'schemaPointers' => $this->error->schemaPointers,
+            'schema' => '/api/v3/' . $context . '/schema',
+            'error' => $this->error->error,
+        ];
+    }
+
+    /**
      * @return string
      */
     public function getError(): string
@@ -61,7 +76,7 @@ class JSONValidatorException extends Exception implements JsonSerializable
      */
     public function getSubErrors(): array
     {
-        return $this->error->subErrors;
+        return $this->error->subErrors ?? [];
     }
 
     /**
@@ -70,11 +85,11 @@ class JSONValidatorException extends Exception implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-                'error'          => $this->getError(),
-                'schemaPointers' => $this->getSchemaPointers(),
-                'dataPointer'    => $this->getDataPointer(),
-                'processingPath' => $this->getProcessingPath(),
-                'subErrors'      => $this->getSubErrors(),
+            'error' => $this->getError(),
+            'schemaPointers' => $this->getSchemaPointers(),
+            'dataPointer' => $this->getDataPointer(),
+            'processingPath' => $this->getProcessingPath(),
+            'subErrors' => $this->getSubErrors(),
         ];
     }
 }

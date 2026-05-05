@@ -37,7 +37,7 @@ class WorkerClient
     public static function init(AMQHandler $handler = null): void
     {
         if (AppConfig::$TASK_RUNNER_CONFIG) {
-            $contextList   = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG[ 'context_definitions' ]);
+            $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
             self::$_QUEUES = $contextList->list;
             if (!is_null($handler)) {
                 self::$_HANDLER = $handler;
@@ -54,8 +54,8 @@ class WorkerClient
      *
      * @param string $queue
      * @param string $class_name
-     * @param array  $data
-     * @param array  $options
+     * @param array $data
+     * @param array $options
      *
      */
     public static function enqueue(string $queue, string $class_name, array $data, array $options = []): void
@@ -65,22 +65,22 @@ class WorkerClient
 
     /**
      * @param AMQHandler $handler
-     * @param string     $queue
-     * @param string     $class_name
-     * @param array      $data
-     * @param array      $options
+     * @param string $queue
+     * @param string $class_name
+     * @param array $data
+     * @param array $options
      */
     public static function enqueueWithClient(AMQHandler $handler, string $queue, string $class_name, array $data, array $options = []): void
     {
-        if (!isset($options[ 'persistent' ])) {
-            $options[ 'persistent' ] = $handler->persistent;
+        if (!isset($options['persistent'])) {
+            $options['persistent'] = $handler->persistent;
         }
 
-        $element            = new QueueElement();
-        $element->params    = new Params($data);
+        $element = new QueueElement();
+        $element->params = new Params($data);
         $element->classLoad = $class_name;
 
-        $queue_name = self::$_QUEUES[ $queue ]->queue_name;
+        $queue_name = self::$_QUEUES[$queue]->queue_name;
 
         if (empty($queue_name)) {
             throw new InvalidArgumentException('Empty queue_name: ' . var_export(self::$_QUEUES, true) . "\n" . var_export($queue, true));

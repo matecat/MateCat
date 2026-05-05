@@ -96,8 +96,8 @@ class TeamModel
             $this->_checkAddMembersToPersonalTeam();
 
             $this->new_memberships = $membershipDao->createList([
-                    'team'    => $this->struct,
-                    'members' => $this->member_emails
+                'team' => $this->struct,
+                'members' => $this->member_emails
             ]);
         }
 
@@ -114,7 +114,7 @@ class TeamModel
                 // if it is, move all projects of the team to the personal team and assign them to himself
                 // moreover, delete the old team
                 if (count($memberList) == 1) {
-                    $teamDao      = new TeamDao();
+                    $teamDao = new TeamDao();
                     $personalTeam = $teamDao->setCacheTTL(60 * 60 * 24)->getPersonalByUser($user);
                     $projectDao->massiveSelfAssignment($this->struct, $user, $personalTeam);
                     $teamDao->deleteTeam($this->struct);
@@ -128,8 +128,8 @@ class TeamModel
         (new MembershipDao)->destroyCacheForListByTeamId($this->struct->id);
 
         $this->all_memberships = (new MembershipDao)
-                ->setCacheTTL(3600)
-                ->getMemberListByTeamId($this->struct->id);
+            ->setCacheTTL(3600)
+            ->getMemberListByTeamId($this->struct->id);
 
         Database::obtain()->commit();
 
@@ -180,8 +180,8 @@ class TeamModel
         $redis = (new RedisHandler())->getConnection();
         foreach ($this->_getInvitedEmails() as $email) {
             $pendingInvitation = new PendingInvitations($redis, [
-                    'team_id' => $this->struct->id,
-                    'email'   => $email
+                'team_id' => $this->struct->id,
+                'email' => $email
             ]);
             $pendingInvitation->set();
         }
@@ -195,7 +195,7 @@ class TeamModel
          */ function (MembershipStruct $membership) {
             return $membership->getUser()->email;
         },
-                $this->all_memberships
+            $this->all_memberships
         );
 
         return array_diff($this->member_emails, $emails_of_existing_members);
@@ -267,9 +267,9 @@ class TeamModel
 
         Database::obtain()->begin();
         $team = $dao->createUserTeam($this->user, [
-                'type'    => $this->struct->type,
-                'name'    => $this->struct->name,
-                'members' => $this->member_emails
+            'type' => $this->struct->type,
+            'name' => $this->struct->name,
+            'members' => $this->member_emails
         ]);
 
         $this->new_memberships = $this->all_memberships = $team->getMembers(); //the new members are all existent members
@@ -315,13 +315,13 @@ class TeamModel
 
             $assigneeIds = [];
             foreach ($membersWithProjects as $assignee) {
-                $assigneeIds[ $assignee->uid ] = $assignee->getAssignedProjects();
+                $assigneeIds[$assignee->uid] = $assignee->getAssignedProjects();
             }
 
             foreach ($this->all_memberships as $member) {
                 $memberWithAssignment = array_key_exists($member->uid, $assigneeIds);
                 if ($memberWithAssignment !== false) {
-                    $member->setAssignedProjects($assigneeIds[ $member->uid ]);
+                    $member->setAssignedProjects($assigneeIds[$member->uid]);
                 }
             }
 

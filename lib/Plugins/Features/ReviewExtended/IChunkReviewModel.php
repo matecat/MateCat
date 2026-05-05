@@ -24,7 +24,7 @@ interface IChunkReviewModel
      * adds penalty_points and updates pass fail result
      *
      * @param                         $penalty_points
-     * @param ProjectStruct           $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return void
      */
@@ -33,7 +33,7 @@ interface IChunkReviewModel
     /**
      * subtract penalty_points and updates pass fail result
      *
-     * @param float         $penalty_points
+     * @param float $penalty_points
      * @param ProjectStruct $projectStruct
      *
      * @return void

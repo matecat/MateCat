@@ -27,7 +27,8 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
+import {SettingsPanel} from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getSupportedFiles} from '../api/getSupportedFiles'
@@ -476,6 +477,7 @@ const NewProject = () => {
       dialectStrict,
       mtQualityValueInEditor,
       subfilteringHandlers,
+      icuEnabled,
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
@@ -531,7 +533,7 @@ const NewProject = () => {
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
       subfiltering_handlers: JSON.stringify(subfilteringHandlers),
-      mt_engine: mt.id,
+      ...(mt?.id != null && {mt_engine: mt.id}),
       private_keys_list: JSON.stringify({
         ownergroup: [],
         mine: tm,
@@ -578,6 +580,7 @@ const NewProject = () => {
         ),
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
+      icu_enabled: icuEnabled,
     })
 
     if (!projectSent) {

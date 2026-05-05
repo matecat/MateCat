@@ -4,9 +4,9 @@
 namespace Model\Translations;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
+use Model\Warnings\GlobalWarningStruct;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
 
@@ -30,8 +30,8 @@ class WarningDao extends AbstractDao
         $statuses[] = TranslationStatus::STATUS_TRANSLATED;
         $statuses[] = TranslationStatus::STATUS_APPROVED;
 
-        $arrayCount   = count($projectIds);
-        $rowCount     = ($arrayCount ? $arrayCount - 1 : 0);
+        $arrayCount = count($projectIds);
+        $rowCount = ($arrayCount ? $arrayCount - 1 : 0);
         $placeholders = sprintf("?%s", str_repeat(",?", $rowCount));
 
         $sql = "
@@ -67,15 +67,15 @@ class WarningDao extends AbstractDao
 
         $stmt = $con->prepare($this->_query_warnings_by_chunk);
         $stmt->execute([
-                'id'       => $chunk->id,
-                'password' => $chunk->password,
-                'level'    => WarningModel::ERROR,
-                'status'   => TranslationStatus::STATUS_NEW
+            'id' => $chunk->id,
+            'password' => $chunk->password,
+            'level' => WarningModel::ERROR,
+            'status' => TranslationStatus::STATUS_NEW
         ]);
 
         $result = $stmt->fetch() ?: [];
 
-        return $result[ 'count' ] ?? 0;
+        return $result['count'] ?? 0;
     }
 
     protected function _buildResult(array $array_result)
@@ -89,7 +89,7 @@ class WarningDao extends AbstractDao
     public static function getWarningsByJobIdAndPassword($jid, $jpassword): array
     {
         $thisDao = new self();
-        $db      = $thisDao->getDatabaseHandler();
+        $db = $thisDao->getDatabaseHandler();
 
         $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
@@ -102,12 +102,10 @@ class WarningDao extends AbstractDao
 
         $stmt = $db->getConnection()->prepare($query);
 
-        return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
-                'id_job'         => $jid,
-                'password'       => $jpassword,
-                'segment_status' => TranslationStatus::STATUS_NEW
+        return $thisDao->_fetchObjectMap($stmt, GlobalWarningStruct::class, [
+            'id_job' => $jid,
+            'password' => $jpassword,
+            'segment_status' => TranslationStatus::STATUS_NEW
         ]);
     }
-
-
 }

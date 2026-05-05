@@ -20,7 +20,7 @@ class ProjectAccessValidator extends Base
      * Class constructor.
      *
      * @param KleinController $controller The KleinController object.
-     * @param ProjectStruct   $project    The ProjectStruct object.
+     * @param ProjectStruct $project The ProjectStruct object.
      */
     public function __construct(KleinController $controller, ProjectStruct $project)
     {
@@ -49,8 +49,8 @@ class ProjectAccessValidator extends Base
         }
 
         $team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndUser(
-                $this->project->id_team,
-                $this->controller->getUser()
+            $this->project->id_team,
+            $this->controller->getUser()
         );
 
         if (empty($team)) {

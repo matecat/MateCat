@@ -39,10 +39,10 @@ interface IFilesStorage
      *          |_work
      *          |_xliff file
      *
-     * @param string  $hash
-     * @param string  $lang
+     * @param string $hash
+     * @param string $lang
      * @param ?string $originalPath
-     * @param string  $xliffPath
+     * @param string $xliffPath
      *
      * @return mixed
      * @throws FileSystemException
@@ -91,9 +91,9 @@ interface IFilesStorage
      *          |_package
      *          |_work
      *
-     * @param string      $dateHashPath
-     * @param string      $lang
-     * @param string      $idFile
+     * @param string $dateHashPath
+     * @param string $lang
+     * @param string $idFile
      * @param string|null $newFileName
      *
      * @return mixed
@@ -134,6 +134,17 @@ interface IFilesStorage
     public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
 
     /**
+     * Deletes the queue directory (and any associated converted-files directory).
+     *
+     * @param string $uploadDir
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function deleteQueue(string $uploadDir): void;
+
+    /**
      **********************************************************************************************
      * 4. FAST ANALYSIS
      **********************************************************************************************
@@ -143,7 +154,7 @@ interface IFilesStorage
      * Stores a serialized file to fast analysis storage
      *
      * @param string $id_project
-     * @param array  $segments_metadata
+     * @param array $segments_metadata
      *
      * @return void
      */

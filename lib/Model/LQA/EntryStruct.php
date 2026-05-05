@@ -12,24 +12,24 @@ use ReflectionException;
 class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int    $id                  = null;
-    public ?int    $uid                 = null;
-    public int     $id_segment;
-    public int     $id_job;
-    public int     $id_category;
-    public string  $severity;
-    public int     $translation_version = 0;
-    public ?int    $start_node          = 0;
-    public ?int    $start_offset        = 0;
-    public ?int    $end_node            = 0;
-    public ?int    $end_offset          = 0;
-    public ?int    $is_full_segment     = 0;
-    public ?float  $penalty_points      = 0.0;
-    public ?string $comment             = null;
-    public ?string $create_date         = null;
-    public ?string $target_text         = null;
-    public int     $source_page;
-    public ?string $deleted_at          = null;
+    public ?int $id = null;
+    public ?int $uid = null;
+    public int $id_segment;
+    public int $id_job;
+    public int $id_category;
+    public string $severity;
+    public int $translation_version = 0;
+    public ?int $start_node = 0;
+    public ?int $start_offset = 0;
+    public ?int $end_node = 0;
+    public ?int $end_offset = 0;
+    public ?int $is_full_segment = 0;
+    public ?float $penalty_points = 0.0;
+    public ?string $comment = null;
+    public ?string $create_date = null;
+    public ?string $target_text = null;
+    public int $source_page;
+    public ?string $deleted_at = null;
 
     protected mixed $_comments;
     protected mixed $_diff;
@@ -97,11 +97,11 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
         // set the translation reading the version number on the
         // segment translation
-        $translation               = SegmentTranslationDao::findBySegmentAndJob($this->id_segment, $this->id_job);
+        $translation = SegmentTranslationDao::findBySegmentAndJob($this->id_segment, $this->id_job);
         $this->translation_version = $translation->version_number;
 
         $this->penalty_points = $this->getPenaltyPoints();
-        $this->id_category    = $this->validator->category->id;
+        $this->id_category = $this->validator->category->id;
     }
 
     /**
@@ -112,8 +112,8 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
         $severities = $this->validator->category->getJsonSeverities();
 
         foreach ($severities as $severity) {
-            if ($severity[ 'label' ] == $this->severity) {
-                return $severity[ 'penalty' ];
+            if ($severity['label'] == $this->severity) {
+                return $severity['penalty'];
             }
         }
 

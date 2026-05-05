@@ -221,8 +221,7 @@ class EngineController extends KleinController
             $this->destroyUserEnginesCache();
         }
 
-        $engine_type = explode("\\", $newEngineStruct->class_load);
-        $engine_type = array_pop($engine_type);
+        $engine_type = $newEngineStruct->getEngineType();
 
         if (!$newCreatedDbRowStruct instanceof EngineStruct) {
             throw new AuthorizationError("Creation failed. Only one $engine_type engine is allowed.", 403);
@@ -251,15 +250,11 @@ class EngineController extends KleinController
             $UserMetadataDao->set($this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id);
         }
 
+        $data = $newCreatedDbRowStruct->arrayRepresentation();
+        $data['extra'] = $newEngineStruct->extra_parameters;
+
         $this->response->json([
-            'data' => [
-                'id' => $newCreatedDbRowStruct->id,
-                'name' => $newCreatedDbRowStruct->name,
-                'description' => $newCreatedDbRowStruct->description,
-                'type' => $newCreatedDbRowStruct->type,
-                'extra' => $newEngineStruct->extra_parameters,
-                'engine_type' => $engine_type,
-            ],
+            'data' => $data,
             'errors' => [],
         ]);
     }
@@ -291,9 +286,8 @@ class EngineController extends KleinController
         $engine = EnginesFactory::createTempInstance($result);
 
         if ($engine->isAdaptiveMT()) {
-            $engName = explode("\\", $result->class_load);
             //retrieve OWNER EnginesFactory License
-            (new MetadataDao())->delete($this->user->uid, array_pop($engName)); // engine_id
+            (new MetadataDao())->delete($this->user->uid, $result->getEngineType()); // engine_id
         }
 
         $this->response->json([

@@ -97,7 +97,7 @@ class OutsourceContainer extends React.Component {
           >
             <div
               className={
-                'outsource-container chunk ui grid shadow-1 ' +
+                'outsource-container ui grid shadow-1 ' +
                 outsourceContainerClass
               }
               ref={(container) => (this.container = container)}

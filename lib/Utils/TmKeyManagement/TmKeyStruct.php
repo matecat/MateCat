@@ -141,7 +141,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     }
 
     /**
-     * @param array|TmKeyStruct|null $params                 An associative array with the following keys:<br/>
+     * @param array|TmKeyStruct|null $params An associative array with the following keys:<br/>
      *                                                       <pre>
      *                                                       tm         : boolean - Tm key
      *                                                       glos       : boolean - Glossary key
@@ -200,7 +200,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
 
     public function getCrypt(): string
     {
-        $keyLength   = strlen($this->key);
+        $keyLength = strlen($this->key);
         $last_digits = substr($this->key, -$this->readable_chars);
 
         return str_repeat("*", $keyLength - $this->readable_chars) . $last_digits;
@@ -213,33 +213,33 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     {
         if ($this->complete_format) {
             return [
-                    'tm'         => $this->tm,
-                    'glos'       => $this->glos,
-                    'owner'      => $this->owner,
-                    'uid_transl' => $this->uid_transl,
-                    'uid_rev'    => $this->uid_rev,
-                    'name'       => $this->name,
-                    'key'        => $this->key,
-                    'r'          => (int)$this->r,
-                    'w'          => (int)$this->w,
-                    'r_transl'   => $this->r_transl,
-                    'w_transl'   => $this->w_transl,
-                    'r_rev'      => $this->r_rev,
-                    'w_rev'      => $this->w_rev,
-                    'penalty'    => $this->penalty ?? 0,
-                    'is_shared'  => $this->is_shared,
-                    'is_private' => $this->isEncryptedKey()
+                'tm' => $this->tm,
+                'glos' => $this->glos,
+                'owner' => $this->owner,
+                'uid_transl' => $this->uid_transl,
+                'uid_rev' => $this->uid_rev,
+                'name' => $this->name,
+                'key' => $this->key,
+                'r' => (int)$this->r,
+                'w' => (int)$this->w,
+                'r_transl' => $this->r_transl,
+                'w_transl' => $this->w_transl,
+                'r_rev' => $this->r_rev,
+                'w_rev' => $this->w_rev,
+                'penalty' => $this->penalty ?? 0,
+                'is_shared' => $this->is_shared,
+                'is_private' => $this->isEncryptedKey()
             ];
         }
 
         return [
-                'tm'        => $this->tm,
-                'glos'      => $this->glos,
-                'owner'     => $this->owner,
-                'name'      => $this->name,
-                'key'       => $this->key,
-                'penalty'   => $this->penalty ?? 0,
-                'is_shared' => $this->is_shared,
+            'tm' => $this->tm,
+            'glos' => $this->glos,
+            'owner' => $this->owner,
+            'name' => $this->name,
+            'key' => $this->key,
+            'penalty' => $this->penalty ?? 0,
+            'is_shared' => $this->is_shared,
         ];
     }
 }

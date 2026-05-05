@@ -30,7 +30,7 @@ export const UnlockAllSegmentsModal = () => {
       <div className="matecat-modal-middle">
         <div className={'ui one column grid'}>
           <div className="column left aligned" style={{fontSize: '18px'}}>
-            Would you like to unlock all ICE segments?
+            Would you like to unlock all 101% segments?
           </div>
           <div className="column right aligned">
             <div

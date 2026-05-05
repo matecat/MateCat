@@ -20,11 +20,11 @@ class GoogleProvider extends AbstractProvider
      * @var array
      */
     protected static array $OAUTH_SCOPES = [
-            'https://www.googleapis.com/auth/userinfo.email',
-            'https://www.googleapis.com/auth/userinfo.profile',
-            'https://www.googleapis.com/auth/drive.file',
-            'https://www.googleapis.com/auth/drive.install',
-            'profile'
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.install',
+        'profile'
     ];
 
     /**
@@ -62,7 +62,7 @@ class GoogleProvider extends AbstractProvider
      */
     protected static function getLogger(): Logger
     {
-        $log           = new Logger(self::$LOGGER_NAME);
+        $log = new Logger(self::$LOGGER_NAME);
         $streamHandler = new StreamHandler(self::logFilePath(), Logger::INFO);
         $streamHandler->setFormatter(new GoogleClientLogsFormatter());
         $log->pushHandler($streamHandler);
@@ -117,16 +117,16 @@ class GoogleProvider extends AbstractProvider
         $googleClient->setAccessType("offline");
         $googleClient->setAccessToken($token->__toArray()); // __toArray defined in ConnectedServices\Google\AccessToken
 
-        $plus    = new Google_Service_Oauth2($googleClient);
+        $plus = new Google_Service_Oauth2($googleClient);
         $fetched = $plus->userinfo->get();
 
-        $user            = new ProviderUser();
-        $user->email     = $fetched->getEmail();
-        $user->name      = $fetched->getName();
-        $user->lastName  = $fetched->getFamilyName();
-        $user->picture   = $fetched->getPicture();
+        $user = new ProviderUser();
+        $user->email = $fetched->getEmail();
+        $user->name = $fetched->getName();
+        $user->lastName = $fetched->getFamilyName();
+        $user->picture = $fetched->getPicture();
         $user->authToken = $token;
-        $user->provider  = self::PROVIDER_NAME;
+        $user->provider = self::PROVIDER_NAME;
 
         return $user;
     }

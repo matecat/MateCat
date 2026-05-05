@@ -301,12 +301,14 @@ export const Dropdown = forwardRef(
 
     useLayoutEffect(() => {
       if (typeof optionActiveRef?.current?.scrollIntoView === 'function') {
-        requestAnimationFrame(() =>
-          optionActiveRef.current.scrollIntoView({
-            behavior: 'instant',
-            block: 'nearest',
-          }),
-        )
+        requestAnimationFrame(() => {
+          if (optionActiveRef?.current) {
+            optionActiveRef.current.scrollIntoView({
+              behavior: 'instant',
+              block: 'nearest',
+            })
+          }
+        })
       }
     }, [activeOption])
 

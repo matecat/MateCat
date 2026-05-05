@@ -2,6 +2,7 @@
 
 namespace Controller\API\Commons\Validators;
 
+use Closure;
 use Controller\Abstracts\KleinController;
 use Exception;
 use Klein\Request;
@@ -18,19 +19,25 @@ abstract class Base
     protected KleinController $controller;
 
     /**
-     * @var callable[]
+     * @var Closure[]
      */
     protected array $_validationCallbacks = [];
 
     /**
-     * @var callable
+     * @var Closure|null
      */
-    private $_failureCallback = null;
+    private ?Closure $_failureCallback = null;
 
-    public function __construct(KleinController $kleinController)
+    /**
+     * @var array
+     */
+    protected array $args = [];
+
+    public function __construct(KleinController $kleinController, ...$args)
     {
-        $this->request    = $kleinController->getRequest();
+        $this->request = $kleinController->getRequest();
         $this->controller = $kleinController;
+        $this->args = $args;
     }
 
     /**

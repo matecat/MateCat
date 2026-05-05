@@ -9,8 +9,8 @@ import PropTypes from 'prop-types'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import usePortal from '../../../../hooks/usePortal'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {getCodeFromLabel} from './CategoriesSeveritiesTable'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
+import {getCodeFromLabel} from './CategoriesSeveritiesTableUtils'
 
 export const ModifySeverity = ({
   target,

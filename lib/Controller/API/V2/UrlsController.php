@@ -40,10 +40,10 @@ class UrlsController extends KleinController
         if ($jobCheck === 0) {
             $this->response->status()->setCode(404);
             $this->response->json([
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => 'No project found.'
-                    ]
+                'errors' => [
+                    'code' => 0,
+                    'message' => 'No project found.'
+                ]
             ]);
             exit();
         }

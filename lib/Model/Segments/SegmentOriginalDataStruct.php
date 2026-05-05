@@ -8,16 +8,16 @@ use Model\DataAccess\IDaoStruct;
 class SegmentOriginalDataStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int      $id          = null;
-    public int       $id_segment;
-    protected string $map         = '';
-    protected array  $decoded_map = [];
+    public ?int $id = null;
+    public int $id_segment;
+    protected string $map = '';
+    protected array $decoded_map = [];
 
 
     public function setMap(array $map): SegmentOriginalDataStruct
     {
         $this->decoded_map = $map;
-        $this->map         = json_encode($map);
+        $this->map = json_encode($map);
 
         return $this;
     }

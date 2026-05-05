@@ -31,20 +31,20 @@ class Membership
     public function renderItem(MembershipStruct $membership): array
     {
         $out = [
-                'id'      => $membership->id ?? 0,
-                'id_team' => $membership->id_team,
+            'id' => $membership->id ?? 0,
+            'id_team' => $membership->id_team,
         ];
 
         if (!is_null($membership->getUser())) {
-            $out[ 'user' ] = User::renderItem($membership->getUser());
+            $out['user'] = User::renderItem($membership->getUser());
         }
 
         $metadata = UserMetadata::renderMetadataCollection($membership->getUserMetadata());
         if (!empty($metadata)) {
-            $out[ 'user_metadata' ] = array_filter($metadata);
+            $out['user_metadata'] = array_filter($metadata);
         }
 
-        $out[ 'projects' ] = $membership->getAssignedProjects();
+        $out['projects'] = $membership->getAssignedProjects();
 
         return $out;
     }

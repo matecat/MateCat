@@ -3,11 +3,14 @@
 namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\Response;
 use Model\Projects\ProjectTemplateDao;
 use PDOException;
+use ReflectionException;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
@@ -33,7 +36,7 @@ class ProjectTemplateController extends KleinController
     private function validateJSON($json): object
     {
         $validatorObject = new JSONValidatorObject($json);
-        $validator       = new JSONValidator('project_template.json', true);
+        $validator = new JSONValidator('project_template.json', true);
         $validator->validate($validatorObject);
 
         return $validatorObject->getValue();
@@ -41,62 +44,48 @@ class ProjectTemplateController extends KleinController
 
     /**
      * Get all entries
+     * @throws Exception
      */
     public function all(): Response
     {
-        try {
-            $currentPage = $this->request->param('page') ?? 1;
-            $pagination  = $this->request->param('perPage') ?? 20;
+        $currentPage = $this->request->param('page') ?? 1;
+        $pagination = $this->request->param('perPage') ?? 20;
 
-            if ($pagination > 200) {
-                $pagination = 200;
-            }
-
-            $uid = $this->getUser()->uid;
-            $this->response->status()->setCode(200);
-
-            return $this->response->json(ProjectTemplateDao::getAllPaginated($uid, "/api/v3/project-template?page=", (int)$currentPage, (int)$pagination));
-        } catch (Exception $exception) {
-            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
-            $this->response->status()->setCode($code);
-
-            return $this->response->json([
-                    'error' => $exception->getMessage()
-            ]);
+        if ($pagination > 200) {
+            $pagination = 200;
         }
+
+        $uid = $this->getUser()->uid;
+        return $this->response->json(ProjectTemplateDao::getAllPaginated($uid, "/api/v3/project-template?page=", (int)$currentPage, (int)$pagination));
     }
 
     /**
      * Get a single entry
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function get(): Response
     {
-        try {
-            $id = (int)$this->request->param('id');
+        $id = (int)$this->request->param('id');
 
-            $model = ProjectTemplateDao::getByIdAndUser($id, $this->getUser()->uid);
+        $model = ProjectTemplateDao::getByIdAndUser($id, $this->getUser()->uid);
 
-            if (empty($model)) {
-                throw new Exception('Model not found', 404);
-            }
-
-            $this->response->status()->setCode(200);
-
-            return $this->response->json($model);
-        } catch (Exception $exception) {
-            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
-            $this->response->status()->setCode($code);
-
-            return $this->response->json([
-                    'error' => $exception->getMessage()
-            ]);
+        if (empty($model)) {
+            throw new Exception('Model not found', 404);
         }
+
+        return $this->response->json($model);
     }
 
     /**
-     * Create new entry
+     * Create a new entry
      *
      * @return Response
+     * @throws ValidationError
+     * @throws JSONValidatorException
+     * @throws JsonValidatorGenericException
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function create(): Response
     {
@@ -104,10 +93,10 @@ class ProjectTemplateController extends KleinController
         try {
             // accept only JSON
             if (!$this->isJsonRequest()) {
-                throw new Exception('Bad Get', 400);
+                throw new ValidationError('Bad Request');
             }
 
-            $json          = $this->request->body();
+            $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
             $struct = ProjectTemplateDao::createFromJSON($decodedObject, $this->getUser());
@@ -115,32 +104,14 @@ class ProjectTemplateController extends KleinController
             $this->response->code(201);
 
             return $this->response->json($struct);
-        } catch (JSONValidatorException|JsonValidatorGenericException $exception) {
-            $errorCode = max($exception->getCode(), 400);
-            $this->response->code($errorCode);
-
-            return $this->response->json(['error' => $exception->getMessage()]);
+        } catch (JSONValidatorException $exception) {
+            throw new JSONValidatorException($exception->getFormattedError("project-template"));
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
-                $this->response->code(400);
-
-                return $this->response->json([
-                        'error' => "Invalid unique template name"
-                ]);
+                throw new ValidationError("Invalid unique template name");
             } else {
-                $this->response->code(500);
-
-                return $this->response->json([
-                        'error' => $e->getMessage()
-                ]);
+                throw $e;
             }
-        } catch (Exception $exception) {
-            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code($errorCode);
-
-            return $this->response->json([
-                    'error' => $exception->getMessage()
-            ]);
         }
     }
 
@@ -155,12 +126,12 @@ class ProjectTemplateController extends KleinController
         try {
             // accept only JSON
             if (!$this->isJsonRequest()) {
-                throw new Exception('Bad Get', 400);
+                throw new ValidationError('Bad Request');
             }
 
-            $id            = (int)$this->request->param('id');
-            $uid           = $this->getUser()->uid;
-            $json          = $this->request->body();
+            $id = (int)$this->request->param('id');
+            $uid = $this->getUser()->uid;
+            $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
             // mark all templates as not default
@@ -173,54 +144,35 @@ class ProjectTemplateController extends KleinController
             $model = ProjectTemplateDao::getByIdAndUser($id, $uid);
 
             if (empty($model)) {
-                throw new Exception('Model not found', 404);
+                throw new NotFoundException('Model not found');
             }
 
             $struct = ProjectTemplateDao::editFromJSON($model, $decodedObject, $id, $this->getUser());
 
-            $this->response->code(200);
-
             return $this->response->json($struct);
-        } catch (JSONValidatorException|JsonValidatorGenericException  $exception) {
-            $errorCode = max($exception->getCode(), 400);
-            $this->response->code($errorCode);
-
-            return $this->response->json(['error' => $exception->getMessage()]);
-        } catch (Exception $exception) {
-            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code($errorCode);
-
-            return $this->response->json([
-                    'error' => $exception->getMessage()
-            ]);
+        } catch (JSONValidatorException $exception) {
+            throw new JSONValidatorException($exception->getFormattedError("project-template"));
         }
     }
 
     /**
      * Delete an entry
+     * @throws ReflectionException
+     * @throws NotFoundException
      */
     public function delete(): Response
     {
-        try {
-            $id = (int)$this->request->param('id');
+        $id = (int)$this->request->param('id');
 
-            $count = ProjectTemplateDao::remove($id, $this->getUser()->uid);
+        $count = ProjectTemplateDao::remove($id, $this->getUser()->uid);
 
-            if ($count == 0) {
-                throw new Exception('Model not found', 404);
-            }
-
-            return $this->response->json([
-                    'id' => $id
-            ]);
-        } catch (Exception $exception) {
-            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
-            $this->response->status()->setCode($code);
-
-            return $this->response->json([
-                    'error' => $exception->getMessage()
-            ]);
+        if ($count == 0) {
+            throw new NotFoundException('Model not found');
         }
+
+        return $this->response->json([
+            'id' => $id
+        ]);
     }
 
     /**
@@ -238,10 +190,8 @@ class ProjectTemplateController extends KleinController
      */
     public function default(): Response
     {
-        $this->response->status()->setCode(200);
-
         return $this->response->json(
-                ProjectTemplateDao::getDefaultTemplate($this->getUser()->uid)
+            ProjectTemplateDao::getDefaultTemplate($this->getUser()->uid)
         );
     }
 
@@ -250,8 +200,8 @@ class ProjectTemplateController extends KleinController
      */
     private function getProjectTemplateModelSchema(): string
     {
-        $skeletonSchema                                    = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/project_template.json'));
-        $contentSchema                                     = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/subfiltering_handlers.json'));
+        $skeletonSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/project_template.json'));
+        $contentSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/subfiltering_handlers.json'));
         $skeletonSchema->properties->subfiltering_handlers = $contentSchema;
 
         return $skeletonSchema;

@@ -22,7 +22,7 @@ trait AuthenticationTrait
 
     use SessionStarter;
 
-    protected bool       $userIsLogged;
+    protected bool $userIsLogged;
     protected UserStruct $user;
 
     /**
@@ -49,10 +49,10 @@ trait AuthenticationTrait
 
         $this->setAuthKeysIfExists();
 
-        $auth               = AuthenticationHelper::getInstance($_session, $this->api_key, $this->api_secret);
-        $this->user         = $auth->getUser();
+        $auth = AuthenticationHelper::getInstance($_session, $this->api_key, $this->api_secret);
+        $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
-        $this->api_record   = $auth->getApiRecord();
+        $this->api_record = $auth->getApiRecord();
     }
 
     /**
@@ -62,8 +62,8 @@ trait AuthenticationTrait
     {
         $headers = array_change_key_case(getallheaders());
 
-        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode(explode('Bearer ', $headers[ 'authorization' ] ?? '')[ 1 ] ?? '');
-        $this->api_secret = $headers[ 'x-matecat-secret' ] ?? null;
+        $this->api_key = $headers['x-matecat-key'] ?? base64_decode(explode('Bearer ', $headers['authorization'] ?? '')[1] ?? '');
+        $this->api_secret = $headers['x-matecat-secret'] ?? null;
 
         if (str_contains($this->api_key, '-')) {
             [$this->api_key, $this->api_secret] = explode('-', $this->api_key);
@@ -90,14 +90,14 @@ trait AuthenticationTrait
     {
         $this->logout();
         $queueHandler = new AMQHandler();
-        $message      = json_encode([
-                '_type' => 'logout',
-                'data'  => [
-                        'uid'     => $this->user->uid,
-                        'payload' => [
-                                'uid' => $this->user->uid,
-                        ]
+        $message = json_encode([
+            '_type' => 'logout',
+            'data' => [
+                'uid' => $this->user->uid,
+                'payload' => [
+                    'uid' => $this->user->uid,
                 ]
+            ]
         ]);
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }

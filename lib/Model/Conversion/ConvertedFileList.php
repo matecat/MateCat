@@ -16,9 +16,14 @@ class ConvertedFileList
      * @var ConvertedFileModel[]
      */
     private array $convertedFiles = [];
-    private array $erroredFiles   = [];
-    private array $warnedFiles    = [];
+    private array $erroredFiles = [];
+    private array $warnedFiles = [];
 
+    /**
+     * Appends a conversion result to the internal list.
+     *
+     * @param ConvertedFileModel $convertedFileModel
+     */
     public function add(ConvertedFileModel $convertedFileModel): void
     {
         $this->convertedFiles[] = $convertedFileModel;
@@ -49,6 +54,9 @@ class ConvertedFileList
         return !empty($this->erroredFiles);
     }
 
+    /**
+     * @return bool
+     */
     public function hasWarnings(): bool
     {
         return !empty($this->warnedFiles);
@@ -96,9 +104,9 @@ class ConvertedFileList
 
         foreach ($this->convertedFiles as $res) {
             if ($res->isZipContent()) {
-                $data[ 'zipFiles' ][] = $res->getResult();
+                $data['zipFiles'][] = $res->getResult();
             } else {
-                $data[ 'simpleFileName' ][] = $res->getResult();
+                $data['simpleFileName'][] = $res->getResult();
             }
         }
 

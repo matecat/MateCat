@@ -13,8 +13,8 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 
 class CompletionEventStruct extends AbstractDaoObjectStruct
 {
-    public int    $uid;
+    public int $uid;
     public string $remote_ip_address = '';
     public string $source;
-    public bool   $is_review;
+    public bool $is_review;
 }

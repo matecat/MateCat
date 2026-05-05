@@ -33,6 +33,8 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
     } else {
       continueDownloadFunction = continueDownload
     }
+    const continueDownloadFunctionWithoutErrors = () =>
+      continueDownloadFunction({checkErrors: false})
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
     if (
@@ -41,6 +43,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
     ) {
       ModalsActions.showDownloadWarningsModal(
         continueDownloadFunction,
+        continueDownloadFunctionWithoutErrors,
         goToFirstError,
       )
     } else {
@@ -55,7 +58,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
     }, 300)
   }
 
-  const continueDownload = () => {
+  const continueDownload = ({checkErrors = true} = {}) => {
     if (downloadDisabled) {
       return
     }
@@ -64,10 +67,18 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
     const callback = () => {
       setDownloadDisabled(false)
     }
-    DownloadFileUtils.downloadFile(config.id_job, config.password, callback)
+    DownloadFileUtils.downloadFile(
+      config.id_job,
+      config.password,
+      checkErrors,
+      callback,
+    )
   }
 
-  const continueDownloadWithGoogleDrive = (originalFiles) => {
+  const continueDownloadWithGoogleDrive = ({
+    checkErrors = true,
+    originalFiles,
+  } = {}) => {
     if (downloadDisabled) {
       return
     }
@@ -81,6 +92,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
       originalFiles,
       config.id_job,
       config.password,
+      checkErrors,
       callback,
     )
   }
@@ -150,7 +162,9 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
               title="Original in Google Drive"
               alt="Original in Google Drive"
               href="javascript:void(0)"
-              onClick={() => continueDownloadWithGoogleDrive(1)}
+              onClick={() =>
+                continueDownloadWithGoogleDrive({originalFiles: 1})
+              }
             >
               Original in Google Drive
             </a>

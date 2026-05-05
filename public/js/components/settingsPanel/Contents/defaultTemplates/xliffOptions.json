@@ -37,7 +37,7 @@
       {"id": "tm_95_99", "name": "TM Partial 95-99%"},
       {"id": "tm_100", "name": "TM 100%"},
       {"id": "tm_100_public", "name": "Public TM 100% "},
-      {"id": "ice", "name": "TM 100% in context"},
+      {"id": "ice", "name": "TM 101%"},
       {"id": "MT", "name": "Machine Translation"}
     ],
     "editor": ["draft", "translated", "approved", "approved2"]
@@ -55,7 +55,7 @@
       {"id": "tm_95_99", "name": "TM Partial 95-99%"},
       {"id": "tm_100", "name": "TM 100%"},
       {"id": "tm_100_public", "name": "Public TM 100% "},
-      {"id": "ice", "name": "TM 100% in context"},
+      {"id": "ice", "name": "TM 101%"},
       {"id": "MT", "name": "Machine Translation"}
     ],
     "editor": ["draft", "translated", "approved", "approved2"]

@@ -36,22 +36,22 @@ class ProjectCreationStatusController extends KleinController
 
         if (empty($result)) {
             $this->_letsWait();
-        } elseif (!empty($result[ 'errors' ])) {
-            foreach ($result[ 'errors' ] as $error) {
-                throw new Exception($error[ 'message' ], (int)$error[ 'code' ]);
+        } elseif (!empty($result['errors'])) {
+            foreach ($result['errors'] as $error) {
+                throw new Exception($error['message'], (int)$error['code']);
             }
         } else {
             // project is created, find it with password
             try {
                 $project = ProjectDao::findByIdAndPassword($this->request->param('id_project'), $this->request->param('password'));
-            } catch (NotFoundException $e) {
+            } catch (NotFoundException) {
                 throw new AuthorizationError('Not Authorized.');
             }
 
             $featureSet = $project->getFeaturesSet();
-            $result     = $featureSet->filter('filterCreationStatus', $result, $project);
+            $result = $featureSet->filter('filterCreationStatus', $result, $project);
 
-            if (empty($result[ 'id_project' ])) {
+            if (empty($result['id_project'])) {
                 $this->_letsWait();
             } else {
                 $result = (object)$result;

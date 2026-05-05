@@ -28,7 +28,7 @@ class FilesInfoUtility
      */
     public function __construct(JobStruct $chunkStruct)
     {
-        $this->chunk   = $chunkStruct;
+        $this->chunk = $chunkStruct;
         $this->project = $chunkStruct->getProject();
     }
 
@@ -42,55 +42,55 @@ class FilesInfoUtility
      */
     public function getInfo(bool $showMetadata = true): array
     {
-        $fileInfo        = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
+        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
         $fileMetadataDao = new MetadataDao();
-        $filePartsDao    = new FilesPartsDao();
+        $filePartsDao = new FilesPartsDao();
 
         // Show metadata
         if ($showMetadata) {
             // File parts
             foreach ($fileInfo as $file) {
                 $filePartsIdArray = [];
-                $metadata         = [];
+                $metadata = [];
 
                 foreach ($fileMetadataDao->getByJobIdProjectAndIdFile($this->project->id, $file->id_file, 60 * 5) as $metadatum) {
                     if ($metadatum->files_parts_id !== null) {
-                        $metadata[ 'files_parts' ][ (int)$metadatum->files_parts_id ][ $metadatum->key ] = $metadatum->value;
+                        $metadata['files_parts'][(int)$metadatum->files_parts_id][$metadatum->key] = $metadatum->value;
 
                         if (!in_array($metadatum->files_parts_id, $filePartsIdArray)) {
                             $filePartsIdArray[] = (int)$metadatum->files_parts_id;
                         }
                     } else {
-                        $metadata[ $metadatum->key ] = $metadatum->value;
+                        $metadata[$metadatum->key] = $metadatum->value;
                     }
                 }
 
                 $index = 0;
-                if (isset($metadata[ 'files_parts' ])) {
-                    foreach ($metadata[ 'files_parts' ] as $id => $filesPart) {
-                        $filesPart[ 'id' ]                   = $id;
-                        $metadata[ 'files_parts' ][ $index ] = $filesPart;
-                        unset($metadata[ 'files_parts' ][ $id ]);
+                if (isset($metadata['files_parts'])) {
+                    foreach ($metadata['files_parts'] as $id => $filesPart) {
+                        $filesPart['id'] = $id;
+                        $metadata['files_parts'][$index] = $filesPart;
+                        unset($metadata['files_parts'][$id]);
                         $index++;
                     }
 
-                    $metadata[ 'files_parts' ] = array_values($metadata[ 'files_parts' ]);
+                    $metadata['files_parts'] = array_values($metadata['files_parts']);
                 }
 
-                if (!isset($metadata[ 'files_parts' ])) {
-                    $metadata[ 'files_parts' ] = [];
+                if (!isset($metadata['files_parts'])) {
+                    $metadata['files_parts'] = [];
 
                     $fileParts = $filePartsDao->getByFileId($file->id_file);
 
                     foreach ($fileParts as $filePart) {
-                        $metadata[ 'files_parts' ][] = [
-                                'id' => (int)$filePart->id
+                        $metadata['files_parts'][] = [
+                            'id' => (int)$filePart->id
                         ];
                     }
                 }
 
-                if (!isset($metadata[ 'instructions' ])) {
-                    $metadata[ 'instructions' ] = null;
+                if (!isset($metadata['instructions'])) {
+                    $metadata['instructions'] = null;
                 }
 
                 $file->metadata = $metadata;
@@ -101,7 +101,7 @@ class FilesInfoUtility
     }
 
     /**
-     * @param int      $id_file
+     * @param int $id_file
      * @param int|null $filePartsId
      *
      * @return array|null
@@ -110,7 +110,7 @@ class FilesInfoUtility
     public function getInstructions(int $id_file, ?int $filePartsId = null): ?array
     {
         if (FileDao::isFileInProject($id_file, $this->project->id)) {
-            $metadataDao  = new MetadataDao;
+            $metadataDao = new MetadataDao;
             $instructions = $metadataDao->get($this->project->id, $id_file, 'instructions', $filePartsId, 60 * 5);
 
             if (!$instructions) {
@@ -128,7 +128,7 @@ class FilesInfoUtility
     }
 
     /**
-     * @param int    $id_file
+     * @param int $id_file
      * @param string $instructions
      *
      * @return bool

@@ -3,6 +3,7 @@
 namespace Model\DataAccess;
 
 use PDO;
+use Throwable;
 
 interface IDatabase
 {
@@ -57,11 +58,27 @@ interface IDatabase
     public function rollback(): void;
 
     /**
+     * Execute a callback within a database transaction.
+     *
+     * Begins a transaction, executes the callback, and commits.
+     * On any exception, rolls back (if still in transaction) and re-throws.
+     *
+     * @template T
+     *
+     * @param callable(): T $callback
+     *
+     * @return T The value returned by the callback
+     *
+     * @throws Throwable Re-throws the original exception after rollback
+     */
+    public function transaction( callable $callback ): mixed;
+
+    /**
      * Execute a update query with an array as argument
      *
      * @param string $table Table to update
-     * @param array  $data  Data to update, with the form (keyToUpdate => newValue)
-     * @param array  $where Condition
+     * @param array $data Data to update, with the form (keyToUpdate => newValue)
+     * @param array $where Condition
      *
      * @return integer Number of affected rows
      */
@@ -72,7 +89,7 @@ interface IDatabase
      * Run an insert query with an array as argument
      *
      * @param string $table Table to insert data in
-     * @param array  $data  Data to insert, with the form (keyToUpdate => newValue)
+     * @param array $data Data to insert, with the form (keyToUpdate => newValue)
      *
      * @return string
      */
@@ -101,5 +118,22 @@ interface IDatabase
      * Get the number of rows affected by the last update/insert query
      */
     public function rowCount(): int;
+
+    /**
+     * Get the underlying PDO connection
+     *
+     * @return PDO
+     */
+    public function getConnection(): PDO;
+
+    /**
+     * Reserve and return a range of sequence IDs
+     *
+     * @param string $sequence_name
+     * @param int $seqIncrement
+     *
+     * @return list<int>
+     */
+    public function nextSequence(string $sequence_name, int $seqIncrement = 1): array;
 
 }

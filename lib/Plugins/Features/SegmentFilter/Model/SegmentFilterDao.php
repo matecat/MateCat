@@ -21,7 +21,7 @@ class SegmentFilterDao extends AbstractDao
 {
 
     /**
-     * @param JobStruct        $chunk
+     * @param JobStruct $chunk
      * @param FilterDefinition $filter
      *
      * @return ShapelessConcreteStruct[]
@@ -37,18 +37,19 @@ class SegmentFilterDao extends AbstractDao
                AND jobs.password = :password
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-               AND st.status = :status";
+               AND st.status = :status
+            JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1";
 
         $data = [
-                'id_job'            => $chunk->id,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment'  => $chunk->job_last_segment,
-                'password'          => $chunk->password,
-                'status'            => $filter->getSegmentStatus()
+            'id_job' => $chunk->id,
+            'job_first_segment' => $chunk->job_first_segment,
+            'job_last_segment' => $chunk->job_last_segment,
+            'password' => $chunk->password,
+            'status' => $filter->getSegmentStatus()
         ];
 
         $thisDao = new self();
-        $stmt    = $thisDao->_getStatementForQuery($sql);
+        $stmt = $thisDao->_getStatementForQuery($sql);
 
         return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $data);
     }
@@ -60,11 +61,11 @@ class SegmentFilterDao extends AbstractDao
      */
     private static function __getWhereFromFilter(FilterDefinition $filter): object
     {
-        $where      = '';
+        $where = '';
         $where_data = [];
 
         if ($filter->isFiltered()) {
-            $where      = " AND st.status = :status ";
+            $where = " AND st.status = :status ";
             $where_data = ['status' => $filter->getSegmentStatus()];
         }
 
@@ -75,15 +76,15 @@ class SegmentFilterDao extends AbstractDao
     private static function __getData(JobStruct $chunk, FilterDefinition $filter): array
     {
         $data = [
-                'id_job'            => $chunk->id,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment'  => $chunk->job_last_segment,
-                'password'          => $chunk->password
+            'id_job' => $chunk->id,
+            'job_first_segment' => $chunk->job_first_segment,
+            'job_last_segment' => $chunk->job_last_segment,
+            'password' => $chunk->password
         ];
 
         if ($filter->getSegmentStatus()) {
             $data = array_merge($data, [
-                    'status' => $filter->getSegmentStatus()
+                'status' => $filter->getSegmentStatus()
             ]);
         }
 
@@ -91,57 +92,57 @@ class SegmentFilterDao extends AbstractDao
             switch ($filter->sampleType()) {
                 case 'mt':
                     $data = array_merge($data, [
-                            'match_type' => InternalMatchesConstants::MT,
+                        'match_type' => InternalMatchesConstants::MT,
                     ]);
                     break;
 
                 case 'matches':
                     $data = array_merge($data, [
-                            'match_type_100_public' => InternalMatchesConstants::TM_100_PUBLIC,
-                            'match_type_100'        => InternalMatchesConstants::TM_100,
+                        'match_type_100_public' => InternalMatchesConstants::TM_100_PUBLIC,
+                        'match_type_100' => InternalMatchesConstants::TM_100,
                     ]);
                     break;
 
                 case 'fuzzies_50_74':
                     $data = array_merge($data, [
-                            'match_type' => InternalMatchesConstants::TM_50_74,
+                        'match_type' => InternalMatchesConstants::TM_50_74,
                     ]);
                     break;
 
                 case 'fuzzies_75_84':
                     $data = array_merge($data, [
-                            'match_type' => InternalMatchesConstants::TM_75_84,
+                        'match_type' => InternalMatchesConstants::TM_75_84,
                     ]);
                     break;
 
                 case 'fuzzies_85_94':
                     $data = array_merge($data, [
-                            'match_type' => InternalMatchesConstants::TM_85_94,
+                        'match_type' => InternalMatchesConstants::TM_85_94,
                     ]);
                     break;
 
                 case 'fuzzies_95_99':
                     $data = array_merge($data, [
-                            'match_type' => InternalMatchesConstants::TM_95_99,
+                        'match_type' => InternalMatchesConstants::TM_95_99,
                     ]);
                     break;
 
                 case 'todo':
                     $data = array_merge($data, [
-                            'status_new'   => TranslationStatus::STATUS_NEW,
-                            'status_draft' => TranslationStatus::STATUS_DRAFT
+                        'status_new' => TranslationStatus::STATUS_NEW,
+                        'status_draft' => TranslationStatus::STATUS_DRAFT
                     ]);
 
                     if ($chunk->getIsReview()) {
                         $data = array_merge($data, [
-                                'status_translated' => TranslationStatus::STATUS_TRANSLATED,
+                            'status_translated' => TranslationStatus::STATUS_TRANSLATED,
                         ]);
                     }
 
                     if ($chunk->isSecondPassReview()) {
                         $data = array_merge($data, [
-                                'status_translated' => TranslationStatus::STATUS_TRANSLATED,
-                                'status_approved'   => TranslationStatus::STATUS_APPROVED,
+                            'status_translated' => TranslationStatus::STATUS_TRANSLATED,
+                            'status_approved' => TranslationStatus::STATUS_APPROVED,
                         ]);
                     }
 
@@ -153,7 +154,7 @@ class SegmentFilterDao extends AbstractDao
     }
 
     /**
-     * @param JobStruct        $chunk
+     * @param JobStruct $chunk
      * @param FilterDefinition $filter
      *
      * @return object
@@ -170,6 +171,7 @@ class SegmentFilterDao extends AbstractDao
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql ";
 
@@ -188,14 +190,14 @@ class SegmentFilterDao extends AbstractDao
         $limit = round(($count / 100) * $filter->sampleSize());
 
         return (object)[
-                'limit'       => $limit,
-                'count'       => $count,
-                'sample_size' => $filter->sampleSize()
+            'limit' => $limit,
+            'count' => $count,
+            'sample_size' => $filter->sampleSize()
         ];
     }
 
     /**
-     * @param JobStruct        $chunk
+     * @param JobStruct $chunk
      * @param FilterDefinition $filter
      *
      * @return ShapelessConcreteStruct[]
@@ -211,7 +213,7 @@ class SegmentFilterDao extends AbstractDao
         }
 
         $where = self::__getWhereFromFilter($filter);
-        $data  = self::__getData($chunk, $filter);
+        $data = self::__getData($chunk, $filter);
 
         switch ($filter->sampleType()) {
             case 'segment_length_high_to_low':
@@ -271,7 +273,7 @@ class SegmentFilterDao extends AbstractDao
         }
 
         $thisDao = new self();
-        $stmt    = $thisDao->_getStatementForQuery($sql);
+        $stmt = $thisDao->_getStatementForQuery($sql);
 
         return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $data);
     }
@@ -297,7 +299,7 @@ class SegmentFilterDao extends AbstractDao
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            JOIN (SELECT @curRow := -1) r --  using -1 here makes the sample start from the first segment
            WHERE 1
            $where->sql
@@ -325,7 +327,7 @@ class SegmentFilterDao extends AbstractDao
                AND jobs.id = :id_job
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-               JOIN segments s ON s.id = st.id_segment
+               JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
             WHERE 1
                $where->sql
                ORDER BY st.edit_distance $sqlSort
@@ -352,7 +354,7 @@ class SegmentFilterDao extends AbstractDao
                AND jobs.id = :id_job
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY CHAR_LENGTH(s.segment) $sqlSort
@@ -371,6 +373,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND st.locked = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -389,6 +392,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND st.match_type = :match_type
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -410,6 +414,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.match_type = 'ICE'
            AND locked = 1
            AND version_number = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -431,6 +436,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.match_type = 'ICE'
            AND locked = 1
            AND version_number > 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -451,6 +457,7 @@ class SegmentFilterDao extends AbstractDao
                         AND jobs.id = :id_job
                         AND jobs.password = :password
                         AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
+                JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
                 WHERE 1
 
                         $where->sql
@@ -475,6 +482,7 @@ class SegmentFilterDao extends AbstractDao
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.match_type = :match_type_100_public 
            OR st.match_type = :match_type_100)
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -484,7 +492,7 @@ class SegmentFilterDao extends AbstractDao
     public static function getSqlForToDo(object $where, bool $isReview = false, bool $isSecondPassReview = false): string
     {
         $sql_condition = "";
-        $sql_sp        = "";
+        $sql_sp = "";
 
         if ($isReview) {
             $sql_condition = " OR st.status = :status_translated ";
@@ -505,6 +513,7 @@ class SegmentFilterDao extends AbstractDao
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
            OR st.status = :status_draft " . $sql_condition . ")
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            " . $where->sql . "
            " . $sql_sp . "

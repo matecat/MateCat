@@ -16,9 +16,10 @@ class QAWarning
     protected array $structure;
 
     const string GLOSSARY_CATEGORY = "GLOSSARY";
-    const string TAGS_CATEGORY     = "TAGS";
-    const string SIZE_CATEGORY     = "SIZE";
+    const string TAGS_CATEGORY = "TAGS";
+    const string SIZE_CATEGORY = "SIZE";
     const string MISMATCH_CATEGORY = "MISMATCH";
+    const string ICU_CATEGORY = "ICU";
 
     protected function pushErrorSegment($error_type, $error_category, $content): void
     {
@@ -33,15 +34,16 @@ class QAWarning
             QA::ERR_SPACE_MISMATCH_BEFORE_TAG,
             QA::ERR_SYMBOL_MISMATCH,
             QA::ERR_NEWLINE_MISMATCH => self::MISMATCH_CATEGORY,
+            QA::ERR_ICU_VALIDATION => self::ICU_CATEGORY,
             default => self::TAGS_CATEGORY,
         };
 
-        if (!isset($this->structure[ $error_type ][ 'Categories' ][ $category ])) {
-            $this->structure[ $error_type ][ 'Categories' ][ $category ] = [];
+        if (!isset($this->structure[$error_type]['Categories'][$category])) {
+            $this->structure[$error_type]['Categories'][$category] = [];
         }
 
-        if (!in_array($content, $this->structure[ $error_type ][ 'Categories' ][ $category ])) {
-            $this->structure[ $error_type ][ 'Categories' ][ $category ][] = $content;
+        if (!in_array($content, $this->structure[$error_type]['Categories'][$category], true)) {
+            $this->structure[$error_type]['Categories'][$category][] = $content;
         }
     }
 }

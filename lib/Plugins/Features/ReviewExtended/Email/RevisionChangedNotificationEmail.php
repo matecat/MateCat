@@ -26,16 +26,16 @@ class RevisionChangedNotificationEmail extends AbstractEmail
     protected $recipientUser;
 
     protected ?string $title = 'Revised segment changed';
-    protected         $data;
-    protected         $_segmentInfo;
+    protected $data;
+    protected $_segmentInfo;
 
     public function __construct($segmentInfo, $data, $segmentUrl, $changeAuthor = null)
     {
-        $this->_segmentInfo  = $segmentInfo;
-        $this->data          = $data;
-        $this->recipientUser = $data[ 'recipient' ];
-        $this->segmentUrl    = $segmentUrl;
-        $this->changeAuthor  = $changeAuthor;
+        $this->_segmentInfo = $segmentInfo;
+        $this->data = $data;
+        $this->recipientUser = $data['recipient'];
+        $this->segmentUrl = $segmentUrl;
+        $this->changeAuthor = $changeAuthor;
 
         $this->_setlayout('skeleton.html');
         $this->_settemplate('Revise/second_pass_segment_changed_notice.html');
@@ -44,11 +44,11 @@ class RevisionChangedNotificationEmail extends AbstractEmail
     protected function _getTemplateVariables(): array
     {
         return [
-                'changeAuthor'  => ($this->changeAuthor ? $this->changeAuthor->toArray() : null),
-                'recipientUser' => $this->data[ 'recipient' ]->toArray(),
-                'segmentUrl'    => $this->segmentUrl,
-                'data'          => $this->data,
-                'segmentInfo'   => $this->_segmentInfo
+            'changeAuthor' => ($this->changeAuthor ? $this->changeAuthor->toArray() : null),
+            'recipientUser' => $this->data['recipient']->toArray(),
+            'segmentUrl' => $this->segmentUrl,
+            'data' => $this->data,
+            'segmentInfo' => $this->_segmentInfo
         ];
     }
 
@@ -63,7 +63,7 @@ class RevisionChangedNotificationEmail extends AbstractEmail
     }
 
     /**
-     * @param string          $email
+     * @param string $email
      * @param UserStruct|null $user
      *
      * @return bool

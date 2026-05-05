@@ -16,7 +16,7 @@ use Model\DataAccess\IDaoStruct;
 class RemoteFileServiceNameStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public int    $id_project;
+    public int $id_project;
     public string $service;
 
 }

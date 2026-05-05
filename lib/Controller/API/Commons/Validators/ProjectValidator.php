@@ -56,7 +56,7 @@ class ProjectValidator extends Base
      * @var ?ProjectStruct
      */
     private ?ProjectStruct $project = null;
-    private ?string        $feature = null;
+    private ?string $feature = null;
 
     /**
      * @param ProjectStruct $project

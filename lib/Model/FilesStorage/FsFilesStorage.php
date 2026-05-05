@@ -2,6 +2,7 @@
 
 namespace Model\FilesStorage;
 
+use Exception;
 use FilesystemIterator;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -67,13 +68,14 @@ class FsFilesStorage extends AbstractFilesStorage
      */
 
     /**
-     * @param string      $hash
-     * @param string      $lang
+     * @param string $hash
+     * @param string $lang
      * @param string|null $originalPath
-     * @param string      $xliffPath
+     * @param string $xliffPath
      *
      * @return bool
      * @throws FileSystemException
+     * @throws Exception
      */
     public function makeCachePackage(string $hash, string $lang, ?string $originalPath, string $xliffPath): bool
     {
@@ -99,8 +101,8 @@ class FsFilesStorage extends AbstractFilesStorage
             // detect which type of xliff
             //check also for the extension, if already present do not force
             $force_extension = "";
-            $fileType        = XliffProprietaryDetect::getInfo($xliffPath);
-            if (!$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff') {
+            $fileType = (new XliffProprietaryDetect())->getInfo($xliffPath);
+            if (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') {
                 $force_extension = '.sdlxliff';
             }
 
@@ -109,7 +111,7 @@ class FsFilesStorage extends AbstractFilesStorage
         } else {
             //move original
             $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
-            $file_name     = array_pop($raw_file_path);
+            $file_name = array_pop($raw_file_path);
 
             $outcome1 = copy($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
 
@@ -211,9 +213,9 @@ class FsFilesStorage extends AbstractFilesStorage
      */
 
     /**
-     * @param string      $dateHashPath
-     * @param string      $lang
-     * @param string      $idFile
+     * @param string $dateHashPath
+     * @param string $lang
+     * @param string $idFile
      * @param string|null $newFileName
      *
      * @return bool
@@ -224,7 +226,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $cacheTree = implode(DIRECTORY_SEPARATOR, static::composeCachePath($hash));
 
         //destination dir
-        $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
+        $fileDir = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
 
         $this->logger->debug($fileDir);
@@ -248,7 +250,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
         $this->logger->debug($origDir);
 
-        $origFilePath    = $this->getSingleFileInPath($origDir);
+        $origFilePath = $this->getSingleFileInPath($origDir);
         $tmpOrigFileName = $origFilePath;
         if (is_file($origFilePath)) {
             /*
@@ -273,7 +275,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $tmpConvertedFilePath = $convertedFilePath;
         if (!empty($newFileName)) {
             if (!XliffFiles::isXliff($newFileName)) {
-                $convertedExtension   = static::pathinfo_fix($convertedFilePath, PATHINFO_EXTENSION);
+                $convertedExtension = static::pathinfo_fix($convertedFilePath, PATHINFO_EXTENSION);
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
@@ -344,28 +346,28 @@ class FsFilesStorage extends AbstractFilesStorage
     public function getHashesFromDir(string $dirToScan): array
     {
         //fetch cache links, created by converter, from a directory
-        $linkFiles     = scandir($dirToScan) ?: [];
-        $zipFilesHash  = [];
+        $linkFiles = scandir($dirToScan) ?: [];
+        $zipFilesHash = [];
         $filesHashInfo = [];
         //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
         foreach ($linkFiles as $k => $linkFile) {
             if (str_contains($linkFile, self::ORIGINAL_ZIP_PLACEHOLDER)) {
                 $zipFilesHash[] = $linkFile;
-                unset($linkFiles[ $k ]);
+                unset($linkFiles[$k]);
             } elseif (str_contains($linkFile, '.') or !str_contains($linkFile, self::OBJECTS_SAFE_DELIMITER)) {
-                unset($linkFiles[ $k ]);
+                unset($linkFiles[$k]);
             } else {
-                $filesHashInfo[ 'sha' ][]                 = $linkFile;
-                $filesHashInfo[ 'fileName' ][ $linkFile ] = file(
-                        $dirToScan . DIRECTORY_SEPARATOR . $linkFile,
-                        FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+                $filesHashInfo['sha'][] = $linkFile;
+                $filesHashInfo['fileName'][$linkFile] = file(
+                    $dirToScan . DIRECTORY_SEPARATOR . $linkFile,
+                    FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
                 );
             }
         }
 
         return [
-                'conversionHashes' => $filesHashInfo,
-                'zipHashes'        => $zipFilesHash
+            'conversionHashes' => $filesHashInfo,
+            'zipHashes' => $zipFilesHash
         ];
     }
 
@@ -387,10 +389,10 @@ class FsFilesStorage extends AbstractFilesStorage
 
         /** @var RecursiveDirectoryIterator $iterator */
         foreach (
-                $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS),
-                        RecursiveIteratorIterator::SELF_FIRST
-                ) as $item
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            ) as $item
         ) {
             if ($item->isDir()) {
                 mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
@@ -401,9 +403,9 @@ class FsFilesStorage extends AbstractFilesStorage
                     // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
                     $short_hash = sha1($subPathName);
 
-                    //XXX check this separator: could be the same for S3 and FS ?
-                    $pathParts   = explode("|", $iterator->getSubPathName());
-                    $lang        = array_pop($pathParts);
+                    //TODO check this separator: could be the same for S3 and FS ?
+                    $pathParts = explode("|", $iterator->getSubPathName());
+                    $lang = array_pop($pathParts);
                     $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
                 }
 
@@ -415,6 +417,17 @@ class FsFilesStorage extends AbstractFilesStorage
     }
 
     /**
+     * @inheritDoc
+     */
+    public function deleteQueue(string $uploadDir): void
+    {
+        Utils::deleteDir($uploadDir);
+        if (is_dir($uploadDir . '_converted')) {
+            Utils::deleteDir($uploadDir . '_converted');
+        }
+    }
+
+    /**
      **********************************************************************************************
      * 4. FAST ANALYSIS
      **********************************************************************************************
@@ -422,7 +435,7 @@ class FsFilesStorage extends AbstractFilesStorage
 
     /**
      * @param string $id_project
-     * @param array  $segments_metadata
+     * @param array $segments_metadata
      */
     public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void
     {

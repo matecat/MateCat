@@ -25,15 +25,15 @@ class OAuthController extends AbstractStatefulKleinController
      */
     public function response(): void
     {
-        if (empty($this->request->param('state')) || $_SESSION[ 'googledrive-' . AppConfig::$XSRF_TOKEN ] !== $this->request->param('state')) {
+        if (empty($this->request->param('state')) || $_SESSION['googledrive-' . AppConfig::$XSRF_TOKEN] !== $this->request->param('state')) {
             $this->response->code(401);
 
             return;
         }
 
-        unset($_SESSION[ 'google-drive-' . AppConfig::$XSRF_TOKEN ]);
+        unset($_SESSION['google-drive-' . AppConfig::$XSRF_TOKEN]);
 
-        $code  = $this->request->param('code');
+        $code = $this->request->param('code');
         $error = $this->request->param('error');
 
         if (isset($code) && $code) {

@@ -26,12 +26,12 @@ class ReviewUtils
     public static function sourcePageToTranslationStatus($number = null): ?string
     {
         $statuses = [
-                SourcePages::SOURCE_PAGE_TRANSLATE  => TranslationStatus::STATUS_TRANSLATED,
-                SourcePages::SOURCE_PAGE_REVISION   => TranslationStatus::STATUS_APPROVED,
-                SourcePages::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
+            SourcePages::SOURCE_PAGE_TRANSLATE => TranslationStatus::STATUS_TRANSLATED,
+            SourcePages::SOURCE_PAGE_REVISION => TranslationStatus::STATUS_APPROVED,
+            SourcePages::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
         ];
 
-        return empty($number) ? null : $statuses[ $number ];
+        return empty($number) ? null : $statuses[$number];
     }
 
     /**
@@ -57,7 +57,7 @@ class ReviewUtils
 
     /**
      * @param ModelStruct $lqaModel
-     * @param int         $sourcePage
+     * @param int $sourcePage
      *
      * @return int
      * @throws Exception
@@ -70,7 +70,7 @@ class ReviewUtils
             /**
              * Limit array index equals to $source_page -2.
              */
-            return $limit[ $sourcePage - 2 ] ?? end($limit);
+            return $limit[$sourcePage - 2] ?? end($limit);
         }
 
         return $limit;

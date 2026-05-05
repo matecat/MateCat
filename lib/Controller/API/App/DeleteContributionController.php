@@ -36,36 +36,36 @@ class DeleteContributionController extends KleinController
      */
     public function delete(): void
     {
-        $request     = $this->validateTheRequest();
-        $id_segment  = $request[ 'id_segment' ];
-        $source_lang = $request[ 'source_lang' ];
-        $target_lang = $request[ 'target_lang' ];
-        $source      = $request[ 'source' ];
-        $target      = $request[ 'target' ];
-        $id_job      = $request[ 'id_job' ];
+        $request = $this->validateTheRequest();
+        $id_segment = $request['id_segment'];
+        $source_lang = $request['source_lang'];
+        $target_lang = $request['target_lang'];
+        $source = $request['source'];
+        $target = $request['target'];
+        $id_job = $request['id_job'];
 //        $id_translator     = $request[ 'id_translator' ];
-        $id_match = $request[ 'id_match' ];
-        $password = $request[ 'password' ];
+        $id_match = $request['id_match'];
+        $password = $request['password'];
 //        $received_password = $request[ 'received_password' ];
 
         //check Job password
         $jobStruct = ChunkDao::getByIdAndPassword($id_job, $password);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
-        $tm_keys = $jobStruct[ 'tm_keys' ];
+        $tm_keys = $jobStruct['tm_keys'];
 
-        $tms    = EnginesFactory::getInstance($jobStruct[ 'id_tms' ]);
+        $tms = EnginesFactory::getInstance($jobStruct['id_tms']);
         $config = $tms->getConfigStruct();
 
         /** @var MateCatFilter $Filter */
-        $Filter                  = MateCatFilter::getInstance($this->getFeatureSet(), $source_lang, $target_lang);
-        $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0($source);
-        $config[ 'translation' ] = $Filter->fromLayer2ToLayer0($target);
-        $config[ 'source' ]      = $source_lang;
-        $config[ 'target' ]      = $target_lang;
-        $config[ 'email' ]       = AppConfig::$MYMEMORY_API_KEY;
-        $config[ 'id_user' ]     = [];
-        $config[ 'id_match' ]    = $id_match;
+        $Filter = MateCatFilter::getInstance($this->getFeatureSet(), $source_lang, $target_lang);
+        $config['segment'] = $Filter->fromLayer2ToLayer0($source);
+        $config['translation'] = $Filter->fromLayer2ToLayer0($target);
+        $config['source'] = $source_lang;
+        $config['target'] = $target_lang;
+        $config['email'] = AppConfig::$MYMEMORY_API_KEY;
+        $config['id_user'] = [];
+        $config['id_match'] = $id_match;
 
         //get job's TM keys
         try {
@@ -73,7 +73,7 @@ class DeleteContributionController extends KleinController
 
             //get TM keys with read grants
             $tm_keys = TmKeyManager::getJobTmKeys($tm_keys, 'w', 'tm', $this->user->uid, $userRole);
-            $tm_keys = TmKeyManager::filterOutByOwnership($tm_keys, $this->user->email, $jobStruct[ 'owner' ]);
+            $tm_keys = TmKeyManager::filterOutByOwnership($tm_keys, $this->user->email, $jobStruct['owner']);
         } catch (Exception $e) {
             throw new NotFoundException("Cannot retrieve TM keys info.", -11, $e);
         }
@@ -99,8 +99,8 @@ class DeleteContributionController extends KleinController
             //loop over the list of keys
             foreach ($tm_keys as $tm_key) {
                 //issue a separate call for each key
-                $config[ 'id_user' ] = $tm_key->key;
-                $TMS_RESULT          = $tms->delete($config);
+                $config['id_user'] = $tm_key->key;
+                $TMS_RESULT = $tms->delete($config);
 
                 if ($TMS_RESULT) {
                     $this->updateSuggestionsArray($id_segment, $id_job, $id_match);
@@ -117,8 +117,8 @@ class DeleteContributionController extends KleinController
         }
 
         $this->response->json([
-                'data' => ($set_successful ? "OK" : null),
-                'code' => $set_successful,
+            'data' => ($set_successful ? "OK" : null),
+            'code' => $set_successful,
         ]);
     }
 
@@ -127,20 +127,20 @@ class DeleteContributionController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $id_segment        = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $source_lang       = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $target_lang       = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $source            = filter_var($this->request->param('seg'), FILTER_UNSAFE_RAW);
-        $target            = filter_var($this->request->param('tra'), FILTER_UNSAFE_RAW);
-        $id_job            = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $id_translator     = !empty($this->request->param('id_translator')) ? filter_var($this->request->param('id_translator'), FILTER_SANITIZE_NUMBER_INT) : null;
-        $id_match          = filter_var($this->request->param('id_match'), FILTER_SANITIZE_NUMBER_INT);
-        $password          = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $source = filter_var($this->request->param('seg'), FILTER_UNSAFE_RAW);
+        $target = filter_var($this->request->param('tra'), FILTER_UNSAFE_RAW);
+        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
+        $id_translator = !empty($this->request->param('id_translator')) ? filter_var($this->request->param('id_translator'), FILTER_SANITIZE_NUMBER_INT) : null;
+        $id_match = filter_var($this->request->param('id_match'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
-        $source            = trim($source);
-        $target            = trim($target);
-        $password          = trim($password);
+        $source = trim($source);
+        $target = trim($target);
+        $password = trim($password);
         $received_password = trim($received_password);
 
         if (empty($source_lang)) {
@@ -167,20 +167,20 @@ class DeleteContributionController extends KleinController
             throw new InvalidArgumentException("missing job password", -6);
         }
 
-        $this->id_job           = $id_job;
+        $this->id_job = $id_job;
         $this->request_password = $received_password;
 
         return [
-                'id_segment'        => $id_segment,
-                'source_lang'       => $source_lang,
-                'target_lang'       => $target_lang,
-                'source'            => $source,
-                'target'            => $target,
-                'id_job'            => $id_job,
-                'id_translator'     => $id_translator,
-                'id_match'          => $id_match,
-                'password'          => $password,
-                'received_password' => $received_password,
+            'id_segment' => $id_segment,
+            'source_lang' => $source_lang,
+            'target_lang' => $target_lang,
+            'source' => $source,
+            'target' => $target,
+            'id_job' => $id_job,
+            'id_translator' => $id_translator,
+            'id_match' => $id_match,
+            'password' => $password,
+            'received_password' => $received_password,
         ];
     }
 
@@ -195,7 +195,7 @@ class DeleteContributionController extends KleinController
      */
     private function updateSuggestionsArray($id_segment, $id_job, $id_match): void
     {
-        $segmentTranslation  = SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
+        $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
         $oldSuggestionsArray = json_decode($segmentTranslation->suggestions_array);
 
         if (!empty($oldSuggestionsArray)) {

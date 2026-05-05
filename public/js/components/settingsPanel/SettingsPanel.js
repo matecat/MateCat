@@ -68,7 +68,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   return [
     {
       id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
-      label: 'Translation Memory and Glossary',
+      label: 'Translation Memory and Termbase',
       description:
         'Manage your language resources and select which should be used on your new project. <a href="https://guides.matecat.com/activ" target="_blank">More details</a>',
       component: <TranslationMemoryGlossaryTab />,
@@ -137,20 +137,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   ]
 }
 
-export const DEFAULT_ENGINE_MEMORY = {
-  id: 1,
-  name: 'ModernMT Lite',
-  description: (
-    <div
-      dangerouslySetInnerHTML={{
-        __html:
-          'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT’s basic features. To unlock all features, <a target="_blank" href="https://www.modernmt.com/pricing#translators">click here</a>.',
-      }}
-    />
-  ),
-  default: true,
-  engine_type: 'MMTLite',
-}
+
 
 export const SettingsPanel = ({
   onClose,

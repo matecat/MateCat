@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -16,7 +17,8 @@ use Utils\Tools\CatUtils;
  * Date: 01/04/16
  * Time: 12.12
  */
-class FastUnicode2ordTest extends AbstractTest {
+class FastUnicode2ordTest extends AbstractTest
+{
 
     protected $source_segment;
     protected $int_expected;
@@ -26,94 +28,97 @@ class FastUnicode2ordTest extends AbstractTest {
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
-    public function test_fastUnicode2ord_1() {
-
+    #[Test]
+    public function test_fastUnicode2ord_1()
+    {
         $this->source_segment = <<<'LAB'
 🛠
 LAB;
         $this->int_expected = 128736;
         $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
-
     }
 
     /**
      * @group regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_2()
     {
         $this->source_segment = <<<'LAB'
 😴
 LAB;
-        $this->int_expected   = 128564;
-        $this->assertEquals( $this->int_expected, CatUtils::fastUnicode2ord( $this->source_segment ) );
-
+        $this->int_expected = 128564;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
     }
 
     /**
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
-    public function test_fastUnicode2ord_3() {
+    #[Test]
+    public function test_fastUnicode2ord_3()
+    {
         $this->source_segment = <<<'LAB'
 😆
 LAB;
         $this->int_expected = 128518;
         $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
-
     }
 
     /**
      * @group regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_4()
     {
         $this->source_segment = <<<'LAB'
 𐎆
 LAB;
-        $this->int_expected   = 66438;
-        $this->assertEquals( $this->int_expected, CatUtils::fastUnicode2ord( $this->source_segment ) );
-
+        $this->int_expected = 66438;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
     }
 
     /**
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
-    public function test_fastUnicode2ord_anomalyimput_swichcase1() {
+    #[Test]
+    public function test_fastUnicode2ord_anomalyimput_swichcase1()
+    {
         $this->source_segment = <<<'LAB'
 @
 LAB;
-        $this->int_expected   = 64;
-        $this->assertEquals( $this->int_expected, CatUtils::fastUnicode2ord( $this->source_segment ) );
-
-
+        $this->int_expected = 64;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
     }
 
     /**
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
-    public function test_fastUnicode2ord_anomalyimput_swichcase2() {
+    #[Test]
+    public function test_fastUnicode2ord_anomalyimput_swichcase2()
+    {
         $this->source_segment = <<<'LAB'
 گ
 LAB;
-        $this->int_expected   = 1711;
-        $this->assertEquals( $this->int_expected, CatUtils::fastUnicode2ord( $this->source_segment ) );
-
+        $this->int_expected = 1711;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
     }
 
     /**
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
-    public function test_fastUnicode2ord_anomalyimput_swichcase3() {
+    #[Test]
+    public function test_fastUnicode2ord_anomalyimput_swichcase3()
+    {
         $this->source_segment = <<<'LAB'
 ◕
 LAB;
-        $this->int_expected   = 9685;
-        $this->assertEquals( $this->int_expected, CatUtils::fastUnicode2ord( $this->source_segment ) );
-
+        $this->int_expected = 9685;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
     }
 }

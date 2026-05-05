@@ -2,8 +2,8 @@
 
 namespace Model\Conversion;
 
+use Matecat\Locales\Languages;
 use Model\Conversion\MimeTypes\MimeTypes;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 
 /**
@@ -30,9 +30,9 @@ class OCRCheck
      * @var array
      */
     private array $mimeTypes = [
-            'image/',
-            'application/octet-stream', //bmp or binary files
-            'application/pdf',
+        'image/',
+        'application/octet-stream', //bmp or binary files
+        'application/pdf',
     ];
 
     /**

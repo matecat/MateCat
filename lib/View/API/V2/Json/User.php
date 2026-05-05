@@ -16,20 +16,20 @@ class User
     public static function renderItem(UserStruct $user): array
     {
         return [
-                'uid'          => (int)$user->uid,
-                'first_name'   => $user->first_name,
-                'last_name'    => $user->last_name,
-                'email'        => $user->email,
-                'has_password' => !is_null($user->pass)
+            'uid' => (int)$user->uid,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'has_password' => !is_null($user->pass)
         ];
     }
 
     public static function renderItemPublic(UserStruct $user): array
     {
         return [
-                'uid'        => (int)$user->uid,
-                'first_name' => $user->first_name,
-                'last_name'  => $user->last_name,
+            'uid' => (int)$user->uid,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
         ];
     }
 

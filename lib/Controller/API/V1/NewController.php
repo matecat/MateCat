@@ -6,8 +6,13 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
+use Controller\Traits\ValidatesDialectStrictTrait;
 use Exception;
 use InvalidArgumentException;
+use Matecat\Locales\LanguageDomains;
+use Matecat\Locales\Languages;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\HandlersSorter;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -18,6 +23,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
@@ -29,29 +35,33 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
+use Model\Users\UserStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
+use ReflectionException;
 use RuntimeException;
-use SebastianBergmann\Invoker\TimeoutException;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
-use Utils\Engines\Validators\DeeplFormalityValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\LaraGlossaryValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
-use Utils\Langs\LanguageDomains;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
+use Utils\Subfiltering\SubfilteringOptionsValidator;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -59,7 +69,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
-use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
@@ -67,8 +76,9 @@ class NewController extends KleinController
 {
 
     use ScanDirectoryForConvertedFiles;
+    use ValidatesDialectStrictTrait;
 
-    const int MAX_NUM_KEYS = 13;
+    const int MAX_NUM_KEYS = 15;
 
     protected function afterConstruct(): void
     {
@@ -113,6 +123,7 @@ class NewController extends KleinController
             $uploadDir,
             $errDir,
             $uploadTokenValue,
+            $request['icu_enabled'],
             $request['segmentation_rule'],
             $this->featureSet,
             $request['filters_extraction_parameters'],
@@ -139,157 +150,158 @@ class NewController extends KleinController
 
         $filesFound = $this->getFilesList(FilesStorageFactory::create(), $arFiles, $uploadDir);
 
-        $projectManager = new ProjectManager();
-        $projectStructure = $projectManager->getProjectStructure();
-        $projectStructure['sanitize_project_options'] = false;
-        $projectStructure['project_name'] = $request['project_name'];
-        $projectStructure['job_subject'] = $request['subject'];
-        $projectStructure['private_tm_key'] = $request['private_tm_key'];
-        $projectStructure['private_tm_user'] = $request['private_tm_user'];
-        $projectStructure['private_tm_pass'] = $request['private_tm_pass'];
-        $projectStructure['tm_prioritization'] = $request['tm_prioritization'];
-        $projectStructure['uploadToken'] = $uploadFile->getDirUploadToken();
-        $projectStructure['array_files'] = $filesFound['arrayFiles']; //list of file names
-        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta']; //list of file metadata
-        $projectStructure['source_language'] = $request['source_lang'];
-        $projectStructure['target_language'] = explode(',', $request['target_lang']);
-        $projectStructure['mt_engine'] = $request['mt_engine'];
-        $projectStructure['tms_engine'] = $request['tms_engine'];
-        $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure['owner'] = $this->user->email;
-        $projectStructure['metadata'] = $request['metadata'];
-        $projectStructure['public_tm_penalty'] = $request['public_tm_penalty'];
-        $projectStructure['pretranslate_100'] = (int)!!$request['pretranslate_100']; // Force pretranslate_100 to be 0 or 1
-        $projectStructure['pretranslate_101'] = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
-
-        //default gets all public matches from TM
-        $projectStructure['only_private'] = (isset($request['get_public_matches']) && !$request['get_public_matches']);
-
-        $projectStructure['user_ip'] = Utils::getRealIpAddr();
-        $projectStructure['HTTP_HOST'] = AppConfig::$HTTPHOST;
-        $projectStructure['due_date'] = (empty($request['due_date']) ? null : Utils::mysqlTimestamp(
-            $request['due_date']
-        ));
-        $projectStructure['target_language_mt_engine_association'] = $request['target_language_mt_engine_association'];
-        $projectStructure['instructions'] = $request['instructions'];
-
-        $projectStructure['userIsLogged'] = true;
-        $projectStructure['uid'] = $this->user->getUid();
-        $projectStructure['id_customer'] = $this->user->getEmail();
-        $projectManager->setTeam($request['team']);
-
-        $projectStructure['character_counter_mode'] = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
-        $projectStructure['character_counter_count_tags'] = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
-
-        $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
-
-        // Lara glossaries
-        if ($request['lara_glossaries']) {
-            $projectStructure['lara_glossaries'] = $request['lara_glossaries'];
-        }
-
-        // mmtGlossaries
-        if ($request['mmt_glossaries']) {
-            $projectStructure['mmt_glossaries'] = $request['mmt_glossaries'];
-        }
-
-        // MT Extra params
         $engine = EnginesFactory::getInstance($request['mt_engine']);
 
-        foreach ($engine->getConfigurationParameters() as $param) {
-            if ($request[$param] !== null) {
-                $projectStructure[$param] = $request[$param];
-            }
-        }
+        $projectStructure = $this->buildProjectStructure(
+            $request,
+            $filesFound,
+            $uploadFile->getDirUploadToken(),
+            $this->user,
+            $engine,
+        );
 
-        // with the qa template id
-        if ($request['qaModelTemplate']) {
-            $projectStructure['qa_model_template'] = $request['qaModelTemplate']->getDecodedModel();
-        }
-
-        if ($request['qaModel']) {
-            $projectStructure['qa_model'] = $request['qaModel']->getDecodedModel();
-        }
-
-        if ($request['mt_qe_workflow_payable_rate']) {
-            $projectStructure['mt_qe_workflow_payable_rate'] = $request['mt_qe_workflow_payable_rate'];
-        }
-
-        if ($request['payableRateModelTemplate']) {
-            $projectStructure['payable_rate_model_id'] = $request['payableRateModelTemplate']->id;
-        }
-
-        if ($request['dialect_strict']) {
-            $projectStructure['dialect_strict'] = $request['dialect_strict'];
-        }
-
-        if ($request['filters_extraction_parameters']) {
-            $projectStructure['filters_extraction_parameters'] = $request['filters_extraction_parameters'];
-        }
-
-        if ($request['xliff_parameters']) {
-            $projectStructure['xliff_parameters'] = $request['xliff_parameters'];
-        }
-
-        if ($request['mt_evaluation']) {
-            $projectStructure['mt_evaluation'] = true;
-        }
-
-        //set features override
-        $projectStructure['project_features'] = $request['project_features'];
-
-        $projectManager->sanitizeProjectStructure();
+        $projectManager = new ProjectManager($projectStructure);
+        $projectManager->setTeam($request['team']);
 
         $fs::moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
 
         //reserve a project id from the sequence
-        $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString();
-
-        $projectStructure = $this->featureSet->filter('addNewProjectStructureAttributes', $projectStructure, $_POST);
+        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->ppassword = Utils::randomString();
 
         // flag to mark the project "from API"
-        $projectStructure['from_api'] = true;
+        $projectStructure->from_api = true;
 
         ProjectQueue::sendProject($projectStructure);
 
-        $result['errors'] = $this->pollForCreationResult($projectStructure);
+        $errors = $projectStructure->result['errors'];
 
-        if ($result == null) {
-            throw new TimeoutException('Project Creation Failure');
-        }
-
-        if (!empty($result['errors'])) {
+        if (!empty($errors)) {
             throw new RuntimeException('Project Creation Failure');
         }
 
         $this->response->json([
             'status' => 'OK',
             'message' => 'Success',
-            'id_project' => $projectStructure['id_project'],
-            'project_pass' => $projectStructure['ppassword'],
+            'id_project' => $projectStructure->id_project,
+            'project_pass' => $projectStructure->ppassword,
             'new_keys' => $request['new_keys'],
             'analyze_url' => $projectManager->getAnalyzeURL()
         ]);
     }
 
     /**
-     * @param $projectStructure
+     * Build a {@see ProjectStructure} from a validated request array.
      *
-     * @return array
+     * This method performs the pure mapping from the validated request data
+     * (produced by {@see validateTheRequest()}) to a ProjectStructure DTO.
+     * Side-effecting operations (database sequence, random password, queue
+     * submission, project sanitization) are intentionally left in
+     * {@see create()}.
+     *
+     * @param array          $request     Validated request data from validateTheRequest()
+     * @param array          $filesFound  Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string         $uploadToken Upload directory token
+     * @param UserStruct     $user        Authenticated user
+     * @param AbstractEngine $engine      MT engine instance (for getConfigurationParameters())
+     *
+     * @return ProjectStructure
      */
-    private function pollForCreationResult($projectStructure): array
-    {
-        return $projectStructure['result']['errors']->getArrayCopy();
+    protected function buildProjectStructure(
+        array $request,
+        array $filesFound,
+        string $uploadToken,
+        UserStruct $user,
+        AbstractEngine $engine,
+    ): ProjectStructure {
+        $projectStructure = new ProjectStructure();
+
+        $projectStructure->project_name = $request['project_name'];
+        $projectStructure->job_subject = $request['subject'];
+        $projectStructure->private_tm_key = $request['private_tm_key'];
+        $projectStructure->tm_prioritization = $request['tm_prioritization'];
+        $projectStructure->uploadToken = $uploadToken;
+        $projectStructure->array_files = $filesFound['arrayFiles'];
+        $projectStructure->array_files_meta = $filesFound['arrayFilesMeta'];
+        $projectStructure->source_language = $request['source_lang'];
+        $projectStructure->target_language = explode(',', $request['target_lang']);
+        $projectStructure->mt_engine = $request['mt_engine'];
+        $projectStructure->tms_engine = $request['tms_engine'];
+        $projectStructure->status = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure->owner = $user->email;
+        $projectStructure->metadata = $request['metadata'];
+        $projectStructure->public_tm_penalty = $request['public_tm_penalty'];
+        $projectStructure->pretranslate_100 = (int)!!$request['pretranslate_100'];
+        $projectStructure->pretranslate_101 = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
+
+        //default gets all public matches from TM
+        $projectStructure->only_private = (isset($request['get_public_matches']) && !$request['get_public_matches']);
+
+        $projectStructure->user_ip = Utils::getRealIpAddr();
+        $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
+        $projectStructure->due_date = (empty($request['due_date']) ? null : Utils::mysqlTimestamp(
+            $request['due_date']
+        ));
+        $projectStructure->target_language_mt_engine_association = $request['target_language_mt_engine_association'];
+        $projectStructure->instructions = $request['instructions'];
+        $projectStructure->userIsLogged = true;
+        $projectStructure->uid = $user->getUid();
+        $projectStructure->id_customer = $user->getEmail();
+
+        $projectStructure->character_counter_mode = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
+        $projectStructure->character_counter_count_tags = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
+
+        $projectStructure->subfiltering_handlers = $request[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
+
+        // MT Extra params
+        foreach ($engine->getConfigurationParameters() as $param) {
+            if ($request[$param] !== null) {
+                $projectStructure->{$param} = $request[$param];
+            }
+        }
+
+        // with the qa template id
+        if ($request['qaModelTemplate']) {
+            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel();
+        }
+
+        if ($request['qaModel']) {
+            $projectStructure->qa_model = $request['qaModel']->getDecodedModel();
+        }
+
+        if ($request['mt_qe_workflow_payable_rate']) {
+            $projectStructure->mt_qe_workflow_payable_rate = $request['mt_qe_workflow_payable_rate'];
+        }
+
+        if ($request['payableRateModelTemplate']) {
+            $projectStructure->payable_rate_model_id = $request['payableRateModelTemplate']->id;
+        }
+
+        if ($request['dialect_strict']) {
+            $projectStructure->dialect_strict = $request['dialect_strict'];
+        }
+
+        if ($request['filters_extraction_parameters']) {
+            $projectStructure->filters_extraction_parameters = $request['filters_extraction_parameters']->jsonSerialize();
+        }
+
+        if ($request['xliff_parameters']) {
+            $projectStructure->xliff_parameters = $request['xliff_parameters'];
+        }
+
+        if ($request['mt_evaluation']) {
+            $projectStructure->mt_evaluation = true;
+        }
+
+        //set features override
+        $projectStructure->project_features = $request['project_features'];
+
+        return $projectStructure;
     }
 
     /**
      * @return array
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
+     * @throws ReflectionException
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -300,12 +312,19 @@ class NewController extends KleinController
         $dialect_strict = filter_var($this->request->param('dialect_strict'), FILTER_SANITIZE_SPECIAL_CHARS);
         $filters_extraction_parameters = filter_var($this->request->param('filters_extraction_parameters'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]);
         $filters_extraction_parameters_template_id = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_SANITIZE_NUMBER_INT);
-        $get_public_matches = ($this->request->param('get_public_matches') !== null) ? filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN) : true; // used to set the default value of get_public_matches to 1
+        $get_public_matches = ($this->request->param('get_public_matches') !== null) ? filter_var(
+            $this->request->param('get_public_matches'),
+            FILTER_VALIDATE_BOOLEAN
+        ) : true; // used to set the default value of get_public_matches to 1
         $id_qa_model = filter_var($this->request->param('id_qa_model'), FILTER_SANITIZE_NUMBER_INT);
         $id_qa_model_template = filter_var($this->request->param('id_qa_model_template'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
         $metadata = filter_var($this->request->param('metadata'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $mt_engine = filter_var($this->request->param('mt_engine'), FILTER_SANITIZE_NUMBER_INT, ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => ['default' => 1, 'min_range' => 0]]);
+        $mt_engine = filter_var(
+            $this->request->param('mt_engine'),
+            FILTER_SANITIZE_NUMBER_INT,
+            ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => ['default' => 1, 'min_range' => 0]]
+        );
         $mt_evaluation = filter_var($this->request->param('mt_evaluation'), FILTER_VALIDATE_BOOLEAN);
 
         $mt_quality_value_in_editor = filter_var($this->request->param('mt_quality_value_in_editor'), FILTER_SANITIZE_NUMBER_INT, [
@@ -330,7 +349,6 @@ class NewController extends KleinController
         $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $payable_rate_template_name = filter_var($this->request->param('payable_rate_template_name'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $project_info = filter_var($this->request->param('project_info'), FILTER_SANITIZE_SPECIAL_CHARS);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
@@ -340,10 +358,11 @@ class NewController extends KleinController
         $qa_model_template_id = filter_var($this->request->param('qa_model_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $speech2text = filter_var($this->request->param('speech2text'), FILTER_VALIDATE_BOOLEAN);
         $subject = filter_var($this->request->param('subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $tms_engine = filter_var($this->request->param('tms_engine'), FILTER_VALIDATE_INT,
+        $tms_engine = filter_var(
+            $this->request->param('tms_engine'),
+            FILTER_VALIDATE_INT,
             [
                 'filter' => FILTER_VALIDATE_INT,
                 'flags' => FILTER_REQUIRE_SCALAR,
@@ -366,24 +385,26 @@ class NewController extends KleinController
         $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
 
-        // Strip tags from instructions
-        $instructions = [];
-        if (is_array($this->request->param('instructions'))) {
-            /** @var array $instructions */
-            $instructions = $this->request->param('instructions');
-            foreach ($instructions as $value) {
-                $instructions[] = Utils::stripTagsPreservingHrefs($value);
-            }
-
-            /**
-             * Uber plugin callback
-             */
-            $instructions = $this->featureSet->filter('encodeInstructions', $instructions ?? null);
-        }
+        $instructions = filter_var(
+            $this->request->param('instructions'),
+            FILTER_CALLBACK,
+            [
+                'flags' => FILTER_REQUIRE_ARRAY,
+                'options' => function ($value) {
+                    $value = Utils::stripTagsPreservingHrefs($value);
+                    /**
+                     * Uber plugin callback
+                     */
+                    return $this->featureSet->filter('encodeInstructions', $value);
+                }
+            ]
+        ) ?: null;
 
         if ($this->request->files()->isEmpty()) {
             throw new InvalidArgumentException("Missing file. Not Sent.");
@@ -407,7 +428,7 @@ class NewController extends KleinController
         $target_lang = $this->validateTargetLangs($lang_handler, $target_lang);
         [$tms_engine, $engineStruct] = $this->validateEngines($tms_engine, $mt_engine);
         $subject = $this->validateSubject($subject);
-        $segmentation_rule = $this->validateSegmentationRules($segmentation_rule);
+        $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule);
         [$private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization] = $this->validateTmAndKeys(
             $private_tm_key,
             $private_tm_key_json
@@ -442,7 +463,14 @@ class NewController extends KleinController
             )
         );
 
-        $dialect_strict = $this->validateDialectStrictParam($target_lang, $dialect_strict);
+        // validate Lara style
+        if ($engineStruct instanceof Lara) {
+            $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
+        }
+
+        $lara_glossaries = $this->validateLaraGlossaries($lara_glossaries);
+
+        $dialect_strict = $this->validateDialectStrictParam($lang_handler, $dialect_strict);
         $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
             $filters_extraction_parameters,
             $filters_extraction_parameters_template_id
@@ -463,8 +491,8 @@ class NewController extends KleinController
          * Note:
          * - The values above are expected as strings (e.g., "[]"), not native PHP types.
          */
-        $subfiltering_handlers = $this->validateSubfilteringOptions(
-            $this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]')
+        $subfiltering_handlers = SubfilteringOptionsValidator::validate(
+            $this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]')
         ); // string value or default '[]'
 
         if ($mt_qe_workflow_enable) {
@@ -473,8 +501,8 @@ class NewController extends KleinController
                 throw new InvalidArgumentException("MT Engine id $mt_engine is not supported for QE Workflows");
             }
 
-            $metadata[MetadataDao::MT_QE_WORKFLOW_ENABLED] = $mt_qe_workflow_enable;
-            $metadata[MetadataDao::MT_QE_WORKFLOW_PARAMETERS] = $this->validateMTQEParametersOrDefault(
+            $metadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] = $mt_qe_workflow_enable;
+            $metadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] = $this->validateMTQEParametersOrDefault(
                 $mt_qe_workflow_template_id,
                 $mt_qe_workflow_template_raw_parameters
             ); // or default
@@ -485,34 +513,23 @@ class NewController extends KleinController
             $mt_evaluation = true; // force mt_evaluation because it is the default for mt_qe_workflows
         }
 
-        if (!empty($project_info)) {
-            $metadata['project_info'] = $project_info;
-        }
-
-        if (!empty($dialect_strict)) {
-            $metadata['dialect_strict'] = $dialect_strict;
-        }
-
-        if (!empty($speech2text)) {
-            $metadata['speech2text'] = $speech2text;
-        }
-
         if (!empty($project_completion)) {
-            $metadata['project_completion'] = $project_completion;
+            $metadata[ProjectsMetadataMarshaller::PROJECT_COMPLETION->value] = $project_completion;
         }
 
         if (!empty($segmentation_rule)) {
-            $metadata['segmentation_rule'] = $segmentation_rule;
+            $metadata[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $segmentation_rule;
         }
 
-        $metadata[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $mt_quality_value_in_editor;
+        $metadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $mt_quality_value_in_editor;
 
         if ($mt_evaluation) {
-            $metadata[MetadataDao::MT_EVALUATION] = true;
+            $metadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] = true;
         }
 
+        $metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
+
         return [
-            'project_info' => $project_info,
             'project_name' => $project_name,
             'source_lang' => $source_lang,
             'target_lang' => $target_lang,
@@ -529,6 +546,7 @@ class NewController extends KleinController
             'intento_routing' => $intento_routing ?? null,
             'intento_provider' => $intento_provider ?? null,
             'lara_glossaries' => $lara_glossaries ?? null,
+            'lara_style' => $lara_style ?? null,
             'deepl_id_glossary' => $deepl_id_glossary ?? null,
             'deepl_formality' => $deepl_formality ?? null,
             'deepl_engine_type' => $deepl_engine_type ?? null,
@@ -556,7 +574,6 @@ class NewController extends KleinController
             'qaModelTemplate' => $qaModelTemplate,
             'payableRateModelTemplate' => $payableRateModelTemplate,
             'instructions' => $instructions,
-            'speech2text' => $speech2text,
             'project_features' => $project_features,
             'mt_evaluation' => $mt_evaluation,
             'character_counter_count_tags' => $character_counter_count_tags,
@@ -564,7 +581,8 @@ class NewController extends KleinController
             'target_language_mt_engine_association' => $target_language_mt_engine_association,
             'mt_qe_workflow_payable_rate' => $mt_qe_PayableRate ?? null,
             'legacy_icu' => $legacy_icu,
-            JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode($subfiltering_handlers)
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode($subfiltering_handlers),
+            'icu_enabled' => $icu_enabled,
         ];
     }
 
@@ -584,8 +602,12 @@ class NewController extends KleinController
                 throw new InvalidArgumentException('metadata string is too long');
             }
 
-            $depth = 2; // only converts key value structures
             $metadata = html_entity_decode($metadata);
+            $validatorObject = new JSONValidatorObject($metadata);
+            $validator = new JSONValidator('project_metadata.json', true);
+            $validator->validate($validatorObject);
+
+            $depth = 2;
             $parsedMetadata = json_decode($metadata, true, $depth);
 
             if (is_array($parsedMetadata)) {
@@ -596,7 +618,7 @@ class NewController extends KleinController
         }
 
         // new raw counter model
-        $metadata[MetadataDao::WORD_COUNT_TYPE_KEY] = MetadataDao::WORD_COUNT_RAW;
+        $metadata[ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value] = ProjectsMetadataMarshaller::WORD_COUNT_RAW->value;
 
         return $metadata;
     }
@@ -670,7 +692,7 @@ class NewController extends KleinController
         $subject = (!empty($subject)) ? $subject : 'general';
 
         if (empty($subjectMap[$subject])) {
-            throw new InvalidArgumentException("Subject not allowed: " . $subject, -3);
+            throw new InvalidArgumentException("Subject not allowed: " . $subject, -5);
         }
 
         return $subject;
@@ -702,7 +724,7 @@ class NewController extends KleinController
         try {
             return $lang_handler->validateLanguage($source_lang);
         } catch (Exception) {
-            throw new InvalidArgumentException("Missing source language.");
+            throw new InvalidArgumentException("Missing source language.", -3);
         }
     }
 
@@ -720,7 +742,7 @@ class NewController extends KleinController
         $targets = array_unique($targets);
 
         if (empty($targets)) {
-            throw new InvalidArgumentException("Missing target language.");
+            throw new InvalidArgumentException("Missing target language.", -4);
         }
 
         try {
@@ -731,7 +753,7 @@ class NewController extends KleinController
                 $targets
             );
         } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage());
+            throw new InvalidArgumentException($e->getMessage(), -4);
         }
 
         return implode(',', $normalizedTargets);
@@ -783,47 +805,6 @@ class NewController extends KleinController
     }
 
     /**
-     * @param $segmentation_rule
-     *
-     * @return string|null
-     * @throws Exception
-     */
-    private function validateSegmentationRules($segmentation_rule): ?string
-    {
-        return Constants::validateSegmentationRules($segmentation_rule);
-    }
-
-    /**
-     * Validates the provided subfiltering options by attempting to decode them as JSON.
-     *
-     * This method ensures that the input string is a valid JSON-encoded structure.
-     * If the decoding process encounters an error, it returns an empty array to enforce
-     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
-     *
-     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
-     *
-     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
-     * @throws Exception
-     */
-    private function validateSubfilteringOptions(string $subfiltering_handlers): ?array
-    {
-        if ($subfiltering_handlers == 'none') {
-            // subfiltering is disabled
-            $subfiltering_handlers = 'null';
-        }
-
-        $validatorObject = new JSONValidatorObject($subfiltering_handlers);
-        $validator = new JSONValidator('subfiltering_handlers.json', true);
-        $validator->validate($validatorObject);
-
-        if (is_null($validatorObject->getValue())) {
-            return null;
-        }
-
-        return $validatorObject->getValue();
-    }
-
-    /**
      * @param string $private_tm_key
      * @param string $private_tm_key_json
      *
@@ -840,7 +821,7 @@ class NewController extends KleinController
         try {
             if (!empty($private_tm_key_json)) {
                 // first check if `private_tm_key_json` is a valid JSON
-                if (!Utils::isJson($private_tm_key_json)) {
+                if (!json_validate($private_tm_key_json)) {
                     throw new Exception("private_tm_key_json is not a valid JSON");
                 }
 
@@ -890,7 +871,7 @@ class NewController extends KleinController
 
         //If a TMX file has been uploaded and no key was provided, create a new key.
         if (empty($private_tm_key)) {
-            $uniformedFileObject = Upload::getUniformGlobalFilesStructure($_FILES);
+            $uniformedFileObject = Upload::getUniformGlobalFilesStructure($this->request->files()->all());
             foreach ($uniformedFileObject as $_fileinfo) {
                 $pathinfo = AbstractFilesStorage::pathinfo_fix($_fileinfo->name);
                 if ($pathinfo['extension'] == 'tmx') {
@@ -1125,7 +1106,7 @@ class NewController extends KleinController
 
                 return $mmtGlossaries;
             } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage());
+                throw new InvalidArgumentException($exception->getMessage(), -6);
             }
         }
 
@@ -1133,48 +1114,31 @@ class NewController extends KleinController
     }
 
     /**
-     * Validate `dialect_strict` param vs target languages
-     *
-     * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
-     *
-     * @param      $target_lang
-     * @param null $dialect_strict
+     * @param null $lara_glossaries
      *
      * @return string|null
      */
-    private function validateDialectStrictParam($target_lang, $dialect_strict = null): ?string
+    private function validateLaraGlossaries($lara_glossaries = null): ?string
     {
-        if (!empty($dialect_strict)) {
-            $dialect_strict = trim(html_entity_decode($dialect_strict));
-            $target_languages = preg_replace('/\s+/', '', $target_lang);
-            $targets = explode(',', trim($target_languages));
+        if (!empty($lara_glossaries)) {
+            try {
+                $laraGlossaries = html_entity_decode($lara_glossaries);
 
-            // first check if `dialect_strict` is a valid JSON
-            if (!Utils::isJson($dialect_strict)) {
-                throw new InvalidArgumentException("dialect_strict is not a valid JSON");
+                (new LaraGlossaryValidator)->validate(
+                    EngineValidatorObject::fromArray([
+                        'glossaryString' => $laraGlossaries,
+                    ])
+                );
+
+                return $laraGlossaries;
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -6);
             }
-
-            $dialectStrictObj = json_decode($dialect_strict, true);
-
-            foreach ($dialectStrictObj as $lang => $value) {
-                if (!in_array($lang, $targets)) {
-                    throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages'
-                    );
-                }
-
-                if (!is_bool($value)) {
-                    throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, not boolean declared value for ' . $lang
-                    );
-                }
-            }
-
-            return html_entity_decode($dialect_strict);
         }
 
         return null;
     }
+
 
     /**
      * @param null $filters_extraction_parameters
@@ -1227,7 +1191,7 @@ class NewController extends KleinController
     ): MTQEWorkflowParams {
         if (!empty($mt_qe_workflow_template_raw_parameters)) {
             // first check if `mt_qe_workflow_template_raw_parameters` is a valid JSON
-            if (!Utils::isJson($mt_qe_workflow_template_raw_parameters)) {
+            if (!json_validate($mt_qe_workflow_template_raw_parameters)) {
                 throw new InvalidArgumentException("mt_qe_workflow_template_raw_parameters is not a valid JSON");
             }
 
@@ -1288,7 +1252,7 @@ class NewController extends KleinController
     {
         if (!empty($xliff_parameters)) {
             // first check if `xliff_parameters` is a valid JSON
-            if (!Utils::isJson($xliff_parameters)) {
+            if (!json_validate($xliff_parameters)) {
                 throw new InvalidArgumentException("xliff_parameters is not a valid JSON");
             }
 

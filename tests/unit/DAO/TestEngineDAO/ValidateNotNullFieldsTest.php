@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -14,38 +15,41 @@ use Utils\Registry\AppConfig;
  * Date: 15/04/16
  * Time: 12.28
  */
-class ValidateNotNullFieldsTest extends AbstractTest {
-    /**
-     * @var EngineDAO
-     */
-    protected $method;
-    protected $reflector;
+class ValidateNotNullFieldsTest extends AbstractTest
+{
+    protected ReflectionMethod $method;
+    protected ReflectionClass $reflector;
     /**
      * @var EngineStruct
      */
-    protected $engine_struct_param;
+    protected EngineStruct $engine_struct_param;
+    protected EngineDAO $engineDAO;
 
-    public function setUp(): void {
+    /**
+     * @throws ReflectionException
+     */
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_validateNotNullFields" );
-        
+        $this->engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->reflector = new ReflectionClass($this->engineDAO);
+        $this->method = $this->reflector->getMethod("_validateNotNullFields");
+
         $this->engine_struct_param = new EngineStruct();
 
-        $this->engine_struct_param->name                    = "Moses_bar_and_foo";
-        $this->engine_struct_param->description             = "Machine translation from bar and foo.";
-        $this->engine_struct_param->type                    = "TM";
-        $this->engine_struct_param->base_url                = "http://mtserver01.deepfoobar.com:8019";
-        $this->engine_struct_param->translate_relative_url  = "translate";
+        $this->engine_struct_param->name = "Moses_bar_and_foo";
+        $this->engine_struct_param->description = "Machine translation from bar and foo.";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->base_url = "http://mtserver01.deepfoobar.com:8019";
+        $this->engine_struct_param->translate_relative_url = "translate";
         $this->engine_struct_param->contribute_relative_url = null;
-        $this->engine_struct_param->delete_relative_url     = null;
-        $this->engine_struct_param->others                  = "{}";
-        $this->engine_struct_param->class_load              = "foo_bar";
-        $this->engine_struct_param->extra_parameters        = "{}";
-        $this->engine_struct_param->penalty                 = 1;
-        $this->engine_struct_param->active                  = 0;
-        $this->engine_struct_param->uid                     = 1;
+        $this->engine_struct_param->delete_relative_url = null;
+        $this->engine_struct_param->others = "{}";
+        $this->engine_struct_param->class_load = "foo_bar";
+        $this->engine_struct_param->extra_parameters = "{}";
+        $this->engine_struct_param->penalty = 1;
+        $this->engine_struct_param->active = 0;
+        $this->engine_struct_param->uid = 1;
     }
 
     /**
@@ -53,34 +57,54 @@ class ValidateNotNullFieldsTest extends AbstractTest {
      * exception if there is the property 'base_url' uninitialized.
      * @group  regression
      * @covers EngineDAO::_validateNotNullFields
+     * @throws ReflectionException
      */
-    public function test__validateNotNullFields_base_url_field() {
+    #[Test]
+    public function test__validateNotNullFields_base_url_field()
+    {
         $this->engine_struct_param->base_url = null;
-        $this->expectException( 'Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
+        $this->expectException('Exception');
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 
     /**
      * @group  regression
      * @covers EngineDAO::_validateNotNullFields
      * TODO: this test fails until the source code will be fixed
+     * @throws ReflectionException
      */
-    public function test__validateNotNullFields_type_field_not_allowed_value_string() {
-
+    #[Test]
+    public function test__validateNotNullFields_type_field_not_allowed_value_string()
+    {
         $this->engine_struct_param->type = "bar";
-        $this->expectException( 'Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
+        $this->expectException('Exception');
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 
     /**
      * @group  regression
      * @covers EngineDAO::_validateNotNullFields
+     * @throws ReflectionException
      */
-    public function test__validateNotNullFields_type_field_int_not_present() {
-
+    #[Test]
+    public function test__validateNotNullFields_type_field_int_not_present()
+    {
         $this->engine_struct_param->type = 67;
-        $this->expectException( 'Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
+        $this->expectException('Exception');
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
+    }
+
+    /**
+     * @group  regression
+     * @covers EngineDAO::_validateNotNullFields
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__validateNotNullFields_type_value_not_between_types1()
+    {
+        $this->engine_struct_param->type = 'FooBar';
+        $this->expectException('Exception');
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 
     /**
@@ -88,23 +112,12 @@ class ValidateNotNullFieldsTest extends AbstractTest {
      * @covers EngineDAO::_validateNotNullFields
      * TODO: this test fails until the source code will be fixed
      */
-    public function test__validateNotNullFields_type_value_not_between_types1() {
-
-        $this->engine_struct_param->type = 1;
-        $this->expectException( 'Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
-    }
-
-    /**
-     * @group  regression
-     * @covers EngineDAO::_validateNotNullFields
-     * TODO: this test fails until the source code will be fixed
-     */
-    public function test__validateNotNullFields_type_value_not_between_types2() {
-
+    #[Test]
+    public function test__validateNotNullFields_type_value_not_between_types2()
+    {
         $this->engine_struct_param->type = 1000;
-        $this->expectException( 'Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
+        $this->expectException('Exception');
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 
 }

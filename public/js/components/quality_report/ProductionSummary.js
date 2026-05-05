@@ -1,6 +1,7 @@
 import React from 'react'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 class ProductionSummary extends React.Component {
   getTimeToEdit = () => {
@@ -23,7 +24,7 @@ class ProductionSummary extends React.Component {
         <br />
         <code>(Tot. error points * 1000) / reviewed words</code>
         <br />
-        Reviewed words = raw words - unmodified ICE matches
+        Reviewed words = raw words - unmodified 101% matches
         <br />
         <br />
         The score is compared to a max. amount of tolerated error points.
@@ -158,7 +159,7 @@ class ProductionSummary extends React.Component {
               wide="very"
               trigger={
                 <div className="qr-label">
-                  Threshold {limit} <i className="icon-info icon" />
+                  Threshold {limit} <HelpCircle />
                 </div>
               }
             />

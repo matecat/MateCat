@@ -26,13 +26,13 @@ class SignupModel
     protected array $params;
 
     protected ?string $error = null;
-    private array     $session;
+    private array $session;
 
     public function __construct(array $params, array &$session)
     {
-        $this->params  = $params;
+        $this->params = $params;
         $this->session =& $session;
-        $this->user    = new UserStruct($this->params);
+        $this->user = new UserStruct($this->params);
     }
 
     /**
@@ -60,12 +60,12 @@ class SignupModel
         if ($this->__userAlreadyExists()) {
             $this->__updatePersistedUser();
             UserDao::updateStruct($this->user, [
-                    'fields' => [
-                            'salt',
-                            'pass',
-                            'confirmation_token',
-                            'confirmation_token_created_at'
-                    ]
+                'fields' => [
+                    'salt',
+                    'pass',
+                    'confirmation_token',
+                    'confirmation_token_created_at'
+                ]
             ]);
         } else {
             $this->__prepareNewUser();
@@ -105,7 +105,7 @@ class SignupModel
 
     private function __saveWantedUrl(): void
     {
-        $this->session[ 'wanted_url' ] = $this->params[ 'wanted_url' ];
+        $this->session['wanted_url'] = $this->params['wanted_url'];
     }
 
     /**
@@ -114,8 +114,8 @@ class SignupModel
      */
     public function flushWantedURL(): string
     {
-        $url = $this->session[ 'wanted_url' ] ?? CanonicalRoutes::appRoot();
-        unset($this->session[ 'wanted_url' ]);
+        $url = $this->session['wanted_url'] ?? CanonicalRoutes::appRoot();
+        unset($this->session['wanted_url']);
 
         return $url;
     }
@@ -130,7 +130,7 @@ class SignupModel
             $this->user->salt = Utils::randomString(15, true);
         }
 
-        $this->user->pass = Utils::encryptPass($this->params[ 'password' ], $this->user->salt);
+        $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
         $this->user->initAuthToken();
     }
@@ -138,8 +138,8 @@ class SignupModel
     private function __prepareNewUser(): void
     {
         $this->user->create_date = Utils::mysqlTimestamp(time());
-        $this->user->salt        = Utils::randomString(15, true);
-        $this->user->pass        = Utils::encryptPass($this->params[ 'password' ], $this->user->salt);
+        $this->user->salt = Utils::randomString(15, true);
+        $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
         $this->user->initAuthToken();
     }
@@ -152,7 +152,7 @@ class SignupModel
      */
     private function __userAlreadyExists(): bool
     {
-        $dao       = new UserDao();
+        $dao = new UserDao();
         $persisted = $dao->getByEmail($this->user->email);
 
         if ($persisted) {
@@ -182,8 +182,8 @@ class SignupModel
      */
     public function confirm(): UserStruct
     {
-        $dao  = new UserDao();
-        $user = $dao->getByConfirmationToken($this->params[ 'token' ]);
+        $dao = new UserDao();
+        $user = $dao->getByConfirmationToken($this->params['token']);
 
         if (!$user) {
             throw new ValidationError('Confirmation token not found');
@@ -213,8 +213,8 @@ class SignupModel
     {
         $this->__saveWantedUrl();
 
-        $dao  = new UserDao();
-        $user = $dao->getByEmail($this->params[ 'email' ]);
+        $dao = new UserDao();
+        $user = $dao->getByEmail($this->params['email']);
 
         if ($user) {
             $user->initAuthToken();
@@ -240,7 +240,7 @@ class SignupModel
     {
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-        $dao  = new UserDao();
+        $dao = new UserDao();
         $user = $dao->getByEmail($email);
 
         if ($user) {

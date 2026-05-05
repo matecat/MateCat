@@ -1,0 +1,25 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 8
+    paths:
+        - lib
+    scanFiles:
+        - router.php
+    excludePaths:
+        - lib/View/APIDoc.php (?)
+        - lib/View/templates/_APIDoc.php
+    universalObjectCratesClasses:
+        - Model\DataAccess\ShapelessConcreteStruct
+    # Flag @throws \Exception on public/protected methods when only
+    # a narrower exception (e.g. \InvalidArgumentException) is thrown
+    checkTooWideThrowTypesInProtectedAndPublicMethods: true
+    exceptions:
+        check:
+            # Report when code throws an exception that has no
+            # matching @throws tag in the method's PHPDoc
+            missingCheckedExceptionInThrows: true
+            # Report when @throws declares a broader type than
+            # what is actually thrown (applies to all methods)
+            tooWideThrowType: true

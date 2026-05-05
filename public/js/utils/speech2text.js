@@ -1,4 +1,8 @@
-import SegmentActions from '../actions/SegmentActions'
+import {
+  replaceEditAreaTextContent,
+  modifiedTranslation,
+  activateTab,
+} from '../actions/segmentDispatchActions'
 import SegmentStore from '../stores/SegmentStore'
 import CatToolActions from '../actions/CatToolActions'
 import $ from 'jquery'
@@ -99,7 +103,7 @@ const Speech2Text = {
 
     if (Speech2Text.shouldEmptyTargetElement(segment)) {
       Speech2Text.finalTranscript = ''
-      SegmentActions.replaceEditAreaTextContent(Speech2Text.sid, '')
+      replaceEditAreaTextContent(Speech2Text.sid, '')
     } else {
       Speech2Text.finalTranscript = segment.translation + ' '
     }
@@ -160,8 +164,8 @@ const Speech2Text = {
         Speech2Text.linebreak(Speech2Text.finalTranscript) +
         Speech2Text.linebreak(Speech2Text.interimTranscript)
       let sid = Speech2Text.sid
-      SegmentActions.replaceEditAreaTextContent(sid, html)
-      SegmentActions.modifiedTranslation(sid, true)
+      replaceEditAreaTextContent(sid, html)
+      modifiedTranslation(sid, true)
     }
   },
   linebreak: function (s) {
@@ -187,7 +191,7 @@ const Speech2Text = {
     Speech2Text.isToKeepRecognizing = false
   },
   showMatches: function () {
-    SegmentActions.activateTab(SegmentStore.getCurrentSegmentId(), 'matches')
+    activateTab(SegmentStore.getCurrentSegmentId(), 'matches')
   },
   animateSpeechActive: function () {
     Speech2Text.microphone.removeClass('micSpeechReceiving')

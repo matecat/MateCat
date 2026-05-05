@@ -23,9 +23,9 @@ class GithubProvider extends AbstractProvider
     public static function getClient(?string $redirectUrl = null): Github
     {
         return new Github([
-                'clientId'     => AppConfig::$GITHUB_OAUTH_CLIENT_ID,
-                'clientSecret' => AppConfig::$GITHUB_OAUTH_CLIENT_SECRET,
-                'redirectUri'  => $redirectUrl ?? AppConfig::$GITHUB_OAUTH_REDIRECT_URL,
+            'clientId' => AppConfig::$GITHUB_OAUTH_CLIENT_ID,
+            'clientSecret' => AppConfig::$GITHUB_OAUTH_CLIENT_SECRET,
+            'redirectUri' => $redirectUrl ?? AppConfig::$GITHUB_OAUTH_REDIRECT_URL,
         ]);
     }
 
@@ -36,13 +36,13 @@ class GithubProvider extends AbstractProvider
      */
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
-        $options      = [
-                'state'  => $csrfTokenState,
-                'scope'  => [
-                        'user',
-                        'user:email'
-                ],
-                'prompt' => 'select_account'
+        $options = [
+            'state' => $csrfTokenState,
+            'scope' => [
+                'user',
+                'user:email'
+            ],
+            'prompt' => 'select_account'
         ];
         $githubClient = static::getClient($this->redirectUrl);
 
@@ -62,7 +62,7 @@ class GithubProvider extends AbstractProvider
 
         /** @var AccessToken $token */
         $token = $githubClient->getAccessToken('authorization_code', [
-                'code' => $code
+            'code' => $code
         ]);
 
         return $token;
@@ -83,15 +83,15 @@ class GithubProvider extends AbstractProvider
         $fetched = $fetched->toArray();
 
         // GitHub only returns the full name
-        $name = explode(" ", $fetched[ 'name' ]);
+        $name = explode(" ", $fetched['name']);
 
-        $user            = new ProviderUser();
-        $user->email     = $fetched[ 'email' ];
-        $user->name      = $name[ 0 ];
-        $user->lastName  = $name[ 1 ];
-        $user->picture   = $fetched[ 'avatar_url' ];
+        $user = new ProviderUser();
+        $user->email = $fetched['email'];
+        $user->name = $name[0];
+        $user->lastName = $name[1];
+        $user->picture = $fetched['avatar_url'];
         $user->authToken = $token;
-        $user->provider  = self::PROVIDER_NAME;
+        $user->provider = self::PROVIDER_NAME;
 
         return $user;
     }

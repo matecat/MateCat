@@ -18,19 +18,19 @@ use Utils\Date\DateTimeUtil;
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
 
-    public ?int          $id            = null;
-    public ?string       $name          = null;
-    public ?int          $uid           = null;
-    public ?string       $created_at    = null;
-    public ?string       $modified_at   = null;
-    public ?string       $deleted_at    = null;
-    public ?Yaml         $yaml          = null;
-    public ?Xml          $xml           = null;
-    public ?Json         $json          = null;
-    public ?MSWord       $ms_word       = null;
-    public ?MSExcel      $ms_excel      = null;
+    public ?int $id = null;
+    public ?string $name = null;
+    public ?int $uid = null;
+    public ?string $created_at = null;
+    public ?string $modified_at = null;
+    public ?string $deleted_at = null;
+    public ?Yaml $yaml = null;
+    public ?Xml $xml = null;
+    public ?Json $json = null;
+    public ?MSWord $ms_word = null;
+    public ?MSExcel $ms_excel = null;
     public ?MSPowerpoint $ms_powerpoint = null;
-    public ?Dita         $dita          = null;
+    public ?Dita $dita = null;
 
     /**
      * Get YAML filter configuration DTO.
@@ -190,7 +190,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * Instantiate and hydrate a DTO from array data, then assign it to the proper property.
      *
      * @param class-string $dtoClass Fully qualified DTO class name.
-     * @param array        $data     DTO payload.
+     * @param array $data DTO payload.
      *
      * @return void
      */
@@ -234,38 +234,41 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      */
     public function hydrateAllDto(array $json): void
     {
-        if (isset($json[ 'json' ])) {
-            is_array($json[ 'json' ]) ? $this->hydrateDtoFromArray(Json::class, $json[ 'json' ]) : $this->hydrateDtoFromArray(Json::class, json_decode($json[ 'json' ], true));
+        if (isset($json['json'])) {
+            is_array($json['json']) ? $this->hydrateDtoFromArray(Json::class, $json['json']) : $this->hydrateDtoFromArray(Json::class, json_decode($json['json'], true));
         }
 
         // xml
-        if (isset($json[ 'xml' ])) {
-            is_array($json[ 'xml' ]) ? $this->hydrateDtoFromArray(Xml::class, $json[ 'xml' ]) : $this->hydrateDtoFromArray(Xml::class, json_decode($json[ 'xml' ], true));
+        if (isset($json['xml'])) {
+            is_array($json['xml']) ? $this->hydrateDtoFromArray(Xml::class, $json['xml']) : $this->hydrateDtoFromArray(Xml::class, json_decode($json['xml'], true));
         }
 
         // yaml
-        if (isset($json[ 'yaml' ])) {
-            is_array($json[ 'yaml' ]) ? $this->hydrateDtoFromArray(Yaml::class, $json[ 'yaml' ]) : $this->hydrateDtoFromArray(Yaml::class, json_decode($json[ 'yaml' ], true));
+        if (isset($json['yaml'])) {
+            is_array($json['yaml']) ? $this->hydrateDtoFromArray(Yaml::class, $json['yaml']) : $this->hydrateDtoFromArray(Yaml::class, json_decode($json['yaml'], true));
         }
 
         // ms excel
-        if (isset($json[ 'ms_excel' ])) {
-            is_array($json[ 'ms_excel' ]) ? $this->hydrateDtoFromArray(MSExcel::class, $json[ 'ms_excel' ]) : $this->hydrateDtoFromArray(MSExcel::class, json_decode($json[ 'ms_excel' ], true));
+        if (isset($json['ms_excel'])) {
+            is_array($json['ms_excel']) ? $this->hydrateDtoFromArray(MSExcel::class, $json['ms_excel']) : $this->hydrateDtoFromArray(MSExcel::class, json_decode($json['ms_excel'], true));
         }
 
         // ms word
-        if (isset($json[ 'ms_word' ])) {
-            is_array($json[ 'ms_word' ]) ? $this->hydrateDtoFromArray(MSWord::class, $json[ 'ms_word' ]) : $this->hydrateDtoFromArray(MSWord::class, json_decode($json[ 'ms_word' ], true));
+        if (isset($json['ms_word'])) {
+            is_array($json['ms_word']) ? $this->hydrateDtoFromArray(MSWord::class, $json['ms_word']) : $this->hydrateDtoFromArray(MSWord::class, json_decode($json['ms_word'], true));
         }
 
         // ms powerpoint
-        if (isset($json[ 'ms_powerpoint' ])) {
-            is_array($json[ 'ms_powerpoint' ]) ? $this->hydrateDtoFromArray(MSPowerpoint::class, $json[ 'ms_powerpoint' ]) : $this->hydrateDtoFromArray(MSPowerpoint::class, json_decode($json[ 'ms_powerpoint' ], true));
+        if (isset($json['ms_powerpoint'])) {
+            is_array($json['ms_powerpoint']) ? $this->hydrateDtoFromArray(MSPowerpoint::class, $json['ms_powerpoint']) : $this->hydrateDtoFromArray(
+                MSPowerpoint::class,
+                json_decode($json['ms_powerpoint'], true)
+            );
         }
 
         // dita
-        if (isset($json[ 'dita' ])) {
-            is_array($json[ 'dita' ]) ? $this->hydrateDtoFromArray(Dita::class, $json[ 'dita' ]) : $this->hydrateDtoFromArray(Dita::class, json_decode($json[ 'dita' ], true));
+        if (isset($json['dita'])) {
+            is_array($json['dita']) ? $this->hydrateDtoFromArray(Dita::class, $json['dita']) : $this->hydrateDtoFromArray(Dita::class, json_decode($json['dita'], true));
         }
     }
 
@@ -273,8 +276,8 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * Hydrate the struct from a JSON string and optional user id.
      * Sets default empty DTOs, then fills them from payload if present.
      *
-     * @param string   $json JSON string.
-     * @param int|null $uid  Optional user id to use if not present in JSON.
+     * @param string $json JSON string.
+     * @param int|null $uid Optional user id to use if not present in JSON.
      *
      * @return FiltersConfigTemplateStruct
      *
@@ -283,31 +286,31 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
     {
         $json = json_decode($json, true);
 
-        if (!isset($json[ 'name' ])) {
+        if (!isset($json['name'])) {
             throw new DomainException("Cannot instantiate a new FiltersConfigStruct. Invalid data provided.", 400);
         }
 
-        if (empty($uid) && empty($json[ 'uid' ])) {
+        if (empty($uid) && empty($json['uid'])) {
             throw new DomainException("Cannot instantiate a new FiltersConfigStruct. Invalid user id provided.", 400);
         }
 
-        $this->uid  = $json[ 'uid' ] ?? $uid;
-        $this->name = $json[ 'name' ];
+        $this->uid = $json['uid'] ?? $uid;
+        $this->name = $json['name'];
 
-        if (isset($json[ 'id' ])) {
-            $this->id = $json[ 'id' ];
+        if (isset($json['id'])) {
+            $this->id = $json['id'];
         }
 
-        if (isset($json[ 'created_at' ])) {
-            $this->created_at = $json[ 'created_at' ];
+        if (isset($json['created_at'])) {
+            $this->created_at = $json['created_at'];
         }
 
-        if (isset($json[ 'deleted_at' ])) {
-            $this->deleted_at = $json[ 'deleted_at' ];
+        if (isset($json['deleted_at'])) {
+            $this->deleted_at = $json['deleted_at'];
         }
 
-        if (isset($json[ 'modified_at' ])) {
-            $this->modified_at = $json[ 'modified_at' ];
+        if (isset($json['modified_at'])) {
+            $this->modified_at = $json['modified_at'];
         }
 
         // set defaults
@@ -333,18 +336,18 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
     public function jsonSerialize(): array
     {
         return [
-                'id'            => $this->id,
-                'uid'           => $this->uid,
-                'name'          => $this->name,
-                'xml'           => $this->xml,
-                'yaml'          => $this->yaml,
-                'json'          => $this->json,
-                'ms_word'       => $this->ms_word,
-                'ms_excel'      => $this->ms_excel,
-                'ms_powerpoint' => $this->ms_powerpoint,
-                'dita'          => $this->dita,
-                'created_at'    => DateTimeUtil::formatIsoDate($this->created_at),
-                'modified_at'   => DateTimeUtil::formatIsoDate($this->modified_at)
+            'id' => $this->id,
+            'uid' => $this->uid,
+            'name' => $this->name,
+            'xml' => $this->xml,
+            'yaml' => $this->yaml,
+            'json' => $this->json,
+            'ms_word' => $this->ms_word,
+            'ms_excel' => $this->ms_excel,
+            'ms_powerpoint' => $this->ms_powerpoint,
+            'dita' => $this->dita,
+            'created_at' => DateTimeUtil::formatIsoDate($this->created_at),
+            'modified_at' => DateTimeUtil::formatIsoDate($this->modified_at)
         ];
     }
 

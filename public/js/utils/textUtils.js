@@ -1,8 +1,9 @@
 import {isUndefined} from 'lodash'
 import $ from 'jquery'
-import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
+import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textConstants'
 import CommonUtils from './commonUtils'
 import diff_match_patch from 'diff-match-patch'
+import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -490,6 +491,12 @@ const TEXT_UTILS = {
       let tempEnd = cursor
       callback(tempStart, tempEnd)
     }
+  },
+  removeWhitespacePlaceholders: (text) => {
+    let spaceRegexp = tagSignatures.space
+      ? new RegExp(tagSignatures.space.placeholder, 'g')
+      : null
+    return text.replace(spaceRegexp, ' ')
   },
 }
 

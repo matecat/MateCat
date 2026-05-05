@@ -40,7 +40,7 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @var mixed
      */
-    protected $result = []; // this cannot be forced to be an array, engines may use different types
+    protected mixed $result = []; // this cannot be forced to be an array, engines may use different types
     protected array $error = [];
 
     protected array $curl_additional_params = [];
@@ -100,7 +100,7 @@ abstract class AbstractEngine implements EngineInterface
         return $this;
     }
 
-    public function setFeatureSet(FeatureSet $fSet = null)
+    public function setFeatureSet(FeatureSet $fSet = null): void
     {
         if ($fSet != null) {
             $this->featureSet = $fSet;
@@ -191,7 +191,7 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @return array
      */
-    abstract public function getConfigurationParameters(): array;
+    abstract public static function getConfigurationParameters(): array;
 
     /**
      * @param mixed $rawValue
@@ -206,9 +206,9 @@ abstract class AbstractEngine implements EngineInterface
      * @param string $url
      * @param array $curl_options
      *
-     * @return array|bool|string|null
+     * @return string|bool|null
      */
-    public function _call(string $url, array $curl_options = [])
+    public function _call(string $url, array $curl_options = []): string|bool|null
     {
         $mh = new MultiCurlHandler();
         $uniq_uid = uniqid('', true);
@@ -266,7 +266,7 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @return void
      */
-    public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false)
+    public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
     {
         if ($this->_isAnalysis && $this->_skipAnalysis) {
             $this->result = [];
@@ -316,7 +316,7 @@ abstract class AbstractEngine implements EngineInterface
         $this->result = $this->_decode($rawValue, $parameters, $function);
     }
 
-    public function _setAdditionalCurlParams(array $curlOptParams = [])
+    public function _setAdditionalCurlParams(array $curlOptParams = []): void
     {
         /*
          * Append array elements from the second array to the first array while not
@@ -355,8 +355,11 @@ abstract class AbstractEngine implements EngineInterface
         return $this->engineRecord->name;
     }
 
-    public function getMTName(): string
+    public function getMTName(string $forceName = ''): string
     {
+        if (!empty($forceName)) {
+            return "MT-" . $forceName;
+        }
         return "MT-" . $this->getName();
     }
 
@@ -388,7 +391,7 @@ abstract class AbstractEngine implements EngineInterface
      * @return array|TMSAbstractResponse
      * @throws Exception
      */
-    protected function GoogleTranslateFallback(array $_config)
+    protected function GoogleTranslateFallback(array $_config): TMSAbstractResponse|array
     {
         try {
             /**
@@ -399,7 +402,7 @@ abstract class AbstractEngine implements EngineInterface
             $newEngineStruct->name = "Generic";
             $newEngineStruct->uid = 0;
             $newEngineStruct->type = EngineConstants::MT;
-            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'];
+            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
             $newEngineStruct->others = [];
 
             $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);

@@ -6,12 +6,31 @@ import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
-import SegmentActions from '../../../actions/SegmentActions'
+import {addClassToSegment} from '../../../actions/segmentClassActions'
+import {
+  replaceEditAreaTextContent,
+  setHeaderPercentage,
+  modifiedTranslation,
+  setSegmentContributions,
+  setChoosenSuggestion,
+} from '../../../actions/segmentDispatchActions'
+import {
+  getSegmentsQa,
+  startSegmentQACheck,
+} from '../../../actions/segmentQaActions'
+import {disableTPOnSegment} from '../../../actions/tagProjectionActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
+import {laraAuth} from '../../../api/laraAuth'
+import {laraTranslate} from '../../../api/laraTranslate'
+import CatToolStore from '../../../stores/CatToolStore'
+import {
+  decodeTagsToUnicodeChar,
+  encodeTagsFromUnicodeChar,
+} from './DraftMatecatUtils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -21,21 +40,24 @@ let TranslationMatches = {
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentageClass(matchToUse)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
-      SegmentActions.setHeaderPercentage(
+      replaceEditAreaTextContent(segment.sid, translation)
+      setHeaderPercentage(
         segment.sid,
         segment.id_file,
         matchToUse,
         percentageClass,
         matchToUse.created_by,
       )
-      SegmentActions.startSegmentQACheck()
+      startSegmentQACheck()
       CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
       })
 
-      SegmentActions.modifiedTranslation(segment.sid, true)
+      modifiedTranslation(
+        segment.sid,
+        segment.translation !== '',
+      )
     }
   },
 
@@ -44,7 +66,7 @@ let TranslationMatches = {
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
     if (isUndefined(segmentObj)) return
 
-    SegmentActions.setSegmentContributions(
+    setSegmentContributions(
       segmentObj.sid,
       data.matches,
       data.errors,
@@ -52,7 +74,7 @@ let TranslationMatches = {
 
     this.useSuggestionInEditArea(sid)
 
-    SegmentActions.addClassToSegment(sid, 'loaded')
+    addClassToSegment(sid, 'loaded')
   },
   useSuggestionInEditArea: function (sid) {
     let segmentObj = SegmentStore.getSegmentByIdToJS(sid)
@@ -70,7 +92,7 @@ let TranslationMatches = {
       var translation = matches[0].translation
 
       if (editareaLength === 0) {
-        SegmentActions.setChoosenSuggestion(segmentObj.sid, 1)
+        setChoosenSuggestion(segmentObj.sid, 1)
 
         /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
          * the source with the text with tags, the segment is tagged
@@ -81,7 +103,7 @@ let TranslationMatches = {
           if (parseInt(match) !== 100) {
             translation = DraftMatecatUtils.removeTagsFromText(translation)
           } else {
-            SegmentActions.disableTPOnSegment(segmentObj)
+            disableTPOnSegment(segmentObj)
           }
         }
 
@@ -104,29 +126,91 @@ let TranslationMatches = {
       }
     }
   },
-  getContribution: function (segmentSid, next, crossLanguageSettings, force) {
-    const segment = SegmentStore.getSegmentByIdToJS(segmentSid)
+  segmentsWaitingForContributions: [],
+  /**
+   * Get contributions for the current segment and prefetch for the next ones
+   * @param sid Segment ID
+   * @param crossLanguageSettings Cross language settings
+   * @param force Force to fetch new contributions
+   * @param prefetch Number of segments to prefetch contributions for
+   */
+  getContributionsWithPrefetch: function ({
+    sid,
+    crossLanguageSettings,
+    force = false,
+    prefetch = 3,
+  }) {
+    const segment = SegmentStore.getSegmentByIdToJS(sid)
+    if (!segment) return
+    const nextSegment = SegmentStore.getNextSegment({
+      current_sid: sid,
+      lockedSegments: false,
+    })
+    let segmentsToFetch = [segment.sid]
+    if (nextSegment) {
+      segmentsToFetch = [...segmentsToFetch, nextSegment.sid]
+    }
+    let currentSid = nextSegment ? nextSegment.sid : sid
+    for (let i = 1; i < prefetch; i++) {
+      const followingSegment = SegmentStore.getNextSegment({
+        status: SEGMENTS_STATUS.UNTRANSLATED,
+        current_sid: currentSid,
+      })
+      if (followingSegment) {
+        segmentsToFetch = [...segmentsToFetch, followingSegment.sid]
+        currentSid = followingSegment.sid
+      } else {
+        // no untranslated segments after
+        break
+      }
+    }
+    if (segmentsToFetch.length < prefetch + 1) {
+      // fill up with next segments
+      currentSid = segmentsToFetch[segmentsToFetch.length - 1]
+      while (segmentsToFetch.length < prefetch + 1) {
+        const followingSegment = SegmentStore.getNextSegment({
+          current_sid: currentSid,
+        })
+        if (followingSegment) {
+          segmentsToFetch = [...segmentsToFetch, followingSegment.sid]
+          currentSid = followingSegment.sid
+        } else {
+          // no more segments after
+          break
+        }
+      }
+    }
+    segmentsToFetch.forEach((segmentSid, index) => {
+      this.getContribution({
+        sid: segmentSid,
+        crossLanguageSettings,
+        force,
+        fastFetch: index === 0,
+      })
+    })
+  },
+  /**
+   * Get contribution for a segment
+   * @param sid Segment ID
+   * @param crossLanguageSettings Cross language settings
+   * @param force Force to fetch new contributions
+   * @param fastFetch If true, skip advanced MT engines like Lara
+   * @returns {Promise<Object | void>|Promise<void>}
+   */
+  getContribution: function ({
+    sid,
+    crossLanguageSettings,
+    force,
+    fastFetch = false,
+  }) {
+    const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
+    if (!currentSegment) return Promise.resolve()
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(segment.sid, 'loaded')
-      SegmentActions.getSegmentsQa(segment)
+      addClassToSegment(currentSegment.sid, 'loaded')
+      getSegmentsQa(currentSegment)
       return Promise.resolve()
     }
-    const currentSegment =
-      next === 0
-        ? segment
-        : next == 1
-          ? SegmentStore.getNextSegment({current_sid: segmentSid})
-          : SegmentStore.getNextSegment({
-              current_sid: segmentSid,
-              status: SEGMENTS_STATUS.UNTRANSLATED,
-            })
 
-    if (!currentSegment) return
-    //If segment locked or ICE
-    if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
-      SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
-      return Promise.resolve()
-    }
     let callNewContributions = force
     //Check similar segments
     if (
@@ -165,48 +249,120 @@ let TranslationMatches = {
       }
       return Promise.resolve()
     }
-    if (!currentSegment && next) {
-      return Promise.resolve()
-    }
     const id_segment_original = currentSegment.original_sid
-    const nextSegment = SegmentStore.getNextSegment({
-      current_sid: segmentSid,
-    })
-    // `next` and `untranslated next` are the same
-    if (
-      next === 2 &&
-      currentSegment &&
-      nextSegment &&
-      id_segment_original === nextSegment.sid
-    ) {
-      return Promise.resolve()
-    }
 
     if (isUndefined(config.id_client)) {
       setTimeout(function () {
-        TranslationMatches.getContribution(
-          segmentSid,
-          next,
+        TranslationMatches.getContribution({
+          sid,
           crossLanguageSettings,
-        )
+          force,
+          fastFetch,
+        })
       }, 3000)
-      // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
     const {contextListBefore, contextListAfter} =
       SegmentUtils.getSegmentContext(id_segment_original)
-    return getContributions({
-      idSegment: id_segment_original,
-      target: currentSegment.segment,
-      crossLanguages: crossLanguageSettings
-        ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
-        : [],
-      contextListBefore,
-      contextListAfter,
-    }).catch((errors) => {
-      CatToolActions.processErrors(errors, 'getContribution')
-      TranslationMatches.renderContributionErrors(errors, id_segment_original)
-    })
+
+    const isLaraEngine = config.active_engine?.engine_type === 'Lara'
+
+    const getContributionRequest = (translation = null) => {
+      if (!translation) {
+        console.log(
+          'Call classic matches for segment:',
+          id_segment_original,
+          this.segmentsWaitingForContributions,
+        )
+      }
+
+      return getContributions({
+        idSegment: id_segment_original,
+        target: currentSegment.segment,
+        translation: translation,
+        crossLanguages: crossLanguageSettings
+          ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
+          : [],
+        contextListBefore,
+        contextListAfter,
+      })
+        .then(() => {
+          // Remove from waiting list
+          if (
+            this.segmentsWaitingForContributions.indexOf(id_segment_original) >
+            -1
+          ) {
+            this.segmentsWaitingForContributions.splice(
+              this.segmentsWaitingForContributions.indexOf(id_segment_original),
+              1,
+            )
+          }
+        })
+        .catch((errors) => {
+          CatToolActions.processErrors(errors, 'getContribution')
+          TranslationMatches.renderContributionErrors(
+            errors,
+            id_segment_original,
+          )
+        })
+    }
+
+    const jobLanguages = [config.source_code, config.target_code]
+    // Keep only languages whose base code is 'en' or 'it'.
+    let allowed =
+      jobLanguages
+        .map((x) => x.split('-')[0])
+        .filter((x) => ['en', 'it'].includes(x))
+        .filter(
+          // Remove duplicates, then check we have exactly two distinct matches.
+          (value, index, array) => array.indexOf(value) === index,
+        ).length === 2
+
+    if (
+      this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
+    ) {
+      return Promise.resolve()
+    }
+    if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
+      this.segmentsWaitingForContributions.push(id_segment_original)
+      laraAuth({idJob: config.id_job, password: config.password})
+        .then((response) => {
+          const jobMetadata = CatToolStore.getJobMetadata()
+          const glossaries =
+            jobMetadata?.project?.mt_extra?.lara_glossaries || []
+          const decodedSource = decodeTagsToUnicodeChar(currentSegment.segment)
+          laraTranslate({
+            token: response.token,
+            source: decodedSource,
+            contextListBefore: contextListBefore.map((t) =>
+              decodeTagsToUnicodeChar(t),
+            ),
+            contextListAfter: contextListAfter.map((t) =>
+              decodeTagsToUnicodeChar(t),
+            ),
+            sid: id_segment_original,
+            jobId: config.id_job,
+            glossaries,
+          })
+            .then((response) => {
+              const translation =
+                response.translation.find((item) => item.translatable)?.text ||
+                ''
+              return getContributionRequest(
+                encodeTagsFromUnicodeChar(translation),
+              )
+            })
+            .catch((e) => {
+              return getContributionRequest()
+            })
+        })
+        .catch(() => {
+          return getContributionRequest()
+        })
+    } else {
+      this.segmentsWaitingForContributions.push(id_segment_original)
+      return getContributionRequest()
+    }
   },
 
   processContributions: function (data, sid) {
@@ -224,7 +380,7 @@ let TranslationMatches = {
   },
 
   renderContributionErrors: function (errors, segmentId) {
-    SegmentActions.setSegmentContributions(segmentId, [], errors)
+    setSegmentContributions(segmentId, [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id, sid) {

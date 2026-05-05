@@ -2,8 +2,10 @@
 
 namespace TestHelpers;
 
+use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 /**
  * User: domenico
@@ -11,29 +13,34 @@ use PHPUnit\Framework\TestCase;
  * Time: 15.21
  *
  */
-abstract class AbstractTest extends TestCase {
+abstract class AbstractTest extends TestCase
+{
 
-    protected $thisTest;
+    protected ?float $thisTestStartingTime = null;
 
-    protected $databaseInstance;
-    protected $reflectedMethod;
+    protected IDatabase $databaseInstance;
+    protected ReflectionMethod $reflectedMethod;
 
-    public function setUp(): void {
+    protected function setUp(): void
+    {
         parent::setUp();
-        $this->thisTest = microtime( true );
+        $this->thisTestStartingTime = microtime(true);
     }
 
-    public function tearDown(): void {
+    protected function tearDown(): void
+    {
         parent::tearDown();
-        $resultTime = microtime( true ) - $this->thisTest;
-        echo " " . str_pad( get_class( $this ) . "::" . $this->name(), 35 ) . " - Did in " . $resultTime . " seconds.\n";
+        $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
+        echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . round($resultTime, 6) . " seconds.\n";
     }
 
     /**
+     * @param IDatabase $database_instance
      * @return mixed
      */
-    protected function getTheLastInsertIdByQuery( IDatabase $database_instance ) {
-        $stmt = $database_instance->getConnection()->query( "SELECT LAST_INSERT_ID()" );
+    protected function getTheLastInsertIdByQuery(IDatabase $database_instance): mixed
+    {
+        $stmt = $database_instance->getConnection()->query("SELECT LAST_INSERT_ID()");
         $stmt->execute();
 
         return $stmt->fetchColumn();
@@ -63,14 +70,15 @@ abstract class AbstractTest extends TestCase {
      * @return string
      *
      */
-    protected function getRawQuery( array $preparedQuery ) {
-        $rawQuery = $preparedQuery[ 0 ];
-        foreach ( $preparedQuery[ 1 ] as $key => $value ) {
-            if ( is_string( $value ) ) {
+    protected function getRawQuery(array $preparedQuery): string
+    {
+        $rawQuery = $preparedQuery[0];
+        foreach ($preparedQuery[1] as $key => $value) {
+            if (is_string($value)) {
                 $value = '\'' . $value . '\'';
             }
 
-            $rawQuery = str_replace( ':' . $key, $value, $rawQuery );
+            $rawQuery = str_replace(':' . $key, $value, $rawQuery);
         }
 
         return $rawQuery;

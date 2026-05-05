@@ -2,7 +2,10 @@ import {isUndefined, clone} from 'lodash'
 import {find} from 'lodash/collection'
 import {findIndex} from 'lodash/array'
 
-import SegmentActions from '../../../../actions/SegmentActions'
+import {
+  addSearchResultToSegments,
+  removeSearchResultToSegments,
+} from '../../../../actions/segmentDispatchActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
@@ -148,7 +151,7 @@ let SearchUtils = {
         searchResultsDictionary: clone(this.searchResultsDictionary),
         featuredSearchResult: 0,
       })
-      SegmentActions.addSearchResultToSegments(
+      addSearchResultToSegments(
         this.occurrencesList,
         this.searchResultsDictionary,
         0,
@@ -156,7 +159,7 @@ let SearchUtils = {
       )
       console.log('this.searchResultsDictionary', this.searchResultsDictionary)
     } else {
-      SegmentActions.removeSearchResultToSegments()
+      removeSearchResultToSegments()
       this.resetSearch()
       CatToolActions.storeSearchResults({
         total: 0,
@@ -555,7 +558,7 @@ let SearchUtils = {
     this.searchResultsDictionary = {}
     this.featuredSearchResult = 0
     this.searchSegmentsResult = []
-    SegmentActions.removeSearchResultToSegments()
+    removeSearchResultToSegments()
   },
   /**
    * Close search container
@@ -563,7 +566,7 @@ let SearchUtils = {
   closeSearch: function () {
     this.resetSearch()
     CatToolActions.closeSubHeader()
-    SegmentActions.removeSearchResultToSegments()
+    removeSearchResultToSegments()
 
     CatToolActions.storeSearchResults({
       total: 0,

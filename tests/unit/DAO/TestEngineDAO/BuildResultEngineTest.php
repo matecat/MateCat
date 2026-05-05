@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -14,71 +15,72 @@ use Utils\Registry\AppConfig;
  * Date: 15/04/16
  * Time: 15.59
  */
-class BuildResultEngineTest extends AbstractTest {
+class BuildResultEngineTest extends AbstractTest
+{
 
-    protected $array_param;
-    protected $reflector;
-    protected $method;
+    protected ReflectionMethod $method;
+    protected EngineDAO $engineDao;
 
-
-    public function setUp(): void {
+    /**
+     */
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_buildResult" );
-        
-
-
+        $this->engineDao = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $reflector = new ReflectionClass($this->engineDao);
+        $this->method = $reflector->getMethod("_buildResult");
     }
 
     /**
      * This test builds an engine object from an array that describes the properties
      * @group  regression
      * @covers EngineDAO::_buildResult
+     * @throws ReflectionException
      */
-    public function test_build_result_from_simple_array() {
-
-        $this->array_param = [
-                0 =>
-                        [
-                                'id'                           => "0",
-                                'name'                         => "bar",
-                                'type'                         => "foo",
-                                'description'                  => "No MT",
-                                'base_url'                     => "base/sample",
-                                'translate_relative_url'       => "translate",
-                                'contribute_relative_url'      => "contribute",
-                                'update_relative_url'          => "update",
-                                'delete_relative_url'          => "delete",
-                                'others'                       => "{}",
-                                'class_load'                   => "NONE",
-                                'extra_parameters'             => "",
-                                'google_api_compliant_version' => "1",
-                                'penalty'                      => "100",
-                                'active'                       => "0",
-                                'uid'                          => "5678"
-                        ]
+    #[Test]
+    public function test_build_result_from_simple_array()
+    {
+        $array_param = [
+            0 =>
+                [
+                    'id' => "0",
+                    'name' => "bar",
+                    'type' => "foo",
+                    'description' => "No MT",
+                    'base_url' => "base/sample",
+                    'translate_relative_url' => "translate",
+                    'contribute_relative_url' => "contribute",
+                    'update_relative_url' => "update",
+                    'delete_relative_url' => "delete",
+                    'others' => "{}",
+                    'class_load' => "NONE",
+                    'extra_parameters' => "",
+                    'google_api_compliant_version' => "1",
+                    'penalty' => "100",
+                    'active' => "0",
+                    'uid' => "5678"
+                ]
         ];
 
-        $actual_array_of_engine_structures = $this->method->invoke( $this->databaseInstance, $this->array_param );
-        $actual_engine_struct              = $actual_array_of_engine_structures[ '0' ];
-        $this->assertTrue( $actual_engine_struct instanceof EngineStruct );
+        $actual_array_of_engine_structures = $this->method->invoke($this->engineDao, $array_param);
+        $actual_engine_struct = $actual_array_of_engine_structures['0'];
+        $this->assertTrue($actual_engine_struct instanceof EngineStruct);
 
-        $this->assertEquals( "0", $actual_engine_struct->id );
-        $this->assertEquals( "bar", $actual_engine_struct->name );
-        $this->assertEquals( "foo", $actual_engine_struct->type );
-        $this->assertEquals( "No MT", $actual_engine_struct->description );
-        $this->assertEquals( "base/sample", $actual_engine_struct->base_url );
-        $this->assertEquals( "translate", $actual_engine_struct->translate_relative_url );
-        $this->assertEquals( "contribute", $actual_engine_struct->contribute_relative_url );
-        $this->assertEquals( "update", $actual_engine_struct->update_relative_url );
-        $this->assertEquals( "delete", $actual_engine_struct->delete_relative_url );
-        $this->assertEquals( [], $actual_engine_struct->others );
-        $this->assertEquals( "NONE", $actual_engine_struct->class_load );
-        $this->assertEquals( "", $actual_engine_struct->extra_parameters );
-        $this->assertEquals( "1", $actual_engine_struct->google_api_compliant_version );
-        $this->assertEquals( "100", $actual_engine_struct->penalty );
-        $this->assertEquals( "0", $actual_engine_struct->active );
-        $this->assertEquals( "5678", $actual_engine_struct->uid );
+        $this->assertEquals("0", $actual_engine_struct->id);
+        $this->assertEquals("bar", $actual_engine_struct->name);
+        $this->assertEquals("foo", $actual_engine_struct->type);
+        $this->assertEquals("No MT", $actual_engine_struct->description);
+        $this->assertEquals("base/sample", $actual_engine_struct->base_url);
+        $this->assertEquals("translate", $actual_engine_struct->translate_relative_url);
+        $this->assertEquals("contribute", $actual_engine_struct->contribute_relative_url);
+        $this->assertEquals("update", $actual_engine_struct->update_relative_url);
+        $this->assertEquals("delete", $actual_engine_struct->delete_relative_url);
+        $this->assertEquals([], $actual_engine_struct->others);
+        $this->assertEquals("NONE", $actual_engine_struct->class_load);
+        $this->assertEquals("", $actual_engine_struct->extra_parameters);
+        $this->assertEquals("1", $actual_engine_struct->google_api_compliant_version);
+        $this->assertEquals("100", $actual_engine_struct->penalty);
+        $this->assertEquals("0", $actual_engine_struct->active);
+        $this->assertEquals("5678", $actual_engine_struct->uid);
     }
 }

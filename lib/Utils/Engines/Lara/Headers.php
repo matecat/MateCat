@@ -22,7 +22,7 @@ use Iterator;
  */
 class Headers implements Iterator
 {
-
+    const string LARA_MEMORIES_IDS = 'x-memory-ids';
     /**
      * Header name for the LARA pre-shared key.
      * This constant is used to identify the HTTP header for the pre-shared key.

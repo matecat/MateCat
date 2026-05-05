@@ -27,7 +27,7 @@ class CommentsController extends KleinController
         $this->return404IfTheJobWasDeleted();
 
         $comments = CommentDao::getCommentsForChunk($this->chunk, [
-                'from_id' => $this->request->param('from_id')
+            'from_id' => $this->request->param('from_id')
         ]);
 
         $this->response->json(['comments' => $comments]);

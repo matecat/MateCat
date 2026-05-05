@@ -4,12 +4,13 @@ namespace Utils\Url;
 
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 class JobUrls
 {
 
     // STATUS LABELS
-    const string LABEL_T  = 't';
+    const string LABEL_T = 't';
     const string LABEL_R1 = 'r1';
     const string LABEL_R2 = 'r2';
 
@@ -51,29 +52,29 @@ class JobUrls
     /**
      * JobUrls constructor.
      *
-     * @param int         $jid
-     * @param string      $projectName
-     * @param string      $source
-     * @param string      $target
-     * @param array       $passwords
+     * @param int $jid
+     * @param string $projectName
+     * @param string $source
+     * @param string $target
+     * @param array $passwords
      * @param string|null $httpHost
      * @param string|null $segmentId
      */
     public function __construct(
-            int $jid,
-            string $projectName,
-            string $source,
-            string $target,
-            array $passwords = [],
-            ?string $httpHost = null,
-            ?string $segmentId = null
+        int $jid,
+        string $projectName,
+        string $source,
+        string $target,
+        array $passwords = [],
+        ?string $httpHost = null,
+        ?string $segmentId = null
     ) {
-        $this->jid         = $jid;
+        $this->jid = $jid;
         $this->projectName = $projectName;
-        $this->source      = $source;
-        $this->target      = $target;
-        $this->passwords   = $passwords;
-        $this->segmentId   = $segmentId;
+        $this->source = $source;
+        $this->target = $target;
+        $this->passwords = $passwords;
+        $this->segmentId = $segmentId;
         $this->setUrls($httpHost);
     }
 
@@ -118,7 +119,7 @@ class JobUrls
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->getJobType($sourcePage);
                 $url .= DIRECTORY_SEPARATOR;
-                $url .= $this->projectName;
+                $url .= Utils::friendlySlug($this->projectName);
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->source . '-' . $this->target;
                 $url .= DIRECTORY_SEPARATOR;
@@ -128,7 +129,7 @@ class JobUrls
                     $url .= '#' . $this->segmentId;
                 }
 
-                $this->urls[ $label ] = $url;
+                $this->urls[$label] = $url;
             }
         }
     }
@@ -182,7 +183,7 @@ class JobUrls
      */
     public function getTranslationUrl(): ?string
     {
-        return $this->urls[ self::LABEL_T ] ?? null;
+        return $this->urls[self::LABEL_T] ?? null;
     }
 
     /**
@@ -190,7 +191,7 @@ class JobUrls
      */
     public function getReviseUrl(): ?string
     {
-        return $this->urls[ self::LABEL_R1 ] ?? null;
+        return $this->urls[self::LABEL_R1] ?? null;
     }
 
     /**
@@ -198,7 +199,7 @@ class JobUrls
      */
     public function getRevise2Url(): ?string
     {
-        return $this->urls[ self::LABEL_R2 ] ?? null;
+        return $this->urls[self::LABEL_R2] ?? null;
     }
 
     /**
@@ -238,7 +239,7 @@ class JobUrls
      */
     public function hasReview(): bool
     {
-        return isset($this->urls[ self::LABEL_R1 ]) and !isset($this->urls[ self::LABEL_R2 ]);
+        return isset($this->urls[self::LABEL_R1]) and !isset($this->urls[self::LABEL_R2]);
     }
 
     /**
@@ -246,6 +247,6 @@ class JobUrls
      */
     public function hasSecondPassReview(): bool
     {
-        return isset($this->urls[ self::LABEL_R2 ]);
+        return isset($this->urls[self::LABEL_R2]);
     }
 }

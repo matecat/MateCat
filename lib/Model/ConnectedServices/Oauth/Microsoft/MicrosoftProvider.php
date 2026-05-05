@@ -24,9 +24,9 @@ class MicrosoftProvider extends AbstractProvider
     public static function getClient(?string $redirectUrl = null): Microsoft
     {
         return new Microsoft([
-                'clientId'     => AppConfig::$MICROSOFT_OAUTH_CLIENT_ID,
-                'clientSecret' => AppConfig::$MICROSOFT_OAUTH_CLIENT_SECRET,
-                'redirectUri'  => $redirectUrl ?? AppConfig::$MICROSOFT_OAUTH_REDIRECT_URL,
+            'clientId' => AppConfig::$MICROSOFT_OAUTH_CLIENT_ID,
+            'clientSecret' => AppConfig::$MICROSOFT_OAUTH_CLIENT_SECRET,
+            'redirectUri' => $redirectUrl ?? AppConfig::$MICROSOFT_OAUTH_REDIRECT_URL,
         ]);
     }
 
@@ -38,8 +38,8 @@ class MicrosoftProvider extends AbstractProvider
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
         $options = [
-                'state'  => $csrfTokenState,
-                'prompt' => 'select_account'
+            'state' => $csrfTokenState,
+            'prompt' => 'select_account'
         ];
 
         $microsoftClient = static::getClient($this->redirectUrl);
@@ -60,7 +60,7 @@ class MicrosoftProvider extends AbstractProvider
 
         /** @var AccessToken $token */
         $token = $microsoftClient->getAccessToken('authorization_code', [
-                'code' => $code
+            'code' => $code
         ]);
 
         return $token;
@@ -79,13 +79,13 @@ class MicrosoftProvider extends AbstractProvider
         /** @var MicrosoftResourceOwner $fetched */
         $fetched = $microsoftClient->getResourceOwner($token);
 
-        $user            = new ProviderUser();
-        $user->email     = $fetched->getEmail();
-        $user->name      = $fetched->getFirstname();
-        $user->lastName  = $fetched->getLastname();
-        $user->picture   = null; // profile picture is not publicly accessible
+        $user = new ProviderUser();
+        $user->email = $fetched->getEmail();
+        $user->name = $fetched->getFirstname();
+        $user->lastName = $fetched->getLastname();
+        $user->picture = null; // profile picture is not publicly accessible
         $user->authToken = $token;
-        $user->provider  = self::PROVIDER_NAME;
+        $user->provider = self::PROVIDER_NAME;
 
         return $user;
     }

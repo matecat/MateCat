@@ -31,7 +31,7 @@ test('Placeholders to text', () => {
     'test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0D$## <ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3AmZ3Q7"/> <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/> <ph id="mtc_3" ctype="x-html" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/>pippoL&apos; placeholder &nbsp; ##$_A0$##elle-même'
 
   let resultText =
-    'test tag ph con \uf03d &lt; &gt; \n &amp;lt; \u21E5 &amp;gt; \u00B0 \\r <p> <strong> </strong>pippoL&apos; placeholder &nbsp; \u00B0elle-même'
+    'test tag ph con \uf03d &lt; &gt; \n &amp;lt; \u21E5 &amp;gt; \u00B0 \r <p> <strong> </strong>pippoL&apos; placeholder &nbsp; \u00B0elle-même'
 
   expect(transformTagsToText(text)).toBe(resultText)
 })

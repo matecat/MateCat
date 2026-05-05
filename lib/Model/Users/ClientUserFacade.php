@@ -15,7 +15,7 @@ use Stringable;
 class ClientUserFacade extends stdClass implements Stringable
 {
 
-    public int    $uid;
+    public int $uid;
     public string $email;
     public string $first_name;
     public string $last_name;

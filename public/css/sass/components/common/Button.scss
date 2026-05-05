@@ -32,15 +32,13 @@ a.button-component-container {
     pointer-events: none;
   }
 
-
-
   // Mode modifiers
   &.basic {
     background-color: var(--btnBgColor);
     color: var(--btnTextColor);
 
     &:not(:disabled):hover,
-    &:not(:disabled):focus {
+    &:not(:disabled):focus-visible {
       background-color: var(--btnBgColorAlt);
       color: var(--btnTextColor);
     }
@@ -64,7 +62,7 @@ a.button-component-container {
     }
 
     &:not(:disabled):hover,
-    &:not(:disabled):focus {
+    &:not(:disabled):focus-visible {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColorHover);
@@ -89,17 +87,13 @@ a.button-component-container {
     }
 
     &:not(:disabled):hover,
-    &:not(:disabled):focus {
+    &:not(:disabled):focus-visible {
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColor);
     }
 
     &:disabled {
       color: var(--btnAltTextColorDisabled);
-
-      svg {
-        color: var(--btnAltTextColorDisabled);
-      }
     }
   }
   &.link {
@@ -110,16 +104,12 @@ a.button-component-container {
     }
 
     &:not(:disabled):hover,
-    &:not(:disabled):focus {
+    &:not(:disabled):focus-visible {
       color: colors.$black;
     }
 
     &:disabled {
       color: var(--btnAltTextColorDisabled);
-
-      svg {
-        color: var(--btnAltTextColorDisabled);
-      }
     }
   }
 

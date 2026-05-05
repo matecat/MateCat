@@ -24,13 +24,13 @@ class JSONValidator extends AbstractValidator
      * @var SchemaContract
      */
     private SchemaContract $schemaContract;
-    private bool           $throwExceptions;
+    private bool $throwExceptions;
 
     /**
      * JSONSchemaValidator constructor.
      *
      * @param string $jsonSchema
-     * @param bool   $throwExceptions
+     * @param bool $throwExceptions
      *
      * @throws InvalidValue
      * @throws \Swaggest\JsonSchema\Exception
@@ -43,23 +43,23 @@ class JSONValidator extends AbstractValidator
             $jsonSchema = file_get_contents($jsonSchema);
         }
 
-        $this->schemaContract  = Schema::import(
-                static::getValidJSONSchema($jsonSchema),
-                new Context(
-                        new class implements RemoteRefProvider {
-                            public function getSchemaData($url): object
-                            {
-                                if (is_file($url)) {
-                                    $url = file_get_contents($url);
-                                } elseif (is_file(AppConfig::$ROOT . '/inc/validation/schema/' . $url)) {
-                                    $url = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $url);
-                                }
-
-                                return JSONValidator::getValidJSONSchema($url);
-                            }
-
+        $this->schemaContract = Schema::import(
+            static::getValidJSONSchema($jsonSchema),
+            new Context(
+                new class implements RemoteRefProvider {
+                    public function getSchemaData($url): object
+                    {
+                        if (is_file($url)) {
+                            $url = file_get_contents($url);
+                        } elseif (is_file(AppConfig::$ROOT . '/inc/validation/schema/' . $url)) {
+                            $url = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $url);
                         }
-                )
+
+                        return JSONValidator::getValidJSONSchema($url);
+                    }
+
+                }
+            )
         );
         $this->throwExceptions = $throwExceptions;
     }

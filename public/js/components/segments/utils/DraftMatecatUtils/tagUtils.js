@@ -4,7 +4,32 @@ import {
   tagSignatures,
 } from './tagModel'
 import {Base64} from 'js-base64'
-import TextUtils from '../../../../utils/textUtils'
+// replaceTempTags/restoreTempTags inlined from textUtils to avoid
+// the cycle: SegmentStore → tagUtils → textUtils → commonUtils → SegmentStore
+const replaceTempTags = (text) => {
+  const tags = []
+  const makeid = (len) => {
+    let r = ''
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    for (let i = 0; i < len; i++)
+      r += chars.charAt(Math.floor(Math.random() * chars.length))
+    return r
+  }
+  text = text.replace(
+    /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+    (match) => {
+      const id = makeid(5)
+      tags.push({id, match})
+      return '#_' + id + '_#'
+    },
+  )
+  return {tags, text}
+}
+const restoreTempTags = (tags, text) =>
+  text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
+    const tag = tags.find((item) => item.id === id)
+    return tag ? tag.match : match
+  })
 import {isUndefined} from 'lodash'
 import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
@@ -129,15 +154,35 @@ export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
   return text
 }
 
+export const excludeSomeTagsFromText = (text, excludeTags = []) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, regex, type} = tagSignatures[key]
+      const shouldExcludeTag = excludeTags.some((value) => value === type)
+
+      if (shouldExcludeTag) {
+        const globalRegex = placeholderRegex
+          ? new RegExp(placeholderRegex.source, placeholderRegex.flags + 'g')
+          : new RegExp(regex)
+
+        text = text.replace(globalRegex, '')
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
 export const transformTagsToLexiqaText = (text) => {
   const tagsStruct = matchTagStructure(text).sort((a, b) =>
     a.offset > b.offset ? 1 : -1,
   )
 
   let textNormalized = text
-  const {tags, text: tempText} = TextUtils.replaceTempTags(text)
+  const {tags, text: tempText} = replaceTempTags(text)
   textNormalized = decodeHtmlEntities(tempText)
-  textNormalized = TextUtils.restoreTempTags(tags, textNormalized)
+  textNormalized = restoreTempTags(tags, textNormalized)
 
   return tagsStruct.reduce(
     (acc, {data}) => {
@@ -242,24 +287,91 @@ export const decodePlaceholdersToPlainText = (str) => {
   return str
     ? str
         .replace(
-          config.lfPlaceholderRegex,
+          tagSignatures['lineFeed'].regex,
           tagSignatures['lineFeed'].placeholder,
         )
         .replace(
-          config.crPlaceholderRegex,
+          tagSignatures['carriageReturn'].regex,
           tagSignatures['carriageReturn'].placeholder,
         )
         .replace(
-          config.crlfPlaceholderRegex,
+          tagSignatures['carriageReturn'].regex,
           `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
         )
-        .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
-        .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
+        .replace(tagSignatures['tab'].regex, tagSignatures['tab'].placeholder)
+        .replace(tagSignatures['nbsp'].regex, tagSignatures['nbsp'].placeholder)
+    : str
+}
+export const encodePlaceholdersToTags = (str) => {
+  return str
+    ? str
+        .replaceAll(
+          tagSignatures['lineFeed'].placeholder,
+          tagSignatures['lineFeed'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['carriageReturn'].placeholder,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replaceAll(
+          `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['tab'].placeholder,
+          tagSignatures['tab'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['nbsp'].placeholder,
+          tagSignatures['nbsp'].encodedPlaceholder,
+        )
+    : str
+}
+
+export const decodeTagsToUnicodeChar = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].regex,
+          tagSignatures['lineFeed'].unicodeChar,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regex,
+          tagSignatures['carriageReturn'].unicodeChar,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regex,
+          tagSignatures['carriageReturn'].unicodeChar,
+        )
+        .replace(tagSignatures['tab'].regex, tagSignatures['tab'].unicodeChar)
+        .replace(tagSignatures['nbsp'].regex, tagSignatures['nbsp'].unicodeChar)
+    : str
+}
+
+export const encodeTagsFromUnicodeChar = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].regexUnicodeChar,
+          tagSignatures['lineFeed'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regexUnicodeChar,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['tab'].regexUnicodeChar,
+          tagSignatures['tab'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['nbsp'].regexUnicodeChar,
+          tagSignatures['nbsp'].encodedPlaceholder,
+        )
     : str
 }
 
 export const removePlaceholdersForGlossary = (str) => {
-  return str.replace(config.nbspPlaceholderRegex, ' ')
+  return str.replace(tagSignatures['nbsp'].regex, ' ')
 }
 
 export const decodeHtmlEntities = (text) => {
@@ -276,15 +388,7 @@ export const encodeHtmlEntities = (text) => {
   // .replace(/'/g, '&apos;')
 }
 
-export const getIdAttributeRegEx = () => {
-  return /id="(-?\w+)"/g
-}
 
-/**
- *
- * @param segmentString
- * @returns {*}
- */
 export const removeTagsFromText = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
@@ -293,53 +397,12 @@ export const removeTagsFromText = (segmentString) => {
   return segmentString
 }
 
-/**
- * Checks if the given segment string contains XLIFF tags.
- *
- * @param {string} segmentString - The segment string to check for XLIFF tags.
- * @returns {boolean|string} - Returns `true` if XLIFF tags are found, `false` if not,
- *                             or the original segment string if it is empty.
- */
 export const textHasTags = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
     return regExp.test(segmentString)
   }
   return segmentString
-}
-
-/**
- *
- * @param escapedHTML
- * @returns {string}
- */
-export const unescapeHTMLinTags = (escapedHTML) => {
-  try {
-    return escapedHTML
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-  } catch (e) {
-    return ''
-  }
-}
-
-export const unescapeHTMLRecursive = (escapedHTML) => {
-  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
-
-  try {
-    while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTMLinTags(escapedHTML)
-    }
-  } catch (e) {
-    console.error('Error unescapeHTMLRecursive')
-  }
-
-  return escapedHTML
 }
 
 /**

@@ -11,15 +11,16 @@ use Model\Xliff\DTO\DefaultRule;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
-class DefaultRuleTest extends AbstractTest {
+class DefaultRuleTest extends AbstractTest
+{
 
     /**
      * @test
      * @throws Exception
      */
     #[Test]
-    public function testStateQualifiers() {
-
+    public function testStateQualifiers()
+    {
         $stateQualifiers = [
             'exact-match',
             'id-match',
@@ -32,14 +33,14 @@ class DefaultRuleTest extends AbstractTest {
             'tm-suggestion',
         ];
 
-        foreach ($stateQualifiers as $stateQualifier){
-            $rule = new DefaultRule( [ $stateQualifier ], 'pre-translated' );
+        foreach ($stateQualifiers as $stateQualifier) {
+            $rule = new DefaultRule([$stateQualifier], 'pre-translated');
 
-            $this->assertTrue( $rule->isTranslated( "testo", "traduzione" ) );
-            $this->assertEquals( 'APPROVED', $rule->asEditorStatus() );
-            $this->assertEquals( 'ICE', $rule->asMatchType() );
-            $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
-            $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
+            $this->assertTrue($rule->isTranslated("testo", "traduzione"));
+            $this->assertEquals('APPROVED', $rule->asEditorStatus());
+            $this->assertEquals('ICE', $rule->asMatchType());
+            $this->assertEquals(1, $rule->asStandardWordCount(1, ['ICE' => 100]));
+            $this->assertEquals(1, $rule->asEquivalentWordCount(1, ['ICE' => 100]));
         }
 
         $stateQualifiers = [
@@ -50,13 +51,13 @@ class DefaultRuleTest extends AbstractTest {
             'mt-suggestion',
         ];
 
-        foreach ($stateQualifiers as $stateQualifier){
-            $rule = new DefaultRule( [ $stateQualifier ], 'pre-translated' );
+        foreach ($stateQualifiers as $stateQualifier) {
+            $rule = new DefaultRule([$stateQualifier], 'pre-translated');
 
-            $this->assertEquals( 'NEW', $rule->asEditorStatus() );
-            $this->assertEquals( 'ICE', $rule->asMatchType() );
-            $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
-            $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
+            $this->assertEquals('NEW', $rule->asEditorStatus());
+            $this->assertEquals('ICE', $rule->asMatchType());
+            $this->assertEquals(1, $rule->asStandardWordCount(1, ['ICE' => 100]));
+            $this->assertEquals(1, $rule->asEquivalentWordCount(1, ['ICE' => 100]));
         }
     }
 
@@ -65,17 +66,16 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testTranslatedWithState() {
-
+    public function testTranslatedWithState()
+    {
         // needs-review-adaptation is considered translated
-        $rule = new DefaultRule( [ 'needs-review-adaptation' ], 'pre-translated' );
+        $rule = new DefaultRule(['needs-review-adaptation'], 'pre-translated');
 
-        $this->assertTrue( $rule->isTranslated( "testo", "traduzione" ) );
-        $this->assertEquals( 'TRANSLATED', $rule->asEditorStatus() );
-        $this->assertEquals( 'ICE', $rule->asMatchType() );
-        $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
-        $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
-
+        $this->assertTrue($rule->isTranslated("testo", "traduzione"));
+        $this->assertEquals('TRANSLATED', $rule->asEditorStatus());
+        $this->assertEquals('ICE', $rule->asMatchType());
+        $this->assertEquals(1, $rule->asStandardWordCount(1, ['ICE' => 100]));
+        $this->assertEquals(1, $rule->asEquivalentWordCount(1, ['ICE' => 100]));
     }
 
     /**
@@ -83,16 +83,15 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testTranslatedWithStateQualifier() {
+    public function testTranslatedWithStateQualifier()
+    {
+        $rule = new DefaultRule(['translated'], 'pre-translated');
 
-        $rule = new DefaultRule( [ 'translated' ], 'pre-translated' );
-
-        $this->assertTrue( $rule->isTranslated( "testo", "traduzione" ) );
-        $this->assertEquals( 'TRANSLATED', $rule->asEditorStatus() );
-        $this->assertEquals( 'ICE', $rule->asMatchType() );
-        $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
-        $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
-
+        $this->assertTrue($rule->isTranslated("testo", "traduzione"));
+        $this->assertEquals('TRANSLATED', $rule->asEditorStatus());
+        $this->assertEquals('ICE', $rule->asMatchType());
+        $this->assertEquals(1, $rule->asStandardWordCount(1, ['ICE' => 100]));
+        $this->assertEquals(1, $rule->asEquivalentWordCount(1, ['ICE' => 100]));
     }
 
     /**
@@ -100,16 +99,15 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testTranslatedWithNoStates_old_behaviour() {
+    public function testTranslatedWithNoStates_old_behaviour()
+    {
+        $rule = new DefaultRule([], 'pre-translated');
 
-        $rule = new DefaultRule( [], 'pre-translated' );
-
-        $this->assertTrue( $rule->isTranslated( "testo", "traduzione" ) );
-        $this->assertEquals( 'APPROVED', $rule->asEditorStatus() );
-        $this->assertEquals( 'ICE', $rule->asMatchType() );
-        $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
-        $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
-
+        $this->assertTrue($rule->isTranslated("testo", "traduzione"));
+        $this->assertEquals('APPROVED', $rule->asEditorStatus());
+        $this->assertEquals('ICE', $rule->asMatchType());
+        $this->assertEquals(1, $rule->asStandardWordCount(1, ['ICE' => 100]));
+        $this->assertEquals(1, $rule->asEquivalentWordCount(1, ['ICE' => 100]));
     }
 
     /**
@@ -117,12 +115,11 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testNewWithNoStates_old_behaviour() {
+    public function testNewWithNoStates_old_behaviour()
+    {
+        $rule = new DefaultRule([], 'pre-translated');
 
-        $rule = new DefaultRule( [], 'pre-translated' );
-
-        $this->assertFalse( $rule->isTranslated( "testo", "testo" ) );
-
+        $this->assertFalse($rule->isTranslated("testo", "testo"));
     }
 
     /**
@@ -130,14 +127,13 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testNew_exception() {
+    public function testNew_exception()
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage("DefaultRule is designed to be pre-translated only.");
+        $this->expectExceptionCode(500);
 
-        $this->expectException( LogicException::class );
-        $this->expectExceptionMessage( "DefaultRule is designed to be pre-translated only." );
-        $this->expectExceptionCode( 500 );
-
-        new DefaultRule( [], 'new' );
-
+        new DefaultRule([], 'new');
     }
 
     /**
@@ -145,12 +141,11 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testNewWithStateQualifier() {
+    public function testNewWithStateQualifier()
+    {
+        $rule = new DefaultRule(['fuzzy-match'], 'pre-translated');
 
-        $rule = new DefaultRule( [ 'fuzzy-match' ], 'pre-translated' );
-
-        $this->assertFalse( $rule->isTranslated( "testo", "traduzione" ) );
-
+        $this->assertFalse($rule->isTranslated("testo", "traduzione"));
     }
 
     /**
@@ -158,12 +153,11 @@ class DefaultRuleTest extends AbstractTest {
      * @throws Exception
      */
     #[Test]
-    public function testNewWithState() {
+    public function testNewWithState()
+    {
+        $rule = new DefaultRule(['initial'], 'pre-translated');
 
-        $rule = new DefaultRule( [ 'initial' ], 'pre-translated' );
-
-        $this->assertFalse( $rule->isTranslated( "testo", "traduzione" ) );
-
+        $this->assertFalse($rule->isTranslated("testo", "traduzione"));
     }
 
 }

@@ -1,6 +1,8 @@
 <?php
 
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -12,16 +14,19 @@ use Utils\Registry\AppConfig;
  * Date: 12/04/16
  * Time: 16.22
  */
-class CloseTest extends AbstractTest {
+class CloseTest extends AbstractTest
+{
 
-    protected $databaseInstance;
+    protected IDatabase $databaseInstance;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
     }
 
@@ -31,16 +36,16 @@ class CloseTest extends AbstractTest {
      * @covers \Model\DataAccess\Database::close
      * @throws ReflectionException
      */
-    public function test_close() {
-
+    #[Test]
+    public function test_close()
+    {
         $this->databaseInstance->close();
 
-        $reflector  = new ReflectionClass( $this->databaseInstance );
-        $connection = $reflector->getProperty( 'connection' );
-        
-        $current_value = $connection->getValue( $this->databaseInstance );
-        $this->assertNull( $current_value );
+        $reflector = new ReflectionClass($this->databaseInstance);
+        $connection = $reflector->getProperty('connection');
 
+        $current_value = $connection->getValue($this->databaseInstance);
+        $this->assertNull($current_value);
     }
 
 }

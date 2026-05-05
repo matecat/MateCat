@@ -72,16 +72,16 @@ class JobsWorker extends AbstractWorker
 
         $segments = $jDao->getAllModifiedSegmentsForPee($jobStruct);
 
-        $Pee_weighted       = 0;
+        $Pee_weighted = 0;
         $total_time_to_edit = 0;
         foreach ($segments as $segment) {
-            $segment->target_language_code = $jobStruct->target; //Add language to tell to TMS_MATCH if this is a CJK
-            $Pee_weighted                  += $segment->getPEE() * $segment->raw_word_count;
-            $total_time_to_edit            += $segment->time_to_edit;
+            $segment->target_language = $jobStruct->target; //Add language to tell to TMS_MATCH if this is a CJK
+            $Pee_weighted += $segment->getPEE() * $segment->raw_word_count;
+            $total_time_to_edit += $segment->time_to_edit;
         }
 
         $jobStruct->avg_post_editing_effort = $Pee_weighted;
-        $jobStruct->total_time_to_edit      = $total_time_to_edit;
+        $jobStruct->total_time_to_edit = $total_time_to_edit;
 
         $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $jobStruct->password . " AvgPee: " . $Pee_weighted . " ***** ");
 

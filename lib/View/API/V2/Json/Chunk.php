@@ -24,14 +24,14 @@ class Chunk extends Job
      */
     public function renderOne(JobStruct $chunk): array
     {
-        $project    = $chunk->getProject();
+        $project = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
         return [
-                'job' => [
-                        'id'     => (int)$chunk->id,
-                        'chunks' => [$this->renderItem($chunk, $project, $featureSet)]
-                ]
+            'job' => [
+                'id' => (int)$chunk->id,
+                'chunks' => [$this->renderItem($chunk, $project, $featureSet)]
+            ]
         ];
     }
 

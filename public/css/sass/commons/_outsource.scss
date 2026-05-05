@@ -1,4 +1,4 @@
-@use "../commons/colors";
+@use '../commons/colors';
 .after-open-outsource {
   border-left: 2px solid colors.$translatedBlue;
   padding-left: 13px !important;
@@ -13,16 +13,28 @@
   //box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
   //overflow: hidden;
   .outsource-header {
+    display: flex !important;
+    background-color: white;
+    gap: 20px;
+    align-items: center;
     padding: 5px 35px 5px 40px !important;
     z-index: 1;
     .job-id {
+      color: #969696;
     }
     .source-target {
+      display: flex;
+      font-weight: bold;
+
       .source-box,
       .target-box {
         width: unset !important;
         max-width: unset !important;
         font-size: 18px;
+      }
+
+      .in-to {
+        margin: 2px 0 0 6px;
       }
     }
     .job-payable {
@@ -30,7 +42,6 @@
       padding: 0 0 0 10px !important;
       line-height: 30px;
       position: relative;
-      top: 2px;
       text-decoration: none !important;
       font-weight: 700;
       font-size: 16px;
@@ -118,7 +129,6 @@
     position: relative;
     width: 160px;
     .gmt-select {
-
       /*min-width: 107px !important;
       width: auto;
       background: transparent;
@@ -232,7 +242,7 @@
               }
               input[type='text'],
               input[type='email'],
-              span.select{
+              span.select {
                 box-shadow: inset 0 1px 3px #ddd;
                 border: 1px solid #ccc;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -768,7 +778,6 @@
                 left: -10px;
               }
             }
-
           }
           @media only screen and (max-width: 1199px) and (min-width: 992px) {
             width: 21%;
@@ -1150,7 +1159,6 @@
                 height: 95px;
               }
             }
-
           }
           .order-button-outsource {
             .open-order,

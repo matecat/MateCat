@@ -50,10 +50,10 @@ class Cart
     public static function getInstance(string $cartName): Cart
     {
         if (!array_key_exists($cartName, self::$_instance)) {
-            self::$_instance[ $cartName ] = new Cart($cartName);
+            self::$_instance[$cartName] = new Cart($cartName);
         }
 
-        return self::$_instance[ $cartName ];
+        return self::$_instance[$cartName];
     }
 
     /**
@@ -65,10 +65,10 @@ class Cart
     protected function __construct(string $cartName)
     {
         $this->cartName = $cartName;
-        if (!isset ($_SESSION[ $this->cartName ])) {
-            $_SESSION[ $this->cartName ] = [];
+        if (!isset ($_SESSION[$this->cartName])) {
+            $_SESSION[$this->cartName] = [];
         }
-        $this->cart =& $_SESSION[ $this->cartName ];
+        $this->cart =& $_SESSION[$this->cartName];
     }
 
     /**
@@ -80,31 +80,31 @@ class Cart
      */
     public function addItem(AbstractItem $item): void
     {
-        if (!isset($item[ 'id' ]) || $item[ 'id' ] == null) {
+        if (!isset($item['id']) || $item['id'] == null) {
             throw new LogicException("Field 'id' in object " . get_class($item) . " is mandatory.");
         }
 
-        if (!isset($item[ 'quantity' ]) || $item[ 'quantity' ] == null) {
+        if (!isset($item['quantity']) || $item['quantity'] == null) {
             throw new LogicException("Field 'quantity' in object " . get_class($item) . " is mandatory.");
         }
 
-        if (!isset($item[ 'price' ]) || $item[ 'price' ] == null) {
+        if (!isset($item['price']) || $item['price'] == null) {
             throw new LogicException("Field 'price' in object " . get_class($item) . " is mandatory.");
         }
 
-        $item_id = $item[ 'id' ];
+        $item_id = $item['id'];
 
         $Add = true;
         foreach ($this->cart as $key => $_item) {
-            if ($_item[ 'id' ] == $item_id) {
-                $this->cart[ $key ][ 'quantity' ] += (int)$item[ 'quantity' ];
-                $this->cart[ $key ][ 'price' ]    += floatval($item[ 'price' ]);
-                $Add                              = false;
+            if ($_item['id'] == $item_id) {
+                $this->cart[$key]['quantity'] += (int)$item['quantity'];
+                $this->cart[$key]['price'] += floatval($item['price']);
+                $Add = false;
             }
         }
 
         if ($Add) {
-            $this->cart[ $item_id ] = $item->getStorage();
+            $this->cart[$item_id] = $item->getStorage();
         }
     }
 
@@ -140,7 +140,7 @@ class Cart
     public function getItem(string $item_id): ?AbstractItem
     {
         if (array_key_exists($item_id, $this->cart)) {
-            return AbstractItem::getInflate($this->cart[ $item_id ]);
+            return AbstractItem::getInflate($this->cart[$item_id]);
         }
 
         return null;
@@ -154,8 +154,8 @@ class Cart
     public function delItem(string $item_id): void
     {
         foreach ($this->cart as $key => $item) {
-            if (str_contains($item[ 'id' ], $item_id)) {
-                unset ($this->cart[ $key ]);
+            if (str_contains($item['id'], $item_id)) {
+                unset ($this->cart[$key]);
             }
         }
     }
@@ -177,8 +177,8 @@ class Cart
     public function deleteCart(): void
     {
         unset ($this->cart);
-        unset ($_SESSION[ $this->cartName ]);
-        unset(self::$_instance[ $this->cartName ]);
+        unset ($_SESSION[$this->cartName]);
+        unset(self::$_instance[$this->cartName]);
     }
 
     /**
@@ -190,7 +190,7 @@ class Cart
     {
         $_cart = $this->cart;
         foreach ($_cart as $k => $v) {
-            unset($_cart[ $k ][ '_id_type_class' ]);
+            unset($_cart[$k]['_id_type_class']);
         }
 
         return $_cart;
@@ -205,7 +205,7 @@ class Cart
      */
     public static function issetCart(string $cart_name): bool
     {
-        if (empty($_SESSION[ $cart_name ])) {
+        if (empty($_SESSION[$cart_name])) {
             return false;
         }
 

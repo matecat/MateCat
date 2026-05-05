@@ -32,10 +32,10 @@ class IntentoStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'apikey'           => "",
-            'provider'         => "",
-            'providerkey'      => "",
-            'providercategory' => ""
+        'apikey' => "",
+        'provider' => "",
+        'providerkey' => "",
+        'providercategory' => ""
     ];
 
     /**

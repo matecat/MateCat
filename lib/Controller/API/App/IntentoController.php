@@ -33,12 +33,12 @@ class IntentoController extends KleinController
      */
     public function routingList(): void
     {
-        $engineId   = $this->request->param("engineId");
-        $engine     = new EngineStruct();
+        $engineId = $this->request->param("engineId");
+        $engine = new EngineStruct();
         $engine->id = $engineId;
 
-        $engineDAO        = new EngineDAO(Database::obtain());
-        $engineStruct     = $engineDAO->setCacheTTL(60 * 60 * 5)->read($engine)[ 0 ] ?: throw new UnexpectedValueException('Engine ID is not valid');
+        $engineDAO = new EngineDAO(Database::obtain());
+        $engineStruct = $engineDAO->setCacheTTL(60 * 60 * 5)->read($engine)[0] ?: throw new UnexpectedValueException('Engine ID is not valid');
         $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
 
         $newTestCreatedMT instanceof Intento || throw new UnexpectedValueException('Engine is not of Intento type');

@@ -38,20 +38,20 @@ class GetTranslationMismatchesController extends KleinController
     {
         $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
 
-        $this->featureSet->loadForProject(ProjectDao::findByJobId($this->params[ 'id_job' ], 60 * 60));
+        $this->featureSet->loadForProject(ProjectDao::findByJobId($this->params['id_job'], 60 * 60));
         $parsedIdSegment = $this->parseIdSegment($id_segment);
 
-        if ($parsedIdSegment[ 'id_segment' ] == '') {
-            $parsedIdSegment[ 'id_segment' ] = 0;
+        if ($parsedIdSegment['id_segment'] == '') {
+            $parsedIdSegment['id_segment'] = 0;
         }
 
-        $sDao                   = new SegmentDao();
-        $Translation_mismatches = $sDao->setCacheTTL(60 /* 1 minutes cache */)->getTranslationsMismatches($this->params[ 'id_job' ], $this->params[ 'password' ], $parsedIdSegment[ 'id_segment' ]);
+        $sDao = new SegmentDao();
+        $Translation_mismatches = $sDao->setCacheTTL(60 /* 1 minutes cache */)->getTranslationsMismatches($this->params['id_job'], $this->params['password'], $parsedIdSegment['id_segment']);
 
         $this->response->json([
-                'errors' => [],
-                'code'   => 1,
-                'data'   => (new SegmentTranslationMismatches($Translation_mismatches, $this->chunk, count($Translation_mismatches), $this->featureSet))->render()
+            'errors' => [],
+            'code' => 1,
+            'data' => (new SegmentTranslationMismatches($Translation_mismatches, $this->chunk, count($Translation_mismatches), $this->featureSet))->render()
         ]);
     }
 

@@ -8,11 +8,11 @@ use JsonSerializable;
 class Yaml implements IDto, JsonSerializable
 {
 
-    private array   $translate_keys        = [];
-    private array   $do_not_translate_keys = [];
-    private array   $context_keys          = [];
-    private array   $character_limit       = [];
-    private ?string $inner_content_type    = null;
+    private array $translate_keys = [];
+    private array $do_not_translate_keys = [];
+    private array $context_keys = [];
+    private array $character_limit = [];
+    private ?string $inner_content_type = null;
 
     /**
      * @param array $translate_keys
@@ -36,17 +36,19 @@ class Yaml implements IDto, JsonSerializable
     public function setInnerContentType(?string $inner_content_type): void
     {
         $mimeTypes = [
-                'text/html',
-                'text/xml',
-                'application/xml',
-                'text/csv',
-                'application/json',
-                'text/markdown',
-                'text/x-markdown',
+            'text/html',
+            'text/xml',
+            'application/xml',
+            'text/csv',
+            'application/json',
+            'text/markdown',
+            'text/x-markdown',
         ];
 
         if (!in_array($inner_content_type, $mimeTypes)) {
-            throw new DomainException("YAML Inner content type not valid. Allowed values: ['text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']");
+            throw new DomainException(
+                "YAML Inner content type not valid. Allowed values: ['text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']"
+            );
         }
 
         $this->inner_content_type = $inner_content_type;
@@ -73,24 +75,24 @@ class Yaml implements IDto, JsonSerializable
      */
     public function fromArray(array $data): void
     {
-        if (isset($data[ 'translate_keys' ])) {
-            $this->setTranslateKeys($data[ 'translate_keys' ]);
+        if (isset($data['translate_keys'])) {
+            $this->setTranslateKeys($data['translate_keys']);
         }
 
-        if (isset($data[ 'do_not_translate_keys' ])) {
-            $this->setDoNotTranslateKeys($data[ 'do_not_translate_keys' ]);
+        if (isset($data['do_not_translate_keys'])) {
+            $this->setDoNotTranslateKeys($data['do_not_translate_keys']);
         }
 
-        if (isset($data[ 'inner_content_type' ])) {
-            $this->setInnerContentType($data[ 'inner_content_type' ]);
+        if (isset($data['inner_content_type'])) {
+            $this->setInnerContentType($data['inner_content_type']);
         }
 
-        if (isset($data[ 'context_keys' ])) {
-            $this->setContextKeys($data[ 'context_keys' ]);
+        if (isset($data['context_keys'])) {
+            $this->setContextKeys($data['context_keys']);
         }
 
-        if (isset($data[ 'character_limit' ])) {
-            $this->setCharacterLimit($data[ 'character_limit' ]);
+        if (isset($data['character_limit'])) {
+            $this->setCharacterLimit($data['character_limit']);
         }
     }
 
@@ -101,16 +103,16 @@ class Yaml implements IDto, JsonSerializable
     {
         $format = [];
 
-        $format[ 'translate_keys' ] = $this->translate_keys;
+        $format['translate_keys'] = $this->translate_keys;
 
         if (!empty($this->do_not_translate_keys)) {
-            $format[ 'do_not_translate_keys' ] = $this->do_not_translate_keys;
-            unset($format[ 'translate_keys' ]);
+            $format['do_not_translate_keys'] = $this->do_not_translate_keys;
+            unset($format['translate_keys']);
         }
 
-        $format[ 'inner_content_type' ] = $this->inner_content_type;
-        $format[ 'context_keys' ]       = $this->context_keys;
-        $format[ 'character_limit' ]    = $this->character_limit;
+        $format['inner_content_type'] = $this->inner_content_type;
+        $format['context_keys'] = $this->context_keys;
+        $format['character_limit'] = $this->character_limit;
 
         return $format;
     }

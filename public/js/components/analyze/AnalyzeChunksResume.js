@@ -16,6 +16,9 @@ import {
 } from '../../constants/Constants'
 import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
+import Split from '../../../img/icons/Split'
+import Merge from '../../../img/icons/Merge'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -222,7 +225,7 @@ class AnalyzeChunksResume extends React.Component {
                       ref={(el) => (this.jobLinkRef[jidChunk] = el)}
                       type="text"
                       readOnly
-                      value={chunkAnalysis.urls.t}
+                      value={encodeURI(chunkAnalysis.urls.t)}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Popup
@@ -323,7 +326,7 @@ class AnalyzeChunksResume extends React.Component {
                       className="merge ui blue basic button"
                       onClick={this.openMergeModal(jobsAnalysis[indexJob].id)}
                     >
-                      <i className="icon-compress icon" />
+                      <Merge size={18} />
                       Merge
                     </div>
                   </div>
@@ -387,7 +390,7 @@ class AnalyzeChunksResume extends React.Component {
                       <input
                         type="text"
                         readOnly
-                        value={chunkAnalysis.urls.t}
+                        value={encodeURI(chunkAnalysis.urls.t)}
                         ref={(el) =>
                           (this.jobLinkRef[jobsAnalysis[indexJob].id] = el)
                         }
@@ -443,7 +446,7 @@ class AnalyzeChunksResume extends React.Component {
                             jobsAnalysis[indexJob].id,
                           )}
                         >
-                          <i className="icon-expand icon" />
+                          <Split size={18} />
                           Split
                         </div>
                       ) : null}
@@ -571,8 +574,11 @@ class AnalyzeChunksResume extends React.Component {
                 <div className="title-standard-words">
                   <h5>
                     Industry weighted
-                    <span data-tooltip="As counted by other CAT tools: no discount applied for machine-translation words.">
-                      <i className="icon-info icon" />
+                    <span
+                      className="title-standard-words-help-icon"
+                      data-tooltip="No discount applied for machine-translated words"
+                    >
+                      <HelpCircle />
                     </span>
                   </h5>
                 </div>

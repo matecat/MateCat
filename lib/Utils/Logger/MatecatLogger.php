@@ -14,6 +14,7 @@
 namespace Utils\Logger;
 
 use Exception;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -81,6 +82,19 @@ class MatecatLogger implements LoggerInterface
     public function withName(string $name): MatecatLogger
     {
         return new MatecatLogger($this->logger->withName($name));
+    }
+
+
+    /**
+     * Adds a handler to the logger's handler stack.
+     *
+     * @param HandlerInterface $handler The handler to be added to the logger.
+     *
+     * @return void
+     */
+    public function pushHandler(HandlerInterface $handler): void
+    {
+        $this->logger->pushHandler($handler);
     }
 
     /**
@@ -168,7 +182,7 @@ class MatecatLogger implements LoggerInterface
      * using the Monolog logger. If an exception occurs during the logging process,
      * the log data is written to a fallback file.
      *
-     * @param mixed $level   The log level (e.g., DEBUG, INFO, ERROR).
+     * @param mixed $level The log level (e.g., DEBUG, INFO, ERROR).
      * @param mixed $message The message to log. Can be a string, array, or object.
      * @param array $context Additional context to include with the log. Defaults to an empty array.
      *
@@ -180,13 +194,13 @@ class MatecatLogger implements LoggerInterface
 
         try {
             // Log the formatted message and context using the Monolog logger.
-            $this->logger->log($level, $r[ 'message' ], $r[ 'context' ]);
+            $this->logger->log($level, $r['message'], $r['context']);
         } catch (Exception) {
             // If logging fails, write the log data to a fallback file.
             file_put_contents(
-                    self::getFileNamePath('logging_configuration_exception.log'),
-                    json_encode($r) . PHP_EOL,
-                    FILE_APPEND
+                self::getFileNamePath('logging_configuration_exception.log'),
+                json_encode($r) . PHP_EOL,
+                FILE_APPEND
             );
         }
     }

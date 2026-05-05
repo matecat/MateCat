@@ -70,6 +70,7 @@ const SegmentConstants = keyMirror({
   UPDATE_GLOBAL_WARNINGS: null,
   QA_LEXIQA_ISSUES: null,
   LOCK_EDIT_AREA: null,
+  UNLOCK_EDIT_AREA: null,
   OPEN_TAGS_MENU: null,
   CLOSE_TAGS_MENU: null,
   SET_OPEN_SEGMENT: null,
@@ -115,5 +116,10 @@ const SegmentConstants = keyMirror({
   REFRESH_TAG_MAP: null,
   CHANGE_CHARACTERS_COUNTER_RULES: null,
   SET_CURRENT_SEGMENT_ID: null,
+  LARA_STYLES: null,
+  AI_ALTERNATIVES: null,
+  AI_FEEDBACK: null,
+  AI_ALTERNATIVES_SUGGESTION: null,
+  AI_FEEDBACK_SUGGESTION: null,
 })
 export default SegmentConstants

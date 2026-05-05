@@ -8,13 +8,13 @@ use Model\DataAccess\IDaoStruct;
 class CategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int   $id = null;
+    public ?int $id = null;
     public string $severities;
 
-    public int     $id_model;
-    public ?int    $id_parent = null;
-    public string  $label;
-    public ?string $options   = null;
+    public int $id_model;
+    public ?int $id_parent = null;
+    public string $label;
+    public ?string $options = null;
 
     /**
      * @return mixed
@@ -28,15 +28,15 @@ class CategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct
     {
         $result = $this->toArray();
 
-        $severities      = json_decode($this->severities, true);
+        $severities = json_decode($this->severities, true);
         $severitiesArray = [];
 
         foreach ($severities as $index => $severity) {
-            $severitiesArray[ $index ] = array_merge(['id' => null], $severity);
+            $severitiesArray[$index] = array_merge(['id' => null], $severity);
         }
 
-        $result[ 'severities' ] = $severitiesArray;
-        $result[ 'options' ]    = json_decode($this->options, true);
+        $result['severities'] = $severitiesArray;
+        $result['options'] = json_decode($this->options, true);
 
         return $result;
     }

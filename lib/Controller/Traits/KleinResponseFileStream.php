@@ -43,9 +43,9 @@ class KleinResponseFileStream
      * the file's data
      *
      * @param resource $filePointer The pointer to the file to send
-     * @param string   $filename    The file's name
-     * @param string   $mimeType
-     * @param string   $disposition
+     * @param string $filename The file's name
+     * @param string $mimeType
+     * @param string $disposition
      *
      * @internal param KleinController $controller The MIME type of the file
      */

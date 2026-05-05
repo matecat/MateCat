@@ -10,7 +10,7 @@ class CSV
 {
     /**
      * @param UploadElement $file
-     * @param string        $prefix
+     * @param string $prefix
      *
      * @return false|string
      * @throws Exception
@@ -26,10 +26,10 @@ class CSV
         $objReader = IOFactory::createReaderForFile($file->file_path);
 
         $objPHPExcel = $objReader->load($file->file_path);
-        $objWriter   = new \PhpOffice\PhpSpreadsheet\Writer\Csv($objPHPExcel);
+        $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Csv($objPHPExcel);
         $objWriter->save($tmpFileName);
 
-        $oldPath         = $file->file_path;
+        $oldPath = $file->file_path;
         $file->file_path = $tmpFileName;
 
         unlink($oldPath);
@@ -71,7 +71,7 @@ class CSV
 
     /**
      * @param string $filepath
-     * @param array  $data
+     * @param array $data
      *
      * @return bool
      */

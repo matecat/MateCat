@@ -42,7 +42,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController
     public function forgotPassword(): void
     {
         $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5);
-        $checkRateLimitIp    = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
+        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
 
         if ($checkRateLimitIp instanceof Response) {
             $this->response = $checkRateLimitIp;
@@ -57,21 +57,21 @@ class ForgotPasswordController extends AbstractStatefulKleinController
         }
 
         $filtered = filter_var_array(
-                [
-                        'email'      => $this->request->param('email'),
-                        'wanted_url' => $this->request->param('wanted_url')
-                ],
-                [
-                        'email'      => FILTER_SANITIZE_EMAIL,
-                        'wanted_url' => [
-                                'filter'  => FILTER_CALLBACK,
-                                'options' => function ($wanted_url) {
-                                    $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
+            [
+                'email' => $this->request->param('email'),
+                'wanted_url' => $this->request->param('wanted_url')
+            ],
+            [
+                'email' => FILTER_SANITIZE_EMAIL,
+                'wanted_url' => [
+                    'filter' => FILTER_CALLBACK,
+                    'options' => function ($wanted_url) {
+                        $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
 
-                                    return parse_url($wanted_url)[ 'host' ] != parse_url(AppConfig::$HTTPHOST)[ 'host' ] ? AppConfig::$HTTPHOST : $wanted_url;
-                                }
-                        ]
+                        return parse_url($wanted_url)['host'] != parse_url(AppConfig::$HTTPHOST)['host'] ? AppConfig::$HTTPHOST : $wanted_url;
+                    }
                 ]
+            ]
         );
 
         $signupModel = new SignupModel($filtered, $_SESSION);
@@ -81,11 +81,11 @@ class ForgotPasswordController extends AbstractStatefulKleinController
         $this->incrementRateLimitCounter($this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password');
         $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password');
 
-        $this->response->code($doForgotPassword[ 'code' ]);
+        $this->response->code($doForgotPassword['code']);
         $this->response->json([
-                'email'      => $signupModel->getParams()[ 'email' ],
-                'wanted_url' => $signupModel->getParams()[ 'wanted_url' ],
-                'errors'     => $doForgotPassword[ 'errors' ],
+            'email' => $signupModel->getParams()['email'],
+            'wanted_url' => $signupModel->getParams()['wanted_url'],
+            'errors' => $doForgotPassword['errors'],
         ]);
     }
 
@@ -134,8 +134,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     public function setNewPassword(): void
     {
-        $reset                 = new PasswordResetModel($_SESSION);
-        $new_password          = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $reset = new PasswordResetModel($_SESSION);
+        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
         $password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
         $this->validatePasswordRequirements($new_password, $password_confirmation);
         $reset->resetPassword($new_password);
@@ -155,29 +155,29 @@ class ForgotPasswordController extends AbstractStatefulKleinController
     {
         $params = $signupModel->getParams();
 
-        $email      = $params[ 'email' ];
-        $wanted_url = $params[ 'wanted_url' ];
-        $errors     = [];
-        $code       = 200;
+        $email = $params['email'];
+        $wanted_url = $params['wanted_url'];
+        $errors = [];
+        $code = 200;
 
         if (!$email) {
             $errors[] = 'email is a mandatory field.';
-            $code     = 400;
+            $code = 400;
         }
 
         if (!$wanted_url) {
             $errors[] = 'wanted_url is a mandatory field.';
-            $code     = 400;
+            $code = 400;
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'email is not valid.';
-            $code     = 400;
+            $code = 400;
         }
 
         if (!filter_var($wanted_url, FILTER_VALIDATE_URL)) {
             $errors[] = 'wanted_url is not a valid URL.';
-            $code     = 400;
+            $code = 400;
         }
 
         if (empty($errors)) {
@@ -185,8 +185,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController
         }
 
         return [
-                'errors' => $errors,
-                'code'   => $code,
+            'errors' => $errors,
+            'code' => $code,
         ];
     }
 

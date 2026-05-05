@@ -7,10 +7,10 @@ use JsonSerializable;
 class MSPowerpoint implements IDto, JsonSerializable
 {
 
-    private bool  $extract_doc_properties = false;
-    private bool  $extract_hidden_slides  = false;
-    private bool  $extract_notes          = true;
-    private array $translate_slides       = [];
+    private bool $extract_doc_properties = false;
+    private bool $extract_hidden_slides = false;
+    private bool $extract_notes = true;
+    private array $translate_slides = [];
 
     /**
      * @param bool|null $extract_doc_properties
@@ -49,20 +49,20 @@ class MSPowerpoint implements IDto, JsonSerializable
      */
     public function fromArray(array $data): void
     {
-        if (isset($data[ 'extract_doc_properties' ])) {
-            $this->setExtractDocProperties($data[ 'extract_doc_properties' ]);
+        if (isset($data['extract_doc_properties'])) {
+            $this->setExtractDocProperties($data['extract_doc_properties']);
         }
 
-        if (isset($data[ 'extract_hidden_slides' ])) {
-            $this->setExtractHiddenSlides($data[ 'extract_hidden_slides' ]);
+        if (isset($data['extract_hidden_slides'])) {
+            $this->setExtractHiddenSlides($data['extract_hidden_slides']);
         }
 
-        if (isset($data[ 'translate_slides' ])) {
-            $this->setTranslateSlides($data[ 'translate_slides' ]);
+        if (isset($data['translate_slides'])) {
+            $this->setTranslateSlides($data['translate_slides']);
         }
 
-        if (isset($data[ 'extract_notes' ])) {
-            $this->setExtractNotes($data[ 'extract_notes' ]);
+        if (isset($data['extract_notes'])) {
+            $this->setExtractNotes($data['extract_notes']);
         }
     }
 
@@ -73,13 +73,13 @@ class MSPowerpoint implements IDto, JsonSerializable
     {
         $format = [];
 
-        $format[ 'extract_doc_properties' ] = $this->extract_doc_properties;
-        $format[ 'translate_slides' ]       = $this->translate_slides;
-        $format[ 'extract_notes' ]          = $this->extract_notes;
+        $format['extract_doc_properties'] = $this->extract_doc_properties;
+        $format['translate_slides'] = $this->translate_slides;
+        $format['extract_notes'] = $this->extract_notes;
 
         if (!empty($this->extract_hidden_slides)) {
-            $format[ 'extract_hidden_slides' ] = $this->extract_hidden_slides;
-            unset($format[ 'translate_slides' ]);
+            $format['extract_hidden_slides'] = $this->extract_hidden_slides;
+            unset($format['translate_slides']);
         }
 
         return $format;
