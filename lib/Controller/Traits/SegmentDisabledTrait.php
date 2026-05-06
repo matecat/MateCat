@@ -14,12 +14,9 @@ trait SegmentDisabledTrait
     const int CACHE_TTL = 3600;
 
     /**
-     * Removes the "translation_disabled" metadata for a given segment and clears the related cache.
-     *
-     * @param int $id_job
-     * @param int $id_segment The unique identifier of the segment to clear metadata and cache for.
-     * @return void
      * @throws ReflectionException
+     * @throws Exception
+     * @throws \PDOException
      */
     protected function destroySegmentDisabledCache(int $id_job, int $id_segment): void
     {
@@ -49,9 +46,8 @@ trait SegmentDisabledTrait
 
         // retrieve from cache fails, we need to check the database and update the cache accordingly
         if (empty($cachedValue)) {
-            $metadataList = SegmentMetadataDao::get($id_segment, 'translation_disabled');
-            $metadata = $metadataList[0] ?? null;
-            $isDisabled = (($metadata->meta_value ?? '0') === '1');
+            $metadata = SegmentMetadataDao::get($id_segment, 'translation_disabled');
+            $isDisabled = ($metadata !== null && $metadata->meta_value === '1');
             $this->_setInCacheMap($cache['key'], $cache['query'], [$isDisabled ? 1 : 0]);
 
             return $isDisabled;

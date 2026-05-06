@@ -6,14 +6,14 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline errors** | 7,366 | ~3,489 | −3,877 (−52.6%) |
-| **PHPUnit tests** | ~2,248 | 3,400+ | +1,152 (+51.2%) |
-| **PHPUnit assertions** | ~19,449 | 22,278+ | +2,829 (+14.5%) |
+| **PHPStan baseline errors** | 7,366 | ~3,453 | −3,913 (−53.1%) |
+| **PHPUnit tests** | ~2,248 | 3,413+ | +1,165 (+51.8%) |
+| **PHPUnit assertions** | ~19,449 | 22,326+ | +2,877 (+14.8%) |
 | **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
-| **New test files** | 235 | 264+ | +29 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 30+ | — |
+| **New test files** | 235 | 265+ | +30 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 32+ | — |
 
 ---
 
@@ -476,6 +476,27 @@ All in-file PHPStan errors eliminated across 26 baseline entries (45 total occur
 
 ---
 
+### Phase 8: Controllers & Traits (~36 entries) — ✅ DONE
+
+**Why:** `SegmentAnalysisController` is a high-traffic API endpoint consumed by the frontend analysis panel. Fixing it ensures type-safe segment data formatting, proper null guards on DB lookups, and correct exception propagation.
+
+#### 8A. `SegmentAnalysisController.php` + `SegmentDisabledTrait.php` — ✅ DONE (−36 entries, +13 tests)
+
+All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@throws DivisionByZeroError` propagation + 1 `SegmentDisabledTrait` bug fix + 2 `missingType.checkedException` on trait). Key changes:
+- **Null guard**: `JobDao::getByIdAndPassword()` result in `formatSegment()` → `?? throw new RuntimeException('Job not found')`
+- **Null assertions**: `$jobStruct->id ?? throw new RuntimeException(...)` and `$jobStruct->password ?? throw new RuntimeException(...)` before passing to `SegmentDao`
+- **Type cast**: `getMetadataValue()` (`mixed`) → `!empty(...)` for clean `bool` to `MatchConstantsFactory::getInstance(?bool)`
+- **Null coalesce**: `CatUtils::getSegmentTranslationsCount() ?? 0` — method returns `?int`
+- **Type assertion**: `assert($filter instanceof MateCatFilter)` after `MateCatFilter::getInstance()` (vendor returns `AbstractFilter`)
+- **Removed misplaced `@var`**: `/** @var MateCatFilter $filter */` was above `$jobStruct` assignment (different variable)
+- **Array shape PHPDocs**: all 13 `missingType.iterableValue` errors resolved with precise shapes
+- **Native types**: `humanReadableSourcePage(int $sourcePage)`, `getIssuesNotesAndIdRequests(array $segmentsForAnalysis)`
+- **`@throws` annotations**: `DivisionByZeroError`, `Exception`, `PDOException` propagation on `job()`, `project()`, `getSegmentsForAJob()`, `getSegmentsForAProject()`, `getIssuesNotesAndIdRequests()`, `destroySegmentDisabledCache()`
+- **Bug fix** (`SegmentDisabledTrait`): `SegmentMetadataDao::get()` returns `?SegmentMetadataStruct` (single struct), not array — removed erroneous `[0]` offset access that would crash on non-null results
+- **13 new tests** in `SegmentAnalysisControllerTest.php` (0 warnings)
+
+---
+
 ## Aligner Plugin (Deferred)
 
 737 errors across 11 files in `plugins/aligner/`. Separate module — to be addressed as a dedicated batch if time permits.
@@ -488,12 +509,12 @@ All in-file PHPStan errors eliminated across 26 baseline entries (45 total occur
 
 | Priority | File | Errors | Rationale |
 |----------|------|--------|-----------|
-| 1 | `lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php` | ~26 | Model — foundation type for review word count logic |
-| 2 | `lib/Controller/API/V3/SegmentAnalysisController.php` | ~30 | Controller — consumes fixed models |
+| ~~1~~ | ~~`lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php`~~ | ~~26~~ | ✅ Done (Phase 7B) |
+| ~~2~~ | ~~`lib/Controller/API/V3/SegmentAnalysisController.php`~~ | ~~30~~ | ✅ Done (Phase 8A) |
 | 3 | `lib/Utils/LQA/QA/DomHandler.php` | ~24 | DOM parsing utility — isolated, self-contained |
 | 4 | `lib/Utils/OutsourceTo/Translated.php` | ~31 | External integration — lower priority, side-effect heavy |
 
-**Estimated total if all completed:** ~111 additional errors removed
+**Estimated total if all completed:** ~55 additional errors removed
 
 ### Phase 5 Residual Controllers
 
@@ -506,4 +527,4 @@ All in-file PHPStan errors eliminated across 26 baseline entries (45 total occur
 
 ## Next Action
 
-Start Priority 1: `lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php` (~26 errors)
+Start Priority 3: `lib/Utils/LQA/QA/DomHandler.php` (~24 errors)
