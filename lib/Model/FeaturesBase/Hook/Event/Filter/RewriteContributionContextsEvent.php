@@ -16,6 +16,9 @@ final class RewriteContributionContextsEvent extends FilterEvent
     {
         return 'rewriteContributionContexts';
     }
+    /**
+     * @param array<string, mixed> $requestData
+     */
     public function __construct(
         private mixed $segmentsList,
         private readonly array $requestData,
@@ -31,6 +34,10 @@ final class RewriteContributionContextsEvent extends FilterEvent
     {
         $this->segmentsList = $segmentsList;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function getRequestData(): array
     {
         return $this->requestData;
