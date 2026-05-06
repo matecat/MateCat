@@ -9,6 +9,7 @@
 
 namespace Model\Translators;
 
+use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Users\UserDao;
@@ -29,16 +30,18 @@ class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public string $target;
 
     /**
-     * @return UserStruct
+     * @return UserStruct|null
+     *
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function getUser(): UserStruct
+    public function getUser(): ?UserStruct
     {
         if (!empty($this->id_translator_profile)) {
             return (new UserDao())->setCacheTTL(60 * 60)->getByEmail($this->email);
         }
 
-        return new UserStruct();
+        return null;
     }
 
 }

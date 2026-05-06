@@ -92,6 +92,7 @@ class JobSplitMergeManager
      * Delegates to {@see JobSplitMergeService::applySplit()}.
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function applySplit(SplitMergeProjectData $data): void
     {

@@ -28,6 +28,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
      * @throws ReflectionException
      * @throws AuthorizationError
      * @throws Exception
+     * @throws \TypeError
      */
     public function confirm(): void
     {

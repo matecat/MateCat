@@ -165,6 +165,8 @@ class JobSplitMergeService
 
     /**
      * Create a new TranslatorsModel instance — overridable in tests.
+     *
+     * @throws \TypeError
      */
     protected function createTranslatorsModel(JobStruct $job): TranslatorsModel
     {
@@ -359,6 +361,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split (nullable)
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -378,6 +381,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
     {
