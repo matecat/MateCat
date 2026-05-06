@@ -167,6 +167,7 @@ function CatTool() {
               sid: seg.sid,
               source: seg.segment,
               target: seg.translation,
+              internal_id: seg.internal_id,
               ...extractSegmentContextFields(seg),
             })
           }
@@ -545,6 +546,7 @@ function CatTool() {
         sid: seg.sid,
         source: seg.segment,
         target: seg.translation,
+        internal_id: seg.internal_id,
         ...extractSegmentContextFields(seg),
       })
     }

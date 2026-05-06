@@ -98,20 +98,36 @@ export const updateNodeTranslation = (el, segments) => {
   const relevant = segments.filter((s) => sidSet.has(Number(s.sid)))
   if (!relevant.length || relevant.length < sids.length) return 'no-target'
 
-  const targets = relevant
-    .map((s) => {
+  // Group segments by internal_id. Segments sharing the same internal_id
+  // originate from a single trans-unit that was split into N parts — their
+  // translations must be concatenated. Segments with different internal_id
+  // are textual duplicates mapped to the same node — they must produce
+  // identical translations (mismatch otherwise).
+  const groups = new Map()
+  for (const seg of relevant) {
+    const key = seg.internal_id ?? `__sid_${seg.sid}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(seg)
+  }
+
+  const groupTargets = []
+  for (const [, group] of groups) {
+    group.sort((a, b) => Number(a.sid) - Number(b.sid))
+    const targets = group.map((s) => {
       if (!s.target) return null
       const stripped = stripSegmentTags(s.target).replace(/[\s\u200b]+/g, ' ').trim()
       return stripped || null
     })
-    .filter(Boolean)
+    if (targets.some((t) => t === null)) return 'no-target'
+    groupTargets.push(targets.join(' '))
+  }
 
-  if (targets.length < relevant.length) return 'no-target'
+  if (!groupTargets.length) return 'no-target'
 
-  const allSame = targets.every((t) => t === targets[0])
+  const allSame = groupTargets.every((t) => t === groupTargets[0])
   if (!allSame) return 'mismatch'
 
-  replaceTextContent(el, targets[0])
+  replaceTextContent(el, groupTargets[0])
   return 'ok'
 }
 
