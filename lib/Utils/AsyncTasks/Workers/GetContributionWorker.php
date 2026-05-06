@@ -17,7 +17,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
-use Model\TmKeyManagement\MemoryKeyStruct;
+use Utils\TmKeyManagement\TmKeyStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -43,17 +43,16 @@ class GetContributionWorker extends AbstractWorker
     use MatchesComparator;
 
     /**
-     * @param AbstractElement $queueElement
-     *
-     * @return void
      * @throws EndQueueException
+     * @throws TypeError
      * @throws Exception
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            throw new EndQueueException('Expected QueueElement, got ' . get_class($queueElement));
+        }
+
         $this->_checkForReQueueEnd($queueElement);
 
         $contributionStruct = new GetContributionRequest($queueElement->params->toArray());
@@ -64,9 +63,8 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param GetContributionRequest $contributionStruct
-     *
      * @throws Exception
+     * @throws TypeError
      */
     protected function _execGetContribution(GetContributionRequest $contributionStruct): void
     {
@@ -119,15 +117,11 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array $content
-     * @param GetContributionRequest $contributionStruct
-     * @param FeatureSet $featureSet
-     * @param                        $targetLang
-     * @param bool $isCrossLang
+     * @param list<array<string, mixed>> $content
      *
      * @throws Exception
      */
-    protected function _publishPayload(array $content, GetContributionRequest $contributionStruct, FeatureSet $featureSet, $targetLang, ?bool $isCrossLang = false): void
+    protected function _publishPayload(array $content, GetContributionRequest $contributionStruct, FeatureSet $featureSet, string $targetLang, bool $isCrossLang = false): void
     {
         $type = 'contribution';
 
@@ -179,6 +173,8 @@ class GetContributionWorker extends AbstractWorker
 
 
     /**
+     * @return list<string>
+     *
      * @throws Exception
      */
     protected function _extractAvailableKeysForUser(GetContributionRequest $contributionStruct): array
@@ -189,7 +185,9 @@ class GetContributionWorker extends AbstractWorker
         $keyList = [];
         if (!empty($tm_keys)) {
             foreach ($tm_keys as $tm_info) {
-                $keyList[] = $tm_info->key;
+                if ($tm_info->key !== null) {
+                    $keyList[] = $tm_info->key;
+                }
             }
         }
 
@@ -197,9 +195,7 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array $matches
-     * @param GetContributionRequest $contributionStruct
-     * @param FeatureSet $featureSet
+     * @param list<array<string, mixed>> $matches
      *
      * @throws Exception
      */
@@ -213,8 +209,8 @@ class GetContributionWorker extends AbstractWorker
 
                 $QA = new PostProcess($match['segment'], $match['translation']); // layer 1 here
                 $QA->setFeatureSet($featureSet);
-                $QA->setSourceSegLang($jobStruct?->source);
-                $QA->setTargetSegLang($jobStruct?->target);
+                $QA->setSourceSegLang($jobStruct->source);
+                $QA->setTargetSegLang($jobStruct->target);
                 $QA->realignMTSpaces();
 
                 //this should every time be ok because MT preserve tags, but we use the check on the errors
@@ -242,7 +238,7 @@ class GetContributionWorker extends AbstractWorker
             $match = $this->_matchRewrite($match);
 
             if ($contributionStruct->concordanceSearch) {
-                $regularExpressions = $this->tokenizeSourceSearch($contributionStruct->getContexts()->segment);
+                $regularExpressions = $this->tokenizeSourceSearch($contributionStruct->getContexts()->segment ?? '');
 
                 if (!$contributionStruct->fromTarget) {
                     [$match['segment'], $match['translation']] = $this->_formatConcordanceValues($match['segment'], $match['translation'], $regularExpressions);
@@ -253,22 +249,26 @@ class GetContributionWorker extends AbstractWorker
         }
     }
 
-    private function _formatConcordanceValues($_source, $_target, $regularExpressions): array
+    /**
+     * @param array<string, string> $regularExpressions
+     *
+     * @return array{string, string}
+     */
+    private function _formatConcordanceValues(string $_source, string $_target, array $regularExpressions): array
     {
         $_source = strip_tags(html_entity_decode($_source));
-        $_source = preg_replace('#\x{20}{2,}#u', chr(0x20), $_source);
+        $_source = preg_replace('#\x{20}{2,}#u', chr(0x20), $_source) ?? $_source;
 
-        //Do something with &$match, tokenize strings and send to the client
-        $_source = preg_replace(array_keys($regularExpressions), array_values($regularExpressions), $_source);
+        $_source = preg_replace(array_keys($regularExpressions), array_values($regularExpressions), $_source) ?? $_source;
         $_target = strip_tags(html_entity_decode($_target));
 
         return [$_source, $_target];
     }
 
     /**
-     * @param array $match
+     * @param array<string, mixed> $match
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function _matchRewrite(array $match): array
     {
@@ -283,10 +283,7 @@ class GetContributionWorker extends AbstractWorker
      * Build tokens to mark with highlight placeholders
      * the source RESULTS occurrences (correspondences) with text search incoming from ajax
      *
-     * @param $text string
-     *
-     * @return array[string => string] $regularExpressions Pattern is in the key and replacement in the value of the array
-     *
+     * @return array<string, string> Pattern is in the key and replacement in the value
      */
     protected function tokenizeSourceSearch(string $text): array
     {
@@ -297,17 +294,17 @@ class GetContributionWorker extends AbstractWorker
          *
          * \x{84} => „
          * \x{82} => ‚ //single low quotation mark
-         * \x{91} => ‘
-         * \x{92} => ’
-         * \x{93} => “
-         * \x{94} => ”
+         * \x{91} => '
+         * \x{92} => '
+         * \x{93} => "
+         * \x{94} => "
          * \x{B7} => · //Middle dot - Georgian comma
          * \x{AB} => «
          * \x{BB} => »
          */
-        $tmp_text = preg_replace('#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}.(){}\[\];:,\"\'\#+*]+#u', chr(0x20), $text);
+        $tmp_text = preg_replace('#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}.(){}\[\];:,\"\'\#+*]+#u', chr(0x20), $text) ?? $text;
         $tmp_text = str_replace(' - ', chr(0x20), $tmp_text);
-        $tmp_text = preg_replace('#\x{20}{2,}#u', chr(0x20), $tmp_text);
+        $tmp_text = preg_replace('#\x{20}{2,}#u', chr(0x20), $tmp_text) ?? $tmp_text;
 
         $tokenizedBySpaces = explode(" ", $tmp_text);
         $regularExpressions = [];
@@ -346,11 +343,8 @@ class GetContributionWorker extends AbstractWorker
     }
 
      /**
-      * @param string $targetLang
-      * @param FeatureSet $featureSet
-      * @param bool $isCrossLang
+      * @return array{array<string, mixed>, array<int, array<string, mixed>>}
       *
-      * @return array
       * @throws EndQueueException
       * @throws ReQueueException
       * @throws Exception
@@ -462,7 +456,7 @@ class GetContributionWorker extends AbstractWorker
             !$contributionStruct->concordanceSearch &&
             !$isCrossLang
         ) {
-            if (($contributionStruct->mt_quality_value_in_editor ?? 0) > 99 || empty($tms_match) || (int)str_replace("%", "", $tms_match[0]['match']) < 100) {
+            if ($contributionStruct->mt_quality_value_in_editor > 99 || empty($tms_match) || (int)str_replace("%", "", $tms_match[0]['match']) < 100) {
                 /**
                  * Call The MT EnginesFactory IF
                  * - The user has set an MT Quality value in the editor > 99
@@ -494,12 +488,9 @@ class GetContributionWorker extends AbstractWorker
                 $config['reasoning'] = $contributionStruct->reasoning;
                 $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 
-                $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
-                $config['keys'] = array_map(function ($tm_key) {
-                    /**
-                     * @var $tm_key MemoryKeyStruct
-                     */
-                    return $tm_key->key;
+                $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys], 'r');
+                $config['keys'] = array_map(function (TmKeyStruct $tm_key): string {
+                    return $tm_key->key ?? '';
                 }, $tm_keys);
 
                 if ($contributionStruct->mt_evaluation) {
@@ -507,8 +498,7 @@ class GetContributionWorker extends AbstractWorker
                 }
 
                 if ($contributionStruct->mt_qe_workflow_enabled) {
-                    // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-                    $mt_qe_config = new MTQEWorkflowParams($queueElement->params->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
+                    $mt_qe_config = new MTQEWorkflowParams($contributionStruct->mt_qe_workflow_parameters ?? []);
                     $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
                 }
 
@@ -531,16 +521,14 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param $_config
-     *
-     * @return bool
+     * @param array<string, mixed> $_config
      */
-    private function issetSourceAndTarget($_config): bool
+    private function issetSourceAndTarget(array $_config): bool
     {
         return (isset($_config['source']) and $_config['source'] !== '' and isset($_config['target']) and $_config['target'] !== '');
     }
 
-    private function _sortByLenDesc($stringA, $stringB): int
+    private function _sortByLenDesc(string $stringA, string $stringB): int
     {
         if (strlen($stringA) == strlen($stringB)) {
             return 0;
@@ -550,8 +538,7 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array $matches
-     * @param GetContributionRequest $contributionStruct
+     * @param array<int, array<string, mixed>> $matches
      *
      * @throws ReflectionException
      * @throws Exception
@@ -561,10 +548,13 @@ class GetContributionWorker extends AbstractWorker
         if (
             count($matches) > 0 and
             $contributionStruct->segmentId !== null and
-            $contributionStruct->getJobStruct() !== null and
             !empty($contributionStruct->getJobStruct()->id)
         ) {
             $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
+
+            if ($segmentTranslation === null) {
+                return;
+            }
 
             // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
             if ($segmentTranslation->status != TranslationStatus::STATUS_NEW) {

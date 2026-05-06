@@ -5407,6 +5407,18 @@ parameters:
 			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
 
 		-
+			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$vite_html\.$#'
+			identifier: property.notFound
+			count: 1
+			path: lib/Controller/Abstracts/BaseKleinViewController.php
+
+		-
+			message: '#^Variable \$nonce on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: lib/Controller/Abstracts/BaseKleinViewController.php
+
+		-
 			message: '#^Method Controller\\Abstracts\\IController\:\:getFeatureSet\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12607,252 +12619,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/ErrMailWorker.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$context_after\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$context_before\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$segment\.$#'
-			identifier: property.notFound
-			count: 3
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$password on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$source on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$status on Model\\Translations\\SegmentTranslationStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$target on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$tm_keys on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot access property \$uid on Model\\Users\\UserStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Cannot call method isAnonymous\(\) on Model\\Users\\UserStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_execGetContribution\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_extractAvailableKeysForUser\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_formatConcordanceValues\(\) has parameter \$_source with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_formatConcordanceValues\(\) has parameter \$_target with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_formatConcordanceValues\(\) has parameter \$regularExpressions with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_formatConcordanceValues\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_getMatches\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_matchRewrite\(\) has parameter \$match with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_matchRewrite\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_publishPayload\(\) has parameter \$content with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_publishPayload\(\) has parameter \$targetLang with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_sortByLenDesc\(\) has parameter \$stringA with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_sortByLenDesc\(\) has parameter \$stringB with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:issetSourceAndTarget\(\) has parameter \$_config with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:normalizeMTMatches\(\) has parameter \$matches with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:tokenizeSourceSearch\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:updateAnalysisSuggestion\(\) has parameter \$matches with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(array\[string \=\> string\] \$regularExpressions Pattern is in the key and replacement in the value of the array\)\: Unexpected token "\[", expected TOKEN_HORIZONTAL_WS at offset 213 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$tm_key MemoryKeyStruct\)\: Unexpected token "\$tm_key", expected type at offset 32 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#1 \$pattern of function preg_replace expects array\<string\>\|string, list\<int\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#1 \$project of method Model\\FeaturesBase\\FeatureSet\:\:loadForProject\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#2 \$jobStruct of method Utils\\AsyncTasks\\Workers\\GetContributionWorker\:\:_getMatches\(\) expects Model\\Jobs\\JobStruct, Model\\Jobs\\JobStruct\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobStruct\:\:\$tm_keys \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$mt_quality_value_in_editor \(int\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
-			message: '#^Variable \$queueElement on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GetContributionWorker.php
-
-		-
 			message: '#^Match arm comparison between int\<300, max\> and 202 is always false\.$#'
 			identifier: match.alwaysFalse
 			count: 1
@@ -13367,18 +13133,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Utils/Constants/XliffTranslationStatus.php
-
-		-
-			message: '#^Cannot access property \$id_mt_engine on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Cannot access property \$id_tms on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
 
 		-
 			message: '#^Parameter \#1 \$array_params of class Model\\Jobs\\JobStruct constructor expects array\<string, mixed\>, array\|null given\.$#'

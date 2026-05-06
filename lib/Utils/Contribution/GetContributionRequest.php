@@ -151,18 +151,12 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     }
 
 
-    /**
-     * @return ?JobStruct
-     */
-    public function getJobStruct(): ?JobStruct
+    public function getJobStruct(): JobStruct
     {
         return new JobStruct($this->jobStruct);
     }
 
-    /**
-     * @return ProjectStruct|null
-     */
-    public function getProjectStruct(): ?ProjectStruct
+    public function getProjectStruct(): ProjectStruct
     {
         return new ProjectStruct($this->projectStruct);
     }
@@ -199,15 +193,12 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
         return $this->mt_engine;
     }
 
-    public function getContexts(): object
+    public function getContexts(): ContributionContexts
     {
-        return (object)$this->contexts;
+        return ContributionContexts::fromArray($this->contexts);
     }
 
-    /**
-     * @return ?UserStruct
-     */
-    public function getUser(): ?UserStruct
+    public function getUser(): UserStruct
     {
         return new UserStruct($this->user);
     }
