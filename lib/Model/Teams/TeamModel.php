@@ -8,8 +8,10 @@ use InvalidArgumentException;
 use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use Model\Users\UserStruct;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\Teams;
 use Utils\Email\InvitedToTeamEmail;
 use Utils\Email\MembershipCreatedEmail;
@@ -19,6 +21,7 @@ use Utils\Redis\RedisHandler;
 class TeamModel
 {
 
+    /** @var list<string> */
     protected array $member_emails = [];
 
     /**
@@ -36,9 +39,7 @@ class TeamModel
      */
     protected array $new_memberships = [];
 
-    /**
-     * @var array
-     */
+    /** @var list<int> */
     protected array $uids_to_remove = [];
 
     /**
@@ -66,6 +67,9 @@ class TeamModel
         $this->user = $user;
     }
 
+    /**
+     * @param list<string> $emails
+     */
     public function addMemberEmails(array $emails): void
     {
         foreach ($emails as $email) {
@@ -73,6 +77,9 @@ class TeamModel
         }
     }
 
+    /**
+     * @param list<int> $uids
+     */
     public function removeMemberUids(array $uids): void
     {
         $this->uids_to_remove = array_merge($this->uids_to_remove, $uids);
@@ -84,10 +91,14 @@ class TeamModel
      * @return MembershipStruct[] the full list of members after the update.
      * @throws ReflectionException
      * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
      */
     public function updateMembers(): array
     {
         $this->removed_users = [];
+
+        $teamId = $this->getTeamId();
 
         Database::obtain()->begin();
 
@@ -96,43 +107,44 @@ class TeamModel
         if (!empty($this->member_emails)) {
             $this->_checkAddMembersToPersonalTeam();
 
-            $members = array_values(array_filter($this->member_emails, fn($member) => $member !== null));
-
             $this->new_memberships = $membershipDao->createList([
                 'team' => $this->struct,
-                'members' => $members
+                'members' => $this->member_emails
             ]);
         }
 
         if (!empty($this->uids_to_remove)) {
             //check if this is the last user of the team
-            $memberList = $membershipDao->getMemberListByTeamId($this->struct->id);
+            $memberList = $membershipDao->getMemberListByTeamId($teamId);
 
             $projectDao = new ProjectDao();
 
             foreach ($this->uids_to_remove as $uid) {
-                $user = $membershipDao->deleteUserFromTeam($uid, $this->struct->id);
+                $user = $membershipDao->deleteUserFromTeam($uid, $teamId);
 
                 //check if this is the last user of the team
                 // if it is, move all projects of the team to the personal team and assign them to himself
                 // moreover, delete the old team
                 if (count($memberList) == 1) {
+                    if ($user === null) {
+                        continue;
+                    }
                     $teamDao = new TeamDao();
                     $personalTeam = $teamDao->setCacheTTL(60 * 60 * 24)->getPersonalByUser($user);
                     $projectDao->massiveSelfAssignment($this->struct, $user, $personalTeam);
                     $teamDao->deleteTeam($this->struct);
-                } elseif ($user) {
+                } elseif ($user !== null) {
                     $this->removed_users[] = $user;
                     $projectDao->unassignProjects($this->struct, $user);
                 }
             }
         }
 
-        (new MembershipDao)->destroyCacheForListByTeamId($this->struct->id);
+        (new MembershipDao)->destroyCacheForListByTeamId($teamId);
 
         $this->all_memberships = (new MembershipDao)
             ->setCacheTTL(3600)
-            ->getMemberListByTeamId($this->struct->id);
+            ->getMemberListByTeamId($teamId);
 
         Database::obtain()->commit();
 
@@ -147,6 +159,10 @@ class TeamModel
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     public function create(): TeamStruct
     {
@@ -155,7 +171,7 @@ class TeamModel
         $this->_checkType();
         $this->_checkPersonalUnique();
 
-        $this->struct = $this->_createTeamWithMatecatUsers(); //update the struct of the team in the model
+        $this->struct = $this->_createTeamWithMatecatUsers();
 
         $this->_sendEmailsToNewMemberships();
         $this->_sendEmailsToInvited();
@@ -166,26 +182,28 @@ class TeamModel
 
     /**
      * @throws Exception
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     protected function _sendEmailsToInvited(): void
     {
         foreach ($this->_getInvitedEmails() as $email) {
-            $email = new InvitedToTeamEmail($this->user, $email, $this->struct);
-            $email->send();
+            $emailMessage = new InvitedToTeamEmail($this->user, $email, $this->struct);
+            $emailMessage->send();
         }
     }
 
     /**
      * @throws ReflectionException
-     * @throws \RuntimeException
+     * @throws RuntimeException
+     * @throws Exception
      */
     protected function _setPendingStatuses(): void
     {
+        $teamId = $this->getTeamId();
         $redis = (new RedisHandler())->getConnection();
         foreach ($this->_getInvitedEmails() as $email) {
             $pendingInvitation = new PendingInvitations($redis, [
-                'team_id' => $this->struct->id,
+                'team_id' => $teamId,
                 'email' => $email
             ]);
             $pendingInvitation->set();
@@ -193,26 +211,28 @@ class TeamModel
     }
 
     /**
-     * @throws \RuntimeException
+     * @return list<string>
+     * @throws RuntimeException
+     * @throws ReflectionException
+     * @throws Exception
      */
     protected function _getInvitedEmails(): array
     {
-        $emails_of_existing_members = array_map(
-        /**
-         * @throws ReflectionException
-         */ function (MembershipStruct $membership) {
-            return $membership->getUser()->email;
-        },
-            $this->all_memberships
+        $emails_of_existing_members = array_filter(
+            array_map(
+                fn(MembershipStruct $membership): ?string => $membership->getUser()->email,
+                $this->all_memberships
+            )
         );
 
-        return array_diff($this->member_emails, $emails_of_existing_members);
+        return array_values(array_diff($this->member_emails, $emails_of_existing_members));
     }
 
     /**
      * @return MembershipStruct[]
      * @throws ReflectionException
-     * @throws \RuntimeException
+     * @throws RuntimeException
+     * @throws Exception
      */
     protected function _getNewMembershipEmailList(): array
     {
@@ -226,6 +246,9 @@ class TeamModel
         return $notify_list;
     }
 
+    /**
+     * @return UserStruct[]
+     */
     protected function _getRemovedMembersEmailList(): array
     {
         $notify_list = [];
@@ -239,7 +262,9 @@ class TeamModel
         return $notify_list;
     }
 
-
+    /**
+     * @throws InvalidArgumentException
+     */
     protected function _checkType(): void
     {
         if (!Teams::isAllowedType($this->struct->type)) {
@@ -249,15 +274,23 @@ class TeamModel
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     protected function _checkPersonalUnique(): void
     {
-        $dao = new TeamDao();
-        if ($this->struct->type == Teams::PERSONAL && $dao->getPersonalByUid($this->struct->created_by)) {
-            throw new InvalidArgumentException("User already has the personal team");
+        if ($this->struct->type !== Teams::PERSONAL) {
+            return;
         }
+
+        $dao = new TeamDao();
+        $dao->getPersonalByUid($this->struct->created_by);
+        throw new InvalidArgumentException("User already has the personal team");
     }
 
+    /**
+     * @throws DomainException
+     */
     protected function _checkAddMembersToPersonalTeam(): void
     {
         if ($this->struct->type == Teams::PERSONAL) {
@@ -267,6 +300,10 @@ class TeamModel
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
+     * @throws DomainException
      */
     protected function _createTeamWithMatecatUsers(): TeamStruct
     {
@@ -281,7 +318,7 @@ class TeamModel
             'members' => $this->member_emails
         ]);
 
-        $this->new_memberships = $this->all_memberships = $team->getMembers(); //the new members are all existent members
+        $this->new_memberships = $this->all_memberships = $team->getMembers() ?? [];
 
         Database::obtain()->commit();
 
@@ -291,7 +328,7 @@ class TeamModel
     /**
      * @throws ReflectionException
      * @throws Exception
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     protected function _sendEmailsToNewMemberships(): void
     {
@@ -315,10 +352,12 @@ class TeamModel
     /**
      * @return $this
      * @throws ReflectionException
+     * @throws Exception
      */
     public function updateMembersProjectsCount(): TeamModel
     {
-        $this->all_memberships = (new MembershipDao())->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($this->struct->id);
+        $teamId = $this->getTeamId();
+        $this->all_memberships = (new MembershipDao())->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($teamId);
 
         if (!empty($this->all_memberships)) {
             $membersWithProjects = (new TeamDao())->setCacheTTL(60 * 60)->getAssigneeWithProjectsByTeam($this->struct);
@@ -329,8 +368,10 @@ class TeamModel
             }
 
             foreach ($this->all_memberships as $member) {
-                $memberWithAssignment = array_key_exists($member->uid, $assigneeIds);
-                if ($memberWithAssignment !== false) {
+                if ($member->uid === null) {
+                    continue;
+                }
+                if (array_key_exists($member->uid, $assigneeIds)) {
                     $member->setAssignedProjects($assigneeIds[$member->uid]);
                 }
             }
@@ -339,6 +380,16 @@ class TeamModel
         }
 
         return $this;
+    }
+
+    /**
+     * Returns the team ID, asserting it is non-null (team has been persisted).
+     *
+     * @throws RuntimeException if team has no ID (not persisted yet)
+     */
+    private function getTeamId(): int
+    {
+        return $this->struct->id ?? throw new RuntimeException('Team must be persisted before this operation (id is null)');
     }
 
 }

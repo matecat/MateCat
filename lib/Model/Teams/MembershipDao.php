@@ -172,7 +172,7 @@ class MembershipDao extends AbstractDao
      * @param int $id_team
      * @param bool $traverse
      *
-     * @return IDaoStruct[]|MembershipStruct[]
+     * @return MembershipStruct[]
      * @throws ReflectionException
      * @throws Exception
      */

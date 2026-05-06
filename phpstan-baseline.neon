@@ -499,12 +499,6 @@ parameters:
 			path: lib/Controller/API/App/GetContributionController.php
 
 		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDaoStruct\:\:getUser\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/App/GetProjectsController.php
-
-		-
 			message: '#^Cannot access property \$type on Model\\Teams\\TeamStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -513,7 +507,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\GetProjectsController\:\:filterAssignee\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Controller/API/App/GetProjectsController.php
 
 		-
@@ -554,12 +548,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$team of method Controller\\API\\App\\GetProjectsController\:\:filterAssignee\(\) expects Model\\Teams\\TeamStruct, Model\\Teams\\TeamStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/GetProjectsController.php
-
-		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(Model\\DataAccess\\IDaoStruct\)\: bool\)\|null, Closure\(Model\\Teams\\MembershipStruct\)\: bool given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/GetProjectsController.php
@@ -2413,12 +2401,6 @@ parameters:
 			path: lib/Controller/API/V2/ReviseTranslationIssuesController.php
 
 		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$uid\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
 			message: '#^Cannot access property \$id on Model\\Teams\\TeamStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -2623,13 +2605,25 @@ parameters:
 			path: lib/Controller/API/V2/TeamMembersController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\TeamMembersController\:\:index\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\V2\\TeamMembersController\:\:delete\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: lib/Controller/API/V2/TeamMembersController.php
 
 		-
-			message: '#^Parameter \#1 \$emails of method Model\\Teams\\TeamModel\:\:addMemberEmails\(\) expects array, array\<string\|false\>\|false\|null given\.$#'
+			message: '#^Method Controller\\API\\V2\\TeamMembersController\:\:index\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 3
+			path: lib/Controller/API/V2/TeamMembersController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\TeamMembersController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/TeamMembersController.php
+
+		-
+			message: '#^Parameter \#1 \$emails of method Model\\Teams\\TeamModel\:\:addMemberEmails\(\) expects list\<string\>, array\<string\|false\>\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/TeamMembersController.php
@@ -2647,8 +2641,8 @@ parameters:
 			path: lib/Controller/API/V2/TeamsController.php
 
 		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDaoStruct\:\:getUser\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Method Controller\\API\\V2\\TeamsController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/TeamsController.php
 
@@ -4059,7 +4053,7 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\CattoolController\:\:findOwnerEmailAndTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 4
 			path: lib/Controller/Views/CattoolController.php
 
 		-
@@ -7861,12 +7855,6 @@ parameters:
 			path: lib/Model/Projects/ManageModel.php
 
 		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$uid\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
 			message: '#^Cannot access property \$type on Model\\Teams\\TeamStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -7940,12 +7928,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$uid of method Model\\Teams\\TeamDao\:\:getPersonalByUid\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(Model\\DataAccess\\IDaoStruct\)\: bool\)\|null, Closure\(Model\\Teams\\MembershipStruct\)\: bool given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Projects/ProjectModel.php
@@ -8503,6 +8485,12 @@ parameters:
 			path: lib/Model/Teams/InvitedUser.php
 
 		-
+			message: '#^Method Model\\Teams\\InvitedUser\:\:completeTeamSignUp\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/InvitedUser.php
+
+		-
 			message: '#^Parameter \#1 \$struct of class Model\\Teams\\TeamModel constructor expects Model\\Teams\\TeamStruct, Model\\Teams\\TeamStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -8537,186 +8525,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Teams/PendingInvitations.php
-
-		-
-			message: '#^Access to an undefined property Model\\DataAccess\\IDaoStruct\:\:\$uid\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDaoStruct\:\:setAssignedProjects\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_checkAddMembersToPersonalTeam\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_checkPersonalUnique\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_checkPersonalUnique\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_checkType\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_createTeamWithMatecatUsers\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_createTeamWithMatecatUsers\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_createTeamWithMatecatUsers\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_getInvitedEmails\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_getInvitedEmails\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_getNewMembershipEmailList\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_getRemovedMembersEmailList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:_setPendingStatuses\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:addMemberEmails\(\) has parameter \$emails with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:removeMemberUids\(\) has parameter \$uids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Method Model\\Teams\\TeamModel\:\:updateMembersProjectsCount\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#1 \$id_team of method Model\\Teams\\MembershipDao\:\:destroyCacheForListByTeamId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#1 \$id_team of method Model\\Teams\\MembershipDao\:\:getMemberListByTeamId\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#1 \$list of method Model\\Teams\\TeamStruct\:\:setMembers\(\) expects array\<Model\\Teams\\MembershipStruct\>, array\<Model\\DataAccess\\IDaoStruct\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#1 \$user of method Model\\Teams\\TeamDao\:\:getPersonalByUser\(\) expects Model\\Users\\UserStruct, Model\\Users\\UserStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#2 \$payload of class Model\\Teams\\PendingInvitations constructor expects array\{team_id\?\: int, email\?\: string\}, array\{team_id\: int\|null, email\: mixed\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#2 \$teamId of method Model\\Teams\\MembershipDao\:\:deleteUserFromTeam\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Parameter \#2 \$user of method Model\\Projects\\ProjectDao\:\:massiveSelfAssignment\(\) expects Model\\Users\\UserStruct, Model\\Users\\UserStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamModel\:\:\$all_memberships \(array\<Model\\Teams\\MembershipStruct\>\) does not accept array\<Model\\DataAccess\\IDaoStruct\>\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamModel\:\:\$all_memberships \(array\<Model\\Teams\\MembershipStruct\>\) does not accept array\<Model\\Teams\\MembershipStruct\>\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamModel\:\:\$member_emails type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamModel\:\:\$new_memberships \(array\<Model\\Teams\\MembershipStruct\>\) does not accept array\<Model\\Teams\\MembershipStruct\>\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Property Model\\Teams\\TeamModel\:\:\$uids_to_remove type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
-
-		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: lib/Model/Teams/TeamModel.php
 
 		-
 			message: '#^Argument of an invalid type array\<Model\\Teams\\MembershipStruct\>\|null supplied for foreach, only iterables are supported\.$#'
