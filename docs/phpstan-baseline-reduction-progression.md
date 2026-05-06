@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-06 (last updated)  
-**Commits (refactor + fix + security):** 35  
+**Commits (refactor + fix + security):** 36  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline errors** | 7,366 | ~3,527 | −3,839 (−52.1%) |
-| **PHPUnit tests** | ~2,248 | 3,382+ | +1,134 (+50.4%) |
-| **PHPUnit assertions** | ~19,449 | 22,237+ | +2,788 (+14.3%) |
+| **PHPStan baseline errors** | 7,366 | ~3,489 | −3,877 (−52.6%) |
+| **PHPUnit tests** | ~2,248 | 3,400+ | +1,152 (+51.2%) |
+| **PHPUnit assertions** | ~19,449 | 22,278+ | +2,829 (+14.5%) |
 | **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
-| **New test files** | 235 | 263+ | +28 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 29+ | — |
+| **New test files** | 235 | 264+ | +29 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 30+ | — |
 
 ---
 
@@ -462,6 +462,17 @@ All in-file PHPStan errors eliminated. Key changes:
 - **Type annotations**: `@throws` additions (TypeError, RuntimeException, PDOException, DomainException, Exception), typed `$undo_data` param as `array<string, mixed>`, typed `$options` as `array{source_page?: int, first_record_password?: string|null}`, typed return as `ChunkReviewStruct[]`, typed `$dependencies` as `list<string>`
 - **1 cascade entry added**: `ReviewsController::createReview()` (calls `createQaChunkReviewRecords` which now `@throws TypeError`)
 - **30 new tests** in `AbstractRevisionFeatureTest.php` (81% line coverage, 0 warnings)
+
+#### 7B. `ReviewedWordCountModel.php` + `TransactionalTrait.php` — ✅ DONE (−38 entries, +18 tests)
+
+All in-file PHPStan errors eliminated across 26 baseline entries (45 total occurrences). Key changes:
+- **Null guards**: Constructor throws `RuntimeException` when `TranslationEvent::getChunk()` or `getSegmentStruct()` returns null; cached `$_segment` property eliminates repeated nullable DB calls (7 occurrences)
+- **Type narrowing**: `$_chunk` property changed from `?JobStruct` to `JobStruct` (eliminates 14 property.nonObject + method.nonObject occurrences)
+- **Argument.type fixes**: Inline `?? throw new RuntimeException(...)` at 5 call sites (`$_chunk->id`, `$_chunk->password`, `$revision->review_password`, `$issue->id`); null-coalesce for `eq_word_count ?? 0.0` and `translation ?? ''`
+- **TransactionalTrait**: `private static $__transactionStarted` → `protected static` (eliminates `staticClassAccess.privateProperty` ×5 in THIS file + ×15 in 3 other users: TranslationEventsHandler, TranslatorsModel, MetadataDao)
+- **Type annotations**: `@throws PDOException` on all 3 trait methods, `@throws RuntimeException` on constructor/deleteIssues/flagIssuesToBeDeleted, typed `$_finalRevisions` as `TranslationEventStruct[]`, `$_sourcePagesWithFinalRevisions` as `int[]`, `$chunkReviews` param as `ChunkReviewStruct[]`, `$finalRevisions` as `TranslationEventStruct[]`, `$chunkReviewsWithFinalRevisions` as `array<int, ChunkReviewStruct>`
+- **Performance**: `getSegmentStruct()` was a DB query per call (7 calls → 1 cached)
+- **18 new tests** in `ReviewedWordCountModelTest.php` (85% line coverage, 0 warnings)
 
 ---
 

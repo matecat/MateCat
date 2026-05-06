@@ -6739,30 +6739,6 @@ parameters:
 			path: lib/Model/Jobs/LexiQaAndTagProjectionLanguages.php
 
 		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Method Model\\Jobs\\MetadataDao\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
-			message: '#^Unsafe access to private property Model\\Jobs\\MetadataDao\:\:\$__transactionStarted through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 5
-			path: lib/Model/Jobs/MetadataDao.php
-
-		-
 			message: '#^Method Model\\LQA\\CategoryStruct\:\:toArrayWithJsonDecoded\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -8167,30 +8143,6 @@ parameters:
 			path: lib/Model/TranslationsSplit/SplitDAO.php
 
 		-
-			message: '#^Method Model\\Translators\\TranslatorsModel\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Translators/TranslatorsModel.php
-
-		-
-			message: '#^Method Model\\Translators\\TranslatorsModel\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Translators/TranslatorsModel.php
-
-		-
-			message: '#^Method Model\\Translators\\TranslatorsModel\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Translators/TranslatorsModel.php
-
-		-
-			message: '#^Unsafe access to private property Model\\Translators\\TranslatorsModel\:\:\$__transactionStarted through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 5
-			path: lib/Model/Translators/TranslatorsModel.php
-
-		-
 			message: '#^Method Model\\Users\\Authentication\\ChangePasswordModel\:\:changePassword\(\) has parameter \$new_password with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -9145,162 +9097,6 @@ parameters:
 			path: lib/Plugins/Features/ReviewExtended/ReviewUtils.php
 
 		-
-			message: '#^Cannot access property \$id on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\Segments\\SegmentStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot access property \$password on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot access property \$raw_word_count on Model\\Segments\\SegmentStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot access property \$segment on Model\\Segments\\SegmentStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot access property \$source on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot access property \$target on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Cannot call method getProject\(\) on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 6
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:__construct\(\) has parameter \$chunkReviews with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:_sendNotificationEmail\(\) has parameter \$chunkReviewsWithFinalRevisions with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:_sendNotificationEmail\(\) has parameter \$finalRevisions with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:deleteIssues\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:flagIssuesToBeDeleted\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Model\\LQA\\EntryCommentStruct\:\:getEntriesById\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getAllFinalRevisionsForSegment\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\Utils\:\:htmlentitiesToUft8WithoutDoubleEncoding\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#1 \$weighted_words_amount of method Model\\WordCount\\CounterModel\:\:setUpdatedValues\(\) expects float, float\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#2 \$id_job of static method Model\\LQA\\EntryDao\:\:findByIdSegmentAndSourcePage\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#2 \$id_job of static method Utils\\Url\\CanonicalRoutes\:\:translate\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Parameter \#3 \$password of static method Utils\\Url\\CanonicalRoutes\:\:translate\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Property Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:\$_finalRevisions type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Property Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:\$_sourcePagesWithFinalRevisions type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
-			message: '#^Unsafe access to private property Plugins\\Features\\ReviewExtended\\ReviewedWordCountModel\:\:\$__transactionStarted through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 5
-			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
-
-		-
 			message: '#^Cannot call method getChunk\(\) on Model\\LQA\\ChunkReviewStruct\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -9535,27 +9331,9 @@ parameters:
 			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
 
 		-
-			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:commitTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:openTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
-
-		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:prepareEventStruct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 6
-			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:rollbackTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
 			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
 
 		-
@@ -9580,12 +9358,6 @@ parameters:
 			message: '#^Property Plugins\\Features\\TranslationEvents\\Model\\TranslationEventStruct\:\:\$uid \(int\) does not accept int\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
-			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
-
-		-
-			message: '#^Unsafe access to private property Plugins\\Features\\TranslationEvents\\TranslationEventsHandler\:\:\$__transactionStarted through static\:\:\.$#'
-			identifier: staticClassAccess.privateProperty
-			count: 5
 			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
 
 		-
