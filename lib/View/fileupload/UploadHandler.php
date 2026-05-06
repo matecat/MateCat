@@ -57,15 +57,7 @@ class UploadHandler
 
     protected function getFullUrl(): string
     {
-        $https = AppConfig::$PROTOCOL === 'https';
-
-        /** @noinspection HttpUrlsUsage */
-        return
-            ($https ? 'https://' : 'http://') .
-            (!empty($_SERVER['REMOTE_USER']) ? $_SERVER['REMOTE_USER'] . '@' : '') .
-            ($_SERVER['HTTP_HOST'] ?? (
-                ($_SERVER['SERVER_NAME'] ?? '') .
-                ($https && ($_SERVER['SERVER_PORT'] ?? 0) === 443 || ($_SERVER['SERVER_PORT'] ?? 0) === 80 ? '' : ':' . $_SERVER['SERVER_PORT']))) .
+        return rtrim(AppConfig::$HTTPHOST, '/') .
             rtrim($_SERVER['REQUEST_URI'] ?? '', '/');
     }
 
