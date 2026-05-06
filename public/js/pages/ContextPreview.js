@@ -195,7 +195,38 @@ const ContextPreview = () => {
       htmlRenderedRef.current.target = htmlContent + viewMode
       injected = true
     }
-    if (injected) setHtmlReady((prev) => prev + 1)
+    if (!injected) return
+
+    const links = [
+      ...(sourceRef.current?.querySelectorAll('link[rel="stylesheet"]') || []),
+      ...(targetRef.current?.querySelectorAll('link[rel="stylesheet"]') || []),
+    ]
+
+    if (links.length === 0) {
+      setHtmlReady((prev) => prev + 1)
+      return
+    }
+
+    let settled = 0
+    let cancelled = false
+    const onSettle = () => {
+      settled++
+      if (!cancelled && settled >= links.length) {
+        setHtmlReady((prev) => prev + 1)
+      }
+    }
+    links.forEach((link) => {
+      if (link.sheet) {
+        onSettle()
+      } else {
+        link.addEventListener('load', onSettle)
+        link.addEventListener('error', onSettle)
+      }
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [htmlContent, viewMode, contentView])
 
   // Tag segments in panels when segments or HTML changes

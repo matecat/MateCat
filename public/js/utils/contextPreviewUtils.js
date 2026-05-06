@@ -99,7 +99,11 @@ export const updateNodeTranslation = (el, segments) => {
   if (!relevant.length || relevant.length < sids.length) return 'no-target'
 
   const targets = relevant
-    .map((s) => (s.target ? stripSegmentTags(s.target).trim() : null))
+    .map((s) => {
+      if (!s.target) return null
+      const stripped = stripSegmentTags(s.target).replace(/[\s\u200b]+/g, ' ').trim()
+      return stripped || null
+    })
     .filter(Boolean)
 
   if (targets.length < relevant.length) return 'no-target'
