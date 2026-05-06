@@ -3,6 +3,19 @@
 .context-preview-page {
   width: 100%;
   max-width: unset;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+.context-preview__page {
+  height: 100%;
+}
+
+.context-preview-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .context-preview-zoom {
