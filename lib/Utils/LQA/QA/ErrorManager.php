@@ -81,6 +81,7 @@ class ErrorManager
     public const string WARNING = 'WARNING';
     public const string INFO = 'INFO';
 
+    /** @var array<int, string|null> */
     protected array $errorMap = [
         0 => '',
         1 => 'Tag count mismatch',
@@ -129,12 +130,14 @@ class ErrorManager
         3000 => 'Characters limit exceeded',
     ];
 
+    /** @var array<int, string|null> */
     protected array $tipMap = [
         29 => "Should be < g ... > ... < /g >",
         1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
         3000 => 'Maximum characters limit exceeded.',
     ];
 
+    /** @var array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>} */
     protected array $exceptionList = [
         self::ERROR => [],
         self::WARNING => [],
@@ -150,6 +153,8 @@ class ErrorManager
 
     /**
      * Add a custom error to the error map
+     *
+     * @param array{code: int, debug?: string|null, tip?: string|null} $errorMap
      */
     public function addCustomError(array $errorMap): void
     {
@@ -367,6 +372,9 @@ class ErrorManager
         };
     }
 
+    /**
+     * @return array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>}
+     */
     public function getExceptionList(): array
     {
         return $this->exceptionList;
@@ -397,7 +405,7 @@ class ErrorManager
 
     public function getErrorsJSON(): string
     {
-        return json_encode($this->getErrorsByLevel(self::ERROR, true));
+        return json_encode($this->getErrorsByLevel(self::ERROR, true)) ?: '[]';
     }
 
     /**
@@ -410,7 +418,7 @@ class ErrorManager
 
     public function getWarningsJSON(): string
     {
-        return json_encode($this->getErrorsByLevel(self::WARNING, true));
+        return json_encode($this->getErrorsByLevel(self::WARNING, true)) ?: '[]';
     }
 
     /**
@@ -423,7 +431,7 @@ class ErrorManager
 
     public function getNoticesJSON(): string
     {
-        return json_encode($this->getErrorsByLevel(self::INFO));
+        return json_encode($this->getErrorsByLevel(self::INFO)) ?: '[]';
     }
 
     /**
@@ -451,7 +459,8 @@ class ErrorManager
             $list = array_values(array_unique($list));
 
             foreach ($list as $errObj) {
-                $errObj->debug = $errObj->getOrigDebug() . " ( " . $errorCount[$errObj->outcome] . " )";
+                $outcomeKey = (string)$errObj->outcome;
+                $errObj->debug = $errObj->getOrigDebug() . " ( " . ($errorCount[$outcomeKey] ?? 1) . " )";
             }
         }
 
@@ -460,6 +469,8 @@ class ErrorManager
 
     /**
      * Parse JSON error string and populate the exception list
+     *
+     * @return array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>}
      */
     public static function JSONtoExceptionList(string $jsonString): array
     {

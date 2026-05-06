@@ -50,19 +50,19 @@ class ErrObject implements Stringable
     /**
      * Static instance constructor
      *
-     * @param array $errors
+     * @param array<string, mixed> $errors
      *
      * @return ErrObject
      */
     public static function get(array $errors): ErrObject
     {
         $errObj = new self();
-        $errObj->outcome = $errors['outcome'];
-        $errObj->orig_debug = $errors['debug'];
-        $errObj->debug = $errors['debug'];
+        $errObj->outcome = isset($errors['outcome']) ? (int)$errors['outcome'] : null;
+        $errObj->orig_debug = isset($errors['debug']) ? (string)$errors['debug'] : '';
+        $errObj->debug = isset($errors['debug']) ? (string)$errors['debug'] : '';
 
-        if ( !empty( $errors[ 'tip' ] ) ) {
-            $errObj->tip = $errors[ 'tip' ];
+        if (!empty($errors['tip'])) {
+            $errObj->tip = (string)$errors['tip'];
         }
 
         return $errObj;

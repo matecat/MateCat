@@ -11,7 +11,7 @@ class Element
     public ?string $name = null;
 
     /**
-     * @var array
+     * @var array<string, string>
      */
     public array $attributes = [];
 
@@ -83,11 +83,11 @@ class Element
     }
 
     /**
-     * @param $children
+     * @param array<Element> $children
      *
      * @return bool
      */
-    private function searchForNestedBxOrEx($children): bool
+    private function searchForNestedBxOrEx(array $children): bool
     {
         foreach ($children as $child) {
             if ($child->isExOrBx()) {

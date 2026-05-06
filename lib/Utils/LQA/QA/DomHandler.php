@@ -9,6 +9,7 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
+use LibXMLError;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\InjectExcludedTagsInQaEvent;
 
@@ -41,16 +42,24 @@ class DomHandler
     /** @var DOMDocument|null Normalized target DOM for output */
     protected ?DOMDocument $normalizedTrgDOM = null;
 
-    /** @var DOMNodeList|null Normalized target DOM node list */
+    /** @var DOMNodeList<DOMNode>|null Normalized target DOM node list */
     protected ?DOMNodeList $normalizedTrgDOMNodeList = null;
 
-    /** @var array Source DOM element map */
+    /**
+     * Source DOM element map.
+     *
+     * @var array<string, mixed>
+     */
     protected array $srcDomMap = [];
 
-    /** @var array Target DOM element map */
+    /**
+     * Target DOM element map.
+     *
+     * @var array<string, mixed>
+     */
     protected array $trgDomMap = [];
 
-    /** @var array{source: array, target: array} Tag differences for malformed XML */
+    /** @var array{source: list<string>, target: list<string>} Tag differences for malformed XML */
     protected array $malformedXmlStructDiff = ['source' => [], 'target' => []];
 
     /** @var FeatureSet|null Feature set for plugin customizations */
@@ -129,17 +138,25 @@ class DomHandler
         $this->normalizedTrgDOM = clone $dom;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getSrcDomMap(): array
     {
         return $this->srcDomMap;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getTrgDomMap(): array
     {
         return $this->trgDomMap;
     }
 
-
+    /**
+     * @return array{source: list<string>, target: list<string>}
+     */
     public function getMalformedXmlStructs(): array
     {
         return $this->malformedXmlStructDiff;
@@ -189,7 +206,7 @@ class DomHandler
         return $dom;
     }
 
-    private function checkUnclosedTag(string $tag, string $xmlString, $error): bool
+    private function checkUnclosedTag(string $tag, string $xmlString, LibXMLError $error): bool
     {
         $message = str_replace("\n", " ", $error->message);
         if ($error->code == 76 && preg_match('#<' . $tag . '[^/>]+>#', $xmlString) && preg_match('# ' . $tag . ' #', $message)) {
@@ -210,11 +227,17 @@ class DomHandler
     /**
      * Prepare DOM structures for analysis
      *
+     * @return array{0: DOMNodeList<DOMNode>, 1: DOMNodeList<DOMNode>}
+     *
      * @throws DOMException
      * @throws Exception
      */
     public function prepareDOMStructures(): array
     {
+        if ($this->srcDom === null || $this->trgDom === null) {
+            throw new DOMException('Source or target DOM not loaded');
+        }
+
         $srcNodeList = @$this->srcDom->getElementsByTagName('root')->item(0)->childNodes;
         $trgNodeList = @$this->trgDom->getElementsByTagName('root')->item(0)->childNodes;
 
@@ -237,6 +260,11 @@ class DomHandler
     /**
      * Build a node map tree of XML source and XML target
      *
+     * @param DOMNodeList<DOMNode> $srcNodeList
+     * @param DOMNodeList<DOMNode> $trgNodeList
+     *
+     * @return array{0: array<string, mixed>, 1: array<string, mixed>}
+     *
      * @throws Exception
      */
     protected function mapDom(DOMNodeList $srcNodeList, DOMNodeList $trgNodeList): array
@@ -252,6 +280,9 @@ class DomHandler
     /**
      * Create a map of NodeTree walking recursively a DOMNodeList
      *
+     * @param DOMNodeList<DOMNode> $elementList
+     * @param array<string, mixed> $srcDomElements
+     *
      * @throws Exception
      */
     protected function mapElements(DOMNodeList $elementList, array &$srcDomElements = [], int $depth = 0, ?string $parentID = null): void
@@ -265,13 +296,14 @@ class DomHandler
                 $elementID = $element->getAttribute('id');
 
                 if ($this->addThisElementToDomMap($element)) {
+                    $innerHTML = $element->ownerDocument?->saveXML($element) ?? '';
                     $plainRef = [
                         'type' => 'DOMElement',
                         'name' => $element->tagName,
                         'id' => $elementID,
                         'parent_id' => $parentID,
                         'node_idx' => $i,
-                        'innerHTML' => $element->ownerDocument->saveXML($element),
+                        'innerHTML' => $innerHTML,
                     ];
 
                     $srcDomElements['DOMElement'][] = $plainRef;
@@ -280,7 +312,6 @@ class DomHandler
 
                     // Handle PH tags specially for content comparison
                     if ($element->tagName === 'ph') {
-                        $innerHTML = $plainRef['innerHTML'];
                         $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
                         preg_match_all($regex, $innerHTML, $html, PREG_SET_ORDER);
 
@@ -299,13 +330,14 @@ class DomHandler
                     }
                 }
             } else {
+                $node = $elementList->item($i);
                 $plainRef = [
                     'type' => 'DOMText',
                     'name' => null,
                     'id' => null,
                     'parent_id' => $parentID,
                     'node_idx' => $i,
-                    'content' => $elementList->item($i)->textContent,
+                    'content' => $node !== null ? $node->textContent : '',
                 ];
 
                 $srcDomElements['DOMText'][$depth++] = $plainRef;
@@ -337,6 +369,8 @@ class DomHandler
 
     /**
      * Check if a tag element is contained in exclusion map
+     *
+     * @param array<string> $tagsToBeExcludedFromChecks
      */
     private function elementIsToBeExcludedFromChecks(DOMElement $element, array $tagsToBeExcludedFromChecks): bool
     {
@@ -417,6 +451,8 @@ class DomHandler
 
     /**
      * Find in a DOMDocument an Element by its Reference
+     *
+     * @param array{id?: string} $TagReference
      */
     public function queryDOMElement(DOMDocument $domDoc, array $TagReference): DOMNode
     {
@@ -425,6 +461,11 @@ class DomHandler
 
         $Node = $xpath->query($query);
 
-        return (($Node->length == 0 || !$Node) ? new DOMNode() : $Node->item(0));
+        if ($Node === false || $Node->length === 0) {
+            return new DOMNode();
+        }
+
+        /** @var DOMNode */
+        return $Node->item(0);
     }
 }

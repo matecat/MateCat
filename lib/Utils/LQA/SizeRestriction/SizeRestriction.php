@@ -74,21 +74,21 @@ class SizeRestriction
     }
 
     /**
-     * @param $limit
+     * @param int $limit
      *
      * @return bool
      */
-    public function checkLimit($limit): bool
+    public function checkLimit(int $limit): bool
     {
         return $this->getCleanedStringLength() <= $limit;
     }
 
     /**
-     * @param $limit
+     * @param int $limit
      *
      * @return int
      */
-    public function getCharactersRemaining($limit): int
+    public function getCharactersRemaining(int $limit): int
     {
         return $limit - $this->getCleanedStringLength();
     }

@@ -787,18 +787,6 @@ parameters:
 			path: lib/Controller/API/App/GetWarningController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\GetWarningController\:\:icuEnabled\(\) should return bool but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/GetWarningController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\GetWarningController\:\:icuEnabled\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/GetWarningController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\GetWarningController\:\:validateTheGlobalRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -825,12 +813,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$chunk of method Controller\\API\\App\\GetWarningController\:\:sourceContainsIcu\(\) expects Model\\Jobs\\JobStruct, Model\\Jobs\\JobStruct\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/GetWarningController.php
-
-		-
-			message: '#^Property Controller\\API\\App\\GetWarningController\:\:\$icuEnabled \(bool\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/API/App/GetWarningController.php
 
@@ -1171,18 +1153,6 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:icuEnabled\(\) should return bool but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:icuEnabled\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:isRevision\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -1216,12 +1186,6 @@ parameters:
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:updateJobPEE\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Property Controller\\API\\App\\SetTranslationController\:\:\$icuEnabled \(bool\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
@@ -2768,6 +2732,18 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/CountWordController.php
+
+		-
+			message: '#^Parameter \#1 \$limit of method Utils\\LQA\\SizeRestriction\\SizeRestriction\:\:checkLimit\(\) expects int, float\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/CountWordController.php
+
+		-
+			message: '#^Parameter \#1 \$limit of method Utils\\LQA\\SizeRestriction\\SizeRestriction\:\:getCharactersRemaining\(\) expects int, float\|int\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/CountWordController.php
@@ -10603,147 +10579,15 @@ parameters:
 			path: lib/Utils/Files/File.php
 
 		-
-			message: '#^Method Utils\\LQA\\BxExG\\Element\:\:searchForNestedBxOrEx\(\) has parameter \$children with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/BxExG/Element.php
-
-		-
-			message: '#^Property Utils\\LQA\\BxExG\\Element\:\:\$attributes type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/BxExG/Element.php
-
-		-
-			message: '#^Argument of an invalid type DOMNamedNodeMap\<DOMAttr\>\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Utils/LQA/BxExG/Mapper.php
-
-		-
-			message: '#^Cannot access property \$childNodes on DOMNode\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Utils/LQA/BxExG/Mapper.php
-
-		-
-			message: '#^Cannot access property \$nodeName on DOMNode\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/LQA/BxExG/Mapper.php
-
-		-
-			message: '#^Method Utils\\LQA\\BxExG\\Mapper\:\:extract\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/BxExG/Mapper.php
-
-		-
-			message: '#^Parameter \#1 \$node of static method Utils\\LQA\\BxExG\\Mapper\:\:appendBxExGTagMapElement\(\) expects DOMNode, DOMNode\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Utils/LQA/BxExG/Mapper.php
-
-		-
-			message: '#^Method Utils\\LQA\\BxExG\\Validator\:\:doesAMapHaveOneBxOrEx\(\) has parameter \$map with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/BxExG/Validator.php
-
-		-
-			message: '#^Method Utils\\LQA\\BxExG\\Validator\:\:validate\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/BxExG/Validator.php
-
-		-
-			message: '#^Method Utils\\LQA\\PostProcess\:\:getErrors\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Method Utils\\LQA\\PostProcess\:\:getWarnings\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Method Utils\\LQA\\PostProcess\:\:nbspToSpace\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Method Utils\\LQA\\PostProcess\:\:normalizeHeadSpaces\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Method Utils\\LQA\\PostProcess\:\:normalizeTailSpaces\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Method Utils\\LQA\\PostProcess\:\:performTagCheckOnly\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_strlen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_substr expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/LQA/PostProcess.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between int\<1, max\>\|false and 0 will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: lib/Utils/LQA/PostProcess.php
 
 		-
-			message: '#^Cannot access property \$documentElement on DOMDocument\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA.php
-
-		-
-			message: '#^Cannot call method saveXML\(\) on DOMDocument\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\:\:JSONtoExceptionList\(\) should return array\{ERROR\: array\<Utils\\LQA\\QA\\ErrObject\>, WARNING\: array\<Utils\\LQA\\QA\\ErrObject\>, INFO\: array\<Utils\\LQA\\QA\\ErrObject\>\} but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\:\:getExceptionList\(\) should return array\{ERROR\: array\<Utils\\LQA\\QA\\ErrObject\>, WARNING\: array\<Utils\\LQA\\QA\\ErrObject\>, INFO\: array\<Utils\\LQA\\QA\\ErrObject\>\} but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA.php
-
-		-
 			message: '#^Method Utils\\LQA\\QA\:\:getMalformedXmlStructs\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 2
-			path: lib/Utils/LQA/QA.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\:\:getMalformedXmlStructs\(\) should return array\{source\: array, target\: array\} but returns array\.$#'
-			identifier: return.type
-			count: 1
 			path: lib/Utils/LQA/QA.php
 
 		-
@@ -10753,55 +10597,7 @@ parameters:
 			path: lib/Utils/LQA/QA.php
 
 		-
-			message: '#^Method Utils\\LQA\\QA\:\:prepareDOMStructures\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/LQA/QA.php
-
-		-
-			message: '#^Parameter \#2 \$subject of function preg_match expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/LQA/QA.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ContentPreprocessor\:\:cleanOutputContent\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/ContentPreprocessor.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ContentPreprocessor\:\:replaceAscii\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/ContentPreprocessor.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ContentPreprocessor\:\:replaceHexEntities\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/ContentPreprocessor.php
-
-		-
 			message: '#^Parameter \#1 \$seg of method Utils\\LQA\\QA\\ContentPreprocessor\:\:replaceAscii\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/LQA/QA/ContentPreprocessor.php
-
-		-
-			message: '#^Parameter \#3 \$from_encoding of function mb_convert_encoding expects array\|string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/LQA/QA/ContentPreprocessor.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 7
-			path: lib/Utils/LQA/QA/ContentPreprocessor.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/LQA/QA/ContentPreprocessor.php
@@ -10819,190 +10615,10 @@ parameters:
 			path: lib/Utils/LQA/QA/DomHandler.php
 
 		-
-			message: '#^Cannot access property \$length on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Cannot access property \$textContent on DOMNameSpaceNode\|DOMNode\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Cannot call method getElementsByTagName\(\) on DOMDocument\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Cannot call method saveXML\(\) on DOMDocument\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Cannot clone DOMDocument\|null\.$#'
-			identifier: clone.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:checkUnclosedTag\(\) has parameter \$error with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:elementIsToBeExcludedFromChecks\(\) has parameter \$tagsToBeExcludedFromChecks with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:getMalformedXmlStructs\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:getSrcDomMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:getTrgDomMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:mapDom\(\) has parameter \$srcNodeList with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:mapDom\(\) has parameter \$trgNodeList with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:mapDom\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:mapElements\(\) has parameter \$elementList with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:mapElements\(\) has parameter \$srcDomElements with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:prepareDOMStructures\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:queryDOMElement\(\) has parameter \$TagReference with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\DomHandler\:\:queryDOMElement\(\) should return DOMNode but returns DOMNameSpaceNode\|DOMNode\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
 			message: '#^Parameter \#2 \$subject of function preg_match_all expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Property Utils\\LQA\\QA\\DomHandler\:\:\$malformedXmlStructDiff type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 2
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Property Utils\\LQA\\QA\\DomHandler\:\:\$normalizedTrgDOMNodeList with generic class DOMNodeList does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Property Utils\\LQA\\QA\\DomHandler\:\:\$srcDomMap type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Property Utils\\LQA\\QA\\DomHandler\:\:\$trgDomMap type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/DomHandler.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrObject\:\:get\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrObject.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrObject\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Utils/LQA/QA/ErrObject.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrorManager\:\:JSONtoExceptionList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrorManager\:\:addCustomError\(\) has parameter \$errorMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrorManager\:\:getErrorsJSON\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrorManager\:\:getExceptionList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrorManager\:\:getNoticesJSON\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\ErrorManager\:\:getWarningsJSON\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
 
 		-
 			message: '#^Offset 1 on array\{non\-falsy\-string, numeric\-string\} on left side of \?\? always exists and is not nullable\.$#'
@@ -11011,238 +10627,16 @@ parameters:
 			path: lib/Utils/LQA/QA/ErrorManager.php
 
 		-
-			message: '#^Property Utils\\LQA\\QA\\ErrorManager\:\:\$errorMap type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Property Utils\\LQA\\QA\\ErrorManager\:\:\$exceptionList type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Property Utils\\LQA\\QA\\ErrorManager\:\:\$tipMap type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/ErrorManager.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function mb_substr_count expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/LQA/QA/SymbolChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkContentAndAddTagMismatchError\(\) has parameter \$originalTargetValues with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkContentAndAddTagMismatchError\(\) has parameter \$src with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkContentAndAddTagMismatchError\(\) has parameter \$trg with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkDiff\(\) has parameter \$diff with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkTagPositionsAndAddTagOrderError\(\) has parameter \$src with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkTagPositionsAndAddTagOrderError\(\) has parameter \$trg with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkWhiteSpaces\(\) has parameter \$source_tags with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:checkWhiteSpaces\(\) has parameter \$target_tags with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:extractEquivTextAttributes\(\) has parameter \$tags with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:extractEquivTextAttributes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:extractIdAttributes\(\) has parameter \$tags with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:extractIdAttributes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:getTagPositionError\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:normalizeTags\(\) has parameter \$_opening_toCheck with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:normalizeTags\(\) has parameter \$_selfClosing_toCheck with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\TagChecker\:\:normalizeTags\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Parameter \#1 \$dom of method Utils\\LQA\\QA\\DomHandler\:\:setNormalizedTrgDOM\(\) expects DOMDocument, DOMDocument\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
 			message: '#^Parameter \#1 \$errorCode of class Model\\FeaturesBase\\Hook\\Event\\Filter\\CheckTagPositionsEvent constructor expects bool, int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/LQA/QA/TagChecker.php
 
 		-
-			message: '#^Property Utils\\LQA\\QA\\TagChecker\:\:\$tagPositionError type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/LQA/QA/TagChecker.php
-
-		-
-			message: '#^Access to an undefined property DOMNameSpaceNode\|DOMNode\:\:\$textContent\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Cannot access offset 0 on list\<string\>\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Cannot access property \$ownerDocument on DOMNameSpaceNode\|DOMNode\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Cannot call method saveXML\(\) on DOMDocument\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\WhitespaceChecker\:\:checkContentConsistency\(\) has parameter \$srcNodeList with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\WhitespaceChecker\:\:checkContentConsistency\(\) has parameter \$trgNodeList with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\QA\\WhitespaceChecker\:\:nbspToSpace\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Parameter \#1 \$array of function end expects array\|object, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Parameter \#1 \$domDoc of method Utils\\LQA\\QA\\DomHandler\:\:queryDOMElement\(\) expects DOMDocument, DOMDocument\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Parameter \#1 \$value of function count expects array\|Countable, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 4
-			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
 			message: '#^Parameter \#2 \$subject of function preg_match expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/LQA/QA/WhitespaceChecker.php
-
-		-
-			message: '#^Method Utils\\LQA\\SizeRestriction\\CJKLangUtils\:\:getMatches\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/SizeRestriction/CJKLangUtils.php
-
-		-
-			message: '#^Method Utils\\LQA\\SizeRestriction\\EmojiUtils\:\:getMatches\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/SizeRestriction/EmojiUtils.php
-
-		-
-			message: '#^Method Utils\\LQA\\SizeRestriction\\EmojiUtils\:\:isEmoji\(\) has parameter \$string with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/SizeRestriction/EmojiUtils.php
-
-		-
-			message: '#^Method Utils\\LQA\\SizeRestriction\\SizeRestriction\:\:checkLimit\(\) has parameter \$limit with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/SizeRestriction/SizeRestriction.php
-
-		-
-			message: '#^Method Utils\\LQA\\SizeRestriction\\SizeRestriction\:\:getCharactersRemaining\(\) has parameter \$limit with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/LQA/SizeRestriction/SizeRestriction.php
 
 		-
 			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, string\|null given\.$#'
@@ -12895,18 +12289,6 @@ parameters:
 			path: lib/Utils/XliffReplacer/XliffReplacerCallback.php
 
 		-
-			message: '#^Method Utils\\XliffReplacer\\XliffReplacerCallback\:\:icuEnabled\(\) should return bool but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/XliffReplacer/XliffReplacerCallback.php
-
-		-
-			message: '#^Method Utils\\XliffReplacer\\XliffReplacerCallback\:\:icuEnabled\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/XliffReplacer/XliffReplacerCallback.php
-
-		-
 			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12927,12 +12309,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Utils/XliffReplacer/XliffReplacerCallback.php
-
-		-
-			message: '#^Property Utils\\XliffReplacer\\XliffReplacerCallback\:\:\$icuEnabled \(bool\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: lib/Utils/XliffReplacer/XliffReplacerCallback.php
 

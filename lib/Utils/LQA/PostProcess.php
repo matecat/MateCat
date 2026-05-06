@@ -300,10 +300,10 @@ class PostProcess
         // If space types don't match, convert the target to match the source
         if ($srcHasHeadNBSP != $trgHasHeadNBSP && $srcHasHeadNBSP) {
             // Source has NBSP, target has regular space -> convert target to NBSP
-            $_trgNodeContent = preg_replace('/^\x{20}/u', CatUtils::unicode2chr(0Xa0), $_trgNodeContent);
+            $_trgNodeContent = preg_replace('/^\x{20}/u', CatUtils::unicode2chr(160), $_trgNodeContent) ?? $_trgNodeContent;
         } elseif ($srcHasHeadNBSP != $trgHasHeadNBSP && $trgHasHeadNBSP) {
             // Target has NBSP, the source has regular space -> convert target to regular space
-            $_trgNodeContent = preg_replace('/^\x{a0}/u', CatUtils::unicode2chr(0X20), $_trgNodeContent);
+            $_trgNodeContent = preg_replace('/^\x{a0}/u', CatUtils::unicode2chr(32), $_trgNodeContent) ?? $_trgNodeContent;
         }
 
         // ========== Space Presence Normalization ==========
@@ -349,17 +349,17 @@ class PostProcess
         $trgLen = mb_strlen($trgNodeContent);
 
         // Extract the last character from each string
-        $trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 1, 1, 'utf-8');
-        $trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 1, 1, 'utf-8');
+        $trailingSrcChar = $srcLen > 0 ? mb_substr($srcNodeContent, $srcLen - 1, 1, 'utf-8') : '';
+        $trailingTrgChar = $trgLen > 0 ? mb_substr($trgNodeContent, $trgLen - 1, 1, 'utf-8') : '';
 
         // ========== NBSP Type Normalization ==========
         // If space types don't match, convert the target to match the source
         if ($srcHasTailNBSP != $trgHasTailNBSP && $srcHasTailNBSP) {
             // Source ends with NBSP, target ends with regular space -> convert target to NBSP
-            $_trgNodeContent = preg_replace('/\x{20}$/u', CatUtils::unicode2chr(0Xa0), $_trgNodeContent);
+            $_trgNodeContent = preg_replace('/\x{20}$/u', CatUtils::unicode2chr(160), $_trgNodeContent) ?? $_trgNodeContent;
         } elseif ($srcHasTailNBSP != $trgHasTailNBSP && $trgHasTailNBSP) {
             // Target ends with NBSP, the source ends with regular space -> convert target to regular space
-            $_trgNodeContent = preg_replace('/\x{a0}$/u', CatUtils::unicode2chr(0X20), $_trgNodeContent);
+            $_trgNodeContent = preg_replace('/\x{a0}$/u', CatUtils::unicode2chr(32), $_trgNodeContent) ?? $_trgNodeContent;
         }
 
         // ========== Space Presence Normalization ==========
@@ -379,7 +379,7 @@ class PostProcess
      */
     private function nbspToSpace(string $s): string
     {
-        return preg_replace("/\x{a0}/u", chr(0x20), $s);
+        return preg_replace("/\x{a0}/u", chr(0x20), $s) ?? $s;
     }
 
     /**
@@ -423,7 +423,7 @@ class PostProcess
     /**
      * Gets the array of error objects.
      *
-     * @return array Array of ErrObject instances
+     * @return ErrObject[] Array of ErrObject instances
      */
     public function getErrors(): array
     {
@@ -433,7 +433,7 @@ class PostProcess
     /**
      * Gets the array of warning objects.
      *
-     * @return array Array of ErrObject instances
+     * @return ErrObject[] Array of ErrObject instances
      */
     public function getWarnings(): array
     {
@@ -480,7 +480,7 @@ class PostProcess
     /**
      * Performs tag-only validation without full consistency checks.
      *
-     * @return array Array of ErrObject instances
+     * @return ErrObject[] Array of ErrObject instances
      * @throws Exception If feature set operations fail
      */
     public function performTagCheckOnly(): array
