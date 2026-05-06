@@ -664,6 +664,10 @@ class UploadHandler
 
     protected function _isRightMime(stdClass $fileUp): bool
     {
+        if (!is_string($fileUp->type) || $fileUp->type === '') {
+            return false;
+        }
+
         //Mime Allowlist, take them from ProjectManager.php
         foreach (AppConfig::$MIME_TYPES as $key => $value) {
             if (str_contains($key, $fileUp->type)) {

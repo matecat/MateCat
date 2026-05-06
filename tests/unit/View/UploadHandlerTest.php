@@ -282,6 +282,26 @@ class UploadHandlerTest extends AbstractTest
         $this->assertFalse($result);
     }
 
+    #[Test]
+    public function isRightMime_rejects_false_type(): void
+    {
+        $file = new \stdClass();
+        $file->type = false;
+
+        $result = $this->invokePrivate('_isRightMime', [$file]);
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isRightMime_rejects_empty_string_type(): void
+    {
+        $file = new \stdClass();
+        $file->type = '';
+
+        $result = $this->invokePrivate('_isRightMime', [$file]);
+        $this->assertFalse($result);
+    }
+
     // ─── my_basename ───
 
     #[Test]
