@@ -837,3 +837,98 @@ describe('tagSegments — strategy pass (metadataMap)', () => {
     expect(getSidsFromElement(dupEl)).toContain(2)
   })
 })
+
+describe('updateNodeTranslation — internal_id grouping (split trans-units)', () => {
+  const SEGMENT_SIDS_ATTR = 'data-context-sids'
+
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  const tagWithSids = (el, sids) => {
+    el.setAttribute(SEGMENT_SIDS_ATTR, sids.join(','))
+  }
+
+  it('replaces text with concatenated translations when two segments share internal_id', () => {
+    document.body.innerHTML = '<p>First part second part</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [1, 2])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'First part', target: 'Erster Teil', internal_id: 'tu1'},
+      {sid: 2, source: 'second part', target: 'zweiter Teil', internal_id: 'tu1'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Erster Teil zweiter Teil')
+  })
+
+  it('returns no-target when one segment in a split group has no translation', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [1, 2])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello', target: 'Hallo', internal_id: 'tu1'},
+      {sid: 2, source: 'world', target: '', internal_id: 'tu1'},
+    ])
+    expect(result).toBe('no-target')
+    expect(p.textContent.trim()).toBe('Hello world')
+  })
+
+  it('returns no-target when one segment in a split group has null translation', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [1, 2])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello', target: 'Hallo', internal_id: 'tu1'},
+      {sid: 2, source: 'world', target: null, internal_id: 'tu1'},
+    ])
+    expect(result).toBe('no-target')
+  })
+
+  it('sorts split segments by SID before concatenating', () => {
+    document.body.innerHTML = '<p>A B C</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [10, 20, 30])
+    const result = updateNodeTranslation(p, [
+      {sid: 30, source: 'C', target: 'Cee', internal_id: 'tu1'},
+      {sid: 10, source: 'A', target: 'Ay', internal_id: 'tu1'},
+      {sid: 20, source: 'B', target: 'Bee', internal_id: 'tu1'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Ay Bee Cee')
+  })
+
+  it('preserves mismatch detection for duplicate text nodes (different internal_id)', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [1, 2])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt', internal_id: 'tu1'},
+      {sid: 2, source: 'Hello world', target: 'Ciao mondo', internal_id: 'tu2'},
+    ])
+    expect(result).toBe('mismatch')
+    expect(p.textContent.trim()).toBe('Hello world')
+  })
+
+  it('replaces text when duplicate text nodes have identical translations (different internal_id)', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [1, 2])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt', internal_id: 'tu1'},
+      {sid: 2, source: 'Hello world', target: 'Hallo Welt', internal_id: 'tu2'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+
+  it('segments without internal_id are treated as independent groups', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagWithSids(p, [1])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+})
