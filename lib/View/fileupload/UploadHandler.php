@@ -486,7 +486,8 @@ class UploadHandler
 
             if ($fp !== false) {
                 $readBuff = fread($fp, 1024);
-                while ($readBuff !== false && !preg_match($regexp, $readBuff, $matches)) {
+                $maxRead = 16 * 1024; // 16KB cap — multipart headers are always <1KB
+                while ($readBuff !== false && strlen($readBuff) < $maxRead && !preg_match($regexp, $readBuff, $matches)) {
                     $readBuff .= fread($fp, 1024);
                 }
                 fclose($fp);
