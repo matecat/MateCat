@@ -526,16 +526,9 @@ class UploadHandler
     public function flush(mixed $info): void
     {
         $json = json_encode($info);
-        $redirect = isset($_REQUEST['redirect']) ? stripslashes($_REQUEST['redirect']) : null;
 
         header('Vary: Accept');
         header('Content-type: application/json');
-
-        if ($redirect) {
-            header('Location: ' . sprintf($redirect, rawurlencode((string)$json)));
-
-            return;
-        }
 
         echo $json;
 
