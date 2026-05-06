@@ -1,19 +1,19 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-06 (last updated)  
-**Commits (refactor + fix + security):** 36  
+**Date:** 2026-05-07 (last updated)  
+**Commits (refactor + fix + security):** 37  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline errors** | 7,366 | ~3,453 | −3,913 (−53.1%) |
-| **PHPUnit tests** | ~2,248 | 3,413+ | +1,165 (+51.8%) |
-| **PHPUnit assertions** | ~19,449 | 22,326+ | +2,877 (+14.8%) |
+| **PHPStan baseline entries** | 7,366 | 3,349 | −4,017 (−54.5%) |
+| **PHPUnit tests** | ~2,248 | 3,421 | +1,173 (+52.2%) |
+| **PHPUnit assertions** | ~19,449 | 22,391+ | +2,942 (+15.1%) |
 | **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
-| **New test files** | 235 | 265+ | +30 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 32+ | — |
+| **New test files** | 235 | 271+ | +36 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 39+ | — |
 
 ---
 
@@ -424,9 +424,9 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,340+ |
-| **Assertions** | 22,010+ |
-| **Warnings** | 1 |
+| **Total tests** | 3,421 |
+| **Assertions** | 22,391+ |
+| **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
 ### Coverage Analysis
@@ -451,7 +451,7 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 **Why:** `AbstractRevisionFeature` is the abstract base for all revision/review features. Fixing it propagates type safety to `ReviewExtended`, `SecondPassReview`, and all review controllers.
 
-#### 7A. `AbstractRevisionFeature.php` — ✅ DONE (−24 entries net, +30 tests)
+#### 7A. `AbstractRevisionFeature.php` — ✅ DONE (commit `c5ff0d18fc`, −24 entries net, +30 tests)
 
 All in-file PHPStan errors eliminated. Key changes:
 - **Bug fix**: `get_called_class() instanceof ReviewExtended` always evaluated to `false` (class-string is not an object) → replaced with `is_a(static::class, ReviewExtended::class, true)`
@@ -463,7 +463,7 @@ All in-file PHPStan errors eliminated. Key changes:
 - **1 cascade entry added**: `ReviewsController::createReview()` (calls `createQaChunkReviewRecords` which now `@throws TypeError`)
 - **30 new tests** in `AbstractRevisionFeatureTest.php` (81% line coverage, 0 warnings)
 
-#### 7B. `ReviewedWordCountModel.php` + `TransactionalTrait.php` — ✅ DONE (−38 entries, +18 tests)
+#### 7B. `ReviewedWordCountModel.php` + `TransactionalTrait.php` — ✅ DONE (commit `d4c46f4bc5`, −38 entries, +18 tests)
 
 All in-file PHPStan errors eliminated across 26 baseline entries (45 total occurrences). Key changes:
 - **Null guards**: Constructor throws `RuntimeException` when `TranslationEvent::getChunk()` or `getSegmentStruct()` returns null; cached `$_segment` property eliminates repeated nullable DB calls (7 occurrences)
@@ -480,7 +480,7 @@ All in-file PHPStan errors eliminated across 26 baseline entries (45 total occur
 
 **Why:** `SegmentAnalysisController` is a high-traffic API endpoint consumed by the frontend analysis panel. Fixing it ensures type-safe segment data formatting, proper null guards on DB lookups, and correct exception propagation.
 
-#### 8A. `SegmentAnalysisController.php` + `SegmentDisabledTrait.php` — ✅ DONE (−36 entries, +13 tests)
+#### 8A. `SegmentAnalysisController.php` + `SegmentDisabledTrait.php` — ✅ DONE (commit `4d23170dbc`, −36 entries, +13 tests)
 
 All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@throws DivisionByZeroError` propagation + 1 `SegmentDisabledTrait` bug fix + 2 `missingType.checkedException` on trait). Key changes:
 - **Null guard**: `JobDao::getByIdAndPassword()` result in `formatSegment()` → `?? throw new RuntimeException('Job not found')`
@@ -494,6 +494,40 @@ All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@th
 - **`@throws` annotations**: `DivisionByZeroError`, `Exception`, `PDOException` propagation on `job()`, `project()`, `getSegmentsForAJob()`, `getSegmentsForAProject()`, `getIssuesNotesAndIdRequests()`, `destroySegmentDisabledCache()`
 - **Bug fix** (`SegmentDisabledTrait`): `SegmentMetadataDao::get()` returns `?SegmentMetadataStruct` (single struct), not array — removed erroneous `[0]` offset access that would crash on non-null results
 - **13 new tests** in `SegmentAnalysisControllerTest.php` (0 warnings)
+
+---
+
+### Phase 9: LQA Stack (~109 entries) — ✅ DONE
+
+**Why:** The LQA (Language Quality Assessment) subsystem handles all QA validation — tag checking, whitespace normalization, DOM analysis, BxEx/G tag validation, size restrictions, ICU pattern checks, and symbol comparison. It spans 19 PHP files with 109 baseline entries.
+
+#### 9A. Full LQA stack — ✅ DONE (−97 entries, 12 residual)
+
+97 of 109 baseline entries eliminated across all 19 files in `lib/Utils/LQA/`. Coverage was already >80% on all files (existing tests from prior sessions). Key changes by file:
+
+**`QA/DomHandler.php`** (24→2): `array<string, mixed>` property types replacing overly strict shapes, `DOMNodeList<DOMNode>` generics, `LibXMLError` param type on `checkUnclosedTag()`, null-narrowing `$this->srcDom`/`$this->trgDom` with explicit check + `DOMException`, `$element->ownerDocument?->saveXML()` null-safe chain, `$node !== null` guard for `textContent`, typed `$TagReference` as `array{id?: string}`, cleaned `queryDOMElement()` return logic.
+
+**`QA/TagChecker.php`** (19→1): `list<string>` for `$tagPositionError`, PHPDoc array types on all private methods (`normalizeTags`, `extractIdAttributes`, `extractEquivTextAttributes`, `checkTagPositionsAndAddTagOrderError`, `checkContentAndAddTagMismatchError`, `checkWhiteSpaces`, `checkDiff`), null-narrowing `getTrgDom()` before `setNormalizedTrgDOM()`.
+
+**`QA/WhitespaceChecker.php`** (11→1): `DOMNodeList<DOMNode>` generics, `$srcDom`/`$trgDom` null checks before `queryDOMElement()`, `$srcNode` null guard before `ownerDocument` access, `mb_split()` false-guard in `checkHeadCRNL`/`checkTailCRNL`, `preg_replace` fallback in `nbspToSpace()`.
+
+**`QA/ErrorManager.php`** (10→1): `array<int, string|null>` for `$errorMap`/`$tipMap`, `array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>}` for `$exceptionList`, `json_encode() ?: '[]'` on all JSON methods, typed `$errorMap` param as `array{code: int, debug?: string|null, tip?: string|null}`, string-cast for `$errorCount` offset lookup.
+
+**`QA.php`** (9→2): Return type PHPDocs for `getMalformedXmlStructs()` and `getTargetTagPositionError()`, `@throws Exception` on `prepareDOMStructures()`, null-narrowing on DOMDocument accesses.
+
+**`PostProcess.php`** (9→1): `preg_replace` null-safety fallbacks, `mb_strlen`/`mb_substr` null-coalesce on inputs, DOMDocument null checks, strict comparison fix.
+
+**`QA/ContentPreprocessor.php`** (8→2): `preg_replace_callback` null-safety, `replaceAscii()` string|false narrowing, static property type remains as residual (PHPStan literal-type limitation).
+
+**`BxExG/Mapper.php`** (5→0): `$childNode` null guard before `->nodeName` access.
+
+**`BxExG/Validator.php`** (2→0), **`BxExG/Element.php`** (2→0), **`QA/ErrObject.php`** (2→0), **`QA/SymbolChecker.php`** (1→0), **`SizeRestriction/SizeRestriction.php`** (4→2), **`SizeRestriction/EmojiUtils.php`** (2→0), **`SizeRestriction/CJKLangUtils.php`** (1→0), **`ICUSourceSegmentChecker.php`** (1→0): PHPDoc annotations, null guards, and type narrowing.
+
+**12 residual entries** — hard-to-fix structural issues:
+- `ContentPreprocessor::$asciiPlaceHoldMap` static property type vs literal (PHPStan limitation)
+- `CheckTagPositionsEvent` constructor expects `bool`, receives `int` (upstream class contract)
+- `SizeRestriction` nullable property chains through `preg_replace` (11 occurrences)
+- Various `string|false`/`string|null` from DOM/regex operations in deeply nested flows
 
 ---
 
@@ -511,10 +545,10 @@ All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@th
 |----------|------|--------|-----------|
 | ~~1~~ | ~~`lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php`~~ | ~~26~~ | ✅ Done (Phase 7B) |
 | ~~2~~ | ~~`lib/Controller/API/V3/SegmentAnalysisController.php`~~ | ~~30~~ | ✅ Done (Phase 8A) |
-| 3 | `lib/Utils/LQA/QA/DomHandler.php` | ~24 | DOM parsing utility — isolated, self-contained |
+| ~~3~~ | ~~`lib/Utils/LQA/` (full stack)~~ | ~~109~~ | ✅ Done (Phase 9A, −97) |
 | 4 | `lib/Utils/OutsourceTo/Translated.php` | ~31 | External integration — lower priority, side-effect heavy |
 
-**Estimated total if all completed:** ~55 additional errors removed
+**Estimated remaining if Priority 4 completed:** ~31 additional errors removed
 
 ### Phase 5 Residual Controllers
 
@@ -527,4 +561,4 @@ All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@th
 
 ## Next Action
 
-Start Priority 3: `lib/Utils/LQA/QA/DomHandler.php` (~24 errors)
+Start Priority 4: `lib/Utils/OutsourceTo/Translated.php` (~31 errors) or Phase 5 residual controllers.
