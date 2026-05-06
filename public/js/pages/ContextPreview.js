@@ -41,6 +41,10 @@ const ContextPreview = () => {
   const [htmlReady, setHtmlReady] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(100)
 
+  const urlParams = useMemo(() => new URLSearchParams(window.location.search), [])
+  const sourceCode = urlParams.get('source_code') || config.source_code || ''
+  const targetCode = urlParams.get('target_code') || config.target_code || ''
+
   const handleContentViewChange = useCallback((newView) => {
     setContentView(newView)
     if (newView === CONTENT_VIEWS.SCREENSHOT) {
@@ -487,6 +491,7 @@ const ContextPreview = () => {
               key={`source-${contentView}`}
               panelRef={sourceRef}
               title="Source"
+              languageLabel={viewMode === VIEW_MODES.BOTH ? `Source - ${sourceCode}` : undefined}
               zoomLevel={zoomLevel}
             />
           ) : (
@@ -506,6 +511,7 @@ const ContextPreview = () => {
               key={`target-${contentView}`}
               panelRef={targetRef}
               title="Translation"
+              languageLabel={viewMode === VIEW_MODES.BOTH ? `Target - ${targetCode}` : undefined}
               zoomLevel={zoomLevel}
             />
           ) : (

@@ -7,6 +7,26 @@ import {
 } from '../utils/contextPreviewUtils'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 
+// Manual scroll — scrollIntoView propagates through shadow DOM to outer page
+function scrollToCenter(el, behavior = 'smooth') {
+  const root = el.getRootNode()
+  const host = root instanceof ShadowRoot ? root.host : null
+  const scrollContainer = host
+    ? host.closest('.context-preview-content')
+    : el.closest('.context-preview-content')
+  if (!scrollContainer) return
+
+  const elRect = el.getBoundingClientRect()
+  const containerRect = scrollContainer.getBoundingClientRect()
+  const targetTop =
+    scrollContainer.scrollTop +
+    (elRect.top - containerRect.top) -
+    containerRect.height / 2 +
+    elRect.height / 2
+
+  scrollContainer.scrollTo({top: targetTop, behavior})
+}
+
 /**
  * Manages highlight state and occurrence navigation for the ContextPreview panels.
  *
@@ -48,10 +68,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         const res = highlightBySid(sourceRef.current, sid, activeIndex)
         total = res.total
         if (scroll && res.marks[activeIndex]) {
-          res.marks[activeIndex][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          })
+          scrollToCenter(res.marks[activeIndex][0])
         }
       }
       if (targetRef.current) {
@@ -59,10 +76,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         const res = highlightBySid(targetRef.current, sid, activeIndex)
         if (!total) total = res.total
         if (scroll && res.marks[activeIndex]) {
-          res.marks[activeIndex][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          })
+          scrollToCenter(res.marks[activeIndex][0])
         }
       }
       return total
@@ -82,10 +96,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         clearHighlights(ref.current)
         const res = highlightBySid(ref.current, activeSid, 0)
         if (scroll && res.marks[0]?.[0]) {
-          res.marks[0][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          })
+          scrollToCenter(res.marks[0][0])
         }
       })
     },
@@ -104,7 +115,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         ;[sourceRef, targetRef].forEach((ref) => {
           if (!ref.current) return
           const mark = setActiveHighlight(ref.current, nextIndex)
-          if (mark) mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+          if (mark) scrollToCenter(mark)
         })
         setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
         return

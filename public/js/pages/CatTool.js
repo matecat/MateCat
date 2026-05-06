@@ -94,7 +94,7 @@ function CatTool() {
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [segmentHasPreview, setSegmentHasPreview] = useState(false)
-  const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}`
+  const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
 
