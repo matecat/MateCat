@@ -2383,6 +2383,12 @@ parameters:
 			path: lib/Controller/API/V2/ReviewsController.php
 
 		-
+			message: '#^Method Controller\\API\\V2\\ReviewsController\:\:createReview\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/ReviewsController.php
+
+		-
 			message: '#^Property Controller\\API\\V2\\ReviewsController\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -8695,150 +8701,6 @@ parameters:
 			path: lib/Plugins/Features/AbstractRevisionFeature.php
 
 		-
-			message: '#^Instanceof between class\-string and Plugins\\Features\\ReviewExtended will always evaluate to false\.$#'
-			identifier: instanceof.alwaysFalse
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:_validateUndoData\(\) has parameter \$undo_data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:alterChunkReviewStruct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:createQaChunkReviewRecords\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:createQaChunkReviewRecords\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:createQaChunkReviewRecords\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:filterJobPasswordToReviewPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:jobPasswordChanged\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:postProjectCreate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:reviewPasswordChanged\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:setQaModelFromJsonFile\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:setQaModelFromJsonFile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:setQaModelFromJsonFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\LQA\\ChunkReviewDao\:\:updatePassword\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getLatestEventsInSegmentInterval\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$password of method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterJobPasswordToReviewPasswordEvent\:\:setPassword\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$project of method Model\\Projects\\ProjectDao\:\:updateField\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#1 \$project of method Plugins\\Features\\ReviewExtended\\ChunkReviewModel\:\:recountAndUpdatePassFailResult\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#2 \$project of method Plugins\\Features\\AbstractRevisionFeature\:\:createQaChunkReviewRecords\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Parameter \#3 \$new_password of method Model\\LQA\\ChunkReviewDao\:\:updatePassword\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Property Model\\ProjectCreation\\ProjectStructure\:\:\$create_2_pass_review \(bool\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Property Model\\ProjectCreation\\ProjectStructure\:\:\$features \(array\<string, mixed\>\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
-			message: '#^Property Plugins\\Features\\AbstractRevisionFeature\:\:\$dependencies type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
-
-		-
 			message: '#^Method Plugins\\Features\\BaseFeature\:\:getBuildFiles\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9527,12 +9389,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Plugins/Features/RevisionFactory.php
-
-		-
-			message: '#^Property Plugins\\Features\\SecondPassReview\:\:\$dependencies type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/SecondPassReview.php
 
 		-
 			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'

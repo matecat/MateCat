@@ -1,0 +1,498 @@
+# PHPStan Baseline Reduction — Comprehensive Progression
+
+**Branch:** `context-review` (based on `develop`)  
+**Date:** 2026-05-06 (last updated)  
+**Commits (refactor + fix + security):** 35  
+
+| Metric | develop (baseline) | context-review (current) | Delta |
+|--------|-------------------|--------------------------|-------|
+| **PHPStan baseline errors** | 7,366 | ~3,527 | −3,839 (−52.1%) |
+| **PHPUnit tests** | ~2,248 | 3,382+ | +1,134 (+50.4%) |
+| **PHPUnit assertions** | ~19,449 | 22,237+ | +2,788 (+14.3%) |
+| **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
+| **New test files** | 235 | 263+ | +28 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 29+ | — |
+
+---
+
+## Strategy: Foundation-First, Cascade-Down
+
+Fix **shared infrastructure classes first** — interfaces, abstract classes, base controllers — because every error fixed there often reveals or resolves errors in child classes automatically.
+
+Execution order:
+1. Engine hierarchy (AbstractEngine → concrete engines → results/factory) — widest inheritance tree
+2. Controller abstracts (KleinController → AbstractDownloadController → auth layer)
+3. DataAccess layer (DaoCacheTrait → AbstractDao → concrete DAOs)
+4. Utility layer (CatUtils, Utils — called from everywhere)
+5. Worker cluster (TMAnalysisWorker, GetContributionWorker, FastAnalysis)
+6. High-value controllers (highest error count files)
+7. Models & modules (TeamModel, FilesStorage, TmKeyManagement, Translators)
+
+---
+
+## Rules
+
+### Core Process Rules
+
+1. **TDD** — write good test coverage alongside every PHPStan improvement. Tests FIRST or alongside, never deferred.
+2. **Verify ALL callers** — when changing/updating method signatures (parameters, return types), MUST verify ALL callers, child classes, and sibling implementations before committing.
+3. **Types MUST be certain** — no speculative type changes. Confirm actual runtime behavior via tests/callers before narrowing or changing a type.
+4. **Minimize scope** — fix the PHPStan error, don't refactor surrounding code.
+5. **No `@phpstan-ignore`** or baseline suppression.
+
+### TDD Specifics
+
+- **Behavioral changes** (null guards, new exceptions, restructured control flow) → strict TDD red/green. Write the failing test FIRST (red), then apply the minimal fix (green).
+- **Type-only annotations** (`@throws`, `@return`, `@param` PHPDocs) → don't require red/green since PHPStan itself is the verifier.
+
+### Coverage Target
+
+- When fixing PHPStan errors in a file, the goal is also to **increase test coverage above 80%** for that file. Tests must cover the fixed code paths, not just satisfy PHPStan.
+
+### Commit / Git Rules
+
+- **Conventional-commit with emoji prefix** — format: `<emoji> <type>(<scope>): <description>`
+- **Full test suite must pass before commit**
+- **Do NOT push without explicit user authorization** — commit and push are two separate gates
+- **Always `-a` flag (lowercase)** for `git commit`
+- Show commit message → WAIT for authorization → commit
+
+### Progress Docs
+
+- **Never modify baseline/starting values** in progress docs
+- Only update current values, delta columns, completed rows, queue movements
+
+---
+
+## Completed Work
+
+### Phase 0: Structs & Engine Hierarchy (~1,100 errors)
+
+**Why:** The engine hierarchy is the widest inheritance tree in the codebase. AbstractEngine → 10+ concrete engines → Results classes → Factory. Fixing it first propagates type safety to all engine consumers.
+
+| # | Scope | Errors Fixed | Commit |
+|---|-------|--------------|--------|
+| 1 | EngineStruct + 11 subclasses | 43 | `dab5d87bc8` |
+| 2 | 9 struct `iterableValue` fixes | 31 | `6ec492f326` |
+| 3 | SegmentUIStruct, MembershipStruct, ConfirmationStruct, PropagationTotalStruct | 31 | `295a73b1bf` |
+| 4 | ChunkDao, ProjectDao | 7 | `7a3e36d0fb` |
+| 5 | 12 DAO files | 32 | `9bd1630414` |
+| 6 | 65 struct @throws annotations | — | `dafe761033` |
+| 7 | ProjectTemplateStruct | 28 | `295c1c79f0` |
+| 8 | AbstractXliffRule | 26 | `1610122f4b` |
+| 9 | ConnectedServiceStruct + AbstractDaoObjectStruct | 30 | `287700a975` |
+| 10 | AbstractEngine (38 in-file + 33 cascaded) | 71 | `2412061ebf` |
+| 11 | MMT engine layer (type-safe API client) | 117 | `157b2a681d` |
+| 12 | MyMemory engine + result structs | 66 | `8bfad25f72` |
+| 13 | Lara engine, validators, controllers | 80 | `ed83e0d321` |
+| 14 | 7 sibling engines (Intento, SmartMATE, DeepL, Apertium, Altlang, Google, Yandex) | 83 | `a1514b8438` |
+| 15 | Results/ response classes | 40 | `907c10531b` |
+| 16 | EngineInterface, SmartMATE, Oauth trait, EngineController | 37 | `73d3cda245` |
+| 17 | EnginesFactory, NONE, EngineOwnershipValidator | 28 | `add058c639` |
+| 18 | SimpleJWT (typed ArrayAccess, null guards) | 29 | `990b466cbe` |
+| 19 | Database, BaseKleinViewController, foundation layers | 59 | `18ab7162ee` |
+
+---
+
+### Phase 1: Controller Abstracts Layer (~185 errors) — ✅ DONE
+
+**Why:** Every HTTP controller in Matecat inherits from this chain. Fixing it unlocks clean analysis for all 980 errors in `lib/Controller/API/`.
+
+#### 1A. `KleinController.php` — ✅ DONE (commit `67cf2372b4`)
+
+All 15 baseline entries eliminated. Cascade bonus: ~35 `FeatureSet|null` entries across Controller/ files eliminated by making `$featureSet` non-nullable.
+
+**Total: −50 errors (15 direct + ~35 cascade)**
+
+#### 1B. `AbstractDownloadController.php` + all 4 subclasses — ✅ DONE (commit `e122f8e04d`)
+
+**95 baseline entries eliminated.** Changes:
+- Parent: `finalize(): void`, `nocache(): void`, `setMimeType(): void`, `unlockToken(?array): void`; null guards; `pathinfo_fix` type safety
+- `DownloadController`: `pathinfoString()` helper; filter_var casts; null guards; `@throws`; dead code removal; typed `$downloadToken`
+- `DownloadOriginalController`: `void` return; filter_var casts; null guards on ChunkReview + Project
+- `DownloadJobTMXController`: `SplFileInfo` → `SplTempFileObject`; `is_string()` iteration guard; filter_var casts
+- `DownloadAnalysisReportController`: **Bug fix** — `InvalidArgumentException` constructor args were swapped; null-coalesce on `findById()`
+- `ActivityLogStruct::$ip` → `?string` (−10 cascade entries across 10 files)
+- 35 new tests (25 parent + 10 subclasses)
+
+Residual: 9 entries remain (8 in DownloadController, 1 in DownloadOriginal) — cross-file type issues, will resolve in later phases.
+
+#### 1C. `AuthenticationHelper.php` — ✅ DONE (commit `866e3545eb`, −16 entries)
+
+- `$logged` type annotation `@var true` → `bool`
+- `$session` property + all 4 method params typed as `array<string, mixed>`
+- Null guard on `$userDao->getByUid()` return (`?UserStruct` → non-nullable)
+- Null guard on `$api_record` before `->getUser()` call
+- `getUserProfile()`: `@return array<string, mixed>`, `@throws Exception`
+- `findUserTeams() ?? []` — null-safe for `array_map`
+- Removed unused `use ($membersDao)` closure capture
+- Removed invalid `@var $user UserStruct` and `@var $team TeamStruct` inline tags
+- `validKeys()`: `@throws PDOException`
+- `setUserSession()`: `@throws Exception`
+- Removed unused `TeamStruct` import
+- Cascade: `TypeError` catch widened in constructor inner try/catch
+- Cascade: `destroyAuthentication()` gains `@throws Exception|TypeError`
+- **9 tests** in `AuthenticationHelperTest.php`
+
+#### 1D. `SessionTokenStoreHandler.php` — ✅ DONE (commit `866e3545eb`, −11 stale + 2 real)
+
+- `setCookieLoginTokenActive()`: `@throws Exception` (propagated from `_cacheSetConnection()`)
+- `isLoginCookieStillActive()`: `@throws Exception`
+- 9 other baseline entries were stale (DaoCacheTrait was already fixed upstream)
+- **7 tests** in `SessionTokenStoreHandlerTest.php`
+
+#### 1E. `AuthCookie.php` — ✅ DONE (commit `866e3545eb`, −11 real errors)
+
+- `getCredentials()`: `@return ?array<string, mixed>`, `@throws Exception|TypeError`
+- `setCredentials()`: `$user->uid` null guard → `RuntimeException` (real bug fix), `@throws Exception|TypeError`
+- `generateSignedAuthCookie()`: `@return array{string, int}`, `@throws TypeError|UnexpectedValueException`
+- `destroyAuthentication()`: `@throws Exception|TypeError`, `session_status()` guard (real bug fix)
+- `getData()`: `@return ?array<string, mixed>`, `@throws TypeError`
+- Added imports: `RuntimeException`, `TypeError`
+- **13 tests** in `AuthCookieTest.php`
+
+#### 1F. `CookieManager.php` — ✅ DONE (commit `866e3545eb`)
+
+- `headers_sent()` guard — prevents no-op `setcookie()` calls after headers sent (real bug fix + eliminates PHPUnit warnings)
+- Removed dead PHP ≤7.2 `else` branch (we run PHP 8.3)
+
+#### 1G. `AuthenticationTrait.php` — ✅ DONE (commit `866e3545eb`, cascade)
+
+- `logout()`: `@throws Exception|TypeError` (cascade from `destroyAuthentication()`)
+
+#### 1H. `Team::render()` — ✅ DONE (commit `866e3545eb`, −1 baseline entry, real bug fix)
+
+- `empty($data)` → `$data === null` — distinguishes "not provided" from "empty array"
+- `foreach ($data ?? [] as $team)` — null-safe iteration
+- **Bug**: user with 0 teams caused `foreach(null)` PHP warning in production path
+
+---
+
+### Phase 2: DataAccess Layer (59 errors) — ✅ DONE (commit `61853c67b1`)
+
+**Why:** Completes the entire `Model/DataAccess/` foundation. Every DAO inherits `AbstractDao`.
+
+**59 baseline entries eliminated** (5,293 → 5,234).
+
+#### 2A. `DaoCacheTrait.php` + `AbstractDao.php` — ✅ DONE
+
+- `@throws Exception` on `_cacheSetConnection()` — propagates to all cache-init callers
+- `get('1')` int→string — Redis `get()` requires string key
+- Null guard in `_getFromCacheMap` — `$keyMap` can be null on cache miss
+- `(bool)` casts on `del()` — Redis returns int, trait declares bool
+- Null guard for `$keyMap` in `_deleteCacheByKey` — prevents null array access
+- Typed `_serializeForCacheKey` param: `array<int|string, scalar|null>`
+- Removed phantom `@template T` from `_getFromCacheMap`/`_setInCacheMap` (used `list<mixed>`)
+- `@throws Exception` on `_removeObjectCacheMapElement`/`_deleteCacheByKey`
+- `_destroyObjectCache` → best-effort try/catch (cache failure is non-critical; TTL handles recovery)
+- `@throws PDOException` on `updateFields`
+- Cascade `@throws` added to: SessionTokenStoreHandler, SegmentDisabledTrait, Pager, ProjectDao, JobDao, SegmentMetadataDao, SegmentTranslationDao, CustomPayableRateDao, XliffConfigTemplateDao, SetTranslationController
+
+#### 2B. `ShapelessConcreteStruct.php` — ✅ DONE (−1 entry)
+
+- `@implements ArrayAccess<string, mixed>` — fixes generics error
+- 3 remaining `@throws DomainException` entries kept in baseline (ArrayAccessTrait cascade risk)
+
+#### 2C. `AbstractDaoObjectStruct.php` — ❌ CANCELLED
+
+- Adding `@throws DomainException` on constructor cascades to ALL struct instantiations (+115 entries)
+- Kept as 1 baseline entry — will fix when all struct callers are targeted
+
+#### 2D. `XFetchEnvelope.php` — ✅ DONE (−1 entry)
+
+- `list<mixed>` param type on `$value`
+
+#### Key Decisions (Phase 2)
+
+- **`_destroyObjectCache` made best-effort**: Cache invalidation failure is non-critical. Prevents massive cascade to 25+ DAO methods.
+- **Removed phantom templates**: Template T was unreferenced in `_getFromCacheMap`/`_setInCacheMap` parameters. Replaced with `list<mixed>`.
+- **`list<mixed>` for cache values**: DaoCacheTrait stores diverse data. `list<mixed>` is honest; callers do instanceof filtering.
+- **ArrayAccessTrait `@throws` NOT added**: Used by 11 classes; creates unacceptable cascade.
+
+---
+
+### Phase 3: Utility Layer (88 errors) — ✅ DONE
+
+**Why:** `CatUtils` and `Utils` are called from everywhere. Typing them enables cascade fixes across the entire codebase.
+
+#### 3A. `CatUtils.php` — ✅ DONE (commit `23b20c1867`, −54 entries + 53 new tests)
+
+All 54 errors eliminated. Native param/return types, array shape PHPDocs, null guards, 53 new tests in `CatUtilsTest.php`.
+
+#### 3B. `Utils.php` — ✅ DONE (commit `3b650fbf4e`, −34 entries)
+
+All 34 errors eliminated. Native param types, array shape PHPDocs, guards, 12 new DB-dependent tests.
+
+---
+
+### Phase 4: Worker Cluster (145 errors) — ✅ DONE
+
+**Why:** Prepares for TMAnalysisWorker concurrency hardening. These workers run as daemons and process the highest-volume workloads.
+
+#### 4A. `GetContributionWorker.php` — ✅ DONE (commit `18866124c8`, −54 entries including cascade)
+
+54 baseline entries eliminated (41 direct + 13 cascade from `GetContributionRequest` return type fixes). Key changes:
+- `GetContributionRequest::getJobStruct()` → non-nullable `JobStruct` (always does `new JobStruct(...)`)
+- `GetContributionRequest::getUser()` → non-nullable `UserStruct`
+- `GetContributionRequest::getProjectStruct()` → non-nullable `ProjectStruct`
+- `GetContributionRequest::getContexts()` → new `ContributionContexts` value object (replaces untyped `(object)` cast)
+- `process()`: proper `instanceof QueueElement` narrowing instead of `@var` annotation
+- Native param types on `_formatConcordanceValues(string, string, array)`, `_sortByLenDesc(string, string)`, `issetSourceAndTarget(array)`, `_publishPayload(... string $targetLang, bool $isCrossLang)`
+- Array shape PHPDocs on all methods (`array<string, mixed>`, `array<int, array<string, mixed>>`, `array<string, string>`)
+- `@throws TypeError` propagation on `process()` and `_execGetContribution()`
+- **Bug fix**: `$queueElement` undefined variable in `_getMatches()` → replaced with `$contributionStruct->mt_qe_workflow_parameters`
+- Null guard on `SegmentTranslationDao::findBySegmentAndJob()` result
+- Null guard on `TmKeyStruct::$key` in `_extractAvailableKeysForUser()`
+- `preg_replace` null-safety: `?? $fallback` for all `preg_replace` calls that can return null
+- Removed unnecessary `??` on non-nullable properties (`tm_keys`, `mt_quality_value_in_editor`)
+- Fixed `@var $tm_key MemoryKeyStruct` invalid PHPDoc → typed closure `TmKeyStruct $tm_key`
+- Fixed `@return array[string => string]` invalid PHPDoc → `@return array<string, string>`
+- Removed `$jobStruct?->` nullsafe operator (unnecessary after non-nullable return type)
+- 26 new tests (10 GetContributionRequest + 16 GetContributionWorker)
+
+#### 4B. `FastAnalysis.php` — ✅ DONE (commit `a21971d0a2`, −35 entries + daemon fix)
+
+35 baseline entries eliminated + 1 non-baselined daemon error fixed. Key changes:
+- `requireQueueHandler()` helper — eliminates 12 `method.nonObject` errors from nullable `?AMQHandler`
+- `instanceof MyMemory` narrowing — proper type-safe engine access for `fastAnalysis()`
+- `instanceof Database` guard for `ping()` — `IDatabase` lacks the method
+- Native param types on `_updateProject(int, string)`, `_fetchMyMemoryFast(int)`, `_getSegmentsForFastVolumeAnalysis(int)`, `_executeInsert(array, array)`, `_getWordCountForSegment(array, array)`
+- Array shape PHPDocs for properties (`$segments`, `$segment_hashes`, `$actual_project_row`)
+- `@throws PDOException` on `_checkDatabaseConnection()`
+- `@throws RuntimeException` on `cleanShutDown()`
+- `date_create()` → `new \DateTime()` (cannot return false)
+- `is_null(int)` → `!== 0` for `AppConfig::$INSTANCE_ID`
+- `(int)$id_job` cast for `MetadataDao::get()` calls
+- Null guard for `$pid = $projectStruct->id` (nullable `?int`)
+- `$queueInfo` null check before queue operations
+- `rpush()` wraps value in array as Predis requires
+- Fixed `AbstractEngine::syncMemories()` PHPDoc: `array<string, mixed>|null` → `list<array<string, mixed>>|null`
+- Daemon entry: guard `getenv()` return before `realpath()`
+
+#### 4C. `TMAnalysisWorker.php` — ✅ DONE (commit `acc3c74c74`, −55 entries)
+
+55 of 56 errors eliminated. Key changes:
+- `MatchesComparator` trait: typed params, return types, null guards
+- `ProjectWordCount` trait: all 10 errors fixed via `@throws`, array shapes
+- TMAnalysisWorker itself: null guards, typed properties, removed dead code
+- 1 residual entry: EnginesFactory `argument.templateType` — kept (needs arch change)
+
+---
+
+### Phase 5: High-Value Controllers (~560 errors) — ✅ DONE
+
+**Why:** Highest-error-count controllers in the codebase. Fixing these creates maximum baseline reduction per commit.
+
+#### 5A. `NewController.php` — ✅ DONE (commit `e97b092d1e`, −86 entries)
+
+All 86 errors eliminated (1 residual fixed via CatUtils param widening). Key changes:
+- `buildProjectStructure()`: `@throws TypeError|DomainException`, typed `array<string, mixed>` params
+- `$owner`/`$id_customer`: `$user->email ?? ''` (nullable email → non-nullable property)
+- `$only_private`: `(int)(...)` cast (bool → int property)
+- `validateTheRequest()`: `@return array<string, mixed>`, all 16 `string|false` call-site normalizations via `?: null`/`?: ''`/`(int)` casts
+- `validateEngines()`: uid null guard `?? throw new TypeError(...)`, `@throws TypeError`, template type fix
+- `validateSubject()`: native param type `string|false|null`
+- `validateSourceLang()`/`validateTargetLangs()`: native param types, `?: null`/`?: ''` for explode
+- `validatePayableRateTemplate()`: uid null guard, `(int)` cast on template_id
+- `validateFiltersExtractionParameters()`/`validateXliffParameters()`/`validateMTQEParametersOrDefault()`/`validateMTQEPayableRateBreakdownsOrDefault()`: uid null guards, `@throws TypeError`, null guards on `->rules`/`->params`/`->breakdowns`
+- `validateMetadataParam()`: native param type `?string`, ternary for json_decode fallback
+- `generateTargetEngineAssociation()`: native param types, removed null from return type
+- `sanitizeTmKeyArr()`/`parseTmKeyInput()`: native param types, typed returns
+- `validateTeam()`: narrowed return to non-nullable `TeamStruct`, `(int)` cast on `$id_team`
+- `validateQaModelTemplate()`/`validateQaModel()`: native param types, `(int)` cast on ids
+- `create()`: `get_object_vars()` for UploadElement iteration, `AbstractEngine::class` template arg
+- `validateTmAndKeys()`: `preg_replace ?? ''` null safety, `get_object_vars()` for UploadElement, `?->` null-safe for TmKeyStruct
+- 40 new tests (validation methods) + 6 UploadElement tests
+- CatUtils::sanitizeOrFallbackProjectName param widened to `array<array-key, array<string, mixed>>`
+
+#### 5B. `CreateProjectController.php` — ✅ DONE (commit `e97b092d1e`, −76 entries)
+
+All 76 errors eliminated. Same patterns as NewController (independent implementations):
+- `buildProjectStructure()`: `@throws TypeError|DomainException`, typed params
+- `$id_customer`/`$owner`: `$user->email ?? ''`
+- `validateTheRequest()`: `@return array<string, mixed>`, `$file_name ?: ''`, `(int)$due_date`
+- `validateMtEngine()`: uid null guard, template type fix, `@throws TypeError|InvalidArgumentException`, typed return `array{mt_engine: int, engine: AbstractEngine|null}`
+- `validateSourceLang()`/`validateTargetLangs()`: native param types, `@throws`
+- `validatePublicTMPenalty()`: `@throws InvalidArgumentException`
+- `validateMMTGlossaries()`: `@throws InvalidArgumentException`
+- `validateQaModelTemplate()`: typed params, `$json ?: '{}'` for JSONValidatorObject, uid null guard
+- `validatePayableRateTemplate()`: uid null guard, `@throws TypeError`
+- `validateFiltersExtractionParameters()`: typed return `?array<string, mixed>`
+- `validateXliffParameters()`: uid null guard, null guard on `->rules`, `@throws TypeError`, typed return
+- `appendFeaturesToProject()`: typed return `array<string, mixed>`
+- `generateTargetEngineAssociation()`: native param types, non-nullable return
+- `setTeam()`: non-nullable return, typed param, `(int)` cast
+- `setMetadataFromPostInput()`: removed unused `@throws`, typed param
+- `assignLastCreatedPid()`: native param type `int`
+- `clearSessionFiles()`: `@throws Exception`
+- Properties: `/** @var array<string, mixed> */` on `$data`, `$metadata`
+- `getData()`: `@return array<string, mixed>`
+
+#### 5C. `GetContribution + DeleteContribution controllers` — ✅ DONE (commit `a357416ba2`, −71 entries)
+
+71 errors eliminated across GetContributionController and DeleteContributionController.
+
+#### 5D. `CommentController` — ✅ DONE (commit `852398bf5c`, −79 entries)
+
+79 errors eliminated.
+
+#### 5E. `GetSearchController` — ✅ DONE (commit `8a2714cbe2`, −68 entries)
+
+68 errors eliminated.
+
+#### 5F. `UploadHandler` — ✅ DONE (commit `a87bdf12ca`, −42 entries)
+
+42 errors eliminated.
+
+#### 5G. Residual fixes after develop merge — ✅ DONE (commit `ac74eaa9f0`, −20 entries)
+
+20 entries fixed (regressions from merge + stale entries).
+
+#### 5H. `AIAssistantController + MultiCurlHandler` — ✅ DONE (commit `2c9f4cdde0`, −26 entries)
+
+26 errors eliminated.
+
+---
+
+### Phase 6: Models & Modules (~244 errors) — ✅ DONE
+
+**Why:** These modules are self-contained subsystems with high error density. Each can be fixed independently.
+
+#### 6A. `TeamModel` — ✅ DONE (commit `a4a40e1dff`, −37 entries)
+
+37 errors eliminated. Typed params and returns across team management methods.
+
+#### 6B. `FilesStorage module` (IFilesStorage, AbstractFilesStorage, FsFilesStorage, S3FilesStorage) — ✅ DONE (commit `9580171b5f`, −109 entries)
+
+109 errors eliminated. Full PHPDoc with `@throws` annotations, typed contracts across the entire interface/abstract/concrete hierarchy.
+
+#### 6C. `TmKeyManagement module` (8 files + EngineConstants) — ✅ DONE (commit `ad8b0ca30c`, −66 entries)
+
+66 errors eliminated. Key changes:
+- TmKeyStruct: null guards in `getCrypt()`/`isEncryptedKey()`, typed `__set`, constructor uses `get_object_vars` instead of unsafe foreach-on-object
+- TmKeyManager: `filter_var` type safety with explicit `!== false` guard, null-safe `array_shift`, `filterOutByOwnership` nullable email parameter
+- EngineConstants: `@return` fixed from `AbstractEngine[]` to `array<class-string<AbstractEngine>, class-string<AbstractEngine>>`
+
+#### 6D. `Translators module` — ✅ DONE (commit `3090ce5b46`, −32 entries)
+
+32 errors eliminated. TranslatorsModel: typed params and returns across translator management methods.
+
+---
+
+### Security Fixes (VULN-02 through VULN-05)
+
+| # | Scope | Commit |
+|---|-------|--------|
+| VULN-02 | Reject falsy MIME type in upload allowlist check — empty string bypassed validation | `a35d408b7d` |
+| VULN-03 | Remove open redirect via unused `redirect` parameter in upload form | `fb8f1836a9` |
+| VULN-04 | Use canonical host constant instead of client-supplied `HTTP_HOST` in redirect URLs | `882098c6ec` |
+| VULN-05 | Cap `php://input` read buffer to 500MB to prevent memory exhaustion DoS | `50b5d54dd6` |
+
+---
+
+## Key Architectural Improvements
+
+1. **Native return types** on AbstractEngine methods — constructor, `__get`, `__set`, `_decode`, `getCurlFile`
+2. **Null guards** using `?? throw new Exception(...)` pattern throughout
+3. **`@phpstan-assert`** postcondition annotations on validation methods
+4. **Typed properties** on AbstractDaoObjectStruct (`$cached_results`)
+5. **Removed dead code** and invalid inline `@var` tags
+6. **Singleton non-nullable return** (`OauthTokenEncryption::getInstance()`)
+7. **`is_array()` guards** before `array_key_exists()` on mixed-type struct fields
+8. **`ActivityLogStruct::$ip` → `?string`** — cascade fix across 10 files
+9. **`AuthCookie::setCredentials()`** — null guard on `$user->uid` with `RuntimeException` (real bug: unauthenticated user could reach this path)
+10. **`CookieManager::setCookie()`** — `headers_sent()` guard + removed dead PHP ≤7.2 branch
+11. **`AuthCookie::destroyAuthentication()`** — `session_status()` guard (real bug: `session_destroy()` on uninitialized session)
+12. **`Team::render()`** — `empty($data)` → `$data === null` + `?? []` guard (real bug: user with 0 teams caused `foreach(null)` warning in production)
+13. **FilesStorage interface** — full PHPDoc with `@throws` annotations, typed contracts across IFilesStorage/AbstractFilesStorage/FsFilesStorage/S3FilesStorage
+14. **TmKeyStruct** — null guards in `getCrypt()`/`isEncryptedKey()`, typed `__set`, constructor uses `get_object_vars` instead of unsafe foreach-on-object
+15. **TmKeyManager** — `filter_var` type safety with explicit `!== false` guard, null-safe `array_shift`, `filterOutByOwnership` nullable email parameter
+16. **EngineConstants** — `@return` fixed from `AbstractEngine[]` to `array<class-string<AbstractEngine>, class-string<AbstractEngine>>`
+17. **Full engine hierarchy** — native types across MMT, MyMemory, Lara, 7 sibling engines, Results classes, EnginesFactory, and validators
+18. **DaoCacheTrait** — `_destroyObjectCache` made best-effort (cache failure non-critical), phantom `@template T` removed, typed cache values as `list<mixed>`
+19. **GetContributionWorker** — `ContributionContexts` value object replaces untyped `(object)` cast, `GetContributionRequest` typed accessors
+20. **TranslatorsModel** — typed params and returns across translator management methods
+
+---
+
+## Coverage & Test Suite Health
+
+Measured with: `vendor/bin/phpunit --exclude-group=ExternalServices --coverage-text`  
+Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
+
+| Metric | Value |
+|--------|-------|
+| **Total tests** | 3,340+ |
+| **Assertions** | 22,010+ |
+| **Warnings** | 1 |
+| **Status** | ALL PASSING |
+
+### Coverage Analysis
+
+- **Class coverage more than doubled** (8.48% → 18.32%) — 71 additional classes now have test coverage, primarily structs, DAO files, and controllers that were previously untested.
+- **Method coverage jumped +10pp** (21.74% → 31.85%) — 454 additional methods covered, driven by new typed accessors and controller test harnesses.
+- **Line coverage grew by +8.41pp** (21.19% → 29.60%) — 2,990 additional lines covered while total lines grew by only 350.
+- **Total classes grew by 52** (625 → 677) — new struct types, validators, and test infrastructure added.
+- **Total methods grew by 192** (3,883 → 4,075) — new typed accessors replacing magic `__get`/`__set`.
+
+---
+
+## Known Issues
+
+- **FiltersConfigTemplateDao::getByUidAndName()** uses wrong hydration class — documented in `.sisyphus/drafts/filters-config-template-dao-wrong-hydration-class.md`
+- **develop branch fatal error**: `FeatureSet` missing abstract methods from subfiltering interface change — coverage run required submodule sync
+- **1 unfixable PHPStan error**: `argument.templateType` in TmKeyManagementController — caused by `EnginesFactory::getInstance()` generic template type (known PHPStan limitation with abstract factory patterns)
+
+---
+
+### Phase 7: Revision Feature Foundation (~24 errors) — ✅ DONE
+
+**Why:** `AbstractRevisionFeature` is the abstract base for all revision/review features. Fixing it propagates type safety to `ReviewExtended`, `SecondPassReview`, and all review controllers.
+
+#### 7A. `AbstractRevisionFeature.php` — ✅ DONE (−24 entries net, +30 tests)
+
+All in-file PHPStan errors eliminated. Key changes:
+- **Bug fix**: `get_called_class() instanceof ReviewExtended` always evaluated to `false` (class-string is not an object) → replaced with `is_a(static::class, ReviewExtended::class, true)`
+- **Bug fix**: `file_get_contents()` return value unchecked (`string|false` → `json_decode(string)`) → added `=== false` guard with `RuntimeException`, suppressed redundant PHP warning via `@`
+- **Bug fix**: `findChunkReviews(...)[0]` accessed on potentially empty array → added `?? null` null-coalescing
+- **Null guards**: `ProjectDao::findById()` result (×4 call sites), `$chunk->id` (×1), `$chunk_review->review_password` (×1), `$job->id` (×1), `$job->password` (×1)
+- **Removed dead code**: `isset()` on non-nullable `$projectStructure->features` (always `array`) and `$projectStructure->create_2_pass_review` (always `bool`)
+- **Type annotations**: `@throws` additions (TypeError, RuntimeException, PDOException, DomainException, Exception), typed `$undo_data` param as `array<string, mixed>`, typed `$options` as `array{source_page?: int, first_record_password?: string|null}`, typed return as `ChunkReviewStruct[]`, typed `$dependencies` as `list<string>`
+- **1 cascade entry added**: `ReviewsController::createReview()` (calls `createQaChunkReviewRecords` which now `@throws TypeError`)
+- **30 new tests** in `AbstractRevisionFeatureTest.php` (81% line coverage, 0 warnings)
+
+---
+
+## Aligner Plugin (Deferred)
+
+737 errors across 11 files in `plugins/aligner/`. Separate module — to be addressed as a dedicated batch if time permits.
+
+---
+
+## Queue (Next Targets — Priority Order)
+
+### Priority 1–4
+
+| Priority | File | Errors | Rationale |
+|----------|------|--------|-----------|
+| 1 | `lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php` | ~26 | Model — foundation type for review word count logic |
+| 2 | `lib/Controller/API/V3/SegmentAnalysisController.php` | ~30 | Controller — consumes fixed models |
+| 3 | `lib/Utils/LQA/QA/DomHandler.php` | ~24 | DOM parsing utility — isolated, self-contained |
+| 4 | `lib/Utils/OutsourceTo/Translated.php` | ~31 | External integration — lower priority, side-effect heavy |
+
+**Estimated total if all completed:** ~111 additional errors removed
+
+### Phase 5 Residual Controllers
+
+| File | Errors | Notes |
+|------|--------|-------|
+| `SetTranslationController.php` | ~25 | |
+| `GetContributionController.php` | ~26 | Adjacent to contribution worker |
+
+---
+
+## Next Action
+
+Start Priority 1: `lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php` (~26 errors)

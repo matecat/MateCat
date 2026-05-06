@@ -4,6 +4,7 @@ namespace Plugins\Features;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
+use DomainException;
 use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
@@ -31,11 +32,13 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
 use Model\ReviseFeedback\FeedbackDAO;
+use PDOException;
 use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -44,6 +47,7 @@ use Utils\Tools\Utils;
 abstract class AbstractRevisionFeature extends BaseFeature
 {
 
+    /** @var list<string> */
     protected static array $dependencies = [
         FeatureCodes::TRANSLATION_VERSIONS
     ];
@@ -68,15 +72,19 @@ abstract class AbstractRevisionFeature extends BaseFeature
         route('/project/[:id_project]/[:password]/reviews', 'POST', ['Controller\API\V2\ReviewsController', 'createReview']);
     }
 
-        public function filterGetSegmentsResult(FilterGetSegmentsResultEvent $event): void
+    /**
+     * @throws RuntimeException
+     */
+    public function filterGetSegmentsResult(FilterGetSegmentsResultEvent $event): void
     {
         $data = $event->getData();
         $chunk = $event->getChunk();
 
         if (empty($data['files'])) {
-            // this means that there are no more segments after
             return;
         }
+
+        $chunkId = $chunk->id ?? throw new RuntimeException('Chunk id is required to fetch segment translation events');
 
         reset($data['files']);
 
@@ -89,7 +97,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             $lastSid = $lastSegment['sid'];
 
             $segment_translation_events = (new TranslationEventDao())->getLatestEventsInSegmentInterval(
-                $chunk->id,
+                $chunkId,
                 $firstSid,
                 $lastSid
             );
@@ -116,13 +124,14 @@ abstract class AbstractRevisionFeature extends BaseFeature
     /**
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws Exception
      */
     public function filterJobPasswordToReviewPassword(FilterJobPasswordToReviewPasswordEvent $event): void
     {
         $password = $event->getPassword();
         $id_job = $event->getIdJob();
 
-        $chunk_review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $id_job, 'password' => $password]))[0];
+        $chunk_review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $id_job, 'password' => $password]))[0] ?? null;
 
         if (!$chunk_review) {
             $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
@@ -132,7 +141,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             throw new NotFoundException('Review record was not found');
         }
 
-        $event->setPassword($chunk_review->review_password);
+        $event->setPassword($chunk_review->review_password ?? throw new RuntimeException('Review password is null for chunk review record'));
     }
 
     /**
@@ -143,6 +152,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws Exception
+     * @throws TypeError
      */
     public function postProjectCreate(PostProjectCreateEvent $event): void
     {
@@ -158,8 +169,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     /**
      * @param JobStruct[]|ChunkReviewStruct[] $chunksArray
+     * @param array{source_page?: int, first_record_password?: string|null} $options
+     *
+     * @return ChunkReviewStruct[]
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function createQaChunkReviewRecords(array $chunksArray, ProjectStruct $project, array $options = []): array
     {
@@ -178,7 +193,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'source_page' => $options['source_page']
             ];
 
-            if ($k == 0 && array_key_exists('first_record_password', $options) != null) {
+            if ($k == 0 && isset($options['first_record_password'])) {
                 $data['review_password'] = $options['first_record_password'];
             }
 
@@ -192,19 +207,18 @@ abstract class AbstractRevisionFeature extends BaseFeature
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     protected function createChunkReviewRecords(ProjectStructure $projectStructure): void
     {
         $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to create chunk review records');
-        $project = ProjectDao::findById($idProject);
+        $project = ProjectDao::findById($idProject)
+            ?? throw new RuntimeException('Project not found for id: ' . $idProject);
+
         foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
             $chunkStruct = JobDao::getById($id_job);
 
-            $iMax = 3;
-
-            if (isset($projectStructure->create_2_pass_review) && $projectStructure->create_2_pass_review) {
-                $iMax = 4;
-            }
+            $iMax = $projectStructure->create_2_pass_review ? 4 : 3;
 
             for ($i = 2; $i < $iMax; $i++) {
                 $this->createQaChunkReviewRecords($chunkStruct, $project, ['source_page' => $i]);
@@ -216,6 +230,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function postJobSplitted(PostJobSplittedEvent $event): void
     {
@@ -230,7 +245,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
         $previousRevisionRecords = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure->idProject, 86400);
+        $project = ProjectDao::findById($projectStructure->idProject, 86400)
+            ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
         ChunkReviewDao::deleteByJobId($id_job);
 
@@ -267,6 +283,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function postJobMerged(PostJobMergedEvent $event): void
     {
@@ -274,7 +291,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
         $old_reviews = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure->idProject, 86400);
+        $project = ProjectDao::findById($projectStructure->idProject, 86400)
+            ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
         $reviewGroupedData = [];
 
@@ -324,6 +342,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * @throws ReflectionException
      * @throws ValidationError
      * @throws Exception
+     * @throws TypeError
      */
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
@@ -356,9 +375,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
+     * @param array<string, mixed> $undo_data
+     *
      * @throws ValidationError
      */
-    protected function _validateUndoData(ChunkCompletionEventStruct $event, $undo_data): void
+    protected function _validateUndoData(ChunkCompletionEventStruct $event, array $undo_data): void
     {
         try {
             Utils::ensure_keys($undo_data, [
@@ -376,16 +397,26 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
     }
 
-        public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
+    /**
+     * @throws PDOException
+     */
+    public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
         $feedbackDao = new FeedbackDAO();
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
     }
 
-        public function jobPasswordChanged(JobPasswordChangedEvent $event): void
+    /**
+     * @throws PDOException
+     * @throws RuntimeException
+     */
+    public function jobPasswordChanged(JobPasswordChangedEvent $event): void
     {
+        $jobId = $event->job->id ?? throw new RuntimeException('Job id is required to update chunk review password');
+        $jobPassword = $event->job->password ?? throw new RuntimeException('Job password is required to update chunk review password');
+
         $dao = new ChunkReviewDao();
-        $dao->updatePassword($event->job->id, $event->oldPassword, $event->job->password);
+        $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
     }
 
     /**
@@ -394,6 +425,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws DomainException
+     * @throws Exception
+     * @throws TypeError
      */
     private function setQaModelFromJsonFile(ProjectStructure $projectStructure): void
     {
@@ -415,9 +449,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $model_record = ModelDao::createModelFromJsonDefinition($model_json);
 
         $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to set QA model');
-        $project = ProjectDao::findById(
-            $idProject
-        );
+        $project = ProjectDao::findById($idProject)
+            ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
         $dao = new ProjectDao(Database::obtain());
         $dao->updateField($project, 'id_qa_model', $model_record->id);
@@ -433,19 +466,20 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public static function loadAndValidateQualityFramework(ProjectStructure &$projectStructure, ?string $jsonPath = null): void
     {
-        if (get_called_class() instanceof ReviewExtended || get_called_class() == ReviewExtended::class) {
+        if (is_a(static::class, ReviewExtended::class, true)) {
             return;
         }
 
-        // Use Null Coalescing Operator to simplify checks for template or model
         $decoded_model = $projectStructure->qa_model_template ?? $projectStructure->qa_model;
 
-        // Still empty?
         if (empty($decoded_model)) {
-            $decoded_model = self::loadModelFromPathOrDefault($projectStructure, $jsonPath);
+            try {
+                $decoded_model = self::loadModelFromPathOrDefault($projectStructure, $jsonPath);
+            } catch (RuntimeException) {
+                $decoded_model = null;
+            }
         }
 
-        // If decoding the model failed, register the error
         if (empty($decoded_model)) {
             $projectStructure->result['errors'][] = [
                 'code' => '-900',
@@ -453,12 +487,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
             ];
         }
 
-        // Initialize features if not already set
-        if (!isset($projectStructure->features)) {
-            $projectStructure->features = [];
-        }
-
-        // Append the QA model to the project structure
         $features = $projectStructure->features;
         $features['quality_framework'] = $decoded_model;
         $projectStructure->features = $features;
@@ -468,15 +496,19 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * Get a model from path or default.
      *
      * @return array<string, mixed>
+     *
+     * @throws RuntimeException
      */
     private static function loadModelFromPathOrDefault(ProjectStructure $projectStructure, ?string $jsonPath): array
     {
-        // Use null coalescing to simplify fallback logic
         $path = $jsonPath ?? AppConfig::$ROOT . '/inc/qa_model.json';
-        $qa_model = file_get_contents($path);
+        $qa_model = @file_get_contents($path);
+
+        if ($qa_model === false) {
+            throw new RuntimeException('Unable to read QA model file: ' . $path);
+        }
 
         $decoded_model = json_decode($qa_model, true);
-        // Set the user ID to allow ownership in the QA models table
         $decoded_model['model']['uid'] = $projectStructure->uid;
 
         return $decoded_model;
