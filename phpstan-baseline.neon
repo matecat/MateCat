@@ -129,19 +129,13 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception Stomp\\Exception\\ConnectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
 
 		-
@@ -281,6 +275,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/Authentication/SignupController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\UserController\:\:changePasswordAsLoggedUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/Authentication/UserController.php
 
 		-
 			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\UserController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
@@ -453,6 +453,12 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\CommentController\:\:getProjectPasswords\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/App/CommentController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\CommentController\:\:getProjectPasswords\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/CommentController.php
 
@@ -1333,6 +1339,24 @@ parameters:
 			path: lib/Controller/API/App/GetContributionController.php
 
 		-
+			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$context_list_after \(list\<string\>\|null\) does not accept array\<string\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Controller/API/App/GetContributionController.php
+
+		-
+			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$context_list_before \(list\<string\>\|null\) does not accept array\<string\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Controller/API/App/GetContributionController.php
+
+		-
+			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$crossLangTargets \(list\<string\>\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Controller/API/App/GetContributionController.php
+
+		-
 			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$mt_qe_workflow_enabled \(bool\) does not accept string\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -1340,6 +1364,12 @@ parameters:
 
 		-
 			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$mt_quality_value_in_editor \(int\) does not accept int\|string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Controller/API/App/GetContributionController.php
+
+		-
+			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$subfiltering_handlers \(list\<string\>\|null\) does not accept array\<int\|string, mixed\>\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Controller/API/App/GetContributionController.php
@@ -1477,6 +1507,12 @@ parameters:
 			path: lib/Controller/API/App/GetSearchController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\GetSearchController\:\:doSearch\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 8
+			path: lib/Controller/API/App/GetSearchController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\GetSearchController\:\:doSearch\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -1522,6 +1558,12 @@ parameters:
 			message: '#^Method Controller\\API\\App\\GetSearchController\:\:saveReplacementEvent\(\) has parameter \$tRow with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
+			path: lib/Controller/API/App/GetSearchController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\GetSearchController\:\:saveReplacementEvent\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 5
 			path: lib/Controller/API/App/GetSearchController.php
 
 		-
@@ -1687,9 +1729,21 @@ parameters:
 			path: lib/Controller/API/App/GetSegmentsController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\GetSegmentsController\:\:attachContexts\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/App/GetSegmentsController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\GetSegmentsController\:\:attachNotes\(\) has parameter \$segment_notes with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/Controller/API/App/GetSegmentsController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\GetSegmentsController\:\:attachNotes\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/Controller/API/App/GetSegmentsController.php
 
 		-
@@ -2308,6 +2362,12 @@ parameters:
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:translate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
+			path: lib/Controller/API/App/SetTranslationController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:updateJobPEE\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 4
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
@@ -3647,6 +3707,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\DownloadJobTMXController\:\:_saveActivity\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/DownloadJobTMXController.php
 
 		-
 			message: '#^Variable \$jobData in empty\(\) always exists and is not falsy\.$#'
@@ -5407,34 +5473,10 @@ parameters:
 			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
 
 		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$vite_html\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
-			message: '#^Variable \$nonce on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: lib/Controller/Abstracts/BaseKleinViewController.php
-
-		-
 			message: '#^Method Controller\\Abstracts\\IController\:\:getFeatureSet\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Controller/Abstracts/IController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:broadcastLogout\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:broadcastLogout\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
 
 		-
 			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has no return type specified\.$#'
@@ -7117,6 +7159,12 @@ parameters:
 			path: lib/Model/Conversion/Upload.php
 
 		-
+			message: '#^Method Model\\Conversion\\Upload\:\:getUniformGlobalFilesStructure\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 6
+			path: lib/Model/Conversion/Upload.php
+
+		-
 			message: '#^Method Model\\Conversion\\Upload\:\:uploadFiles\(\) has parameter \$filesToUpload with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7289,24 +7337,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/DataAccess/IDaoStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\ShapelessConcreteStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\ShapelessConcreteStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\ShapelessConcreteStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/ShapelessConcreteStruct.php
 
 		-
 			message: '#^Method Model\\EditLog\\EditLogSegmentStruct\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -8671,24 +8701,6 @@ parameters:
 			path: lib/Model/Jobs/JobStruct.php
 
 		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Model\\Jobs\\JobStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Jobs/JobStruct.php
-
-		-
 			message: '#^Method Model\\Jobs\\JobStruct\:\:setSourcePage\(\) has parameter \$_revisionNumber with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -9559,24 +9571,6 @@ parameters:
 			path: lib/Model/Projects/ProjectStruct.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
 			message: '#^Method Model\\Projects\\ProjectStruct\:\:setMetadata\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -10009,24 +10003,6 @@ parameters:
 			path: lib/Model/Segments/ContextStruct.php
 
 		-
-			message: '#^Method Model\\Segments\\ContextStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/ContextStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\ContextStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/ContextStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\ContextStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/ContextStruct.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, array\<string, mixed\>\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10055,42 +10031,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: lib/Model/Segments/SegmentStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentUIStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentUIStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentUIStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentUIStruct.php
 
 		-
 			message: '#^Method Model\\Teams\\InvitedUser\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -10333,6 +10273,12 @@ parameters:
 			path: lib/Model/Teams/TeamStruct.php
 
 		-
+			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:_buildResult\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 9
+			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
+
+		-
 			message: '#^Method Model\\TmKeyManagement\\MemoryKeyStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -10395,24 +10341,6 @@ parameters:
 		-
 			message: '#^Class Model\\Translations\\SegmentTranslationStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationStruct.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationStruct.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationStruct.php
-
-		-
-			message: '#^Method Model\\Translations\\SegmentTranslationStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Translations/SegmentTranslationStruct.php
 
@@ -10929,24 +10857,6 @@ parameters:
 		-
 			message: '#^Class Model\\Warnings\\GlobalWarningStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Warnings/GlobalWarningStruct.php
-
-		-
-			message: '#^Method Model\\Warnings\\GlobalWarningStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Warnings/GlobalWarningStruct.php
-
-		-
-			message: '#^Method Model\\Warnings\\GlobalWarningStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Warnings/GlobalWarningStruct.php
-
-		-
-			message: '#^Method Model\\Warnings\\GlobalWarningStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Warnings/GlobalWarningStruct.php
 
@@ -13133,90 +13043,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Utils/Constants/XliffTranslationStatus.php
-
-		-
-			message: '#^Parameter \#1 \$array_params of class Model\\Jobs\\JobStruct constructor expects array\<string, mixed\>, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Parameter \#1 \$array_params of class Model\\Projects\\ProjectStruct constructor expects array\<string, mixed\>, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Parameter \#1 \$array_params of class Model\\Users\\UserStruct constructor expects array\<string, mixed\>, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$context_list_after type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$context_list_before type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$contexts type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$crossLangTargets type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$dataRefMap type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$jobStruct type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$mt_qe_workflow_parameters type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$projectStruct type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$subfiltering_handlers type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Property Utils\\Contribution\\GetContributionRequest\:\:\$user type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Contribution/GetContributionRequest.php
-
-		-
-			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
-			identifier: argument.templateType
-			count: 2
-			path: lib/Utils/Contribution/GetContributionRequest.php
 
 		-
 			message: '#^Cannot call method toArray\(\) on string\.$#'
@@ -15637,12 +15463,6 @@ parameters:
 			path: lib/Utils/TaskRunner/TaskManager.php
 
 		-
-			message: '#^Property Utils\\Templating\\PHPTALWithAppend\:\:\$internal_store type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Templating/PHPTALWithAppend.php
-
-		-
 			message: '#^Call to an undefined method Utils\\Templating\\PHPTalMap\:\:__get\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -17335,6 +17155,12 @@ parameters:
 			path: lib/View/API/V3/Json/Chunk.php
 
 		-
+			message: '#^Method View\\API\\V3\\Json\\Chunk\:\:getTimeToEditArray\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 3
+			path: lib/View/API/V3/Json/Chunk.php
+
+		-
 			message: '#^Method View\\API\\V3\\Json\\Chunk\:\:getTimeToEditArray\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -17428,6 +17254,12 @@ parameters:
 			message: '#^Method View\\API\\V3\\Json\\QualitySummary\:\:populateQualitySummarySection\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+			path: lib/View/API/V3/Json/QualitySummary.php
+
+		-
+			message: '#^Method View\\API\\V3\\Json\\QualitySummary\:\:populateQualitySummarySection\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/View/API/V3/Json/QualitySummary.php
 
 		-
@@ -19789,24 +19621,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedStruct.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobExportedStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobExportedStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobExportedStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedStruct.php
-
-		-
 			message: '#^Class Features\\Aligner\\Model\\Jobs_JobStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -19827,24 +19641,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobStruct\:\:isCanceled\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobStruct.php
 
@@ -21085,6 +20881,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMisalignmentCount\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMisalignmentCount\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -21575,24 +21377,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentStruct\:\:offsetGet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentStruct\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentStruct\:\:offsetUnset\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentStruct.php
 
 		-
 			message: '#^Property Features\\Aligner\\Model\\Segments_SegmentStruct\:\:\$content_clean has no type specified\.$#'

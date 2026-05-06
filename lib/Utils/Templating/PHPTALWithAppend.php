@@ -30,10 +30,12 @@ use PHPTAL;
  * @property string $gdriveAuthURL
  * @property string $x_nonce_unique_id
  * @property string|null $x_self_ajax_location_hosts
+ * @property string $vite_html
  */
 class PHPTALWithAppend extends PHPTAL
 {
 
+    /** @var array<string, list<mixed>> */
     protected array $internal_store = [];
 
     /**

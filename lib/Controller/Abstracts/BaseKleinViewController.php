@@ -102,7 +102,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'x_nonce_unique_id'} = $nonce;
 
         $this->view->{'vite_html'} = '';
-        AppConfig::decorateView( $this->view, $template_name, $nonce ?? '' );
+        AppConfig::decorateView( $this->view, $template_name, $nonce );
 
         // init oauth clients
         $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";

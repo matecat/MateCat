@@ -93,6 +93,8 @@ trait AuthenticationTrait
     /**
      * @throws ReflectionException
      * @throws ConnectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function broadcastLogout(): void
     {

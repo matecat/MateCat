@@ -33,13 +33,13 @@ class GetContributionRequestTest extends AbstractTest
     }
 
     #[Test]
-    public function test_getJobStruct_with_null_array_throws_TypeError(): void
+    public function test_getJobStruct_with_null_array_returns_empty_struct(): void
     {
         $request            = new GetContributionRequest();
         $request->jobStruct = null;
 
-        $this->expectException(TypeError::class);
-        $request->getJobStruct();
+        $result = $request->getJobStruct();
+        $this->assertInstanceOf(JobStruct::class, $result);
     }
 
     #[Test]
