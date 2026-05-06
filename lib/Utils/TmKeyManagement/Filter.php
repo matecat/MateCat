@@ -46,7 +46,7 @@ class Filter
 
     /**
      * @see Filter::setTmType
-     * @var array Filter types
+     * @var list<string> Filter types
      */
     protected array $_type = [];
 
@@ -60,7 +60,7 @@ class Filter
      * This variable holds the map to look for the right key in the JSON structure
      * Filtering can be by Translator or By Revisor
      *
-     * @var array
+     * @var array<string, array<string, string>>
      */
     public static array $GRANTS_MAP = [
         self::ROLE_TRANSLATOR => ["r" => 'r_transl', "w" => 'w_transl'],
@@ -70,7 +70,7 @@ class Filter
 
     /**
      * White list of the accepted types constants
-     * @var array
+     * @var list<string>
      */
     protected array $_accepted_types = ["tm", "glos", "tm,glos"];
 
@@ -85,7 +85,7 @@ class Filter
     /**
      * I have to get all owner keys that match required filters and all translator keys that match these filters too
      *
-     * @param array $tm_key
+     * @param array<string, mixed> $tm_key
      *
      * @return bool
      */
@@ -120,7 +120,7 @@ class Filter
     }
 
     /**
-     * @param array $tm_key
+     * @param array<string, mixed> $tm_key
      *
      * @return bool
      */
@@ -156,13 +156,11 @@ class Filter
     }
 
     /**
-     *
-     *
-     * @param $tm_key
+     * @param array<string, mixed> $tm_key
      *
      * @return bool
      */
-    public function byOwner($tm_key): bool
+    public function byOwner(array $tm_key): bool
     {
         return ($tm_key[self::OWNER] == true)
             && $this->_hasRightGrants($tm_key, self::OWNER)
@@ -217,8 +215,8 @@ class Filter
      * Check if the key has the right grants.<br />
      * If No grant filter is required it returns true
      *
-     * @param $role   string
-     * @param $tm_key array
+     * @param array<string, mixed> $tm_key
+     * @param string $role
      *
      * @return bool
      */
@@ -250,7 +248,7 @@ class Filter
      * Check if the key is of the right type.<br />
      * If No type filter is required it returns true
      *
-     * @param $tm_key array
+     * @param array<string, mixed> $tm_key
      *
      * @return bool
      */

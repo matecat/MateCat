@@ -427,6 +427,18 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:sanitizeTmKeyArr\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/App/CreateProjectController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:sanitizeTmKeyArr\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/CreateProjectController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validateDialectStrictParam\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -843,6 +855,12 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\GlossaryController\:\:createThePayloadForWorker\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/App/GlossaryController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\GlossaryController\:\:createThePayloadForWorker\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/GlossaryController.php
 
@@ -1297,54 +1315,6 @@ parameters:
 			path: lib/Controller/API/App/TeamPublicMembersController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\TmKeyManagementController\:\:_checkForAdaptiveEngines\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\TmKeyManagementController\:\:_checkForAdaptiveEngines\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\TmKeyManagementController\:\:sortKeysInTheRightOrder\(\) has parameter \$jobKeyList with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\TmKeyManagementController\:\:sortKeysInTheRightOrder\(\) has parameter \$keys with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\TmKeyManagementController\:\:sortKeysInTheRightOrder\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Parameter \#1 \$id of static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\) expects int, array\|int\|object\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Property Model\\Engines\\Structs\\EngineStruct\:\:\$class_load \(string\|null\) does not accept Utils\\Engines\\AbstractEngine\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
 			identifier: argument.templateType
 			count: 1
@@ -1359,6 +1329,12 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\UpdateJobKeysController\:\:jobOwnerIsMe\(\) has parameter \$owner with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: lib/Controller/API/App/UpdateJobKeysController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\UpdateJobKeysController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/UpdateJobKeysController.php
 
@@ -1447,8 +1423,20 @@ parameters:
 			path: lib/Controller/API/App/UserKeysController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\UserKeysController\:\:share\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/UserKeysController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\UserKeysController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/App/UserKeysController.php
+
+		-
+			message: '#^Parameter \#1 \$emailList of method Utils\\TmKeyManagement\\TmKeyManager\:\:shareKey\(\) expects list\<string\>, array\<int, string\> given\.$#'
+			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/UserKeysController.php
 
@@ -1941,6 +1929,18 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V1\\NewController\:\:getFilesList\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/V1/NewController.php
+
+		-
+			message: '#^Method Controller\\API\\V1\\NewController\:\:sanitizeTmKeyArr\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/V1/NewController.php
+
+		-
+			message: '#^Method Controller\\API\\V1\\NewController\:\:sanitizeTmKeyArr\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V1/NewController.php
 
@@ -6649,6 +6649,12 @@ parameters:
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
+			message: '#^Parameter \#1 \$jsonTmKeys_array of static method Utils\\TmKeyManagement\\TmKeyManager\:\:getOwnerKeys\(\) expects list\<string\>, array\<int, string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
+
+		-
 			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:get\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -6687,6 +6693,12 @@ parameters:
 		-
 			message: '#^Method Model\\Jobs\\JobStruct\:\:getClientKeys\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Model/Jobs/JobStruct.php
+
+		-
+			message: '#^Method Model\\Jobs\\JobStruct\:\:getClientKeys\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Jobs/JobStruct.php
 
@@ -7225,6 +7237,12 @@ parameters:
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
+			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:buildTmKeysJson\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/JobCreationService.php
+
+		-
 			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:buildTmKeysJson\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 5
@@ -7346,6 +7364,12 @@ parameters:
 
 		-
 			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:getUserByUid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/TmKeyService.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:setPrivateTMKeys\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ProjectCreation/TmKeyService.php
@@ -8111,66 +8135,6 @@ parameters:
 			identifier: foreach.nonIterable
 			count: 1
 			path: lib/Model/Teams/TeamStruct.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:_buildResult\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 9
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyStruct.php
-
-		-
-			message: '#^Cannot access property \$key on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^Cannot call method isShared\(\) on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\UserKeysModel\:\:getKeys\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\UserKeysModel\:\:getKeys\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$_client_tm_key TmKeyStruct\)\: Unexpected token "\$_client_tm_key", expected type at offset 24 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$keyList MemoryKeyStruct\[\]\)\: Unexpected token "\$keyList", expected type at offset 84 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$keyList array\)\: Unexpected token "\$keyList", expected type at offset 159 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
-
-		-
-			message: '#^Property Model\\TmKeyManagement\\UserKeysModel\:\:\$_user_keys type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TmKeyManagement/UserKeysModel.php
 
 		-
 			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
@@ -10751,12 +10715,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Constants/Constants.php
-
-		-
-			message: '#^Property Utils\\Constants\\EngineConstants\:\:\$ENGINES_LIST type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Constants/EngineConstants.php
 
 		-
 			message: '#^Property Utils\\Constants\\Ices\:\:\$iceLockDisabledForTargetLangs type has no value type specified in iterable type array\.$#'
@@ -13349,282 +13307,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Utils/Templating/PHPTalMap.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\Filter\:\:_hasRightGrants\(\) has parameter \$tm_key with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\Filter\:\:_isTheRightType\(\) has parameter \$tm_key with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\Filter\:\:byOwner\(\) has parameter \$tm_key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\Filter\:\:byRevisor\(\) has parameter \$tm_key with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\Filter\:\:byTranslator\(\) has parameter \$tm_key with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\Filter\:\:\$GRANTS_MAP type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\Filter\:\:\$_accepted_types type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\Filter\:\:\$_type type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/Filter.php
-
-		-
-			message: '#^Cannot access property \$key on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/TmKeyManagement/ShareKeyEmail.php
-
-		-
-			message: '#^Cannot access property \$name on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/TmKeyManagement/ShareKeyEmail.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\ShareKeyEmail\:\:__construct\(\) has parameter \$userMail with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/ShareKeyEmail.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\ShareKeyEmail\:\:_getLayoutVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/ShareKeyEmail.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\ShareKeyEmail\:\:_getTemplateVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/ShareKeyEmail.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\ShareKeyEmail\:\:\$userMail type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/ShareKeyEmail.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:filterOutByOwnership\(\) has parameter \$jobOwnerEmail with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:filterOutByOwnership\(\) has parameter \$userEmail with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:getClientTmKeyStructure\(\) has parameter \$tmKey_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:getOwnerKeys\(\) has parameter \$jsonTmKeys_array with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:getPenaltyMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:getTmKeyStructure\(\) has parameter \$tmKey_arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:isValidStructure\(\) has parameter \$arr with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:mergeJsonKeys\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:sanitize\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:sanitize\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 6
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:shareKey\(\) has parameter \$emailList with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyManager\:\:shareKey\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$_client_tm_key TmKeyStruct\)\: Unexpected token "\$_client_tm_key", expected type at offset 24 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$_job_Key TmKeyStruct\)\: Unexpected token "\$_job_Key", expected type at offset 24 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$newClientKey TmKeyStruct\)\: Unexpected token "\$newClientKey", expected type at offset 28 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Model\\TmKeyManagement\\MemoryKeyStruct\:\:\$uid \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$key \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$name \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$source \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$target \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$uid_rev \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$uid_transl \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyManager.php
-
-		-
-			message: '#^Argument of an invalid type array\<string, mixed\>\|Utils\\TmKeyManagement\\TmKeyStruct supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__set\(\) has parameter \$_value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__set\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Method Utils\\TmKeyManagement\\TmKeyStruct\:\:__set\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function strrpos expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
-
-		-
-			message: '#^Property Utils\\TmKeyManagement\\TmKeyStruct\:\:\$penalty \(int\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: lib/Utils/TmKeyManagement/TmKeyStruct.php
 
 		-
 			message: '#^Cannot access offset int\<0, max\> on list\<non\-empty\-string\>\|false\.$#'
@@ -16647,6 +16329,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\TmController\:\:createTmData\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\TmController\:\:createTmData\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 

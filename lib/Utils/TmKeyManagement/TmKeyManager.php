@@ -26,11 +26,13 @@ class TmKeyManager
      * If a proper associative array is passed, it fills the fields
      * with the array values.
      *
-     * @param array|null $tmKey_arr An associative array having
+     * @param array<string, mixed>|null $tmKey_arr An associative array having
      *                              the same keys of a
      *                              TmKeyStruct object
      *
      * @return TmKeyStruct The converted object
+     *
+     * @throws DomainException
      */
     public static function getTmKeyStructure(?array $tmKey_arr = null): TmKeyStruct
     {
@@ -45,11 +47,13 @@ class TmKeyManager
      * If a proper associative array is passed, it fills the fields
      * with the array values.
      *
-     * @param array|null $tmKey_arr An associative array having
+     * @param array<string, mixed>|null $tmKey_arr An associative array having
      *                              the same keys of a
      *                              ClientTmKeyStruct object
      *
      * @return ClientTmKeyStruct The converted object
+     *
+     * @throws DomainException
      */
     public static function getClientTmKeyStructure(?array $tmKey_arr = null): ClientTmKeyStruct
     {
@@ -106,7 +110,7 @@ class TmKeyManager
      *                                  If null, a default value may be considered.
      * @param string $user_role The role of the user affecting the translation memory keys
      *
-     * @return array
+     * @return list<object{key: string|null, penalty: float|int}>
      * @throws Exception
      */
     public static function getPenaltyMap(string $jsonTmKeys, string $grant_level = 'rw', string $type = "tm", ?int $uid = null, string $user_role = Filter::ROLE_TRANSLATOR): array
@@ -116,7 +120,7 @@ class TmKeyManager
         foreach ($tmKeys as $tmKey) {
             $penalty_key_objects[] = (object)[
                 'key' => $tmKey->key,
-                'penalty' => $tmKey->penalty / 100 ?? 0
+                'penalty' => $tmKey->penalty / 100
             ];
         }
 
@@ -127,7 +131,7 @@ class TmKeyManager
      * Converts an array of strings representing a json_encoded array
      * of TmKeyStruct objects into the corresponding array.
      *
-     * @param $jsonTmKeys_array array An array of strings representing a json_encoded array of TmKeyStruct objects
+     * @param list<string> $jsonTmKeys_array An array of strings representing a json_encoded array of TmKeyStruct objects
      *
      * @return TmKeyStruct[] An array of TmKeyStruct objects
      * @throws Exception              Throws Exception if the input is not an array or if a string is not a valid json
@@ -163,6 +167,10 @@ class TmKeyManager
         //take only the first Job entries
         $result_arr = array_shift($result_arr);
 
+        if ($result_arr === null) {
+            return [];
+        }
+
         //convert tm keys into TmKeyStruct objects
         $result_arr = array_map(self::getTmKeyStructure(...), $result_arr);
 
@@ -172,7 +180,7 @@ class TmKeyManager
     /**
      * Checks if a given array has the same structure of a TmKeyStruct object
      *
-     * @param $arr array The array whose structure has to be tested
+     * @param array<string, mixed> $arr The array whose structure has to be tested
      *
      * @return TmKeyStruct|bool True if the structure is compliant to a TmKeyStruct object. False otherwise.
      */
@@ -193,6 +201,9 @@ class TmKeyManager
      * @param TmKeyStruct $obj
      *
      * @return TmKeyStruct
+     *
+     * @throws \TypeError
+     * @throws DomainException
      */
     public static function sanitize(TmKeyStruct $obj): TmKeyStruct
     {
@@ -209,20 +220,24 @@ class TmKeyManager
         }
 
         if (!is_null($obj->uid_transl)) {
-            $obj->uid_transl = filter_var($obj->uid_transl, FILTER_SANITIZE_NUMBER_INT);
+            $sanitized = filter_var($obj->uid_transl, FILTER_SANITIZE_NUMBER_INT);
+            $obj->uid_transl = $sanitized !== false ? (int)$sanitized : null;
         }
 
         if (!is_null($obj->uid_rev)) {
-            $obj->uid_rev = filter_var($obj->uid_rev, FILTER_SANITIZE_NUMBER_INT);
+            $sanitized = filter_var($obj->uid_rev, FILTER_SANITIZE_NUMBER_INT);
+            $obj->uid_rev = $sanitized !== false ? (int)$sanitized : null;
         }
 
         if (!is_null($obj->name)) {
             $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s]+/u', '', $obj->name);
-            $obj->name = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+            $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+            $obj->name = $sanitized !== false ? $sanitized : null;
         }
 
         if (!is_null($obj->key)) {
-            $obj->key = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $sanitized = filter_var($obj->key, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $obj->key = $sanitized !== false ? $sanitized : null;
         }
 
         if (!is_null($obj->r)) {
@@ -250,11 +265,13 @@ class TmKeyManager
         }
 
         if (!is_null($obj->source)) {
-            $obj->source = filter_var($obj->source, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $sanitized = filter_var($obj->source, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $obj->source = $sanitized !== false ? $sanitized : null;
         }
 
         if (!is_null($obj->target)) {
-            $obj->target = filter_var($obj->target, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+            $sanitized = filter_var($obj->target, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+            $obj->target = $sanitized !== false ? $sanitized : null;
         }
 
         if ($obj->penalty < 0 or $obj->penalty > 100) {
@@ -280,9 +297,10 @@ class TmKeyManager
      * @param string $userRole One of the following strings: "owner", "translator", "revisor"
      * @param int|null $uid
      *
-     * @return array TmKeyStruct[]
+     * @return TmKeyStruct[] TmKeyStruct[]
      *
      * @throws Exception
+     * @throws \TypeError
      * @see TmKeyStruct
      *
      */
@@ -304,9 +322,7 @@ class TmKeyManager
         $server_reorder_position = [];
         $reverse_lookup_client_json = ['pos' => [], 'elements' => [], 'unique' => []];
         foreach ($client_tm_keys as $_j => $_client_tm_key) {
-            /**
-             * @var $_client_tm_key TmKeyStruct
-             */
+            /** @var TmKeyStruct $_client_tm_key */
 
             //create a reverse lookup
             $reverse_lookup_client_json['pos'][$_j] = $_client_tm_key->key;
@@ -330,9 +346,7 @@ class TmKeyManager
 
         //update existing job keys
         foreach ($job_tm_keys as $i => $_job_Key) {
-            /**
-             * @var $_job_Key TmKeyStruct
-             */
+            /** @var TmKeyStruct $_job_Key */
 
             $_index_position = array_search($_job_Key->key, $reverse_lookup_client_json['pos']);
 
@@ -432,9 +446,7 @@ class TmKeyManager
             $justCreatedKey = new TmKeyStruct();
 
             foreach ($reverse_lookup_client_json['elements'] as $_pos => $newClientKey) {
-                /**
-                 * @var $newClientKey TmKeyStruct
-                 */
+                /** @var TmKeyStruct $newClientKey */
 
                 //set the key value
                 $justCreatedKey->key = $newClientKey->key;
@@ -549,12 +561,12 @@ class TmKeyManager
 
     /**
      * @param TmKeyStruct[] $tm_keys
-     * @param                               $userEmail
-     * @param                               $jobOwnerEmail
+     * @param string|null $userEmail
+     * @param string|null $jobOwnerEmail
      *
      * @return TmKeyStruct[]
      */
-    public static function filterOutByOwnership(array $tm_keys, $userEmail, $jobOwnerEmail): array
+    public static function filterOutByOwnership(array $tm_keys, ?string $userEmail, ?string $jobOwnerEmail): array
     {
         foreach ($tm_keys as $k => $tm_key) {
             if ($userEmail != $jobOwnerEmail && $tm_key->owner) {
@@ -568,11 +580,12 @@ class TmKeyManager
     }
 
     /**
-     * @param array $emailList
+     * @param list<string> $emailList
      * @param MemoryKeyStruct $memoryKeyToUpdate
      * @param UserStruct $user
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user): void
     {
@@ -585,21 +598,24 @@ class TmKeyManager
             $alreadyRegisteredRecipient = $userDao->setCacheTTL(60 * 10)->read($userQuery);
 
             if (!empty($alreadyRegisteredRecipient)) {
-                // do not send the email to myself
-                if ($memoryKeyToUpdate->uid == $alreadyRegisteredRecipient[0]->uid) {
+                $recipientUid = $alreadyRegisteredRecipient[0]->uid;
+                if ($recipientUid === null) {
                     continue;
                 }
 
-                $memoryKeyToUpdate->uid = $alreadyRegisteredRecipient[0]->uid;
+                // do not send the email to myself
+                if ($memoryKeyToUpdate->uid == $recipientUid) {
+                    continue;
+                }
+
+                $memoryKeyToUpdate->uid = $recipientUid;
                 $this->_addToUserKeyRing($memoryKeyToUpdate, $mkDao);
 
-                /**
-                 * @var UserStruct[] $alreadyRegisteredRecipient
-                 */
+                /** @var UserStruct[] $alreadyRegisteredRecipient */
                 $email = new ShareKeyEmail(
                     $user,
                     [
-                        $alreadyRegisteredRecipient[0]->email,
+                        $alreadyRegisteredRecipient[0]->email ?? '',
                         $alreadyRegisteredRecipient[0]->fullName()
                     ],
                     $memoryKeyToUpdate

@@ -426,6 +426,8 @@ class MemoryKeyDao extends AbstractDao
      * @param list<ShapelessConcreteStruct> $array_result
      *
      * @return list<MemoryKeyStruct>
+     *
+     * @throws \DomainException
      */
     protected function _buildResult(array $array_result): array
     {

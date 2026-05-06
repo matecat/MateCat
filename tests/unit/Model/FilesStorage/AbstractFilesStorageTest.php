@@ -61,7 +61,14 @@ class AbstractFilesStorageTest extends AbstractTest
         $nonExistentDir = '/tmp/opencode/non_existent_dir_' . uniqid();
         $reflection = new \ReflectionMethod($this->fs, '_linkToCache');
 
-        $result = $reflection->invoke($this->fs, $nonExistentDir, 'somehash', 'file.txt');
+        // Suppress the expected E_WARNING from fopen() on non-existent path
+        set_error_handler(static fn() => true, E_WARNING);
+        try {
+            $result = $reflection->invoke($this->fs, $nonExistentDir, 'somehash', 'file.txt');
+        } finally {
+            restore_error_handler();
+        }
+
         $this->assertSame(0, $result);
     }
 

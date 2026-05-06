@@ -132,6 +132,10 @@ class TmKeyStruct extends stdClass implements JsonSerializable
      */
     public function isEncryptedKey(): bool
     {
+        if ($this->key === null) {
+            return false;
+        }
+
         return strrpos($this->key, '*') !== false;
     }
 
@@ -159,10 +163,16 @@ class TmKeyStruct extends stdClass implements JsonSerializable
      *                                                       source     : string  - Source languages
      *                                                       target     : string  - Target languages
      *                                                       </pre>
+     *
+     * @throws DomainException
      */
     public function __construct(array|TmKeyStruct|null $params = null)
     {
-        if ($params != null) {
+        if ($params instanceof TmKeyStruct) {
+            $params = get_object_vars($params);
+        }
+
+        if ($params !== null) {
             foreach ($params as $property => $value) {
                 if (property_exists($this, $property)) {
                     $this->$property = $value;
@@ -171,7 +181,10 @@ class TmKeyStruct extends stdClass implements JsonSerializable
         }
     }
 
-    public function __set($name, $_value)
+    /**
+     * @throws DomainException
+     */
+    public function __set(string $name, mixed $_value): void
     {
         if (!property_exists($this, $name)) {
             throw new DomainException('Unknown property ' . $name);
@@ -200,6 +213,10 @@ class TmKeyStruct extends stdClass implements JsonSerializable
 
     public function getCrypt(): string
     {
+        if ($this->key === null) {
+            return '';
+        }
+
         $keyLength = strlen($this->key);
         $last_digits = substr($this->key, -$this->readable_chars);
 
@@ -227,7 +244,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
                 'w_transl' => $this->w_transl,
                 'r_rev' => $this->r_rev,
                 'w_rev' => $this->w_rev,
-                'penalty' => $this->penalty ?? 0,
+                'penalty' => $this->penalty,
                 'is_shared' => $this->is_shared,
                 'is_private' => $this->isEncryptedKey()
             ];
@@ -239,7 +256,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable
             'owner' => $this->owner,
             'name' => $this->name,
             'key' => $this->key,
-            'penalty' => $this->penalty ?? 0,
+            'penalty' => $this->penalty,
             'is_shared' => $this->is_shared,
         ];
     }
