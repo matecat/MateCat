@@ -20,10 +20,7 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import {
-  SETTINGS_PANEL_TABS,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {SETTINGS_PANEL_TABS, SettingsPanel} from '../components/settingsPanel'
 import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
@@ -54,8 +51,11 @@ import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
 import useResizable from '../hooks/useResizable'
 import IconRedirect from '../components/icons/IconRedirect'
 import IconDown from '../components/icons/IconDown'
-import EyeIcon from '../../img/icons/EyeIcon'
-import {Button} from '../components/common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+} from '../components/common/Button/Button'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -708,30 +708,29 @@ function CatTool() {
               onMouseDown={onResizeMouseDown}
             />
             <div className="context-preview__header">
+              <Button
+                className="context-preview__header-btn"
+                mode={BUTTON_MODE.GHOST}
+                size={BUTTON_SIZE.SMALL}
+                onClick={togglePreview}
+                title="Close preview"
+              >
+                Close
+                <IconDown size={16} />
+              </Button>
               <span className="context-preview__header-title">
-                <EyeIcon size={16} />
-                Preview
+                Visual context
               </span>
-              <div className="context-preview__header-actions">
-                <Button
-                  className="context-preview__header-btn"
-                  onClick={openPreviewInNewWindow}
-                  title="Open in new window"
-                >
-                  <IconRedirect size={16} />
-                </Button>
-
-                <Button
-                  className="context-preview__header-btn"
-                  onClick={togglePreview}
-                  title="Close preview"
-                >
-                  <span className="context-preview__header-close-label">
-                    Close
-                  </span>
-                  <IconDown size={16} />
-                </Button>
-              </div>
+              <Button
+                className="context-preview__header-btn"
+                mode={BUTTON_MODE.GHOST}
+                size={BUTTON_SIZE.SMALL}
+                onClick={openPreviewInNewWindow}
+                title="Open in another tab"
+              >
+                Open in another tab
+                <IconRedirect size={16} />
+              </Button>
             </div>
             <div
               className="context-preview__container"

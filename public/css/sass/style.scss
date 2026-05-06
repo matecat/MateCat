@@ -329,8 +329,6 @@ section.opened .warnings {
     border-radius: 2px;
     font-size: 16px;
     background: colors.$translatedBlue;
-    background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-    background: linear-gradient(top, colors.$translatedBlue, #119ec4);
     user-select: none;
     cursor: pointer;
     min-width: 95px;
@@ -444,16 +442,7 @@ section.opened .warnings {
     transparent 75%,
     transparent
   );
-  background-image: -moz-linear-gradient(
-    -45deg,
-    rgba(255, 255, 255, 0.2) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.2) 75%,
-    transparent 75%,
-    transparent
-  );
+
   background-image: -ms-linear-gradient(
     -45deg,
     rgba(255, 255, 255, 0.2) 25%,
@@ -645,8 +634,6 @@ strong:first-child {
   border-radius: 2px;
   font-size: 18px;
   background: colors.$translatedBlue;
-  background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-  background: linear-gradient(top, colors.$translatedBlue, #119ec4);
   text-transform: uppercase;
   user-select: none;
 }
@@ -784,8 +771,6 @@ article .approved:active {
     from(#f5f5f5),
     to(#d3d4d5)
   );
-  background: -moz-linear-gradient(top, #f5f5f5, #d3d4d5);
-  background: linear-gradient(top, #f5f5f5, #d3d4d5);
 }
 
 .btn {
@@ -2553,8 +2538,6 @@ section .segment-side-buttons {
     from(#f6f6f6),
     to(#e2e3e5)
   );
-  background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
-  background: linear-gradient(top, #f6f6f6, #e2e3e5);
 }
 
 .edit-distance {

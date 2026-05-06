@@ -3,7 +3,8 @@ import {mountPage} from './mountPage'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {findSegmentSidsByClick, tagSegments} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
-import IconDown from '../components/icons/IconDown'
+import IconChevronLeft from '../components/icons/IconChevronLeft'
+import IconChevronRight from '../components/icons/IconChevronRight'
 import useContextDocument from '../hooks/useContextDocument'
 import useContextHighlight from '../hooks/useContextHighlight'
 import useContextPreviewMessages from '../hooks/useContextPreviewMessages'
@@ -20,8 +21,8 @@ const VIEW_MODES = {
 
 const VIEW_OPTIONS = [
   {id: VIEW_MODES.SOURCE, name: 'Source'},
-  {id: VIEW_MODES.TARGET, name: 'Translation'},
-  {id: VIEW_MODES.BOTH, name: 'Both'},
+  {id: VIEW_MODES.TARGET, name: 'Target'},
+  {id: VIEW_MODES.BOTH, name: 'Split view'},
 ]
 
 const CONTENT_VIEWS = {
@@ -30,7 +31,7 @@ const CONTENT_VIEWS = {
 }
 
 const CONTENT_VIEW_OPTIONS = [
-  {id: CONTENT_VIEWS.LIVE_PREVIEW, name: 'Live preview'},
+  {id: CONTENT_VIEWS.LIVE_PREVIEW, name: 'HTML'},
   {id: CONTENT_VIEWS.SCREENSHOT, name: 'Screenshot'},
 ]
 
@@ -152,6 +153,9 @@ const ContextPreview = () => {
     segmentsRef.current = segments
   }, [segments])
 
+  // Track segment request deduplication per direction
+  const requestedAtRef = useRef({before: -1, after: -1})
+
   // Render the fetched HTML into panels once (or when viewMode changes)
   const htmlRenderedRef = useRef({source: '', target: ''})
 
@@ -232,65 +236,97 @@ const ContextPreview = () => {
     setHighlight,
   ])
 
-  // Scroll listener — detect untagged nodes and request more segments
+  // Detect untagged nodes and proactively request adjacent segments
   useEffect(() => {
-    const panel = sourceRef.current || targetRef.current
-    if (!panel || !segments.length) return
+    const container = sourceRef.current || targetRef.current
+    if (!container || !mappableSegments.length || !htmlReady) return
+    if (contentView !== CONTENT_VIEWS.LIVE_PREVIEW) return
 
-    const lastRequestRef = {before: 0, after: 0}
-    const THROTTLE_MS = 1000
+    const THROTTLE_MS = 2000
+    let lastCheckTime = 0
+    const segCount = mappableSegments.length
 
-    const hasUntaggedNodesInViewport = (region) => {
-      const container = sourceRef.current || targetRef.current
-      if (!container) return false
+    const checkForUntaggedNodes = () => {
+      const now = Date.now()
+      if (now - lastCheckTime < THROTTLE_MS) return
+      lastCheckTime = now
+
       const meaningfulEls = container.querySelectorAll(
         'p, li, td, th, h1, h2, h3, h4',
       )
-      const viewportMidY = window.innerHeight / 2
-      for (const el of meaningfulEls) {
-        const elRect = el.getBoundingClientRect()
-        if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue
-        const midY = (elRect.top + elRect.bottom) / 2
-        if (region === 'before' && midY > viewportMidY) continue
-        if (region === 'after' && midY < viewportMidY) continue
-        if (
-          !el.hasAttribute('data-context-sids') &&
-          !el.querySelector('[data-context-sids]')
-        ) {
-          return true
+      if (!meaningfulEls.length) return
+
+      let firstTaggedIdx = -1
+      let lastTaggedIdx = -1
+      for (let i = 0; i < meaningfulEls.length; i++) {
+        if (meaningfulEls[i].closest('[data-context-sids]')) {
+          if (firstTaggedIdx === -1) firstTaggedIdx = i
+          lastTaggedIdx = i
         }
       }
-      return false
-    }
 
-    const handleScroll = () => {
-      const now = Date.now()
-      const scrollTop = window.scrollY
-      const scrollBottom =
-        document.documentElement.scrollHeight - scrollTop - window.innerHeight
-      if (scrollTop < 200 && now - lastRequestRef.before > THROTTLE_MS) {
-        if (hasUntaggedNodesInViewport('before')) {
-          lastRequestRef.before = now
+      if (firstTaggedIdx === -1) {
+        if (requestedAtRef.current.before !== segCount) {
+          requestedAtRef.current.before = segCount
           ContextPreviewChannel.sendMessage({
             type: 'loadMoreSegments',
             where: 'before',
           })
         }
-      }
-      if (scrollBottom < 200 && now - lastRequestRef.after > THROTTLE_MS) {
-        if (hasUntaggedNodesInViewport('after')) {
-          lastRequestRef.after = now
+        if (requestedAtRef.current.after !== segCount) {
+          requestedAtRef.current.after = segCount
           ContextPreviewChannel.sendMessage({
             type: 'loadMoreSegments',
             where: 'after',
           })
         }
+        return
+      }
+
+      let hasUntaggedBefore = false
+      for (let i = 0; i < firstTaggedIdx; i++) {
+        if (!meaningfulEls[i].closest('[data-context-sids]')) {
+          hasUntaggedBefore = true
+          break
+        }
+      }
+
+      let hasUntaggedAfter = false
+      for (let i = lastTaggedIdx + 1; i < meaningfulEls.length; i++) {
+        if (!meaningfulEls[i].closest('[data-context-sids]')) {
+          hasUntaggedAfter = true
+          break
+        }
+      }
+
+      if (hasUntaggedBefore && requestedAtRef.current.before !== segCount) {
+        requestedAtRef.current.before = segCount
+        ContextPreviewChannel.sendMessage({
+          type: 'loadMoreSegments',
+          where: 'before',
+        })
+      }
+      if (hasUntaggedAfter && requestedAtRef.current.after !== segCount) {
+        requestedAtRef.current.after = segCount
+        ContextPreviewChannel.sendMessage({
+          type: 'loadMoreSegments',
+          where: 'after',
+        })
       }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [segments, viewMode])
+    checkForUntaggedNodes()
+
+    const scrollContainer =
+      container.getRootNode()?.host?.closest('.context-preview-content') ??
+      container.closest('.context-preview-content')
+
+    if (scrollContainer) {
+      const handleScroll = () => checkForUntaggedNodes()
+      scrollContainer.addEventListener('scroll', handleScroll, {passive: true})
+      return () => scrollContainer.removeEventListener('scroll', handleScroll)
+    }
+  }, [mappableSegments, htmlReady, contentView, viewMode])
 
   // Click listeners on both panels
   useEffect(() => {
@@ -363,78 +399,86 @@ const ContextPreview = () => {
   return (
     <div className="context-preview-container">
       <div className="context-preview-toolbar">
-        {hasScreenshots && (
-          <SegmentedControl
-            name="context-preview-content-view"
-            options={CONTENT_VIEW_OPTIONS}
-            selectedId={contentView}
-            onChange={handleContentViewChange}
-            compact
-          />
-        )}
-        {contentView === CONTENT_VIEWS.LIVE_PREVIEW && (
-          <SegmentedControl
-            name="context-preview-view-mode"
-            options={VIEW_OPTIONS}
-            selectedId={viewMode}
-            onChange={setViewMode}
-            compact
-          />
-        )}
-
-        <div className="context-preview-zoom">
-          <button
-            className="context-preview-zoom__button"
-            onClick={handleZoomOut}
-            disabled={zoomLevel <= 50}
-            aria-label="Zoom out"
-          >
-            −
-          </button>
-          <span className="context-preview-zoom__level">{zoomLevel}%</span>
-          <button
-            className="context-preview-zoom__button"
-            onClick={handleZoomIn}
-            disabled={zoomLevel >= 200}
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-          <button
-            className="context-preview-zoom__reset"
-            onClick={handleZoomReset}
-            disabled={zoomLevel === 100}
-            aria-label="Reset zoom"
-          >
-            Reset
-          </button>
+        <div className="context-preview-toolbar__left">
+          {hasScreenshots && (
+            <SegmentedControl
+              name="context-preview-content-view"
+              className="context-preview-content-view"
+              options={CONTENT_VIEW_OPTIONS}
+              selectedId={contentView}
+              onChange={handleContentViewChange}
+              compact
+              autoWidth
+            />
+          )}
+          {contentView === CONTENT_VIEWS.LIVE_PREVIEW && (
+            <SegmentedControl
+              name="context-preview-view-mode"
+              className="context-preview-view-mode"
+              options={VIEW_OPTIONS}
+              selectedId={viewMode}
+              onChange={setViewMode}
+              compact
+              autoWidth
+            />
+          )}
         </div>
 
-        {highlight &&
-          ((highlight.mode === 'segment' && highlight.total > 1) ||
-            (highlight.mode === 'node' && highlight.sids.length > 1)) && (
-            <div className="context-preview-nav">
-              <button
-                className="context-preview-nav__button"
-                onClick={handlePrev}
-                aria-label="Previous"
-              >
-                <IconDown size={16} />
-              </button>
-              <span className="context-preview-nav__counter">
-                {highlight.mode === 'segment'
-                  ? `${highlight.activeIndex + 1} of ${highlight.total}`
-                  : `Segment ${highlight.activeSegIdx + 1} of ${highlight.sids.length}`}
-              </span>
-              <button
-                className="context-preview-nav__button"
-                onClick={handleNext}
-                aria-label="Next"
-              >
-                <IconDown size={16} />
-              </button>
-            </div>
-          )}
+        <div className="context-preview-toolbar__right">
+          {highlight &&
+            ((highlight.mode === 'segment' && highlight.total > 1) ||
+              (highlight.mode === 'node' && highlight.sids.length > 1)) && (
+              <div className="context-preview-nav">
+                <button
+                  className="context-preview-nav__button"
+                  onClick={handlePrev}
+                  aria-label="Previous"
+                >
+                  <IconChevronLeft size={16} />
+                </button>
+                <span className="context-preview-nav__counter">
+                  {highlight.mode === 'segment'
+                    ? `${highlight.activeIndex + 1} of ${highlight.total}`
+                    : `Segment ${highlight.activeSegIdx + 1} of ${highlight.sids.length}`}
+                </span>
+                <button
+                  className="context-preview-nav__button"
+                  onClick={handleNext}
+                  aria-label="Next"
+                >
+                  <IconChevronRight size={16} />
+                </button>
+              </div>
+            )}
+
+          <div className="context-preview-zoom">
+            <button
+              className="context-preview-zoom__button"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 50}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="context-preview-zoom__level">{zoomLevel}%</span>
+            <button
+              className="context-preview-zoom__button"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 200}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+            <button
+              className="context-preview-zoom__reset"
+              onClick={handleZoomReset}
+              disabled={zoomLevel === 100}
+              aria-label="Reset zoom"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
       </div>
       <div className="context-preview-panels">
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) &&

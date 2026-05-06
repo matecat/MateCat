@@ -56,7 +56,7 @@ a.button-component-container {
     box-shadow: inset 0 0 0 1px var(--btnBorderColor);
     color: var(--btnAltTextColor);
 
-    &:not(:disabled):global(.button--active) {
+    &:not(:disabled).button--active {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorActive);
       background-color: var(--btnBgColorSemitransAlt);
     }
@@ -80,8 +80,8 @@ a.button-component-container {
   &.ghost {
     color: var(--btnAltTextColor);
 
-    &:not(:disabled):global(.button--active),
-    &:not(:disabled):global(.button--active):hover {
+    &:not(:disabled).button--active,
+    &:not(:disabled).button--active:hover {
       background-color: var(--btnBgColorSemitransAlt);
       color: var(--btnAltTextColor);
     }
@@ -99,7 +99,7 @@ a.button-component-container {
   &.link {
     color: var(--btnAltTextColor);
 
-    &:not(:disabled):global(.button--active) {
+    &:not(:disabled).button--active {
       color: colors.$grey8;
     }
 

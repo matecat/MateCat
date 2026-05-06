@@ -22,7 +22,6 @@ use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Templating\PHPTALWithAppend;
 use Utils\Tools\Utils;
-
 /**
  * Created by PhpStorm.
  * User: fregini
@@ -69,7 +68,8 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      */
     public function setView(string $template_name, array $params = [], int $code = 200): void
     {
-        $this->view = new PHPTALWithAppend(AppConfig::$TEMPLATE_ROOT . "/$template_name");
+        $templatePath = AppConfig::$TEMPLATE_ROOT . "/$template_name";
+        $this->view = new PHPTALWithAppend($templatePath);
         $this->httpCode = $code;
 
         $this->view->{'basepath'} = AppConfig::$BASEURL;
@@ -93,7 +93,16 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];
-        $this->view->{'css_resources'} = [];
+
+        /**
+         * This is a unique ID generated at runtime.
+         * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
+         */
+        $nonce = Utils::uuid4();
+        $this->view->{'x_nonce_unique_id'} = $nonce;
+
+        $this->view->{'vite_html'} = '';
+        AppConfig::decorateView( $this->view, $template_name, $nonce ?? '' );
 
         // init oauth clients
         $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";

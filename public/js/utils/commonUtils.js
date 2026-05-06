@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import $ from 'jquery'
+import OfflineUtils from './offlineUtils'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
 import SegmentStore from '../stores/SegmentStore'
@@ -8,15 +9,26 @@ import {
   setLastSegmentFromLocalStorage,
 } from './segmentLocalStorage'
 
-import OfflineUtils from './offlineUtils'
-
-// Lazy-loaded to break circular dependencies
+// Async-loaded to break circular dependency for static analysis.
+// In Vite/ESM, the module resolves before any user interaction triggers these getters.
 let _SegmentActions
-const getSegmentActions = () =>
-  _SegmentActions ||
-  (_SegmentActions = require('../actions/SegmentActions').default)
-const checkTranslationTailEmpty = () =>
-  require('../setTranslationUtil').isTranslationTailEmpty()
+import('../actions/SegmentActions').then((m) => {
+  _SegmentActions = m.default
+})
+const getSegmentActions = () => {
+  if (!_SegmentActions)
+    throw new Error('[commonUtils] SegmentActions not loaded yet')
+  return _SegmentActions
+}
+
+let _SetTranslationUtil
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
+const checkTranslationTailEmpty = () => {
+  if (!_SetTranslationUtil) return false // safe default: assume not empty → show onbeforeunload warning
+  return _SetTranslationUtil.isTranslationTailEmpty()
+}
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -128,12 +140,23 @@ const CommonUtils = {
   },
 
   setBrowserHistoryBehavior() {
-    let updateAppByPopState = () => {
-      var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
-      var currentSegment = SegmentStore.getCurrentSegment()
-      if (segment && currentSegment?.sid === segment.sid) return
-      if (segment && !segment.opened) {
-        getSegmentActions().openSegment(this.parsedHash.segmentId, true)
+    const updateAppByPopState = () => {
+      try {
+        const segment = SegmentStore.getSegmentByIdToJS(
+          this.parsedHash.segmentId,
+        )
+        const currentSegment = SegmentStore.getCurrentSegment()
+        if (segment && currentSegment?.sid === segment.sid) return
+        if (segment && !segment.opened) {
+          getSegmentActions().openSegment(this.parsedHash.segmentId, true)
+        }
+      } catch (e) {
+        console.error(
+          '[commonUtils] updateAppByPopState failed for segment',
+          this.parsedHash.segmentId,
+          '- navigation may be incomplete:',
+          e,
+        )
       }
     }
 
