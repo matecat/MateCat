@@ -4,6 +4,7 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Model\Comments\CommentDao;
@@ -14,11 +15,14 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Transport\Message;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
@@ -38,6 +42,9 @@ class CommentController extends KleinController
     /**
      * @return void
      * @throws ReflectionException
+     * @throws TypeError
+     * @throws PDOException
+     * @throws Exception
      */
     public function getRange(): void
     {
@@ -67,6 +74,8 @@ class CommentController extends KleinController
     /**
      * @return void
      * @throws ReflectionException
+     * @throws TypeError
+     * @throws Exception
      */
     public function resolve(): void
     {
@@ -99,6 +108,7 @@ class CommentController extends KleinController
      * @return void
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -135,6 +145,10 @@ class CommentController extends KleinController
     /**
      * @return void
      * @throws ReflectionException
+     * @throws InvalidArgumentException
+     * @throws Exception
+     * @throws PDOException
+     * @throws RuntimeException
      */
     public function delete(): void
     {
@@ -167,6 +181,10 @@ class CommentController extends KleinController
 
         $segments = $commentDao->getBySegmentId($comment->id_segment);
         $lastSegment = end($segments);
+
+        if ($lastSegment === false) {
+            throw new InvalidArgumentException("No comments found for this segment.", -205);
+        }
 
         if ((int)$lastSegment->id !== (int)$request['id_comment']) {
             throw new InvalidArgumentException("Only the last element comment can be deleted.", -205);
@@ -217,8 +235,10 @@ class CommentController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
@@ -234,12 +254,12 @@ class CommentController extends KleinController
         $id_comment = filter_var($this->request->param('id_comment'), FILTER_SANITIZE_NUMBER_INT);
         $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $message = filter_var($this->request->param('message'), FILTER_UNSAFE_RAW);
-        $message = htmlspecialchars($message);
+        $message = htmlspecialchars((string)$message);
 
-        $job = JobDao::getByIdAndPassword($id_job, $password, 60 * 60 * 24);
+        $job = JobDao::getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
 
         if (empty($job)) {
-            throw new InvalidArgumentException(-10, "wrong password");
+            throw new InvalidArgumentException("wrong password", -10);
         }
 
         return [
@@ -260,12 +280,14 @@ class CommentController extends KleinController
     }
 
     /**
-     * @param $request
+     * @param array<string, mixed> $request
      *
-     * @return array
+     * @return array{struct: CommentStruct, users_mentioned_id: list<int|null>, users_mentioned: UserStruct[]}
      * @throws ReflectionException
+     * @throws TypeError
+     * @throws Exception
      */
-    private function prepareCommentData($request): array
+    private function prepareCommentData(array $request): array
     {
         $struct = new CommentStruct();
 
@@ -279,10 +301,11 @@ class CommentController extends KleinController
         $struct->email = $this->user->getEmail();
         $struct->uid = $this->user->getUid();
 
-        $user_mentions = $this->resolveUserMentions($struct->message);
-        $user_team_mentions = $this->resolveTeamMentions($request['job'], $struct->message);
+        $message = (string)$struct->message;
+        $user_mentions = $this->resolveUserMentions($message);
+        $user_team_mentions = $this->resolveTeamMentions($request['job'], $message);
         $userDao = new UserDao(Database::obtain());
-        $users_mentioned_id = array_unique(array_merge($user_mentions, $user_team_mentions));
+        $users_mentioned_id = array_values(array_unique(array_merge($user_mentions, $user_team_mentions)));
         $users_mentioned = $this->filterUsers($userDao->getByUids($users_mentioned_id));
 
         return [
@@ -293,12 +316,13 @@ class CommentController extends KleinController
     }
 
     /**
-     * @param                  $request
+     * @param array<string, mixed> $request
      * @param UserStruct $user
      *
      * @return CommentStruct
+     * @throws TypeError
      */
-    private function prepareMentionCommentData($request, UserStruct $user): CommentStruct
+    private function prepareMentionCommentData(array $request, UserStruct $user): CommentStruct
     {
         $struct = new CommentStruct();
 
@@ -315,31 +339,40 @@ class CommentController extends KleinController
     }
 
     /**
-     * @param $message
+     * @param string $message
      *
-     * @return array
+     * @return list<int>
      */
-    private function resolveUserMentions($message): array
+    private function resolveUserMentions(string $message): array
     {
-        return CommentDao::getUsersIdFromContent($message);
+        return array_values(array_map('intval', CommentDao::getUsersIdFromContent($message)));
     }
 
     /**
      * @param JobStruct $job
-     * @param                $message
+     * @param string $message
      *
-     * @return array
+     * @return list<int>
      * @throws ReflectionException
+     * @throws Exception
      */
-    private function resolveTeamMentions(JobStruct $job, $message): array
+    private function resolveTeamMentions(JobStruct $job, string $message): array
     {
         $users = [];
 
         if (str_contains($message, "{@team@}")) {
             $project = $job->getProject();
+
+            if ($project->id_team === null) {
+                return [];
+            }
+
             $memberships = (new MembershipDao())->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($project->id_team, false);
+
             foreach ($memberships as $membership) {
-                $users[] = $membership->uid;
+                if ($membership instanceof MembershipStruct && $membership->uid !== null) {
+                    $users[] = $membership->uid;
+                }
             }
         }
 
@@ -347,12 +380,12 @@ class CommentController extends KleinController
     }
 
     /**
-     * @param            $users
-     * @param array $uidSentList
+     * @param UserStruct[] $users
+     * @param list<int|null> $uidSentList
      *
-     * @return array
+     * @return UserStruct[]
      */
-    private function filterUsers($users, array $uidSentList = []): array
+    private function filterUsers(array $users, array $uidSentList = []): array
     {
         $userIsLogged = $this->userIsLogged;
         $current_uid = $this->user->uid;
@@ -376,23 +409,28 @@ class CommentController extends KleinController
     /**
      * @param CommentStruct $comment
      * @param JobStruct $job
-     * @param                        $users_mentioned_id
+     * @param list<int|null> $users_mentioned_id
      *
-     * @return array
+     * @return UserStruct[]
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
-    private function resolveUsers(CommentStruct $comment, JobStruct $job, $users_mentioned_id): array
+    private function resolveUsers(CommentStruct $comment, JobStruct $job, array $users_mentioned_id): array
     {
         $commentDao = new CommentDao(Database::obtain());
         $result = $commentDao->getThreadContributorUids($comment);
 
         $userDao = new UserDao(Database::obtain());
         $users = $userDao->getByUids($result);
-        $userDao->setCacheTTL(60 * 60 * 24);
-        $owner = $userDao->getProjectOwner($job->id);
 
-        if (!empty($owner->uid) and !empty($owner->email)) {
-            $users[] = $owner;
+        if ($job->id !== null) {
+            $userDao->setCacheTTL(60 * 60 * 24);
+            $owner = $userDao->getProjectOwner($job->id);
+
+            if (!empty($owner->uid) and !empty($owner->email)) {
+                $users[] = $owner;
+            }
         }
 
         $userDao->setCacheTTL(60 * 10);
@@ -406,16 +444,19 @@ class CommentController extends KleinController
 
     /**
      * @param CommentStruct $comment
-     * @param                        $id_project
-     * @param                        $id_job
-     * @param                        $id_client
+     * @param int $id_project
+     * @param string $id_job
+     * @param string $id_client
      *
      * @return void
      * @throws ReflectionException
+     * @throws DomainException
+     * @throws Exception
+     * @throws \Stomp\Exception\ConnectionException
      */
-    private function enqueueComment(CommentStruct $comment, $id_project, $id_job, $id_client): void
+    private function enqueueComment(CommentStruct $comment, int $id_project, string $id_job, string $id_client): void
     {
-        $message = json_encode([
+        $message = (string)json_encode([
             '_type' => 'comment',
             'data' => [
                 'id_job' => $id_job,
@@ -430,27 +471,34 @@ class CommentController extends KleinController
     }
 
     /**
-     * @param $id_project
+     * @param int $id_project
      *
      * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
-    private function projectData($id_project): array
+    private function projectData(int $id_project): array
     {
         return (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($id_project);
     }
 
     /**
-     * @param $id_project
+     * @param int $id_project
      *
-     * @return array
+     * @return list<string>
      * @throws ReflectionException
+     * @throws DomainException
+     * @throws Exception
      */
-    private function getProjectPasswords($id_project): array
+    private function getProjectPasswords(int $id_project): array
     {
         $pws = [];
 
         foreach ($this->projectData($id_project) as $chunk) {
+            if (!isset($chunk['jpassword'])) {
+                throw new DomainException('Project password not found for project chunk.');
+            }
+
             $pws[] = $chunk['jpassword'];
         }
 
@@ -458,24 +506,27 @@ class CommentController extends KleinController
     }
 
     /**
-     * @param $id_job
-     * @param $id_client
-     * @param $id_project
-     * @param $id
-     * @param $idSegment
-     * @param $sourcePage
+     * @param string $id_job
+     * @param string $id_client
+     * @param int $id_project
+     * @param int $id
+     * @param int $idSegment
+     * @param string $sourcePage
      *
      * @throws ReflectionException
+     * @throws DomainException
+     * @throws Exception
+     * @throws \Stomp\Exception\ConnectionException
      */
     private function enqueueDeleteCommentMessage(
-        $id_job,
-        $id_client,
-        $id_project,
-        $id,
-        $idSegment,
-        $sourcePage
+        string $id_job,
+        string $id_client,
+        int $id_project,
+        int $id,
+        int $idSegment,
+        string $sourcePage
     ): void {
-        $message = json_encode([
+        $message = (string)json_encode([
             '_type' => 'comment',
             'data' => [
                 'id_job' => $id_job,
@@ -497,8 +548,8 @@ class CommentController extends KleinController
     /**
      * @param CommentStruct $comment
      * @param JobStruct $job
-     * @param array $users
-     * @param array $users_mentioned
+     * @param UserStruct[] $users
+     * @param UserStruct[] $users_mentioned
      *
      * @return void
      * @throws ReflectionException
@@ -511,6 +562,17 @@ class CommentController extends KleinController
             'skip_check_segment' => true
         ]);
 
+        if ($jobUrlStruct === null) {
+            $this->response->code(404);
+
+            $this->response->json([
+                "code" => -10,
+                "message" => "No valid url was found for this project."
+            ]);
+
+            return;
+        }
+
         $url = $jobUrlStruct->getUrlByRevisionNumber($comment->revision_number);
 
         if (!$url) {
@@ -520,6 +582,8 @@ class CommentController extends KleinController
                 "code" => -10,
                 "message" => "No valid url was found for this project."
             ]);
+
+            return;
         }
 
         $project_data = $this->projectData($job->id_project);
