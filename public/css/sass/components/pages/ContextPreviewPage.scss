@@ -215,6 +215,15 @@
   color: colors.$grey1;
 }
 
+.context-preview-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: 14px;
+  color: colors.$grey1;
+}
+
 .context-preview-error {
   display: flex;
   flex-direction: column;

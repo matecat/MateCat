@@ -94,7 +94,12 @@ const useContextDocument = (url) => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!url) return
+    if (!url) {
+      setHtmlContent('')
+      setLoading(false)
+      setError(null)
+      return
+    }
     let cancelled = false
 
     if (htmlCache.has(url)) {

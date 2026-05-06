@@ -400,6 +400,16 @@ const ContextPreview = () => {
     )
   }
 
+  if (!currentContextUrl && !htmlContent) {
+    return (
+      <div className="context-preview-container">
+        <div className="context-preview-empty">
+          No context available for this segment
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="context-preview-container">
       <div className="context-preview-toolbar">

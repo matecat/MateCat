@@ -94,6 +94,7 @@ function CatTool() {
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [segmentHasPreview, setSegmentHasPreview] = useState(false)
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
   const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
@@ -105,6 +106,7 @@ function CatTool() {
       if (!prev && popupWindowRef.current && !popupWindowRef.current.closed) {
         popupWindowRef.current.close()
         popupWindowRef.current = null
+        setIsPopupOpen(false)
       }
       return next
     })
@@ -133,7 +135,21 @@ function CatTool() {
       )
     }
     setIsPreviewOpen(false)
+    setIsPopupOpen(true)
   }, [contextPreviewUrl])
+
+  // Detect when the popup window is manually closed by the user
+  useEffect(() => {
+    if (!isPopupOpen) return
+    const interval = setInterval(() => {
+      if (!popupWindowRef.current || popupWindowRef.current.closed) {
+        popupWindowRef.current = null
+        setIsPopupOpen(false)
+        setIsPreviewOpen(previewDesiredOpenRef.current)
+      }
+    }, 500)
+    return () => clearInterval(interval)
+  }, [isPopupOpen])
 
   useEffect(() => {
     return ContextPreviewChannel.onMessage((message) => {
@@ -336,7 +352,9 @@ function CatTool() {
       const hasContent = Boolean(context_url || screenshot)
       setSegmentHasPreview(hasContent)
       if (hasContent) {
-        setIsPreviewOpen(previewDesiredOpenRef.current)
+        if (!popupWindowRef.current || popupWindowRef.current.closed) {
+          setIsPreviewOpen(previewDesiredOpenRef.current)
+        }
       } else {
         setIsPreviewOpen(false)
       }
@@ -690,6 +708,7 @@ function CatTool() {
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
+      {!isPopupOpen && (
       <div
         id="context-preview-wrapper"
         className={
@@ -757,6 +776,7 @@ function CatTool() {
           </div>
         )}
       </div>
+      )}
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
