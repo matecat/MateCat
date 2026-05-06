@@ -2095,7 +2095,13 @@ parameters:
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
-			message: '#^Offset ''basename'' might not exist on array\|string\.$#'
+			message: '#^Method Controller\\API\\V2\\DownloadController\:\:transferZipFromS3ToTmpDir\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Offset ''basename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
@@ -2107,13 +2113,13 @@ parameters:
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
-			message: '#^Offset ''extension'' might not exist on array\|string\.$#'
+			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
 			identifier: offsetAccess.notFound
 			count: 4
 			path: lib/Controller/API/V2/DownloadController.php
 
 		-
-			message: '#^Offset ''filename'' might not exist on array\|string\.$#'
+			message: '#^Offset ''filename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: lib/Controller/API/V2/DownloadController.php
@@ -2165,6 +2171,18 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/DownloadJobTMXController.php
+
+		-
+			message: '#^Offset ''basename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\: string, filename\?\: string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: lib/Controller/API/V2/DownloadOriginalController.php
+
+		-
+			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: lib/Controller/API/V2/DownloadOriginalController.php
 
 		-
 			message: '#^Variable \$jobData in empty\(\) always exists and is not falsy\.$#'
@@ -4339,15 +4357,21 @@ parameters:
 			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
 
 		-
-			message: '#^Offset ''extension'' might not exist on array\|string\.$#'
+			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
 			identifier: offsetAccess.notFound
 			count: 2
 			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
 
 		-
-			message: '#^Offset ''filename'' might not exist on array\|string\.$#'
+			message: '#^Offset ''filename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\: string, filename\?\: string\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 4
+			count: 2
+			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
+
+		-
+			message: '#^Offset ''filename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
+			identifier: offsetAccess.notFound
+			count: 2
 			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
 
 		-
@@ -4917,7 +4941,7 @@ parameters:
 		-
 			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:removeFile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Model/ConnectedServices/GDrive/Session.php
 
 		-
@@ -5485,13 +5509,13 @@ parameters:
 			path: lib/Model/Conversion/Filters.php
 
 		-
-			message: '#^Part \$basename \(array\|string\) of encapsed string cannot be cast to string\.$#'
+			message: '#^Part \$basename \(array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 1
 			path: lib/Model/Conversion/Filters.php
 
 		-
-			message: '#^Part \$extension \(array\|string\) of encapsed string cannot be cast to string\.$#'
+			message: '#^Part \$extension \(array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 1
 			path: lib/Model/Conversion/Filters.php
@@ -5653,7 +5677,7 @@ parameters:
 			path: lib/Model/Conversion/UploadElement.php
 
 		-
-			message: '#^Binary operation "\." between array\|string and ''___SEP___'' results in an error\.$#'
+			message: '#^Binary operation "\." between array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string and ''___SEP___'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: lib/Model/Conversion/ZipArchiveHandler.php
@@ -5725,7 +5749,7 @@ parameters:
 			path: lib/Model/Conversion/ZipArchiveHandler.php
 
 		-
-			message: '#^Parameter \#1 \$search of function str_replace expects array\<string\>\|string, array\<int, array\|string\> given\.$#'
+			message: '#^Parameter \#1 \$search of function str_replace expects array\<string\>\|string, array\<int, array\<string, string\>\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Conversion/ZipArchiveHandler.php
@@ -6185,456 +6209,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: lib/Model/Files/FilesMetadataMarshaller.php
-
-		-
-			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:_linkToCache\(\) should return int but returns int\<0, max\>\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:composeCachePath\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:deleteHashFromUploadDir\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:getFilesForJob\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:getFilesForJob\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\AbstractFilesStorage\:\:pathinfo_fix\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type bool\|string is not subtype of native type string\|false\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of function date_create expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function fclose expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function fflush expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function fgets expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function flock expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function ftruncate expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function fwrite expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$stream of function rewind expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/AbstractFilesStorage.php
-
-		-
-			message: '#^Binary operation "\." between non\-falsy\-string and array\|string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Cannot call method debug\(\) on Utils\\Logger\\MatecatLogger\|null\.$#'
-			identifier: method.nonObject
-			count: 7
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:cacheZipArchive\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:getFastAnalysisData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:getFastAnalysisData\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:getHashesFromDir\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:linkZipToProject\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:moveFileFromUploadSessionToQueuePath\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:moveFileFromUploadSessionToQueuePath\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:moveFromCacheToFileDir\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:storeFastAnalysisFile\(\) has parameter \$segments_metadata with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:storeFastAnalysisFile\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type bool\|string is not subtype of native type string\|false\.$#'
-			identifier: return.phpDocType
-			count: 4
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$data of function unserialize expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$filename of function is_file expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$path of static method Model\\FilesStorage\\AbstractFilesStorage\:\:basename_fix\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$path of static method Model\\FilesStorage\\AbstractFilesStorage\:\:pathinfo_fix\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$target of function link expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Variable \$iterator in PHPDoc tag @var does not match any variable in the foreach loop\: \$item$#'
-			identifier: varTag.differentVariable
-			count: 1
-			path: lib/Model/FilesStorage/FsFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\IFilesStorage\:\:getFastAnalysisData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\IFilesStorage\:\:getHashesFromDir\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\IFilesStorage\:\:storeFastAnalysisFile\(\) has parameter \$segments_metadata with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type bool\|string is not subtype of native type string\|false\.$#'
-			identifier: return.phpDocType
-			count: 2
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type array\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type bool\.$#'
-			identifier: return.phpDocType
-			count: 4
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type string\|false\.$#'
-			identifier: return.phpDocType
-			count: 2
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type void\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/FilesStorage/IFilesStorage.php
-
-		-
-			message: '#^Cannot call method info\(\) on Utils\\Logger\\MatecatLogger\|null\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:cacheZipArchive\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:createFileName\(\) has parameter \$file_info with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:findAKeyInProjectBucket\(\) has parameter \$dateHashPath with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:findAKeyInProjectBucket\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:findAKeyInProjectBucket\(\) has parameter \$keyToSearch with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getArrayMessageForLogs\(\) has parameter \$destItems with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getArrayMessageForLogs\(\) has parameter \$sourceItems with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getArrayMessageForLogs\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getFastAnalysisData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getFastAnalysisData\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getFastAnalysisFileName\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getHashesFromDir\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getHashesFromDir\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:getStaticS3Client\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:moveFileFromUploadSessionToQueuePath\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:moveFileFromUploadSessionToQueuePath\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:storeFastAnalysisFile\(\) has parameter \$segments_metadata with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:storeFastAnalysisFile\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Offset ''basename'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Offset ''extension'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Offset ''filename'' might not exist on array\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^PHPDoc tag @return with type bool\|string is not subtype of native type string\|false\.$#'
-			identifier: return.phpDocType
-			count: 4
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$data of function unserialize expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$path of static method Model\\FilesStorage\\AbstractFilesStorage\:\:pathinfo_fix\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$search of function str_replace expects array\<string\>\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Parameter \#1 \$uploadSession of static method Model\\FilesStorage\\S3FilesStorage\:\:getUploadSessionSafeName\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Parameter \#2 \$file_info of static method Model\\FilesStorage\\S3FilesStorage\:\:createFileName\(\) expects array, array\|string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and string will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Variable \$iterator in PHPDoc tag @var does not match any variable in the foreach loop\: \$item$#'
-			identifier: varTag.differentVariable
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
 
 		-
 			message: '#^Method Model\\Filters\\DTO\\Dita\:\:fromArray\(\) has parameter \$data with no value type specified in iterable type array\.$#'
@@ -7688,6 +7262,12 @@ parameters:
 
 		-
 			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:insertInstructions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:mapSegmentExtractionError\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ProjectCreation/ProjectManager.php
@@ -10739,6 +10319,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
+
+		-
+			message: '#^Parameter \#1 \$segs_array of method Utils\\Engines\\MyMemory\:\:fastAnalysis\(\) expects array\<int, array\<string, mixed\>\>, array\<int\|string, array\<string, mixed\>\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
@@ -20853,6 +20439,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCachePackage\(\) has parameter \$prefix with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/FilesStorage/S3AlignerFilesStorage.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCachePackage\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/FilesStorage/S3AlignerFilesStorage.php
 

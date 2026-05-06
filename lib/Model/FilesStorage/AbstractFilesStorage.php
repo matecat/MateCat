@@ -81,7 +81,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string $path
      * @param int $options
      *
-     * @return array|string
+     * @return array{dirname?: string, basename?: string, extension?: string, filename?: string}|string
      */
     public static function pathinfo_fix(string $path, int $options = 15): array|string
     {
@@ -129,7 +129,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
     /**
      * @param string $path
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getSingleFileInPath(string $path): false|string
     {
@@ -176,6 +176,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string $linkFile
      *
      * @return bool
+     * @throws \RuntimeException
      */
     public function deleteHashFromUploadDir(string $uploadDirPath, string $linkFile): bool
     {
@@ -207,10 +208,16 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string|null $create_date
      *
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function getDatePath(?string $create_date = null): string
     {
-        return date_create($create_date)->format('Ymd');
+        $date = date_create($create_date ?? 'now');
+        if ($date === false) {
+            throw new \InvalidArgumentException("Invalid date string: '$create_date'");
+        }
+
+        return $date->format('Ymd');
     }
 
     /**
@@ -224,7 +231,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      *
      * @param string $hash
      *
-     * @return array
+     * @return array{firstLevel: string, secondLevel: string, thirdLevel: string}
      */
     public static function composeCachePath(string $hash): array
     {
@@ -284,6 +291,9 @@ abstract class AbstractFilesStorage implements IFilesStorage
         $bytesWritten = 0;
 
         $fp = fopen($filePath, "c+");
+        if ($fp === false) {
+            return 0;
+        }
 
         if (flock($fp, LOCK_EX)) {
             $fileRawContent = "";
@@ -309,7 +319,8 @@ abstract class AbstractFilesStorage implements IFilesStorage
 
             $contentString = implode("\n", $content) . "\n";
 
-            $bytesWritten = fwrite($fp, $contentString);
+            $written = fwrite($fp, $contentString);
+            $bytesWritten = ($written !== false) ? $written : 0;
             fflush($fp);
             flock($fp, LOCK_UN);
             fclose($fp);
@@ -330,7 +341,8 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param int $id_job
      * @param bool $getXliffPath
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws \PDOException
      */
     public function getFilesForJob(int $id_job, bool $getXliffPath = true): array
     {

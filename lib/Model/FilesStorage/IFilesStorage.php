@@ -44,7 +44,7 @@ interface IFilesStorage
      * @param ?string $originalPath
      * @param string $xliffPath
      *
-     * @return mixed
+     * @return bool
      * @throws FileSystemException
      */
     public function makeCachePackage(string $hash, string $lang, ?string $originalPath, string $xliffPath): bool;
@@ -55,7 +55,7 @@ interface IFilesStorage
      * @param string $hash
      * @param string $lang
      *
-     * @return mixed
+     * @return false|string
      */
     public function getOriginalFromCache(string $hash, string $lang): false|string;
 
@@ -63,14 +63,14 @@ interface IFilesStorage
      * @param string $hash
      * @param string $lang
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getXliffFromCache(string $hash, string $lang): false|string;
 
     /**
      * @param string $dirToScan
      *
-     * @return mixed
+     * @return array{conversionHashes: array<string, mixed>, zipHashes: list<string>}
      */
     public function getHashesFromDir(string $dirToScan): array;
 
@@ -96,7 +96,7 @@ interface IFilesStorage
      * @param string $idFile
      * @param string|null $newFileName
      *
-     * @return mixed
+     * @return bool
      */
     public function moveFromCacheToFileDir(string $dateHashPath, string $lang, string $idFile, ?string $newFileName = null): bool;
 
@@ -106,7 +106,7 @@ interface IFilesStorage
      * @param string $id
      * @param string $dateHashPath
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getOriginalFromFileDir(string $id, string $dateHashPath): false|string;
 
@@ -114,7 +114,7 @@ interface IFilesStorage
      * @param string $id
      * @param string $dateHashPath
      *
-     * @return mixed
+     * @return false|string
      */
     public function getXliffFromFileDir(string $id, string $dateHashPath): false|string;
 
@@ -127,9 +127,9 @@ interface IFilesStorage
     /**
      * Moves the files from upload session folder to queue path
      *
-     * @param $uploadSession
+     * @param string $uploadSession
      *
-     * @return mixed
+     * @return void
      */
     public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
 
@@ -154,9 +154,11 @@ interface IFilesStorage
      * Stores a serialized file to fast analysis storage
      *
      * @param string $id_project
-     * @param array $segments_metadata
+     * @param array<string|int, mixed> $segments_metadata
      *
      * @return void
+     * @throws \UnexpectedValueException
+     * @throws \ReflectionException
      */
     public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void;
 
@@ -165,7 +167,9 @@ interface IFilesStorage
      *
      * @param int $id_project
      *
-     * @return array
+     * @return array<string|int, mixed>
+     * @throws \UnexpectedValueException
+     * @throws \ReflectionException
      */
     public static function getFastAnalysisData(int $id_project): array;
 
@@ -174,7 +178,7 @@ interface IFilesStorage
      *
      * @param string $id_project
      *
-     * @return mixed
+     * @return bool
      */
     public static function deleteFastAnalysisFile(string $id_project): bool;
 
@@ -199,7 +203,7 @@ interface IFilesStorage
      * @param string $zipHash
      * @param string $projectID
      *
-     * @return mixed
+     * @return bool
      */
     public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool;
 
