@@ -1095,8 +1095,8 @@ class CatUtils
      *   The file name is sanitized to ensure it meets the project name criteria.
      *
      * @param string $name The project name to validate. An empty string is treated as missing.
-     * @param array<int, array<string, string>> $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
-     *                         If the array contains exactly one file, its name is used as the fallback.
+     * @param array<array-key, array<string, mixed>> $arrFiles An array of file entries used to determine a fallback name if the project name is invalid.
+     *                         If the array contains exactly one file, its 'name' key is used as the fallback.
      *
      * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
      */

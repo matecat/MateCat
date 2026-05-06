@@ -98,5 +98,75 @@ class UploadElementTest extends AbstractTest
         $this->assertContains('a.txt', $names);
         $this->assertContains('b.txt', $names);
     }
+
+    #[Test]
+    public function toArray_recursively_converts_nested_elements(): void
+    {
+        $parent = new UploadElement();
+        $parent->file1 = new UploadElement(['name' => 'a.docx', 'size' => 100]);
+        $parent->file2 = new UploadElement(['name' => 'b.pdf', 'size' => 200]);
+
+        $result = $parent->toArray();
+
+        $this->assertIsArray($result['file1']);
+        $this->assertIsArray($result['file2']);
+        $this->assertSame('a.docx', $result['file1']['name']);
+        $this->assertSame(100, $result['file1']['size']);
+        $this->assertSame('b.pdf', $result['file2']['name']);
+        $this->assertSame(200, $result['file2']['size']);
+    }
+
+    #[Test]
+    public function toArray_with_mask_filters_properties(): void
+    {
+        $el = new UploadElement(['name' => 'file.txt', 'tmp_name' => '/tmp/abc', 'size' => 512]);
+
+        $result = $el->toArray(['name', 'size']);
+
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('size', $result);
+        $this->assertArrayNotHasKey('tmp_name', $result);
+    }
+
+    #[Test]
+    public function toArray_empty_element_returns_empty_array(): void
+    {
+        $el = new UploadElement();
+
+        $this->assertSame([], $el->toArray());
+    }
+
+    #[Test]
+    public function toArray_matches_getUniformGlobalFilesStructure_pattern(): void
+    {
+        $parent = new UploadElement();
+        $child = new UploadElement();
+        $child['tmp_name'] = '/tmp/php001';
+        $child['name'] = 'document.docx';
+        $child['size'] = 4096;
+        $child['type'] = 'application/octet-stream';
+        $child['error'] = '0';
+
+        $parent->{$child['tmp_name']} = $child;
+
+        $result = $parent->toArray();
+
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('/tmp/php001', $result);
+        $this->assertSame('document.docx', $result['/tmp/php001']['name']);
+        $this->assertSame(4096, $result['/tmp/php001']['size']);
+    }
+
+    #[Test]
+    public function get_object_vars_returns_dynamic_properties(): void
+    {
+        $el = new UploadElement(['name' => 'test.xml', 'tmp_name' => '/tmp/def']);
+
+        $vars = get_object_vars($el);
+
+        $this->assertArrayHasKey('name', $vars);
+        $this->assertArrayHasKey('tmp_name', $vars);
+        $this->assertSame('test.xml', $vars['name']);
+    }
 }
 
