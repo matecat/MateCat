@@ -39,7 +39,7 @@ const SHADOW_STYLES = `
   }
 `
 
-export const LivePreviewPanel = ({panelRef, title, zoomLevel, ...props}) => {
+export const LivePreviewPanel = ({panelRef, title, zoomLevel, languageLabel, ...props}) => {
   const hostRef = useRef(null)
 
   useEffect(() => {
@@ -60,6 +60,13 @@ export const LivePreviewPanel = ({panelRef, title, zoomLevel, ...props}) => {
 
   return (
     <div className="context-preview-panel" {...props}>
+      {languageLabel && (
+        <div className="context-preview-panel-header">
+          <span className="context-preview-panel-header__label">
+            {languageLabel}
+          </span>
+        </div>
+      )}
       <div className="context-preview-content">
         <div
           ref={hostRef}

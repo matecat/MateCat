@@ -12,7 +12,6 @@ export const ScreenshotContextPanel = ({
 
   return (
     <div className="context-preview-panel" {...props}>
-      <div className="context-preview-panel-header">{title}</div>
       <div className="context-preview-screenshot">
         {screenshotUrl ? (
           <div
