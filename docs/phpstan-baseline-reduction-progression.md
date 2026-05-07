@@ -2,13 +2,13 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security):** 38  
+**Commits (refactor + fix + security + test):** 39  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,319 | −4,047 (−54.9%) |
-| **PHPUnit tests** | ~2,248 | 3,429 | +1,181 (+52.5%) |
-| **PHPUnit assertions** | ~19,449 | 22,421+ | +2,972 (+15.3%) |
+| **PHPStan baseline entries** | 7,366 | 3,320 | −4,046 (−54.9%) |
+| **PHPUnit tests** | ~2,248 | 3,452 | +1,204 (+53.6%) |
+| **PHPUnit assertions** | ~19,449 | 22,521 | +3,072 (+15.8%) |
 | **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
@@ -424,8 +424,8 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,429 |
-| **Assertions** | 22,421+ |
+| **Total tests** | 3,452 |
+| **Assertions** | 22,521 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
@@ -561,6 +561,34 @@ All in-file PHPStan errors eliminated. Key changes:
 
 ---
 
+### Phase 11: CI Test Infrastructure — ✅ DONE
+
+**Why:** 4 tests in `CommentControllerTest` and `GetContributionControllerTest` passed locally (seeded DB) but failed in CI (fresh DB from `tests/inc/unittest_matecat_local.sql`). The CI seed only contains 1 user (`uid=1886428310, email='domenico@translated.net'`), missing the `foo@example.org` user that `UserDao::getProjectOwner()` resolves via `JOIN users.email = jobs.owner`.
+
+#### 11A. Self-Contained Test Data — ✅ DONE (commit `b3b34bc321`)
+
+Made tests independent of local DB state by inserting required seed data in `setUp()` within transactions (rolled back in `tearDown()`). No baseline reduction — pure CI reliability fix.
+
+**`GetContributionControllerTest.php`** (2 tests fixed):
+- Added `Database::obtain()->begin()` in `setUp()` + `rollback()` in `tearDown()`
+- `INSERT IGNORE INTO users` — fake user `foo@example.org` (uid 1886472050) for `getProjectOwner()` resolution
+- Tests fixed: `get_concordance_search_returns_valid_response`, `get_segment_contribution_returns_valid_response`
+
+**`CommentControllerTest.php`** (2 tests fixed):
+- `INSERT IGNORE INTO users` — same fake user for `resolveUsers()` project-owner resolution
+- `INSERT IGNORE INTO teams` — team 32786 for `resolveTeamMentions()` 
+- `INSERT IGNORE INTO teams_users` — membership (uid 1886428336) for team member resolution
+- `INSERT IGNORE INTO jobs` — job 1886428342 (password `92c5e0ce9316`, project 1886428330) for `resolveTeamMentions` test path
+- Tests fixed: `resolveUsers_includes_contributors_and_owner`, `resolveTeamMentions_with_valid_team_resolves_members`
+
+**Key design decisions:**
+- Used `INSERT IGNORE` to avoid conflicts when running locally (where data may already exist)
+- Inserted minimal data: user + team + membership + job — no over-seeding
+- Transaction begin/rollback pattern consistent with existing `CommentControllerTest` conventions
+- All 51 tests in both files verified passing with 0 warnings
+
+---
+
 ## Queue (Next Targets — Priority Order)
 
 ### Priority 1–4
@@ -585,4 +613,5 @@ All in-file PHPStan errors eliminated. Key changes:
 
 ## Next Action
 
-Start Phase 5 residual controllers: `SetTranslationController.php` (~25 errors) or `GetContributionController.php` (~26 errors).
+1. **Push & verify CI** — confirm `b3b34bc321` passes GitHub Actions on PR #4429
+2. Start Phase 5 residual controllers: `SetTranslationController.php` (~25 errors) or `GetContributionController.php` (~26 errors)

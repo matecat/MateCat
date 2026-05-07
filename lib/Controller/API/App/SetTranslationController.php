@@ -7,8 +7,11 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Controller\Traits\SegmentDisabledTrait;
+use DivisionByZeroError;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
@@ -47,6 +50,7 @@ use Plugins\Features\TranslationVersions;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
 use Utils\Constants\ProjectStatus;
@@ -138,6 +142,11 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
+     * @throws PDOException
+     * @throws RuntimeException
+     * @throws TypeError
+     * @throws DivisionByZeroError
      */
     public function translate(): void
     {
@@ -183,6 +192,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @return array{segment: string, translation: string, check: QA, err_json: string}
      * @throws Exception
+     * @throws PDOException
      */
     private function prepareTranslation(): array
     {
@@ -234,6 +244,9 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @return array{new: SegmentTranslationStruct, old: SegmentTranslationStruct}
      * @throws ReflectionException
+     * @throws Exception
+     * @throws RuntimeException
+     * @throws TypeError
      */
     private function buildNewTranslation(string $translation, string $errJson, QA $check): array
     {
@@ -303,6 +316,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @return array<string, mixed>
      * @throws Exception
+     * @throws TypeError
      */
     private function persistTranslation(
         SegmentTranslationStruct $newTranslation,
@@ -441,6 +455,8 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws ReQueueException
      * @throws ValidationError
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     private function buildResult(
         SegmentTranslationStruct $newTranslation,
@@ -508,6 +524,8 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
+     * @throws TypeError
      */
     private function finalizeTranslation(
         SegmentTranslationStruct $newTranslation,
@@ -974,6 +992,10 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @param array<string, mixed> $new_translation
      *
      * @throws PDOException
+     * @throws DomainException
+     * @throws RuntimeException
+     * @throws TypeError
+     * @throws LogicException
      */
     private function updateJobPEE(array $old_translation, array $new_translation): void
     {
@@ -1078,6 +1100,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws ReflectionException
      * @throws ValidationError
      * @throws Exception
+     * @throws TypeError
      */
     private function evalSetContribution(SegmentTranslationStruct $_Translation, SegmentTranslationStruct $old_translation): void
     {

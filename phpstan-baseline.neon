@@ -469,12 +469,6 @@ parameters:
 			path: lib/Controller/API/App/CreateRandUserController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\DeleteContributionController\:\:isRevision\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/DeleteContributionController.php
-
-		-
 			message: '#^Cannot access property \$first_segment on Model\\DataAccess\\ShapelessConcreteStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -503,12 +497,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/FilesController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\GetContributionController\:\:isRevision\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/GetContributionController.php
 
 		-
 			message: '#^Cannot access property \$type on Model\\Teams\\TeamStruct\|null\.$#'
@@ -1045,7 +1033,7 @@ parameters:
 			path: lib/Controller/API/App/SetChunkCompletedController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\SetChunkCompletedController\:\:isRevision\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\App\\SetChunkCompletedController\:\:complete\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/SetChunkCompletedController.php
@@ -1115,84 +1103,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/SetCurrentSegmentController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildNewTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildNewTranslation\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildNewTranslation\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildResult\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:buildResult\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:evalSetContribution\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:finalizeTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:isRevision\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:translate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:translate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:updateJobPEE\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:updateJobPEE\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:updateJobPEE\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\SplitSegmentController\:\:split\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -1265,12 +1175,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: lib/Controller/API/App/TmKeyManagementController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\UpdateJobKeysController\:\:isRevision\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/UpdateJobKeysController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\UpdateJobKeysController\:\:jobOwnerIsMe\(\) has parameter \$owner with no type specified\.$#'

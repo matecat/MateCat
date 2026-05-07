@@ -3,12 +3,22 @@
 namespace unit\Controllers;
 
 use Controller\API\App\SetTranslationController;
+use Exception;
+use InvalidArgumentException;
+use Klein\Request;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
+use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
+use Predis\Client;
 use TestHelpers\AbstractTest;
 use ReflectionClass;
 use ReflectionException;
@@ -18,6 +28,35 @@ use RuntimeException;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\LQA\QA;
+use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
+
+class LocalFakeRedisClient extends Client
+{
+    private array $hashStore = [];
+
+    public function __construct()
+    {
+    }
+
+    public function __call($commandID, $arguments)
+    {
+        return match (strtolower($commandID)) {
+            'hget' => $this->hashStore[$arguments[0]][$arguments[1]] ?? null,
+            'hset' => $this->doHset($arguments[0], $arguments[1], $arguments[2]),
+            'expire' => true,
+            'del' => 1,
+            default => null,
+        };
+    }
+
+    private function doHset($key, $field, $value): int
+    {
+        $this->hashStore[$key][$field] = $value;
+
+        return 1;
+    }
+}
 
 class TestableSetTranslationController extends SetTranslationController
 {
@@ -44,6 +83,22 @@ class TestableSetTranslationController extends SetTranslationController
  */
 class SetTranslationControllerTest extends AbstractTest
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Database::obtain()->begin();
+    }
+
+    protected function tearDown(): void
+    {
+        $conn = Database::obtain()->getConnection();
+        if ($conn->inTransaction()) {
+            Database::obtain()->rollback();
+        }
+
+        parent::tearDown();
+    }
+
     /**
      * @throws ReflectionException
      */
@@ -71,6 +126,46 @@ class SetTranslationControllerTest extends AbstractTest
         $reflection = new ReflectionClass(SetTranslationController::class);
 
         return $reflection->getMethod($methodName);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function setNamedProperty(object $object, string $propertyName, mixed $value): void
+    {
+        $ref = new ReflectionProperty($object, $propertyName);
+        $ref->setValue($object, $value);
+    }
+
+    private function seedMinimalProjectJobAndSegment(
+        int $projectId = 881001,
+        int $jobId = 881002,
+        string $jobPassword = 'pw881002',
+        int $segmentId = 881003,
+        int $fileId = 881004,
+        string $segmentText = 'Hello world',
+        int $rawWordCount = 2
+    ): void {
+        $conn = Database::obtain()->getConnection();
+
+        $conn->exec("INSERT IGNORE INTO projects (id, id_customer, password, name, create_date, status_analysis)
+                     VALUES ({$projectId}, 'test@example.org', 'projectpw', 'SetTranslationTestProject', NOW(), 'DONE')");
+        $conn->exec("INSERT IGNORE INTO files (id, id_project, filename, source_language, mime_type)
+                     VALUES ({$fileId}, {$projectId}, 'set-translation-test.xliff', 'en-US', 'application/xliff+xml')");
+        $conn->exec("INSERT IGNORE INTO jobs (id, password, id_project, source, target, job_first_segment, job_last_segment, owner, tm_keys, create_date, disabled, status)
+                     VALUES ({$jobId}, '{$jobPassword}', {$projectId}, 'en-US', 'it-IT', {$segmentId}, {$segmentId}, 'test@example.org', '[]', NOW(), 0, 'active')");
+        $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
+                     VALUES ({$segmentId}, {$fileId}, '1', '" . addslashes($segmentText) . "', 'hash_{$segmentId}', {$rawWordCount})");
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function injectFakeCacheClient(SetTranslationController $controller, LocalFakeRedisClient $client): void
+    {
+        $ref = new ReflectionClass($controller);
+        $prop = $ref->getProperty('cache_con');
+        $prop->setValue(null, $client);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -912,6 +1007,1180 @@ class SetTranslationControllerTest extends AbstractTest
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Segment must not be null in buildNewTranslation');
         $method->invoke($controller, 'Should fail', '', $this->makeQAStub());
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // SECTION 6: Additional private/protected methods coverage
+    // ──────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function updateJobPEEThrowsWhenSegmentIsNull(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->total_time_to_edit = 0;
+        $chunk->avg_post_editing_effort = 0;
+        $chunk->target = 'it-IT';
+
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+        $this->setNamedProperty($controller, 'id_job', 111111);
+        $this->setNamedProperty($controller, 'password', 'pw');
+        $this->setNamedProperty($controller, 'request_password', 'pw');
+        $this->setNamedProperty($controller, 'segment', null);
+
+        $method = $this->getAccessibleMethod('updateJobPEE');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Segment must not be null in updateJobPEE');
+        $method->invoke(
+            $controller,
+            ['suggestion' => '', 'translation' => '', 'time_to_edit' => 0],
+            ['translation' => '', 'time_to_edit' => 10]
+        );
+    }
+
+    #[Test]
+    public function updateJobPEEUpdatesOnlyTotalTimeToEditWhenSegmentsAreNotValidForEditLog(): void
+    {
+        $projectId = 882001;
+        $jobId = 882002;
+        $jobPassword = 'pw882002';
+        $segmentId = 882003;
+        $fileId = 882004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Short', 100);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->total_time_to_edit = 100;
+        $chunk->avg_post_editing_effort = 10;
+        $chunk->target = 'it-IT';
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+
+        $segment = new SegmentStruct();
+        $segment->raw_word_count = 100;
+        $this->setNamedProperty($controller, 'segment', $segment);
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+
+        $method = $this->getAccessibleMethod('updateJobPEE');
+        $method->invoke(
+            $controller,
+            ['suggestion' => '', 'translation' => '', 'time_to_edit' => 1],
+            ['translation' => '', 'time_to_edit' => 50]
+        );
+
+        $row = Database::obtain()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+        self::assertSame('150', (string)$row['total_time_to_edit']);
+    }
+
+    #[Test]
+    public function updateJobPEEDoesNotAddTimeToEditInRevisionMode(): void
+    {
+        $originalReferer = $_SERVER['HTTP_REFERER'] ?? null;
+        $_SERVER['HTTP_REFERER'] = 'http://localhost/revise/123';
+
+        try {
+            $projectId = 883001;
+            $jobId = 883002;
+            $jobPassword = 'pw883002';
+            $segmentId = 883003;
+            $fileId = 883004;
+            $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Short', 100);
+
+            $controller = $this->createControllerWithoutConstructor();
+            $chunk = new \Model\Jobs\JobStruct();
+            $chunk->total_time_to_edit = 200;
+            $chunk->avg_post_editing_effort = 0;
+            $chunk->target = 'it-IT';
+            $this->setNamedProperty($controller, 'chunk', $chunk);
+
+            $segment = new SegmentStruct();
+            $segment->raw_word_count = 100;
+            $this->setNamedProperty($controller, 'segment', $segment);
+            $this->setNamedProperty($controller, 'id_job', $jobId);
+            $this->setNamedProperty($controller, 'password', $jobPassword);
+            $this->setNamedProperty($controller, 'request_password', $jobPassword);
+
+            $method = $this->getAccessibleMethod('updateJobPEE');
+            $method->invoke(
+                $controller,
+                ['suggestion' => '', 'translation' => '', 'time_to_edit' => 1],
+                ['translation' => '', 'time_to_edit' => 50]
+            );
+
+            $row = Database::obtain()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+            self::assertSame('200', (string)$row['total_time_to_edit']);
+        } finally {
+            if ($originalReferer === null) {
+                unset($_SERVER['HTTP_REFERER']);
+            } else {
+                $_SERVER['HTTP_REFERER'] = $originalReferer;
+            }
+        }
+    }
+
+    #[Test]
+    public function updateJobPEEUpdatesAvgPeeWhenOldAndNewAreValidForEditLog(): void
+    {
+        $projectId = 887001;
+        $jobId = 887002;
+        $jobPassword = 'pw887002';
+        $segmentId = 887003;
+        $fileId = 887004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Valid PEE', 2);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->total_time_to_edit = 10;
+        $chunk->avg_post_editing_effort = 50;
+        $chunk->target = 'it-IT';
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+
+        $segment = new SegmentStruct();
+        $segment->raw_word_count = 2;
+        $this->setNamedProperty($controller, 'segment', $segment);
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+
+        $method = $this->getAccessibleMethod('updateJobPEE');
+        $method->invoke(
+            $controller,
+            ['suggestion' => 'abc', 'translation' => 'abc', 'time_to_edit' => 1000],
+            ['translation' => 'abcd', 'time_to_edit' => 1000]
+        );
+
+        $row = Database::obtain()->getConnection()->query("SELECT avg_post_editing_effort, total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+        self::assertSame('1010', (string)$row['total_time_to_edit']);
+        self::assertNotSame('50', (string)$row['avg_post_editing_effort']);
+    }
+
+    #[Test]
+    public function updateJobPEEAddsWeightedPeeWhenOldWasInvalidAndNewBecomesValid(): void
+    {
+        $projectId = 888001;
+        $jobId = 888002;
+        $jobPassword = 'pw888002';
+        $segmentId = 888003;
+        $fileId = 888004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Valid transition', 2);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->total_time_to_edit = 0;
+        $chunk->avg_post_editing_effort = 100;
+        $chunk->target = 'it-IT';
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+
+        $segment = new SegmentStruct();
+        $segment->raw_word_count = 2;
+        $this->setNamedProperty($controller, 'segment', $segment);
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+
+        $method = $this->getAccessibleMethod('updateJobPEE');
+        $method->invoke(
+            $controller,
+            ['suggestion' => 'abc', 'translation' => 'abc', 'time_to_edit' => 100],
+            ['translation' => 'abx', 'time_to_edit' => 900]
+        );
+
+        $row = Database::obtain()->getConnection()->query("SELECT avg_post_editing_effort FROM jobs WHERE id = {$jobId}")->fetch();
+        self::assertNotSame('100', (string)$row['avg_post_editing_effort']);
+    }
+
+    #[Test]
+    public function updateJobPEESubtractsWeightedPeeWhenOldWasValidAndNewBecomesInvalid(): void
+    {
+        $projectId = 889001;
+        $jobId = 889002;
+        $jobPassword = 'pw889002';
+        $segmentId = 889003;
+        $fileId = 889004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Invalid transition', 2);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->total_time_to_edit = 0;
+        $chunk->avg_post_editing_effort = 200;
+        $chunk->target = 'it-IT';
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+
+        $segment = new SegmentStruct();
+        $segment->raw_word_count = 2;
+        $this->setNamedProperty($controller, 'segment', $segment);
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+
+        $method = $this->getAccessibleMethod('updateJobPEE');
+        $method->invoke(
+            $controller,
+            ['suggestion' => 'abcd', 'translation' => 'abce', 'time_to_edit' => 1000],
+            ['translation' => 'abcf', 'time_to_edit' => 100000]
+        );
+
+        $row = Database::obtain()->getConnection()->query("SELECT avg_post_editing_effort FROM jobs WHERE id = {$jobId}")->fetch();
+        self::assertNotSame('200', (string)$row['avg_post_editing_effort']);
+    }
+
+    #[Test]
+    public function buildResultReturnsExpectedResponseStructureAndWarningId(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->id = 9001;
+        $chunk->password = 'pw9001';
+        $chunk->new_words = 1;
+        $chunk->draft_words = 2;
+        $chunk->translated_words = 3;
+        $chunk->approved_words = 4;
+        $chunk->approved2_words = 5;
+        $chunk->new_raw_words = 1;
+        $chunk->draft_raw_words = 2;
+        $chunk->translated_raw_words = 3;
+        $chunk->approved_raw_words = 4;
+        $chunk->approved2_raw_words = 5;
+
+        $this->setProperty($controller, [
+            'chunk' => $chunk,
+            'project' => ['status_analysis' => 'DONE'],
+            'id_segment' => '42',
+            'segment' => new SegmentStruct(),
+            'revisionNumber' => 0,
+        ]);
+
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+
+        $featureSet = $this->createMock(FeatureSet::class);
+        $featureSet
+            ->expects(self::once())
+            ->method('dispatchRun')
+            ->with(self::isInstanceOf(SetTranslationCommittedEvent::class));
+        $this->setNamedProperty($controller, 'featureSet', $featureSet);
+
+        $newTranslation = new SegmentTranslationStruct();
+        $newTranslation->id_segment = 42;
+        $newTranslation->status = TranslationStatus::STATUS_TRANSLATED;
+        $newTranslation->translation = 'ciao';
+        $newTranslation->translation_date = '2025-01-01 00:00:00';
+        $newTranslation->version_number = 7;
+
+        $oldTranslation = new SegmentTranslationStruct();
+        $oldTranslation->status = TranslationStatus::STATUS_DRAFT;
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('getWarnings')->willReturn([(object)['outcome' => 1]]);
+
+        $method = $this->getAccessibleMethod('buildResult');
+        $result = $method->invoke($controller, $newTranslation, $oldTranslation, [], $qa);
+
+        self::assertSame(1, $result['code']);
+        self::assertSame('OK', $result['data']);
+        self::assertSame(1, $result['warning']['cod']);
+        self::assertSame('42', (string)$result['warning']['id']);
+        self::assertSame(42, $result['translation']['sid']);
+        self::assertSame(TranslationStatus::STATUS_TRANSLATED, $result['translation']['status']);
+        self::assertArrayHasKey(ProjectsMetadataMarshaller::WORD_COUNT_RAW->value, $result['stats']);
+    }
+
+    #[Test]
+    public function buildResultSetsWarningIdToZeroWhenNoWarningOutcome(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->id = 9002;
+        $chunk->password = 'pw9002';
+        $chunk->new_raw_words = 1;
+        $chunk->draft_raw_words = 0;
+        $chunk->translated_raw_words = 0;
+        $chunk->approved_raw_words = 0;
+        $chunk->approved2_raw_words = 0;
+
+        $this->setProperty($controller, [
+            'chunk' => $chunk,
+            'project' => ['status_analysis' => 'DONE'],
+            'id_segment' => '52',
+            'segment' => new SegmentStruct(),
+            'revisionNumber' => 0,
+        ]);
+
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+        $featureSet = $this->createStub(FeatureSet::class);
+        $this->setNamedProperty($controller, 'featureSet', $featureSet);
+
+        $newTranslation = new SegmentTranslationStruct();
+        $newTranslation->id_segment = 52;
+        $newTranslation->status = TranslationStatus::STATUS_DRAFT;
+        $newTranslation->translation = 'ciao';
+        $newTranslation->translation_date = '2025-01-01 00:00:00';
+
+        $oldTranslation = new SegmentTranslationStruct();
+        $oldTranslation->status = TranslationStatus::STATUS_NEW;
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('getWarnings')->willReturn([(object)['outcome' => 0]]);
+
+        $method = $this->getAccessibleMethod('buildResult');
+        $result = $method->invoke($controller, $newTranslation, $oldTranslation, [], $qa);
+
+        self::assertSame(0, $result['warning']['id']);
+    }
+
+    #[Test]
+    public function finalizeTranslationAddsPropagationAndCallsEvalSetContribution(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setProperty($controller, [
+            'id_job' => '1',
+            'status' => TranslationStatus::STATUS_DRAFT,
+            'password' => 'pw',
+            'id_segment' => '1',
+            'propagate' => false,
+            'context_after' => '',
+            'context_before' => '',
+        ]);
+
+        $new = new SegmentTranslationStruct();
+        $old = new SegmentTranslationStruct();
+        $propagation = ['segments_for_propagation' => ['propagated_ids' => []]];
+        $result = [
+            'stats' => [
+                ProjectsMetadataMarshaller::WORD_COUNT_RAW->value => ['draft' => 1, 'new' => 0],
+            ],
+        ];
+
+        $method = $this->getAccessibleMethod('finalizeTranslation');
+        $method->invokeArgs($controller, [$new, $old, $propagation, &$result]);
+
+        self::assertSame($propagation, $result['propagation']);
+    }
+
+    #[Test]
+    public function evalSetContributionThrowsWhenSegmentIsNullForNonDraftStatuses(): void
+    {
+        $projectId = 890001;
+        $jobId = 890002;
+        $jobPassword = 'pw890002';
+        $segmentId = 890003;
+        $fileId = 890004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Eval set', 2);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $project = $chunk->getProject();
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+
+        $this->setProperty($controller, [
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'id_job' => (string)$jobId,
+            'password' => $jobPassword,
+            'id_segment' => (string)$segmentId,
+            'segment' => null,
+            'propagate' => true,
+            'context_before' => '',
+            'context_after' => '',
+            'project' => $project,
+        ]);
+
+        $new = new SegmentTranslationStruct();
+        $new->translation = 'new';
+        $old = new SegmentTranslationStruct();
+        $old->translation = 'old';
+        $old->status = TranslationStatus::STATUS_DRAFT;
+
+        $method = $this->getAccessibleMethod('evalSetContribution');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Segment must not be null in evalSetContribution');
+        $method->invoke($controller, $new, $old);
+    }
+
+    #[Test]
+    public function getContextsFillsBeforeAndAfterFromSegmentDao(): void
+    {
+        $projectId = 891001;
+        $jobId = 891002;
+        $jobPassword = 'pw891002';
+        $fileId = 891003;
+        $segmentBefore = 891004;
+        $segmentMain = 891005;
+        $segmentAfter = 891006;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentMain, $fileId, 'Main segment', 2);
+
+        $conn = Database::obtain()->getConnection();
+        $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
+                     VALUES ({$segmentBefore}, {$fileId}, '0', 'Before context', 'hash_{$segmentBefore}', 2)");
+        $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
+                     VALUES ({$segmentAfter}, {$fileId}, '2', 'After context', 'hash_{$segmentAfter}', 2)");
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setProperty($controller, [
+            'id_before' => (string)$segmentBefore,
+            'id_segment' => (string)$segmentMain,
+            'id_after' => (string)$segmentAfter,
+            'context_before' => '',
+            'context_after' => '',
+        ]);
+
+        $method = $this->getAccessibleMethod('getContexts');
+        $method->invoke($controller);
+
+        $dataRef = new ReflectionProperty($controller, 'data');
+        $data = $dataRef->getValue($controller);
+
+        self::assertStringContainsString('Before context', $data['context_before']);
+        self::assertStringContainsString('After context', $data['context_after']);
+    }
+
+    #[Test]
+    public function checkSegmentSplitDataThrowsWhenIdSegmentIsMissingAfterSplitParsing(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+
+        $this->setProperty($controller, [
+            'translation' => 'text',
+            'id_segment' => '-2',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'split_statuses' => [TranslationStatus::STATUS_TRANSLATED],
+            'split_num' => null,
+        ]);
+
+        $method = $this->getAccessibleMethod('checkSegmentSplitData');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('missing id_segment');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function checkSegmentSplitDataThrowsForInvalidStatus(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['payload' => 'x'], [], [], [], null));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+
+        $this->setProperty($controller, [
+            'translation' => 'text',
+            'id_segment' => '50',
+            'status' => 'HACKED',
+            'split_statuses' => [''],
+            'split_num' => null,
+        ]);
+
+        $method = $this->getAccessibleMethod('checkSegmentSplitData');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Error Hack Status');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function validateTheRequestThrowsWhenPasswordIsMissing(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['id_job' => '1', 'password' => null, 'id_segment' => '1'], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing password');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function validateTheRequestThrowsWhenIdSegmentIsMissing(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['id_job' => '1', 'password' => 'pw', 'id_segment' => null], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing id segment');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function validateTheRequestThrowsWhenJobIsArchived(): void
+    {
+        $projectId = 892001;
+        $jobId = 892002;
+        $jobPassword = 'pw892002';
+        $segmentId = 892003;
+        $fileId = 892004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Archived', 2);
+        Database::obtain()->getConnection()->exec("UPDATE jobs SET status = 'archived' WHERE id = {$jobId}");
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job' => (string)$jobId,
+            'password' => $jobPassword,
+            'id_segment' => (string)$segmentId,
+        ], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+
+        $this->expectException(\Model\Exceptions\NotFoundException::class);
+        $this->expectExceptionMessage('Job archived');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function evalSetContributionReturnsEarlyForDraftStatus(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setProperty($controller, ['status' => TranslationStatus::STATUS_DRAFT]);
+
+        $new = new SegmentTranslationStruct();
+        $old = new SegmentTranslationStruct();
+
+        $method = $this->getAccessibleMethod('evalSetContribution');
+        $method->invoke($controller, $new, $old);
+
+        self::assertTrue(true);
+    }
+
+    #[Test]
+    public function getTranslationObjectBuildsApiV2LikePayload(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+
+        $saved = new SegmentTranslationStruct();
+        $saved->version_number = 11;
+        $saved->id_segment = 901;
+        $saved->translation = 'Hello <b>world</b>';
+        $saved->status = TranslationStatus::STATUS_TRANSLATED;
+
+        $method = $this->getAccessibleMethod('getTranslationObject');
+        $result = $method->invoke($controller, $saved);
+
+        self::assertSame(11, $result['version_number']);
+        self::assertSame(901, $result['sid']);
+        self::assertSame(TranslationStatus::STATUS_TRANSLATED, $result['status']);
+        self::assertIsString($result['translation']);
+    }
+
+    #[Test]
+    public function getOriginalSuggestionProviderReturnsDefaultTMForNonDraftOldStatus(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $new = new SegmentTranslationStruct();
+        $new->suggestions_array = json_encode([
+            ['created_by' => 'x-deepl']
+        ]);
+        $new->suggestion_position = 1;
+
+        $old = new SegmentTranslationStruct();
+        $old->status = TranslationStatus::STATUS_TRANSLATED;
+
+        $method = $this->getAccessibleMethod('getOriginalSuggestionProvider');
+        $provider = $method->invoke($controller, $new, $old);
+
+        self::assertSame(EngineConstants::TM, $provider);
+    }
+
+    #[Test]
+    public function getOriginalSuggestionProviderExtractsProviderSuffixFromCreatedBy(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $new = new SegmentTranslationStruct();
+        $new->suggestions_array = json_encode([
+            ['created_by' => 'x-deepl']
+        ]);
+        $new->suggestion_position = 1;
+
+        $old = new SegmentTranslationStruct();
+        $old->status = TranslationStatus::STATUS_DRAFT;
+
+        $method = $this->getAccessibleMethod('getOriginalSuggestionProvider');
+        $provider = $method->invoke($controller, $new, $old);
+
+        self::assertSame('deepl', $provider);
+    }
+
+    #[Test]
+    public function checkSegmentSplitDataThrowsOnEmptyTranslation(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+
+        $this->setProperty($controller, [
+            'translation' => '',
+            'id_segment' => '10',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'split_statuses' => [TranslationStatus::STATUS_TRANSLATED],
+            'split_num' => null,
+        ]);
+
+        $method = $this->getAccessibleMethod('checkSegmentSplitData');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Empty Translation');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function checkSegmentSplitDataNormalizesIdAndResetsStatusToDraftForMixedSplitStatuses(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+
+        $this->setProperty($controller, [
+            'translation' => 'text',
+            'id_segment' => '123-2',
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'split_statuses' => [TranslationStatus::STATUS_TRANSLATED, TranslationStatus::STATUS_DRAFT],
+            'split_num' => null,
+        ]);
+
+        $method = $this->getAccessibleMethod('checkSegmentSplitData');
+        $method->invoke($controller);
+
+        $dataRef = new ReflectionProperty($controller, 'data');
+        $data = $dataRef->getValue($controller);
+        self::assertSame('123', $data['id_segment']);
+        self::assertSame('2', $data['split_num']);
+        self::assertSame(TranslationStatus::STATUS_DRAFT, $data['status']);
+    }
+
+    #[Test]
+    public function setSubFilteringBehaviorCreatesMateCatFilter(): void
+    {
+        $projectId = 884001;
+        $jobId = 884002;
+        $jobPassword = 'pw884002';
+        $segmentId = 884003;
+        $fileId = 884004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source', 2);
+
+        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $project = $chunk->getProject();
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'sourceContainsIcu', false);
+        $this->setProperty($controller, [
+            'project' => $project,
+            'chunk' => $chunk,
+            'id_segment' => (string)$segmentId,
+        ]);
+
+        $method = $this->getAccessibleMethod('setSubFilteringBehavior');
+        $method->invoke($controller);
+
+        $filterProp = new ReflectionProperty($controller, 'filter');
+        self::assertInstanceOf(MateCatFilter::class, $filterProp->getValue($controller));
+    }
+
+    #[Test]
+    public function getOldTranslationReturnsExistingTranslation(): void
+    {
+        $projectId = 885001;
+        $jobId = 885002;
+        $jobPassword = 'pw885002';
+        $segmentId = 885003;
+        $fileId = 885004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello old', 2);
+
+        Database::obtain()->getConnection()->exec(
+            "INSERT IGNORE INTO segment_translations (id_segment, id_job, segment_hash, translation, status, translation_date, time_to_edit)
+             VALUES ({$segmentId}, {$jobId}, 'hash_{$segmentId}', 'ciao vecchio', 'DRAFT', NOW(), 10)"
+        );
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setProperty($controller, [
+            'id_segment' => (string)$segmentId,
+            'id_job' => (string)$jobId,
+        ]);
+
+        $method = $this->getAccessibleMethod('getOldTranslation');
+        $old = $method->invoke($controller);
+
+        self::assertInstanceOf(SegmentTranslationStruct::class, $old);
+        self::assertSame('ciao vecchio', $old->translation);
+        self::assertSame(TranslationStatus::STATUS_DRAFT, $old->status);
+    }
+
+    #[Test]
+    public function getOldTranslationThrowsWhenNoSegmentAndNoExistingRow(): void
+    {
+        $original = AppConfig::$VOLUME_ANALYSIS_ENABLED;
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
+
+        try {
+            $controller = $this->createControllerWithoutConstructor();
+            $this->setProperty($controller, [
+                'id_segment' => '999001',
+                'id_job' => '999002',
+            ]);
+            $this->setNamedProperty($controller, 'segment', null);
+
+            $method = $this->getAccessibleMethod('getOldTranslation');
+            $this->expectException(\Error::class);
+            $this->expectExceptionMessage('SegmentTranslationStruct::$status must not be accessed before initialization');
+            $method->invoke($controller);
+        } finally {
+            AppConfig::$VOLUME_ANALYSIS_ENABLED = $original;
+        }
+    }
+
+    #[Test]
+    public function validateTheRequestThrowsWhenIdJobIsMissing(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['id_job' => null], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing id job');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function validateTheRequestSanitizesAndLoadsChunkAndSegment(): void
+    {
+        $projectId = 886001;
+        $jobId = 886002;
+        $jobPassword = 'pw886002';
+        $segmentId = 886003;
+        $fileId = 886004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello validate', 2);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job' => (string)$jobId,
+            'password' => $jobPassword,
+            'current_password' => $jobPassword,
+            'id_segment' => (string)$segmentId,
+            'time_to_edit' => '1500',
+            'id_translator' => '123',
+            'translation' => 'Nuova traduzione',
+            'segment' => 'Hello validate',
+            'version' => '3',
+            'chosen_suggestion_index' => '1',
+            'suggestion_array' => '[{"raw_translation":"s"}]',
+            'status' => 'translated',
+            'splitStatuses' => 'new,draft',
+            'context_before' => 'before',
+            'context_after' => 'after',
+            'id_before' => '1',
+            'id_after' => '2',
+            'revision_number' => '0',
+            'guess_tag_used' => '1',
+            'characters_counter' => '12',
+            'propagate' => '1',
+        ], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+        $data = $method->invoke($controller);
+
+        self::assertSame((string)$jobId, $data['id_job']);
+        self::assertSame($jobPassword, $data['password']);
+        self::assertSame((string)$segmentId, $data['id_segment']);
+        self::assertSame('TRANSLATED', $data['status']);
+        self::assertSame(['NEW', 'DRAFT'], $data['split_statuses']);
+        self::assertInstanceOf(\Model\Jobs\JobStruct::class, $data['chunk']);
+        self::assertInstanceOf(SegmentStruct::class, $data['segment']);
+    }
+
+    #[Test]
+    public function prepareTranslationReturnsPreparedPayloadForValidRequest(): void
+    {
+        $projectId = 893001;
+        $jobId = 893002;
+        $jobPassword = 'pw893002';
+        $segmentId = 893003;
+        $fileId = 893004;
+        $beforeId = 893005;
+        $afterId = 893006;
+
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source segment', 2);
+        $conn = Database::obtain()->getConnection();
+        $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
+                     VALUES ({$beforeId}, {$fileId}, '0', 'Before text', 'hash_{$beforeId}', 2)");
+        $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
+                     VALUES ({$afterId}, {$fileId}, '2', 'After text', 'hash_{$afterId}', 2)");
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job' => (string)$jobId,
+            'password' => $jobPassword,
+            'current_password' => $jobPassword,
+            'id_segment' => (string)$segmentId,
+            'time_to_edit' => '1000',
+            'id_translator' => '1',
+            'translation' => 'Traduzione pronta',
+            'segment' => 'Source segment',
+            'version' => '1',
+            'chosen_suggestion_index' => null,
+            'suggestion_array' => null,
+            'status' => 'translated',
+            'splitStatuses' => '',
+            'context_before' => '',
+            'context_after' => '',
+            'id_before' => (string)$beforeId,
+            'id_after' => (string)$afterId,
+            'revision_number' => '0',
+            'guess_tag_used' => '0',
+            'characters_counter' => null,
+            'propagate' => '0',
+        ], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('prepareTranslation');
+        $prepared = $method->invoke($controller);
+
+        self::assertArrayHasKey('segment', $prepared);
+        self::assertArrayHasKey('translation', $prepared);
+        self::assertArrayHasKey('check', $prepared);
+        self::assertArrayHasKey('err_json', $prepared);
+        self::assertInstanceOf(QA::class, $prepared['check']);
+        self::assertIsString($prepared['translation']);
+    }
+
+    #[Test]
+    public function persistTranslationWithoutPropagationStoresTranslationAndReturnsDefaultTotals(): void
+    {
+        $projectId = 894001;
+        $jobId = 894002;
+        $jobPassword = 'pw894002';
+        $segmentId = 894003;
+        $fileId = 894004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source persist', 2);
+
+        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $project = $chunk->getProject();
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $this->setNamedProperty($controller, 'segment', $segmentDao->getById($segmentId));
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+
+        $versionsHandler = new class implements \Plugins\Features\TranslationVersions\VersionHandlerInterface {
+            public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
+            {
+                return true;
+            }
+
+            public function storeTranslationEvent(array $params): void
+            {
+            }
+
+            public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+            {
+                return [];
+            }
+        };
+        $this->setNamedProperty($controller, 'VersionsHandler', $versionsHandler);
+
+        $featureSet = $this->createMock(FeatureSet::class);
+        $featureSet->expects(self::once())
+            ->method('dispatchRun')
+            ->with(self::isInstanceOf(PostAddSegmentTranslationEvent::class));
+        $this->setNamedProperty($controller, 'featureSet', $featureSet);
+
+        $this->setProperty($controller, [
+            'id_segment' => (string)$segmentId,
+            'id_job' => (string)$jobId,
+            'status' => TranslationStatus::STATUS_DRAFT,
+            'propagate' => false,
+            'split_statuses' => [''],
+            'split_num' => null,
+            'split_chunk_lengths' => null,
+            'project' => $project,
+            'revisionNumber' => 0,
+            'chunk' => $chunk,
+            'segment' => $segmentDao->getById($segmentId),
+        ]);
+
+        $old = new SegmentTranslationStruct();
+        $old->id_segment = $segmentId;
+        $old->id_job = $jobId;
+        $old->segment_hash = 'hash_' . $segmentId;
+        $old->translation = 'vecchia';
+        $old->status = TranslationStatus::STATUS_DRAFT;
+        $old->match_type = InternalMatchesConstants::NO_MATCH;
+        $old->locked = false;
+        $old->suggestion = 'old';
+        $old->time_to_edit = 0;
+
+        $new = new SegmentTranslationStruct();
+        $new->id_segment = $segmentId;
+        $new->id_job = $jobId;
+        $new->segment_hash = 'hash_' . $segmentId;
+        $new->translation = 'nuova';
+        $new->status = TranslationStatus::STATUS_DRAFT;
+        $new->match_type = InternalMatchesConstants::NO_MATCH;
+        $new->locked = false;
+        $new->time_to_edit = 1000;
+        $new->suggestion = 'new';
+        $new->translation_date = date('Y-m-d H:i:s');
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('thereAreWarnings')->willReturn(false);
+
+        $method = $this->getAccessibleMethod('persistTranslation');
+        $result = $method->invoke($controller, $new, $old, 'nuova', '', $qa);
+
+        self::assertSame([
+            'totals' => [],
+            'propagated_ids' => [],
+            'segments_for_propagation' => [],
+        ], $result);
+
+        $stored = \Model\Translations\SegmentTranslationDao::findBySegmentAndJob($segmentId, $jobId);
+        self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
+        self::assertSame('nuova', $stored->translation);
+    }
+
+    #[Test]
+    public function persistTranslationWithPropagationReturnsPropagationTotalsFromVersionHandler(): void
+    {
+        $projectId = 898001;
+        $jobId = 898002;
+        $jobPassword = 'pw898002';
+        $segmentId = 898003;
+        $fileId = 898004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source propagation', 2);
+
+        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $project = $chunk->getProject();
+
+        $controller = $this->createControllerWithoutConstructor();
+        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+        $this->setNamedProperty($controller, 'segment', $segmentDao->getById($segmentId));
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+
+        $expectedPropagation = [
+            'totals' => ['translated' => 1],
+            'propagated_ids' => [100, 101],
+            'segments_for_propagation' => ['propagated_ids' => [100, 101]],
+        ];
+
+        $versionsHandler = new class($expectedPropagation) implements \Plugins\Features\TranslationVersions\VersionHandlerInterface {
+            public function __construct(private array $propagation)
+            {
+            }
+
+            public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
+            {
+                return true;
+            }
+
+            public function storeTranslationEvent(array $params): void
+            {
+            }
+
+            public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+            {
+                return $this->propagation;
+            }
+        };
+        $this->setNamedProperty($controller, 'VersionsHandler', $versionsHandler);
+
+        $featureSet = $this->createStub(FeatureSet::class);
+        $this->setNamedProperty($controller, 'featureSet', $featureSet);
+
+        $this->setProperty($controller, [
+            'id_segment' => (string)$segmentId,
+            'id_job' => (string)$jobId,
+            'status' => TranslationStatus::STATUS_TRANSLATED,
+            'propagate' => true,
+            'split_statuses' => [''],
+            'split_num' => null,
+            'split_chunk_lengths' => null,
+            'project' => $project,
+            'revisionNumber' => 0,
+            'chunk' => $chunk,
+            'segment' => $segmentDao->getById($segmentId),
+        ]);
+
+        $old = new SegmentTranslationStruct();
+        $old->id_segment = $segmentId;
+        $old->id_job = $jobId;
+        $old->segment_hash = 'hash_' . $segmentId;
+        $old->translation = 'stessa';
+        $old->status = TranslationStatus::STATUS_DRAFT;
+        $old->match_type = InternalMatchesConstants::NO_MATCH;
+        $old->locked = false;
+        $old->suggestion = 'old';
+        $old->time_to_edit = 0;
+
+        $new = new SegmentTranslationStruct();
+        $new->id_segment = $segmentId;
+        $new->id_job = $jobId;
+        $new->segment_hash = 'hash_' . $segmentId;
+        $new->translation = 'stessa';
+        $new->status = TranslationStatus::STATUS_TRANSLATED;
+        $new->match_type = InternalMatchesConstants::NO_MATCH;
+        $new->locked = false;
+        $new->time_to_edit = 1000;
+        $new->suggestion = 'new';
+        $new->translation_date = date('Y-m-d H:i:s');
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('thereAreWarnings')->willReturn(false);
+
+        $method = $this->getAccessibleMethod('persistTranslation');
+        $result = $method->invoke($controller, $new, $old, 'stessa', '', $qa);
+
+        self::assertSame($expectedPropagation, $result);
+    }
+
+    #[Test]
+    public function checkIfSegmentIsNotDisabledThrowsWhenSegmentMetadataMarksItDisabled(): void
+    {
+        $jobId = 895001;
+        $segmentId = 895002;
+        $conn = Database::obtain()->getConnection();
+        $conn->exec("INSERT IGNORE INTO segment_metadata (id_segment, meta_key, meta_value)
+                     VALUES ({$segmentId}, 'translation_disabled', '1')");
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->injectFakeCacheClient($controller, new LocalFakeRedisClient());
+        $this->setProperty($controller, [
+            'id_job' => (string)$jobId,
+            'id_segment' => (string)$segmentId,
+        ]);
+
+        $method = $this->getAccessibleMethod('checkIfSegmentIsNotDisabled');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('is disabled');
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function checkIfSegmentIsNotDisabledDoesNothingWhenSegmentIsEnabled(): void
+    {
+        $jobId = 896001;
+        $segmentId = 896002;
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->injectFakeCacheClient($controller, new LocalFakeRedisClient());
+        $this->setProperty($controller, [
+            'id_job' => (string)$jobId,
+            'id_segment' => (string)$segmentId,
+        ]);
+
+        $method = $this->getAccessibleMethod('checkIfSegmentIsNotDisabled');
+        $method->invoke($controller);
+
+        self::assertTrue(true);
+    }
+
+    #[Test]
+    public function initVersionHandlerInitializesVersionsHandlerProperty(): void
+    {
+        $projectId = 897001;
+        $jobId = 897002;
+        $jobPassword = 'pw897002';
+        $segmentId = 897003;
+        $fileId = 897004;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Init version', 2);
+
+        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $project = $chunk->getProject();
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+        $this->setProperty($controller, [
+            'chunk' => $chunk,
+            'project' => $project,
+            'id_segment' => (string)$segmentId,
+        ]);
+
+        $method = $this->getAccessibleMethod('initVersionHandler');
+        $method->invoke($controller);
+
+        $versionsProp = new ReflectionProperty($controller, 'VersionsHandler');
+        self::assertInstanceOf(\Plugins\Features\TranslationVersions\VersionHandlerInterface::class, $versionsProp->getValue($controller));
+    }
+
+    #[Test]
+    public function buildResultUsesCurrentTimestampWhenTranslationDateIsInvalid(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $chunk = new \Model\Jobs\JobStruct();
+        $chunk->id = 9101;
+        $chunk->password = 'pw9101';
+        $chunk->new_raw_words = 0;
+        $chunk->draft_raw_words = 0;
+        $chunk->translated_raw_words = 0;
+        $chunk->approved_raw_words = 0;
+        $chunk->approved2_raw_words = 0;
+
+        $this->setProperty($controller, [
+            'chunk' => $chunk,
+            'project' => ['status_analysis' => 'DONE'],
+            'id_segment' => '77',
+            'segment' => new SegmentStruct(),
+            'revisionNumber' => 0,
+        ]);
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+        $this->setNamedProperty($controller, 'featureSet', $this->createStub(FeatureSet::class));
+
+        $newTranslation = new SegmentTranslationStruct();
+        $newTranslation->id_segment = 77;
+        $newTranslation->status = TranslationStatus::STATUS_DRAFT;
+        $newTranslation->translation = 'x';
+        $newTranslation->translation_date = 'not-a-date';
+
+        $oldTranslation = new SegmentTranslationStruct();
+        $oldTranslation->status = TranslationStatus::STATUS_NEW;
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('getWarnings')->willReturn([(object)['outcome' => 0]]);
+
+        $before = time();
+        $method = $this->getAccessibleMethod('buildResult');
+        $result = $method->invoke($controller, $newTranslation, $oldTranslation, [], $qa);
+        $after = time();
+
+        self::assertGreaterThanOrEqual($before, $result['version']);
+        self::assertLessThanOrEqual($after, $result['version']);
     }
 
     // ──────────────────────────────────────────────────────────────
