@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security + test):** 39  
+**Commits (refactor + fix + security + test):** 40  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,272 | −4,094 (−55.6%) |
-| **PHPUnit tests** | ~2,248 | 3,517 | +1,269 (+56.4%) |
-| **PHPUnit assertions** | ~19,449 | 22,771 | +3,322 (+17.1%) |
-| **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
-| **New test files** | 235 | 272+ | +37 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 40+ | — |
+| **PHPStan baseline entries** | 7,366 | 3,260 | −4,106 (−55.7%) |
+| **PHPUnit tests** | ~2,248 | 3,582 | +1,334 (+59.3%) |
+| **PHPUnit assertions** | ~19,449 | 22,955 | +3,506 (+18.0%) |
+| **Coverage — Classes** | 8.48% (53/625) | 18.76% (127/677) | +10.28pp (+74 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 35.21% (1,436/4,078) | +13.47pp (+592 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 35.06% (12,169/34,707) | +13.87pp (+4,896 lines) |
+| **New test files** | 235 | 277+ | +42 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 48+ | — |
 
 ---
 
@@ -424,18 +424,18 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,452 |
-| **Assertions** | 22,521 |
+| **Total tests** | 3,582 |
+| **Assertions** | 22,955 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
 ### Coverage Analysis
 
-- **Class coverage more than doubled** (8.48% → 18.32%) — 71 additional classes now have test coverage, primarily structs, DAO files, and controllers that were previously untested.
-- **Method coverage jumped +10pp** (21.74% → 31.85%) — 454 additional methods covered, driven by new typed accessors and controller test harnesses.
-- **Line coverage grew by +8.41pp** (21.19% → 29.60%) — 2,990 additional lines covered while total lines grew by only 350.
+- **Class coverage more than doubled** (8.48% → 18.76%) — 74 additional classes now have test coverage, primarily structs, DAO files, and controllers that were previously untested.
+- **Method coverage jumped +13.47pp** (21.74% → 35.21%) — 592 additional methods covered, driven by new typed accessors and controller test harnesses.
+- **Line coverage grew by +13.87pp** (21.19% → 35.06%) — 4,896 additional lines covered while total lines grew by only 387.
 - **Total classes grew by 52** (625 → 677) — new struct types, validators, and test infrastructure added.
-- **Total methods grew by 192** (3,883 → 4,075) — new typed accessors replacing magic `__get`/`__set`.
+- **Total methods grew by 195** (3,883 → 4,078) — new typed accessors replacing magic `__get`/`__set`.
 
 ---
 
@@ -589,6 +589,38 @@ Made tests independent of local DB state by inserting required seed data in `set
 
 ---
 
+### Phase 12: Tier 1 Easy Wins + DI Refactor (~70 errors) — ✅ DONE
+
+**Why:** Highest ROI batch — mostly PHPDoc-only fixes across 8 files, plus a targeted DI refactor on Chunk V3 to unlock testability.
+
+#### 12A. Tier 1 PHPDoc Batch — ✅ DONE (commit `f2540750cb`, −44 baseline entries, +65 tests)
+
+| File | Errors Fixed | Coverage Before → After | Notes |
+|------|-------------|------------------------|-------|
+| `Utils/Logger/MatecatLogger.php` | 19 | 0% → 100% | Pure PHPDoc (`array<string, mixed>` context params + `@throws`) |
+| `View/App/Json/Analysis/AnalysisFile.php` | ~8 | 100% (existing) | Typed constructor params, `@throws TypeError`, array shapes |
+| `View/App/Json/Analysis/AnalysisFileMetadata.php` | ~2 | 100% (existing) | Return type fix |
+| `View/V2/Json/Membership.php` | 9 | 0% → 100% | Removed dead `is_null()` guard, typed returns |
+| `Utils/Email/MembershipCreatedEmail.php` | 5 | 0% → 100% | `$this->title ?? ''` for nullable-to-string, `@throws` |
+| `Utils/Email/MembershipDeletedEmail.php` | 3 | 0% → 100% | Same pattern as above |
+| `View/V3/Json/Chunk.php` | 12 | 20% → 88% | DI refactor (constructor-injected `JobDao`/`ChunkReviewDao`), extracted `renderQualitySummary()` |
+| `TranslationEventDao.php` | 12 | 0% → 100% | PHPDoc + `?? null` → `?: null` fix; integration tests |
+| **Total** | **70** | — | — |
+
+Key architectural changes:
+- **Chunk V3 DI refactor**: Added constructor with optional `?JobDao` and `?ChunkReviewDao` (defaults to `new`). Zero breaking change — all existing `new Chunk()` call sites continue to work.
+- **Extracted `renderQualitySummary()`**: Protected method wrapping `QualitySummary` instantiation — enables test isolation without touching deeply-coupled QualityReport stack.
+- **TranslationEventDao integration tests**: `#[Group('PersistenceNeeded')]` — run in standard suite, follow `TranslationVersionDaoTest` pattern exactly.
+
+New test files:
+- `tests/unit/Utils/Logger/MatecatLoggerTest.php` (26 tests)
+- `tests/unit/View/API/V2/Json/MembershipTest.php` (7 tests)
+- `tests/unit/Utils/Email/MembershipEmailTest.php` (9 tests)
+- `tests/unit/View/API/V3/Json/ChunkTest.php` (12 tests)
+- `tests/unit/Plugins/TranslationEvents/TranslationEventDaoTest.php` (11 tests)
+
+---
+
 ## Queue (Next Targets — Priority Order)
 
 ### Priority 1–4
@@ -631,9 +663,9 @@ Made tests independent of local DB state by inserting required seed data in `set
 
 ## Remaining Baseline Analysis
 
-**Core baseline:** 2,571 entries in 439 files  
-**Plugin baseline:** ~1,109 entries (mostly aligner plugin — separate concern)  
-**By error type:** PHPDoc-only=1,536 (59%), Behavioral=703 (27%), Other=332 (12%)
+**Core baseline:** 2,527 entries in ~435 files  
+**Plugin baseline:** ~733 entries (mostly aligner plugin — separate concern)  
+**By error type:** PHPDoc-only=~1,500 (59%), Behavioral=~700 (27%), Other=~327 (12%)
 
 ### Phase 6 Candidates — Prioritized
 
@@ -641,18 +673,18 @@ Made tests independent of local DB state by inserting required seed data in `set
 
 | File | Errors | %doc | PHPDoc | Behavioral | Notes |
 |------|--------|------|--------|------------|-------|
-| `TranslationEventDao.php` (ReviewExtended) | 27 | 96% | 26 | 0 | Almost entirely @throws |
-| `View/V3/Json/Chunk.php` | 20 | 95% | 19 | 0 | Iterables + @throws only |
+| ~~`TranslationEventDao.php` (ReviewExtended)~~ | ~~27~~ | ~~96%~~ | ~~26~~ | ~~0~~ | ✅ Done (Phase 12) |
+| ~~`View/V3/Json/Chunk.php`~~ | ~~20~~ | ~~95%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, refactored DI, 88% coverage) |
 | `Model/Projects/ManageModel.php` | 19 | 94% | 18 | 1 | @throws + iterables |
-| `Utils/Logger/MatecatLogger.php` | 19 | 100% | 19 | 0 | Pure PHPDoc — zero behavioral |
+| ~~`Utils/Logger/MatecatLogger.php`~~ | ~~19~~ | ~~100%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
 | `View/V3/Json/QualitySummary.php` | 19 | 78% | 15 | 4 | Mostly iterables |
 | `Model/QualityReport/QualityReportModel.php` | 24 | 70% | 17 | 1 | @throws + iterables |
 | `Controller/V3/QualityReportControllerAPI.php` | 21 | 71% | 15 | 6 | QR stack (pair with above) |
 | `Utils/AsyncTasks/Workers/GlossaryWorker.php` | 18 | 72% | 13 | 2 | Worker pattern (familiar) |
 | `Model/Conversion/Filters.php` | 19 | 73% | 14 | 2 | Iterables-heavy |
 | `Model/Projects/ProjectModel.php` | 18 | 72% | 13 | 5 | @throws cascade |
-| `View/App/Json/Analysis/AnalysisFile.php` | 10 | 100% | 10 | 0 | Pure PHPDoc |
-| `View/V2/Json/Membership.php` | 12 | 83% | 10 | 0 | Pure PHPDoc |
+| ~~`View/App/Json/Analysis/AnalysisFile.php`~~ | ~~10~~ | ~~100%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
+| ~~`View/V2/Json/Membership.php`~~ | ~~12~~ | ~~83%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
 | `Controller/V2/SplitJobController.php` | 15 | 86% | 13 | 0 | @throws + iterables |
 
 **Subtotal Tier 1:** ~261 entries, ~228 PHPDoc-only (no TDD needed)
@@ -702,8 +734,8 @@ Made tests independent of local DB state by inserting required seed data in `set
 
 ### Recommended Strategy
 
-1. **Batch Tier 1 PHPDoc-only files** (MatecatLogger, Chunk, ManageModel, AnalysisFile, Membership, SplitJobController) — ~90 entries, zero TDD, fast
+1. ~~**Batch Tier 1 PHPDoc-only files** (MatecatLogger, Chunk, ManageModel, AnalysisFile, Membership, SplitJobController) — ~90 entries, zero TDD, fast~~ ✅ Partially done (Phase 12 — MatecatLogger, Chunk, AnalysisFile, Membership)
 2. **Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster
 3. **GlossaryWorker** — familiar worker pattern from contribution stack
 4. **GetSegmentsController** — high business value, moderate difficulty
-5. **TranslationEventDao** — 27 entries, 96% PHPDoc-only, massive single-file win
+5. **Remaining Tier 1** — ManageModel (19), SplitJobController (15), ProjectModel (18), Filters (19)
