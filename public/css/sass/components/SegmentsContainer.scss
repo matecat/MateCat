@@ -82,4 +82,43 @@
   position: sticky;
   top: 0;
   z-index: 2;
+  width: 89.5%;
+  left: 4.5%;
+  background-color: colors.$grey5;
+
+  &.sticky-project-bar-compressed {
+    padding-top: 10px;
+  }
+
+  &.sticky-project-bar-slide-right {
+    width: 70.7%;
+  }
+
+  .projectbar {
+    padding-left: 0;
+    width: auto;
+  }
+
+  .projectbar-compressed {
+    padding-top: 10px;
+  }
+
+  .sticky-project-bar-blink {
+    animation: blinkBackground 1s;
+    border-radius: 8px;
+  }
+
+  @keyframes blinkBackground {
+    0% {
+      background-color: transparent;
+    }
+
+    50% {
+      background-color: rgba(42, 140, 252, 0.3);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
 }

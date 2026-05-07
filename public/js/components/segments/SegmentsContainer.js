@@ -415,25 +415,29 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   }, [])
 
   // set width and height of area
-  useEffect(() => {
-    const onWindowResize = () => {
-      const headerHeight =
-        document.getElementsByTagName('header')[0].offsetHeight
-      const footerHeight =
-        document.getElementsByTagName('footer')[0].offsetHeight
+  useEffect(
+    () => {
+      const onWindowResize = () => {
+        const headerHeight =
+          document.getElementsByTagName('header')[0].offsetHeight
+        const footerHeight =
+          document.getElementsByTagName('footer')[0].offsetHeight
 
-      setHeightArea(
-        window.innerHeight -
-          (headerHeight + footerHeight) -
-          (stickyProjectBarRef.current?.offsetHeight ?? 0),
-      )
-    }
+        setHeightArea(
+          window.innerHeight - (headerHeight + footerHeight) /* -
+          (stickyProjectBarRef.current?.offsetHeight ?? 0), */,
+        )
+      }
 
-    onWindowResize()
-    window.addEventListener('resize', onWindowResize)
+      onWindowResize()
+      window.addEventListener('resize', onWindowResize)
 
-    return () => window.removeEventListener('resize', onWindowResize)
-  }, [stickyProjectBarRef.current?.offsetHeight])
+      return () => window.removeEventListener('resize', onWindowResize)
+    },
+    [
+      /* stickyProjectBarRef.current?.offsetHeight */
+    ],
+  )
 
   // add actions listener
   useEffect(() => {
@@ -848,18 +852,23 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
   const getProjectBar = () => {
-    const props = getSegmentPropsBySid(firstRowIdVisible)
+    if (typeof firstRowIdVisible !== 'undefined') {
+      const props = getSegmentPropsBySid(firstRowIdVisible)
 
-    return <ProjectBar {...props} />
+      return (
+        <div
+          className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
+        >
+          <ProjectBar
+            {...{...props, listRef: listRef.current, isSticky: true}}
+          />
+        </div>
+      )
+    }
   }
 
   return (
     <>
-      {typeof firstRowIdVisible !== 'undefined' && (
-        <div ref={stickyProjectBarRef} className="sticky-project-bar">
-          {getProjectBar()}
-        </div>
-      )}
       <VirtualList
         ref={listRef}
         className="virtual-list"
@@ -870,6 +879,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         }}
         overscan={OVERSCAN}
         height={heightArea}
+        header={getProjectBar()}
         onRender={(index) => {
           const props = getSegmentPropsBySid(essentialRows[index].id)
           return (
@@ -884,6 +894,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
                   ...(index === essentialRows.length - 1 && {
                     isLastRow: true,
                   }),
+                  scrollValue: listRef.current ? listRef.current.scrollTop : 0,
                 }}
               />
             )

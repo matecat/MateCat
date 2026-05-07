@@ -1,7 +1,7 @@
 import React, {forwardRef, useCallback, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {useVirtual} from 'react-virtual'
-import {debounce} from 'lodash'
+import {st} from 'make-plural'
 
 const VirtualList = forwardRef(
   (
@@ -14,6 +14,7 @@ const VirtualList = forwardRef(
       scrollToIndex = {},
       onRender,
       setFirstRowIdVisible,
+      header,
       itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
@@ -31,9 +32,17 @@ const VirtualList = forwardRef(
       overscan,
     })
 
-    const firstRowIdVisible =
-      items[virtualItems[virtualItems.length > overscan ? overscan : 0]?.index]
-        ?.id
+    const getFirstVisibleIndex = () => {
+      const parent = ref.current
+
+      const scrollOffset = parent?.scrollTop ?? 0
+
+      const firstVisible = virtualItems.find((item) => item.end > scrollOffset)
+
+      return firstVisible?.index ?? null
+    }
+
+    const firstRowIdVisible = items[getFirstVisibleIndex()]?.id
 
     const scrollToIndexDebounceTmOut = useRef()
 
@@ -69,12 +78,7 @@ const VirtualList = forwardRef(
     }, [ref, width, height])
 
     useEffect(() => {
-      const tmOut = setTimeout(
-        () => setFirstRowIdVisible(firstRowIdVisible),
-        100,
-      )
-
-      return () => clearTimeout(tmOut)
+      setFirstRowIdVisible(firstRowIdVisible)
     }, [firstRowIdVisible, setFirstRowIdVisible])
 
     return (
@@ -91,6 +95,7 @@ const VirtualList = forwardRef(
             position: 'relative',
           }}
         >
+          {header && header}
           {virtualItems.map((item) => (
             <div
               key={items[item.index].id ? items[item.index].id : item.index}
@@ -125,6 +130,7 @@ VirtualList.propTypes = {
   }),
   onRender: PropTypes.func.isRequired,
   setFirstRowIdVisible: PropTypes.func.isRequired,
+  header: PropTypes.node,
   itemStyle: PropTypes.func,
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,

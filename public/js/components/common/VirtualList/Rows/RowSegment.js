@@ -1,4 +1,10 @@
-import React, {useEffect, useRef} from 'react'
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
@@ -7,6 +13,10 @@ import JobMetadataModal from '../../../modals/JobMetadataModal'
 import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
 import SegmentUtils from '../../../../utils/segmentUtils'
+import {se} from 'make-plural'
+import {head} from 'lodash'
+import {is} from 'immutable'
+import SegmentStore from '../../../../stores/SegmentStore'
 
 const LinkIcon = () => {
   return (
@@ -72,10 +82,9 @@ function RowSegment({
       ref={ref}
       className={`row${isLastRow ? ' last-row' : ''} ${borderRadiusCssClasses}`}
     >
-      {idFileSegment !== parseInt(currentFileId) &&
-        idFileSegment !== parseInt(restProps.files[0].id) && (
-          <ProjectBar {...restProps} />
-        )}
+      {idFileSegment !== parseInt(currentFileId) && (
+        <ProjectBar {...restProps} />
+      )}
       {collectionTypeSeparator}
       <Segment {...restProps} />
     </div>
@@ -94,7 +103,25 @@ RowSegment.propTypes = {
 
 export default RowSegment
 
-export const ProjectBar = ({segment, files, sideOpen}) => {
+const projectBarCache = {
+  headerHeight: 0,
+  paddingTop: 0,
+}
+
+export const ProjectBar = ({
+  segment,
+  files,
+  sideOpen,
+  isSticky,
+  listRef,
+  scrollValue,
+}) => {
+  const [replacedSegment, setReplacedSegment] = useState()
+  const [isBlinking, setIsBlinking] = useState(false)
+
+  const ref = useRef()
+  const previousFileIdRef = useRef()
+
   const openInstructionsModal = (id_file) => {
     const props = {
       showCurrent: true,
@@ -114,7 +141,82 @@ export const ProjectBar = ({segment, files, sideOpen}) => {
     )
   }
 
-  const idFileSegment = SegmentUtils.getSegmentFileId(segment)
+  useEffect(() => {
+    const onReplaceSegment = ({detail: {segment}}) => {
+      if (isSticky) setReplacedSegment(segment)
+    }
+    const onReplaceSegmentReset = ({detail: {sid}}) => {
+      if (isSticky)
+        setReplacedSegment((prevState) =>
+          prevState?.sid === sid ? undefined : prevState,
+        )
+    }
+
+    document.addEventListener(
+      'segmentProjectBar.replaceSegment',
+      onReplaceSegment,
+    )
+    document.addEventListener(
+      'segmentProjectBar.replaceSegmentReset',
+      onReplaceSegmentReset,
+    )
+
+    if (!isSticky) {
+      const rect = ref.current?.getBoundingClientRect() ?? {}
+      const isVisible =
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.right <= window.innerWidth
+
+      if (isVisible) {
+        if (!projectBarCache.headerHeight) {
+          projectBarCache.headerHeight =
+            document.getElementsByTagName('header')[0]?.getBoundingClientRect()
+              .height || 0
+        }
+
+        if (!projectBarCache.paddingTop && ref.current) {
+          projectBarCache.paddingTop = parseInt(
+            window.getComputedStyle(ref.current).paddingTop.replace('px', ''),
+          )
+        }
+
+        const diff =
+          rect.y - (projectBarCache.headerHeight + projectBarCache.paddingTop)
+        console.log('---------------> sid[', segment.sid, ']:', diff)
+
+        if (diff < -30 && diff > -60) {
+          document.dispatchEvent(
+            new CustomEvent('segmentProjectBar.replaceSegment', {
+              detail: {segment},
+            }),
+          )
+        } else {
+          document.dispatchEvent(
+            new CustomEvent('segmentProjectBar.replaceSegmentReset', {
+              detail: {sid: segment.sid},
+            }),
+          )
+        }
+      }
+    }
+
+    return () => {
+      document.removeEventListener(
+        'segmentProjectBar.replaceSegment',
+        onReplaceSegment,
+      )
+      document.removeEventListener(
+        'segmentProjectBar.replaceSegmentReset',
+        onReplaceSegmentReset,
+      )
+    }
+  }, [isSticky, segment, scrollValue])
+
+  const currentSegment = replacedSegment || segment
+
+  const idFileSegment = SegmentUtils.getSegmentFileId(currentSegment)
   const file = files ? files.find((file) => file.id == idFileSegment) : false
   let fileType = ''
   if (file) {
@@ -126,15 +228,60 @@ export const ProjectBar = ({segment, files, sideOpen}) => {
   }
   let classes = sideOpen ? 'slide-right' : ''
   const isFirstSegment =
-    files?.length && parseInt(segment.sid) === parseInt(files[0].first_segment)
+    files?.length &&
+    parseInt(currentSegment.sid) === parseInt(files[0].first_segment)
   classes = isFirstSegment ? classes + ' first-segment' : classes
 
+  useEffect(() => {
+    const stopBlinking = () => setIsBlinking(false)
+    const filenameElement = ref.current.firstChild
+
+    if (
+      isSticky &&
+      idFileSegment !== previousFileIdRef.current &&
+      typeof previousFileIdRef.current === 'number'
+    ) {
+      filenameElement.addEventListener('animationend', stopBlinking)
+      setIsBlinking(true)
+    }
+
+    previousFileIdRef.current = idFileSegment
+
+    return () => {
+      filenameElement.removeEventListener('animationend', stopBlinking)
+      stopBlinking()
+    }
+  }, [isSticky, idFileSegment])
+
+  useEffect(() => {
+    let paddingTop = 0
+
+    const onScroll = () => {
+      if (listRef.scrollTop < paddingTop) {
+        const newPaddingTop = paddingTop - listRef.scrollTop
+        if (newPaddingTop > 10)
+          ref.current.style.paddingTop = `${newPaddingTop}px`
+      }
+    }
+
+    if (isSticky) {
+      paddingTop = parseInt(
+        window.getComputedStyle(ref.current).paddingTop.replace('px', ''),
+      )
+      listRef?.addEventListener('scroll', onScroll)
+    }
+
+    return () => listRef?.removeEventListener('scroll', onScroll)
+  }, [isSticky, listRef])
+
   return (
-    <div className={'projectbar ' + classes}>
+    <div ref={ref} className={'projectbar ' + classes}>
       {file ? (
-        <div className={'projectbar-filename'}>
+        <div
+          className={`projectbar-filename ${isBlinking ? 'sticky-project-bar-blink' : ''}`}
+        >
           <span
-            title={segment.filename}
+            title={currentSegment.filename}
             className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
           >
             {file.file_name}
