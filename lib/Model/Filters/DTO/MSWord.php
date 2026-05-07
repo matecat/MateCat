@@ -2,9 +2,7 @@
 
 namespace Model\Filters\DTO;
 
-use JsonSerializable;
-
-class MSWord implements IDto, JsonSerializable
+class MSWord implements IDto
 {
 
     private bool $extract_doc_properties = false;
@@ -12,51 +10,38 @@ class MSWord implements IDto, JsonSerializable
     private bool $extract_headers_footers = false;
     private bool $extract_hidden_text = false;
     private bool $accept_revisions = false;
+    /** @var list<string> */
     private array $exclude_styles = [];
+    /** @var list<string> */
     private array $exclude_highlight_colors = [];
 
-    /**
-     * @param bool $extract_doc_properties
-     */
     public function setExtractDocProperties(bool $extract_doc_properties): void
     {
         $this->extract_doc_properties = $extract_doc_properties;
     }
 
-    /**
-     * @param bool $extract_comments
-     */
     public function setExtractComments(bool $extract_comments): void
     {
         $this->extract_comments = $extract_comments;
     }
 
-    /**
-     * @param bool $extract_headers_footers
-     */
     public function setExtractHeadersFooters(bool $extract_headers_footers): void
     {
         $this->extract_headers_footers = $extract_headers_footers;
     }
 
-    /**
-     * @param bool $extract_hidden_text
-     */
     public function setExtractHiddenText(bool $extract_hidden_text): void
     {
         $this->extract_hidden_text = $extract_hidden_text;
     }
 
-    /**
-     * @param bool $accept_revisions
-     */
     public function setAcceptRevisions(bool $accept_revisions): void
     {
         $this->accept_revisions = $accept_revisions;
     }
 
     /**
-     * @param array $exclude_styles
+     * @param list<string> $exclude_styles
      */
     public function setExcludeStyles(array $exclude_styles): void
     {
@@ -64,7 +49,7 @@ class MSWord implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $exclude_highlight_colors
+     * @param list<string> $exclude_highlight_colors
      */
     public function setExcludeHighlightColors(array $exclude_highlight_colors): void
     {
@@ -72,7 +57,7 @@ class MSWord implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function fromArray(array $data): void
     {
@@ -106,7 +91,7 @@ class MSWord implements IDto, JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

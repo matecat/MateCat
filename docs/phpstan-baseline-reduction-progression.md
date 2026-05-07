@@ -2,13 +2,13 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security + test):** 43
+**Commits (refactor + fix + security + test):** 44
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,103 | −4,263 (−57.9%) |
-| **PHPUnit tests** | ~2,248 | 3,845 | +1,597 (+71.0%) |
-| **PHPUnit assertions** | ~19,449 | 23,990 | +4,541 (+23.3%) |
+| **PHPStan baseline entries** | 7,366 | 3,032 | −4,334 (−58.8%) |
+| **PHPUnit tests** | ~2,248 | 3,873 | +1,625 (+72.3%) |
+| **PHPUnit assertions** | ~19,449 | 24,072 | +4,623 (+23.8%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
@@ -56,7 +56,8 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
    - If the error is in a file **not on our ledger** → **add it to the baseline** (we haven't committed to cleaning it yet).
 7. **Add the newly cleaned file** to the fixed-files ledger.
 8. **Manually remove** all resolved entries for that file from `phpstan-baseline.neon`. **NEVER regenerate the baseline.** Regenerating resets the baseline to the current state, potentially re-whitelisting errors in files we've already committed to keeping clean.
-9. **Repeat from step 2.**
+9. **If you modified files other than the target** → each modified file must be checked with this algorithm. Repeat from step 2 for each one.
+10. **Repeat from step 2** for the next target.
 
 ### TDD Specifics
 
@@ -86,7 +87,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 170 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 179 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
@@ -142,6 +143,19 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/DataAccess/ShapelessConcreteStruct.php` | Phase 2B |
 | `lib/Model/DataAccess/TransactionalTrait.php` | Phase 7B |
 | `lib/Model/DataAccess/XFetchEnvelope.php` | Phase 2D |
+
+#### Model/Conversion & Filters/DTO
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/Conversion/Filters.php` | Phase 18 |
+| `lib/Model/Filters/DTO/IDto.php` | Phase 18 |
+| `lib/Model/Filters/DTO/Dita.php` | Phase 18 |
+| `lib/Model/Filters/DTO/Json.php` | Phase 18 |
+| `lib/Model/Filters/DTO/MSExcel.php` | Phase 18 |
+| `lib/Model/Filters/DTO/MSPowerpoint.php` | Phase 18 |
+| `lib/Model/Filters/DTO/MSWord.php` | Phase 18 |
+| `lib/Model/Filters/DTO/Xml.php` | Phase 18 |
+| `lib/Model/Filters/DTO/Yaml.php` | Phase 18 |
 
 #### Model/Engines (Structs)
 | File | Cleaned In |
@@ -1031,6 +1045,41 @@ Key changes:
 
 ---
 
+### Phase 18: Filters.php + IDto.php — ✅ DONE (−18 net baseline entries, +28 tests)
+
+#### 18A. Interface Fix + Type Fixes + DI Refactor — ✅ DONE
+
+| File | Errors Fixed | Coverage Before → After | Notes |
+|------|-------------|------------------------|-------|
+| `Filters.php` | 21→0 | 0% → **82.78%** (125/151 lines) | DI refactor, 3 behavioral fixes, PHPDoc shapes |
+| `IDto.php` | 1→0 | n/a (interface) | Extended `\JsonSerializable` |
+
+Key changes:
+- **Interface fix**: `IDto` now extends `\JsonSerializable` — all 7 implementors already implemented it independently, this formalizes the contract
+- **Null guard**: `parse_url()` result guarded with `$parsedUrl['host'] ?? ''` instead of direct offset access on potentially false return
+- **Type guard**: `$headers[$id]` guarded with `is_array()` check — `getAllHeaders()` returns `array<string, true|string[]>`, `true` value was being passed to `extractInstanceInfoFromHeaders()`
+- **String guard**: `pathinfo_fix()` results guarded with `is_string()` — returns `array|string` but PHPStan can't narrow based on flag value
+- **DI refactor**: `sendToFilters()`, `extractInstanceInfoFromHeaders()`, `formatErrorMessage()`, `backupFailedConversion()` changed from `private` to `protected`; added `createMultiCurlHandler()` and `createLogConnection()` factory methods
+- **PHPDoc shapes**: 14 `missingType.iterableValue` errors resolved with precise array shapes
+- **`@throws` annotations**: Added to `sendToFilters()`, `sourceToXliff()`, `xliffToTarget()`, `backupFailedConversion()`
+- **28 new tests** across `FiltersTest.php` (19 tests) and `FiltersSendToFiltersTest.php` (9 tests), 64 assertions
+- **3 cascade errors** in `XliffToTargetConverterController.php` (not on ledger) — added to baseline
+
+**Baseline reduction:** 3,103 → 3,085 (−21 removed, +3 cascade added = −18 net)
+
+**Phase 18b — 7 DTO subclasses (algorithm step 9 — collateral file check):**
+- `IDto extends \JsonSerializable` made the explicit `implements JsonSerializable` redundant on all 7 DTO classes
+- Removed redundant `implements JsonSerializable` from: Dita, Json, MSExcel, MSPowerpoint, MSWord, Xml, Yaml
+- Removed redundant `@param` PHPDocs that just repeated native types
+- Added `@var list<string>` on all array properties, `@param list<string>` on array setters
+- Added `@param array<string, mixed>` on `fromArray()`, `@return array<string, mixed>` on `jsonSerialize()`
+- Added `@throws DomainException` on `Yaml::setInnerContentType()` and `Yaml::fromArray()`
+- **53 errors resolved**, 7 files added to ledger (179 total)
+
+**Baseline reduction (cumulative):** 3,103 → 3,032 (−71 total: −21 Filters − 53 DTOs + 3 cascade = −71 net)
+
+---
+
 ## Queue (Remaining Targets — Priority Order)
 
 ### Priority 1–4
@@ -1091,7 +1140,7 @@ Key changes:
 | ~~`Model/QualityReport/QualityReportModel.php`~~   | ~~24~~ | ~~70%~~ | ~~17~~ | ~~1~~ | ✅ Done (Phase 13, DI refactored, 82.61% methods) |
 | ~~`Controller/V3/QualityReportControllerAPI.php`~~ | ~~21~~ | ~~71%~~ | ~~15~~ | ~~6~~ | ✅ Done (Phase 13, 80% methods) |
 | ~~`Utils/AsyncTasks/Workers/GlossaryWorker.php`~~      | ~~18~~ | ~~72%~~ | ~~13~~ | ~~2~~ | ✅ Done (Phase 17) |
-| `Model/Conversion/Filters.php`                     | 19 | 73% | 14 | 2 | Iterables-heavy |
+| ~~`Model/Conversion/Filters.php`~~                     | ~~19~~ | ~~73%~~ | ~~14~~ | ~~2~~ | ✅ Done (Phase 18) |
 | ~~`Model/Projects/ProjectModel.php`~~              | 18 | 72% | 13 | 5 | @throws cascade |
 | ~~`View/App/Json/Analysis/AnalysisFile.php`~~      | ~~10~~ | ~~100%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
 | ~~`View/V2/Json/Membership.php`~~                  | ~~12~~ | ~~83%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
