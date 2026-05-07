@@ -90,6 +90,10 @@ const ContextPreview = () => {
 
   const onHighlight = useCallback(
     (numericSid) => {
+      const current = highlightRef.current
+      if (current?.mode === 'node' && current.sids.includes(numericSid)) {
+        return
+      }
       pendingHighlightRef.current = numericSid
       const total = applyHighlightsForSegment(numericSid, 0, true)
       setHighlight(
@@ -98,7 +102,7 @@ const ContextPreview = () => {
           : null,
       )
     },
-    [applyHighlightsForSegment, setHighlight],
+    [applyHighlightsForSegment, setHighlight, highlightRef],
   )
 
   const onTranslationUpdate = useCallback(() => {
@@ -147,11 +151,27 @@ const ContextPreview = () => {
 
   const hasScreenshots = Object.keys(screenshotMap).length > 0
 
+  const currentHasScreenshot = useMemo(() => {
+    if (highlight?.mode === 'segment' && highlight.sid != null) {
+      return Boolean(screenshotMap[highlight.sid])
+    }
+    if (highlight?.mode === 'node' && highlight.sids?.length) {
+      return highlight.sids.some((sid) => Boolean(screenshotMap[sid]))
+    }
+    return hasScreenshots
+  }, [highlight, screenshotMap, hasScreenshots])
+
   const screenshotUrl = useMemo(() => {
     if (highlight?.sid) return screenshotMap[highlight.sid] ?? null
     const firstWithScreenshot = segments.find((s) => s.screenshot)
     return firstWithScreenshot?.screenshot ?? null
   }, [highlight, screenshotMap, segments])
+
+  useEffect(() => {
+    if (!currentHasScreenshot && contentView === CONTENT_VIEWS.SCREENSHOT) {
+      setContentView(CONTENT_VIEWS.LIVE_PREVIEW)
+    }
+  }, [currentHasScreenshot, contentView])
 
   const segmentsRef = useRef([])
   useEffect(() => {
@@ -446,7 +466,7 @@ const ContextPreview = () => {
     <div className="context-preview-container">
       <div className="context-preview-toolbar">
         <div className="context-preview-toolbar__left">
-          {hasScreenshots && (
+          {currentHasScreenshot && (
             <SegmentedControl
               name="context-preview-content-view"
               className="context-preview-content-view"
@@ -476,7 +496,8 @@ const ContextPreview = () => {
               Segment preview not available
             </span>
           )}
-          {highlight &&
+          {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
+            highlight &&
             ((highlight.mode === 'segment' && highlight.total > 1) ||
               (highlight.mode === 'node' && highlight.sids.length > 1)) && (
               <div className="context-preview-nav">
