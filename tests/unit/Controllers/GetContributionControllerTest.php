@@ -6,6 +6,7 @@ use Controller\API\App\GetContributionController;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -40,6 +41,16 @@ class GetContributionControllerTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
+
+        Database::obtain()->begin();
+
+        // Insert fake user matching job owner so getProjectOwner() can resolve
+        $conn = Database::obtain()->getConnection();
+        $conn->exec(
+            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+             VALUES (1886472050, 'foo@example.org', 'x', 'x', '2024-01-01 00:00:00', 'Test', 'Owner')"
+        );
+
         $this->requestMock = $this->createStub(Request::class);
         $responseMock = $this->createStub(Response::class);
 
@@ -61,6 +72,16 @@ class GetContributionControllerTest extends AbstractTest
         $user->email = 'test@example.com';
         $userProp = $this->reflector->getProperty('user');
         $userProp->setValue($this->controller, $user);
+    }
+
+    public function tearDown(): void
+    {
+        $conn = Database::obtain()->getConnection();
+        if ($conn->inTransaction()) {
+            Database::obtain()->rollback();
+        }
+
+        parent::tearDown();
     }
 
     private function invokeMethod(string $name, array $args = []): mixed

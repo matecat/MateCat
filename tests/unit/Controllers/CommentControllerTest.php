@@ -77,6 +77,27 @@ class CommentControllerTest extends AbstractTest
         $this->setControllerUser($user, true);
 
         Database::obtain()->begin();
+
+        // Insert fake user matching job owner so getProjectOwner() can resolve
+        $conn = Database::obtain()->getConnection();
+        $conn->exec(
+            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+             VALUES (1886472050, 'foo@example.org', 'x', 'x', '2024-01-01 00:00:00', 'Test', 'Owner')"
+        );
+
+        // Insert team + membership + job for resolveTeamMentions tests
+        $conn->exec(
+            "INSERT IGNORE INTO teams (id, name, created_by, type)
+             VALUES (32786, 'Test Team', 1886472050, 'general')"
+        );
+        $conn->exec(
+            "INSERT IGNORE INTO teams_users (id, id_team, uid, is_admin)
+             VALUES (1, 32786, 1886428336, 0)"
+        );
+        $conn->exec(
+            "INSERT IGNORE INTO jobs (id, password, id_project, job_first_segment, job_last_segment, tm_keys, source, target, create_date, disabled, owner)
+             VALUES (1886428342, '92c5e0ce9316', 1886428330, 1, 4, '[]', 'en-GB', 'es-ES', '2024-01-01 00:00:00', 0, 'foo@example.org')"
+        );
     }
 
     public function tearDown(): void
