@@ -3,6 +3,7 @@
 namespace Controller\Abstracts;
 
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Klein\App;
@@ -162,15 +163,25 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * @return never
      *
+     * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
      */
     public function render(?int $code = null): never
     {
         $this->response->noCache();
         $this->response->code($code ?? $this->httpCode);
-        $this->response->body($this->view->execute());
+
+        if (isset($this->view)) {
+            $this->response->body($this->view->execute());
+        }
+
         $this->response->send();
         $this->_logWithTime();
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
         die();
     }
 

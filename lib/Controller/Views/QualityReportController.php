@@ -33,8 +33,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
     /**
      * @throws Exception
+     * @return void
      */
-    public function renderView()
+    public function renderView(): void
     {
         $request = $this->validateTheRequest();
 
@@ -94,6 +95,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
         $this->render();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function validateTheRequest(): array
     {
         $filterArgs = [
@@ -105,7 +109,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
     }
 
     /**
-     * @return array
+     * @return array<int, object>
      */
     private function searchableStatuses(): array
     {

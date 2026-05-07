@@ -4,11 +4,13 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\LQA\ModelDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PDOException;
 use ReflectionException;
 use TypeError;
 
@@ -26,6 +28,8 @@ class QualityFrameworkController extends KleinController
      * @throws NotFoundException
      * @throws ReflectionException
      * @throws TypeError
+     * @throws Exception
+     * @throws PDOException
      */
     public function project(): void
     {
@@ -39,10 +43,12 @@ class QualityFrameworkController extends KleinController
     /**
      * @param ProjectStruct $projectStruct
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws NotFoundException
      * @throws ReflectionException
      * @throws TypeError
+     * @throws Exception
+     * @throws PDOException
      */
     private function renderQualityFramework(ProjectStruct $projectStruct): array
     {

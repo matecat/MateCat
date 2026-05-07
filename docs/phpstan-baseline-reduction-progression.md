@@ -9,9 +9,9 @@
 | **PHPStan baseline entries** | 7,366 | 3,260 | −4,106 (−55.7%) |
 | **PHPUnit tests** | ~2,248 | 3,582 | +1,334 (+59.3%) |
 | **PHPUnit assertions** | ~19,449 | 22,955 | +3,506 (+18.0%) |
-| **Coverage — Classes** | 8.48% (53/625) | 18.76% (127/677) | +10.28pp (+74 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 35.21% (1,436/4,078) | +13.47pp (+592 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 35.06% (12,169/34,707) | +13.87pp (+4,896 lines) |
+| **Coverage — Classes** | 8.48% (53/625) | 18.76% (127/677) | +10.28% (+74 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 35.21% (1,436/4,078) | +13.47% (+592 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 35.06% (12,169/34,707) | +13.87% (+4,896 lines) |
 | **New test files** | 235 | 277+ | +42 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 48+ | — |
 
@@ -432,8 +432,8 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 ### Coverage Analysis
 
 - **Class coverage more than doubled** (8.48% → 18.76%) — 74 additional classes now have test coverage, primarily structs, DAO files, and controllers that were previously untested.
-- **Method coverage jumped +13.47pp** (21.74% → 35.21%) — 592 additional methods covered, driven by new typed accessors and controller test harnesses.
-- **Line coverage grew by +13.87pp** (21.19% → 35.06%) — 4,896 additional lines covered while total lines grew by only 387.
+- **Method coverage jumped +13.47%** (21.74% → 35.21%) — 592 additional methods covered, driven by new typed accessors and controller test harnesses.
+- **Line coverage grew by +13.87%** (21.19% → 35.06%) — 4,896 additional lines covered while total lines grew by only 387.
 - **Total classes grew by 52** (625 → 677) — new struct types, validators, and test infrastructure added.
 - **Total methods grew by 195** (3,883 → 4,078) — new typed accessors replacing magic `__get`/`__set`.
 

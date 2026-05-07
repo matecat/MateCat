@@ -15,14 +15,19 @@ final class FilterRevisionChangeNotificationListEvent extends FilterEvent
     {
         return 'filterRevisionChangeNotificationList';
     }
+    /** @param list<string> $emails */
     public function __construct(
         private array $emails,
     ) {
     }
+
+    /** @return list<string> */
     public function getEmails(): array
     {
         return $this->emails;
     }
+
+    /** @param list<string> $emails */
     public function setEmails(array $emails): void
     {
         $this->emails = $emails;

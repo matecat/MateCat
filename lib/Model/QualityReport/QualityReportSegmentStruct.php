@@ -25,6 +25,15 @@ use View\API\V2\Json\QALocalWarning;
 class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
 {
 
+    private ?MetadataDao $metadataDao = null;
+
+    /** @param array<string, mixed> $array_params */
+    public function __construct(array $array_params = [], ?MetadataDao $metadataDao = null)
+    {
+        parent::__construct($array_params);
+        $this->metadataDao = $metadataDao;
+    }
+
 
     public int $sid;
 
@@ -64,32 +73,32 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public string $match_type;
 
-    /** @var list<array<string, mixed>> */
+    /** @var array<string, mixed> */
     public array $warnings;
 
-    public int $pee;
+    public float $pee;
 
     public bool $ice_modified;
 
-    public int $secs_per_word;
+    public float $secs_per_word;
 
     /** @var list<string|int> */
     public array $parsed_time_to_edit;
 
-    /** @var list<array<string, mixed>> */
+    /** @var list<mixed> */
     public array $comments = [];
 
-    /** @var list<array<string, mixed>> */
+    /** @var list<mixed> */
     public array $issues = [];
 
     public string $last_translation = '';
 
-    /** @var list<array{translation: string, source_page?: int}> */
+    /** @var list<array{translation: string, source_page?: int, revision_number?: int|null}> */
     public array $last_revisions = [];
 
-    public int $pee_translation_revise;
+    public float $pee_translation_revise;
 
-    public int $pee_translation_suggestion;
+    public float $pee_translation_suggestion;
 
     public int $version_number;
 
@@ -132,30 +141,30 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getPEE(): int
+    public function getPEE(): float
     {
         if (empty($this->translation) || empty($this->suggestion)) {
-            return 0;
+            return 0.0;
         }
 
         return PostEditing::getPee($this->suggestion, $this->translation, $this->target);
     }
 
-    public function getPEEBwtTranslationSuggestion(): int
+    public function getPEEBwtTranslationSuggestion(): float
     {
-        if (empty($this->last_translation)) {
-            return 0;
+        if (empty($this->last_translation) || empty($this->suggestion)) {
+            return 0.0;
         }
 
         return PostEditing::getPee($this->suggestion, $this->last_translation, $this->target);
     }
 
-    public function getPEEBwtTranslationRevise(): int
+    public function getPEEBwtTranslationRevise(): float
     {
-        if (empty($this->last_translation) or empty($this->last_revisions)) {
-            return 0;
+        if (empty($this->last_translation) || empty($this->last_revisions)) {
+            return 0.0;
         }
 
         $last_revision_record = end($this->last_revisions);
@@ -165,18 +174,18 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array
     {
         // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
         // so that the local warning check is not displayed/needed
-        if (is_null($this->translation)) {
+        if (is_null($this->translation) || $chunk->id === null || $chunk->password === null) {
             return [];
         }
 
-        $metadata = new MetadataDao();
+        $metadata = $this->metadataDao ?? new MetadataDao();
         $dataRefMap = (!empty($this->sid)) ? SegmentOriginalDataDao::getSegmentDataRefMap($this->sid) : [];
 
         /** @var MateCatFilter $Filter */

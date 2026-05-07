@@ -257,7 +257,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             // check if $review belongs to a deleted job
             $chunk = JobDao::getByIdAndPassword($review->id_job, $review->password);
 
-            if (!$chunk->isDeleted()) {
+            if ($chunk !== null && !$chunk->isDeleted()) {
                 $reviews = array_merge(
                     $reviews,
                     $this->createQaChunkReviewRecords(

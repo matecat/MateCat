@@ -2785,24 +2785,6 @@ parameters:
 			path: lib/Controller/API/V3/DeepLGlossaryController.php
 
 		-
-			message: '#^Cannot access property \$comments on array\<string, mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/V3/DownloadQRController.php
-
-		-
-			message: '#^Cannot access property \$issue_category on array\<string, mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/V3/DownloadQRController.php
-
-		-
-			message: '#^Cannot access property \$issue_severity on array\<string, mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/V3/DownloadQRController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\DownloadQRController\:\:buildArrayOfSegmentIds\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -2817,6 +2799,18 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\DownloadQRController\:\:buildFileContentFromArrayOfSegmentIds\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Controller/API/V3/DownloadQRController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\DownloadQRController\:\:buildFileContentFromArrayOfSegmentIds\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/DownloadQRController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\DownloadQRController\:\:buildFileContentFromArrayOfSegmentIds\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/DownloadQRController.php
 
@@ -3463,6 +3457,18 @@ parameters:
 			path: lib/Controller/API/V3/QualityReportControllerAPI.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:renderSegments\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/QualityReportControllerAPI.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:renderSegments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/QualityReportControllerAPI.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:show\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3476,6 +3482,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$mt_we_workflow_enabled of static method Model\\Analysis\\Constants\\MatchConstantsFactory\:\:getInstance\(\) expects bool\|null, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V3/QualityReportControllerAPI.php
+
+		-
+			message: '#^Parameter \#1 \$segment_ids of method Model\\QualityReport\\QualityReportSegmentModel\:\:getSegmentsForQR\(\) expects list\<int\|string\>, non\-empty\-array\<int, int\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/QualityReportControllerAPI.php
@@ -5719,24 +5731,6 @@ parameters:
 			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterPayableRatesEvent.php
 
 		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterRevisionChangeNotificationListEvent\:\:__construct\(\) has parameter \$emails with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterRevisionChangeNotificationListEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterRevisionChangeNotificationListEvent\:\:getEmails\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterRevisionChangeNotificationListEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterRevisionChangeNotificationListEvent\:\:setEmails\(\) has parameter \$emails with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterRevisionChangeNotificationListEvent.php
-
-		-
 			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\InjectExcludedTagsInQaEvent\:\:__construct\(\) has parameter \$excludedTags with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7435,324 +7429,6 @@ parameters:
 			path: lib/Model/Projects/ProjectTemplateDao.php
 
 		-
-			message: '#^Cannot call method fullName\(\) on Model\\Users\\UserStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:__setAverages\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:buildFilesSegmentsNestedTree\(\) has parameter \$records with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:buildQualityReportStructure\(\) has parameter \$records with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:buildQualityReportStructure\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:filterDate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:filterDate\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:getAndDecodePossiblyProjectMetadataJson\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:getChunkReview\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:getStructure\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:resetScore\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:structureNestComment\(\) has parameter \$record with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:structureNestFile\(\) has parameter \$record with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:structureNestIssue\(\) has parameter \$record with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportModel\:\:structureNestSegment\(\) has parameter \$record with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\LQA\\ChunkReviewStruct\:\:\$is_pass \(bool\|null\) does not accept int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\LQA\\ChunkReviewStruct\:\:\$undo_data \(string\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportModel\:\:\$all_segments is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportModel\:\:\$all_segments type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportModel\:\:\$current_file with generic class ArrayObject does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportModel\:\:\$current_issue with generic class ArrayObject does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportModel\:\:\$current_segment with generic class ArrayObject does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportModel\:\:\$quality_report_structure type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignComments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignComments\(\) has parameter \$seg with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignComments\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignIssues\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignIssues\(\) has parameter \$issue_comments with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignIssues\(\) has parameter \$issues with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_assignIssues\(\) has parameter \$seg with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_commonSegmentAssignments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_commonSegmentAssignments\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_commonSegmentAssignments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_getChunkReviews\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:_populateLastTranslationAndRevision\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:getSegmentsForQR\(\) has parameter \$segment_ids with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:getSegmentsIdForQR\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentModel\:\:getSegmentsIdForQR\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Parameter \#1 \$segment of method Matecat\\SubFiltering\\MateCatFilter\:\:fromLayer0ToLayer2\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentModel\:\:\$_chunkReviews has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentModel\:\:\$chunk has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_revisions \(list\<array\{translation\: string, source_page\?\: int\}\>\) does not accept non\-empty\-list\<array\{revision_number\: 1, translation\: string\|null\}\|array\{translation\: string, source_page\?\: int\}\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_revisions \(list\<array\{translation\: string, source_page\?\: int\}\>\) does not accept non\-empty\-list\<array\{revision_number\: 2, translation\: string\|null\}\|array\{translation\: string, source_page\?\: int\}\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$last_translation \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Property Model\\QualityReport\\QualityReportSegmentStruct\:\:\$secs_per_word \(int\) does not accept float\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Variable \$issues on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentModel.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getLocalWarning\(\) should return list\<array\<string, mixed\>\> but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getPEE\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getPEEBwtTranslationRevise\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Method Model\\QualityReport\\QualityReportSegmentStruct\:\:getPEEBwtTranslationSuggestion\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Parameter \#1 \$seg1 of static method Utils\\Tools\\PostEditing\:\:getPee\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/QualityReport/QualityReportSegmentStruct.php
-
-		-
 			message: '#^Call to an undefined method Predis\\Client\:\:hgetAll\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -8509,8 +8185,8 @@ parameters:
 			path: lib/Model/Xliff/XliffConfigTemplateStruct.php
 
 		-
-			message: '#^Cannot call method isDeleted\(\) on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: method.nonObject
+			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:projectCompletionEventSaved\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Plugins/Features/AbstractRevisionFeature.php
 
@@ -8959,6 +8635,18 @@ parameters:
 			path: lib/Plugins/Features/ReviewExtended/ReviewUtils.php
 
 		-
+			message: '#^Offset ''recipient'' does not exist on string\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
+
+		-
+			message: '#^Parameter \#1 \$emails of class Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterRevisionChangeNotificationListEvent constructor expects list\<string\>, list\<array\{isPreviousChangeAuthor\: bool, recipient\: Model\\Users\\UserStruct\}\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php
+
+		-
 			message: '#^Cannot call method getChunk\(\) on Model\\LQA\\ChunkReviewStruct\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -9035,18 +8723,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 2
 			path: lib/Plugins/Features/ReviewExtended/TranslationIssueModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\RevisionFactory\:\:initFromProject\(\) should return static\(Plugins\\Features\\RevisionFactory\) but returns Plugins\\Features\\RevisionFactory\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Plugins/Features/RevisionFactory.php
-
-		-
-			message: '#^Parameter \#1 \$revisionFeature of class Plugins\\Features\\RevisionFactory constructor expects Plugins\\Features\\AbstractRevisionFeature, Plugins\\Features\\AbstractRevisionFeature\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/RevisionFactory.php
 
 		-
 			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
@@ -11833,12 +11509,6 @@ parameters:
 			path: lib/Utils/Validator/GlossaryCSVValidator.php
 
 		-
-			message: '#^Method Utils\\Validator\\IsJobRevisionValidator\:\:validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Validator/IsJobRevisionValidator.php
-
-		-
 			message: '#^Method Utils\\Validator\\JSONSchema\\Errors\\JSONValidatorException\:\:getFormattedError\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -12910,6 +12580,12 @@ parameters:
 			message: '#^Method Features\\Airbnb\:\:filterContributionStructOnMTSet\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
+			path: plugins/airbnb/lib/Features/Airbnb.php
+
+		-
+			message: '#^Parameter \#1 \$emails of method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterRevisionChangeNotificationListEvent\:\:setEmails\(\) expects list\<string\>, list\<array\{recipient\: Model\\Users\\UserStruct, isPreviousChangeAuthor\: false\}\|string\> given\.$#'
+			identifier: argument.type
+			count: 1
 			path: plugins/airbnb/lib/Features/Airbnb.php
 
 		-
