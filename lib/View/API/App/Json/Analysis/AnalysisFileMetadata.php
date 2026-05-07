@@ -37,7 +37,7 @@ class AnalysisFileMetadata implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array{key: string, value: string}
      */
     public function jsonSerialize(): array
     {

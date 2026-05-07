@@ -47,8 +47,21 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable
      */
     protected float $total_equivalent = 0;
 
+    /**
+     * @var AnalysisFileMetadata[]
+     */
     protected array $metadata = [];
 
+    /**
+     * @param int|string           $id
+     * @param string|null          $id_file_part
+     * @param string               $name
+     * @param string               $original_name
+     * @param ConstantsInterface   $matchConstantsClass
+     * @param array<\Model\Files\MetadataStruct|object> $metadata
+     *
+     * @throws \TypeError
+     */
     public function __construct($id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [])
     {
         $this->id = (int)$id;
@@ -74,6 +87,9 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

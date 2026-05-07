@@ -21,7 +21,7 @@ class MembershipCreatedEmail extends AbstractEmail
     /**
      * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
 
     /**
      * @var MembershipStruct
@@ -41,6 +41,7 @@ class MembershipCreatedEmail extends AbstractEmail
      * @param UserStruct $sender
      * @param MembershipStruct $membership
      *
+     * @throws Exception
      * @throws ReflectionException
      * @throws RuntimeException
      */
@@ -64,17 +65,23 @@ class MembershipCreatedEmail extends AbstractEmail
 
         $this->doSend(
             $recipient,
-            $this->title,
+            $this->title ?? '',
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function _getDefaultMailConf(): array
     {
         return parent::_getDefaultMailConf();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();
@@ -84,6 +91,8 @@ class MembershipCreatedEmail extends AbstractEmail
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws Exception
      */
     public function _getTemplateVariables(): array

@@ -6,9 +6,9 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,320 | −4,046 (−54.9%) |
-| **PHPUnit tests** | ~2,248 | 3,452 | +1,204 (+53.6%) |
-| **PHPUnit assertions** | ~19,449 | 22,521 | +3,072 (+15.8%) |
+| **PHPStan baseline entries** | 7,366 | 3,272 | −4,094 (−55.6%) |
+| **PHPUnit tests** | ~2,248 | 3,517 | +1,269 (+56.4%) |
+| **PHPUnit assertions** | ~19,449 | 22,771 | +3,322 (+17.1%) |
 | **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
@@ -606,12 +606,104 @@ Made tests independent of local DB state by inserting required seed data in `set
 
 | File | Errors | Notes |
 |------|--------|-------|
-| `SetTranslationController.php` | ~25 | |
-| `GetContributionController.php` | ~26 | Adjacent to contribution worker |
+| ~~`SetTranslationController.php`~~ | ~~25~~ | ✅ Done (−16 entries, coverage 80.08%) |
+| ~~`GetContributionController.php`~~ | ~~26~~ | ✅ Done (previous phase, 98.51% coverage) |
+
+### Phase 5B Contribution Stack
+
+| File | Errors Fixed | Coverage Before → After |
+|------|-------------|------------------------|
+| `AnalysisBeforeMTGetContributionEvent.php` | 3 | n/a (trivial event class) |
+| `SetContributionRequest.php` | 5 | mixed → 88.89% |
+| `SetContributionWorker.php` | 23 | 56.52% → 85.44% |
+| `SetContributionMTWorker.php` | 6 | 68.97% → 96.88% |
+| `GetContributionWorker.php` | 0 (coverage only) | 9.68% → 86.29% |
+| **Total** | **37** | **All ≥80%** |
 
 ---
 
 ## Next Action
 
-1. **Push & verify CI** — confirm `b3b34bc321` passes GitHub Actions on PR #4429
-2. Start Phase 5 residual controllers: `SetTranslationController.php` (~25 errors) or `GetContributionController.php` (~26 errors)
+1. **Push & verify CI** — confirm latest commits pass GitHub Actions
+2. Continue PHPStan baseline reduction from candidates below
+
+---
+
+## Remaining Baseline Analysis
+
+**Core baseline:** 2,571 entries in 439 files  
+**Plugin baseline:** ~1,109 entries (mostly aligner plugin — separate concern)  
+**By error type:** PHPDoc-only=1,536 (59%), Behavioral=703 (27%), Other=332 (12%)
+
+### Phase 6 Candidates — Prioritized
+
+#### TIER 1: Easy Wins (≥70% PHPDoc-only, 15+ errors — fastest ROI)
+
+| File | Errors | %doc | PHPDoc | Behavioral | Notes |
+|------|--------|------|--------|------------|-------|
+| `TranslationEventDao.php` (ReviewExtended) | 27 | 96% | 26 | 0 | Almost entirely @throws |
+| `View/V3/Json/Chunk.php` | 20 | 95% | 19 | 0 | Iterables + @throws only |
+| `Model/Projects/ManageModel.php` | 19 | 94% | 18 | 1 | @throws + iterables |
+| `Utils/Logger/MatecatLogger.php` | 19 | 100% | 19 | 0 | Pure PHPDoc — zero behavioral |
+| `View/V3/Json/QualitySummary.php` | 19 | 78% | 15 | 4 | Mostly iterables |
+| `Model/QualityReport/QualityReportModel.php` | 24 | 70% | 17 | 1 | @throws + iterables |
+| `Controller/V3/QualityReportControllerAPI.php` | 21 | 71% | 15 | 6 | QR stack (pair with above) |
+| `Utils/AsyncTasks/Workers/GlossaryWorker.php` | 18 | 72% | 13 | 2 | Worker pattern (familiar) |
+| `Model/Conversion/Filters.php` | 19 | 73% | 14 | 2 | Iterables-heavy |
+| `Model/Projects/ProjectModel.php` | 18 | 72% | 13 | 5 | @throws cascade |
+| `View/App/Json/Analysis/AnalysisFile.php` | 10 | 100% | 10 | 0 | Pure PHPDoc |
+| `View/V2/Json/Membership.php` | 12 | 83% | 10 | 0 | Pure PHPDoc |
+| `Controller/V2/SplitJobController.php` | 15 | 86% | 13 | 0 | @throws + iterables |
+
+**Subtotal Tier 1:** ~261 entries, ~228 PHPDoc-only (no TDD needed)
+
+#### TIER 2: High-Value Controllers
+
+| File | Errors | %doc | PHPDoc | Behavioral | Notes |
+|------|--------|------|--------|------------|-------|
+| `GetSegmentsController.php` | 27 | 59% | 16 | 8 | Core editor endpoint |
+| `ModernMTController.php` | 26 | 34% | 9 | 15 | MT integration — heavy behavioral |
+| `CattoolController.php` | 25 | 60% | 15 | 1 | View controller |
+| `SegmentTranslationIssueController.php` | 21 | 47% | 10 | 9 | LQA endpoint |
+| `DownloadQRController.php` | 18 | 66% | 12 | 6 | QR downloads |
+| `GetWarningController.php` | 17 | 23% | 4 | 12 | QA warnings — heavy behavioral |
+
+**Subtotal Tier 2:** ~134 entries
+
+#### TIER 3: Infrastructure/Models (cascade potential)
+
+| File | Errors | %doc | PHPDoc | Behavioral | Notes |
+|------|--------|------|--------|------------|-------|
+| `Model/Analysis/XTRFStatus.php` | 34 | 44% | 15 | 19 | Highest count, mixed |
+| `Utils/TaskRunner/TaskManager.php` | 33 | 9% | 3 | 28 | Almost all behavioral — hardest |
+| `GDrive/Session.php` | 29 | 68% | 20 | 9 | GDrive integration |
+| `Utils/Tools/PostEditing.php` | 27 | 29% | 8 | 19 | Heavy behavioral |
+| `Model/Analysis/AbstractStatus.php` | 25 | 56% | 14 | 9 | Analysis base class |
+| `QualityReportSegmentModel.php` | 25 | 68% | 17 | 3 | QR stack |
+| `Model/WordCount/CounterModel.php` | 23 | 21% | 5 | 18 | Heavy behavioral |
+| `Utils/TMS/TMSService.php` | 23 | 52% | 12 | 11 | TM service |
+
+**Subtotal Tier 3:** ~219 entries
+
+#### TIER 4: View Layer (JSON serializers)
+
+| File | Errors | %doc | Notes |
+|------|--------|------|-------|
+| `View/V3/Json/Chunk.php` | 20 | 95% | Already in Tier 1 |
+| `View/V3/Json/QualitySummary.php` | 19 | 78% | Already in Tier 1 |
+| `View/Commons/ZipContentObject.php` | 13 | 61% | |
+| `View/V2/Json/Job.php` | 13 | 76% | |
+| `View/V2/Json/Membership.php` | 12 | 83% | |
+| `View/App/Json/Analysis/AnalysisChunk.php` | 11 | 54% | |
+| `View/V2/Json/SegmentVersion.php` | 11 | 54% | |
+| `View/App/Json/Analysis/AnalysisFile.php` | 10 | 100% | Pure PHPDoc |
+
+**Subtotal Tier 4:** ~109 entries
+
+### Recommended Strategy
+
+1. **Batch Tier 1 PHPDoc-only files** (MatecatLogger, Chunk, ManageModel, AnalysisFile, Membership, SplitJobController) — ~90 entries, zero TDD, fast
+2. **Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster
+3. **GlossaryWorker** — familiar worker pattern from contribution stack
+4. **GetSegmentsController** — high business value, moderate difficulty
+5. **TranslationEventDao** — 27 entries, 96% PHPDoc-only, massive single-file win

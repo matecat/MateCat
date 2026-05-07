@@ -12,13 +12,16 @@ use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Constants\EngineConstants;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\EngineInterface;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 
@@ -425,6 +428,263 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         ]);
 
         $this->assertInstanceOf(MyMemory::class, $engineLoaded);
+    }
+
+    #[Test]
+    public function process_throws_end_queue_exception_for_non_queue_element(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+
+        $invalidQueueElement = new class extends AbstractElement {
+        };
+
+        $this->expectException(EndQueueException::class);
+        $_worker->process($invalidQueueElement);
+    }
+
+    #[Test]
+    public function execContribution_throws_logic_exception_when_engine_is_not_set(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getJobStruct'])
+            ->getMock();
+
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'en-US',
+                        'target' => 'it-IT',
+                        'id_tms' => 1,
+                        'id_mt_engine' => 1,
+                        'tm_keys' => '[]'
+                    ]
+                )
+            );
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('TM engine is not initialized');
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
+    }
+
+    #[Test]
+    public function raiseReQueueException_handles_missing_engine_name(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+
+        $this->expectException(ReQueueException::class);
+        $this->expectExceptionMessage('Set failed on unknown');
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_raiseReQueueException');
+        $reflectedMethod->invokeArgs($_worker, ['Set', ['k' => 'v']]);
+    }
+
+    #[Test]
+    public function raiseEndQueueException_handles_missing_engine_name(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+
+        $this->expectException(EndQueueException::class);
+        $this->expectExceptionMessage('Update failed on unknown');
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_raiseEndQueueException');
+        $reflectedMethod->invokeArgs($_worker, ['Update', ['k' => 'v']]);
+    }
+
+    #[Test]
+    public function set_handles_success_response_status(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
+
+        $successResponse = new \stdClass();
+        $successResponse->responseStatus = 201;
+
+        $stubEngine->expects($this->once())
+            ->method('set')
+            ->with($this->anything())
+            ->willReturn($successResponse);
+
+        $_worker->setEngine($stubEngine);
+
+        $contribution = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
+        $contribution->expects($this->once())->method('getProp')->willReturn([]);
+        $contribution->expects($this->once())->method('getJobStruct')->willReturn(new JobStruct(['id_mt_engine' => 1]));
+        $contribution->uid = $this->contributionStruct->uid;
+        $contribution->segment = $this->contributionStruct->segment;
+        $contribution->translation = $this->contributionStruct->translation;
+        $contribution->context_before = $this->contributionStruct->context_before;
+        $contribution->context_after = $this->contributionStruct->context_after;
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_set');
+        $reflectedMethod->invokeArgs($_worker, [[], $contribution]);
+
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function set_handles_client_error_response_status_with_end_queue_exception(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
+
+        $errorResponse = new \stdClass();
+        $errorResponse->responseStatus = 404;
+
+        $stubEngine->expects($this->once())
+            ->method('set')
+            ->with($this->anything())
+            ->willReturn($errorResponse);
+
+        $_worker->setEngine($stubEngine);
+
+        $contribution = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
+        $contribution->expects($this->once())->method('getProp')->willReturn([]);
+        $contribution->expects($this->once())->method('getJobStruct')->willReturn(new JobStruct(['id_mt_engine' => 1]));
+        $contribution->uid = $this->contributionStruct->uid;
+        $contribution->segment = $this->contributionStruct->segment;
+        $contribution->translation = $this->contributionStruct->translation;
+        $contribution->context_before = $this->contributionStruct->context_before;
+        $contribution->context_after = $this->contributionStruct->context_after;
+
+        $this->expectException(EndQueueException::class);
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_set');
+        $reflectedMethod->invokeArgs($_worker, [[], $contribution]);
+    }
+
+    #[Test]
+    public function set_handles_non_object_response_with_requeue_exception(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
+
+        $stubEngine->expects($this->once())
+            ->method('set')
+            ->with($this->anything())
+            ->willReturn('OK');
+
+        $_worker->setEngine($stubEngine);
+
+        $contribution = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
+        $contribution->expects($this->once())->method('getProp')->willReturn([]);
+        $contribution->expects($this->once())->method('getJobStruct')->willReturn(new JobStruct(['id_mt_engine' => 1]));
+        $contribution->uid = $this->contributionStruct->uid;
+        $contribution->segment = $this->contributionStruct->segment;
+        $contribution->translation = $this->contributionStruct->translation;
+        $contribution->context_before = $this->contributionStruct->context_before;
+        $contribution->context_after = $this->contributionStruct->context_after;
+
+        $this->expectException(ReQueueException::class);
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_set');
+        $reflectedMethod->invokeArgs($_worker, [[], $contribution]);
+    }
+
+    #[Test]
+    public function update_handles_client_error_response_status_with_end_queue_exception(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
+
+        $errorResponse = new \stdClass();
+        $errorResponse->responseStatus = 429;
+
+        $stubEngine->expects($this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn($errorResponse);
+
+        $_worker->setEngine($stubEngine);
+
+        $contribution = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp'])
+            ->getMock();
+        $contribution->expects($this->once())->method('getProp')->willReturn([]);
+        $contribution->id_job = $this->contributionStruct->id_job;
+        $contribution->id_segment = $this->contributionStruct->id_segment;
+        $contribution->translation_origin = $this->contributionStruct->translation_origin;
+        $contribution->uid = $this->contributionStruct->uid;
+        $contribution->oldSegment = $this->contributionStruct->oldSegment;
+        $contribution->oldTranslation = $this->contributionStruct->oldTranslation;
+        $contribution->segment = $this->contributionStruct->segment;
+        $contribution->translation = $this->contributionStruct->translation;
+        $contribution->context_before = $this->contributionStruct->context_before;
+        $contribution->context_after = $this->contributionStruct->context_after;
+
+        $this->expectException(EndQueueException::class);
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_update');
+        $reflectedMethod->invokeArgs($_worker, [[], $contribution, 1]);
+    }
+
+    #[Test]
+    public function update_handles_non_object_response_with_requeue_exception(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(EngineInterface::class)->getMock();
+
+        $stubEngine->expects($this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(true);
+
+        $_worker->setEngine($stubEngine);
+
+        $contribution = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp'])
+            ->getMock();
+        $contribution->expects($this->once())->method('getProp')->willReturn([]);
+        $contribution->id_job = $this->contributionStruct->id_job;
+        $contribution->id_segment = $this->contributionStruct->id_segment;
+        $contribution->translation_origin = $this->contributionStruct->translation_origin;
+        $contribution->uid = $this->contributionStruct->uid;
+        $contribution->oldSegment = $this->contributionStruct->oldSegment;
+        $contribution->oldTranslation = $this->contributionStruct->oldTranslation;
+        $contribution->segment = $this->contributionStruct->segment;
+        $contribution->translation = $this->contributionStruct->translation;
+        $contribution->context_before = $this->contributionStruct->context_before;
+        $contribution->context_after = $this->contributionStruct->context_after;
+
+        $this->expectException(ReQueueException::class);
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_update');
+        $reflectedMethod->invokeArgs($_worker, [[], $contribution, 1]);
     }
 
 }

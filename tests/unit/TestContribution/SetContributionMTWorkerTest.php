@@ -502,4 +502,148 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver
         ]);
     }
 
+    #[Test]
+    public function set_throws_logic_exception_when_engine_is_not_set(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getJobStruct', 'getSessionId'])
+            ->getMock();
+
+        $contributionMockQueueObject->expects($this->never())
+            ->method('getJobStruct');
+        $contributionMockQueueObject->expects($this->never())->method('getSessionId');
+
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->uid = $this->contributionStruct->uid;
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('TM engine is not initialized');
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_set');
+        $reflectedMethod->invokeArgs($_worker, [[], $contributionMockQueueObject]);
+    }
+
+    #[Test]
+    public function update_throws_logic_exception_when_engine_is_not_set(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getSessionId'])
+            ->getMock();
+
+        $contributionMockQueueObject->expects($this->never())->method('getSessionId');
+
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->context_before = $this->contributionStruct->context_before;
+        $contributionMockQueueObject->context_after = $this->contributionStruct->context_after;
+        $contributionMockQueueObject->translation_origin = $this->contributionStruct->translation_origin;
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('TM engine is not initialized');
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_update');
+        $reflectedMethod->invokeArgs($_worker, [[], $contributionMockQueueObject, 1]);
+    }
+
+    #[Test]
+    public function set_builds_payload_and_succeeds_when_engine_returns_true(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(\Utils\Engines\EngineInterface::class)->getMock();
+        $stubEngine->expects($setSpy = $this->once())
+            ->method('set')
+            ->with($this->anything())
+            ->willReturn(true);
+
+        $_worker->setEngine($stubEngine);
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getJobStruct', 'getSessionId'])
+            ->getMock();
+
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(new JobStruct(['id_mt_engine' => 1]));
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getSessionId')
+            ->willReturn('session-123');
+
+        $contributionMockQueueObject->uid = $this->contributionStruct->uid;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_set');
+        $reflectedMethod->invokeArgs($_worker, [[], $contributionMockQueueObject]);
+
+        $inspector = new InvocationInspector($setSpy);
+        $invocations = $inspector->getInvocations();
+
+        $this->assertEquals($this->contributionStruct->segment, $invocations[0]->parameters()[0]['segment']);
+        $this->assertEquals($this->contributionStruct->translation, $invocations[0]->parameters()[0]['translation']);
+        $this->assertEquals('session-123', $invocations[0]->parameters()[0]['session']);
+        $this->assertEquals($this->contributionStruct->uid, $invocations[0]->parameters()[0]['uid']);
+        $this->assertTrue($invocations[0]->parameters()[0]['set_mt']);
+    }
+
+    #[Test]
+    public function update_builds_payload_and_succeeds_when_engine_returns_true(): void
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
+
+        $stubEngine = $this->getMockBuilder(\Utils\Engines\EngineInterface::class)->getMock();
+        $stubEngine->expects($updateSpy = $this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(true);
+
+        $_worker->setEngine($stubEngine);
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getSessionId'])
+            ->getMock();
+
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getSessionId')
+            ->willReturn('session-456');
+
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->context_before = $this->contributionStruct->context_before;
+        $contributionMockQueueObject->context_after = $this->contributionStruct->context_after;
+        $contributionMockQueueObject->translation_origin = $this->contributionStruct->translation_origin;
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_update');
+        $reflectedMethod->invokeArgs($_worker, [[], $contributionMockQueueObject, 0]);
+
+        $inspector = new InvocationInspector($updateSpy);
+        $invocations = $inspector->getInvocations();
+
+        $this->assertEquals($this->contributionStruct->segment, $invocations[0]->parameters()[0]['segment']);
+        $this->assertEquals($this->contributionStruct->translation, $invocations[0]->parameters()[0]['translation']);
+        $this->assertEquals('1999999:9876', $invocations[0]->parameters()[0]['tuid']);
+        $this->assertEquals('session-456', $invocations[0]->parameters()[0]['session']);
+        $this->assertFalse($invocations[0]->parameters()[0]['set_mt']);
+        $this->assertEquals($this->contributionStruct->translation_origin, $invocations[0]->parameters()[0]['translation_origin']);
+    }
+
 }

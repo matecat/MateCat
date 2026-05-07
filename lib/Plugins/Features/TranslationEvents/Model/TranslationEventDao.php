@@ -11,6 +11,7 @@ namespace Plugins\Features\TranslationEvents\Model;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
 
@@ -23,6 +24,13 @@ class TranslationEventDao extends AbstractDao
     protected static array $auto_increment_field = ['id'];
     protected static array $primary_keys = ['id'];
 
+    /**
+     * @param int       $id_job
+     * @param array<int> $id_segments
+     * @param array<int> $source_pages
+     *
+     * @throws PDOException
+     */
     public function unsetFinalRevisionFlag(int $id_job, array $id_segments, array $source_pages): int
     {
         $sql = " UPDATE segment_translation_events SET final_revision = 0 " .
@@ -46,6 +54,8 @@ class TranslationEventDao extends AbstractDao
      * @param int $max_segment
      *
      * @return TranslationEventStruct[]
+     *
+     * @throws PDOException
      */
     public function getLatestEventsInSegmentInterval(int $id_job, int $min_segment, int $max_segment): array
     {
@@ -75,6 +85,8 @@ class TranslationEventDao extends AbstractDao
      * @param int $id_segment
      *
      * @return TranslationEventStruct[]
+     *
+     * @throws PDOException
      */
     public function getAllFinalRevisionsForSegment(int $id_job, int $id_segment): array
     {
@@ -98,10 +110,12 @@ class TranslationEventDao extends AbstractDao
     }
 
     /**
-     * @param $id_job
-     * @param $id_segment
+     * @param int $id_job
+     * @param int $id_segment
      *
      * @return TranslationEventStruct|null
+     *
+     * @throws PDOException
      */
     public function getLatestEventForSegment($id_job, $id_segment): ?TranslationEventStruct
     {
@@ -128,10 +142,13 @@ class TranslationEventDao extends AbstractDao
     }
 
     /**
-     * @param array $id_segment_list
-     * @param int $id_job
+     * @param array<int> $id_segment_list
+     * @param int        $id_job
      *
      * @return ShapelessConcreteStruct[]|null
+     *
+     * @throws \Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getTteForSegments(array $id_segment_list, int $id_job): ?array
@@ -154,7 +171,7 @@ class TranslationEventDao extends AbstractDao
         $stmt = $this->_getStatementForQuery($sql);
         $id_segment_list[] = $id_job;
 
-        return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $id_segment_list) ?? null;
+        return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $id_segment_list) ?: null;
     }
 
 }

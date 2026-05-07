@@ -15,16 +15,27 @@ final class AnalysisBeforeMTGetContributionEvent extends FilterEvent
     {
         return 'analysisBeforeMTGetContribution';
     }
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(
         private array $config,
         private readonly mixed $mtEngine,
         private readonly mixed $queueElement,
     ) {
     }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function getConfig(): array
     {
         return $this->config;
     }
+
+    /**
+     * @param array<string, mixed> $config
+     */
     public function setConfig(array $config): void
     {
         $this->config = $config;

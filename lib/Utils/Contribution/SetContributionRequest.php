@@ -104,7 +104,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool $propagationRequest = true;
 
     /**
-     * @var array|string
+     * @var array<string, mixed>|string
      */
     public string|array $props = [];
 
@@ -139,17 +139,15 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getProp(): array
     {
         $jobStruct = $this->getJobStruct();
         $props = $this->props;
         if (!is_array($props)) {
-            /**
-             * @var $props Params
-             */
-            $props = $props->toArray();
+            $decoded = json_decode($props, true);
+            $props = is_array($decoded) ? $decoded : [];
         }
 
         return array_merge($jobStruct->getTMProps(), $props);
@@ -168,7 +166,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public function __toString(): string
     {
-        return json_encode($this->toArray());
+        return json_encode($this->toArray()) ?: '{}';
     }
 
 }
