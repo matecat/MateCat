@@ -4,6 +4,7 @@ import {
   highlightBySid,
   setActiveHighlight,
   getSegmentNodeMap,
+  isNodeHidden,
 } from '../utils/contextPreviewUtils'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 
@@ -24,6 +25,7 @@ import ContextPreviewChannel from '../utils/contextPreviewChannel'
  */
 const useContextHighlight = ({sourceRef, targetRef}) => {
   const [highlight, setHighlightState] = useState(null)
+  const [highlightHidden, setHighlightHidden] = useState(false)
   const highlightRef = useRef(null)
 
   const setHighlight = useCallback((valueOrUpdater) => {
@@ -43,15 +45,18 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
   const applyHighlightsForSegment = useCallback(
     (sid, activeIndex, scroll) => {
       let total = 0
+      let hidden = false
       if (sourceRef.current) {
         clearHighlights(sourceRef.current)
         const res = highlightBySid(sourceRef.current, sid, activeIndex)
         total = res.total
         if (scroll && res.marks[activeIndex]) {
-          res.marks[activeIndex][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          })
+          const mark = res.marks[activeIndex][0]
+          if (isNodeHidden(mark)) {
+            hidden = true
+          } else {
+            mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+          }
         }
       }
       if (targetRef.current) {
@@ -59,12 +64,15 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         const res = highlightBySid(targetRef.current, sid, activeIndex)
         if (!total) total = res.total
         if (scroll && res.marks[activeIndex]) {
-          res.marks[activeIndex][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          })
+          const mark = res.marks[activeIndex][0]
+          if (isNodeHidden(mark)) {
+            hidden = true
+          } else {
+            mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+          }
         }
       }
+      setHighlightHidden(hidden)
       return total
     },
     [sourceRef, targetRef],
@@ -72,6 +80,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
 
   const applyHighlightsForNode = useCallback(
     (nodeIndex, activeSegIdx, scroll) => {
+      let hidden = false
       ;[sourceRef, targetRef].forEach((ref) => {
         if (!ref.current) return
         const map = getSegmentNodeMap(ref.current)
@@ -82,12 +91,15 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         clearHighlights(ref.current)
         const res = highlightBySid(ref.current, activeSid, 0)
         if (scroll && res.marks[0]?.[0]) {
-          res.marks[0][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          })
+          const mark = res.marks[0][0]
+          if (isNodeHidden(mark)) {
+            hidden = true
+          } else {
+            mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+          }
         }
       })
+      setHighlightHidden(hidden)
     },
     [sourceRef, targetRef],
   )
@@ -101,11 +113,19 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
           direction === 'next'
             ? (highlight.activeIndex + 1) % highlight.total
             : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+        let hidden = false
         ;[sourceRef, targetRef].forEach((ref) => {
           if (!ref.current) return
           const mark = setActiveHighlight(ref.current, nextIndex)
-          if (mark) mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+          if (mark) {
+            if (isNodeHidden(mark)) {
+              hidden = true
+            } else {
+              mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+            }
+          }
         })
+        setHighlightHidden(hidden)
         setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
         return
       }
@@ -138,6 +158,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
 
   return {
     highlight,
+    highlightHidden,
     setHighlight,
     highlightRef,
     applyHighlightsForSegment,

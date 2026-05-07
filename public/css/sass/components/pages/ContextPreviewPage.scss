@@ -290,6 +290,16 @@
   user-select: none;
 }
 
+.context-preview-hidden-warning {
+  font-size: 12px;
+  color: #e05c00;
+  white-space: nowrap;
+  user-select: none;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(224, 92, 0, 0.08);
+}
+
 [data-context-sids].context-preview-node--mismatch {
   outline: 2px solid #e05c00;
   outline-offset: 2px;

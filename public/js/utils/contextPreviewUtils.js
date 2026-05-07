@@ -138,13 +138,17 @@ export const updateNodeTranslation = (el, segments) => {
  * @param {HTMLElement} container
  */
 export const clearHighlights = (container) => {
-  const marks = container.querySelectorAll(`mark.${HIGHLIGHT_CLASS}`)
-  marks.forEach((mark) => {
+  const marks = Array.from(
+    container.querySelectorAll(`mark.${HIGHLIGHT_CLASS}`),
+  )
+  for (let i = marks.length - 1; i >= 0; i--) {
+    const mark = marks[i]
     const parent = mark.parentNode
+    if (!parent) continue
     const textNode = document.createTextNode(mark.textContent)
     parent.replaceChild(textNode, mark)
     parent.normalize()
-  })
+  }
 }
 
 /**
@@ -201,6 +205,9 @@ export const highlightBySid = (container, sid, activeIndex = 0) => {
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null)
     const textNodes = []
     while (walker.nextNode()) {
+      if (walker.currentNode.parentNode.closest(`mark.${HIGHLIGHT_CLASS}`)) {
+        continue
+      }
       textNodes.push(walker.currentNode)
     }
 
@@ -615,6 +622,24 @@ export const tagSegments = (
       })
     }
   }
+}
+
+/**
+ * Checks whether a DOM element is hidden by CSS (display:none, visibility:hidden,
+ * opacity:0, zero dimensions, or content-visibility).
+ *
+ * @param {HTMLElement} el
+ * @returns {boolean}
+ */
+export const isNodeHidden = (el) => {
+  if (!el) return true
+  if (typeof el.checkVisibility === 'function') {
+    return !el.checkVisibility({checkOpacity: true, checkVisibilityCSS: true})
+  }
+  const style = getComputedStyle(el)
+  if (style.display === 'none' || style.visibility === 'hidden') return true
+  if (parseFloat(style.opacity) === 0) return true
+  return false
 }
 
 /**

@@ -10,6 +10,7 @@ jest.mock('../utils/contextPreviewUtils', () => ({
   highlightBySid: jest.fn(),
   setActiveHighlight: jest.fn(),
   getSegmentNodeMap: jest.fn(),
+  isNodeHidden: jest.fn(),
 }))
 
 jest.mock('../utils/contextPreviewChannel', () => ({
@@ -21,6 +22,7 @@ const {
   highlightBySid,
   setActiveHighlight,
   getSegmentNodeMap,
+  isNodeHidden,
 } = require('../utils/contextPreviewUtils')
 
 const ContextPreviewChannel = require('../utils/contextPreviewChannel')
@@ -37,6 +39,7 @@ beforeEach(() => {
   highlightBySid.mockReturnValue({total: 0, marks: []})
   setActiveHighlight.mockReturnValue(null)
   getSegmentNodeMap.mockReturnValue(null)
+  isNodeHidden.mockReturnValue(false)
 })
 
 // ---------------------------------------------------------------------------
@@ -436,5 +439,113 @@ describe('navigateHighlight — node mode', () => {
       type: 'segmentClicked',
       sid: 10,
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// highlightHidden detection
+// ---------------------------------------------------------------------------
+
+describe('highlightHidden', () => {
+  it('is false by default', () => {
+    const {result} = renderHook(() =>
+      useContextHighlight({sourceRef: nullRef(), targetRef: nullRef()}),
+    )
+    expect(result.current.highlightHidden).toBe(false)
+  })
+
+  it('is true when applyHighlightsForSegment detects a hidden mark', () => {
+    const mockMark = {scrollIntoView: jest.fn()}
+    highlightBySid.mockReturnValue({total: 1, marks: [[mockMark]]})
+    isNodeHidden.mockReturnValue(true)
+    const sourceRef = makeRef()
+
+    const {result} = renderHook(() =>
+      useContextHighlight({sourceRef, targetRef: nullRef()}),
+    )
+
+    act(() => {
+      result.current.applyHighlightsForSegment(1, 0, true)
+    })
+
+    expect(result.current.highlightHidden).toBe(true)
+    expect(mockMark.scrollIntoView).not.toHaveBeenCalled()
+  })
+
+  it('is false when mark is visible', () => {
+    const mockMark = {scrollIntoView: jest.fn()}
+    highlightBySid.mockReturnValue({total: 1, marks: [[mockMark]]})
+    isNodeHidden.mockReturnValue(false)
+    const sourceRef = makeRef()
+
+    const {result} = renderHook(() =>
+      useContextHighlight({sourceRef, targetRef: nullRef()}),
+    )
+
+    act(() => {
+      result.current.applyHighlightsForSegment(1, 0, true)
+    })
+
+    expect(result.current.highlightHidden).toBe(false)
+    expect(mockMark.scrollIntoView).toHaveBeenCalled()
+  })
+
+  it('resets to false when navigating to a visible occurrence', () => {
+    const mockMark = {scrollIntoView: jest.fn()}
+    highlightBySid.mockReturnValue({total: 2, marks: [[mockMark], [mockMark]]})
+    isNodeHidden.mockReturnValueOnce(true)
+    const sourceRef = makeRef()
+
+    const {result} = renderHook(() =>
+      useContextHighlight({sourceRef, targetRef: nullRef()}),
+    )
+
+    act(() => {
+      result.current.applyHighlightsForSegment(1, 0, true)
+    })
+    expect(result.current.highlightHidden).toBe(true)
+
+    isNodeHidden.mockReturnValue(false)
+    setActiveHighlight.mockReturnValue(mockMark)
+
+    act(() => {
+      result.current.setHighlight({
+        mode: 'segment',
+        sid: 1,
+        activeIndex: 0,
+        total: 2,
+      })
+    })
+    act(() => {
+      result.current.handleNext()
+    })
+
+    expect(result.current.highlightHidden).toBe(false)
+  })
+
+  it('is true when navigateHighlight in segment mode hits a hidden mark', () => {
+    const mockMark = {scrollIntoView: jest.fn()}
+    setActiveHighlight.mockReturnValue(mockMark)
+    isNodeHidden.mockReturnValue(true)
+    const sourceRef = makeRef()
+
+    const {result} = renderHook(() =>
+      useContextHighlight({sourceRef, targetRef: nullRef()}),
+    )
+
+    act(() => {
+      result.current.setHighlight({
+        mode: 'segment',
+        sid: 1,
+        activeIndex: 0,
+        total: 2,
+      })
+    })
+    act(() => {
+      result.current.handleNext()
+    })
+
+    expect(result.current.highlightHidden).toBe(true)
+    expect(mockMark.scrollIntoView).not.toHaveBeenCalled()
   })
 })

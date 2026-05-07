@@ -79,6 +79,7 @@ const ContextPreview = () => {
 
   const {
     highlight,
+    highlightHidden,
     setHighlight,
     highlightRef,
     applyHighlightsForSegment,
@@ -470,6 +471,11 @@ const ContextPreview = () => {
         </div>
 
         <div className="context-preview-toolbar__right">
+          {highlightHidden && (
+            <span className="context-preview-hidden-warning">
+              Segment preview not available
+            </span>
+          )}
           {highlight &&
             ((highlight.mode === 'segment' && highlight.total > 1) ||
               (highlight.mode === 'node' && highlight.sids.length > 1)) && (
