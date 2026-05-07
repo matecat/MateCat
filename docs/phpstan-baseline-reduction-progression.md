@@ -2,13 +2,13 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security + test):** 41  
+**Commits (refactor + fix + security + test):** 42  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,160 | −4,206 (−57.1%) |
-| **PHPUnit tests** | ~2,248 | 3,811 | +1,563 (+69.5%) |
-| **PHPUnit assertions** | ~19,449 | 23,839 | +4,390 (+22.6%) |
+| **PHPStan baseline entries** | 7,366 | 3,121 | −4,245 (−57.6%) |
+| **PHPUnit tests** | ~2,248 | 3,829 | +1,581 (+70.3%) |
+| **PHPUnit assertions** | ~19,449 | 23,909 | +4,460 (+22.9%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
@@ -86,13 +86,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 168 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 169 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
 
 <details>
-<summary>Click to expand full ledger (166 files)</summary>
+<summary>Click to expand full ledger (169 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -330,6 +330,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/View/API/App/Json/Analysis/AnalysisFileMetadata.php` | Phase 12A |
 | `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
 | `lib/View/API/V2/Json/Membership.php` | Phase 12A |
+| `lib/View/API/V3/Json/QualitySummary.php` | Phase 16 |
 
 </details>
 
@@ -693,8 +694,8 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,811 |
-| **Assertions** | 23,839 |
+| **Total tests** | 3,829 |
+| **Assertions** | 23,909 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
@@ -982,6 +983,29 @@ New test files:
 
 ---
 
+### Phase 16: QualitySummary View (~17 entries) — ✅ DONE
+
+**Why:** `QualitySummary.php` renders quality report data for the V3 API — the frontend quality summary panel. Fixing it ensures type-safe JSON serialization, proper null guards on nullable job properties, and testable DI for all DAO dependencies.
+
+#### 16A. PHPDoc + Type Fixes + DI Refactor — ✅ DONE (−17 baseline entries, +18 tests)
+
+| File | Errors Fixed | Coverage Before → After | Notes |
+|------|-------------|------------------------|-------|
+| `QualitySummary.php` | 17→0 | low → **96.58%** (141/146 lines, 6/11 methods) | DI refactor, null guards, PHPDoc shapes |
+
+Key changes:
+- **Null guards**: `$jStruct->id` and `$jStruct->password` guarded with `?? throw new RuntimeException(...)` in both `revisionQualityVars()` and `populateQualitySummarySection()` (4 `argument.type` errors)
+- **Type fix**: `$quality_overall` parameter typed as `?string` (was untyped); `$model_version` widened from `int` to `?int` (latent bug — `$model?->hash` returns null when no LQA model)
+- **Type fix**: `$passfail` native type widened from `array` to `array|bool` (pre-existing mismatch — `revisionQualityVars` returns `true` when no model)
+- **PHPDoc shapes**: 8 `missingType.iterableValue` errors resolved with precise array shapes across all 5 methods
+- **`@throws` annotations**: `DomainException`, `Exception`, `PDOException`, `ReflectionException` added to `populateQualitySummarySection()` and `getDetails()`
+- **DI refactor**: Converted `private static` methods to `protected` instance methods; added 5 protected factory methods (`createQualityReportDao()`, `createFeedbackDao()`, `createEntryDao()`, `getReviewedWordsCountGroupedByFileParts()`, `createRevisionFeature()`) — zero breaking change, all existing callers unaffected
+- **18 new tests** in `QualitySummaryTest.php` (52 assertions, 0 warnings)
+
+**Baseline reduction:** 3,160 → 3,121 (−17 entries from `QualitySummary.php`, −22 lines elsewhere from prior Phase 15 baseline cleanup)
+
+---
+
 ## Queue (Remaining Targets — Priority Order)
 
 ### Priority 1–4
@@ -1038,7 +1062,7 @@ New test files:
 | ~~`View/V3/Json/Chunk.php`~~ | ~~20~~ | ~~95%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, refactored DI, 88% coverage) |
 | `Model/Projects/ManageModel.php` | 19 | 94% | 18 | 1 | @throws + iterables |
 | ~~`Utils/Logger/MatecatLogger.php`~~ | ~~19~~ | ~~100%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
-| `View/V3/Json/QualitySummary.php` | 19 | 78% | 15 | 4 | Mostly iterables |
+| `View/V3/Json/QualitySummary.php` | 19 | 78% | 15 | 4 | ✅ Done (Phase 16, DI refactored, 96.58% coverage) |
 | ~~`Model/QualityReport/QualityReportModel.php`~~ | ~~24~~ | ~~70%~~ | ~~17~~ | ~~1~~ | ✅ Done (Phase 13, DI refactored, 82.61% methods) |
 | ~~`Controller/V3/QualityReportControllerAPI.php`~~ | ~~21~~ | ~~71%~~ | ~~15~~ | ~~6~~ | ✅ Done (Phase 13, 80% methods) |
 | `Utils/AsyncTasks/Workers/GlossaryWorker.php` | 18 | 72% | 13 | 2 | Worker pattern (familiar) |
@@ -1096,7 +1120,7 @@ New test files:
 ### Recommended Strategy
 
 1. ~~**Batch Tier 1 PHPDoc-only files** (MatecatLogger, Chunk, ManageModel, AnalysisFile, Membership, SplitJobController) — ~90 entries, zero TDD, fast~~ ✅ Partially done (Phase 12 — MatecatLogger, Chunk, AnalysisFile, Membership)
-2. ~~**Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster~~ ✅ Done (Phase 13 — QualityReportModel, QualityReportSegmentModel, QualityReportControllerAPI; QualitySummary remains)
+2. ~~**Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster~~ ✅ Done (Phase 13 — QualityReportModel, QualityReportSegmentModel, QualityReportControllerAPI; Phase 16 — QualitySummary)
 3. **GlossaryWorker** — familiar worker pattern from contribution stack
 4. **GetSegmentsController** — high business value, moderate difficulty
 5. **Remaining Tier 1** — ManageModel (19), SplitJobController (15), ProjectModel (18), Filters (19)
