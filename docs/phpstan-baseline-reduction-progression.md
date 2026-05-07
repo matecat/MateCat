@@ -1,12 +1,12 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-07 (last updated)  
+**Date:** 2026-05-08 (last updated)  
 **Commits (refactor + fix + security + test):** 44
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,032 | −4,334 (−58.8%) |
+| **PHPStan baseline entries** | 7,366 | 3,021 | −4,345 (−59.0%) |
 | **PHPUnit tests** | ~2,248 | 3,873 | +1,625 (+72.3%) |
 | **PHPUnit assertions** | ~19,449 | 24,072 | +4,623 (+23.8%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
@@ -87,7 +87,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 179 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 180 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
@@ -120,6 +120,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
 | `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
+| `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
 | `lib/Controller/API/V3/LaraController.php` | Phase 0 |
 | `lib/Controller/API/V3/SegmentAnalysisController.php` | Phase 8A |
 
@@ -1139,12 +1140,12 @@ Key changes:
 | ~~`View/V3/Json/QualitySummary.php`~~              | 19 | 78% | 15 | 4 | ✅ Done (Phase 16, DI refactored, 96.58% coverage) |
 | ~~`Model/QualityReport/QualityReportModel.php`~~   | ~~24~~ | ~~70%~~ | ~~17~~ | ~~1~~ | ✅ Done (Phase 13, DI refactored, 82.61% methods) |
 | ~~`Controller/V3/QualityReportControllerAPI.php`~~ | ~~21~~ | ~~71%~~ | ~~15~~ | ~~6~~ | ✅ Done (Phase 13, 80% methods) |
-| ~~`Utils/AsyncTasks/Workers/GlossaryWorker.php`~~      | ~~18~~ | ~~72%~~ | ~~13~~ | ~~2~~ | ✅ Done (Phase 17) |
-| ~~`Model/Conversion/Filters.php`~~                     | ~~19~~ | ~~73%~~ | ~~14~~ | ~~2~~ | ✅ Done (Phase 18) |
+| ~~`Utils/AsyncTasks/Workers/GlossaryWorker.php`~~  | ~~18~~ | ~~72%~~ | ~~13~~ | ~~2~~ | ✅ Done (Phase 17) |
+| ~~`Model/Conversion/Filters.php`~~                 | ~~19~~ | ~~73%~~ | ~~14~~ | ~~2~~ | ✅ Done (Phase 18) |
 | ~~`Model/Projects/ProjectModel.php`~~              | 18 | 72% | 13 | 5 | @throws cascade |
 | ~~`View/App/Json/Analysis/AnalysisFile.php`~~      | ~~10~~ | ~~100%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
 | ~~`View/V2/Json/Membership.php`~~                  | ~~12~~ | ~~83%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
-| `Controller/V2/SplitJobController.php`             | 15 | 86% | 13 | 0 | @throws + iterables |
+| ~~`Controller/V2/SplitJobController.php`~~         | 15 | 86% | 13 | 0 | ✅ Done (Phase 19) |
 
 **Subtotal Tier 1:** ~261 entries, ~228 PHPDoc-only (no TDD needed)
 
@@ -1197,4 +1198,4 @@ Key changes:
 2. ~~**Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster~~ ✅ Done (Phase 13 — QualityReportModel, QualityReportSegmentModel, QualityReportControllerAPI; Phase 16 — QualitySummary)
 3. ~~**GlossaryWorker** — familiar worker pattern from contribution stack~~ ✅ Done (Phase 17)
 4. **GetSegmentsController** — high business value, moderate difficulty
-5. **Remaining Tier 1** — ManageModel (19), SplitJobController (15), ProjectModel (18), Filters (19)
+5. **Remaining Tier 1** — ManageModel (19), ProjectModel (18)
