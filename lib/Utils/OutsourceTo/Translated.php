@@ -4,12 +4,15 @@ namespace Utils\OutsourceTo;
 
 use Controller\Abstracts\Authentication\SessionStarter;
 use Exception;
+use LogicException;
 use Matecat\Locales\LanguageDomains;
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -116,6 +119,8 @@ class Translated extends AbstractProvider
 
     private string $fixedDelivery;
     private string $typeOfService;
+
+    /** @var array<int, mixed> */
     private array $_curlOptions;
 
     private static string $OUTSOURCE_URL_CONFIRM = '';
@@ -141,7 +146,7 @@ class Translated extends AbstractProvider
 
         $this->_outsource_login_url_ok = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "webhooks/outsource/success";
         $this->_outsource_login_url_ko = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "webhooks/outsource/failure";
-        static::$OUTSOURCE_URL_CONFIRM = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "api/app/outsource/confirm/%u/%s";
+        self::$OUTSOURCE_URL_CONFIRM = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
         $this->_curlOptions = [
             CURLOPT_HEADER => 0,
@@ -161,6 +166,8 @@ class Translated extends AbstractProvider
      * Perform a quote on the remote Provider server (
      *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      * @see AbstractProvider::performQuote
      * @see GUIDE->"PROCEDURE")
      */
@@ -180,9 +187,12 @@ class Translated extends AbstractProvider
      *      - If the data is not in a ItemHTSQuoteJob cached in session,
      *              retrieve them from API and DB and put them in session.
      *      - Retrieve project information from session and return them to the caller
-     * @return array
+     *
+     * @return array{0: string, 1: array<string, mixed>}
+     *
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      * @see GUIDE->"PROCEDURE"->POINT 1 for details
      *
      */
@@ -193,8 +203,17 @@ class Translated extends AbstractProvider
          */
 
         $_project_data = ProjectDao::getProjectAndJobData($this->pid);
+
+        if ($this->features === null) {
+            throw new RuntimeException('FeatureSet is required for volume analysis');
+        }
+
         $analysisStatus = new Status($_project_data, $this->features, $this->user);
-        $volAnalysis = json_encode($analysisStatus->fetchData()->getResult());
+        $volAnalysisJson = json_encode($analysisStatus->fetchData()->getResult());
+
+        if ($volAnalysisJson === false) {
+            throw new RuntimeException('Failed to encode volume analysis data');
+        }
 
         /**
          *************************** GET SUBJECT **************************************
@@ -206,7 +225,7 @@ class Translated extends AbstractProvider
         $jobDao = new JobDao();
         $jobData = $jobDao->setCacheTTL(60 * 60)->read($jStruct)[0];
 
-        return [$jobData['subject'], json_decode($volAnalysis, true)];
+        return [$jobData['subject'], json_decode($volAnalysisJson, true)];
     }
 
 
@@ -221,8 +240,11 @@ class Translated extends AbstractProvider
      *
      *      2- In the second phase, call the vendor with the above jobs and cache al the replies in session
      *
-     * @param string $subject
-     * @param array $volAnalysis
+     * @param string                $subject
+     * @param array<string, mixed>  $volAnalysis
+     *
+     * @throws RuntimeException
+     * @throws LogicException
      *
      * @see GUIDE->"PROCEDURE"->POINT 2 for details
      *
@@ -252,7 +274,7 @@ class Translated extends AbstractProvider
                     'matecat_jid' => $job['jid'],
                     'matecat_jpass' => $job['jpassword'],
                     'of' => 'json'
-                ], PHP_QUERY_RFC3986);
+                ], '', '&', PHP_QUERY_RFC3986);
 
             $mh->createResource($url, $this->_curlOptions, $job['jid'] . "-" . $job['jpassword'] . "-outsourced");
         }
@@ -279,6 +301,10 @@ class Translated extends AbstractProvider
             // job has been outsourced, create a proper ItemHTSQuoteJob to hold it, and add it to the Cart
             $itemCart = $this->__prepareOutsourcedJobCart($jobCredentials, $volAnalysis, $subject, $result_outsource);
 
+            if ($itemCart === null) {
+                continue;
+            }
+
             // NOTE: if we are here, it means this is the first time (unless the cache is expired) we realize this
             // job has been outsourced.
             // In the cache, there still might be many entries about old quotes for this job.
@@ -302,8 +328,11 @@ class Translated extends AbstractProvider
      *
      *      2- In the second phase, call the vendor with the above jobs and cache al the replies in session
      *
-     * @param string $subject
-     * @param array $volAnalysis
+     * @param string                $subject
+     * @param array<string, mixed>  $volAnalysis
+     *
+     * @throws RuntimeException
+     * @throws LogicException
      *
      * @see GUIDE->"PROCEDURE"->POINT 3 for details
      *
@@ -343,7 +372,7 @@ class Translated extends AbstractProvider
                 // (See: GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES"), we here need to convert it in seconds
                 // and provide a MySQL-like date format.
                 // E.g. "1989-10-15 18:24:00"
-                $fixedDeliveryDateForQuote = ($this->fixedDelivery > 0) ? date("Y-m-d H:i:s", $this->fixedDelivery / 1000) : "0";
+                $fixedDeliveryDateForQuote = ($this->fixedDelivery > 0) ? date("Y-m-d H:i:s", (int)$this->fixedDelivery / 1000) : "0";
 
                 $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query([
                         'f' => 'quote',
@@ -361,7 +390,7 @@ class Translated extends AbstractProvider
                         'jt' => 'R',
                         'fd' => $fixedDeliveryDateForQuote,
                         'of' => 'json'
-                    ], PHP_QUERY_RFC3986);
+                    ], '', '&', PHP_QUERY_RFC3986);
 
                 LoggerFactory::doJsonLog("Not Found in Cache. Call url for Quote:  " . $url);
                 $mh->createResource($url, $this->_curlOptions, $job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery);
@@ -410,10 +439,10 @@ class Translated extends AbstractProvider
     /**
      * Create a ItemHTSQuoteJob, which wraps a "job already outsourced" vendor reply
      *
-     * @param string $jpid
-     * @param array $volAnalysis
-     * @param string $subject
-     * @param array $apiCallResult
+     * @param string                $jpid
+     * @param array<string, mixed>  $volAnalysis
+     * @param string                $subject
+     * @param array<string, mixed>  $apiCallResult
      *
      * @return ItemHTSQuoteJob|null
      */
@@ -469,10 +498,10 @@ class Translated extends AbstractProvider
     /**
      * Create a ItemHTSQuoteJob which wraps a quote vendor reply
      *
-     * @param string $jpid
-     * @param array $volAnalysis
-     * @param string $subject
-     * @param array $apiCallResult
+     * @param string                $jpid
+     * @param array<string, mixed>  $volAnalysis
+     * @param string                $subject
+     * @param array<string, mixed>  $apiCallResult
      *
      * @return ItemHTSQuoteJob
      */
@@ -584,16 +613,24 @@ class Translated extends AbstractProvider
      *      - update the parameters
      *      - re-add it to the cache
      *
-     * @param string $cartId
-     * @param string $newCurrency
-     * @param int $newTimezone
+     * @param string      $cartId
+     * @param string      $newCurrency
+     * @param string      $newTimezone
      * @param string|null $newTypeOfService
+     *
+     * @throws RuntimeException
+     * @throws LogicException
      *
      * @see Translated::__addCartElement
      */
-    private function __updateCartElements(string $cartId, string $newCurrency, int $newTimezone, string $newTypeOfService = null): void
+    private function __updateCartElements(string $cartId, string $newCurrency, string $newTimezone, ?string $newTypeOfService = null): void
     {
         $cartElem = Cart::getInstance('outsource_to_external_cache')->getItem($cartId);
+
+        if (!$cartElem instanceof ItemHTSQuoteJob) {
+            throw new RuntimeException("Cart item not found: $cartId");
+        }
+
         $cartElem["currency"] = !empty($newCurrency) ? $newCurrency : $cartElem["currency"];
         $cartElem["timezone"] = !empty($newTimezone) ? $newTimezone : $cartElem["timezone"];
         $cartElem["typeOfService"] = !empty($newTypeOfService) ? $newTypeOfService : $cartElem["typeOfService"];
@@ -611,6 +648,9 @@ class Translated extends AbstractProvider
      *
      * @param ItemHTSQuoteJob $cartElem
      * @param bool $deleteOnPartialMatch
+     *
+     * @throws LogicException
+     * @throws RuntimeException
      *
      * @see Translated::__addCartElementToCart
      *
@@ -645,15 +685,27 @@ class Translated extends AbstractProvider
      *
      *
      * @param ItemHTSQuoteJob $cartElem
-     * @param string $cartName
-     * @param bool $deleteOnPartialMatch
+     * @param string          $cartName
+     * @param bool            $deleteOnPartialMatch
+     *
+     * @throws LogicException
+     * @throws RuntimeException
      *
      * @see Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
      *
      */
     private function __addCartElementToCart(ItemHTSQuoteJob $cartElem, string $cartName, bool $deleteOnPartialMatch): void
     {
-        $idToUse = ($deleteOnPartialMatch) ? substr($cartElem["id"], 0, strrpos($cartElem["id"], "-")) : $cartElem["id"];
+        if ($deleteOnPartialMatch) {
+            $lastHyphen = strrpos($cartElem["id"], "-");
+            if ($lastHyphen === false) {
+                throw new RuntimeException("Invalid cart element ID format: expected 'JID-JPASS-SUFFIX', got '{$cartElem["id"]}'");
+            }
+            $idToUse = substr($cartElem["id"], 0, $lastHyphen);
+        } else {
+            $idToUse = $cartElem["id"];
+        }
+
         Cart::getInstance($cartName)->delItem($idToUse);
         Cart::getInstance($cartName)->addItem($cartElem);
     }
@@ -694,18 +746,21 @@ class Translated extends AbstractProvider
         return $this;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getOutsourceConfirmUrl(): array
     {
         $urls = [];
         foreach ($this->jobList as $job) {
-            $urls[] = sprintf(static::$OUTSOURCE_URL_CONFIRM, $job['jid'], $job['jpassword']);
+            $urls[] = sprintf(self::$OUTSOURCE_URL_CONFIRM, $job['jid'], $job['jpassword']);
         }
 
         return $urls;
     }
 
     /**
-     * @param array $volAnalysis
+     * @param array<string, mixed> $volAnalysis
      *
      * @return int
      */
@@ -735,13 +790,13 @@ class Translated extends AbstractProvider
     }
 
     /**
-     * @param int $jid
-     * @param string $password
-     * @param array $volAnalysis
+     * @param int|string           $jid
+     * @param string               $password
+     * @param array<string, mixed> $volAnalysis
      *
-     * @return array
+     * @return array<string, string>
      */
-    private function getLangPairs(int $jid, string $password, array $volAnalysis): array
+    private function getLangPairs(int|string $jid, string $password, array $volAnalysis): array
     {
         foreach ($volAnalysis['jobs'] as $job) {
             foreach ($job['chunks'] as $chunk) {

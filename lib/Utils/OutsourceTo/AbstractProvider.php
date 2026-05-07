@@ -74,7 +74,7 @@ abstract class AbstractProvider
      *
      * @var AbstractItem[]
      */
-    protected array $_quote_result;
+    protected array $_quote_result = [];
 
     /**
      * @var int Project ID

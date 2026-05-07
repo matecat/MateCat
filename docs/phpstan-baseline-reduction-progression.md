@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security):** 37  
+**Commits (refactor + fix + security):** 38  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,349 | −4,017 (−54.5%) |
-| **PHPUnit tests** | ~2,248 | 3,421 | +1,173 (+52.2%) |
-| **PHPUnit assertions** | ~19,449 | 22,391+ | +2,942 (+15.1%) |
+| **PHPStan baseline entries** | 7,366 | 3,319 | −4,047 (−54.9%) |
+| **PHPUnit tests** | ~2,248 | 3,429 | +1,181 (+52.5%) |
+| **PHPUnit assertions** | ~19,449 | 22,421+ | +2,972 (+15.3%) |
 | **Coverage — Classes** | 8.48% (53/625) | 18.32% (124/677) | +9.84pp (+71 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 31.85% (1,298/4,075) | +10.11pp (+454 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 29.60% (10,263/34,670) | +8.41pp (+2,990 lines) |
-| **New test files** | 235 | 271+ | +36 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 39+ | — |
+| **New test files** | 235 | 272+ | +37 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 40+ | — |
 
 ---
 
@@ -424,8 +424,8 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,421 |
-| **Assertions** | 22,391+ |
+| **Total tests** | 3,429 |
+| **Assertions** | 22,421+ |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
@@ -537,6 +537,30 @@ All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@th
 
 ---
 
+### Phase 10: Outsource Provider (~31 errors) — ✅ DONE
+
+**Why:** `Translated.php` is the sole outsourcing integration, consumed by `OutsourceToController`. Fixing it ensures type-safe vendor API communication, correct `http_build_query` encoding, and proper null guards on session-cached cart data.
+
+#### 10A. `Translated.php` — ✅ DONE (−31 entries, +8 tests)
+
+All in-file PHPStan errors eliminated. Key changes:
+
+- **`http_build_query` bug fix**: `PHP_QUERY_RFC3986` was passed as `$numeric_prefix` (2nd arg) instead of `$encoding_type` (4th arg) — keys would be prefixed with `1` instead of nothing (2 sites)
+- **String division fix**: `$this->fixedDelivery / 1000` on a `string` property → added `(int)` cast
+- **`json_encode` false guard**: added `RuntimeException` on encoding failure in `__getProjectData`
+- **`FeatureSet` null guard**: added `RuntimeException` when `$this->features` is null before `Status` construction
+- **`Cart::getItem` null guard**: `__updateCartElements` now throws `RuntimeException` if cart item not found (was silently using null as array)
+- **`strrpos` false guard**: `__addCartElementToCart` now throws `RuntimeException` on malformed cart element IDs
+- **`__prepareOutsourcedJobCart` null return**: added `continue` guard before `__addCartElement` when no lang pairs found
+- **`$_quote_result` array wrapping**: removed extra `[$cartElem]` wrapping — was `list<ItemHTSQuoteJob>` instead of `AbstractItem`
+- **`__updateCartElements` signature**: changed `int $newTimezone` to `string` (matches `AbstractProvider::$timezone` type)
+- **`getLangPairs` signature**: widened `int $jid` to `int|string` (callers pass `explode()` result)
+- **`static::$OUTSOURCE_URL_CONFIRM`** → `self::` (private property, 2 sites)
+- **21 PHPDoc annotations**: `@param array<string, mixed>`, `@return`, `@throws` across all methods
+- **8 new tests** in `TranslatedTest.php` (pure function tests + behavioral guard tests, 0 warnings)
+
+---
+
 ## Queue (Next Targets — Priority Order)
 
 ### Priority 1–4
@@ -546,9 +570,9 @@ All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@th
 | ~~1~~ | ~~`lib/Plugins/Features/ReviewExtended/ReviewedWordCountModel.php`~~ | ~~26~~ | ✅ Done (Phase 7B) |
 | ~~2~~ | ~~`lib/Controller/API/V3/SegmentAnalysisController.php`~~ | ~~30~~ | ✅ Done (Phase 8A) |
 | ~~3~~ | ~~`lib/Utils/LQA/` (full stack)~~ | ~~109~~ | ✅ Done (Phase 9A, −97) |
-| 4 | `lib/Utils/OutsourceTo/Translated.php` | ~31 | External integration — lower priority, side-effect heavy |
+| ~~4~~ | ~~`lib/Utils/OutsourceTo/Translated.php`~~ | ~~31~~ | ✅ Done (Phase 10A) |
 
-**Estimated remaining if Priority 4 completed:** ~31 additional errors removed
+**All Priority 1–4 targets completed.**
 
 ### Phase 5 Residual Controllers
 
@@ -561,4 +585,4 @@ All in-file PHPStan errors eliminated (29 baseline entries + 4 cascade from `@th
 
 ## Next Action
 
-Start Priority 4: `lib/Utils/OutsourceTo/Translated.php` (~31 errors) or Phase 5 residual controllers.
+Start Phase 5 residual controllers: `SetTranslationController.php` (~25 errors) or `GetContributionController.php` (~26 errors).
