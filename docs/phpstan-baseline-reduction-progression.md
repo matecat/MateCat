@@ -6,14 +6,14 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,206 | −4,160 (−56.5%) |
-| **PHPUnit tests** | ~2,248 | 3,697 | +1,449 (+64.5%) |
-| **PHPUnit assertions** | ~19,449 | 23,490 | +4,041 (+20.8%) |
+| **PHPStan baseline entries** | 7,366 | 3,160 | −4,206 (−57.1%) |
+| **PHPUnit tests** | ~2,248 | 3,811 | +1,563 (+69.5%) |
+| **PHPUnit assertions** | ~19,449 | 23,839 | +4,390 (+22.6%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
-| **New test files** | 235 | 287+ | +52 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 54+ | — |
+| **New test files** | 235 | 290+ | +55 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 56+ | — |
 
 ---
 
@@ -86,7 +86,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 166 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 168 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
@@ -187,6 +187,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `lib/Model/Projects/ManageModel.php` | Phase 14 |
+| `lib/Model/Projects/MetadataDao.php` | Phase 15 |
+| `lib/Model/Projects/ProjectDao.php` | Phase 15 |
 | `lib/Model/Projects/ProjectStruct.php` | Phase 14 |
 | `lib/Model/Projects/ProjectTemplateStruct.php` | Phase 0 |
 
@@ -691,8 +693,8 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,697 |
-| **Assertions** | 23,490 |
+| **Total tests** | 3,811 |
+| **Assertions** | 23,839 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
@@ -950,6 +952,38 @@ New test files:
 
 ## Queue (Next Targets — Priority Order)
 
+### Phase 15: Projects Directory Coverage + Root-Cause Fix (~46 entries) — ✅ DONE
+
+**Why:** Completing `lib/Model/Projects/` — the last 3 files below 80% coverage. Root-cause fix in `AbstractDao::_destroyObjectCache()` eliminated 46 stale baseline entries across the entire codebase in one surgical change.
+
+#### 15A. Root-Cause Fix: `AbstractDao::_destroyObjectCache()` — ✅ DONE (−46 baseline entries)
+
+**Problem:** `LoggerFactory::getLogger()` inside the existing catch block in `_destroyObjectCache()` could throw `Psr\Log\InvalidArgumentException`, which cascaded `@throws` annotations to every DAO method calling `_destroyObjectCache()` (46 baseline entries across MetadataDao, ProjectDao, and 20+ other DAO files).
+
+**Fix:** Wrapped the `LoggerFactory::getLogger()` call in a nested try/catch inside the existing catch block. Logger failure during error recovery is non-critical — silently swallowed. This eliminated ALL 46 cascade entries without touching any downstream files.
+
+**Key decision:** Root-cause fix over cascade `@throws` propagation. Adding `@throws InvalidArgumentException` to MetadataDao/ProjectDao callers would have cascaded to 100+ files. The nested try/catch is architecturally correct: logging failures during error handling should never escape.
+
+#### 15B. Coverage Tests — ✅ DONE (+45 tests, +167 assertions)
+
+| File | Coverage Before → After | Tests | Assertions |
+|------|------------------------|-------|------------|
+| `ProjectTemplateStruct.php` | 43.06% → **100%** (72/72 lines, 7/7 methods) | 13 | 77 |
+| `MetadataDao.php` | 16.22% → **97.30%** (72/74 lines, 7/8 methods) | 11 | 25 |
+| `ProjectDao.php` | 6.63% → **92.08%** (186/202 lines, 22/25 methods) | 21 | 65 |
+| **Total** | — | **45** | **167** |
+
+New test files:
+- `tests/unit/Model/Projects/ProjectTemplateStructTest.php` — struct tests (JSON encoding, serialization, hydration)
+- `tests/unit/Model/Projects/MetadataDaoTest.php` — DB integration tests with transaction rollback
+- `tests/unit/Model/Projects/ProjectDaoTest.php` — DB integration tests covering 22 of 25 methods (skipped destructive bulk ops)
+
+**Baseline reduction:** 3,206 → 3,160 (−46 entries, −276 lines in `phpstan-baseline.neon`)
+
+---
+
+## Queue (Remaining Targets — Priority Order)
+
 ### Priority 1–4
 
 | Priority | File | Errors | Rationale |
@@ -990,7 +1024,7 @@ New test files:
 
 ## Remaining Baseline Analysis
 
-**Core baseline:** 2,527 entries in ~435 files  
+**Core baseline:** 2,481 entries in ~433 files  
 **Plugin baseline:** ~733 entries (mostly aligner plugin — separate concern)  
 **By error type:** PHPDoc-only=~1,500 (59%), Behavioral=~700 (27%), Other=~327 (12%)
 

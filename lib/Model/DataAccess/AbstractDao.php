@@ -8,6 +8,7 @@ use PDOException;
 use PDOStatement;
 use Psr\Log\InvalidArgumentException;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 
 /**
@@ -198,17 +199,20 @@ abstract class AbstractDao
 
     /**
      * @param array<int|string, scalar|null> $bindParams
-     * @throws InvalidArgumentException
      */
     protected function _destroyObjectCache(PDOStatement $stmt, string $fetchClass, array $bindParams): bool
     {
         try {
             return $this->_deleteCacheByKey(md5($stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass));
         } catch (Exception $e) {
-            LoggerFactory::getLogger('query_cache')->error([
-                'destroyObjectCache failed' => $e->getMessage(),
-                'class'                     => static::class,
-            ]);
+            try {
+                LoggerFactory::getLogger('query_cache')->error([
+                    'destroyObjectCache failed' => $e->getMessage(),
+                    'class'                     => static::class,
+                ]);
+            } catch (Throwable) {
+                // Logger failure during cache eviction is non-critical
+            }
 
             return false;
         }
