@@ -2,8 +2,6 @@
 
 namespace unit\LQA;
 
-use DG\BypassFinals;
-use Exception;
 use Matecat\ICU\MessagePatternComparator;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
@@ -13,8 +11,7 @@ use Utils\LQA\QA\ICUChecker;
 /**
  * Tests for ICUChecker class.
  *
- * Note: MessagePatternComparator and MessagePatternValidator are final classes
- * and cannot be mocked. We use BypassFinals to bypass this restriction.
+ * Uses real MessagePatternComparator instances (final class — cannot be mocked).
  */
 class ICUCheckerTest extends AbstractTest
 {
@@ -23,7 +20,6 @@ class ICUCheckerTest extends AbstractTest
 
     public function setUp(): void
     {
-        BypassFinals::enable();
         parent::setUp();
         $this->errorManager = new ErrorManager();
         $this->icuChecker = new ICUChecker($this->errorManager);
@@ -40,7 +36,7 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function hasIcuPatternsWithComparatorNoIcu(): void
     {
-        $comparator = $this->createStub(MessagePatternComparator::class);
+        $comparator = new MessagePatternComparator('en', 'en', 'Hello {0}', 'Hello {0}');
         $this->icuChecker->setIcuPatternComparator($comparator);
 
         $this->assertFalse($this->icuChecker->hasIcuPatterns());
@@ -57,7 +53,7 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function hasIcuPatternsWithBoth(): void
     {
-        $comparator = $this->createStub(MessagePatternComparator::class);
+        $comparator = new MessagePatternComparator('en', 'en', 'Hello {0}', 'Hello {0}');
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->setSourceContainsIcu(true);
 
@@ -104,9 +100,7 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function checkICUMessageConsistencyValidationException(): void
     {
-        $comparator = $this->createStub(MessagePatternComparator::class);
-        $comparator->method('validate')->willThrowException(new Exception('Invalid ICU pattern'));
-
+        $comparator = new MessagePatternComparator('en', 'en', '{n, plural, one{#} other{#}}', 'Plain text');
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
 
@@ -147,14 +141,11 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function multipleCallsToCheckConsistency(): void
     {
-        $comparator = $this->createStub(MessagePatternComparator::class);
-        $comparator->method('validate')->willThrowException(new Exception('Error'));
-
+        $comparator = new MessagePatternComparator('en', 'en', '{n, plural, one{#} other{#}}', 'Plain text');
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
         $this->icuChecker->checkICUMessageConsistency();
 
-        // Should have 2 errors
         $errors = $this->errorManager->getErrors();
         $this->assertGreaterThanOrEqual(1, count($errors));
     }
@@ -165,7 +156,7 @@ class ICUCheckerTest extends AbstractTest
         $this->icuChecker->setSourceContainsIcu(true);
         $this->assertFalse($this->icuChecker->hasIcuPatterns());
 
-        $comparator = $this->createStub(MessagePatternComparator::class);
+        $comparator = new MessagePatternComparator('en', 'en', 'Hello {0}', 'Hello {0}');
         $this->icuChecker->setIcuPatternComparator($comparator);
 
         $this->assertTrue($this->icuChecker->hasIcuPatterns());
