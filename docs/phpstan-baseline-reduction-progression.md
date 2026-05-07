@@ -2,13 +2,13 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security + test):** 42  
+**Commits (refactor + fix + security + test):** 43
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,121 | −4,245 (−57.6%) |
-| **PHPUnit tests** | ~2,248 | 3,829 | +1,581 (+70.3%) |
-| **PHPUnit assertions** | ~19,449 | 23,909 | +4,460 (+22.9%) |
+| **PHPStan baseline entries** | 7,366 | 3,103 | −4,263 (−57.9%) |
+| **PHPUnit tests** | ~2,248 | 3,845 | +1,597 (+71.0%) |
+| **PHPUnit assertions** | ~19,449 | 23,990 | +4,541 (+23.3%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
@@ -86,7 +86,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 169 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 170 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
@@ -235,6 +235,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/AsyncTasks/Workers/SetContributionWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/Traits/MatchesComparator.php` | Phase 4C |
 | `lib/Utils/AsyncTasks/Workers/Traits/ProjectWordCount.php` | Phase 4C |
+| `lib/Utils/AsyncTasks/Workers/GlossaryWorker.php` | Phase 17 |
 | `lib/Utils/Constants/EngineConstants.php` | Phase 6C |
 | `lib/Utils/Contribution/ContributionContexts.php` | Phase 4A |
 | `lib/Utils/Contribution/GetContributionRequest.php` | Phase 4A |
@@ -1006,6 +1007,30 @@ Key changes:
 
 ---
 
+### Phase 17: GlossaryWorker.php — ✅ DONE (−18 baseline entries, +16 tests)
+
+#### 17A. Bug Fixes + Type Fixes + DI Refactor — ✅ DONE
+
+| File | Errors Fixed | Coverage Before → After | Notes |
+|------|-------------|------------------------|-------|
+| `GlossaryWorker.php` | 18→0 | 0% → **97.66%** (209/214 lines) | DI refactor, 2 bug fixes, PHPDoc shapes |
+
+Key changes:
+- **Bug fix (L145)**: `delete()` had wrong `@var UpdateGlossaryResponse` — method returns `DeleteGlossaryResponse`; also `$payload['id_job']` (int) now cast to `(string)` for `glossaryDelete()` string parameter
+- **Bug fix (L426)**: `update()` match arm `202 => "MyMemory is busy..."` was dead code — inside `>= 300` guard but 202 < 300. Restructured to `$response->responseStatus === 202 || $response->responseStatus >= 300` so 202 is correctly treated as error
+- **Type casts**: `(string) $payload['id_job']` added to `get()`, `set()`, `update()` — all `glossaryGet/Set/Update()` expect string idJob
+- **Null-safe access**: `formatGetGlossaryMatches()` now uses `$matches['id_segment'] ?? null` instead of direct access on optional key
+- **Null-safe access**: `set()` now uses `$payload['term']['metadata']['keys'] ?? []` instead of direct access on optional key
+- **PHPDoc shapes**: 9 `missingType.iterableValue` errors resolved with precise array shapes
+- **Native types**: `setResponsePayload()` params typed (`string`, `string`, `array`, `array`) — was untyped
+- **Template resolution**: `EnginesFactory::getInstance(1, MyMemory::class)` resolves template type `T`
+- **DI refactor**: `getMyMemoryClient()` changed from `private` to `protected` for testable subclass override
+- **16 new tests** in `GlossaryWorkerTest.php` (72 assertions, 0 warnings)
+
+**Baseline reduction:** 3,121 → 3,103 (−18 entries)
+
+---
+
 ## Queue (Remaining Targets — Priority Order)
 
 ### Priority 1–4
@@ -1056,21 +1081,21 @@ Key changes:
 
 #### TIER 1: Easy Wins (≥70% PHPDoc-only, 15+ errors — fastest ROI)
 
-| File | Errors | %doc | PHPDoc | Behavioral | Notes |
-|------|--------|------|--------|------------|-------|
-| ~~`TranslationEventDao.php` (ReviewExtended)~~ | ~~27~~ | ~~96%~~ | ~~26~~ | ~~0~~ | ✅ Done (Phase 12) |
-| ~~`View/V3/Json/Chunk.php`~~ | ~~20~~ | ~~95%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, refactored DI, 88% coverage) |
-| `Model/Projects/ManageModel.php` | 19 | 94% | 18 | 1 | @throws + iterables |
-| ~~`Utils/Logger/MatecatLogger.php`~~ | ~~19~~ | ~~100%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
-| `View/V3/Json/QualitySummary.php` | 19 | 78% | 15 | 4 | ✅ Done (Phase 16, DI refactored, 96.58% coverage) |
-| ~~`Model/QualityReport/QualityReportModel.php`~~ | ~~24~~ | ~~70%~~ | ~~17~~ | ~~1~~ | ✅ Done (Phase 13, DI refactored, 82.61% methods) |
+| File                                               | Errors | %doc | PHPDoc | Behavioral | Notes |
+|----------------------------------------------------|--------|------|--------|------------|-------|
+| ~~`TranslationEventDao.php` (ReviewExtended)~~     | ~~27~~ | ~~96%~~ | ~~26~~ | ~~0~~ | ✅ Done (Phase 12) |
+| ~~`View/V3/Json/Chunk.php`~~                       | ~~20~~ | ~~95%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, refactored DI, 88% coverage) |
+| ~~`Model/Projects/ManageModel.php`~~               | 19 | 94% | 18 | 1 | @throws + iterables |
+| ~~`Utils/Logger/MatecatLogger.php`~~               | ~~19~~ | ~~100%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
+| ~~`View/V3/Json/QualitySummary.php`~~              | 19 | 78% | 15 | 4 | ✅ Done (Phase 16, DI refactored, 96.58% coverage) |
+| ~~`Model/QualityReport/QualityReportModel.php`~~   | ~~24~~ | ~~70%~~ | ~~17~~ | ~~1~~ | ✅ Done (Phase 13, DI refactored, 82.61% methods) |
 | ~~`Controller/V3/QualityReportControllerAPI.php`~~ | ~~21~~ | ~~71%~~ | ~~15~~ | ~~6~~ | ✅ Done (Phase 13, 80% methods) |
-| `Utils/AsyncTasks/Workers/GlossaryWorker.php` | 18 | 72% | 13 | 2 | Worker pattern (familiar) |
-| `Model/Conversion/Filters.php` | 19 | 73% | 14 | 2 | Iterables-heavy |
-| `Model/Projects/ProjectModel.php` | 18 | 72% | 13 | 5 | @throws cascade |
-| ~~`View/App/Json/Analysis/AnalysisFile.php`~~ | ~~10~~ | ~~100%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
-| ~~`View/V2/Json/Membership.php`~~ | ~~12~~ | ~~83%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
-| `Controller/V2/SplitJobController.php` | 15 | 86% | 13 | 0 | @throws + iterables |
+| ~~`Utils/AsyncTasks/Workers/GlossaryWorker.php`~~      | ~~18~~ | ~~72%~~ | ~~13~~ | ~~2~~ | ✅ Done (Phase 17) |
+| `Model/Conversion/Filters.php`                     | 19 | 73% | 14 | 2 | Iterables-heavy |
+| ~~`Model/Projects/ProjectModel.php`~~              | 18 | 72% | 13 | 5 | @throws cascade |
+| ~~`View/App/Json/Analysis/AnalysisFile.php`~~      | ~~10~~ | ~~100%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
+| ~~`View/V2/Json/Membership.php`~~                  | ~~12~~ | ~~83%~~ | ~~10~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
+| `Controller/V2/SplitJobController.php`             | 15 | 86% | 13 | 0 | @throws + iterables |
 
 **Subtotal Tier 1:** ~261 entries, ~228 PHPDoc-only (no TDD needed)
 
@@ -1121,6 +1146,6 @@ Key changes:
 
 1. ~~**Batch Tier 1 PHPDoc-only files** (MatecatLogger, Chunk, ManageModel, AnalysisFile, Membership, SplitJobController) — ~90 entries, zero TDD, fast~~ ✅ Partially done (Phase 12 — MatecatLogger, Chunk, AnalysisFile, Membership)
 2. ~~**Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster~~ ✅ Done (Phase 13 — QualityReportModel, QualityReportSegmentModel, QualityReportControllerAPI; Phase 16 — QualitySummary)
-3. **GlossaryWorker** — familiar worker pattern from contribution stack
+3. ~~**GlossaryWorker** — familiar worker pattern from contribution stack~~ ✅ Done (Phase 17)
 4. **GetSegmentsController** — high business value, moderate difficulty
 5. **Remaining Tier 1** — ManageModel (19), SplitJobController (15), ProjectModel (18), Filters (19)
