@@ -2,13 +2,13 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-08 (last updated)  
-**Commits (refactor + fix + security + test):** 44
+**Commits (refactor + fix + security + test):** 45
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,021 | −4,345 (−59.0%) |
-| **PHPUnit tests** | ~2,248 | 3,873 | +1,625 (+72.3%) |
-| **PHPUnit assertions** | ~19,449 | 24,072 | +4,623 (+23.8%) |
+| **PHPStan baseline entries** | 7,366 | 3,000 | −4,366 (−59.3%) |
+| **PHPUnit tests** | ~2,248 | 3,955 | +1,707 (+75.9%) |
+| **PHPUnit assertions** | ~19,449 | 24,308 | +4,859 (+25.0%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
@@ -87,7 +87,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 180 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 181 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
@@ -116,6 +116,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/EngineController.php` | Phase 0 |
 | `lib/Controller/API/App/GetContributionController.php` | Phase 5C |
 | `lib/Controller/API/App/GetSearchController.php` | Phase 5E |
+| `lib/Controller/API/App/GetSegmentsController.php` | Phase 20 |
 | `lib/Controller/API/App/QualityFrameworkController.php` | Phase 13C |
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
@@ -1151,14 +1152,14 @@ Key changes:
 
 #### TIER 2: High-Value Controllers
 
-| File | Errors | %doc | PHPDoc | Behavioral | Notes |
-|------|--------|------|--------|------------|-------|
-| `GetSegmentsController.php` | 27 | 59% | 16 | 8 | Core editor endpoint |
-| `ModernMTController.php` | 26 | 34% | 9 | 15 | MT integration — heavy behavioral |
-| `CattoolController.php` | 25 | 60% | 15 | 1 | View controller |
+| File                                    | Errors | %doc | PHPDoc | Behavioral | Notes |
+|-----------------------------------------|--------|------|--------|------------|-------|
+| ~~`GetSegmentsController.php`~~         | ~~27~~ | ~~59%~~ | ~~16~~ | ~~8~~ | Core editor endpoint |
+| `ModernMTController.php`                | 26 | 34% | 9 | 15 | MT integration — heavy behavioral |
+| `CattoolController.php`                 | 25 | 60% | 15 | 1 | View controller |
 | `SegmentTranslationIssueController.php` | 21 | 47% | 10 | 9 | LQA endpoint |
-| `DownloadQRController.php` | 18 | 66% | 12 | 6 | QR downloads |
-| `GetWarningController.php` | 17 | 23% | 4 | 12 | QA warnings — heavy behavioral |
+| `DownloadQRController.php`              | 18 | 66% | 12 | 6 | QR downloads |
+| `GetWarningController.php`              | 17 | 23% | 4 | 12 | QA warnings — heavy behavioral |
 
 **Subtotal Tier 2:** ~134 entries
 
