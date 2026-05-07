@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternComparator;
@@ -53,7 +54,7 @@ class GetWarningController extends KleinController
         $password = $request['password'];
 
         try {
-            $chunk = $this->getChunk($id_job, $password);
+            $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
             $warnings = WarningDao::getWarningsByJobIdAndPassword($id_job, $password);
             $tMismatch = (new SegmentDao())->setCacheTTL(10 * 60 /* 10-minute cache */)->getTranslationsMismatches($id_job, $password);
 
@@ -101,6 +102,7 @@ class GetWarningController extends KleinController
     /**
      * @return void
      * @throws Exception
+     * @throws DomainException
      */
     public function local(): void
     {
@@ -112,7 +114,7 @@ class GetWarningController extends KleinController
         $password = $request['password'];
         $characters_counter = $request['characters_counter'];
 
-        $chunk = $this->getChunk($id_job, $password);
+        $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
         $featureSet = $this->getFeatureSet();
         $metadata = new MetadataDao();
         $dataRefMap = (!empty($id)) ? SegmentOriginalDataDao::getSegmentDataRefMap($id) : [];
@@ -230,7 +232,7 @@ class GetWarningController extends KleinController
      * @return JobStruct|null
      * @throws Exception
      */
-    private function getChunk($id_job, $password): ?JobStruct
+    private function getChunkAndLoadProjectFeatures($id_job, $password): ?JobStruct
     {
         $chunk = ChunkDao::getByIdAndPassword($id_job, $password);
         $project = $chunk->getProject();

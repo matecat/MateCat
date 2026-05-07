@@ -80,6 +80,7 @@ class DownloadController extends AbstractDownloadController
     /**
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
@@ -96,6 +97,7 @@ class DownloadController extends AbstractDownloadController
     /**
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
@@ -114,6 +116,7 @@ class DownloadController extends AbstractDownloadController
      *
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
@@ -257,8 +260,6 @@ class DownloadController extends AbstractDownloadController
                     $segmentIndex = is_int($i) ? $i : (int)$i;
 
                     $transUnits[$internalId] [] = $segmentIndex;
-
-                    $data['matecat|' . $internalId] [] = $segmentIndex;
                 }
 
                 // if FileStorage is on S3, download the file on a temp dir
@@ -299,7 +300,11 @@ class DownloadController extends AbstractDownloadController
                     unset($data);
                 }
 
-                $output_content[$fileID]['document_content'] = file_get_contents($outputPath);
+                $fileContent = file_get_contents($outputPath);
+                if ($fileContent === false) {
+                    throw new \RuntimeException("Failed to read output file: $outputPath");
+                }
+                $output_content[$fileID]['document_content'] = $fileContent;
                 $output_content[$fileID]['output_filename'] = $current_filename;
 
                 if ($this->forceXliff) {
@@ -380,22 +385,23 @@ class DownloadController extends AbstractDownloadController
 
                 $output_content[$fileID]['document_content'] = $this->ifGlobalSightXliffRemoveTargetMarks(
                     $convertResult[$fileID] ['document_content'],
-                    $files_to_be_converted[$fileID]['output_filename']
+                    $files_to_be_converted[$fileID]['output_filename'] ?? ''
                 );
 
                 //in the case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
-                $extension = $this->pathinfoString($output_content[$fileID]['output_filename'], PATHINFO_EXTENSION);
+                $extension = $this->pathinfoString($output_content[$fileID]['output_filename'] ?? '', PATHINFO_EXTENSION);
                 if (strtoupper($extension) == 'STRINGS') {
                     //use this function to convert stuff
                     $encodingConvertedFile = CatUtils::convertEncoding('UTF-16', $output_content[$fileID]['document_content']);
 
+                    $converted = $encodingConvertedFile[1];
+                    if ($converted === false) {
+                        throw new \RuntimeException("Failed to convert encoding for .strings file");
+                    }
 
-                    //strip previously added BOM
-                    $encodingConvertedFile[1] = Utils::stripFileBOM($encodingConvertedFile[1], 16);
-
-                    //store new content
-                    $output_content[$fileID]['document_content'] = $encodingConvertedFile[1];
+                    //strip previously added BOM and store new content
+                    $output_content[$fileID]['document_content'] = Utils::stripFileBOM($converted, 16);
 
                     //trash temporary data
                     unset($encodingConvertedFile);
@@ -406,7 +412,7 @@ class DownloadController extends AbstractDownloadController
         }
 
         foreach ($output_content as $idFile => $fileInformation) {
-            $zipPathInfo = ZipArchiveHandler::zipPathInfo($fileInformation['output_filename']);
+            $zipPathInfo = ZipArchiveHandler::zipPathInfo($fileInformation['output_filename'] ?? '');
             if (is_array($zipPathInfo)) {
                 $output_content[$idFile]['zipfilename'] = $zipPathInfo['zipfilename'];
                 $output_content[$idFile]['zipinternalPath'] = $zipPathInfo['dirname'];
@@ -446,11 +452,11 @@ class DownloadController extends AbstractDownloadController
                         if ($this->forceXliff) {
                             $_fName = (string)$this->id_job;
                         } else {
-                            $_fName = $pathinfo['basename'];
+                            $_fName = is_array($pathinfo) ? ($pathinfo['basename'] ?? '') : (string)$pathinfo;
                         }
 
                         $nFinfo = AbstractFilesStorage::pathinfo_fix($_fName);
-                        $this->setFilename(($nFinfo['extension'] === 'zip') ? $_fName : $_fName . ".zip");
+                        $this->setFilename((($nFinfo['extension'] ?? '') === 'zip') ? $_fName : $_fName . ".zip");
                         $this->outputContent = self::composeZip($output_content); //add zip archive content here;
 
                     } else {
@@ -463,7 +469,7 @@ class DownloadController extends AbstractDownloadController
                         $filename = $this->generateFilename($oContent->output_filename);
                         $pathinfo = pathinfo($filename);
 
-                        if ($pathinfo['extension'] == 'zip') {
+                        if (($pathinfo['extension'] ?? '') == 'zip') {
                             $this->setFilename($filename);
                         } else {
                             $this->setFilename(self::forceOcrExtension($filename . ($this->forceXliff ? ".xlf" : null)));
@@ -554,6 +560,7 @@ class DownloadController extends AbstractDownloadController
         if (stripos(substr($documentContent, 0, 100), "<?xml ") === false) {
             $is_utf8 = false;
             [$original_charset, $documentContent] = CatUtils::convertEncoding('UTF-8', $documentContent);
+            $documentContent = $documentContent !== false ? $documentContent : '';
         }
 
         //Let's avoid in-memory copy of very large files if possible
@@ -582,6 +589,7 @@ class DownloadController extends AbstractDownloadController
 
         if (!$is_utf8) {
             [, $documentContent] = CatUtils::convertEncoding($original_charset, $documentContent);
+            $documentContent = $documentContent !== false ? $documentContent : '';
         }
 
         return $documentContent;
@@ -609,19 +617,21 @@ class DownloadController extends AbstractDownloadController
      * @param string|null $target
      *
      * @return string
+     * @throws Exception
      */
     private function generateFilename(string $originalFilename, string $target = null): string
     {
-        $pathInfo = AbstractFilesStorage::pathinfo_fix($originalFilename);
-        $extension = ($this->isAnIWorkFile($pathInfo['extension'])) ? $this->overrideExtensionForIWorkFiles($pathInfo['extension']) : $pathInfo['extension'];
+        $extension = $this->pathinfoString($originalFilename, PATHINFO_EXTENSION);
+        $extension = ($this->isAnIWorkFile($extension)) ? $this->overrideExtensionForIWorkFiles($extension) : $extension;
 
         $filename = '';
 
-        if (isset($pathInfo['dirname']) and $pathInfo['dirname'] != '') {
-            $filename .= $pathInfo['dirname'] . DIRECTORY_SEPARATOR;
+        $dirname = $this->pathinfoString($originalFilename, PATHINFO_DIRNAME);
+        if ($dirname !== '') {
+            $filename .= $dirname . DIRECTORY_SEPARATOR;
         }
 
-        $filename .= $pathInfo['filename'];
+        $filename .= $this->pathinfoString($originalFilename, PATHINFO_FILENAME);
 
         if ($target) {
             $filename .= "_" . $target;
@@ -943,6 +953,8 @@ class DownloadController extends AbstractDownloadController
      * @param string $zipPath
      * @param string $tmpDir
      *
+     * @throws Exception
+     * @throws \Psr\Log\InvalidArgumentException
      * @throws ReflectionException
      */
     public function transferZipFromS3ToTmpDir(string $zipPath, string $tmpDir): void

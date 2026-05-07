@@ -9,6 +9,7 @@
 
 namespace Utils\LQA;
 
+use DomainException;
 use Matecat\ICU\MessagePatternValidator;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -34,6 +35,7 @@ trait ICUSourceSegmentChecker
      * @param JobStruct $chunk The job chunk containing the source data to validate.
      * @param string $sourceSegment The specific segment of the source to check for ICU patterns.
      * @return bool Returns true if the source segment contains ICU patterns, otherwise false.
+     * @throws \DomainException
      */
     private function sourceContainsIcu(ProjectStruct $projectStruct, JobStruct $chunk, string $sourceSegment): bool
     {
@@ -57,6 +59,7 @@ trait ICUSourceSegmentChecker
      *
      * @param ProjectStruct $projectStruct The project structure containing metadata.
      * @return bool Returns true if ICU is enabled, otherwise false.
+     * @throws DomainException
      */
     private function icuEnabled(ProjectStruct $projectStruct): bool
     {

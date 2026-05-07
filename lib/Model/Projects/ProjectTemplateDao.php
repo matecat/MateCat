@@ -25,6 +25,7 @@ use PDOException;
 use ReflectionException;
 use stdClass;
 use TypeError;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
@@ -274,7 +275,7 @@ class ProjectTemplateDao extends AbstractDao
             $mt = $projectTemplateStruct->getMt();
 
             if (isset($mt->id)) {
-                $engine = EnginesFactory::getInstance($mt->id);
+                $engine = EnginesFactory::getInstance($mt->id, AbstractEngine::class);
 
                 $engineRecord = $engine->getEngineRecord();
 
@@ -609,6 +610,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function markAsNotDefault(int $uid, int $excludeId): void
     {
@@ -647,6 +649,7 @@ class ProjectTemplateDao extends AbstractDao
      * @return int
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function remove(int $id, int $uid): int
     {
@@ -664,6 +667,7 @@ class ProjectTemplateDao extends AbstractDao
     /**
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function removeSubTemplateByIdAndUser(int $id, int $uid, string $subTemplateField): int
     {
@@ -688,6 +692,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private
     static function destroyQueryByIdCache(
@@ -705,6 +710,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private
     static function destroyQueryByIdAndUserCache(
@@ -720,6 +726,7 @@ class ProjectTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private
     static function destroyQueryPaginated(
@@ -734,6 +741,7 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public static function destroyDefaultTemplateCache(PDO $conn, int $uid): void
     {

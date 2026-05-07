@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-07 (last updated)  
-**Commits (refactor + fix + security + test):** 40  
+**Commits (refactor + fix + security + test):** 41  
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 3,260 | −4,106 (−55.7%) |
-| **PHPUnit tests** | ~2,248 | 3,582 | +1,334 (+59.3%) |
-| **PHPUnit assertions** | ~19,449 | 22,955 | +3,506 (+18.0%) |
-| **Coverage — Classes** | 8.48% (53/625) | 18.76% (127/677) | +10.28% (+74 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 35.21% (1,436/4,078) | +13.47% (+592 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 35.06% (12,169/34,707) | +13.87% (+4,896 lines) |
-| **New test files** | 235 | 277+ | +42 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 48+ | — |
+| **PHPStan baseline entries** | 7,366 | 3,206 | −4,160 (−56.5%) |
+| **PHPUnit tests** | ~2,248 | 3,697 | +1,449 (+64.5%) |
+| **PHPUnit assertions** | ~19,449 | 23,490 | +4,041 (+20.8%) |
+| **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
+| **New test files** | 235 | 287+ | +52 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 54+ | — |
 
 ---
 
@@ -42,6 +42,22 @@ Execution order:
 4. **Minimize scope** — fix the PHPStan error, don't refactor surrounding code.
 5. **No `@phpstan-ignore`** or baseline suppression.
 
+### Baseline Reduction Algorithm (MANDATORY)
+
+Every file we touch **MUST** be clean. The baseline is managed by surgical removal, never regeneration.
+
+1. **Maintain a fixed-files ledger** — a persistent list of every file we've already cleaned (see below).
+2. **Pick a new file** to clean from the baseline.
+3. **Fix all PHPStan errors** in that file.
+4. **Test the file alone with no baseline** (`cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress --error-format=table; cp phpstan-baseline.neon.bak phpstan-baseline.neon`) — it **must** report zero errors.
+5. **Run PHPStan on the full codebase with the baseline** — this surfaces only **new** errors (ones not already recorded in the baseline).
+6. **For each new error found:**
+   - If the error is in a file **on our fixed-files ledger** → **fix it** (that file must stay clean).
+   - If the error is in a file **not on our ledger** → **add it to the baseline** (we haven't committed to cleaning it yet).
+7. **Add the newly cleaned file** to the fixed-files ledger.
+8. **Manually remove** all resolved entries for that file from `phpstan-baseline.neon`. **NEVER regenerate the baseline.** Regenerating resets the baseline to the current state, potentially re-whitelisting errors in files we've already committed to keeping clean.
+9. **Repeat from step 2.**
+
 ### TDD Specifics
 
 - **Behavioral changes** (null guards, new exceptions, restructured control flow) → strict TDD red/green. Write the failing test FIRST (red), then apply the minimal fix (green).
@@ -63,6 +79,257 @@ Execution order:
 
 - **Never modify baseline/starting values** in progress docs
 - Only update current values, delta columns, completed rows, queue movements
+
+---
+
+## Fixed-Files Ledger
+
+Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
+
+**Total: 166 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+
+<!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
+<!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
+
+<details>
+<summary>Click to expand full ledger (166 files)</summary>
+
+#### Controller Abstracts & Auth
+| File | Cleaned In |
+|------|-----------|
+| `lib/Controller/Abstracts/AbstractDownloadController.php` | Phase 1B |
+| `lib/Controller/Abstracts/Authentication/AuthCookie.php` | Phase 1E |
+| `lib/Controller/Abstracts/Authentication/AuthenticationTrait.php` | Phase 1G |
+| `lib/Controller/Abstracts/Authentication/CookieManager.php` | Phase 1F |
+| `lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php` | Phase 1D |
+| `lib/Controller/Abstracts/FlashMessage.php` | Phase 0 |
+| `lib/Controller/Exceptions/RenderTerminatedException.php` | Phase 13D |
+
+#### Controller API
+| File | Cleaned In |
+|------|-----------|
+| `lib/Controller/API/App/Authentication/LaraAuthController.php` | Phase 0 |
+| `lib/Controller/API/App/CommentController.php` | Phase 5D |
+| `lib/Controller/API/App/DeleteContributionController.php` | Phase 5C |
+| `lib/Controller/API/App/DownloadAnalysisReportController.php` | Phase 1B |
+| `lib/Controller/API/App/EngineController.php` | Phase 0 |
+| `lib/Controller/API/App/GetContributionController.php` | Phase 5C |
+| `lib/Controller/API/App/GetSearchController.php` | Phase 5E |
+| `lib/Controller/API/App/QualityFrameworkController.php` | Phase 13C |
+| `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
+| `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
+| `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
+| `lib/Controller/API/V3/LaraController.php` | Phase 0 |
+| `lib/Controller/API/V3/SegmentAnalysisController.php` | Phase 8A |
+
+#### Controller Traits & Views
+| File | Cleaned In |
+|------|-----------|
+| `lib/Controller/Traits/APISourcePageGuesserTrait.php` | Phase 0 |
+| `lib/Controller/Traits/SegmentDisabledTrait.php` | Phase 8A |
+| `lib/Controller/Traits/TimeLoggerTrait.php` | Phase 14 |
+| `lib/Controller/Views/QualityReportController.php` | Phase 13C |
+
+#### Model/DataAccess
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/DataAccess/AbstractDao.php` | Phase 2A |
+| `lib/Model/DataAccess/ArrayAccessTrait.php` | Phase 0 |
+| `lib/Model/DataAccess/DaoCacheTrait.php` | Phase 2A |
+| `lib/Model/DataAccess/Database.php` | Phase 0 |
+| `lib/Model/DataAccess/IDatabase.php` | Phase 0 |
+| `lib/Model/DataAccess/RecursiveArrayCopy.php` | Phase 0 |
+| `lib/Model/DataAccess/ShapelessConcreteStruct.php` | Phase 2B |
+| `lib/Model/DataAccess/TransactionalTrait.php` | Phase 7B |
+| `lib/Model/DataAccess/XFetchEnvelope.php` | Phase 2D |
+
+#### Model/Engines (Structs)
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/Engines/EngineDAO.php` | Phase 0 |
+| `lib/Model/Engines/Structs/AltlangStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/ApertiumStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/DeepLStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/EngineStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/GoogleTranslateStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/IntentoStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/LaraStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/MicrosoftHubStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/MMTStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/NONEStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/SmartMATEStruct.php` | Phase 0 |
+| `lib/Model/Engines/Structs/YandexTranslateStruct.php` | Phase 0 |
+
+#### Model/FeaturesBase (Events)
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/FeaturesBase/Hook/Event/Filter/AnalysisBeforeMTGetContributionEvent.php` | Phase 5B |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/FilterRevisionChangeNotificationListEvent.php` | Phase 0 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/RewriteContributionContextsEvent.php` | Phase 0 |
+
+#### Model/Files & FilesStorage
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/Files/FilesPartsStruct.php` | Phase 0 |
+| `lib/Model/FilesStorage/AbstractFilesStorage.php` | Phase 6B |
+| `lib/Model/FilesStorage/FsFilesStorage.php` | Phase 6B |
+| `lib/Model/FilesStorage/IFilesStorage.php` | Phase 6B |
+
+#### Model/Jobs & LQA
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/Jobs/ChunkDao.php` | Phase 0 |
+| `lib/Model/LQA/CategoryDao.php` | Phase 0 |
+| `lib/Model/LQA/ModelDao.php` | Phase 0 |
+| `lib/Model/LQA/ModelStruct.php` | Phase 0 |
+
+#### Model/Projects
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/Projects/ManageModel.php` | Phase 14 |
+| `lib/Model/Projects/ProjectStruct.php` | Phase 14 |
+| `lib/Model/Projects/ProjectTemplateStruct.php` | Phase 0 |
+
+#### Model (other)
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/ConnectedServices/ConnectedServiceStruct.php` | Phase 0 |
+| `lib/Model/ConnectedServices/Oauth/OauthTokenEncryption.php` | Phase 0 |
+| `lib/Model/Outsource/ConfirmationStruct.php` | Phase 0 |
+| `lib/Model/Propagation/PropagationTotalStruct.php` | Phase 0 |
+| `lib/Model/QualityReport/QualityReportDao.php` | Phase 13 |
+| `lib/Model/QualityReport/QualityReportModel.php` | Phase 13B |
+| `lib/Model/QualityReport/QualityReportSegmentModel.php` | Phase 13B |
+| `lib/Model/QualityReport/QualityReportSegmentStruct.php` | Phase 13A |
+| `lib/Model/ReviseFeedback/FeedbackDAO.php` | Phase 0 |
+| `lib/Model/Search/MySQLReplaceEventDAO.php` | Phase 0 |
+| `lib/Model/Search/MySQLReplaceEventIndexDAO.php` | Phase 0 |
+| `lib/Model/Search/RedisReplaceEventIndexDAO.php` | Phase 0 |
+| `lib/Model/Segments/SegmentOriginalDataDao.php` | Phase 0 |
+| `lib/Model/Segments/SegmentUIStruct.php` | Phase 0 |
+| `lib/Model/Teams/MembershipStruct.php` | Phase 0 |
+| `lib/Model/Teams/TeamModel.php` | Phase 6A |
+| `lib/Model/TmKeyManagement/MemoryKeyDao.php` | Phase 6C |
+| `lib/Model/TmKeyManagement/MemoryKeyStruct.php` | Phase 6C |
+| `lib/Model/TmKeyManagement/UserKeysModel.php` | Phase 6C |
+| `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
+| `lib/Model/Translators/TranslatorsModel.php` | Phase 6D |
+| `lib/Model/Xliff/DTO/AbstractXliffRule.php` | Phase 0 |
+| `lib/Model/Xliff/DTO/XliffRuleInterface.php` | Phase 0 |
+
+#### Plugins
+| File | Cleaned In |
+|------|-----------|
+| `lib/Plugins/Features/RevisionFactory.php` | Phase 13A |
+| `lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php` | Phase 0 |
+| `lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php` | Phase 12A |
+| `lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php` | Phase 0 |
+
+#### Utils/Workers & Contribution
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/AsyncTasks/Workers/GetContributionWorker.php` | Phase 4A |
+| `lib/Utils/AsyncTasks/Workers/SetContributionMTWorker.php` | Phase 5B |
+| `lib/Utils/AsyncTasks/Workers/SetContributionWorker.php` | Phase 5B |
+| `lib/Utils/AsyncTasks/Workers/Traits/MatchesComparator.php` | Phase 4C |
+| `lib/Utils/AsyncTasks/Workers/Traits/ProjectWordCount.php` | Phase 4C |
+| `lib/Utils/Constants/EngineConstants.php` | Phase 6C |
+| `lib/Utils/Contribution/ContributionContexts.php` | Phase 4A |
+| `lib/Utils/Contribution/GetContributionRequest.php` | Phase 4A |
+| `lib/Utils/Contribution/SetContributionRequest.php` | Phase 5B |
+| `lib/Utils/Date/DateTimeUtil.php` | Phase 0 |
+
+#### Utils/Email
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Email/MembershipCreatedEmail.php` | Phase 12A |
+| `lib/Utils/Email/MembershipDeletedEmail.php` | Phase 12A |
+
+#### Utils/Engines (full hierarchy)
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Engines/Altlang.php` | Phase 0 |
+| `lib/Utils/Engines/Apertium.php` | Phase 0 |
+| `lib/Utils/Engines/DeepL.php` | Phase 0 |
+| `lib/Utils/Engines/EngineInterface.php` | Phase 0 |
+| `lib/Utils/Engines/EnginesFactory.php` | Phase 0 |
+| `lib/Utils/Engines/GoogleTranslate.php` | Phase 0 |
+| `lib/Utils/Engines/Intento.php` | Phase 14 |
+| `lib/Utils/Engines/Lara.php` | Phase 14 |
+| `lib/Utils/Engines/Lara/HeaderField.php` | Phase 0 |
+| `lib/Utils/Engines/Lara/Headers.php` | Phase 0 |
+| `lib/Utils/Engines/Lara/HttpClientInterface.php` | Phase 0 |
+| `lib/Utils/Engines/Lara/LaraClient.php` | Phase 0 |
+| `lib/Utils/Engines/MMT/MMTServiceApiException.php` | Phase 0 |
+| `lib/Utils/Engines/MMT.php` | Phase 14 |
+| `lib/Utils/Engines/NONE.php` | Phase 0 |
+| `lib/Utils/Engines/Results/ErrorResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MTResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/AnalyzeResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/AuthKeyResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/CheckGlossaryResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/CreateUserResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/DomainsResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/ExportResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/FileImportAndStatusResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/GetGlossaryResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/GetMemoryResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/KeysGlossaryResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/Matches.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/SearchGlossaryResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/SetContributionResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/TagProjectionResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/MyMemory/UpdateContributionResponse.php` | Phase 0 |
+| `lib/Utils/Engines/Results/TMSAbstractResponse.php` | Phase 14 |
+| `lib/Utils/Engines/Traits/Oauth.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/AltLangEngineValidator.php` | Phase 14 |
+| `lib/Utils/Engines/Validators/Contracts/EngineValidatorObject.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/DeepLEngineValidator.php` | Phase 14 |
+| `lib/Utils/Engines/Validators/GoogleTranslateEngineValidator.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/IntentoEngineOptionsValidator.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/IntentoEngineValidator.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/LaraEngineValidator.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/LaraGlossaryValidator.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/MMTEngineValidator.php` | Phase 0 |
+| `lib/Utils/Engines/Validators/MMTGlossaryValidator.php` | Phase 0 |
+| `lib/Utils/Engines/YandexTranslate.php` | Phase 0 |
+
+#### Utils/LQA
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/LQA/BxExG/Element.php` | Phase 9A |
+| `lib/Utils/LQA/BxExG/Mapper.php` | Phase 9A |
+| `lib/Utils/LQA/BxExG/Validator.php` | Phase 9A |
+| `lib/Utils/LQA/ICUSourceSegmentChecker.php` | Phase 14 |
+| `lib/Utils/LQA/ICUSourceSegmentDetector.php` | Phase 14 |
+| `lib/Utils/LQA/QA/ErrObject.php` | Phase 9A |
+| `lib/Utils/LQA/QA/SymbolChecker.php` | Phase 9A |
+| `lib/Utils/LQA/SizeRestriction/CJKLangUtils.php` | Phase 9A |
+| `lib/Utils/LQA/SizeRestriction/EmojiUtils.php` | Phase 9A |
+
+#### Utils (other)
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
+| `lib/Utils/Templating/PHPTALWithAppend.php` | Phase 0 |
+| `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
+| `lib/Utils/TmKeyManagement/ShareKeyEmail.php` | Phase 6C |
+| `lib/Utils/TmKeyManagement/TmKeyManager.php` | Phase 6C |
+| `lib/Utils/TmKeyManagement/TmKeyStruct.php` | Phase 6C |
+| `lib/Utils/Tools/CatUtils.php` | Phase 3A |
+| `lib/Utils/Tools/SimpleJWT.php` | Phase 0 |
+| `lib/Utils/Tools/Utils.php` | Phase 3B |
+| `lib/Utils/Validator/IsJobRevisionValidator.php` | Phase 13A |
+
+#### View
+| File | Cleaned In |
+|------|-----------|
+| `lib/View/API/App/Json/Analysis/AnalysisFile.php` | Phase 12A |
+| `lib/View/API/App/Json/Analysis/AnalysisFileMetadata.php` | Phase 12A |
+| `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
+| `lib/View/API/V2/Json/Membership.php` | Phase 12A |
+
+</details>
 
 ---
 
@@ -424,18 +691,18 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,582 |
-| **Assertions** | 22,955 |
+| **Total tests** | 3,697 |
+| **Assertions** | 23,490 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
 ### Coverage Analysis
 
-- **Class coverage more than doubled** (8.48% → 18.76%) — 74 additional classes now have test coverage, primarily structs, DAO files, and controllers that were previously untested.
-- **Method coverage jumped +13.47%** (21.74% → 35.21%) — 592 additional methods covered, driven by new typed accessors and controller test harnesses.
-- **Line coverage grew by +13.87%** (21.19% → 35.06%) — 4,896 additional lines covered while total lines grew by only 387.
-- **Total classes grew by 52** (625 → 677) — new struct types, validators, and test infrastructure added.
-- **Total methods grew by 195** (3,883 → 4,078) — new typed accessors replacing magic `__get`/`__set`.
+- **Class coverage more than doubled** (8.48% → 19.94%) — 82 additional classes now have test coverage, primarily structs, DAO files, controllers, and QR models that were previously untested.
+- **Method coverage jumped +15.40%** (21.74% → 37.14%) — 673 additional methods covered, driven by new typed accessors, controller test harnesses, and QR model DI refactors.
+- **Line coverage grew by +15.49%** (21.19% → 36.68%) — 5,464 additional lines covered while total lines grew by only 407.
+- **Total classes grew by 52** (625 → 677) — new struct types, validators, exceptions, and test infrastructure added.
+- **Total methods grew by 202** (3,883 → 4,085) — new typed accessors, factory methods, and protected DI wrappers.
 
 ---
 
@@ -621,6 +888,66 @@ New test files:
 
 ---
 
+### Phase 13: Quality Report Cluster (~100 errors) — ✅ DONE
+
+**Why:** The Quality Report stack is a tightly coupled domain cluster — controllers, models, structs, validators. Fixing it as a unit ensures consistent typing across the entire QR data flow from DAO through model to API response.
+
+#### 13A. Leaf Structs & Validators (commit `1be0e6a57d`, −15 entries)
+
+| File | Notes |
+|------|-------|
+| `QualityReportSegmentStruct.php` | DI for MetadataDao (`?MetadataDao $metadataDao = null`), float types for PEE, null guards. Coverage: **100%** |
+| `RevisionFactory.php` | `static→self` (no subclasses), restructured `getInstance()`. Coverage: **100%** |
+| `AbstractRevisionFeature.php` | Incremental type fixes |
+| `IsJobRevisionValidator.php` | DI refactor: constructor accepts `?ChunkReviewDao`. Coverage: **100%** |
+| `FilterRevisionChangeNotificationListEvent.php` | Type annotation |
+
+#### 13B. Models (commit `1be0e6a57d`, −49 entries)
+
+| File | Errors Fixed | Coverage | Notes |
+|------|-------------|----------|-------|
+| `QualityReportSegmentModel.php` | 25→0 | 80% (8/10 methods) | Typed properties, return types, local var narrowing, null guard; DI for ChunkReviewDao |
+| `QualityReportModel.php` | 24→0 | 91.45% lines (19/23 methods, 82.61%) | Typed properties, ArrayObject generics, dead code removal, null safety; DI for QualityReportDao, ChunkReviewDao, FeedbackDAO |
+
+#### 13C. Controllers (commit `1be0e6a57d`, −36 entries)
+
+| File | Errors Fixed | Coverage | Notes |
+|------|-------------|----------|-------|
+| `QualityReportControllerAPI.php` | 21→0 | 80% (8/10 methods) | `createQualityReportModel()` factory method for testability |
+| `RevisionFeedbackController.php` | 7→0 | 100% (3/3 methods) | `createFeedbackDao()` factory method |
+| `QualityFrameworkController.php` | 5→0 | 100% (3/3 methods) | Type annotations |
+| `QualityReportController.php` (Views) | 3→0 | 100% (4/4 methods) | Type annotations |
+
+#### 13D. Test Infrastructure
+
+- **`BaseKleinViewController::render()`**: Throws `RenderTerminatedException` when `AppConfig::$ENV === 'testing'` instead of `die()`. Flow control preserved — `throw` satisfies `never` return type. Avoids touching ~10 view controllers that rely on render-as-flow-control.
+- **New `RenderTerminatedException`** class: `lib/Controller/Exceptions/RenderTerminatedException.php`
+- **DELETE+INSERT pattern**: Fixed in QualityReportViewControllerTest and QualityFrameworkControllerTest for deterministic test state.
+
+#### Key Architectural Changes
+
+- **DI refactor of QualityReportModel**: Injected `QualityReportDao`, `ChunkReviewDao`, `FeedbackDAO` as constructor params with `= null` defaults. Protected wrappers: `getSegmentsForQualityReport()`, `createRevisionFactory()`, `updateChunkReview()` — wrap static DAO/factory calls so test subclasses can override.
+- **DI refactor of QualityReportSegmentModel**: Injected `ChunkReviewDao` as constructor param with `= null` default.
+- **DI refactor of IsJobRevisionValidator**: Injected `ChunkReviewDao` as constructor param with `= null` default; test rewritten to use mock DAO.
+- **Controller factory methods**: `createQualityReportModel()` in QualityReportControllerAPI, `createFeedbackDao()` in RevisionFeedbackController — minimal production changes enabling mock injection in tests.
+
+#### New Test Files (10 files, 40 tests)
+
+| File | Tests | Assertions |
+|------|-------|------------|
+| `QualityReportModelTest.php` | 19 | 77 |
+| `QualityReportSegmentModelTest.php` | 15 | 52 |
+| `QualityReportControllerAPITest.php` | 13 | — |
+| `QualityReportViewControllerTest.php` | 6 | — |
+| `QualityFrameworkControllerTest.php` | 5 | — |
+| `RevisionFeedbackControllerTest.php` | 4 | — |
+| `AbstractRevisionFeatureTest.php` | — | — |
+| `RevisionFactoryTest.php` | — | — |
+| `QualityReportSegmentStructTest.php` | — | — |
+| `IsJobRevisionValidatorTest.php` | — | — |
+
+---
+
 ## Queue (Next Targets — Priority Order)
 
 ### Priority 1–4
@@ -678,8 +1005,8 @@ New test files:
 | `Model/Projects/ManageModel.php` | 19 | 94% | 18 | 1 | @throws + iterables |
 | ~~`Utils/Logger/MatecatLogger.php`~~ | ~~19~~ | ~~100%~~ | ~~19~~ | ~~0~~ | ✅ Done (Phase 12, 100% coverage) |
 | `View/V3/Json/QualitySummary.php` | 19 | 78% | 15 | 4 | Mostly iterables |
-| `Model/QualityReport/QualityReportModel.php` | 24 | 70% | 17 | 1 | @throws + iterables |
-| `Controller/V3/QualityReportControllerAPI.php` | 21 | 71% | 15 | 6 | QR stack (pair with above) |
+| ~~`Model/QualityReport/QualityReportModel.php`~~ | ~~24~~ | ~~70%~~ | ~~17~~ | ~~1~~ | ✅ Done (Phase 13, DI refactored, 82.61% methods) |
+| ~~`Controller/V3/QualityReportControllerAPI.php`~~ | ~~21~~ | ~~71%~~ | ~~15~~ | ~~6~~ | ✅ Done (Phase 13, 80% methods) |
 | `Utils/AsyncTasks/Workers/GlossaryWorker.php` | 18 | 72% | 13 | 2 | Worker pattern (familiar) |
 | `Model/Conversion/Filters.php` | 19 | 73% | 14 | 2 | Iterables-heavy |
 | `Model/Projects/ProjectModel.php` | 18 | 72% | 13 | 5 | @throws cascade |
@@ -711,7 +1038,7 @@ New test files:
 | `GDrive/Session.php` | 29 | 68% | 20 | 9 | GDrive integration |
 | `Utils/Tools/PostEditing.php` | 27 | 29% | 8 | 19 | Heavy behavioral |
 | `Model/Analysis/AbstractStatus.php` | 25 | 56% | 14 | 9 | Analysis base class |
-| `QualityReportSegmentModel.php` | 25 | 68% | 17 | 3 | QR stack |
+| ~~`QualityReportSegmentModel.php`~~ | ~~25~~ | ~~68%~~ | ~~17~~ | ~~3~~ | ✅ Done (Phase 13, DI refactored, 80% methods) |
 | `Model/WordCount/CounterModel.php` | 23 | 21% | 5 | 18 | Heavy behavioral |
 | `Utils/TMS/TMSService.php` | 23 | 52% | 12 | 11 | TM service |
 
@@ -735,7 +1062,7 @@ New test files:
 ### Recommended Strategy
 
 1. ~~**Batch Tier 1 PHPDoc-only files** (MatecatLogger, Chunk, ManageModel, AnalysisFile, Membership, SplitJobController) — ~90 entries, zero TDD, fast~~ ✅ Partially done (Phase 12 — MatecatLogger, Chunk, AnalysisFile, Membership)
-2. **Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster
+2. ~~**Quality Report stack** (QualityReportModel + QualityReportSegmentModel + QualityReportControllerAPI + QualitySummary) — ~89 entries, domain cluster~~ ✅ Done (Phase 13 — QualityReportModel, QualityReportSegmentModel, QualityReportControllerAPI; QualitySummary remains)
 3. **GlossaryWorker** — familiar worker pattern from contribution stack
 4. **GetSegmentsController** — high business value, moderate difficulty
 5. **Remaining Tier 1** — ManageModel (19), SplitJobController (15), ProjectModel (18), Filters (19)

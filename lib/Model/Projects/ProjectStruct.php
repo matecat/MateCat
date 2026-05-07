@@ -22,6 +22,9 @@ use PDOException;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
 
@@ -60,6 +63,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @param int $ttl
      *
      * @return JobStruct[]
+     *
+     * @throws DomainException
      */
     public function getJobs(int $ttl = 0): array
     {
@@ -72,6 +77,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
     /**
      * @return int
+     *
+     * @throws DomainException
      */
     public function getJobsCount(): int
     {
@@ -89,6 +96,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
       * @param string $value
       *
       * @return bool
+      * @throws DomainException
       * @throws ReflectionException
       * @throws PDOException
       */
@@ -102,7 +110,9 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
     /**
      *
-     * @return array
+     * @return array<string, string>
+     *
+     * @throws DomainException
      */
     public function getAllMetadataAsKeyValue(): array
     {
@@ -120,6 +130,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @param string $key
      *
      * @return ?string
+     *
+     * @throws DomainException
      */
     public function getMetadataValue(string $key): mixed
     {
@@ -134,6 +146,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
     /**
      * @return MetadataStruct[]
+     *
+     * @throws DomainException
      */
     public function getAllMetadata(): array
     {
@@ -182,7 +196,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return bool
      *
      */
-    public function isFeatureEnabled($feature_code): bool
+    public function isFeatureEnabled(string $feature_code): bool
     {
         return in_array($feature_code, $this->getFeaturesSet()->getCodes());
     }
@@ -204,6 +218,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @param int $ttl
      *
      * @return JobStruct[]
+     *
+     * @throws DomainException
      */
     public function getChunks(int $ttl = 0): array
     {
@@ -218,6 +234,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
     /**
      * @return string
+     *
+     * @throws DomainException
      */
     public function getWordCountType(): string
     {
@@ -232,7 +250,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         }
     }
 
-    public function hasFeature($feature_code): bool
+    public function hasFeature(string $feature_code): bool
     {
         return in_array($feature_code, $this->getFeaturesSet()->getCodes());
     }

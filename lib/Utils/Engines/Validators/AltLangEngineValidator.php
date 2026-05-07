@@ -24,6 +24,7 @@ class AltLangEngineValidator extends AbstractValidator
      * @param EngineValidatorObject $object
      * @return ValidatorObject|null
      * @throws Exception
+     * @throws \TypeError
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {

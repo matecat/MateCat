@@ -3,6 +3,7 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
+use Controller\Exceptions\RenderTerminatedException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\Oauth\OauthClient;
@@ -22,6 +23,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
     /**
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws RenderTerminatedException
      */
     public function response(): void
     {
@@ -60,6 +62,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      *
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws RenderTerminatedException
      */
     protected function _processSuccessfulOAuth($code, $provider = null): void
     {
@@ -85,6 +88,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      *
      * @param      $code
      * @param null $provider
+     * @throws RenderTerminatedException
      */
     protected function _initRemoteUser($code, $provider = null): void
     {

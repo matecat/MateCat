@@ -213,6 +213,7 @@ class MMT extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @return bool
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function set($_config): bool
     {

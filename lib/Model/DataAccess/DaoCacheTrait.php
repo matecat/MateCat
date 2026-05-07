@@ -11,6 +11,7 @@ namespace Model\DataAccess;
 
 use Exception;
 use Predis\Client;
+use Psr\Log\InvalidArgumentException;
 use Random\RandomException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
@@ -108,6 +109,9 @@ trait DaoCacheTrait
 
 
     /** @noinspection PhpUnusedParameterInspection */
+    /**
+     * @throws InvalidArgumentException
+     */
     protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
     {
         LoggerFactory::getLogger('query_cache')->debug(

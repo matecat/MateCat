@@ -202,6 +202,9 @@ abstract class KleinController implements IController
     {
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     protected function _logWithTime(): void
     {
         $this->logPageCall();

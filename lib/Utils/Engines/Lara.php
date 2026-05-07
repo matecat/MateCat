@@ -438,6 +438,7 @@ class Lara extends AbstractEngine
      * @param string $mt_qe_engine_id
      *
      * @return float|null
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function getQualityEstimation(
         string $source,
@@ -658,6 +659,7 @@ class Lara extends AbstractEngine
      * @param array<int, array<string, mixed>>|null $segments
      *
      * @return void
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {

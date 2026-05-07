@@ -4,11 +4,13 @@ namespace Model\FilesStorage;
 
 use Exception;
 use FilesystemIterator;
+use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -219,7 +221,8 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string|null $newFileName
      *
      * @return bool
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
+     * @throws Exception
      */
     public function moveFromCacheToFileDir(string $dateHashPath, string $lang, string $idFile, ?string $newFileName = null): bool
     {
@@ -381,7 +384,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $uploadSession
      *
      * @return void
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      * @throws Exception
      */
     public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void
@@ -389,7 +392,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $destination = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         self::ensureDirectoryExists($destination);
 
-        /** @var \SplFileInfo $item */
+        /** @var SplFileInfo $item */
         foreach (
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS),
@@ -397,14 +400,41 @@ class FsFilesStorage extends AbstractFilesStorage
             ) as $item
         ) {
             if ($item->isDir()) {
+                /**
+                 * RecursiveIteratorIterator at the C level delegates unknown method calls to
+                 * the active sub-iterator (RecursiveDirectoryIterator).
+                 *
+                 * It's PHP SPL's internal "magic proxy" at the C level.
+                 * Unlikely to break (it's been like this since PHP 5.1+), but it's not contractual.
+                 *
+                 * @noinspection PhpUndefinedMethodInspection
+                 */
                 mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
+                /**
+                 * RecursiveIteratorIterator at the C level delegates unknown method calls to
+                 * the active sub-iterator (RecursiveDirectoryIterator).
+                 *
+                 * It's PHP SPL's internal "magic proxy" at the C level.
+                 * Unlikely to break (it's been like this since PHP 5.1+), but it's not contractual.
+                 *
+                 * @noinspection PhpUndefinedMethodInspection
+                 */
                 $subPathName = $iterator->getSubPathName();
 
                 if (stripos($subPathName, "|") !== false) {
                     // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
                     $short_hash = sha1($subPathName);
 
+                    /**
+                     * RecursiveIteratorIterator at the C level delegates unknown method calls to
+                     * the active sub-iterator (RecursiveDirectoryIterator).
+                     *
+                     * It's PHP SPL's internal "magic proxy" at the C level.
+                     * Unlikely to break (it's been like this since PHP 5.1+), but it's not contractual.
+                     *
+                     * @noinspection PhpUndefinedMethodInspection
+                     */
                     //TODO check this separator: could be the same for S3 and FS ?
                     $pathParts = explode("|", $iterator->getSubPathName());
                     $lang = array_pop($pathParts);
@@ -440,7 +470,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param array<string|int, mixed> $segments_metadata
      *
      * @return void
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void
     {
@@ -454,7 +484,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param int $id_project
      *
      * @return array<string|int, mixed>
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     public static function getFastAnalysisData(int $id_project): array
     {
@@ -537,7 +567,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $projectID
      *
      * @return bool
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws Exception
      */
     public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool
@@ -575,13 +605,13 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $zipName
      *
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string
     {
         $date = date_create($projectDate);
         if ($date === false) {
-            throw new \InvalidArgumentException("Invalid date string: '$projectDate'");
+            throw new InvalidArgumentException("Invalid date string: '$projectDate'");
         }
 
         $datePath = $date->format('Ymd');
@@ -594,13 +624,13 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $projectID
      *
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getOriginalZipDir(string $projectDate, string $projectID): string
     {
         $date = date_create($projectDate);
         if ($date === false) {
-            throw new \InvalidArgumentException("Invalid date string: '$projectDate'");
+            throw new InvalidArgumentException("Invalid date string: '$projectDate'");
         }
 
         $datePath = $date->format('Ymd');

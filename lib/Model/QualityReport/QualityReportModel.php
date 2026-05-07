@@ -11,6 +11,7 @@ namespace Model\QualityReport;
 use ArrayObject;
 use DateMalformedStringException;
 use DateTime;
+use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\DataAccess\Database;
@@ -168,6 +169,7 @@ class QualityReportModel
 
     /**
      * @return array<int, array<string, mixed>>
+     * @throws PDOException
      */
     protected function getSegmentsForQualityReport(): array
     {
@@ -186,6 +188,7 @@ class QualityReportModel
     /**
      * @param ChunkReviewStruct $chunkReview
      * @param array<string, mixed> $options
+     * @throws Exception
      */
     protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
     {
@@ -245,7 +248,9 @@ class QualityReportModel
         return $this->quality_report_structure;
     }
 
-    /** @return array<string, mixed> */
+    /** @return array<string, mixed>
+     * @throws DomainException
+     */
     protected function getAndDecodePossiblyProjectMetadataJson(): array
     {
         return $this->getProject()->getAllMetadataAsKeyValue();

@@ -10,6 +10,7 @@
 namespace Controller\Traits;
 
 
+use InvalidArgumentException;
 use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
@@ -36,8 +37,9 @@ trait TimeLoggerTrait
 
     /**
      * @return void
+     * @throws InvalidArgumentException
      */
-    protected function logPageCall()
+    protected function logPageCall(): void
     {
         $_request_uri = parse_url($_SERVER['REQUEST_URI']);
         if (is_array($_request_uri) && isset($_request_uri['query'])) {

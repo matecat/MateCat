@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DomainException;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -30,6 +31,7 @@ class MetaDataController extends KleinController
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws RuntimeException
+     * @throws DomainException
      */
     public function index(): void
     {
@@ -59,6 +61,7 @@ class MetaDataController extends KleinController
      * @param ProjectStruct $project
      *
      * @return stdClass
+     * @throws DomainException
      */
     private function getProjectInfo(ProjectStruct $project): stdClass
     {

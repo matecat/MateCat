@@ -47,6 +47,7 @@ abstract class TMSAbstractResponse
      * @param int|null $id_project
      *
      * @return static
+     * @throws \TypeError
      */
     public static function getInstance(mixed $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null): static
     {

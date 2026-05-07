@@ -532,6 +532,8 @@ class MMTServiceApi
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
     protected function send(string $method, string $url, ?array $params = null, ?bool $multipart = false, ?int $timeout = null): ?array
     {

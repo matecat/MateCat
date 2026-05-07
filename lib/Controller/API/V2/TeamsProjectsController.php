@@ -22,6 +22,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
+use PDOException;
 use ReflectionException;
 use Throwable;
 use View\API\V2\Json\Project;
@@ -99,9 +100,9 @@ class TeamsProjectsController extends KleinController
     }
 
     /**
-     * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function getByName(): void
     {

@@ -206,6 +206,7 @@ class Intento extends AbstractEngine
      *
      * @return GetMemoryResponse
      * @throws Exception
+     * @throws \TypeError
      */
     protected function _curl_async(array $config, array $parameters = [], ?string $function = null): GetMemoryResponse
     {

@@ -196,6 +196,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @return int
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function remove(int $id, int $uid): int
     {

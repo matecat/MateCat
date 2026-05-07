@@ -553,12 +553,6 @@ parameters:
 			path: lib/Controller/API/App/GetProjectsController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\GetSearchController\:\:saveReplacementEvent\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/GetSearchController.php
-
-		-
 			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer1ToLayer2\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -763,19 +757,19 @@ parameters:
 			path: lib/Controller/API/App/GetWarningController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\GetWarningController\:\:getChunk\(\) has parameter \$id_job with no type specified\.$#'
+			message: '#^Method Controller\\API\\App\\GetWarningController\:\:getChunkAndLoadProjectFeatures\(\) has parameter \$id_job with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Controller/API/App/GetWarningController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\GetWarningController\:\:getChunk\(\) has parameter \$password with no type specified\.$#'
+			message: '#^Method Controller\\API\\App\\GetWarningController\:\:getChunkAndLoadProjectFeatures\(\) has parameter \$password with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Controller/API/App/GetWarningController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\GetWarningController\:\:getChunk\(\) never returns null so it can be removed from the return type\.$#'
+			message: '#^Method Controller\\API\\App\\GetWarningController\:\:getChunkAndLoadProjectFeatures\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: lib/Controller/API/App/GetWarningController.php
@@ -985,30 +979,6 @@ parameters:
 			path: lib/Controller/API/App/OutsourceToController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\QualityFrameworkController\:\:project\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/QualityFrameworkController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\QualityFrameworkController\:\:renderQualityFramework\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/QualityFrameworkController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\QualityFrameworkController\:\:renderQualityFramework\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/QualityFrameworkController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\QualityFrameworkController\:\:renderQualityFramework\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/QualityFrameworkController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\RequestExportTMXController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1109,12 +1079,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/SetCurrentSegmentController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_logCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\SplitSegmentController\:\:split\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -1933,114 +1897,6 @@ parameters:
 			path: lib/Controller/API/V2/ChangeProjectNameController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationIssueController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/ChunkTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\ChunkTranslationVersionController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/ChunkTranslationVersionController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\CommentsController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/CommentsController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:downloadFile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:ifGlobalSightXliffRemoveTargetMarks\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:transferZipFromS3ToTmpDir\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\DownloadController\:\:transferZipFromS3ToTmpDir\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Offset ''basename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 4
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Offset ''filename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\?\: string, filename\?\: string\}\|string\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Offset ''output_filename'' might not exist on array\{document_content\: string, output_filename\?\: mixed, out_xliff_name\: non\-falsy\-string, source\: mixed, target\: mixed\}\|array\{document_content\: string, output_filename\?\: mixed\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Offset ''output_filename'' might not exist on array\{document_content\: string\|false, output_filename\?\: mixed, out_xliff_name\: non\-falsy\-string, source\: mixed, target\: mixed\}\|array\{document_content\: string\|false, output_filename\?\: mixed\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\Utils\:\:stripFileBOM\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#2 \$data of method Matecat\\XliffParser\\XliffParser\:\:replaceTranslation\(\) expects array\<int\|string, array\<string, mixed\>\>, array\<int\|string, array\<int\|string, mixed\>\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#2 \$documentContent of static method Utils\\Tools\\CatUtils\:\:convertEncoding\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/DownloadController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\DownloadJobTMXController\:\:_saveActivity\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -2137,12 +1993,6 @@ parameters:
 			path: lib/Controller/API/V2/JobMergeController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\JobsController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/JobsController.php
-
-		-
 			message: '#^Method Controller\\API\\V2\\JobsTranslatorsController\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -2153,12 +2003,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V2/JobsTranslatorsController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\MarkAllSegmentStatusController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/MarkAllSegmentStatusController.php
 
 		-
 			message: '#^Method Controller\\API\\V2\\MarkAllSegmentStatusController\:\:sanitizeSegmentIDs\(\) has parameter \$segment_list with no type specified\.$#'
@@ -2275,12 +2119,6 @@ parameters:
 			path: lib/Controller/API/V2/ReviewsController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\ReviseTranslationIssuesController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/ReviseTranslationIssuesController.php
-
-		-
 			message: '#^Cannot access property \$id on Model\\Teams\\TeamStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -2363,12 +2201,6 @@ parameters:
 			identifier: empty.variable
 			count: 2
 			path: lib/Controller/API/V2/SegmentTranslationIssueController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\SegmentVersionController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/SegmentVersionController.php
 
 		-
 			message: '#^Method Controller\\API\\V2\\SplitJobController\:\:checkSplit\(\) has parameter \$request with no value type specified in iterable type array\.$#'
@@ -2581,6 +2413,12 @@ parameters:
 			path: lib/Controller/API/V2/TeamsProjectsController.php
 
 		-
+			message: '#^Method Controller\\API\\V2\\TeamsProjectsController\:\:getByName\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/TeamsProjectsController.php
+
+		-
 			message: '#^Property Controller\\API\\V2\\TeamsProjectsController\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -2641,28 +2479,10 @@ parameters:
 			path: lib/Controller/API/V2/UserController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_logCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:findSegmentTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\ChunkController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/ChunkController.php
 
 		-
 			message: '#^Method Controller\\API\\V3\\ChunkController\:\:show\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -2881,12 +2701,6 @@ parameters:
 			path: lib/Controller/API/V3/DownloadQRController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/FileInfoController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:setInstructions\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -2977,15 +2791,9 @@ parameters:
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\IssueCheckController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/IssueCheckController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\IssueCheckController\:\:segments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/V3/IssueCheckController.php
 
 		-
@@ -2998,12 +2806,6 @@ parameters:
 			message: '#^Argument of an invalid type array\<Model\\Files\\MetadataStruct\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
-			path: lib/Controller/API/V3/MetaDataController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\MetaDataController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: lib/Controller/API/V3/MetaDataController.php
 
 		-
@@ -3020,6 +2822,12 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\V3\\MetaDataController\:\:getJobMetaData\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/MetaDataController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\MetaDataController\:\:index\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/MetaDataController.php
@@ -3307,7 +3115,7 @@ parameters:
 			path: lib/Controller/API/V3/ProjectTemplateController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:delete\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:delete\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/ProjectTemplateController.php
@@ -3377,162 +3185,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Cannot access offset ''path'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_formatSegments\(\) has parameter \$filesInfo with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_formatSegments\(\) has parameter \$ttlArray with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_formatSegments\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) has parameter \$filter with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) has parameter \$segments_id with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:_getPaginationLinks\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getTteArrayForSegment\(\) has parameter \$tteArray with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:getTteArrayForSegment\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:renderSegments\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:renderSegments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QualityReportControllerAPI\:\:show\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^PHPDoc tag @var for variable \$filter has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Parameter \#1 \$mt_we_workflow_enabled of static method Model\\Analysis\\Constants\\MatchConstantsFactory\:\:getInstance\(\) expects bool\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Parameter \#1 \$segment_ids of method Model\\QualityReport\\QualityReportSegmentModel\:\:getSegmentsForQR\(\) expects list\<int\|string\>, non\-empty\-array\<int, int\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Parameter \#2 \$id_job of method Plugins\\Features\\TranslationEvents\\Model\\TranslationEventDao\:\:getTteForSegments\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Parameter \#2 \$ttlArray of method Controller\\API\\V3\\QualityReportControllerAPI\:\:_formatSegments\(\) expects array, array\<Model\\DataAccess\\ShapelessConcreteStruct\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Parameter \#4 \$mt_qe_workflow_enabled of method Controller\\API\\V3\\QualityReportControllerAPI\:\:_formatSegments\(\) expects bool, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/QualityReportControllerAPI.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:feedback\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/RevisionFeedbackController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:feedback\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Controller/API/V3/RevisionFeedbackController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\RevisionFeedbackController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/RevisionFeedbackController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_logCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
 			message: '#^Cannot access offset ''path'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
@@ -3667,13 +3319,19 @@ parameters:
 			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
 
 		-
+			message: '#^Method Controller\\Abstracts\\BaseKleinViewController\:\:render\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/Abstracts/BaseKleinViewController.php
+
+		-
 			message: '#^Method Controller\\Abstracts\\IController\:\:getFeatureSet\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Controller/Abstracts/IController.php
 
 		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:logPageCall\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\Abstracts\\KleinController\:\:_logWithTime\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Abstracts/KleinController.php
@@ -3997,24 +3655,6 @@ parameters:
 			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
 		-
-			message: '#^Method Controller\\Views\\QualityReportController\:\:renderView\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/QualityReportController.php
-
-		-
-			message: '#^Method Controller\\Views\\QualityReportController\:\:searchableStatuses\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/QualityReportController.php
-
-		-
-			message: '#^Method Controller\\Views\\QualityReportController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/QualityReportController.php
-
-		-
 			message: '#^Method Controller\\Views\\TemplateDecorator\\AbstractDecorator\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -4255,6 +3895,12 @@ parameters:
 			path: lib/Model/Analysis/AbstractStatus.php
 
 		-
+			message: '#^Method Model\\Analysis\\AnalysisDao\:\:destroyCacheByProjectId\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Analysis/AnalysisDao.php
+
+		-
 			message: '#^Method Model\\Analysis\\Constants\\AbstractConstants\:\:forValue\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -4433,6 +4079,12 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: lib/Model/Comments/BaseCommentStruct.php
+
+		-
+			message: '#^Method Model\\Comments\\CommentDao\:\:destroySegmentIdSegmentCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Comments/CommentDao.php
 
 		-
 			message: '#^Method Model\\Comments\\CommentDao\:\:resolveThread\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -5545,18 +5197,6 @@ parameters:
 			path: lib/Model/Conversion/ZipArchiveHandler.php
 
 		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_destroyObjectCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDao\:\:_logCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDao.php
-
-		-
 			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:__construct\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -5947,10 +5587,16 @@ parameters:
 			path: lib/Model/Files/FilesMetadataMarshaller.php
 
 		-
-			message: '#^Method Model\\FilesStorage\\FsFilesStorage\:\:moveFromCacheToFileDir\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Files\\MetadataDao\:\:destroyCacheByJobIdProjectAndIdFile\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 7
-			path: lib/Model/FilesStorage/FsFilesStorage.php
+			count: 1
+			path: lib/Model/Files/MetadataDao.php
+
+		-
+			message: '#^Method Model\\Files\\MetadataDao\:\:destroyGetCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Files/MetadataDao.php
 
 		-
 			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:storeOriginalFileAndGetXliffDestination\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -6289,6 +5935,24 @@ parameters:
 			path: lib/Model/Filters/DTO/Yaml.php
 
 		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByIdAndUserCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByIdCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
+			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryByUidAndNameCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Filters/FiltersConfigTemplateDao.php
+
+		-
 			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6361,12 +6025,6 @@ parameters:
 			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
 
 		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeManager\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/JobSplitMerge/JobSplitMergeManager.php
-
-		-
 			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:beginTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6388,12 +6046,6 @@ parameters:
 			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:getJobByIdAndPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
@@ -6431,6 +6083,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
+
+		-
+			message: '#^Method Model\\Jobs\\JobDao\:\:destroyCacheByProjectId\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/Jobs/JobDao.php
 
 		-
 			message: '#^Argument of an invalid type Model\\Outsource\\ConfirmationStruct supplied for foreach, only iterables are supported\.$#'
@@ -6523,10 +6181,46 @@ parameters:
 			path: lib/Model/Jobs/LexiQaAndTagProjectionLanguages.php
 
 		-
+			message: '#^Method Model\\Jobs\\MetadataDao\:\:destroyCacheByJobAndPassword\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Jobs/MetadataDao.php
+
+		-
+			message: '#^Method Model\\Jobs\\MetadataDao\:\:destroyCacheByJobAndPasswordAndKey\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Jobs/MetadataDao.php
+
+		-
+			message: '#^Method Model\\Jobs\\MetadataDao\:\:destroyCacheByJobId\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Jobs/MetadataDao.php
+
+		-
 			message: '#^Method Model\\LQA\\CategoryStruct\:\:toArrayWithJsonDecoded\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/LQA/CategoryStruct.php
+
+		-
+			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:destroyCacheByProjectId\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/ChunkReviewDao.php
+
+		-
+			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:destroyCacheForFindChunkReviews\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/ChunkReviewDao.php
+
+		-
+			message: '#^Method Model\\LQA\\ChunkReviewDao\:\:destroyCacheForJobIdReviewPasswordAndSourcePage\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/LQA/ChunkReviewDao.php
 
 		-
 			message: '#^Method Model\\LQA\\ChunkReviewStruct\:\:getUndoData\(\) has no return type specified\.$#'
@@ -6757,6 +6451,24 @@ parameters:
 			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
 
 		-
+			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:destroyQueryByIdAndUserCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
+
+		-
+			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:destroyQueryByIdCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
+
+		-
+			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:destroyQueryByUidCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
+
+		-
 			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6785,6 +6497,24 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/MTQE/Templates/DTO/MTQEWorkflowParams.php
+
+		-
+			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:destroyQueryByIdAndUserCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
+
+		-
+			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:destroyQueryByIdCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
+
+		-
+			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:destroyQueryByUidCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
 		-
 			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
@@ -6823,6 +6553,24 @@ parameters:
 			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php
 
 		-
+			message: '#^Method Model\\Outsource\\ConfirmationDao\:\:destroyConfirmationCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Outsource/ConfirmationDao.php
+
+		-
+			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureDao\:\:destroyCacheByIdCustomer\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/OwnerFeatures/OwnerFeatureDao.php
+
+		-
+			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureDao\:\:destroyCacheByUserId\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/OwnerFeatures/OwnerFeatureDao.php
+
+		-
 			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureStruct\:\:getOptions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6845,12 +6593,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/OwnerFeatures/OwnerFeatureStruct.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:_logCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Pagination/Pager.php
 
 		-
 			message: '#^Method Model\\Pagination\\Pager\:\:count\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
@@ -6931,6 +6673,18 @@ parameters:
 			path: lib/Model/Pagination/PaginationParameters.php
 
 		-
+			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryByIdAndUserCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/PayableRates/CustomPayableRateDao.php
+
+		-
+			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:destroyQueryByIdCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/PayableRates/CustomPayableRateDao.php
+
+		-
 			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -6983,12 +6737,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\FileInsertionService\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/ProjectCreation/FileInsertionService.php
 
 		-
 			message: '#^Parameter \#2 \$context of method Utils\\Logger\\MatecatLogger\:\:error\(\) expects array\<string, mixed\>, array\<int, mixed\> given\.$#'
@@ -7045,6 +6793,30 @@ parameters:
 			path: lib/Model/ProjectCreation/ProjectManager.php
 
 		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:cleanupUploadDirectory\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:clearFailedProject\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 4
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:determineStatusAndPopulateResult\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:handleZipFiles\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
 			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:insertContextsForFile\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -7057,9 +6829,9 @@ parameters:
 			path: lib/Model/ProjectCreation/ProjectManager.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:mapSegmentExtractionError\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: lib/Model/ProjectCreation/ProjectManager.php
 
 		-
@@ -7069,15 +6841,39 @@ parameters:
 			path: lib/Model/ProjectCreation/ProjectManager.php
 
 		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:pushActivityLog\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:pushTmxToMemory\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:resolveUploadDirAndGetHashes\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
 			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:saveFeaturesInMetadata\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ProjectCreation/ProjectManager.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\ProjectManagerModel\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\ProjectCreation\\ProjectManager\:\:validateBeforeCreation\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
+			path: lib/Model/ProjectCreation/ProjectManager.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\ProjectManagerModel\:\:executeBulkInsert\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 7
 			path: lib/Model/ProjectCreation/ProjectManagerModel.php
 
 		-
@@ -7093,15 +6889,15 @@ parameters:
 			path: lib/Model/ProjectCreation/ProjectMetadataService.php
 
 		-
+			message: '#^Method Model\\ProjectCreation\\QAProcessor\:\:detectIcu\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/QAProcessor.php
+
+		-
 			message: '#^Class Model\\Xliff\\DTO\\XliffRulesModel does not have a constructor and must be instantiated without any parameters\.$#'
 			identifier: new.noConstructor
 			count: 1
-			path: lib/Model/ProjectCreation/SegmentExtractor.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\SegmentExtractor\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: lib/Model/ProjectCreation/SegmentExtractor.php
 
 		-
@@ -7135,12 +6931,6 @@ parameters:
 			path: lib/Model/ProjectCreation/SegmentStorageService.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\SegmentStorageService\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/ProjectCreation/SegmentStorageService.php
-
-		-
 			message: '#^Method Model\\ProjectCreation\\SegmentStorageService\:\:persistSegmentMetadata\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -7159,15 +6949,15 @@ parameters:
 			path: lib/Model/ProjectCreation/SegmentStorageService.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:getUserByUid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:getKeyringOwnerKeys\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ProjectCreation/TmKeyService.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:log\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:getUserByUid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: lib/Model/ProjectCreation/TmKeyService.php
 
 		-
@@ -7177,256 +6967,40 @@ parameters:
 			path: lib/Model/ProjectCreation/TmKeyService.php
 
 		-
+			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:setPrivateTMKeys\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Model/ProjectCreation/TmKeyService.php
+
+		-
 			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:setPrivateTMKeys\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/ProjectCreation/TmKeyService.php
 
 		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:_getProjects\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:_getProjects\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:conditionsForProjectsQuery\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjects\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjects\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Projects\\MetadataDao\:\:destroyMetadataCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Model/Projects/ManageModel.php
+			path: lib/Model/Projects/MetadataDao.php
 
 		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) has parameter \$search_in_pname with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) has parameter \$search_only_completed with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) has parameter \$search_source with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) has parameter \$search_status with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) has parameter \$search_target with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ManageModel\:\:getProjectsNumber\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of class DateTime constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ManageModel.php
-
-		-
-			message: '#^Cannot access property \$type on Model\\Teams\\TeamStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:checkAssigneeChangeInPersonalTeam\(\) has parameter \$id_team with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:checkAssigneeChangeInPersonalTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheById\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Model/Projects/ProjectModel.php
+			path: lib/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:checkIdAssignee\(\) has parameter \$id_team with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:checkIdAssignee\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheByIdAndPassword\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Model/Projects/ProjectModel.php
+			path: lib/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:checkIdTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:cleanAssigneeCaches\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\Projects\\ProjectDao\:\:destroyCacheForProjectData\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:cleanAssigneeCaches\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:cleanProjectCache\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectModel\:\:prepareUpdate\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Model\\Projects\\ProjectDao\:\:destroyCacheById\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Parameter \#1 \$team of method Model\\Teams\\TeamDao\:\:destroyCacheAssignee\(\) expects Model\\Teams\\TeamStruct, Model\\Teams\\TeamStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Parameter \#1 \$uid of method Model\\Teams\\TeamDao\:\:getPersonalByUid\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Parameter \#3 \$assignee of class Utils\\Email\\ProjectAssignedEmail constructor expects Model\\Users\\UserStruct, Model\\Users\\UserStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectModel\:\:\$cacheTeamsToClean type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectModel\:\:\$changedFields type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Property Model\\Projects\\ProjectModel\:\:\$willChange type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectModel.php
-
-		-
-			message: '#^Class Model\\Projects\\ProjectStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:getAllMetadata\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:getAllMetadataAsKeyValue\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:getChunks\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:getJobs\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:getMetadataValue\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:hasFeature\(\) has parameter \$feature_code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:isFeatureEnabled\(\) has parameter \$feature_code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectStruct\:\:setMetadata\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Model\\Projects\\ProjectTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
-
-		-
-			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: lib/Model/Projects/ProjectTemplateDao.php
+			path: lib/Model/Projects/ProjectDao.php
 
 		-
 			message: '#^Call to an undefined method Predis\\Client\:\:hgetAll\(\)\.$#'
@@ -7531,6 +7105,12 @@ parameters:
 			path: lib/Model/Segments/ContextStruct.php
 
 		-
+			message: '#^Method Model\\Segments\\SegmentDao\:\:destroyCacheForGlobalTranslationMismatches\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Segments/SegmentDao.php
+
+		-
 			message: '#^Method Model\\Segments\\SegmentDao\:\:getById\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -7541,6 +7121,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Segments/SegmentMetadataCollection.php
+
+		-
+			message: '#^Method Model\\Segments\\SegmentMetadataDao\:\:destroyGetAllCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Segments/SegmentMetadataDao.php
+
+		-
+			message: '#^Method Model\\Segments\\SegmentMetadataDao\:\:destroyGetCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Segments/SegmentMetadataDao.php
 
 		-
 			message: '#^Match arm comparison between string and Model\\Segments\\SegmentMetadataMarshaller\:\:TRANSLATION_DISABLED is always false\.$#'
@@ -7597,6 +7189,24 @@ parameters:
 			path: lib/Model/Teams/InvitedUser.php
 
 		-
+			message: '#^Method Model\\Teams\\MembershipDao\:\:destroyCacheForListByTeamId\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/MembershipDao.php
+
+		-
+			message: '#^Method Model\\Teams\\MembershipDao\:\:destroyCacheTeamByIdAndUser\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/MembershipDao.php
+
+		-
+			message: '#^Method Model\\Teams\\MembershipDao\:\:destroyCacheUserTeams\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/MembershipDao.php
+
+		-
 			message: '#^Parameter \#1 \$params of static method Utils\\Tools\\Utils\:\:ensure_keys\(\) expects array\<string, mixed\>, array\<int\|string, list\<string\>\|Model\\DataAccess\\IDaoStruct\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -7621,16 +7231,34 @@ parameters:
 			path: lib/Model/Teams/PendingInvitations.php
 
 		-
+			message: '#^Method Model\\Teams\\TeamDao\:\:destroyCacheAssignee\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/TeamDao.php
+
+		-
+			message: '#^Method Model\\Teams\\TeamDao\:\:destroyCacheById\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/TeamDao.php
+
+		-
+			message: '#^Method Model\\Teams\\TeamDao\:\:destroyCachePersonalByUid\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/TeamDao.php
+
+		-
+			message: '#^Method Model\\Teams\\TeamDao\:\:destroyCacheUserCreatedTeams\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Teams/TeamDao.php
+
+		-
 			message: '#^Argument of an invalid type array\<Model\\Teams\\MembershipStruct\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
 			path: lib/Model/Teams/TeamStruct.php
-
-		-
-			message: '#^Method Model\\TmKeyManagement\\MemoryKeyDao\:\:getKeyringOwnerKeysByUid\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/TmKeyManagement/MemoryKeyDao.php
 
 		-
 			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
@@ -7679,6 +7307,12 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Model/TranslationsSplit/SplitDAO.php
+
+		-
+			message: '#^Method Model\\Translators\\JobsTranslatorsDao\:\:destroyCacheByJobStruct\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Translators/JobsTranslatorsDao.php
 
 		-
 			message: '#^Method Model\\Users\\Authentication\\ChangePasswordModel\:\:changePassword\(\) has parameter \$new_password with no type specified\.$#'
@@ -7849,6 +7483,12 @@ parameters:
 			path: lib/Model/Users/ClientUserFacade.php
 
 		-
+			message: '#^Method Model\\Users\\MetadataDao\:\:destroyCacheKey\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Users/MetadataDao.php
+
+		-
 			message: '#^Method Model\\Users\\MetadataStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7937,6 +7577,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Users/RedeemableProject.php
+
+		-
+			message: '#^Method Model\\Users\\UserDao\:\:destroyCacheByEmail\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Users/UserDao.php
+
+		-
+			message: '#^Method Model\\Users\\UserDao\:\:destroyCacheByUid\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Users/UserDao.php
 
 		-
 			message: '#^Method Model\\Users\\UserStruct\:\:belongsToTeam\(\) has parameter \$teamId with no type specified\.$#'
@@ -8159,6 +7811,24 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: lib/Model/Xliff/DTO/XliffRulesModel.php
+
+		-
+			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:destroyQueryByIdAndUidCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Xliff/XliffConfigTemplateDao.php
+
+		-
+			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:destroyQueryByIdCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Xliff/XliffConfigTemplateDao.php
+
+		-
+			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:destroyQueryByUidCache\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/Xliff/XliffConfigTemplateDao.php
 
 		-
 			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -8725,12 +8395,6 @@ parameters:
 			path: lib/Plugins/Features/ReviewExtended/TranslationIssueModel.php
 
 		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:getJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Plugins/Features/SegmentFilter/Controller/API/FilterController.php
-
-		-
 			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\FilterDefinition\:\:__construct\(\) has parameter \$filter_data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9257,6 +8921,12 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 2
 			path: lib/Utils/AsyncTasks/Workers/Analysis/Health.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:detectIcu\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
@@ -10003,39 +9673,255 @@ parameters:
 			path: lib/Utils/Engines/AbstractEngine.php
 
 		-
-			message: '#^Method Utils\\Engines\\Intento\:\:_curl_async\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Intento.php
-
-		-
-			message: '#^Method Utils\\Engines\\Lara\:\:getQualityEstimation\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:addToMemoryContent\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Utils/Engines/Lara.php
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
 
 		-
-			message: '#^Method Utils\\Engines\\Lara\:\:syncMemories\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:addToMemoryContent\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Utils/Engines/Lara.php
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
 
 		-
-			message: '#^Method Utils\\Engines\\MMT\:\:set\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/MMT.php
-
-		-
-			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:send\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:connectMemories\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/Engines/MMT/MMTServiceApi.php
 
 		-
-			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:send\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:connectMemories\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:createMemory\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:createMemory\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:deleteMemory\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:deleteMemory\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getAllMemories\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getAllMemories\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getAvailableLanguages\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getAvailableLanguages\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getContextVectorFromFile\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getContextVectorFromText\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getContextVectorFromText\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getImportJob\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getImportJob\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getMemory\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getMemory\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getMemoryById\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:getMemoryById\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:importGlossary\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:importGlossary\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:importIntoMemoryContent\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:importJobStatus\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:importJobStatus\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:jobStatus\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:jobStatus\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:me\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:me\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:qualityEstimation\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:qualityEstimation\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:signup\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:signup\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:translate\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:translate\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:updateGlossary\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:updateGlossary\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:updateMemory\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:updateMemory\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:updateMemoryContent\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Engines/MMT/MMTServiceApi.php
+
+		-
+			message: '#^Method Utils\\Engines\\MMT\\MMTServiceApi\:\:updateMemoryContent\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Utils/Engines/MMT/MMTServiceApi.php
 
 		-
@@ -10045,28 +9931,10 @@ parameters:
 			path: lib/Utils/Engines/MyMemory.php
 
 		-
-			message: '#^Method Utils\\Engines\\Results\\TMSAbstractResponse\:\:getInstance\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\Engines\\MyMemory\:\:_decode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Results/TMSAbstractResponse.php
-
-		-
-			message: '#^Method Utils\\Engines\\SmartMATE\:\:oauthGetAuthParameters\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Engines/SmartMATE.php
-
-		-
-			message: '#^Method Utils\\Engines\\Validators\\AltLangEngineValidator\:\:validate\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Validators/AltLangEngineValidator.php
-
-		-
-			message: '#^Method Utils\\Engines\\Validators\\DeepLEngineValidator\:\:validate\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Engines/Validators/DeepLEngineValidator.php
+			count: 17
+			path: lib/Utils/Engines/MyMemory.php
 
 		-
 			message: '#^Method Utils\\Files\\CSV\:\:extract\(\) throws checked exception PhpOffice\\PhpSpreadsheet\\Writer\\Exception but it''s missing from the PHPDoc @throws tag\.$#'

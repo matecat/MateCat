@@ -71,6 +71,7 @@ class MemoryKeyDao extends AbstractDao
      * @param int $uid
      *
      * @return MemoryKeyStruct[]
+     * @throws \Exception
      */
     public static function getKeyringOwnerKeysByUid(int $uid): array
     {

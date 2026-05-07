@@ -2,6 +2,7 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis;
 
+use DateTime;
 use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
@@ -157,7 +158,7 @@ class FastAnalysis extends AbstractDaemon
      * @param array<int, string>|null $args
      *
      * @return void
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function main(array $args = null): void
     {
@@ -208,7 +209,7 @@ class FastAnalysis extends AbstractDaemon
                     $perform_Tms_Analysis = false;
                     $status = ProjectStatus::STATUS_DONE;
 
-                    $featureSet->dispatchRun(new TmAnalysisDisabledEvent((int)$pid));
+                    $featureSet->dispatchRun(new TmAnalysisDisabledEvent($pid));
 
                     $this->logger->debug('Perform Analysis FALSE');
                 }
@@ -286,12 +287,25 @@ class FastAnalysis extends AbstractDaemon
                     $projectStruct = $metadataResult['project'];
                     $allMetadata = $metadataResult['metadata'];
                     $projectFeaturesString = $allMetadata[ProjectsMetadataMarshaller::FEATURES_KEY->value] ?? '';
-                    $mt_evaluation = $allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] ?? false;
-                    $mt_qe_workflow_enabled = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] ?? false;
-                    $mt_qe_workflow_parameters = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
-                    $mt_quality_value_in_editor = $allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85;
-                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
-                    $icu_enabled = $allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false;
+                    $mt_evaluation = isset($allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value])
+                        ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_EVALUATION->value]
+                        : null;
+                    $mt_qe_workflow_enabled = isset($allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value])
+                        ? (bool)$allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value]
+                        : null;
+                    $mt_qe_workflow_parameters_raw = $allMetadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] ?? null;
+                    $mt_qe_workflow_parameters_decoded = $mt_qe_workflow_parameters_raw !== null
+                        ? json_decode($mt_qe_workflow_parameters_raw, true)
+                        : null;
+                    $mt_qe_workflow_parameters = is_array($mt_qe_workflow_parameters_decoded)
+                        ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
+                        : null;
+                    $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
+                    $subfiltering_handlers_raw = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null;
+                    $subfiltering_handlers = $subfiltering_handlers_raw !== null
+                        ? array_values(array_map(static fn (mixed $h): string => (string)$h, (array)json_decode($subfiltering_handlers_raw, true)))
+                        : null;
+                    $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
 
                     $insertReportRes = $this->_insertFastAnalysis(
                         $projectStruct,
@@ -430,7 +444,7 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function _updateProject(int $pid, string $status): void
     {
@@ -496,7 +510,7 @@ class FastAnalysis extends AbstractDaemon
      * @param array<int, string>|null $subfiltering_handlers
      * @param bool $icu_enabled
      * @return int
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function _insertFastAnalysis(
         ProjectStruct $projectStruct,
@@ -560,9 +574,9 @@ class FastAnalysis extends AbstractDaemon
                      * IMPORTANT
                      * id_job will be taken from languages ( 80415:fr-FR,80416:it-IT )
                      */
-                    $this->segments[$k]['pid'] = (int)$pid;
+                    $this->segments[$k]['pid'] = $pid;
                     $this->segments[$k]['ppassword'] = $projectStruct->password;
-                    $this->segments[$k]['date_insert'] = (new \DateTime())->format('Y-m-d H:i:s');
+                    $this->segments[$k]['date_insert'] = (new DateTime())->format('Y-m-d H:i:s');
                     $this->segments[$k]['eq_word_count'] = ((float)$eq_word > $v['raw_word_count']) ? $v['raw_word_count'] : (float)$eq_word;
                     $this->segments[$k]['standard_word_count'] = ((float)$standard_words > $v['raw_word_count']) ? $v['raw_word_count'] : (float)$standard_words;
                     $this->segments[$k]['match_type'] = $match_type;
@@ -923,7 +937,7 @@ HD;
      * @param int $limit
      *
      * @return array<int, array<string, mixed>>
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
     {

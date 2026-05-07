@@ -6,6 +6,7 @@ use Exception;
 use PDO;
 use PDOException;
 use PDOStatement;
+use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 
@@ -197,6 +198,7 @@ abstract class AbstractDao
 
     /**
      * @param array<int|string, scalar|null> $bindParams
+     * @throws InvalidArgumentException
      */
     protected function _destroyObjectCache(PDOStatement $stmt, string $fetchClass, array $bindParams): bool
     {

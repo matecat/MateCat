@@ -23,6 +23,9 @@ trait Oauth
 
     protected int $token_endlife = 0;
 
+    /**
+     * @return array<int, mixed>
+     */
     protected function getAuthParameters(): array
     {
         return [

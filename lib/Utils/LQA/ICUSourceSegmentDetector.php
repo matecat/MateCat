@@ -2,6 +2,7 @@
 
 namespace Utils\LQA;
 
+use DomainException;
 use Matecat\ICU\MessagePatternValidator;
 
 /**
@@ -18,6 +19,7 @@ final class ICUSourceSegmentDetector
      * @param bool                    $icuEnabled Whether ICU support is enabled for the current project
      *
      * @return bool True when ICU is enabled and the source has valid complex ICU syntax
+     * @throws DomainException
      */
     public static function sourceContainsIcu(MessagePatternValidator $validator, bool $icuEnabled): bool
     {

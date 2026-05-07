@@ -239,6 +239,7 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
+     * @param int $job_id
      * @return ReplaceHistory
      */
     private function getReplaceHistory(int $job_id): ReplaceHistory
@@ -251,9 +252,10 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
+     * @param SearchQueryParamsStruct $queryParams
+     * @param JobStruct $jobStruct
      * @return SearchModel
-     *
-     * @throws Exception
+     * @throws RuntimeException
      */
     private function getSearchModel(SearchQueryParamsStruct $queryParams, JobStruct $jobStruct): SearchModel
     {
@@ -514,6 +516,8 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
+     * @param SegmentTranslationStruct $translationStruct
+     * @param int|null $revisionNumber
      * @return string
      */
     private function getNewStatus(SegmentTranslationStruct $translationStruct, ?int $revisionNumber = null): string
@@ -530,14 +534,16 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
+     * @param string $translation
+     * @param SearchQueryParamsStruct $queryParams
      * @return string
      */
     private function getReplacedSegmentTranslation(string $translation, SearchQueryParamsStruct $queryParams): string
     {
         $replacedSegmentTranslation = WholeTextFinder::findAndReplace(
             $translation,
-            (string)($queryParams->target ?? ''),
-            (string)($queryParams->replacement ?? ''),
+            $queryParams->target ?? '',
+            $queryParams->replacement ?? '',
             true,
             $queryParams->isExactMatchRequested,
             $queryParams->isMatchCaseRequested,
@@ -552,6 +558,7 @@ class GetSearchController extends AbstractStatefulKleinController
      *
      * @throws DomainException
      * @throws TypeError
+     * @throws Exception
      */
     private function saveReplacementEvent(string $replace_version, array $tRow, ReplaceHistory $srh, SearchQueryParamsStruct $queryParams): void
     {

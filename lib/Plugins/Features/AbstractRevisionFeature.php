@@ -330,7 +330,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {

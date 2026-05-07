@@ -2,6 +2,7 @@
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\CustomPageView;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
@@ -202,6 +203,9 @@ class Bootstrap
 
     }
 
+    /**
+     * @throws RenderTerminatedException
+     */
     private static function formatOutputExceptions(int $httpStatusCode, Throwable $exception): void
     {
         if (stripos(PHP_SAPI, 'cli') === false) {

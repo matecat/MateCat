@@ -5,6 +5,7 @@ namespace Plugins\Features\ProjectCompletion\Decorator;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
+use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\MetadataDao;
@@ -52,6 +53,10 @@ class CatDecorator extends AbstractDecorator
         }
     }
 
+    /**
+     * @return void
+     * @throws DomainException
+     */
     private function varsForUncomplete(): void
     {
         $this->template->{'job_marked_complete'} = new PHPTalBoolean(false);
@@ -69,6 +74,10 @@ class CatDecorator extends AbstractDecorator
         $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean(false);
     }
 
+    /**
+     * @return bool
+     * @throws DomainException
+     */
     private function completable(): bool
     {
         if ($this->arguments->getJob()->getProject()->getWordCountType() != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
