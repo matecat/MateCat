@@ -7,8 +7,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use CURLFile;
 use Exception;
 use Model\Conversion\Upload;
+use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use RuntimeException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Files\CSV as CSVParser;
@@ -24,19 +26,21 @@ class ModernMTController extends KleinController
 
     /**
      * Get all the customer's MMT memories
+     *
      * @throws Exception
      */
     public function keys(): void
     {
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
         $params = $this->request->params();
-        $MMTClient = $this->getModernMTClient($engineId);
         $memories = $MMTClient->getAllMemories();
         $results = [];
 
-        foreach ($memories as $memory) {
-            if ($this->filterResult($params, $memory)) {
-                $results[] = $this->buildResult($memory);
+        if ($memories !== null) {
+            foreach ($memories as $memory) {
+                if ($this->filterResult($params, $memory)) {
+                    $results[] = $this->buildResult($memory);
+                }
             }
         }
 
@@ -46,13 +50,17 @@ class ModernMTController extends KleinController
 
     /**
      * Import job status
+     *
      * @throws Exception
      */
     public function importStatus(): void
     {
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        if (!is_string($uuid) || $uuid === '') {
+            throw new Exception('Invalid `uuid` param', 400);
+        }
+
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->importJobStatus($uuid));
@@ -60,6 +68,7 @@ class ModernMTController extends KleinController
 
     /**
      * Import glossary into MMT
+     *
      * @throws Exception
      */
     public function importGlossary(): void
@@ -71,12 +80,19 @@ class ModernMTController extends KleinController
         }
 
         $memoryId = filter_var($this->params['memoryId'], FILTER_SANITIZE_NUMBER_INT);
+        if (!is_string($memoryId) || $memoryId === '') {
+            throw new Exception('Invalid `memoryId` param', 400);
+        }
 
-        $uploadManager = new Upload();
+        $uploadManager = $this->createUploadManager();
         $uploadedFiles = $uploadManager->uploadFiles($this->request->files()->all());
 
-        $glossary = $this->extractCSV($uploadedFiles->glossary);
+        $glossaryUpload = $uploadedFiles->glossary;
+        if (!$glossaryUpload instanceof UploadElement) {
+            throw new Exception('Glossary file upload failed', 400);
+        }
 
+        $glossary = $this->extractCSV($glossaryUpload);
 
         // validate
         $csv = CSVParser::parseToArray($glossary);
@@ -86,18 +102,18 @@ class ModernMTController extends KleinController
         }
 
         $this->validateCSVContent($csv);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->importGlossary($memoryId, [
-            'csv' => new CURLFile($glossary, 'text/csv'),
-            'type' => $this->getCsvType($csv)
+            'csv'  => new CURLFile($glossary, 'text/csv'),
+            'type' => $this->getCsvType($csv),
         ]));
     }
 
     /**
      * Update a MMT glossary (tuid is needed)
+     *
      * @throws Exception
      */
     public function modifyGlossary(): void
@@ -105,16 +121,29 @@ class ModernMTController extends KleinController
         $this->validateModifyGlossaryParams();
 
         $memoryId = filter_var($this->params['memoryId'], FILTER_SANITIZE_NUMBER_INT);
-        $tuid = (isset($this->params['tuid'])) ? filter_var($this->params['tuid'], FILTER_SANITIZE_SPECIAL_CHARS) : null;
-        $terms = $this->params['terms'];
-        $type = filter_var($this->params['type'], FILTER_SANITIZE_SPECIAL_CHARS);
+        if (!is_string($memoryId) || $memoryId === '') {
+            throw new Exception('Invalid `memoryId` param', 400);
+        }
 
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        $tuid = isset($this->params['tuid'])
+            ? filter_var($this->params['tuid'], FILTER_SANITIZE_SPECIAL_CHARS)
+            : null;
+        if ($tuid === false) {
+            $tuid = null;
+        }
+
+        $terms = $this->params['terms'];
+
+        $type = filter_var($this->params['type'], FILTER_SANITIZE_SPECIAL_CHARS);
+        if (!is_string($type) || $type === '') {
+            throw new Exception('Invalid `type` param', 400);
+        }
+
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         $payload = [
-            'type' => $type,
-            'terms' => $terms
+            'type'  => $type,
+            'terms' => $terms,
         ];
 
         if ($tuid) {
@@ -126,7 +155,8 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * Update a MMT memory
+     * Create a MMT memory
+     *
      * @throws Exception
      */
     public function createMemory(): void
@@ -136,11 +166,21 @@ class ModernMTController extends KleinController
         }
 
         $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        $description = isset($this->params['description']) ? filter_var($this->params['description'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
-        $externalId = isset($this->params['external_id']) ? filter_var($this->params['external_id'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
+        if (!is_string($name) || $name === '') {
+            throw new Exception('Invalid `name` param', 400);
+        }
 
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        $descriptionRaw = isset($this->params['description'])
+            ? filter_var($this->params['description'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW)
+            : null;
+        $description = is_string($descriptionRaw) ? $descriptionRaw : null;
+
+        $externalIdRaw = isset($this->params['external_id'])
+            ? filter_var($this->params['external_id'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW)
+            : null;
+        $externalId = is_string($externalIdRaw) ? $externalIdRaw : null;
+
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->createMemory($name, $description, $externalId));
@@ -148,6 +188,7 @@ class ModernMTController extends KleinController
 
     /**
      * Creates a memory, wait to be completed and then import glossary
+     *
      * @throws Exception
      */
     public function createMemoryAndImportGlossary(): void
@@ -159,21 +200,31 @@ class ModernMTController extends KleinController
         }
 
         $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        if (!is_string($name) || $name === '') {
+            throw new Exception('Invalid `name` param', 400);
+        }
 
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         // create a new memory
         $memory = $MMTClient->createMemory($name);
+        if ($memory === null || !isset($memory['id'])) {
+            throw new RuntimeException('Failed to create MMT memory');
+        }
 
         // wait to be completed
-        $memoryId = $memory['id'];
+        $memoryId = (string) $memory['id'];
 
         // upload glossary
-        $uploadManager = new Upload();
+        $uploadManager = $this->createUploadManager();
         $uploadedFiles = $uploadManager->uploadFiles($this->request->files()->all());
 
-        $glossary = $this->extractCSV($uploadedFiles->glossary);
+        $glossaryUpload = $uploadedFiles->glossary;
+        if (!$glossaryUpload instanceof UploadElement) {
+            throw new Exception('Glossary file upload failed', 400);
+        }
+
+        $glossary = $this->extractCSV($glossaryUpload);
 
         // validate
         $csv = CSVParser::parseToArray($glossary);
@@ -186,13 +237,14 @@ class ModernMTController extends KleinController
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->importGlossary($memoryId, [
-            'csv' => new CURLFile($glossary, 'text/csv'),
-            'type' => $this->getCsvType($csv)
+            'csv'  => new CURLFile($glossary, 'text/csv'),
+            'type' => $this->getCsvType($csv),
         ]));
     }
 
     /**
      * Update a MMT memory
+     *
      * @throws Exception
      */
     public function updateMemory(): void
@@ -202,9 +254,16 @@ class ModernMTController extends KleinController
         }
 
         $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        if (!is_string($name) || $name === '') {
+            throw new Exception('Invalid `name` param', 400);
+        }
+
         $memoryId = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        if (!is_string($memoryId) || $memoryId === '') {
+            throw new Exception('Invalid `memoryId` param', 400);
+        }
+
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->updateMemory($memoryId, $name));
@@ -212,13 +271,17 @@ class ModernMTController extends KleinController
 
     /**
      * Delete a MMT memory
+     *
      * @throws Exception
      */
     public function deleteMemory(): void
     {
         $memoryId = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $MMTClient = $this->getModernMTClient($engineId);
+        if (!is_string($memoryId) || $memoryId === '') {
+            throw new Exception('Invalid `memoryId` param', 400);
+        }
+
+        $MMTClient = $this->getModernMTClient($this->requireEngineId());
 
         $response = $MMTClient->deleteMemory(['id' => $memoryId]);
         $this->response->status()->setCode(200);
@@ -280,14 +343,16 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * @param $glossary
-     *
-     * @return false|string
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws RuntimeException
      */
-    private function extractCSV($glossary): false|string
+    protected function extractCSV(UploadElement $glossary): string
     {
         $tmpFileName = tempnam("/tmp", "MMT_EXCEL_GLOSS_");
+        if ($tmpFileName === false) {
+            throw new RuntimeException('Failed to create temporary file');
+        }
 
         $objReader = IOFactory::createReaderForFile($glossary->file_path);
 
@@ -304,11 +369,11 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * @param $csvContent
+     * @param array<int, array<int, string>> $csvContent
      *
      * @throws Exception
      */
-    private function validateCSVContent($csvContent): void
+    private function validateCSVContent(array $csvContent): void
     {
         $type = $this->getCsvType($csvContent);
 
@@ -339,27 +404,30 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * @param $engineId
-     *
-     * @return MMT
      * @throws Exception
+     * @throws RuntimeException
      */
-    private function getModernMTClient($engineId): MMT
+    protected function getModernMTClient(int $engineId): MMT
     {
-        return EnginesFactory::getInstanceByIdAndUser($engineId, $this->user->uid, MMT::class);
+        $uid = $this->user->uid;
+        if ($uid === null) {
+            throw new RuntimeException('User not authenticated');
+        }
+
+        return EnginesFactory::getInstanceByIdAndUser($engineId, $uid, MMT::class);
     }
 
     /**
-     * @param array $params
-     * @param array $memory
-     *
-     * @return bool
+     * @param array<int|string, mixed> $params
+     * @param array<string, mixed> $memory
      */
     private function filterResult(array $params, array $memory): bool
     {
         if (isset($params['q'])) {
             $q = filter_var($params['q'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
-            if (!str_contains(strtolower($memory['name']), strtolower($q))) {
+            if (is_string($q) && isset($memory['name']) && is_string($memory['name'])
+                && !str_contains(strtolower($memory['name']), strtolower($q))
+            ) {
                 return false;
             }
         }
@@ -368,23 +436,22 @@ class ModernMTController extends KleinController
     }
 
     /**
-     * @param array $memory
+     * @param array<string, mixed> $memory
      *
-     * @return array
+     * @return array{id: mixed, name: mixed, has_glossary: bool}
      */
     private function buildResult(array $memory): array
     {
         return [
-            'id' => $memory['id'],
-            'name' => $memory['name'],
+            'id'           => $memory['id'],
+            'name'         => $memory['name'],
             'has_glossary' => ($memory['hasGlossary'] == 1),
         ];
     }
 
     /**
-     * @param array $csv
+     * @param array<int, array<int, string>> $csv
      *
-     * @return string
      * @throws Exception
      */
     private function getCsvType(array $csv): string
@@ -412,5 +479,26 @@ class ModernMTController extends KleinController
         }
 
         return 'unidirectional';
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function requireEngineId(): int
+    {
+        $raw = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        if (!is_string($raw) || $raw === '') {
+            throw new Exception('Invalid `engineId` param', 400);
+        }
+
+        return (int) $raw;
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createUploadManager(): Upload
+    {
+        return new Upload();
     }
 }
