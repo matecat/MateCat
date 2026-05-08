@@ -66,6 +66,8 @@ const ContextPreview = () => {
 
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
+  const sourceScrollRef = useRef(null)
+  const targetScrollRef = useRef(null)
   const pendingHighlightRef = useRef(null)
 
   const showNodeWarning = useCallback(
@@ -267,7 +269,28 @@ const ContextPreview = () => {
     if (sourceRef.current) {
       tagSegments(sourceRef.current, mappableSegments, {metadataMap})
     }
-  }, [mappableSegments, htmlReady, viewMode, metadataMap, contentView])
+
+    // Re-apply active highlight after re-tagging so marks and counters
+    // reflect any eviction (e.g. text-mapped SID removed by point mapping).
+    const h = highlightRef.current
+    if (h?.mode === 'segment' && h.sid != null) {
+      const idx = h.activeIndex ?? 0
+      const total = applyHighlightsForSegment(h.sid, idx, false)
+      if (total !== h.total) {
+        if (total === 0) {
+          setHighlight(null)
+        } else {
+          setHighlight({
+            ...h,
+            total,
+            activeIndex: Math.min(idx, total - 1),
+          })
+        }
+      }
+    } else if (h?.mode === 'node' && h.nodeIndex != null) {
+      applyHighlightsForNode(h.nodeIndex, h.activeSegIdx ?? 0, false)
+    }
+  }, [mappableSegments, htmlReady, viewMode, metadataMap, contentView, applyHighlightsForSegment, applyHighlightsForNode, setHighlight])
 
   // Re-apply pending highlight after tagging completes
   useEffect(() => {
@@ -400,7 +423,7 @@ const ContextPreview = () => {
       )
       if (!result) return
       const {sids, nodeIndex} = result
-      applyHighlightsForNode(nodeIndex, 0, false)
+      applyHighlightsForNode(nodeIndex, 0, true)
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
       ContextPreviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
     }
@@ -415,7 +438,7 @@ const ContextPreview = () => {
       )
       if (!result) return
       const {sids, nodeIndex} = result
-      applyHighlightsForNode(nodeIndex, 0, false)
+      applyHighlightsForNode(nodeIndex, 0, true)
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
       ContextPreviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
     }
@@ -432,6 +455,40 @@ const ContextPreview = () => {
         targetContainer.removeEventListener('click', handleTargetClick)
     }
   }, [htmlContent, viewMode, applyHighlightsForNode, setHighlight, contentView])
+
+  // Sync scroll position between source and target panels in split view
+  useEffect(() => {
+    if (viewMode !== VIEW_MODES.BOTH) return
+    if (contentView !== CONTENT_VIEWS.LIVE_PREVIEW) return
+    const sourceEl = sourceScrollRef.current
+    const targetEl = targetScrollRef.current
+    if (!sourceEl || !targetEl) return
+
+    let syncing = false
+
+    const syncScroll = (origin, target) => {
+      if (syncing) return
+      syncing = true
+      const maxScroll = origin.scrollHeight - origin.clientHeight
+      const ratio = maxScroll > 0 ? origin.scrollTop / maxScroll : 0
+      const targetMax = target.scrollHeight - target.clientHeight
+      target.scrollTop = ratio * targetMax
+      requestAnimationFrame(() => {
+        syncing = false
+      })
+    }
+
+    const onSourceScroll = () => syncScroll(sourceEl, targetEl)
+    const onTargetScroll = () => syncScroll(targetEl, sourceEl)
+
+    sourceEl.addEventListener('scroll', onSourceScroll, {passive: true})
+    targetEl.addEventListener('scroll', onTargetScroll, {passive: true})
+
+    return () => {
+      sourceEl.removeEventListener('scroll', onSourceScroll)
+      targetEl.removeEventListener('scroll', onTargetScroll)
+    }
+  }, [viewMode, contentView, htmlReady])
 
   if (loading) {
     return (
@@ -558,6 +615,7 @@ const ContextPreview = () => {
             <LivePreviewPanel
               key={`source-${contentView}`}
               panelRef={sourceRef}
+              scrollRef={sourceScrollRef}
               title="Source"
               languageLabel={viewMode === VIEW_MODES.BOTH ? `Source - ${sourceCode}` : undefined}
               zoomLevel={zoomLevel}
@@ -578,6 +636,7 @@ const ContextPreview = () => {
             <LivePreviewPanel
               key={`target-${contentView}`}
               panelRef={targetRef}
+              scrollRef={targetScrollRef}
               title="Translation"
               languageLabel={viewMode === VIEW_MODES.BOTH ? `Target - ${targetCode}` : undefined}
               zoomLevel={zoomLevel}
