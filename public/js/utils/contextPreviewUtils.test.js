@@ -6,6 +6,7 @@ import {
   findSegmentSidsByClick,
   updateNodeTranslation,
   extractSegmentContextFields,
+  isNodeHidden,
 } from './contextPreviewUtils'
 
 describe('getSidsFromElement', () => {
@@ -930,5 +931,64 @@ describe('updateNodeTranslation — internal_id grouping (split trans-units)', (
     ])
     expect(result).toBe('ok')
     expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// isNodeHidden
+// ---------------------------------------------------------------------------
+
+describe('isNodeHidden', () => {
+  it('returns true for null element', () => {
+    expect(isNodeHidden(null)).toBe(true)
+  })
+
+  it('returns false for a visible element', () => {
+    document.body.innerHTML = '<p>Visible</p>'
+    const p = document.body.querySelector('p')
+    expect(isNodeHidden(p)).toBe(false)
+  })
+
+  it('returns true when display is none', () => {
+    document.body.innerHTML = '<p style="display:none">Hidden</p>'
+    const p = document.body.querySelector('p')
+    expect(isNodeHidden(p)).toBe(true)
+  })
+
+  it('returns true when visibility is hidden', () => {
+    document.body.innerHTML = '<p style="visibility:hidden">Hidden</p>'
+    const p = document.body.querySelector('p')
+    expect(isNodeHidden(p)).toBe(true)
+  })
+
+  it('returns true when opacity is 0', () => {
+    document.body.innerHTML = '<p style="opacity:0">Hidden</p>'
+    const p = document.body.querySelector('p')
+    expect(isNodeHidden(p)).toBe(true)
+  })
+
+  it('detects hidden ancestor via checkVisibility', () => {
+    document.body.innerHTML = '<div style="display:none"><p>Nested</p></div>'
+    const p = document.body.querySelector('p')
+    p.checkVisibility = jest.fn(() => false)
+    expect(isNodeHidden(p)).toBe(true)
+  })
+
+  it('uses checkVisibility when available', () => {
+    document.body.innerHTML = '<p>Test</p>'
+    const p = document.body.querySelector('p')
+    p.checkVisibility = jest.fn(() => false)
+    expect(isNodeHidden(p)).toBe(true)
+    expect(p.checkVisibility).toHaveBeenCalledWith({
+      checkOpacity: true,
+      checkVisibilityCSS: true,
+    })
+  })
+
+  it('uses checkVisibility returning true means visible', () => {
+    document.body.innerHTML = '<p>Test</p>'
+    const p = document.body.querySelector('p')
+    p.checkVisibility = jest.fn(() => true)
+    expect(isNodeHidden(p)).toBe(false)
   })
 })

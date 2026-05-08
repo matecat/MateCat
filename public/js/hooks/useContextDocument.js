@@ -74,9 +74,7 @@ const parseHtmlContent = (rawHtml, sourceUrl) => {
   doc.querySelectorAll('head link[rel="stylesheet"]').forEach((el) => {
     headHtml += el.outerHTML
   })
-  doc.querySelectorAll('head script[src]').forEach((el) => {
-    headHtml += el.outerHTML
-  })
+  doc.querySelectorAll('script').forEach((el) => el.remove())
   const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
   return headHtml + bodyHtml
 }
