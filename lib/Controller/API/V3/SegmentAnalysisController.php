@@ -4,7 +4,6 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\ConstantsInterface;
@@ -20,6 +19,7 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -29,8 +29,6 @@ use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController
 {
-    use SegmentDisabledTrait;
-
     const int MAX_PER_PAGE = 200;
 
     /**
@@ -42,6 +40,11 @@ class SegmentAnalysisController extends KleinController
      * @var ProjectDao
      */
     private ProjectDao $projectDao;
+
+    /**
+     * @var SegmentDisabledService
+     */
+    private SegmentDisabledService $segmentDisabledService;
 
     protected function afterConstruct(): void
     {
@@ -130,6 +133,7 @@ class SegmentAnalysisController extends KleinController
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
         $this->projectDao = new ProjectDao();
+        $this->segmentDisabledService = new SegmentDisabledService();
 
         $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($jobStruct->id, $jobStruct->password, $limit, $offset);
         $projectPasswordsMap = $this->projectDao->getPasswordsMap($jobStruct->id_project);
@@ -227,6 +231,7 @@ class SegmentAnalysisController extends KleinController
         $segments = [];
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
+        $this->segmentDisabledService = new SegmentDisabledService();
 
         $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
         $projectPasswordsMap = $this->projectDao->getPasswordsMap($this->project->id);
@@ -344,7 +349,7 @@ class SegmentAnalysisController extends KleinController
             $metadataDao->getProjectStaticSubfilteringCustomHandlers($jobStruct->id_project)
         );
 
-        $disabled = $this->isSegmentDisabled($segmentForAnalysis->id_job, $segmentForAnalysis->id);
+        $disabled = $this->segmentDisabledService->isDisabled($segmentForAnalysis->id);
 
         return [
             'id_segment' => (int)$segmentForAnalysis->id,
