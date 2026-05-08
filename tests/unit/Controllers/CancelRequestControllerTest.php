@@ -25,8 +25,8 @@ use TestHelpers\AbstractTest;
 class TestableCancelRequestController extends CancelRequestController
 {
     public bool $segmentDisabledFlag = false;
-    public array $savedDisabledSegments = [];
-    public bool $destroySegmentDisabledCacheCalled = false;
+    public bool $enableCalled = false;
+    public bool $disableCalled = false;
 
     public function __construct()
     {
@@ -42,7 +42,6 @@ class TestableCancelRequestController extends CancelRequestController
 
     public function enableRequest(): void
     {
-        // Skip performChecks, go straight to validation logic
         $rawIdJob = $this->request->param('id_job');
         $rawIdSegment = $this->request->param('id_segment');
 
@@ -53,8 +52,8 @@ class TestableCancelRequestController extends CancelRequestController
             throw new NotFoundException('Invalid id_job or id_segment');
         }
 
-        if ($this->isSegmentDisabled($id_job, $id_segment)) {
-            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        if ($this->segmentDisabledFlag) {
+            $this->enableCalled = true;
         }
 
         $this->response->json([
@@ -64,7 +63,6 @@ class TestableCancelRequestController extends CancelRequestController
 
     public function cancelRequest(): void
     {
-        // Skip performChecks, go straight to disable logic
         $rawIdJob = $this->request->param('id_job');
         $rawIdSegment = $this->request->param('id_segment');
         $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
@@ -74,28 +72,13 @@ class TestableCancelRequestController extends CancelRequestController
             throw new NotFoundException('Invalid id_job or id_segment');
         }
 
-        if (!$this->isSegmentDisabled($id_job, $id_segment)) {
-            $this->saveSegmentDisabledInCache($id_job, $id_segment);
+        if (!$this->segmentDisabledFlag) {
+            $this->disableCalled = true;
         }
 
         $this->response->json([
             'id_segment' => $id_segment,
         ]);
-    }
-
-    protected function isSegmentDisabled(int $id_job, int $id_segment): bool
-    {
-        return $this->segmentDisabledFlag;
-    }
-
-    protected function saveSegmentDisabledInCache(int $id_job, int $id_segment): void
-    {
-        $this->savedDisabledSegments[] = ['id_job' => $id_job, 'id_segment' => $id_segment];
-    }
-
-    protected function destroySegmentDisabledCache(int $id_job, int $id_segment): void
-    {
-        $this->destroySegmentDisabledCacheCalled = true;
     }
 }
 
@@ -317,7 +300,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller->enableRequest();
 
-        $this->assertTrue($controller->destroySegmentDisabledCacheCalled);
+        $this->assertTrue($controller->enableCalled);
     }
 
     #[Test]
@@ -333,7 +316,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller->enableRequest();
 
-        $this->assertFalse($controller->destroySegmentDisabledCacheCalled);
+        $this->assertFalse($controller->enableCalled);
     }
 
     // ─── cancelRequest tests ─────────────────────────────────────────
@@ -373,7 +356,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller->cancelRequest();
 
-        $this->assertEmpty($controller->savedDisabledSegments);
+        $this->assertFalse($controller->disableCalled);
     }
 
     #[Test]
@@ -389,8 +372,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller->cancelRequest();
 
-        $this->assertCount(1, $controller->savedDisabledSegments);
-        $this->assertEquals(['id_job' => 1, 'id_segment' => 42], $controller->savedDisabledSegments[0]);
+        $this->assertTrue($controller->disableCalled);
     }
 
     #[Test]
@@ -743,10 +725,7 @@ class CancelRequestControllerTest extends AbstractTest
                 'checkRateLimitResponse',
                 'incrementRateLimitCounter',
                 'getUser',
-                'isSegmentDisabled',
-                'saveSegmentDisabledInCache',
                 'findSegmentTranslation',
-                'destroySegmentDisabledCache',
             ])
             ->getMock();
 
@@ -758,10 +737,7 @@ class CancelRequestControllerTest extends AbstractTest
         $controller->method('getUser')->willReturn($user);
         $controller->method('getJob')->willReturn(null);
         $controller->method('checkRateLimitResponse')->willReturn(null);
-        $controller->method('isSegmentDisabled')->willReturn(false);
-        $controller->method('saveSegmentDisabledInCache');
         $controller->method('findSegmentTranslation')->willReturn(null);
-        $controller->method('destroySegmentDisabledCache');
 
         $controller->expects($this->exactly(2))
             ->method('incrementRateLimitCounter');
@@ -826,10 +802,7 @@ class CancelRequestControllerTest extends AbstractTest
                 'checkRateLimitResponse',
                 'incrementRateLimitCounter',
                 'getUser',
-                'isSegmentDisabled',
-                'saveSegmentDisabledInCache',
                 'findSegmentTranslation',
-                'destroySegmentDisabledCache',
             ])
             ->getMock();
 
@@ -875,9 +848,6 @@ class CancelRequestControllerTest extends AbstractTest
             });
 
         $controller->method('incrementRateLimitCounter');
-        $controller->method('isSegmentDisabled')->willReturn(false);
-        $controller->method('saveSegmentDisabledInCache');
-        $controller->method('destroySegmentDisabledCache');
 
         return $controller;
     }

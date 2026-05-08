@@ -12,12 +12,11 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Controller\Traits\RateLimiterTrait;
-use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use ReflectionException;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
-use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Utils\Constants\TranslationStatus;
@@ -26,7 +25,6 @@ use Utils\Tools\Utils;
 class CancelRequestController extends KleinController
 {
     use RateLimiterTrait;
-    use SegmentDisabledTrait;
     use ChunkNotFoundHandlerTrait;
 
     protected function afterConstruct(): void
@@ -57,8 +55,10 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        if ($this->isSegmentDisabled($id_job, $id_segment)) {
-            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        $service = new SegmentDisabledService();
+
+        if ($service->isDisabled($id_segment)) {
+            $service->enable($id_segment);
         }
 
         $this->response->json([
@@ -89,12 +89,10 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
-        // setting the cache to avoid multiple disable requests for the same segment in a short time frame
-        if (!$this->isSegmentDisabled($id_job, $id_segment)) {
-            SegmentMetadataDao::destroyGetAllCache($id_segment);
-            SegmentMetadataDao::setTranslationDisabled($id_segment);
-            $this->saveSegmentDisabledInCache($id_job, $id_segment);
+        $service = new SegmentDisabledService();
+
+        if (!$service->isDisabled($id_segment)) {
+            $service->disable($id_segment);
         }
 
         $this->response->json([
