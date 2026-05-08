@@ -78,14 +78,29 @@ class FiltersTest extends TestCase
 {
     private TestableFilters $filters;
 
+    private ?string $originalStorageDir = null;
+    private bool $originalFiltersEmailFailures = false;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->originalStorageDir = AppConfig::$STORAGE_DIR;
+        $this->originalFiltersEmailFailures = AppConfig::$FILTERS_EMAIL_FAILURES;
+
         $this->filters = new TestableFilters();
 
         // Ensure AppConfig statics are set for tests that reference them
         AppConfig::$FILTERS_EMAIL_FAILURES = false;
         AppConfig::$STORAGE_DIR = sys_get_temp_dir();
+    }
+
+    protected function tearDown(): void
+    {
+        AppConfig::$STORAGE_DIR = $this->originalStorageDir;
+        AppConfig::$FILTERS_EMAIL_FAILURES = $this->originalFiltersEmailFailures;
+
+        parent::tearDown();
     }
 
     // ── extractInstanceInfoFromHeaders ──────────────────────────────────

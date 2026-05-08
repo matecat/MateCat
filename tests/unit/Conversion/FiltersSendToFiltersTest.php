@@ -43,9 +43,24 @@ class FiltersSendToFiltersTest extends TestCase
 {
     private FiltersWithMockedCurl $filters;
 
+    private ?string $originalStorageDir = null;
+    private ?string $originalFiltersAddress = null;
+    private ?string $originalFiltersUserAgent = null;
+    private ?string $originalFiltersRapidApiKey = null;
+    private string|false $originalFiltersForceVersion = false;
+    private bool $originalFiltersEmailFailures = false;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->originalStorageDir = AppConfig::$STORAGE_DIR;
+        $this->originalFiltersAddress = AppConfig::$FILTERS_ADDRESS;
+        $this->originalFiltersUserAgent = AppConfig::$FILTERS_USER_AGENT;
+        $this->originalFiltersRapidApiKey = AppConfig::$FILTERS_RAPIDAPI_KEY;
+        $this->originalFiltersForceVersion = AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
+        $this->originalFiltersEmailFailures = AppConfig::$FILTERS_EMAIL_FAILURES;
+
         $this->filters = new FiltersWithMockedCurl();
         AppConfig::$FILTERS_ADDRESS = 'http://localhost:8080';
         AppConfig::$FILTERS_USER_AGENT = 'Matecat-Test';
@@ -53,6 +68,18 @@ class FiltersSendToFiltersTest extends TestCase
         AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = '';
         AppConfig::$FILTERS_EMAIL_FAILURES = false;
         AppConfig::$STORAGE_DIR = sys_get_temp_dir();
+    }
+
+    protected function tearDown(): void
+    {
+        AppConfig::$STORAGE_DIR = $this->originalStorageDir;
+        AppConfig::$FILTERS_ADDRESS = $this->originalFiltersAddress;
+        AppConfig::$FILTERS_USER_AGENT = $this->originalFiltersUserAgent;
+        AppConfig::$FILTERS_RAPIDAPI_KEY = $this->originalFiltersRapidApiKey;
+        AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = $this->originalFiltersForceVersion;
+        AppConfig::$FILTERS_EMAIL_FAILURES = $this->originalFiltersEmailFailures;
+
+        parent::tearDown();
     }
 
     private function createMockedCurl(string $responseBody, int $httpCode = 200, string $headerLine = ''): MultiCurlHandler
