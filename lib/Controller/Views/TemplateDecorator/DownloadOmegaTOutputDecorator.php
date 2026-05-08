@@ -3,8 +3,6 @@
 namespace Controller\Views\TemplateDecorator;
 
 use Controller\Abstracts\AbstractDownloadController;
-use Controller\Abstracts\IController;
-use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
 use Model\FilesStorage\AbstractFilesStorage;
 use ReflectionException;
@@ -19,18 +17,22 @@ use ZipArchive;
  * Time: 11.58
  *
  */
-class DownloadOmegaTOutputDecorator extends AbstractDecorator
+class DownloadOmegaTOutputDecorator
 {
 
-    /**
-     * @var AbstractDownloadController
-     */
-    protected IController $controller;
+    protected AbstractDownloadController $controller;
+
+    public function __construct(AbstractDownloadController $controller)
+    {
+        $this->controller = $controller;
+    }
 
     /**
+     * @return array<string, array{document_content: string, output_filename: string}>
+     *
      * @throws Exception
      */
-    public function decorate(?ArgumentInterface $arguments = null): array
+    public function decorate(): array
     {
         $output_content = [];
 

@@ -3037,132 +3037,6 @@ parameters:
 			path: lib/Controller/Views/AnalyzeController.php
 
 		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:archived\(\) has parameter \$jobOwnership with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:cancelled\(\) has parameter \$jobOwnership with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:findOwnerEmailAndTeam\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:findOwnerEmailAndTeam\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:getActiveEngine\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:getCategoriesAsJson\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:getCategoriesAsJson\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:searchableStatuses\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Method Controller\\Views\\CattoolController\:\:validateTheRequest\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Offset 0 might not exist on array\<Model\\Teams\\MembershipStruct\>\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$chunkReviewStruct \?ChunkReviewStruct\)\: Unexpected token "\$chunkReviewStruct", expected type at offset 10 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$chunkReviewStruct ChunkReviewStruct\)\: Unexpected token "\$chunkReviewStruct", expected type at offset 36 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$chunkStruct JobStruct\)\: Unexpected token "\$chunkStruct", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$memberStruct MembershipStruct\)\: Unexpected token "\$memberStruct", expected type at offset 32 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\<Model\\Teams\\MembershipStruct\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Property Controller\\Views\\CattoolController\:\:\$id_job \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Property Controller\\Views\\CattoolController\:\:\$id_job is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Property Controller\\Views\\CattoolController\:\:\$request_password \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
-			message: '#^Property Controller\\Views\\CattoolController\:\:\$request_password is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: lib/Controller/Views/CattoolController.php
-
-		-
 			message: '#^Cannot access offset ''id_project'' on array\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -3259,24 +3133,6 @@ parameters:
 			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
 		-
-			message: '#^Method Controller\\Views\\TemplateDecorator\\AbstractDecorator\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/TemplateDecorator/AbstractDecorator.php
-
-		-
-			message: '#^Method Controller\\Views\\TemplateDecorator\\AbstractDecorator\:\:decorate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/TemplateDecorator/AbstractDecorator.php
-
-		-
-			message: '#^Property Controller\\Views\\TemplateDecorator\\AbstractDecorator\:\:\$template \(Utils\\Templating\\PHPTALWithAppend\) does not accept Utils\\Templating\\PHPTALWithAppend\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Views/TemplateDecorator/AbstractDecorator.php
-
-		-
 			message: '#^Loose comparison using \=\= between ''LuceneArabicTokeniz…''\|''LuceneArmenianToken…''\|''LuceneBasqueTokeniz…''\|''LuceneBulgarianToke…''\|''LuceneCatalanTokeni…''\|''LuceneCzechTokenizer''\|''LuceneDanishTokeniz…''\|''LuceneDutchTokenizer''\|''LuceneEnglishTokeni…''\|''LuceneFinnishTokeni…''\|''LuceneFrenchTokeniz…''\|''LuceneGalicianToken…''\|''LuceneGermanTokeniz…''\|''LuceneGreekTokenizer''\|''LuceneHindiTokenizer''\|''LuceneHungarianToke…''\|''LuceneIndonesianTok…''\|''LuceneIrishTokenizer''\|''LuceneItalianTokeni…''\|''LuceneJapaneseToken…''\|''LuceneKoreanTokeniz…''\|''LuceneLatvianTokeni…''\|''LuceneNorwegianToke…''\|''LucenePersianTokeni…''\|''LucenePortugueseTok…''\|''LuceneRomanianToken…''\|''LuceneRussianTokeni…''\|''LuceneSmartChineseT…''\|''LuceneSpanishTokeni…''\|''LuceneSwedishTokeni…''\|''LuceneThaiTokenizer''\|''LuceneTurkishTokeni…'' and null will always evaluate to false\.$#'
 			identifier: equal.alwaysFalse
 			count: 2
@@ -3297,12 +3153,6 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\TemplateDecorator\\DownloadOmegaTOutputDecorator\:\:createOmegaTZip\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
-
-		-
-			message: '#^Method Controller\\Views\\TemplateDecorator\\DownloadOmegaTOutputDecorator\:\:decorate\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php
 
@@ -6845,66 +6695,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Plugins/Features/ProjectCompletion.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$job_completion_current_phase\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$job_completion_last_event_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$job_marked_complete\.$#'
-			identifier: property.notFound
-			count: 2
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$mark_as_complete_button_enabled\.$#'
-			identifier: property.notFound
-			count: 3
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$project_completion_feature_enabled\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Cannot call method getJob\(\) on Controller\\Views\\TemplateDecorator\\Arguments\\CatDecoratorArguments\|null\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Cannot call method getWordCountStruct\(\) on Controller\\Views\\TemplateDecorator\\Arguments\\CatDecoratorArguments\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Cannot call method isRevision\(\) on Controller\\Views\\TemplateDecorator\\Arguments\\CatDecoratorArguments\|null\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Method Plugins\\Features\\ProjectCompletion\\Decorator\\CatDecorator\:\:decorate\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
-
-		-
-			message: '#^Property Plugins\\Features\\ProjectCompletion\\Decorator\\CatDecorator\:\:\$stats type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php
 
 		-
 			message: '#^Method Plugins\\Features\\ProjectCompletion\\Model\\EventModel\:\:save\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -11131,40 +10921,22 @@ parameters:
 			path: plugins/airbnb/lib/Features/Airbnb.php
 
 		-
-			message: '#^Call to an undefined method Controller\\Views\\TemplateDecorator\\Arguments\\ArgumentInterface\:\:getJob\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
-
-		-
-			message: '#^Call to an undefined method Controller\\Views\\TemplateDecorator\\Arguments\\ArgumentInterface\:\:isRevision\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
-
-		-
-			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
-
-		-
-			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
-
-		-
-			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
-
-		-
 			message: '#^Method Features\\Airbnb\\Model\\SegmentDelivery\\SegmentDeliveryDao\:\:isAJobDeliverable\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
 			path: plugins/airbnb/lib/Features/Airbnb/Model/SegmentDelivery/SegmentDeliveryDao.php
+
+		-
+			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'
+			identifier: property.notFound
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
+
+		-
+			message: '#^Parameter \#1 \$directory of function scandir expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
 
 		-
 			message: '#^Method Features\\Aligner\:\:getConfigs\(\) has no return type specified\.$#'
@@ -12833,24 +12605,6 @@ parameters:
 			identifier: empty.initializedProperty
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/Validators/JobPasswordValidator.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'
-			identifier: property.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
-
-		-
-			message: '#^Method Features\\Aligner\\Decorator\\HomeDecorator\:\:decorate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
-
-		-
-			message: '#^Parameter \#1 \$directory of function scandir expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
 
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:createFromStruct\(\) has no return type specified\.$#'

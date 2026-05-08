@@ -50,14 +50,16 @@ use Utils\Tools\Utils;
 class CattoolController extends BaseKleinViewController
 {
 
-    private string $request_password;
-    private int $id_job;
-
     protected function afterConstruct(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
     }
 
+    /**
+     * @return array{jid: string, password: string}
+     *
+     * @throws \TypeError
+     */
     protected function validateTheRequest(): array
     {
         $filterArgs = [
@@ -69,10 +71,11 @@ class CattoolController extends BaseKleinViewController
         ];
 
         $result = filter_var_array($this->request->paramsNamed()->all(), $filterArgs);
-        $this->request_password = $result['password'];
-        $this->id_job = $result['jid'];
 
-        return $result;
+        return [
+            'jid' => (string) ($result['jid'] ?? ''),
+            'password' => (string) ($result['password'] ?? ''),
+        ];
     }
 
     /**
@@ -116,6 +119,7 @@ class CattoolController extends BaseKleinViewController
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function renderView(): void
     {
@@ -125,17 +129,21 @@ class CattoolController extends BaseKleinViewController
         $revisionNumber = null;
 
         try {
-            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage($request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
+            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int) $request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
             $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($chunkAndPasswords->chunkReviewStruct ? $chunkAndPasswords->chunkReviewStruct->source_page : null);
         } catch (NotFoundException) {
             $this->notFound();
         }
 
-        /** @var $chunkStruct JobStruct */
+        /** @var JobStruct $chunkStruct */
         $chunkStruct = $chunkAndPasswords->chunk;
 
-        /** @var  $chunkReviewStruct ?ChunkReviewStruct */
+        /** @var ?ChunkReviewStruct $chunkReviewStruct */
         $chunkReviewStruct = $chunkAndPasswords->chunkReviewStruct;
+
+        $chunkId = $chunkStruct->id ?? throw new RuntimeException('Chunk id is null after successful load');
+        $chunkPassword = $chunkStruct->password ?? throw new RuntimeException('Chunk password is null after successful load');
+        $projectId = $chunkStruct->getProject()->id ?? throw new RuntimeException('Project id is null');
 
         $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject());
 
@@ -145,8 +153,8 @@ class CattoolController extends BaseKleinViewController
 
         if ($chunkStruct->isArchived()) {
             $this->archived(
-                $request['jid'],
-                $isRevision ? $chunkReviewStruct->review_password : $chunkStruct->password,
+                $chunkId,
+                $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : $chunkPassword,
                 $jobOwnership
             );
         }
@@ -157,18 +165,18 @@ class CattoolController extends BaseKleinViewController
 
         $model = $chunkStruct->getProject()->getLqaModel();
         $jobsMetadataDao = new MetadataDao();
-        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
+        $public_tm_penalty = $jobsMetadataDao->get($chunkId, $chunkPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
 
         $this->setView("index.html", [
             'active_engine' => new PHPTalMap($this->getActiveEngine($chunkStruct->id_mt_engine)),
             'allow_link_to_analysis' => new PHPTalBoolean(true),
             'chunk_completion_undoable' => new PHPTalBoolean(true),
             'comments_enabled' => new PHPTalBoolean(AppConfig::$COMMENTS_ENABLED),
-            'currentPassword' => $isRevision ? $chunkReviewStruct->review_password : $chunkStruct->password,
+            'currentPassword' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : $chunkPassword,
             'footer_show_revise_link' => new PHPTalBoolean(!$isRevision),
             'first_job_segment' => $chunkStruct->job_first_segment,
-            'id_job' => $chunkStruct->id,
-            'id_project' => $chunkStruct->getProject()->id,
+            'id_job' => $chunkId,
+            'id_project' => $projectId,
             'id_team' => $chunkStruct->getProject()->id_team,
             'isCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->source)),
             'isGDriveProject' => new PHPTalBoolean(ProjectDao::isGDriveProject($chunkStruct->id_project)),
@@ -186,12 +194,12 @@ class CattoolController extends BaseKleinViewController
             'not_empty_default_tm_key' => new PHPTalBoolean(!empty(AppConfig::$DEFAULT_TM_KEY)),
             'overall_quality_class' => $chunkReviewStruct ? ($chunkReviewStruct->is_pass ? 'excellent' : 'fail') : '',
             'pageTitle' => $this->buildPageTitle($revisionNumber, $chunkStruct),
-            'password' => $chunkStruct->password,
+            'password' => $chunkPassword,
             'project' => $chunkStruct->getProject(),
             'project_name' => Utils::friendlySlug($chunkStruct->getProject()->name),
-            'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkStruct->id-$chunkStruct->password",
+            'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkId-$chunkPassword",
             'review_extended' => new PHPTalBoolean(true),
-            'review_password' => $isRevision ? $chunkReviewStruct->review_password : (new ChunkReviewDao())->findChunkReviewsForSourcePage(
+            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao())->findChunkReviewsForSourcePage(
                 $chunkStruct,
                 Utils::getSourcePage() + 1
             )[0]->review_password,
@@ -200,11 +208,8 @@ class CattoolController extends BaseKleinViewController
             'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
             'secondRevisionsCount' => count(
                 array_filter(
-                    ChunkReviewDao::findByProjectId($chunkStruct->getProject()->id),
-                    function ($chunkReviewStruct) use ($chunkStruct) {
-                        /**
-                         * @var $chunkReviewStruct ChunkReviewStruct
-                         */
+                    ChunkReviewDao::findByProjectId($projectId),
+                    function (ChunkReviewStruct $chunkReviewStruct) use ($chunkStruct) {
                         return $chunkReviewStruct->id_job == $chunkStruct->id && $chunkReviewStruct->source_page > SourcePages::SOURCE_PAGE_REVISION;
                     }
                 )
@@ -226,7 +231,7 @@ class CattoolController extends BaseKleinViewController
             'tag_projection_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$tagProjectionAllowedLanguages),
             'targetIsCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->target)),
             'target_code' => $chunkStruct->target,
-            'team_name' => $jobOwnership['team']->name,
+            'team_name' => $jobOwnership['team']->name ?? '',
             'tms_enabled' => new PHPTalBoolean((bool)$chunkStruct->id_tms),
             'translation_engines_intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'translation_matches_enabled' => new PHPTalBoolean(true),
@@ -286,12 +291,14 @@ class CattoolController extends BaseKleinViewController
             )
         );
 
-        $this->_saveActivity($chunkStruct->id, $chunkStruct->getProject()->id, $isRevision);
+        $this->_saveActivity($chunkId, $projectId, $isRevision);
 
         $this->render();
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws Exception
      */
     protected function getActiveEngine(int $mt_engine_id): array
@@ -318,6 +325,8 @@ class CattoolController extends BaseKleinViewController
     }
 
     /**
+     * @param array{team: ?\Model\Teams\TeamStruct, owner_email: string, jobOwnerIsMe: bool} $jobOwnership
+     *
      * @throws Exception
      */
     private function cancelled(array $jobOwnership): void
@@ -330,6 +339,8 @@ class CattoolController extends BaseKleinViewController
     }
 
     /**
+     * @param array{team: ?\Model\Teams\TeamStruct, owner_email: string, jobOwnerIsMe: bool} $jobOwnership
+     *
      * @throws Exception
      */
     private function archived(int $job_id, string $password, array $jobOwnership): void
@@ -346,8 +357,11 @@ class CattoolController extends BaseKleinViewController
     }
 
     /**
+     * @return array{team: ?\Model\Teams\TeamStruct, owner_email: string, jobOwnerIsMe: bool}
+     *
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws Exception
      */
     private function findOwnerEmailAndTeam(ProjectStruct $project): array
     {
@@ -360,24 +374,25 @@ class CattoolController extends BaseKleinViewController
             $teamModel = new TeamModel($team);
             $teamModel->updateMembersProjectsCount();
             $membersIdList = [];
+            $members = $team->getMembers() ?? [];
             if ($team->type == Teams::PERSONAL) {
-                $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
+                $firstMember = $members[0] ?? null;
+                if ($firstMember !== null) {
+                    $ownerMail = $firstMember->getUser()->getEmail() ?? AppConfig::$SUPPORT_MAIL;
+                }
             } else {
                 $idAssignee = $project->id_assignee ?? 0;
                 $assignee = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid((int)$idAssignee);
 
                 if ($assignee) {
-                    $ownerMail = $assignee->getEmail();
+                    $ownerMail = $assignee->getEmail() ?? AppConfig::$SUPPORT_MAIL;
                 } else {
                     $ownerMail = AppConfig::$SUPPORT_MAIL;
                 }
 
-                $membersIdList = array_map(function ($memberStruct) {
-                    /**
-                     * @var $memberStruct MembershipStruct
-                     */
+                $membersIdList = array_map(function (MembershipStruct $memberStruct) {
                     return $memberStruct->uid;
-                }, $team->getMembers());
+                }, $members);
             }
 
             if ($this->user->email == $ownerMail || in_array($this->user->uid, $membersIdList)) {
@@ -407,10 +422,11 @@ class CattoolController extends BaseKleinViewController
     }
 
     /**
-     * @return array
+     * @return list<array{value: string, label: string}>
      */
     private function searchableStatuses(): array
     {
+        /** @var list<string> $statuses */
         $statuses = array_merge(
             TranslationStatus::$INITIAL_STATUSES,
             TranslationStatus::$TRANSLATION_STATUSES,
@@ -419,15 +435,15 @@ class CattoolController extends BaseKleinViewController
             ]
         );
 
-        return array_map(function ($item) {
+        return array_map(function (string $item) {
             return ['value' => $item, 'label' => $item];
         }, $statuses);
     }
 
     /**
-     * @param ModelStruct $model
+     * @return list<array<string, mixed>>
      *
-     * @return array
+     * @throws \PDOException
      */
     private function getCategoriesAsJson(ModelStruct $model): array
     {

@@ -118,6 +118,12 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/GetSearchController.php` | Phase 5E |
 | `lib/Controller/API/App/GetSegmentsController.php` | Phase 20 |
 | `lib/Controller/API/App/GetWarningController.php` | Phase 22 |
+| `lib/Controller/Views/CattoolController.php` | Phase 23 |
+| `lib/Controller/Views/TemplateDecorator/AbstractDecorator.php` | Phase 23 |
+| `lib/Controller/Views/TemplateDecorator/DownloadOmegaTOutputDecorator.php` | Phase 23 |
+| `lib/Plugins/Features/ProjectCompletion/Decorator/CatDecorator.php` | Phase 23 |
+| `lib/Utils/Templating/PHPTALWithAppend.php` | Phase 23 |
+| `plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php` | Phase 23 |
 | `lib/Controller/API/App/QualityFrameworkController.php` | Phase 13C |
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
@@ -1136,6 +1142,53 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 
 ---
 
+### Phase 23: CattoolController + Decorator Chain (~41 errors) — ✅ DONE
+
+**Why:** `CattoolController` is the main editor view (translate/revise). Its decorator chain (`AbstractDecorator`, `ProjectCompletion/CatDecorator`, `Airbnb/CatDecorator`) sets all template variables for the editor UI. Fixing the full chain ensures type-safe request validation, proper null guards, and correct decorator contracts.
+
+#### 23A. `AbstractDecorator.php` — ✅ DONE (−3 baseline entries)
+
+- Made `$template` constructor parameter required (non-null `PHPTALWithAppend`)
+- Added `void` return type to abstract `decorate()` method
+- Typed `$template` property as `PHPTALWithAppend` (was untyped)
+
+#### 23B. `DownloadOmegaTOutputDecorator.php` — ✅ DONE (−1 baseline entry)
+
+- Decoupled from `AbstractDecorator` hierarchy — it misused the inheritance (no template, returns `array` not `void`, never called via `appendDecorators()`)
+- Added own `AbstractDownloadController $controller` property/constructor
+- Typed `decorate()` return as `array<string, array{document_content: string, output_filename: string}>`
+
+#### 23C. `CattoolController.php` — ✅ DONE (−21 baseline entries)
+
+- Removed dead properties `$id_job`/`$request_password` (set but never read)
+- Added array shape return to `validateTheRequest()`
+- Fixed all PHPDoc `@var` parse errors (swapped to type-first syntax)
+- Added null guards via extracted `$chunkId`/`$chunkPassword`/`$projectId` variables with `?? throw RuntimeException`
+- Fixed `team_name` null-safety, typed `searchableStatuses()` return
+- Added `@throws` tags for all public methods
+
+#### 23D. `ProjectCompletion/CatDecorator.php` — ✅ DONE (−10 baseline entries)
+
+- Added `instanceof CatDecoratorArguments` null guard with `throw RuntimeException`
+- Changed property from `?CatDecoratorArguments` to `CatDecoratorArguments`
+- Typed `$stats` as `array<string, mixed>`, added `@throws DivisionByZeroError`
+- Used direct property access instead of `{'...'}` syntax for PHPTAL template vars
+
+#### 23E. `Airbnb/CatDecorator.php` — ✅ DONE (−5 baseline entries)
+
+- Same `instanceof` guard pattern as ProjectCompletion
+- Typed `$arguments` as `CatDecoratorArguments`, added `@throws` annotations
+- Removed `@phpstan-ignore property.notFound`, used direct property access for template vars
+
+#### 23F. Supporting changes
+
+- `PHPTALWithAppend.php`: added 6 `@property` declarations for ProjectCompletion and Airbnb template vars
+- `HomeDecorator.php` (aligner): added `: void` return type to `decorate()`; 2 pre-existing errors added to baseline
+- Net baseline reduction: **−41 entries** (43 removed, 2 added for pre-existing aligner errors)
+- **28 new tests** across 4 test files (68 assertions, 0 warnings)
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
@@ -1177,7 +1230,7 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 |-----------------------------------------|--------|------|--------|------------|-------|
 | ~~`GetSegmentsController.php`~~         | ~~27~~ | ~~59%~~ | ~~16~~ | ~~8~~ | Core editor endpoint |
 | ~~`ModernMTController.php`~~            | 26 | 34% | 9 | 15 | MT integration — heavy behavioral |
-| `CattoolController.php`                 | 25 | 60% | 15 | 1 | View controller |
+| ~~`CattoolController.php`~~                 | ~~25~~ | ~~60%~~ | ~~15~~ | ~~1~~ | ✅ Done (Phase 23, +decorators, 28 tests) |
 | `SegmentTranslationIssueController.php` | 21 | 47% | 10 | 9 | LQA endpoint |
 | `DownloadQRController.php`              | 18 | 66% | 12 | 6 | QR downloads |
 | ~~`GetWarningController.php`~~           | ~~17~~ | ~~23%~~ | ~~4~~ | ~~12~~ | ✅ Done (Phase 22) |

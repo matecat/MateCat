@@ -31,6 +31,12 @@ use PHPTAL;
  * @property string $x_nonce_unique_id
  * @property string|null $x_self_ajax_location_hosts
  * @property string $vite_html
+ * @property PHPTalBoolean $project_completion_feature_enabled
+ * @property string $job_completion_current_phase
+ * @property string|int $job_completion_last_event_id
+ * @property PHPTalBoolean $job_marked_complete
+ * @property PHPTalBoolean $mark_as_complete_button_enabled
+ * @property PHPTalBoolean|bool $footer_show_revise_link
  */
 class PHPTALWithAppend extends PHPTAL
 {
