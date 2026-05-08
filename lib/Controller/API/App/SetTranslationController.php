@@ -6,7 +6,6 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
-use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternComparator;
@@ -27,6 +26,7 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentStruct;
@@ -58,7 +58,6 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-    use SegmentDisabledTrait;
     use APISourcePageGuesserTrait;
     use ICUSourceSegmentChecker;
 
@@ -567,15 +566,22 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @return void
      * @throws Exception If the segment is disabled.
      */
+    /**
+     * Throws if the segment is disabled for translation.
+     *
+     * @return void
+     * @throws RuntimeException If the segment is disabled.
+     * @throws ReflectionException
+     * @throws Exception
+     */
     private function checkIfSegmentIsNotDisabled(): void
     {
-        $id_job = $this->data['id_job'];
-        $id_segment = $this->data['id_segment'];
+        $id_segment = (int)$this->data['id_segment'];
 
-        if ($this->isSegmentDisabled((int)$id_job, (int)$id_segment)) {
-            throw new RuntimeException("Segment #".$id_segment." is disabled", -5);
+        if ((new SegmentDisabledService())->isDisabled($id_segment)) {
+            throw new RuntimeException("Segment #" . $id_segment . " is disabled", -5);
         }
-}
+    }
 
     /**
      * @return bool
