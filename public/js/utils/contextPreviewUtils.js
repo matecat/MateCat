@@ -518,13 +518,33 @@ export const tagSegments = (
     el.setAttribute(SEGMENT_SIDS_ATTR, updated.join(','))
     elSidsCache.set(el, updated)
   }
+  const setSids = (el, sids) => {
+    if (!sids.length) {
+      el.removeAttribute(SEGMENT_SIDS_ATTR)
+      elSidsCache.set(el, [])
+    } else {
+      const sorted = [...sids].sort((a, b) => a - b)
+      el.setAttribute(SEGMENT_SIDS_ATTR, sorted.join(','))
+      elSidsCache.set(el, sorted)
+    }
+  }
 
   // Strategy pass — runs first, highest priority.
   // Segments with resname + restype are resolved via DOM-attribute lookups
   // before any text-match runs. Misses (element not found) silently fall
   // through to text-match exactly as segments with no metadata.
+  //
+  // When a point-mapped segment claims a node that already carries
+  // text-matched SIDs (from a previous incremental call), those
+  // text-matched SIDs are evicted: removed from the node's attribute
+  // and un-marked from `alreadyTagged` / `used` so Pass 1/2 can
+  // potentially re-assign them elsewhere.
   const strategyResolved = new Set()
   const tier1Nodes = new Set()
+
+  // Collect all elements claimed by point mapping so we can evict
+  // text-matched SIDs from them after the full strategy pass.
+  const pointMappedElements = new Map() // el → Set<sid>
 
   for (const [sidStr, {resname, restype}] of Object.entries(metadataMap)) {
     const sid = Number(sidStr)
@@ -535,7 +555,12 @@ export const tagSegments = (
       if (idx !== -1) used.add(idx)
       // Re-find the element so Pass 2 still excludes it on incremental calls
       const existingEl = findElementByMetadata(container, resname, restype)
-      if (existingEl) tier1Nodes.add(existingEl)
+      if (existingEl) {
+        tier1Nodes.add(existingEl)
+        if (!pointMappedElements.has(existingEl))
+          pointMappedElements.set(existingEl, new Set())
+        pointMappedElements.get(existingEl).add(sid)
+      }
       continue
     }
     const el = findElementByMetadata(container, resname, restype)
@@ -543,9 +568,27 @@ export const tagSegments = (
       appendSid(el, sid)
       strategyResolved.add(sid)
       tier1Nodes.add(el)
+      if (!pointMappedElements.has(el))
+        pointMappedElements.set(el, new Set())
+      pointMappedElements.get(el).add(sid)
       // Mark the corresponding prepared entry as used so Pass 1 skips it
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
+    }
+  }
+
+  // Evict text-matched SIDs from elements that now have point mappings.
+  // Only SIDs that are themselves point-mapped to this element survive.
+  for (const [el, pointSids] of pointMappedElements) {
+    const currentSids = getCachedSids(el)
+    const toEvict = currentSids.filter((sid) => !pointSids.has(sid))
+    if (toEvict.length) {
+      setSids(el, currentSids.filter((sid) => pointSids.has(sid)))
+      for (const sid of toEvict) {
+        alreadyTagged.delete(sid)
+        const idx = prepared.findIndex((p) => p.sid === sid)
+        if (idx !== -1) used.delete(idx)
+      }
     }
   }
 

@@ -837,6 +837,62 @@ describe('tagSegments — strategy pass (metadataMap)', () => {
     // SID 2 should be tagged on the duplicate-text element via text-match
     expect(getSidsFromElement(dupEl)).toContain(2)
   })
+
+  it('evicts text-matched SIDs when a point-mapped segment claims the node on an incremental call', () => {
+    // Simulates the race condition: first call has no metadata, so SID 1
+    // is text-matched to #hero. Second call brings SID 2 with point
+    // mapping to #hero — SID 1 must be evicted.
+    document.body.innerHTML =
+      '<p id="hero">Hello world</p><p>Hello world</p>'
+    const heroEl = document.body.querySelector('#hero')
+    const otherEl = document.body.querySelectorAll('p')[1]
+
+    // First call: no metadataMap — SID 1 text-matches #hero
+    tagSegments(document.body, [{sid: 1, source: 'Hello world', target: ''}])
+    expect(getSidsFromElement(heroEl)).toContain(1)
+
+    // Second call: SID 2 has point mapping to #hero via x-tag-id
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Hello world', target: ''},
+        {sid: 2, source: 'Different source', target: ''},
+      ],
+      {metadataMap: {2: {resname: 'hero', restype: 'x-tag-id'}}},
+    )
+    // SID 1 must be evicted from #hero; only SID 2 remains
+    expect(getSidsFromElement(heroEl)).toEqual([2])
+    // SID 1 should re-match to the other <p> via text-match
+    expect(getSidsFromElement(otherEl)).toContain(1)
+  })
+
+  it('keeps point-mapped SIDs and only evicts text-matched ones when multiple point SIDs target same node', () => {
+    document.body.innerHTML = '<p id="hero">Hello</p><p>Hello</p>'
+    const heroEl = document.body.querySelector('#hero')
+
+    // First call: SID 1 text-matches #hero
+    tagSegments(document.body, [{sid: 1, source: 'Hello', target: ''}])
+    expect(getSidsFromElement(heroEl)).toContain(1)
+
+    // Second call: SID 2 and SID 3 both point-map to #hero
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Hello', target: ''},
+        {sid: 2, source: 'X', target: ''},
+        {sid: 3, source: 'Y', target: ''},
+      ],
+      {
+        metadataMap: {
+          2: {resname: 'hero', restype: 'x-tag-id'},
+          3: {resname: 'hero', restype: 'x-tag-id'},
+        },
+      },
+    )
+    // Only the point-mapped SIDs survive on #hero
+    expect(getSidsFromElement(heroEl)).toEqual([2, 3])
+    expect(getSidsFromElement(heroEl)).not.toContain(1)
+  })
 })
 
 describe('updateNodeTranslation — internal_id grouping (split trans-units)', () => {
