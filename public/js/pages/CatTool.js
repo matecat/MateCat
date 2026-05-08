@@ -138,6 +138,16 @@ function CatTool() {
     setIsPopupOpen(true)
   }, [contextPreviewUrl])
 
+  const closePopupAndOpenInline = useCallback(() => {
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.close()
+    }
+    popupWindowRef.current = null
+    setIsPopupOpen(false)
+    setIsPreviewOpen(true)
+    previewDesiredOpenRef.current = true
+  }, [])
+
   // Detect when the popup window is manually closed by the user
   useEffect(() => {
     if (!isPopupOpen) return
@@ -710,19 +720,21 @@ function CatTool() {
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
-      {!isPopupOpen && (
       <div
         id="context-preview-wrapper"
         className={
-          !isPreviewOpen
-            ? `context-preview-wrapper--collapsed${!segmentHasPreview ? ' context-preview-wrapper--tab-hidden' : ''}`
+          !isPreviewOpen || isPopupOpen
+            ? `context-preview-wrapper--collapsed${!segmentHasPreview && !isPopupOpen ? ' context-preview-wrapper--tab-hidden' : ''}`
             : undefined
         }
         style={{
-          display: isPreviewOpen && !segmentHasPreview ? 'none' : undefined,
+          display:
+            isPreviewOpen && !segmentHasPreview && !isPopupOpen
+              ? 'none'
+              : undefined,
         }}
       >
-        {isPreviewOpen ? (
+        {isPreviewOpen && !isPopupOpen ? (
           <>
             <div
               className="context-preview__resize-handle"
@@ -767,7 +779,7 @@ function CatTool() {
         ) : (
           <div
             className="context-preview__tab"
-            onClick={togglePreview}
+            onClick={isPopupOpen ? closePopupAndOpenInline : togglePreview}
             role="button"
             tabIndex={0}
           >
@@ -778,7 +790,6 @@ function CatTool() {
           </div>
         )}
       </div>
-      )}
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
