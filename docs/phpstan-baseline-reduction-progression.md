@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-08 (last updated)  
-**Commits (refactor + fix + security + test):** 46
+**Commits (refactor + fix + security + test):** 47
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,977 | −4,389 (−59.6%) |
-| **PHPUnit tests** | ~2,248 | 4,003 | +1,755 (+78.1%) |
-| **PHPUnit assertions** | ~19,449 | 24,402 | +4,953 (+25.5%) |
+| **PHPStan baseline entries** | 7,366 | 2,963 | −4,403 (−59.8%) |
+| **PHPUnit tests** | ~2,248 | 4,021 | +1,773 (+78.8%) |
+| **PHPUnit assertions** | ~19,449 | 24,463 | +5,014 (+25.8%) |
 | **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
-| **New test files** | 235 | 290+ | +55 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 56+ | — |
+| **New test files** | 235 | 291+ | +56 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 57+ | — |
 
 ---
 
@@ -87,7 +87,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 182 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 183 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
@@ -117,6 +117,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/GetContributionController.php` | Phase 5C |
 | `lib/Controller/API/App/GetSearchController.php` | Phase 5E |
 | `lib/Controller/API/App/GetSegmentsController.php` | Phase 20 |
+| `lib/Controller/API/App/GetWarningController.php` | Phase 22 |
 | `lib/Controller/API/App/QualityFrameworkController.php` | Phase 13C |
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
@@ -1116,6 +1117,25 @@ Key changes:
 
 ---
 
+### Phase 22: GetWarningController (~17 errors) — ✅ DONE
+
+**Why:** `GetWarningController` is the QA warnings endpoint consumed by the editor for real-time segment validation. Fixing it ensures type-safe request validation, proper null guards on job lookups, and correct `SegmentMetadataDao::get()` usage (single struct, not array).
+
+#### 22A. `GetWarningController.php` — ✅ DONE (−14 baseline entries, +18 tests)
+
+All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key changes:
+
+- **Root cause fix**: `getChunkAndLoadProjectFeatures()` return type `?JobStruct` → `JobStruct` (never returns null — `ChunkDao::getByIdAndPassword()` throws `NotFoundException`). Added native types `string $id_job, string $password` and `(int)` cast for DAO call. This single fix eliminated 12/17 errors.
+- **Bug fix (L159)**: `SegmentMetadataDao::get()[0] ?? null` — `get()` returns `?SegmentMetadataStruct` (single struct), not array. Removed invalid `[0]` offset access.
+- **Null guard**: `$chunk->id ?? throw new RuntimeException(...)` — guards nullable `?int` property before passing to `MetadataDao::getSubfilteringCustomHandlers(int)`
+- **Null guard**: `$this->icuSourcePatternValidator ?? throw new RuntimeException(...)` — guards trait property after `sourceContainsIcu()` call
+- **Type casts**: `(int) $id_job` for `WarningDao::getWarningsByJobIdAndPassword()` and `SegmentDao::getTranslationsMismatches()`; `(int) $characters_counter` for `QA::setCharactersCount(?int)`
+- **String normalization**: `(string) filter_var(...)` on `FILTER_UNSAFE_RAW` results (src_content, trg_content, token, logs, characters_counter) — eliminates `string|false` return type ambiguity
+- **PHPDoc array shapes**: `validateTheGlobalRequest()` → `array{id_job: string, password: string}`, `validateTheLocalRequest()` → full 9-field shape
+- **18 new tests** in `GetWarningControllerTest.php` (52 assertions, 0 warnings)
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
@@ -1160,7 +1180,7 @@ Key changes:
 | `CattoolController.php`                 | 25 | 60% | 15 | 1 | View controller |
 | `SegmentTranslationIssueController.php` | 21 | 47% | 10 | 9 | LQA endpoint |
 | `DownloadQRController.php`              | 18 | 66% | 12 | 6 | QR downloads |
-| `GetWarningController.php`              | 17 | 23% | 4 | 12 | QA warnings — heavy behavioral |
+| ~~`GetWarningController.php`~~           | ~~17~~ | ~~23%~~ | ~~4~~ | ~~12~~ | ✅ Done (Phase 22) |
 
 **Subtotal Tier 2:** ~134 entries
 
