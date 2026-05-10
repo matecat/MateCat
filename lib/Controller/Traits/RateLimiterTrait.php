@@ -44,52 +44,6 @@ trait RateLimiterTrait
     }
 
     /**
-     * @param Response $response
-     * @param string $identifier
-     * @param string $route
-     * @param int $maxRetries
-     *
-     * @return Response|null
-     * @throws Exception
-     */
-    public function checkRateLimitResponse(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
-    {
-        $key = $this->getKey($identifier, $route);
-        $redis = $this->getRedis();
-
-        if ($redis->get($key) and $redis->get($key) > $maxRetries) {
-            $response->code(429);
-            $response->header("Retry-After", $redis->ttl($key));
-
-            // PENALTY: reset ttl
-            $redis->expire($key, $this->getTtl());
-
-            return $response;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string $identifier
-     * @param string $route
-     *
-     * @throws Exception
-     */
-    public function incrementRateLimitCounter(string $identifier, string $route): void
-    {
-        $key = $this->getKey($identifier, $route);
-        $redis = $this->getRedis();
-
-        if (!$redis->get($key)) {
-            $redis->set($key, 1);
-            $redis->expire($key, $this->getTtl());
-        } else {
-            $redis->incr($key);
-        }
-    }
-
-    /**
      * @return Client
      *
      * @throws Exception
