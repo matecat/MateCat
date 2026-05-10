@@ -47,7 +47,7 @@ class CancelRequestController extends KleinController
             throw new NotFoundException('Invalid id_job or id_segment');
         }
 
-        $route = '/api/v3/jobs/' . $id_job . '/' . $password . '/segment/enable/' . $id_segment;
+        $route = '/api/v3/jobs/' . $id_job . '/segment/enable/' . $id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
 
@@ -81,7 +81,7 @@ class CancelRequestController extends KleinController
             throw new NotFoundException('Invalid id_job or id_segment');
         }
 
-        $route = '/api/v3/jobs/' . $id_job . '/' . $password . '/segment/disable/' . $id_segment;
+        $route = '/api/v3/jobs/' . $id_job . '/segment/disable/' . $id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
 
@@ -116,46 +116,41 @@ class CancelRequestController extends KleinController
         $userEmail = $this->user->email ?? "BLANK_EMAIL";
         $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
 
-        // 1. check rate limit
+        // 1. atomic check + increment rate limit
         foreach ([$userIp, $userEmail] as $identifier) {
-            $rateLimitResponse = $this->checkRateLimitResponse($this->response, $identifier, $route, 5);
+            $rateLimitResponse = $this->checkAndIncrementRateLimit($this->response, $identifier, $route, 5);
             if ($rateLimitResponse instanceof Response) {
                 $this->response = $rateLimitResponse;
                 return;
             }
         }
 
-        try {
-            // 2. check job id and password
-            $job = $this->getJob($id_job, $password);
-            if (null === $job) {
-                throw new NotFoundException('Job not found.');
-            }
+        // 2. check job id and password
+        $job = $this->getJob($id_job, $password);
+        if (null === $job) {
+            throw new NotFoundException('Job not found.');
+        }
 
-            // 3. check segment translation
-            $segmentTranslation = $this->findSegmentTranslation($id_segment, $id_job);
-            if (null === $segmentTranslation) {
-                throw new NotFoundException('Segment not found');
-            }
+        // 3. check segment translation
+        $segmentTranslation = $this->findSegmentTranslation($id_segment, $id_job);
+        if (null === $segmentTranslation) {
+            throw new NotFoundException('Segment not found');
+        }
 
-            // 4. check if user is part of the team
-            $team = $job->getProject()->getTeam();
-            if (empty($team)) {
-                throw new NotFoundException('Team not found');
-            }
+        // 4. check if user is part of the team
+        $team = $job->getProject()->getTeam();
+        if (empty($team)) {
+            throw new NotFoundException('Team not found');
+        }
 
-            $uid = $this->getUser()->uid;
-            if (!empty($uid) && $team->created_by != $uid && !$team->hasUser($uid)) {
-                throw new Exception('User is not part of the team');
-            }
+        $uid = $this->getUser()->uid;
+        if (!empty($uid) && $team->created_by !== $uid && !$team->hasUser($uid)) {
+            throw new Exception('User is not part of the team');
+        }
 
-            // 5. check segment status
-            if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
-                throw new Exception('Segment is not in "new" status and cannot be disabled');
-            }
-        } finally {
-            $this->incrementRateLimitCounter($userEmail, $route);
-            $this->incrementRateLimitCounter($userIp, $route);
+        // 5. check segment status
+        if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
+            throw new Exception('Segment is not in "new" status and cannot be disabled');
         }
     }
 

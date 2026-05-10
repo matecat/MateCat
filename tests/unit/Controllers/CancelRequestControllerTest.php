@@ -712,7 +712,7 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function performChecksIncrementsRateLimitCounterWhenJobNotFound(): void
+    public function performChecksCallsCheckAndIncrementWhenJobNotFound(): void
     {
         $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
@@ -722,8 +722,7 @@ class CancelRequestControllerTest extends AbstractTest
             ->disableOriginalConstructor()
             ->onlyMethods([
                 'getJob',
-                'checkRateLimitResponse',
-                'incrementRateLimitCounter',
+                'checkAndIncrementRateLimit',
                 'getUser',
                 'findSegmentTranslation',
             ])
@@ -736,11 +735,11 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller->method('getUser')->willReturn($user);
         $controller->method('getJob')->willReturn(null);
-        $controller->method('checkRateLimitResponse')->willReturn(null);
+        $controller->method('checkAndIncrementRateLimit')->willReturn(null);
         $controller->method('findSegmentTranslation')->willReturn(null);
 
         $controller->expects($this->exactly(2))
-            ->method('incrementRateLimitCounter');
+            ->method('checkAndIncrementRateLimit');
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -799,8 +798,7 @@ class CancelRequestControllerTest extends AbstractTest
             ->disableOriginalConstructor()
             ->onlyMethods([
                 'getJob',
-                'checkRateLimitResponse',
-                'incrementRateLimitCounter',
+                'checkAndIncrementRateLimit',
                 'getUser',
                 'findSegmentTranslation',
             ])
@@ -835,7 +833,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         // Rate limit mocking — order in code: email first, then IP
         $callIndex = 0;
-        $controller->method('checkRateLimitResponse')
+        $controller->method('checkAndIncrementRateLimit')
             ->willReturnCallback(function () use (&$callIndex, $rateLimitResponseIp, $rateLimitResponseEmail) {
                 $callIndex++;
                 if ($callIndex === 1) {
@@ -847,9 +845,6 @@ class CancelRequestControllerTest extends AbstractTest
                 return null;
             });
 
-        $controller->method('incrementRateLimitCounter');
-
         return $controller;
     }
 }
-
