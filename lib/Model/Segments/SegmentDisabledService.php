@@ -28,28 +28,35 @@ class SegmentDisabledService
     {
         $metadata = SegmentMetadataDao::get(
             $id_segment,
-            SegmentMetadataMarshaller::TRANSLATION_DISABLED->value
+            'translation_disabled'
         );
 
-        return $metadata !== null && $metadata->meta_value === '1';
+        /** @var SegmentMetadataStruct $metadata */
+        return !empty($metadata) && $metadata->meta_value === '1';
     }
 
     /**
      * Disable translation for a segment.
      *
-     * Internally calls {@see SegmentMetadataDao::setTranslationDisabled()},
-     * which persists the row and busts all related DAO caches via save().
+     * Persists the row and busts all related DAO caches via save().
      *
      * @param int $id_segment
      *
      * @return void
-     * @throws ReflectionException
      * @throws PDOException
      * @throws Exception
      */
     public function disable(int $id_segment): void
     {
-        SegmentMetadataDao::setTranslationDisabled($id_segment);
+        $metadata = new SegmentMetadataStruct();
+        $metadata->id_segment = $id_segment;
+        $metadata->meta_key = 'translation_disabled';
+        $metadata->meta_value = "1";
+
+        SegmentMetadataDao::save($metadata);
+        SegmentMetadataDao::destroyCache($id_segment, $metadata->meta_key);
+        SegmentMetadataDao::destroyGetAllCache($id_segment);
+        SegmentMetadataDao::destroyGetBySegmentIdsCache($metadata->meta_key);
     }
 
     /**
@@ -67,9 +74,9 @@ class SegmentDisabledService
      */
     public function enable(int $id_segment): void
     {
-        $key = SegmentMetadataMarshaller::TRANSLATION_DISABLED->value;
+        $key = 'translation_disabled';
         SegmentMetadataDao::delete($id_segment, $key);
-        SegmentMetadataDao::destroyGetCache($id_segment, $key);
+        SegmentMetadataDao::destroyCache($id_segment, $key);
         SegmentMetadataDao::destroyGetAllCache($id_segment);
         SegmentMetadataDao::destroyGetBySegmentIdsCache($key);
     }

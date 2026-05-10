@@ -2,6 +2,7 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDOException;
@@ -11,6 +12,8 @@ class SegmentMetadataDao extends AbstractDao
 {
     private static string $sql_get_all = "SELECT * FROM segment_metadata WHERE id_segment = ? ";
     private static string $sql_find_by_id_segment_and_key = "SELECT * FROM segment_metadata WHERE id_segment = ? and meta_key = ? ";
+    const string _keymap_get_by_segment_ids   = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
+
     /**
      * get all meta
      *
@@ -148,19 +151,20 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * Disable translation for a specific segment.
+     * Destroy cache for getBySegmentIds queries matching the given meta_key.
      *
-     * @param int $id_segment The ID of the segment for which translation will be disabled.
-     *
-     * @return void
+     * Because getBySegmentIds bakes segment IDs into the SQL string (not bind params),
+     * we cannot reconstruct the exact cache key via _destroyObjectCache.
+     * Instead, we delete the keyMap directly using _deleteCacheByKey.
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public static function setTranslationDisabled(int $id_segment): void
+    public static function destroyGetBySegmentIdsCache(string $key): bool
     {
-        $metadata = new SegmentMetadataStruct();
-        $metadata->id_segment = $id_segment;
-        $metadata->meta_key = 'translation_disabled';
-        $metadata->meta_value = "1";
+        $thisDao  = new self();
+        $keyMap   = self::_keymap_get_by_segment_ids . $key;
 
-        SegmentMetadataDao::save($metadata);
+        return $thisDao->_deleteCacheByKey($keyMap, false);
     }
+
 }
