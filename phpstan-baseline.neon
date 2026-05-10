@@ -205,30 +205,6 @@ parameters:
 			path: lib/Controller/API/App/Authentication/LoginController.php
 
 		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:incrementRateLimitCounter\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:incrementRateLimitCounter\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Parameter \#2 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:checkRateLimitResponse\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
 			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
@@ -238,12 +214,6 @@ parameters:
 			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:validateCreationRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\SignupController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
@@ -259,31 +229,13 @@ parameters:
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
-			message: '#^Parameter \#2 \$identifier of method Controller\\API\\App\\Authentication\\SignupController\:\:checkRateLimitResponse\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
 			message: '#^Parameter \#2 \$password_confirmation of method Controller\\API\\App\\Authentication\\SignupController\:\:validatePasswordRequirements\(\) expects string, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\UserController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
 			message: '#^Parameter \#1 \$password of method Controller\\API\\App\\Authentication\\UserController\:\:validatePasswordRequirements\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
-			message: '#^Parameter \#2 \$identifier of method Controller\\API\\App\\Authentication\\UserController\:\:checkRateLimitResponse\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/Authentication/UserController.php
@@ -2641,30 +2593,6 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\SetTranslationController\:\:checkStatus\(\) has parameter \$status with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2857,18 +2785,6 @@ parameters:
 			path: lib/Controller/API/App/SetTranslationController.php
 
 		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
 			message: '#^Parameter \#1 \$sourceValidator of static method Matecat\\ICU\\MessagePatternComparator\:\:fromValidators\(\) expects Matecat\\ICU\\MessagePatternValidator, Matecat\\ICU\\MessagePatternValidator\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3039,18 +2955,6 @@ parameters:
 		-
 			message: '#^Strict comparison using \!\=\= between string\|false and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\App\\SetTranslationController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/App/SetTranslationController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\App\\SetTranslationController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/App/SetTranslationController.php
 
@@ -5263,54 +5167,6 @@ parameters:
 			path: lib/Controller/API/V2/UserController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\CancelRequestController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\CancelRequestController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
 			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer2\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -6061,30 +5917,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_cacheSetConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_deleteCacheByKey\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 2
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_serializeForCacheKey\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:_setInCacheMap\(\) has parameter \$value with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\SegmentAnalysisController\:\:formatSegment\(\) has parameter \$idRequestsAggregate with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6205,18 +6037,6 @@ parameters:
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
 		-
-			message: '#^Parameter \#1 \$key of method Predis\\ClientInterface\:\:get\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Parameter \#1 \$keyOrKeys of method Predis\\ClientInterface\:\:del\(\) expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
 			message: '#^Parameter \#1 \$mt_we_workflow_enabled of static method Model\\Analysis\\Constants\\MatchConstantsFactory\:\:getInstance\(\) expects bool\|null, string\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -6237,18 +6057,6 @@ parameters:
 		-
 			message: '#^Parameter \#5 \$segmentsCount of method Controller\\API\\V3\\SegmentAnalysisController\:\:getSegmentsForAProject\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\SegmentAnalysisController\:\:_getFromCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Controller/API/V3/SegmentAnalysisController.php
-
-		-
-			message: '#^Template type T of method Controller\\API\\V3\\SegmentAnalysisController\:\:_setInCacheMap\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: lib/Controller/API/V3/SegmentAnalysisController.php
 
