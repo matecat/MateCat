@@ -46,17 +46,19 @@ class LoginController extends AbstractStatefulKleinController
             'password' => FILTER_SANITIZE_SPECIAL_CHARS
         ]);
 
-        $checkRateLimitResponse = $this->checkRateLimitResponse($this->response, $params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login', 5);
-        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
+        $emailIdentifier = is_string($params['email']) && $params['email'] !== '' ? $params['email'] : 'BLANK_EMAIL';
 
-        if ($checkRateLimitResponse instanceof Response) {
-            $this->response = $checkRateLimitResponse;
+        $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user/login', 5);
+        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
+
+        if ($rateLimitEmailResponse instanceof Response) {
+            $this->response = $rateLimitEmailResponse;
 
             return;
         }
 
-        if ($checkRateLimitIp instanceof Response) {
-            $this->response = $checkRateLimitIp;
+        if ($rateLimitIpResponse instanceof Response) {
+            $this->response = $rateLimitIpResponse;
 
             return;
         }
@@ -65,8 +67,6 @@ class LoginController extends AbstractStatefulKleinController
         $xsrfToken = $this->request->headers()->get(AppConfig::$XSRF_TOKEN);
 
         if ($xsrfToken === null) {
-            $this->incrementRateLimitCounter($params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login');
-            $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login');
             $this->response->code(403);
 
             return;
@@ -78,8 +78,6 @@ class LoginController extends AbstractStatefulKleinController
                 AppConfig::$AUTHSECRET
             );
         } catch (Exception) {
-            $this->incrementRateLimitCounter($params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login');
-            $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login');
             $this->response->code(403);
 
             return;
@@ -102,8 +100,6 @@ class LoginController extends AbstractStatefulKleinController
 
             $this->response->code(200);
         } else {
-            $this->incrementRateLimitCounter($params['email'], '/api/app/user/login');
-            $this->incrementRateLimitCounter(Utils::getRealIpAddr(), '/api/app/user/login');
             $this->response->code(404);
         }
     }
