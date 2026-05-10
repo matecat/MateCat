@@ -199,7 +199,8 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testSetTranslationDisabledCreatesRowWithKeyAndValueOne(): void
     {
-        SegmentMetadataDao::setTranslationDisabled(self::SEGMENT_ID_1);
+        $service = new \Model\Segments\SegmentDisabledService();
+        $service->disable(self::SEGMENT_ID_1);
 
         $result = SegmentMetadataDao::get(self::SEGMENT_ID_1, 'translation_disabled', 0);
 

@@ -10,10 +10,10 @@ use ReflectionException;
 
 class SegmentMetadataDao extends AbstractDao
 {
-    const string TABLE                        = 'segment_metadata';
-    const string _query_get_all               = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? ";
-    const string _query_get                   = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
-    const string _keymap_get_by_segment_ids   = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
+    const string TABLE = 'segment_metadata';
+    const string _query_get_all = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? ";
+    const string _query_get = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
+    const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
 
     /**
      * Get all metadata for a segment.
@@ -141,8 +141,8 @@ class SegmentMetadataDao extends AbstractDao
 
         $stmt->execute([
             'id_segment' => $id_segment,
-            'key'        => $key,
-            'value'      => $value,
+            'key' => $key,
+            'value' => $value,
         ]);
 
         self::destroyGetAllCache($id_segment);
@@ -157,8 +157,8 @@ class SegmentMetadataDao extends AbstractDao
     public static function destroyGetAllCache(int $id_segment): bool
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare(self::_query_get_all);
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare(self::_query_get_all);
 
         return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment]);
     }
@@ -170,30 +170,10 @@ class SegmentMetadataDao extends AbstractDao
     public static function destroyGetCache(int $id_segment, string $key): bool
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare(self::_query_get);
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare(self::_query_get);
 
         return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
-    }
-
-    /**
-     * Disable translation for a specific segment.
-     *
-     * @param int $id_segment The ID of the segment for which translation will be disabled.
-     *
-     * @return void
-     * @throws ReflectionException
-     * @throws PDOException
-     * @throws Exception
-     */
-    public static function setTranslationDisabled(int $id_segment): void
-    {
-        $metadata = new SegmentMetadataStruct();
-        $metadata->id_segment = $id_segment;
-        $metadata->meta_key = SegmentMetadataMarshaller::TRANSLATION_DISABLED->value;
-        $metadata->meta_value = "1";
-
-        SegmentMetadataDao::save($metadata);
     }
 
     /**
@@ -202,14 +182,17 @@ class SegmentMetadataDao extends AbstractDao
      * Because getBySegmentIds bakes segment IDs into the SQL string (not bind params),
      * we cannot reconstruct the exact cache key via _destroyObjectCache.
      * Instead, we delete the keyMap directly using _deleteCacheByKey.
+     * @param string $key
+     * @return bool
      * @throws ReflectionException
      * @throws Exception
      */
     public static function destroyGetBySegmentIdsCache(string $key): bool
     {
-        $thisDao  = new self();
-        $keyMap   = self::_keymap_get_by_segment_ids . $key;
+        $thisDao = new self();
+        $keyMap = self::_keymap_get_by_segment_ids . $key;
 
         return $thisDao->_deleteCacheByKey($keyMap, false);
     }
+
 }

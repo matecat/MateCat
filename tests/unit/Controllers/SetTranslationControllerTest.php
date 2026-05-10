@@ -2077,7 +2077,6 @@ class SetTranslationControllerTest extends AbstractTest
                      VALUES ({$segmentId}, 'translation_disabled', '1')");
 
         $controller = $this->createControllerWithoutConstructor();
-        $this->injectFakeCacheClient($controller, new LocalFakeRedisClient());
         $this->setProperty($controller, [
             'id_job' => (string)$jobId,
             'id_segment' => (string)$segmentId,
@@ -2097,7 +2096,6 @@ class SetTranslationControllerTest extends AbstractTest
         $segmentId = 896002;
 
         $controller = $this->createControllerWithoutConstructor();
-        $this->injectFakeCacheClient($controller, new LocalFakeRedisClient());
         $this->setProperty($controller, [
             'id_job' => (string)$jobId,
             'id_segment' => (string)$segmentId,

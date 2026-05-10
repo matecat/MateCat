@@ -12,6 +12,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -67,6 +68,9 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $featureSet = new FeatureSet();
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);
+
+        $segmentDisabledServiceProp = $this->reflector->getProperty('segmentDisabledService');
+        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService());
     }
 
     protected function tearDown(): void

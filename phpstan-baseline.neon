@@ -204,29 +204,7 @@ parameters:
 			count: 1
 			path: lib/Controller/API/App/Authentication/LoginController.php
 
-		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:incrementRateLimitCounter\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/Authentication/LoginController.php
 
-		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:incrementRateLimitCounter\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Parameter \#2 \$identifier of method Controller\\API\\App\\Authentication\\LoginController\:\:checkRateLimitResponse\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
 
 		-
 			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
@@ -247,12 +225,6 @@ parameters:
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\SignupController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
 			message: '#^Parameter \#1 \$password of method Controller\\API\\App\\Authentication\\SignupController\:\:validatePasswordRequirements\(\) expects string, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -262,12 +234,6 @@ parameters:
 			message: '#^Parameter \#1 \$url of function parse_url expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Parameter \#2 \$identifier of method Controller\\API\\App\\Authentication\\SignupController\:\:checkRateLimitResponse\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
@@ -283,19 +249,7 @@ parameters:
 			path: lib/Controller/API/App/Authentication/UserController.php
 
 		-
-			message: '#^Parameter \#1 \$identifier of method Controller\\API\\App\\Authentication\\UserController\:\:incrementRateLimitCounter\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
 			message: '#^Parameter \#1 \$password of method Controller\\API\\App\\Authentication\\UserController\:\:validatePasswordRequirements\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
-			message: '#^Parameter \#2 \$identifier of method Controller\\API\\App\\Authentication\\UserController\:\:checkRateLimitResponse\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/Authentication/UserController.php

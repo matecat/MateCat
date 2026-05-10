@@ -12,21 +12,19 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Controller\Traits\RateLimiterTrait;
-use Controller\Traits\SegmentDisabledTrait;
 use Exception;
-use ReflectionException;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
-use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
+use ReflectionException;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\Utils;
 
 class CancelRequestController extends KleinController
 {
     use RateLimiterTrait;
-    use SegmentDisabledTrait;
     use ChunkNotFoundHandlerTrait;
 
     protected function afterConstruct(): void
@@ -49,7 +47,7 @@ class CancelRequestController extends KleinController
             throw new NotFoundException('Invalid id_job or id_segment');
         }
 
-        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/enable/'.$id_segment;
+        $route = '/api/v3/jobs/' . $id_job . '/segment/enable/' . $id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
 
@@ -57,8 +55,10 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        if ($this->isSegmentDisabled($id_job, $id_segment)) {
-            $this->destroySegmentDisabledCache($id_job, $id_segment);
+        $service = new SegmentDisabledService();
+
+        if ($service->isDisabled($id_segment)) {
+            $service->enable($id_segment);
         }
 
         $this->response->json([
@@ -81,7 +81,7 @@ class CancelRequestController extends KleinController
             throw new NotFoundException('Invalid id_job or id_segment');
         }
 
-        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
+        $route = '/api/v3/jobs/' . $id_job . '/segment/disable/' . $id_segment;
 
         $this->performChecks($id_job, $password, $id_segment, $route);
 
@@ -89,12 +89,10 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
-        // setting the cache to avoid multiple disable requests for the same segment in a short time frame
-        if (!$this->isSegmentDisabled($id_job, $id_segment)) {
-            SegmentMetadataDao::destroyGetAllCache($id_segment);
-            SegmentMetadataDao::setTranslationDisabled($id_segment);
-            $this->saveSegmentDisabledInCache($id_job, $id_segment);
+        $service = new SegmentDisabledService();
+
+        if (!$service->isDisabled($id_segment)) {
+            $service->disable($id_segment);
         }
 
         $this->response->json([
@@ -118,73 +116,42 @@ class CancelRequestController extends KleinController
         $userEmail = $this->user->email ?? "BLANK_EMAIL";
         $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
 
-        // 1. check rate limit
-        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $userEmail, $route, 5);
-        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, $userIp, $route, 5);
-
-        if ($checkRateLimitIp instanceof Response) {
-            $this->response = $checkRateLimitIp;
-
-            return;
-        }
-
-        if ($checkRateLimitEmail instanceof Response) {
-            $this->response = $checkRateLimitEmail;
-
-            return;
+        // 1. atomic check + increment rate limit
+        foreach ([$userIp, $userEmail] as $identifier) {
+            $rateLimitResponse = $this->checkAndIncrementRateLimit($this->response, $identifier, $route, 5);
+            if ($rateLimitResponse instanceof Response) {
+                $this->response = $rateLimitResponse;
+                return;
+            }
         }
 
         // 2. check job id and password
         $job = $this->getJob($id_job, $password);
-
         if (null === $job) {
-            $this->incrementRateLimitCounter($userEmail, $route);
-            $this->incrementRateLimitCounter($userIp, $route);
-
             throw new NotFoundException('Job not found.');
         }
 
         // 3. check segment translation
         $segmentTranslation = $this->findSegmentTranslation($id_segment, $id_job);
-
-        if (empty($segmentTranslation)) {
-            $this->incrementRateLimitCounter($userEmail, $route);
-            $this->incrementRateLimitCounter($userIp, $route);
-
+        if (null === $segmentTranslation) {
             throw new NotFoundException('Segment not found');
         }
 
-        // 4. check is user is the owner of the segment
+        // 4. check if user is part of the team
         $team = $job->getProject()->getTeam();
-
-        if(empty($team)){
-            $this->incrementRateLimitCounter($userEmail, $route);
-            $this->incrementRateLimitCounter($userIp, $route);
-
+        if (empty($team)) {
             throw new NotFoundException('Team not found');
         }
 
-        if(!empty($this->getUser()->uid) && $team->created_by != $this->getUser()->uid){
-
-            // check if user is part of the team
-            if (!$team->hasUser($this->getUser()->uid)){
-                $this->incrementRateLimitCounter($userEmail, $route);
-                $this->incrementRateLimitCounter($userIp, $route);
-
-                throw new Exception('User is not part of the team');
-            }
+        $uid = $this->getUser()->uid;
+        if (!empty($uid) && $team->created_by !== $uid && !$team->hasUser($uid)) {
+            throw new Exception('User is not part of the team');
         }
 
         // 5. check segment status
         if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
-            $this->incrementRateLimitCounter($userEmail, $route);
-            $this->incrementRateLimitCounter($userIp, $route);
-
             throw new Exception('Segment is not in "new" status and cannot be disabled');
         }
-
-        $this->incrementRateLimitCounter($userEmail, $route);
-        $this->incrementRateLimitCounter($userIp, $route);
     }
 
     /**

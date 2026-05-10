@@ -33,10 +33,10 @@ class SignupController extends AbstractStatefulKleinController
     {
         $user = $this->validateCreationRequest();
 
-        $userIp = Utils::getRealIpAddr();
+        $userIp = Utils::getRealIpAddr() ?? '127.0.0.1';
 
         // rate limit on email
-        $checkRateLimitOnEmail = $this->checkRateLimitResponse($this->response, $user['email'], '/api/app/user', 3);
+        $checkRateLimitOnEmail = $this->checkAndIncrementRateLimit($this->response, $user['email'], '/api/app/user', 3);
         if ($checkRateLimitOnEmail instanceof Response) {
             $this->response = $checkRateLimitOnEmail;
 
@@ -44,7 +44,7 @@ class SignupController extends AbstractStatefulKleinController
         }
 
         // rate limit on IP
-        $checkRateLimitOnIp = $this->checkRateLimitResponse($this->response, $userIp, '/api/app/user', 3);
+        $checkRateLimitOnIp = $this->checkAndIncrementRateLimit($this->response, $userIp, '/api/app/user', 3);
         if ($checkRateLimitOnIp instanceof Response) {
             $this->response = $checkRateLimitOnIp;
 
@@ -52,9 +52,6 @@ class SignupController extends AbstractStatefulKleinController
         }
 
         $signup = new SignupModel($user, $_SESSION);
-        $this->incrementRateLimitCounter($userIp, '/api/app/user');
-        $this->incrementRateLimitCounter($user['email'], '/api/app/user');
-
         $signup->processSignup();
         $this->response->code(200);
     }
@@ -155,10 +152,11 @@ class SignupController extends AbstractStatefulKleinController
      */
     public function resendConfirmationEmail(): void
     {
-        $userIp = Utils::getRealIpAddr();
+        $userIp = Utils::getRealIpAddr() ?? '127.0.0.1';
+        $emailIdentifier = (string)$this->request->param('email');
 
         // rate limit on email
-        $checkRateLimitOnEmail = $this->checkRateLimitResponse($this->response, $this->request->param('email'), '/api/app/user', 3);
+        $checkRateLimitOnEmail = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user', 3);
         if ($checkRateLimitOnEmail instanceof Response) {
             $this->response = $checkRateLimitOnEmail;
 
@@ -166,15 +164,12 @@ class SignupController extends AbstractStatefulKleinController
         }
 
         // rate limit on IP
-        $checkRateLimitOnIp = $this->checkRateLimitResponse($this->response, $userIp, '/api/app/user', 3);
+        $checkRateLimitOnIp = $this->checkAndIncrementRateLimit($this->response, $userIp, '/api/app/user', 3);
         if ($checkRateLimitOnIp instanceof Response) {
             $this->response = $checkRateLimitOnIp;
 
             return;
         }
-
-        $this->incrementRateLimitCounter($userIp, '/api/app/user');
-        $this->incrementRateLimitCounter($this->request->param('email'), '/api/app/user');
 
         SignupModel::resendConfirmationEmail($this->request->param('email'));
         $this->response->code(200);
