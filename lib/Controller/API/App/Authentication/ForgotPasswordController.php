@@ -41,8 +41,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     public function forgotPassword(): void
     {
-        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5);
-        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
+        $checkRateLimitEmail = $this->checkAndIncrementRateLimit($this->response, $this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5);
+        $checkRateLimitIp = $this->checkAndIncrementRateLimit($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
 
         if ($checkRateLimitIp instanceof Response) {
             $this->response = $checkRateLimitIp;
@@ -78,9 +78,6 @@ class ForgotPasswordController extends AbstractStatefulKleinController
 
         $doForgotPassword = $this->doForgotPassword($signupModel);
 
-        $this->incrementRateLimitCounter($this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password');
-        $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password');
-
         $this->response->code($doForgotPassword['code']);
         $this->response->json([
             'email' => $signupModel->getParams()['email'],
@@ -105,21 +102,22 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      */
     public function authForPasswordReset(): void
     {
+        $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
+        $route = '/api/app/user/password_reset';
+
+        $rateLimitResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $route);
+        if ($rateLimitResponse instanceof Response) {
+            $this->response = $rateLimitResponse;
+            return;
+        }
+
         try {
-            $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param('token'), '/api/app/user/password_reset');
-            if ($checkRateLimit instanceof Response) {
-                $this->response = $checkRateLimit;
-
-                return;
-            }
-
             $reset = new PasswordResetModel($_SESSION, $this->request->param('token'));
             $reset->validateUser();
             $this->response->redirect($reset->flushWantedURL());
 
             FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE);
         } catch (ValidationError $e) {
-            $this->incrementRateLimitCounter($this->request->param('token'), '/api/app/user/password_reset');
             FlashMessage::set('passwordReset', $e->getMessage(), FlashMessage::ERROR);
             $this->response->redirect(CanonicalRoutes::appRoot());
         }
