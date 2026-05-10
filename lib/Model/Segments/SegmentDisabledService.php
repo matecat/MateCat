@@ -40,6 +40,13 @@ class SegmentDisabledService
      *
      * Persists the row and busts all related DAO caches via save().
      *
+     * Note: segment_metadata has no UNIQUE constraint on (id_segment, meta_key).
+     * Under concurrent requests, two disable() calls may both pass the isDisabled()
+     * check and INSERT duplicate rows. This is benign:
+     *   - isDisabled() still returns true (non-empty result with meta_value='1')
+     *   - enable() uses DELETE WHERE, which removes ALL matching rows
+     *   - No data corruption or functional breakage occurs
+     *
      * @param int $id_segment
      *
      * @return void
