@@ -34,9 +34,9 @@ trait RateLimiterTrait
 
         if ($current > $maxRetries) {
             $response->code(429);
-            $response->header("Retry-After", $redis->ttl($key));
-            // PENALTY: reset ttl
+            // PENALTY: reset ttl first, then report accurate Retry-After
             $redis->expire($key, $this->getTtl());
+            $response->header("Retry-After", $redis->ttl($key));
             return $response;
         }
 

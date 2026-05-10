@@ -557,16 +557,6 @@ class SetTranslationController extends AbstractStatefulKleinController
     }
 
     /**
-     * checkIfIsNotDisabled
-     *
-     * Determines whether the segment associated with a specific job and segment ID
-     * is disabled by checking cached information. If the segment is found to be disabled,
-     * an exception is thrown.
-     *
-     * @return void
-     * @throws Exception If the segment is disabled.
-     */
-    /**
      * Throws if the segment is disabled for translation.
      *
      * @return void

@@ -38,7 +38,7 @@ class SegmentDisabledService
     /**
      * Disable translation for a segment.
      *
-     * Persists the row and busts all related DAO caches via save().
+     * Persists the row via save(), then busts all related DAO caches.
      *
      * Note: segment_metadata has no UNIQUE constraint on (id_segment, meta_key).
      * Under concurrent requests, two disable() calls may both pass the isDisabled()

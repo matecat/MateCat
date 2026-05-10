@@ -831,16 +831,16 @@ class CancelRequestControllerTest extends AbstractTest
             $controller->method('findSegmentTranslation')->willReturn($segmentReturn);
         }
 
-        // Rate limit mocking — order in code: email first, then IP
+        // Rate limit mocking — order matches performChecks: [$userIp, $userEmail]
         $callIndex = 0;
         $controller->method('checkAndIncrementRateLimit')
             ->willReturnCallback(function () use (&$callIndex, $rateLimitResponseIp, $rateLimitResponseEmail) {
                 $callIndex++;
                 if ($callIndex === 1) {
-                    return $rateLimitResponseEmail;
+                    return $rateLimitResponseIp;
                 }
                 if ($callIndex === 2) {
-                    return $rateLimitResponseIp;
+                    return $rateLimitResponseEmail;
                 }
                 return null;
             });

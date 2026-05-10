@@ -203,7 +203,14 @@ class RateLimiterTraitTest extends AbstractTest
         $this->redis->setTtlValue($key, 45);
 
         $response->expects($this->once())->method('code')->with(429);
-        $response->expects($this->once())->method('header')->with('Retry-After', 45);
+        // After penalty reset, TTL should be 61-120 (new value, not old 45)
+        $response->expects($this->once())->method('header')->with(
+            $this->equalTo('Retry-After'),
+            $this->logicalAnd(
+                $this->greaterThanOrEqual(61),
+                $this->lessThanOrEqual(120)
+            )
+        );
 
         $result = $this->consumer->checkAndIncrementRateLimit($response, 'user@test.com', '/api/route', 10);
 
@@ -246,7 +253,14 @@ class RateLimiterTraitTest extends AbstractTest
         $this->redis->setTtlValue($key, 30);
 
         $response->expects($this->once())->method('code')->with(429);
-        $response->expects($this->once())->method('header')->with('Retry-After', 30);
+        // After penalty reset, TTL should be 61-120 (new value, not old 30)
+        $response->expects($this->once())->method('header')->with(
+            $this->equalTo('Retry-After'),
+            $this->logicalAnd(
+                $this->greaterThanOrEqual(61),
+                $this->lessThanOrEqual(120)
+            )
+        );
 
         $this->consumer->checkAndIncrementRateLimit($response, 'id', '/route', 5);
 
