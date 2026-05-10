@@ -31,8 +31,8 @@ class SegmentDisabledService
             'translation_disabled'
         );
 
-        /** @var SegmentMetadataStruct $metadata */
-        return !empty($metadata) && $metadata->meta_value === '1';
+        /** @var SegmentMetadataStruct[] $metadata */
+        return !empty($metadata) && $metadata[0]->meta_value === '1';
     }
 
     /**

@@ -97,6 +97,11 @@ class ForgotPasswordController extends AbstractStatefulKleinController
      * If an error occurs during the process, it increments the rate limit counter
      * and redirects the user to the application root.
      *
+     * Rate Limiter
+     *
+     * This is the trade-off: 10+ people behind the same NAT all clicking password-reset links within a ~2 minute window would trigger rate limiting.
+     * In practice this is extremely unlikely for a password reset endpoint (unlike a login page).
+     *
      * @throws PredisException
      * @throws Exception
      */

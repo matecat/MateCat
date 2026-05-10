@@ -4,7 +4,6 @@ namespace unit\Model\Segments;
 
 use Model\DataAccess\Database;
 use Model\Segments\SegmentDisabledService;
-use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -58,12 +57,12 @@ class SegmentDisabledServiceTest extends AbstractTest
     {
         $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (?, ?, ?)"
-        )->execute([$idSegment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value, $value]);
+        )->execute([$idSegment, 'translation_disabled', $value]);
     }
 
     private function fetchDisabledRows(int $idSegment): array
     {
-        $key = SegmentMetadataMarshaller::TRANSLATION_DISABLED->value;
+        $key = 'translation_disabled';
 
         return $this->database->getConnection()
             ->query("SELECT * FROM segment_metadata WHERE id_segment = $idSegment AND meta_key = '$key'")
