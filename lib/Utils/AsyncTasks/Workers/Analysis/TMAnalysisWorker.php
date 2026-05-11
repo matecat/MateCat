@@ -274,8 +274,11 @@ class TMAnalysisWorker extends AbstractWorker
 
         try {
             $updateRes = SegmentTranslationDao::setAnalysisValue($tm_data);
-            $message = ($updateRes == 0) ? "No row found: " . $tm_data['id_segment'] . "-" . $tm_data['id_job'] : "Row found: " . $tm_data['id_segment'] . "-" . $tm_data['id_job'] . " - UPDATED.";
-            $this->_doLog($message);
+            if ($updateRes === 0) {
+                $this->_doLog("Segment {$tm_data['id_segment']}-{$tm_data['id_job']} already DONE, skipping side-effects.");
+                return;
+            }
+            $this->_doLog("Row found: " . $tm_data['id_segment'] . "-" . $tm_data['id_job'] . " - UPDATED.");
         } catch (Exception $exception) {
             $this->_doLog("**** " . $exception->getMessage());
             $this->_doLog("**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}");
@@ -842,8 +845,17 @@ class TMAnalysisWorker extends AbstractWorker
             $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null
         ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102);
 
-        /** @var $tms_match GetMemoryResponse */
         $tms_match = $tmsEngine->get($config);
+
+        if (!$tms_match instanceof GetMemoryResponse) {
+            // Strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT (the returned record cannot be empty). Try again
+            if (empty($tms_match) && $_config['get_mt']) {
+                $this->_doLog("--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.");
+                throw new ReQueueException("--- (Worker " . $this->_workerPid . ") : Error from Matches. Empty field received even if MT was requested.", self::ERR_REQUEUE);
+            }
+
+            return $tms_match;
+        }
 
         /**
          * If No results found. Re-Queue
@@ -858,12 +870,6 @@ class TMAnalysisWorker extends AbstractWorker
         if (!$tms_match->mtLangSupported) {
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Error from MyMemory. MT not supported.");
             throw new NotSupportedMTException("--- (Worker " . $this->_workerPid . ") : Error from Matches. MT not supported.", self::ERR_EMPTY_ELEMENT);
-        }
-
-        // Strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT (the returned record cannot be empty). Try again
-        if (empty($tms_match) && $_config['get_mt']) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.");
-            throw new ReQueueException("--- (Worker " . $this->_workerPid . ") : Error from Matches. Empty field received even if MT was requested.", self::ERR_REQUEUE);
         }
 
         if (!empty($tms_match)) {
