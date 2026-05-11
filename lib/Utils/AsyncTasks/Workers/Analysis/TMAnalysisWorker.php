@@ -1030,65 +1030,78 @@ class TMAnalysisWorker extends AbstractWorker
                 'NX'
             )
         ) {
-
-            /*
-             * Remove this job from the project list
-             */
-            $this->_queueHandler->getRedisClient()->lrem($this->_myContext->redis_key, 0, $_project_id);
-
-            $this->_doLog("--- (Worker $this->_workerPid) : trying to initialize job total word count.");
-
-            $database = Database::obtain();
-            $database->begin();
-
-            $_analyzed_report = $this->getProjectSegmentsTranslationSummary($_project_id);
-
-            array_pop($_analyzed_report); //remove Rollup
-
-            $this->_doLog("--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE");
-
-            ProjectDao::updateFields(
-                [
-                    'status_analysis' => ProjectStatus::STATUS_DONE,
-                    'tm_analysis_wc' => $project_totals['eq_wc'],
-                    'standard_analysis_wc' => $project_totals['st_wc']
-                ],
-                ['id' => $_project_id]
-            );
-
-            // update chunks' standard_analysis_wc
-            $jobs = ProjectDao::findById($_project_id)->getChunks();
-            $numberOfJobs = count($jobs);
-
-            foreach ($jobs as $job) {
-                JobDao::updateFields([
-                    'standard_analysis_wc' => round($project_totals['st_wc'] / $numberOfJobs)
-                ], [
-                    'id' => $job->id
-                ]);
-            }
-
-            ProjectDao::destroyCacheById($_project_id);
-            (new JobDao)->destroyCacheByProjectId($_project_id);
-
-            foreach ($_analyzed_report as $job_info) {
-                $counter = new CounterModel();
-                $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
-            }
-
-            $database->commit();
-
             try {
-                $this->featureSet->run('afterTMAnalysisCloseProject', $_project_id, $_analyzed_report);
-            } catch (Exception $e) {
-                //ignore Exception the analysis is finished anyway
-                $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
-            }
+                $this->_queueHandler->getRedisClient()->lrem($this->_myContext->redis_key, 0, $_project_id);
 
-            (new JobDao())->destroyCacheByProjectId($_project_id);
-            ProjectDao::destroyCacheById($_project_id);
-            ProjectDao::destroyCacheByIdAndPassword($_project_id, $_params->ppassword);
-            AnalysisDao::destroyCacheByProjectId($_project_id);
+                $this->_doLog("--- (Worker $this->_workerPid) : trying to initialize job total word count.");
+
+                $database = Database::obtain();
+                $database->begin();
+
+                $_analyzed_report = $this->getProjectSegmentsTranslationSummary($_project_id);
+
+                array_pop($_analyzed_report); //remove Rollup
+
+                $this->_doLog("--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE");
+
+                ProjectDao::updateFields(
+                    [
+                        'status_analysis' => ProjectStatus::STATUS_DONE,
+                        'tm_analysis_wc' => $project_totals['eq_wc'],
+                        'standard_analysis_wc' => $project_totals['st_wc']
+                    ],
+                    ['id' => $_project_id]
+                );
+
+                // update chunks' standard_analysis_wc
+                $jobs = ProjectDao::findById($_project_id)->getChunks();
+                $numberOfJobs = count($jobs);
+
+                foreach ($jobs as $job) {
+                    JobDao::updateFields([
+                        'standard_analysis_wc' => round($project_totals['st_wc'] / $numberOfJobs)
+                    ], [
+                        'id' => $job->id
+                    ]);
+                }
+
+                ProjectDao::destroyCacheById($_project_id);
+                (new JobDao)->destroyCacheByProjectId($_project_id);
+
+                foreach ($_analyzed_report as $job_info) {
+                    $counter = new CounterModel();
+                    $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
+                }
+
+                $database->commit();
+
+                try {
+                    $this->featureSet->run('afterTMAnalysisCloseProject', $_project_id, $_analyzed_report);
+                } catch (Exception $e) {
+                    //ignore Exception the analysis is finished anyway
+                    $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
+                }
+
+                (new JobDao())->destroyCacheByProjectId($_project_id);
+                ProjectDao::destroyCacheById($_project_id);
+                ProjectDao::destroyCacheByIdAndPassword($_project_id, $_params->ppassword);
+                AnalysisDao::destroyCacheByProjectId($_project_id);
+            } catch (\Throwable $e) {
+                $this->_doLog("**** Finalization failed for project $_project_id: " . $e->getMessage());
+
+                // Rollback DB if transaction is active
+                try {
+                    Database::obtain()->rollback();
+                } catch (\Throwable) {
+                    // Already rolled back or no active transaction
+                }
+
+                // Release semaphore so next trigger can retry finalization
+                $this->_queueHandler->getRedisClient()->del(RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id);
+
+                // Re-add project to working list so future segments (or a reconciler) can retry
+                $this->_queueHandler->getRedisClient()->rpush($this->_myContext->redis_key, $_project_id);
+            }
         }
     }
 
