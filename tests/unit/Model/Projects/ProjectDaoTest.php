@@ -9,48 +9,92 @@ use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
 class ProjectDaoTest extends AbstractTest
 {
-    private const int TEST_UID = 9990001;
-    private const int TEST_TEAM_ID = 9990001;
+    private const int TEST_UID = 88880001;
+    private const int TEST_TEAM_ID = 88880002;
 
-    private const int PROJECT_ID_1 = 9990001;
-    private const int PROJECT_ID_2 = 9990002;
-    private const int PROJECT_ID_3 = 9990003;
-    private const int PROJECT_ID_4 = 9990004;
+    private const int PROJECT_ID_1 = 88880011;
+    private const int PROJECT_ID_2 = 88880012;
+    private const int PROJECT_ID_3 = 88880013;
+    private const int PROJECT_ID_4 = 88880014;
 
-    private const int JOB_ID_1 = 9991001;
-    private const int JOB_ID_2 = 9991002;
-    private const int JOB_ID_3 = 9991003;
+    private const int JOB_ID_1 = 88880021;
+    private const int JOB_ID_2 = 88880022;
+    private const int JOB_ID_3 = 88880023;
 
-    private const int FILE_ID_1 = 9992001;
-    private const int FILE_ID_2 = 9992002;
+    private const int FILE_ID_1 = 88880031;
+    private const int FILE_ID_2 = 88880032;
 
-    private const int SEGMENT_ID_1 = 9993001;
-    private const int SEGMENT_ID_2 = 9993002;
-    private const int SEGMENT_ID_3 = 9993003;
+    private const int SEGMENT_ID_1 = 88880041;
+    private const int SEGMENT_ID_2 = 88880042;
+    private const int SEGMENT_ID_3 = 88880043;
+
+    private Database $database;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $conn = Database::obtain()->getConnection();
-        $conn->beginTransaction();
+        $this->database = Database::obtain(
+            AppConfig::$DB_SERVER,
+            AppConfig::$DB_USER,
+            AppConfig::$DB_PASS,
+            AppConfig::$DB_DATABASE
+        );
+
+        $this->deleteFixtureRows();
+        $this->insertFixtureRows();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->deleteFixtureRows();
+
+        $flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
+        $flusher->select(AppConfig::$INSTANCE_ID);
+        $flusher->flushdb();
+
+        parent::tearDown();
+    }
+
+    private function deleteFixtureRows(): void
+    {
+        $conn = $this->database->getConnection();
+
+        $segmentIds = implode(',', [self::SEGMENT_ID_1, self::SEGMENT_ID_2, self::SEGMENT_ID_3]);
+        $jobIds = implode(',', [self::JOB_ID_1, self::JOB_ID_2, self::JOB_ID_3]);
+        $fileIds = implode(',', [self::FILE_ID_1, self::FILE_ID_2]);
+        $projectIds = implode(',', [self::PROJECT_ID_1, self::PROJECT_ID_2, self::PROJECT_ID_3, self::PROJECT_ID_4]);
+
+        $conn->exec("DELETE FROM segment_translations WHERE id_segment IN ($segmentIds)");
+        $conn->exec("DELETE FROM segments WHERE id IN ($segmentIds)");
+        $conn->exec("DELETE FROM files WHERE id IN ($fileIds)");
+        $conn->exec("DELETE FROM jobs WHERE id IN ($jobIds)");
+        $conn->exec("DELETE FROM projects WHERE id IN ($projectIds)");
+        $conn->exec("DELETE FROM teams WHERE id = " . self::TEST_TEAM_ID);
+        $conn->exec("DELETE FROM users WHERE uid = " . self::TEST_UID);
+    }
+
+    private function insertFixtureRows(): void
+    {
+        $conn = $this->database->getConnection();
 
         $conn->exec(
-            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+            "INSERT INTO users (uid, email, salt, pass, create_date, first_name, last_name)
              VALUES (" . self::TEST_UID . ", 'project-dao@test.local', 'x', 'x', '2024-01-01 00:00:00', 'Project', 'Dao')"
         );
 
         $conn->exec(
-            "INSERT IGNORE INTO teams (id, name, created_by, type)
+            "INSERT INTO teams (id, name, created_by, type)
              VALUES (" . self::TEST_TEAM_ID . ", 'ProjectDao Team', " . self::TEST_UID . ", 'general')"
         );
 
         $conn->exec(
-            "INSERT IGNORE INTO projects (id, password, id_customer, name, create_date, id_team, status_analysis, standard_analysis_wc, fast_analysis_wc, tm_analysis_wc)
+            "INSERT INTO projects (id, password, id_customer, name, create_date, id_team, status_analysis, standard_analysis_wc, fast_analysis_wc, tm_analysis_wc)
              VALUES
              (" . self::PROJECT_ID_1 . ", 'ppass-1', 'customer-a', 'Project Alpha', '2024-01-01 00:00:00', " . self::TEST_TEAM_ID . ", 'NEW', 0, 0, 0),
              (" . self::PROJECT_ID_2 . ", 'ppass-2', 'customer-a', 'Project Beta', '2024-01-01 00:00:00', " . self::TEST_TEAM_ID . ", 'DONE', 0, 0, 0),
@@ -59,22 +103,22 @@ class ProjectDaoTest extends AbstractTest
         );
 
         $conn->exec(
-            "INSERT IGNORE INTO jobs (id, password, id_project, source, target, payable_rates, status_owner, subject, job_first_segment, job_last_segment, create_date, owner, status, disabled, tm_keys)
+            "INSERT INTO jobs (id, password, id_project, source, target, payable_rates, status_owner, subject, job_first_segment, job_last_segment, create_date, owner, status, disabled, tm_keys)
              VALUES
              (" . self::JOB_ID_1 . ", 'jpass-1', " . self::PROJECT_ID_1 . ", 'en-US', 'it-IT', '[]', 'active', 'general', " . self::SEGMENT_ID_1 . ", " . self::SEGMENT_ID_2 . ", '2024-01-01 00:00:00', 'project-dao@test.local', 'active', 0, '[]'),
              (" . self::JOB_ID_2 . ", 'jpass-2', " . self::PROJECT_ID_1 . ", 'en-US', 'fr-FR', '[]', 'active', 'general', " . self::SEGMENT_ID_3 . ", " . self::SEGMENT_ID_3 . ", '2024-01-01 00:00:00', 'project-dao@test.local', 'active', 0, '[]'),
-             (" . self::JOB_ID_3 . ", 'jpass-3', " . self::PROJECT_ID_2 . ", 'en-US', 'de-DE', '[]', 'active', 'general', 9993010, 9993010, '2024-01-01 00:00:00', 'project-dao@test.local', 'active', 0, '[]')"
+             (" . self::JOB_ID_3 . ", 'jpass-3', " . self::PROJECT_ID_2 . ", 'en-US', 'de-DE', '[]', 'active', 'general', " . self::SEGMENT_ID_3 . ", " . self::SEGMENT_ID_3 . ", '2024-01-01 00:00:00', 'project-dao@test.local', 'active', 0, '[]')"
         );
 
         $conn->exec(
-            "INSERT IGNORE INTO files (id, id_project, filename, source_language, mime_type)
+            "INSERT INTO files (id, id_project, filename, source_language, mime_type)
              VALUES
              (" . self::FILE_ID_1 . ", " . self::PROJECT_ID_1 . ", 'alpha-1.xliff', 'en-US', 'application/xliff+xml'),
              (" . self::FILE_ID_2 . ", " . self::PROJECT_ID_1 . ", 'alpha-2.xliff', 'en-US', 'application/xliff+xml')"
         );
 
         $conn->exec(
-            "INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
+            "INSERT INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
              VALUES
              (" . self::SEGMENT_ID_1 . ", " . self::FILE_ID_1 . ", '1', 'Hello world', 'hash-1', 10),
              (" . self::SEGMENT_ID_2 . ", " . self::FILE_ID_1 . ", '2', 'How are you?', 'hash-2', 5),
@@ -82,22 +126,12 @@ class ProjectDaoTest extends AbstractTest
         );
 
         $conn->exec(
-            "INSERT IGNORE INTO segment_translations (id_segment, id_job, segment_hash, translation, status, translation_date, time_to_edit, eq_word_count, standard_word_count)
+            "INSERT INTO segment_translations (id_segment, id_job, segment_hash, translation, status, translation_date, time_to_edit, eq_word_count, standard_word_count)
              VALUES
              (" . self::SEGMENT_ID_1 . ", " . self::JOB_ID_1 . ", 'hash-1', 'Ciao mondo', 'DRAFT', NOW(), 10, 4, 6),
              (" . self::SEGMENT_ID_2 . ", " . self::JOB_ID_1 . ", 'hash-2', 'Come stai?', 'DRAFT', NOW(), 10, 2, 3),
              (" . self::SEGMENT_ID_3 . ", " . self::JOB_ID_2 . ", 'hash-3', 'Deuxième fichier', 'DRAFT', NOW(), 10, 3, 4)"
         );
-    }
-
-    protected function tearDown(): void
-    {
-        $conn = Database::obtain()->getConnection();
-        if ($conn->inTransaction()) {
-            $conn->rollBack();
-        }
-
-        parent::tearDown();
     }
 
     #[Test]
@@ -145,7 +179,7 @@ class ProjectDaoTest extends AbstractTest
     public function findByIdReturnsExistingAndNullForMissing(): void
     {
         $this->assertInstanceOf(ProjectStruct::class, ProjectDao::findById(self::PROJECT_ID_1));
-        $this->assertNull(ProjectDao::findById(9990999));
+        $this->assertNull(ProjectDao::findById(88889999));
     }
 
     #[Test]
@@ -170,7 +204,7 @@ class ProjectDaoTest extends AbstractTest
     public function existsReturnsTrueForExistingAndFalseForMissing(): void
     {
         $this->assertTrue(ProjectDao::exists(self::PROJECT_ID_1));
-        $this->assertFalse(ProjectDao::exists(9990999));
+        $this->assertFalse(ProjectDao::exists(88889999));
     }
 
     #[Test]
@@ -206,7 +240,7 @@ class ProjectDaoTest extends AbstractTest
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
         $this->assertSame(self::PROJECT_ID_1, $project?->id);
-        $this->assertNull(ProjectDao::findByJobId(9991999));
+        $this->assertNull(ProjectDao::findByJobId(88889999));
     }
 
     #[Test]

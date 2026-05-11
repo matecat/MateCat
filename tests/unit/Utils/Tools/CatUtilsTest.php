@@ -1562,9 +1562,10 @@ class CatUtilsTest extends AbstractTest
         file_put_contents($filePath, 'content for filters-template test');
 
         try {
-            // filtersTemplateId=999999 → triggers DB lookup → PDOException in test env
-            $this->expectException(\PDOException::class);
+            // filtersTemplateId=999999 → triggers DB lookup, returns null (no matching row)
+            // This should complete without error since the table exists but the row does not
             CatUtils::deleteSha($filePath, 'en-US', null, 999999);
+            $this->assertTrue(true, 'deleteSha completed without error when filtersTemplateId not found');
         } finally {
             @unlink($filePath);
         }
