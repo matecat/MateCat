@@ -28480,3 +28480,159 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/View/fileupload/UploadHandler.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\AnalysisRedisServiceInterface\:\:getWorkingProjects\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\AnalysisRedisServiceInterface\:\:getProjectWordCounts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\EngineServiceInterface\:\:getTMMatches\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/EngineServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\EngineServiceInterface\:\:getTMMatches\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/EngineServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\EngineServiceInterface\:\:getMTTranslation\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/EngineServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\EngineServiceInterface\:\:getMTTranslation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/EngineServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:isMtMatch\(\) has parameter \$match with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:sortMatches\(\) has parameter \$mtResult with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:sortMatches\(\) has parameter \$tmMatches with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:sortMatches\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:detectIcuErrors\(\) has parameter \$match with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:detectIcuErrors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:postProcessMatch\(\) has parameter \$match with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:postProcessMatch\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:calculateWordDiscount\(\) has parameter \$payableRates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:calculateWordDiscount\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:determinePreTranslateStatus\(\) has parameter \$tmData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:determinePreTranslateStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\MatchProcessorServiceInterface\:\:getProjectSegmentsTranslationSummary\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Interface\\SegmentUpdaterServiceInterface\:\:setAnalysisValue\(\) has parameter \$tmData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/SegmentUpdaterServiceInterface.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\DTO\\AnalysisResult\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/DTO/AnalysisResult.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysis\\Service\\AnalysisRedisService\:\:getWorkingProjects\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/AnalysisRedisService.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
+			identifier: argument.templateType
+			count: 2
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/EngineService.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$target\.$#'
+			identifier: property.notFound
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$pretranslate_100\.$#'
+			identifier: property.notFound
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$mt_qe_workflow_enabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php
