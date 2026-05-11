@@ -22,9 +22,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
 {
     private AnalysisRedisServiceInterface $redisService;
 
-    public function __construct(AMQHandler $queueHandler, AnalysisRedisServiceInterface $redisService)
+    public function __construct(AnalysisRedisServiceInterface $redisService)
     {
-        LoggerFactory::doJsonLog('ProjectCompletionService initialized with queue handler ' . get_class($queueHandler));
         $this->redisService = $redisService;
     }
 

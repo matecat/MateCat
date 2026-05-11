@@ -34,10 +34,9 @@ class ProjectCompletionServiceTest extends AbstractTest
 
     private function makeService(?AnalysisRedisServiceInterface $redisService = null): ProjectCompletionService
     {
-        $queueHandler = $this->createStub(AMQHandler::class);
         $redisService ??= $this->createStub(AnalysisRedisServiceInterface::class);
 
-        return new ProjectCompletionService($queueHandler, $redisService);
+        return new ProjectCompletionService($redisService);
     }
 
     #[Test]

@@ -28,6 +28,7 @@ use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 
@@ -64,7 +65,7 @@ class TMAnalysisWorkerV2 extends AbstractWorker
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
         $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService();
-        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService($queueHandler, $this->redisService);
+        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService($this->redisService);
         $this->engineService = $engineService ?? new EngineService();
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService();
     }
@@ -77,6 +78,7 @@ class TMAnalysisWorkerV2 extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
+        $this->_checkDatabaseConnection();
         assert($queueElement instanceof QueueElement);
 
         $params = $queueElement->params;
@@ -98,7 +100,12 @@ class TMAnalysisWorkerV2 extends AbstractWorker
 
             $mtPenalty = $params->mt_quality_value_in_editor ? (int)(100 - $params->mt_quality_value_in_editor) : null;
 
-            $tmMatches = $this->engineService->getTMMatches($config, $this->featureSet, $mtPenalty);
+            try {
+                $tmMatches = $this->engineService->getTMMatches($config, $this->featureSet, $mtPenalty);
+            } catch (NotSupportedMTException) {
+                // Do nothing, skip the frame
+                $tmMatches = [];
+            }
 
             $skipAnalysis = !($params->enable_mt_analysis ?? false);
             if (!empty($params->mt_qe_workflow_enabled)) {
@@ -304,7 +311,7 @@ class TMAnalysisWorkerV2 extends AbstractWorker
      * @return array<string, mixed>
      * @throws Exception
      */
-    private function buildEngineConfig(QueueElement $queueElement): array
+    protected function buildEngineConfig(QueueElement $queueElement): array
     {
         $params = $queueElement->params;
 
