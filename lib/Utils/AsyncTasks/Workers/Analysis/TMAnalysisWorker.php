@@ -936,7 +936,26 @@ class TMAnalysisWorker extends AbstractWorker
             $this->_queueHandler->getRedisClient()->expire(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */);
             $this->_doLog("--- (Worker $process_pid) : found " . $total_segments['project_segments'] . " segments for PID $pid");
         } else {
-            $_projectTotSegments = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJECT_TOT_SEGMENTS . $pid);
+            // Wait for init winner to publish PROJECT_TOT_SEGMENTS
+            $maxWaitMs = 5000; // 5 seconds max
+            $waited = 0;
+            $sleepMs = 50;
+
+            $_projectTotSegments = null;
+            while ($waited < $maxWaitMs) {
+                $_projectTotSegments = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJECT_TOT_SEGMENTS . $pid);
+                if ($_projectTotSegments !== null) {
+                    break;
+                }
+                usleep($sleepMs * 1000);
+                $waited += $sleepMs;
+                $sleepMs = min($sleepMs * 2, 500); // exponential backoff, cap 500ms
+            }
+
+            if ($_projectTotSegments === null) {
+                $this->_doLog("--- (Worker $process_pid) : WARNING — timed out waiting for PROJECT_TOT_SEGMENTS for PID $pid");
+            }
+
             $_analyzed = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid);
             $this->_doLog("--- (Worker $process_pid) : found $_projectTotSegments, analyzed $_analyzed segments for PID $pid in Redis");
         }
