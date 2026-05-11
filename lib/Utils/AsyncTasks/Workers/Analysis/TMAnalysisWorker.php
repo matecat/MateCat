@@ -977,8 +977,8 @@ class TMAnalysisWorker extends AbstractWorker
      */
     protected function _incrementAnalyzedCount($pid, $eq_words, $standard_words): void
     {
-        $this->_queueHandler->getRedisClient()->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)($eq_words * 1000));
-        $this->_queueHandler->getRedisClient()->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)($standard_words * 1000));
+        $this->_queueHandler->getRedisClient()->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)($eq_words * RedisKeys::WORD_COUNT_SCALE));
+        $this->_queueHandler->getRedisClient()->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)($standard_words * RedisKeys::WORD_COUNT_SCALE));
         $this->_queueHandler->getRedisClient()->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1);
     }
 
@@ -1029,8 +1029,8 @@ class TMAnalysisWorker extends AbstractWorker
         $project_totals = [];
         $project_totals['project_segments'] = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJECT_TOT_SEGMENTS . $_project_id);
         $project_totals['num_analyzed'] = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $_project_id);
-        $project_totals['eq_wc'] = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJ_EQ_WORD_COUNT . $_project_id) / 1000;
-        $project_totals['st_wc'] = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJ_ST_WORD_COUNT . $_project_id) / 1000;
+        $project_totals['eq_wc'] = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJ_EQ_WORD_COUNT . $_project_id) / RedisKeys::WORD_COUNT_SCALE;
+        $project_totals['st_wc'] = $this->_queueHandler->getRedisClient()->get(RedisKeys::PROJ_ST_WORD_COUNT . $_project_id) / RedisKeys::WORD_COUNT_SCALE;
 
         $this->_doLog("--- (Worker $this->_workerPid) : count segments in project $_project_id = " . $project_totals['project_segments']);
         $this->_doLog("--- (Worker $this->_workerPid) : Analyzed segments in project $_project_id = " . $project_totals['num_analyzed']);
