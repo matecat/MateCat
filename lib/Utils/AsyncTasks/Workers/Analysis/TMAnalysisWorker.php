@@ -914,9 +914,13 @@ class TMAnalysisWorker extends AbstractWorker
         $pid = $queueElement->params->pid;
 
         //get the number of segments in a job
-        $_acquiredLock = $this->_queueHandler->getRedisClient()->setnx(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true); // lock for 24 hours
-        if (!empty($_acquiredLock)) {
-            $this->_queueHandler->getRedisClient()->expire(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */);
+        $_acquiredLock = $this->_queueHandler->getRedisClient()->set(
+            RedisKeys::PROJECT_INIT_SEMAPHORE . $pid,
+            1,
+            'EX', 86400,
+            'NX'
+        ); // lock for 24 hours
+        if ($_acquiredLock) {
 
             // Get those data from the master database to avoid delayed replication issues
             $db = Database::obtain();
@@ -1018,8 +1022,14 @@ class TMAnalysisWorker extends AbstractWorker
             return;
         }
 
-        if ($project_totals['project_segments'] - $project_totals['num_analyzed'] == 0 && $this->_queueHandler->getRedisClient()->setnx(RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 1)) {
-            $this->_queueHandler->getRedisClient()->expire(RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */);
+        if ($project_totals['project_segments'] - $project_totals['num_analyzed'] == 0
+            && $this->_queueHandler->getRedisClient()->set(
+                RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id,
+                1,
+                'EX', 86400,
+                'NX'
+            )
+        ) {
 
             /*
              * Remove this job from the project list
