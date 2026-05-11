@@ -9,7 +9,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 {
     private function segmentUpdaterServicePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/SegmentUpdaterService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/SegmentUpdaterService.php');
         $this->assertNotFalse($path, 'SegmentUpdaterService.php must exist at expected path.');
 
         return $path;

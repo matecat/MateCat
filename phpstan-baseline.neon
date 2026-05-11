@@ -19561,12 +19561,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/Health.php
 
 		-
-			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
-			identifier: argument.templateType
-			count: 4
-			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$status\.$#'
 			identifier: property.notFound
 			count: 1

@@ -7,9 +7,9 @@ use TestHelpers\AbstractTest;
 
 class ConcurrencyRegressionTest extends AbstractTest
 {
-    private function workerV2Path(): string
+    private function workerPath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/TMAnalysisWorkerV2.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php');
         $this->assertNotFalse($path);
 
         return $path;
@@ -17,7 +17,7 @@ class ConcurrencyRegressionTest extends AbstractTest
 
     private function analysisRedisServicePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/AnalysisRedisService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/AnalysisRedisService.php');
         $this->assertNotFalse($path);
 
         return $path;
@@ -25,7 +25,7 @@ class ConcurrencyRegressionTest extends AbstractTest
 
     private function segmentUpdaterServicePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/SegmentUpdaterService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/SegmentUpdaterService.php');
         $this->assertNotFalse($path);
 
         return $path;
@@ -33,7 +33,7 @@ class ConcurrencyRegressionTest extends AbstractTest
 
     private function projectCompletionServicePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionService.php');
         $this->assertNotFalse($path);
 
         return $path;
@@ -41,7 +41,7 @@ class ConcurrencyRegressionTest extends AbstractTest
 
     private function matchProcessorServicePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php');
         $this->assertNotFalse($path);
 
         return $path;
@@ -49,7 +49,7 @@ class ConcurrencyRegressionTest extends AbstractTest
 
     private function segmentTranslationDaoPath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Model/Translations/SegmentTranslationDao.php');
+        $path = realpath(self::projectRoot() . '/lib/Model/Translations/SegmentTranslationDao.php');
         $this->assertNotFalse($path);
 
         return $path;
@@ -78,16 +78,16 @@ class ConcurrencyRegressionTest extends AbstractTest
     #[Test]
     public function test_worker_v2_returns_early_on_zero_updated_rows_before_redis_side_effects(): void
     {
-        $source = $this->readSource($this->workerV2Path());
+        $source = $this->readSource($this->workerPath());
 
         $zeroGuardPos = strpos($source, 'if ($updateRes === 0)');
-        $this->assertNotFalse($zeroGuardPos, 'Expected $updateRes === 0 guard in TMAnalysisWorkerV2::process().');
+        $this->assertNotFalse($zeroGuardPos, 'Expected $updateRes === 0 guard in TMAnalysisWorker::process().');
 
         $returnPos = strpos($source, 'return;', $zeroGuardPos);
         $this->assertNotFalse($returnPos, 'Expected early return after $updateRes === 0 guard.');
 
         $incrementPos = strpos($source, 'incrementAnalyzedCount');
-        $this->assertNotFalse($incrementPos, 'Expected incrementAnalyzedCount call in TMAnalysisWorkerV2::process().');
+        $this->assertNotFalse($incrementPos, 'Expected incrementAnalyzedCount call in TMAnalysisWorker::process().');
 
         $this->assertLessThan($incrementPos, $zeroGuardPos, 'Zero-update guard must appear before incrementAnalyzedCount.');
         $this->assertLessThan($incrementPos, $returnPos, 'Early return after zero-update guard must appear before incrementAnalyzedCount.');
@@ -96,10 +96,10 @@ class ConcurrencyRegressionTest extends AbstractTest
     #[Test]
     public function test_worker_v2_requeue_exception_catch_has_no_force_set_segment_analyzed(): void
     {
-        $source = $this->readSource($this->workerV2Path());
+        $source = $this->readSource($this->workerPath());
 
         $requeueCatchPos = strpos($source, 'catch (ReQueueException $e)');
-        $this->assertNotFalse($requeueCatchPos, 'Expected ReQueueException catch in TMAnalysisWorkerV2::process().');
+        $this->assertNotFalse($requeueCatchPos, 'Expected ReQueueException catch in TMAnalysisWorker::process().');
 
         $rethrowPos = strpos($source, 'throw $e', $requeueCatchPos);
         $this->assertNotFalse($rethrowPos, 'Expected throw $e in ReQueueException catch path.');
@@ -344,7 +344,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     #[Test]
     public function test_worker_v2_side_effects_gate_logs_before_early_return(): void
     {
-        $source = $this->readSource($this->workerV2Path());
+        $source = $this->readSource($this->workerPath());
 
         $guardPos = strpos($source, 'if ($updateRes === 0)');
         $this->assertNotFalse($guardPos);
@@ -352,7 +352,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         $logPos = strpos($source, 'not updated (already DONE/SKIPPED or missing), skipping side-effects', $guardPos);
         $this->assertNotFalse(
             $logPos,
-            'TMAnalysisWorkerV2 must log explicit idempotency message after zero-update guard.'
+            'TMAnalysisWorker must log explicit idempotency message after zero-update guard.'
         );
 
         $returnPos = strpos($source, 'return;', $logPos);
@@ -410,7 +410,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     #[Test]
     public function test_redis_keys_defines_word_count_scale_constant(): void
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/RedisKeys.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/RedisKeys.php');
         $this->assertNotFalse($path);
 
         $source = $this->readSource($path);

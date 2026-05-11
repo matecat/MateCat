@@ -16,13 +16,13 @@ use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServ
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\TMAnalysisWorkerV2;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysisWorker;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 
-class IntegrationTestableTMAnalysisWorkerV2 extends TMAnalysisWorkerV2
+class IntegrationTestableTMAnalysisWorker extends TMAnalysisWorker
 {
     public array $fixedConfig = [];
 
@@ -90,13 +90,13 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
         $amqHandler = $this->createMock(AMQHandler::class);
         $amqHandler->method('getRedisClient')->willReturn($this->createMock(Client::class));
 
-        $worker = new TMAnalysisWorkerV2($amqHandler);
+        $worker = new TMAnalysisWorker($amqHandler);
 
-        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'redisService'));
-        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'segmentUpdater'));
-        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'projectCompletion'));
-        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'engineService'));
-        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'matchProcessor'));
+        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'redisService'));
+        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'segmentUpdater'));
+        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'projectCompletion'));
+        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'engineService'));
+        $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'matchProcessor'));
     }
 
     #[Test]
@@ -109,7 +109,7 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
         $engineService = $this->createMock(EngineServiceInterface::class);
         $matchProcessor = $this->createMock(MatchProcessorServiceInterface::class);
 
-        $worker = new TMAnalysisWorkerV2(
+        $worker = new TMAnalysisWorker(
             $amqHandler,
             $redisService,
             $segmentUpdater,
@@ -118,11 +118,11 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
             $matchProcessor
         );
 
-        $this->assertSame($redisService, $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'redisService'));
-        $this->assertSame($segmentUpdater, $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'segmentUpdater'));
-        $this->assertSame($projectCompletion, $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'projectCompletion'));
-        $this->assertSame($engineService, $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'engineService'));
-        $this->assertSame($matchProcessor, $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'matchProcessor'));
+        $this->assertSame($redisService, $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'redisService'));
+        $this->assertSame($segmentUpdater, $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'segmentUpdater'));
+        $this->assertSame($projectCompletion, $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'projectCompletion'));
+        $this->assertSame($engineService, $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'engineService'));
+        $this->assertSame($matchProcessor, $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'matchProcessor'));
     }
 
     #[Test]
@@ -131,10 +131,10 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
         $amqHandler = $this->createMock(AMQHandler::class);
         $amqHandler->method('getRedisClient')->willReturn($this->createMock(Client::class));
 
-        $worker = new TMAnalysisWorkerV2($amqHandler);
+        $worker = new TMAnalysisWorker($amqHandler);
 
-        $workerRedisService = $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'redisService');
-        $projectCompletion = $this->getPrivateProperty($worker, TMAnalysisWorkerV2::class, 'projectCompletion');
+        $workerRedisService = $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'redisService');
+        $projectCompletion = $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'projectCompletion');
 
         $this->assertInstanceOf(AnalysisRedisService::class, $workerRedisService);
         $this->assertInstanceOf(ProjectCompletionService::class, $projectCompletion);
@@ -151,13 +151,13 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
     #[Test]
     public function class_hierarchy_is_abstract_worker(): void
     {
-        $this->assertTrue(is_subclass_of(TMAnalysisWorkerV2::class, AbstractWorker::class));
+        $this->assertTrue(is_subclass_of(TMAnalysisWorker::class, AbstractWorker::class));
     }
 
     #[Test]
     public function expected_worker_methods_exist(): void
     {
-        $reflection = new ReflectionClass(TMAnalysisWorkerV2::class);
+        $reflection = new ReflectionClass(TMAnalysisWorker::class);
 
         $this->assertTrue($reflection->hasMethod('process'));
         $this->assertTrue($reflection->hasMethod('_endQueueCallback'));
@@ -168,7 +168,7 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
     public function worker_orchestrator_has_no_direct_redis_client_access(): void
     {
         $source = file_get_contents(
-            dirname(__DIR__, 4) . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/TMAnalysisWorkerV2.php'
+            self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php'
         );
 
         $this->assertIsString($source);
@@ -179,7 +179,7 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
     public function worker_orchestrator_has_no_direct_database_calls(): void
     {
         $source = file_get_contents(
-            dirname(__DIR__, 4) . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/TMAnalysisWorkerV2.php'
+            self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php'
         );
 
         $this->assertIsString($source);
@@ -197,7 +197,7 @@ class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
         $engineService = $this->createMock(EngineServiceInterface::class);
         $matchProcessor = $this->createMock(MatchProcessorServiceInterface::class);
 
-        $worker = new IntegrationTestableTMAnalysisWorkerV2(
+        $worker = new IntegrationTestableTMAnalysisWorker(
             $amqHandler,
             $redisService,
             $segmentUpdater,

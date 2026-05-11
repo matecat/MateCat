@@ -8,7 +8,7 @@ class ExecutorRedisExceptionTest extends AbstractTest
     #[Test]
     public function test_executor_handles_predis_connection_exception_before_throwable_and_requeues(): void
     {
-        $executorPath = realpath(__DIR__ . '/../../../lib/Utils/TaskRunner/Executor.php');
+        $executorPath = realpath(self::projectRoot() . '/lib/Utils/TaskRunner/Executor.php');
         $this->assertNotFalse($executorPath);
 
         $source = file_get_contents($executorPath);

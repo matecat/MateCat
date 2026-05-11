@@ -13,7 +13,7 @@ class ProjectCompletionServiceTest extends AbstractTest
 
     private function sourcePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionService.php');
         $this->assertNotFalse($path, 'ProjectCompletionService.php must exist at expected path.');
 
         return $path;

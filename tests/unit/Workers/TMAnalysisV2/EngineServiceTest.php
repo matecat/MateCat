@@ -9,7 +9,7 @@ class EngineServiceTest extends AbstractTest
 {
     private function engineServicePath(): string
     {
-        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/EngineService.php');
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/EngineService.php');
         $this->assertNotFalse($path, 'EngineService.php must exist at the expected path.');
 
         return $path;

@@ -13,7 +13,7 @@ use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterfac
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\TMAnalysisWorkerV2;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysisWorker;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
@@ -24,7 +24,7 @@ use Utils\TaskRunner\Exceptions\EmptyElementException;
  * Test double: overrides buildEngineConfig() (now protected) to return a fixed array,
  * eliminating static dependencies on EnginesFactory and TmKeyManager that require a DB.
  */
-class TestableTMAnalysisWorkerV2 extends TMAnalysisWorkerV2
+class TestableTMAnalysisWorker extends TMAnalysisWorker
 {
     public array $fixedConfig = [];
 
@@ -42,8 +42,8 @@ class TMAnalysisWorkerV2Test extends AbstractTest
         ?ProjectCompletionServiceInterface $completion = null,
         ?EngineServiceInterface $engine = null,
         ?MatchProcessorServiceInterface $processor = null,
-    ): TestableTMAnalysisWorkerV2 {
-        $worker = new TestableTMAnalysisWorkerV2(
+    ): TestableTMAnalysisWorker {
+        $worker = new TestableTMAnalysisWorker(
             $this->createStub(AMQHandler::class),
             $redis ?? $this->createStub(AnalysisRedisServiceInterface::class),
             $updater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
@@ -133,7 +133,7 @@ class TMAnalysisWorkerV2Test extends AbstractTest
     #[Test]
     public function constructor_has_exactly_one_required_parameter_amqhandler(): void
     {
-        $ref      = new ReflectionClass(TMAnalysisWorkerV2::class);
+        $ref      = new ReflectionClass(TMAnalysisWorker::class);
         $required = array_values(array_filter(
             $ref->getConstructor()->getParameters(),
             static fn(\ReflectionParameter $p): bool => !$p->isOptional()
