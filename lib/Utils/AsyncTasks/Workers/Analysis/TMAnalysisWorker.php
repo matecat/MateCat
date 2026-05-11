@@ -1057,17 +1057,17 @@ class TMAnalysisWorker extends AbstractWorker
                 $database = Database::obtain();
                 $database->begin();
 
-                $_analyzed_report = $this->getProjectSegmentsTranslationSummary($_project_id);
-
-                array_pop($_analyzed_report); //remove Rollup
+                $_full_report = $this->getProjectSegmentsTranslationSummary($_project_id);
+                $rollup = array_pop($_full_report); // Rollup row = project aggregate
+                $_analyzed_report = $_full_report;
 
                 $this->_doLog("--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE");
 
                 ProjectDao::updateFields(
                     [
                         'status_analysis' => ProjectStatus::STATUS_DONE,
-                        'tm_analysis_wc' => $project_totals['eq_wc'],
-                        'standard_analysis_wc' => $project_totals['st_wc']
+                        'tm_analysis_wc' => $rollup['eq_wc'],
+                        'standard_analysis_wc' => $rollup['st_wc']
                     ],
                     ['id' => $_project_id]
                 );
@@ -1078,7 +1078,7 @@ class TMAnalysisWorker extends AbstractWorker
 
                 foreach ($jobs as $job) {
                     JobDao::updateFields([
-                        'standard_analysis_wc' => round($project_totals['st_wc'] / $numberOfJobs)
+                        'standard_analysis_wc' => round($rollup['st_wc'] / $numberOfJobs)
                     ], [
                         'id' => $job->id
                     ]);
