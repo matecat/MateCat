@@ -677,7 +677,6 @@ class TMAnalysisWorker extends AbstractWorker
             }
         } catch (ReQueueException $rEx) {
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : RequeueException: " . $rEx->getMessage());
-            $this->_forceSetSegmentAnalyzed($queueElement);
             throw $rEx;  // just to make code more readable, re-throw exception
         } catch (NotSupportedMTException) {
             // Do nothing, skip the frame
