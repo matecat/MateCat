@@ -23,7 +23,7 @@ class TMAnalysisWorkerSideEffectsGateTest extends AbstractTest
         $betweenGuardAndIncrement = substr($source, $guardPos, $incrementPos - $guardPos);
 
         $this->assertStringContainsString(
-            'already DONE, skipping side-effects',
+            'not updated (already DONE/SKIPPED or missing), skipping side-effects',
             $betweenGuardAndIncrement,
             'Expected explicit idempotency log message before early return.'
         );
