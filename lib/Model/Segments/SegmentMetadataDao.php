@@ -189,8 +189,8 @@ class SegmentMetadataDao extends AbstractDao
      */
     public static function destroyGetBySegmentIdsCache(string $key): bool
     {
-        $thisDao = new self();
-        $keyMap = self::_keymap_get_by_segment_ids . $key;
+        $thisDao  = new self();
+        $keyMap   = self::_keymap_get_by_segment_ids . $key;
 
         return $thisDao->_deleteCacheByKey($keyMap, false);
     }
