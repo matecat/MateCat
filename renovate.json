@@ -1,6 +1,7 @@
 {
   "labels": ["dependencies"],
   "extends": [":semanticCommitTypeAll(🔧 chore)"],
+  "commitMessageAction": "update",
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
