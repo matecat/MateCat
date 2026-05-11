@@ -15,10 +15,10 @@ trait MatchesComparator
 {
 
     /**
-     * @param array $mt_result
-     * @param array $matches
+     * @param array<string, mixed> $mt_result
+     * @param array<int, array<string, mixed>> $matches
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     protected function _sortMatches(array $mt_result, array $matches): array
     {
@@ -43,8 +43,8 @@ trait MatchesComparator
      *   - 1 if the 'match' value of the first array is less than the second.
      *   - -1 if the 'match' value of the first array is greater than the second.
      *
-     * @param array $a The first array to compare, containing 'match' and optionally 'ICE'.
-     * @param array $b The second array to compare, containing 'match' and optionally 'ICE'.
+     * @param array<string, mixed> $a The first array to compare, containing 'match' and optionally 'ICE'.
+     * @param array<string, mixed> $b The second array to compare, containing 'match' and optionally 'ICE'.
      *
      * @return int Returns -1, 0, or 1 based on the comparison logic.
      */
@@ -80,6 +80,9 @@ trait MatchesComparator
         return ($aMatch < $bMatch ? 1 : -1);
     }
 
+    /**
+     * @param array<string, mixed> $match
+     */
     public function isMtMatch(array $match): bool
     {
         return stripos($match['created_by'] ?? '', InternalMatchesConstants::MT) !== false;
