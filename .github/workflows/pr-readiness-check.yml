@@ -12,7 +12,10 @@ jobs:
   readiness-checklist:
     name: Validate mandatory PR checklist
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: >-
+      github.event.pull_request.draft == false
+      && github.actor != 'dependabot[bot]'
+      && github.actor != 'renovate[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
