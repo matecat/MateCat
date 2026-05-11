@@ -3,7 +3,7 @@
 namespace unit\Workers\TMAnalysisV2;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
 use ReflectionProperty;
 use TestHelpers\AbstractTest;
@@ -36,44 +36,32 @@ class TestableTMAnalysisWorkerV2 extends TMAnalysisWorkerV2
 
 class TMAnalysisWorkerV2Test extends AbstractTest
 {
-    private AMQHandler&MockObject $amqHandler;
-    private AnalysisRedisServiceInterface&MockObject $redisService;
-    private SegmentUpdaterServiceInterface&MockObject $segmentUpdater;
-    private ProjectCompletionServiceInterface&MockObject $projectCompletion;
-    private EngineServiceInterface&MockObject $engineService;
-    private MatchProcessorServiceInterface&MockObject $matchProcessor;
-    private TestableTMAnalysisWorkerV2 $worker;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->amqHandler        = $this->createMock(AMQHandler::class);
-        $this->redisService      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $this->segmentUpdater    = $this->createMock(SegmentUpdaterServiceInterface::class);
-        $this->projectCompletion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $this->engineService     = $this->createMock(EngineServiceInterface::class);
-        $this->matchProcessor    = $this->createMock(MatchProcessorServiceInterface::class);
-
-        $this->worker = new TestableTMAnalysisWorkerV2(
-            $this->amqHandler,
-            $this->redisService,
-            $this->segmentUpdater,
-            $this->projectCompletion,
-            $this->engineService,
-            $this->matchProcessor,
+    private function buildWorker(
+        ?AnalysisRedisServiceInterface $redis = null,
+        ?SegmentUpdaterServiceInterface $updater = null,
+        ?ProjectCompletionServiceInterface $completion = null,
+        ?EngineServiceInterface $engine = null,
+        ?MatchProcessorServiceInterface $processor = null,
+    ): TestableTMAnalysisWorkerV2 {
+        $worker = new TestableTMAnalysisWorkerV2(
+            $this->createStub(AMQHandler::class),
+            $redis ?? $this->createStub(AnalysisRedisServiceInterface::class),
+            $updater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
+            $completion ?? $this->createStub(ProjectCompletionServiceInterface::class),
+            $engine ?? $this->createStub(EngineServiceInterface::class),
+            $processor ?? $this->createStub(MatchProcessorServiceInterface::class),
         );
 
-        // AbstractWorker::$_observer is a typed, uninitialized array property.
-        // Without this, the first _doLog() → notify() call throws on property access.
-        (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($this->worker, []);
+        (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($worker, []);
 
-        $this->worker->setContext(Context::buildFromArray([
+        $worker->setContext(Context::buildFromArray([
             'queue_name'    => 'test_queue',
             'max_executors' => 1,
         ]));
 
-        $this->worker->fixedConfig = ['pid' => 100, 'segment' => 'Hello world'];
+        $worker->fixedConfig = ['pid' => 100, 'segment' => 'Hello world'];
+
+        return $worker;
     }
 
     private function makeQueueElement(array $overrides = []): QueueElement
@@ -112,31 +100,34 @@ class TMAnalysisWorkerV2Test extends AbstractTest
         return $element;
     }
 
-    private function stubLockLoserInit(): void
+    private function stubLockLoserInit(AnalysisRedisServiceInterface&Stub $redis): void
     {
-        $this->redisService->method('acquireInitLock')->willReturn(false);
-        $this->redisService->method('waitForInitialization');
-        $this->redisService->method('getProjectTotalSegments')->willReturn(50);
-        $this->redisService->method('getProjectAnalyzedCount')->willReturn(10);
+        $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('waitForInitialization');
+        $redis->method('getProjectTotalSegments')->willReturn(50);
+        $redis->method('getProjectAnalyzedCount')->willReturn(10);
     }
 
-    private function stubMatchPipeline(): void
-    {
+    private function stubMatchPipeline(
+        EngineServiceInterface&Stub $engine,
+        MatchProcessorServiceInterface&Stub $processor,
+        AnalysisRedisServiceInterface&Stub $redis,
+    ): void {
         $match = ['match' => '75', 'created_by' => 'TM', 'suggestion' => 'Ciao mondo'];
 
-        $this->engineService->method('getTMMatches')->willReturn([]);
-        $this->engineService->method('getMTTranslation')->willReturn([]);
-        $this->matchProcessor->method('sortMatches')->willReturn([$match]);
-        $this->matchProcessor->method('isMtMatch')->willReturn(false);
-        $this->matchProcessor->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
-        $this->matchProcessor->method('postProcessMatch')->willReturn([
+        $engine->method('getTMMatches')->willReturn([]);
+        $engine->method('getMTTranslation')->willReturn([]);
+        $processor->method('sortMatches')->willReturn([$match]);
+        $processor->method('isMtMatch')->willReturn(false);
+        $processor->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
+        $processor->method('postProcessMatch')->willReturn([
             'suggestion'             => 'Ciao mondo',
             'warning'                => 0,
             'serialized_errors_list' => '',
         ]);
-        $this->matchProcessor->method('determinePreTranslateStatus')
+        $processor->method('determinePreTranslateStatus')
             ->willReturnCallback(static fn(array $tmData): array => $tmData);
-        $this->redisService->method('getWorkingProjects')->willReturn([]);
+        $redis->method('getWorkingProjects')->willReturn([]);
     }
 
     #[Test]
@@ -155,108 +146,162 @@ class TMAnalysisWorkerV2Test extends AbstractTest
     #[Test]
     public function process_happy_path_calls_all_key_services(): void
     {
-        $this->redisService->method('acquireInitLock')->willReturn(false);
-        $this->redisService->method('waitForInitialization');
-        $this->redisService->method('getProjectTotalSegments')->willReturn(50);
-        $this->redisService->method('getProjectAnalyzedCount')->willReturn(10);
-        $this->redisService->method('getWorkingProjects')->willReturn([]);
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $engine     = $this->createMock(EngineServiceInterface::class);
+        $processor  = $this->createMock(MatchProcessorServiceInterface::class);
+        $updater    = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+
+        $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('waitForInitialization');
+        $redis->method('getProjectTotalSegments')->willReturn(50);
+        $redis->method('getProjectAnalyzedCount')->willReturn(10);
+        $redis->method('getWorkingProjects')->willReturn([]);
 
         $match = ['match' => '75', 'created_by' => 'TM', 'suggestion' => 'Ciao mondo'];
 
-        $this->engineService->expects($this->once())->method('getTMMatches')->willReturn([]);
-        $this->engineService->expects($this->once())->method('getMTTranslation')->willReturn([]);
-        $this->matchProcessor->expects($this->once())->method('sortMatches')->willReturn([$match]);
-        $this->matchProcessor->method('isMtMatch')->willReturn(false);
-        $this->matchProcessor->expects($this->once())->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
-        $this->matchProcessor->method('postProcessMatch')->willReturn([
+        $engine->expects($this->once())->method('getTMMatches')->willReturn([]);
+        $engine->expects($this->once())->method('getMTTranslation')->willReturn([]);
+        $processor->expects($this->once())->method('sortMatches')->willReturn([$match]);
+        $processor->method('isMtMatch')->willReturn(false);
+        $processor->expects($this->once())->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
+        $processor->method('postProcessMatch')->willReturn([
             'suggestion'             => 'Ciao mondo',
             'warning'                => 0,
             'serialized_errors_list' => '',
         ]);
-        $this->matchProcessor->method('determinePreTranslateStatus')
+        $processor->method('determinePreTranslateStatus')
             ->willReturnCallback(static fn(array $tmData): array => $tmData);
 
-        $this->segmentUpdater->expects($this->once())->method('setAnalysisValue')->willReturn(1);
-        $this->redisService->expects($this->once())->method('incrementAnalyzedCount');
-        $this->projectCompletion->expects($this->once())->method('tryCloseProject');
+        $updater->expects($this->once())->method('setAnalysisValue')->willReturn(1);
+        $redis->expects($this->once())->method('incrementAnalyzedCount');
+        $completion->expects($this->once())->method('tryCloseProject');
 
-        $this->worker->process($this->makeQueueElement());
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        $worker->process($this->makeQueueElement());
     }
 
     #[Test]
     public function process_when_setAnalysisValue_returns_zero_skips_increment_and_close(): void
     {
-        $this->stubLockLoserInit();
-        $this->stubMatchPipeline();
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+        $engine     = $this->createStub(EngineServiceInterface::class);
+        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $this->segmentUpdater->method('setAnalysisValue')->willReturn(0);
+        $this->stubLockLoserInit($redis);
+        $this->stubMatchPipeline($engine, $processor, $redis);
 
-        $this->redisService->expects($this->never())->method('incrementAnalyzedCount');
-        $this->projectCompletion->expects($this->never())->method('tryCloseProject');
+        $updater->method('setAnalysisValue')->willReturn(0);
 
-        $this->worker->process($this->makeQueueElement());
+        $redis->expects($this->never())->method('incrementAnalyzedCount');
+        $completion->expects($this->never())->method('tryCloseProject');
+
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        $worker->process($this->makeQueueElement());
     }
 
     #[Test]
     public function process_when_setAnalysisValue_returns_positive_calls_increment_and_close(): void
     {
-        $this->stubLockLoserInit();
-        $this->stubMatchPipeline();
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+        $engine     = $this->createStub(EngineServiceInterface::class);
+        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $this->segmentUpdater->method('setAnalysisValue')->willReturn(1);
+        $this->stubLockLoserInit($redis);
+        $this->stubMatchPipeline($engine, $processor, $redis);
 
-        $this->redisService->expects($this->once())->method('incrementAnalyzedCount');
-        $this->projectCompletion->expects($this->once())->method('tryCloseProject');
+        $updater->method('setAnalysisValue')->willReturn(1);
 
-        $this->worker->process($this->makeQueueElement());
+        $redis->expects($this->once())->method('incrementAnalyzedCount');
+        $completion->expects($this->once())->method('tryCloseProject');
+
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        $worker->process($this->makeQueueElement());
     }
 
     #[Test]
     public function process_with_empty_raw_word_count_throws_EmptyElementException(): void
     {
-        $this->stubLockLoserInit();
-        $this->segmentUpdater->method('forceSetSegmentAnalyzed')->willReturn(false);
+        $redis   = $this->createStub(AnalysisRedisServiceInterface::class);
+        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
+
+        $this->stubLockLoserInit($redis);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
+
+        $worker = $this->buildWorker(redis: $redis, updater: $updater);
 
         $this->expectException(EmptyElementException::class);
-
-        $this->worker->process($this->makeQueueElement(['raw_word_count' => 0]));
+        $worker->process($this->makeQueueElement(['raw_word_count' => 0]));
     }
 
     #[Test]
     public function process_when_init_lock_winner_calls_setProjectTotalSegments(): void
     {
-        $this->redisService->method('acquireInitLock')->willReturn(true);
-        $this->matchProcessor->method('getProjectSegmentsTranslationSummary')
-            ->willReturn([['project_segments' => 10, 'num_analyzed' => 0]]);
-        $this->redisService->method('incrementAnalyzedCount');
+        $redis     = $this->createMock(AnalysisRedisServiceInterface::class);
+        $processor = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $this->redisService->expects($this->once())
+        $redis->method('acquireInitLock')->willReturn(true);
+        $redis->method('incrementAnalyzedCount');
+        $processor->method('getProjectSegmentsTranslationSummary')
+            ->willReturn([['project_segments' => 10, 'num_analyzed' => 0]]);
+
+        $redis->expects($this->once())
             ->method('setProjectTotalSegments')
             ->with(100, 10);
 
-        $this->segmentUpdater->method('forceSetSegmentAnalyzed')->willReturn(false);
-        $this->expectException(EmptyElementException::class);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
 
-        $this->worker->process($this->makeQueueElement(['raw_word_count' => 0]));
+        $worker = $this->buildWorker(redis: $redis, processor: $processor, updater: $updater);
+
+        $this->expectException(EmptyElementException::class);
+        $worker->process($this->makeQueueElement(['raw_word_count' => 0]));
     }
 
     #[Test]
     public function process_when_init_lock_loser_calls_waitForInitialization(): void
     {
-        $this->redisService->method('acquireInitLock')->willReturn(false);
-        $this->redisService->method('getProjectTotalSegments')->willReturn(50);
-        $this->redisService->method('getProjectAnalyzedCount')->willReturn(10);
+        $redis   = $this->createMock(AnalysisRedisServiceInterface::class);
+        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $this->redisService->expects($this->once())
+        $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('getProjectTotalSegments')->willReturn(50);
+        $redis->method('getProjectAnalyzedCount')->willReturn(10);
+
+        $redis->expects($this->once())
             ->method('waitForInitialization')
             ->with(100);
 
-        $this->redisService->expects($this->never())
+        $redis->expects($this->never())
             ->method('setProjectTotalSegments');
 
-        $this->segmentUpdater->method('forceSetSegmentAnalyzed')->willReturn(false);
-        $this->expectException(EmptyElementException::class);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
 
-        $this->worker->process($this->makeQueueElement(['raw_word_count' => 0]));
+        $worker = $this->buildWorker(redis: $redis, updater: $updater);
+
+        $this->expectException(EmptyElementException::class);
+        $worker->process($this->makeQueueElement(['raw_word_count' => 0]));
     }
 }
