@@ -64,11 +64,12 @@ class SetAnalysisValueIdempotencyTest extends AbstractTest
     private function cleanupFixture(): void
     {
         $stmt = $this->database->getConnection()->prepare(
-            'DELETE FROM segment_translations WHERE id_segment = :id_segment'
+            'DELETE FROM segment_translations WHERE id_segment = :id_segment AND id_job = :id_job'
         );
 
         $stmt->execute([
             'id_segment' => self::TEST_SEGMENT_ID,
+            'id_job'     => self::TEST_JOB_ID,
         ]);
     }
 }

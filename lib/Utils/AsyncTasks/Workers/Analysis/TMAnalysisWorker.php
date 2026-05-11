@@ -275,7 +275,7 @@ class TMAnalysisWorker extends AbstractWorker
         try {
             $updateRes = SegmentTranslationDao::setAnalysisValue($tm_data);
             if ($updateRes === 0) {
-                $this->_doLog("Segment {$tm_data['id_segment']}-{$tm_data['id_job']} already DONE, skipping side-effects.");
+                $this->_doLog("Segment {$tm_data['id_segment']}-{$tm_data['id_job']} not updated (already DONE/SKIPPED or missing), skipping side-effects.");
                 return;
             }
             $this->_doLog("Row found: " . $tm_data['id_segment'] . "-" . $tm_data['id_job'] . " - UPDATED.");
