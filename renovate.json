@@ -1,6 +1,6 @@
 {
   "labels": ["dependencies"],
-  "extends": ["config:recommended"],
+  "extends": [":semanticCommitTypeAll(🔧 chore)"],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
