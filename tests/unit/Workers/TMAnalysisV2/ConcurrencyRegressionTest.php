@@ -285,4 +285,140 @@ class ConcurrencyRegressionTest extends AbstractTest
             'AnalysisRedisService must not use magic literal 1000 for st word count incrby — use RedisKeys::WORD_COUNT_SCALE instead.'
         );
     }
+
+    // ── Ported from V1 DAO tests ─────────────────────────────────────────
+
+    #[Test]
+    public function test_project_completion_distributes_job_standard_wc_from_db_rollup(): void
+    {
+        $source = $this->readSource($this->projectCompletionServicePath());
+
+        $jobUpdatePos = strpos($source, 'JobDao::updateFields([');
+        $this->assertNotFalse($jobUpdatePos, 'Expected JobDao::updateFields() in ProjectCompletionService::tryCloseProject().');
+
+        $jobUpdateBlock = substr($source, $jobUpdatePos, 300);
+
+        $this->assertStringContainsString(
+            "round(\$rollup['st_wc'] / \$numberOfJobs)",
+            $jobUpdateBlock,
+            'Job standard_analysis_wc must use round($rollup[st_wc] / $numberOfJobs) from DB rollup.'
+        );
+
+        $this->assertStringNotContainsString(
+            "round(\$project_totals['st_wc'] / \$numberOfJobs)",
+            $jobUpdateBlock,
+            'Job standard_analysis_wc must NOT use Redis-derived $project_totals — use DB $rollup only.'
+        );
+    }
+
+    #[Test]
+    public function test_segment_updater_force_set_captures_affected_rows_and_logs_idempotency(): void
+    {
+        $source = $this->readSource($this->segmentUpdaterServicePath());
+
+        $this->assertStringContainsString(
+            "\$affectedRows = \$db->update('segment_translations', \$data, \$where);",
+            $source,
+            'forceSetSegmentAnalyzed must capture affected rows from DB update.'
+        );
+
+        $this->assertStringContainsString(
+            'already DONE, skipping force-set side-effects.',
+            $source,
+            'Expected idempotency log message when affected rows is zero.'
+        );
+
+        $catchPos = strpos($source, 'catch (PDOException $e)');
+        $this->assertNotFalse($catchPos);
+
+        $zeroGuardPos = strpos($source, 'if ($affectedRows === 0)');
+        $this->assertNotFalse($zeroGuardPos);
+
+        $this->assertLessThan(
+            $zeroGuardPos,
+            $catchPos,
+            'PDOException catch must appear before $affectedRows === 0 guard in forceSetSegmentAnalyzed.'
+        );
+    }
+
+    #[Test]
+    public function test_worker_v2_side_effects_gate_logs_before_early_return(): void
+    {
+        $source = $this->readSource($this->workerV2Path());
+
+        $guardPos = strpos($source, 'if ($updateRes === 0)');
+        $this->assertNotFalse($guardPos);
+
+        $logPos = strpos($source, 'not updated (already DONE/SKIPPED or missing), skipping side-effects', $guardPos);
+        $this->assertNotFalse(
+            $logPos,
+            'TMAnalysisWorkerV2 must log explicit idempotency message after zero-update guard.'
+        );
+
+        $returnPos = strpos($source, 'return;', $logPos);
+        $this->assertNotFalse(
+            $returnPos,
+            'Expected early return after idempotency log message.'
+        );
+    }
+
+    #[Test]
+    public function test_analysis_redis_service_wait_uses_correct_constants(): void
+    {
+        $source = $this->readSource($this->analysisRedisServicePath());
+
+        $this->assertStringContainsString(
+            'int $maxWaitMs = 5000',
+            $source,
+            'waitForInitialization default timeout must be 5000ms.'
+        );
+
+        $this->assertSame(
+            1,
+            preg_match('/\$sleepMs\s*=\s*min\(\$sleepMs\s*\*\s*2,\s*500\)/', $source),
+            'Exponential backoff must cap at 500ms per iteration.'
+        );
+    }
+
+    #[Test]
+    public function test_analysis_redis_service_has_exactly_two_atomic_nx_lock_acquisitions(): void
+    {
+        $source = $this->readSource($this->analysisRedisServicePath());
+
+        $this->assertSame(
+            2,
+            preg_match_all(
+                '/->set\s*\(\s*RedisKeys::PROJECT_(?:INIT|ENDING)_SEMAPHORE/s',
+                $source
+            ),
+            'AnalysisRedisService must have exactly 2 atomic NX lock acquisitions (init + completion).'
+        );
+    }
+
+    #[Test]
+    public function test_project_completion_service_sql_counts_done_and_skipped_as_analyzed(): void
+    {
+        $source = $this->readSource($this->projectCompletionServicePath());
+
+        $this->assertStringContainsString(
+            "SUM(IF(st.tm_analysis_status IN ('DONE', 'SKIPPED'), 1, 0)) AS num_analyzed",
+            $source,
+            "ProjectCompletionService::getProjectSegmentsTranslationSummary() must count both DONE and SKIPPED segments."
+        );
+    }
+
+    #[Test]
+    public function test_redis_keys_defines_word_count_scale_constant(): void
+    {
+        $path = realpath(__DIR__ . '/../../../../lib/Utils/AsyncTasks/Workers/Analysis/RedisKeys.php');
+        $this->assertNotFalse($path);
+
+        $source = $this->readSource($path);
+
+        $this->assertStringContainsString(
+            'const int WORD_COUNT_SCALE = 1000;',
+            $source,
+            'RedisKeys must define WORD_COUNT_SCALE constant for integer-scaled Redis word counts.'
+        );
+    }
 }
