@@ -34,7 +34,7 @@ class TestableTMAnalysisWorker extends TMAnalysisWorker
     }
 }
 
-class TMAnalysisWorkerV2Test extends AbstractTest
+class TMAnalysisWorkerTest extends AbstractTest
 {
     private function buildWorker(
         ?AnalysisRedisServiceInterface $redis = null,

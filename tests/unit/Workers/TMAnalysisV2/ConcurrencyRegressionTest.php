@@ -76,7 +76,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_worker_v2_returns_early_on_zero_updated_rows_before_redis_side_effects(): void
+    public function test_worker_returns_early_on_zero_updated_rows_before_redis_side_effects(): void
     {
         $source = $this->readSource($this->workerPath());
 
@@ -94,7 +94,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_worker_v2_requeue_exception_catch_has_no_force_set_segment_analyzed(): void
+    public function test_worker_requeue_exception_catch_has_no_force_set_segment_analyzed(): void
     {
         $source = $this->readSource($this->workerPath());
 
@@ -342,7 +342,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_worker_v2_side_effects_gate_logs_before_early_return(): void
+    public function test_worker_side_effects_gate_logs_before_early_return(): void
     {
         $source = $this->readSource($this->workerPath());
 

@@ -33,7 +33,7 @@ class IntegrationTestableTMAnalysisWorker extends TMAnalysisWorker
 }
 
 #[AllowMockObjectsWithoutExpectations]
-class TMAnalysisWorkerV2IntegrationTest extends AbstractTest
+class TMAnalysisWorkerIntegrationTest extends AbstractTest
 {
     private function getPrivateProperty(object $object, string $className, string $propertyName): mixed
     {
