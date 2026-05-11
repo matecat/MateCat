@@ -1100,9 +1100,16 @@ class TMAnalysisWorker extends AbstractWorker
 
         $db = Database::obtain();
         try {
-            $db->update('segment_translations', $data, $where);
+            $affectedRows = $db->update('segment_translations', $data, $where);
         } catch (PDOException $e) {
             $this->_doLog($e->getMessage());
+            $this->_doLog("**** DB failure in _forceSetSegmentAnalyzed for segment {$elementQueue->params->id_segment}. NOT incrementing counters.");
+            return;
+        }
+
+        if ($affectedRows === 0) {
+            $this->_doLog("Segment {$elementQueue->params->id_segment} already DONE, skipping force-set side-effects.");
+            return;
         }
 
         $this->_incrementAnalyzedCount($elementQueue->params->pid, $elementQueue->params->raw_word_count, $elementQueue->params->raw_word_count);
