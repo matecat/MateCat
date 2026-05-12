@@ -87,20 +87,14 @@ after commit but before lock release → lock held for up to 24h.
 
 **Future fix (P3):** Shorter completion lock TTL with renewal mechanism.
 
-### 4. Non-atomic per-segment counter group
+### 4. ~~Non-atomic per-segment counter group~~ — FIXED
 
-**Where:** `AnalysisRedisService::incrementAnalyzedCount()` — three separate `INCRBY`
-calls for `eq_wc`, `st_wc`, and `num_done`.
+**Where:** `AnalysisRedisService::incrementAnalyzedCount()`
 
-**Mitigations already applied:**
-- Init path uses MULTI/EXEC via `initializeProjectCounters()`.
-- `<= 0` close condition (#6) means overcounting can't permanently block completion.
-- DB-authoritative gate (#1) means Redis counter drift doesn't prevent correct closure.
-
-**Residual risk:** Per-segment `incrementAnalyzedCount()` is still non-atomic.
-Partial failure can cause word count inaccuracy (cosmetic, not functional).
-
-**Future fix (P3):** Wrap per-segment `INCRBY` calls in MULTI/EXEC.
+**Fix:** All three `INCRBY` calls (`eq_wc`, `st_wc`, `num_done`) are now wrapped
+in a Redis MULTI/EXEC transaction, both in the init path (`initializeProjectCounters`)
+and in the per-segment path (`incrementAnalyzedCount`). A crash or connection failure
+between increments can no longer leave word counts and segment count diverged.
 
 ### 5. Duplicate delivery race on same segment
 
@@ -141,5 +135,5 @@ need to fail simultaneously. No practical scenario identified.
 | ~~P1~~ | ~~**Crash-safe initialization**~~ **DONE** | ~~#3, #8~~ |
 | ~~P2~~ | ~~**Defensive close condition**~~ **DONE** | ~~#6~~ |
 | ~~P3~~ | ~~**Terminal-state guard on `forceSetSegmentAnalyzed`**~~ **DONE** | ~~#7~~ |
-| P3 | **Atomic per-segment side effects**: wrap `INCRBY` calls in MULTI/EXEC. | #4 |
+| ~~P3~~ | ~~**Atomic per-segment side effects**~~ **DONE** | ~~#4~~ |
 | P3 | **Shorter completion lock TTL with renewal**: e.g., 60s TTL with periodic extension. | #2, #9 |

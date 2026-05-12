@@ -101,9 +101,11 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
      */
     public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void
     {
-        $this->redis->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)($eqWc * RedisKeys::WORD_COUNT_SCALE));
-        $this->redis->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)($stWc * RedisKeys::WORD_COUNT_SCALE));
-        $this->redis->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numSegments);
+        $this->redis->transaction(function ($tx) use ($pid, $numSegments, $eqWc, $stWc) {
+            $tx->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)($eqWc * RedisKeys::WORD_COUNT_SCALE));
+            $tx->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)($stWc * RedisKeys::WORD_COUNT_SCALE));
+            $tx->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numSegments);
+        });
     }
 
     public function setProjectAnalyzedCountTTL(int $pid, int $ttlSeconds = 86400): void

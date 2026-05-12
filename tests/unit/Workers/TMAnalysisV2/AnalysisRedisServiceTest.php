@@ -40,6 +40,28 @@ class RedisClientSpy extends Client
         return $this->returnsByMethod[$method] ?? null;
     }
 
+    /**
+     * Override transaction() to execute the callback against $this so
+     * inner commands are recorded by __call(). Real Client::transaction()
+     * creates a MultiExecTransaction context we can't easily spy on.
+     */
+    public function transaction(...$arguments): array|null
+    {
+        $callable = null;
+        foreach ($arguments as $arg) {
+            if (is_callable($arg)) {
+                $callable = $arg;
+                break;
+            }
+        }
+
+        if ($callable !== null) {
+            $callable($this);
+        }
+
+        return [];
+    }
+
     public function getCalls(): array
     {
         return $this->calls;
