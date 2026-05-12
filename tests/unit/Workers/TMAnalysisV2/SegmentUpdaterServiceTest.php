@@ -228,7 +228,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->assertFalse($result);
     }
 
-    // ── Unit tests with injected IDatabase mock ─────────────────────────
+    // ── Unit tests (only for paths that need stubs — e.g., PDOException) ──
 
     #[Test]
     public function forceSetSegmentAnalyzed_returns_false_on_pdo_exception(): void
@@ -247,43 +247,50 @@ class SegmentUpdaterServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function forceSetSegmentAnalyzed_returns_false_when_zero_rows_affected(): void
+    public function forceSetSegmentAnalyzed_returns_false_for_already_done_segment(): void
     {
-        $stmt = $this->createStub(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('rowCount')->willReturn(0);
+        $this->seedTestSegmentTranslation();
 
-        $pdo = $this->createStub(\PDO::class);
-        $pdo->method('prepare')->willReturn($stmt);
+        try {
+            $conn = Database::obtain()->getConnection();
+            $conn->exec(
+                "UPDATE segment_translations SET tm_analysis_status = 'DONE'"
+                . " WHERE id_segment = " . self::TEST_SEGMENT_ID
+                . " AND id_job = " . self::TEST_JOB_ID
+            );
 
-        $db = $this->createStub(IDatabase::class);
-        $db->method('getConnection')->willReturn($pdo);
+            $service = new SegmentUpdaterService(Database::obtain());
 
-        $service = new SegmentUpdaterService($db);
+            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID, 2.0);
 
-        $result = $service->forceSetSegmentAnalyzed(1, 2, 5.0);
-
-        $this->assertFalse($result);
+            // NOT IN ('DONE','SKIPPED') guard → 0 affected rows → false
+            $this->assertFalse($result);
+        } finally {
+            $this->cleanupTestSegmentTranslation();
+        }
     }
 
     #[Test]
-    public function forceSetSegmentAnalyzed_returns_true_when_row_updated(): void
+    public function forceSetSegmentAnalyzed_returns_false_for_skipped_segment(): void
     {
-        $stmt = $this->createStub(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('rowCount')->willReturn(1);
+        $this->seedTestSegmentTranslation();
 
-        $pdo = $this->createStub(\PDO::class);
-        $pdo->method('prepare')->willReturn($stmt);
+        try {
+            $conn = Database::obtain()->getConnection();
+            $conn->exec(
+                "UPDATE segment_translations SET tm_analysis_status = 'SKIPPED'"
+                . " WHERE id_segment = " . self::TEST_SEGMENT_ID
+                . " AND id_job = " . self::TEST_JOB_ID
+            );
 
-        $db = $this->createStub(IDatabase::class);
-        $db->method('getConnection')->willReturn($pdo);
+            $service = new SegmentUpdaterService(Database::obtain());
 
-        $service = new SegmentUpdaterService($db);
+            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID, 2.0);
 
-        $result = $service->forceSetSegmentAnalyzed(1, 2, 5.0);
-
-        $this->assertTrue($result);
+            $this->assertFalse($result);
+        } finally {
+            $this->cleanupTestSegmentTranslation();
+        }
     }
 
     #[Test]
