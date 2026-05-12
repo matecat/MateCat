@@ -14,7 +14,7 @@ interface AnalysisRedisServiceInterface
 
     public function waitForInitialization(int $pid, int $maxWaitMs = 5000): void;
 
-    public function incrementAnalyzedCount(int $pid, int $numSegments, int $eqWc, int $stWc): void;
+    public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void;
 
     /**
      * @return string[]

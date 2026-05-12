@@ -3,6 +3,7 @@
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface;
 
 use Model\FeaturesBase\FeatureSet;
+use Utils\TaskRunner\Commons\QueueElement;
 
 interface EngineServiceInterface
 {
@@ -18,5 +19,5 @@ interface EngineServiceInterface
      *
      * @return array<string, mixed>
      */
-    public function getMTTranslation(array $config, FeatureSet $featureSet, ?int $mtPenalty, bool $skipAnalysis): array;
+    public function getMTTranslation(array $config, FeatureSet $featureSet, ?int $mtPenalty, QueueElement $queueElement): array;
 }

@@ -2,6 +2,7 @@
 
 namespace unit\Workers\TMAnalysisV2;
 
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -103,6 +104,9 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             'mt_quality_value_in_editor' => null,
             'enable_mt_analysis' => true,
             'mt_qe_workflow_enabled' => true,
+            'match_type' => InternalMatchesConstants::NO_MATCH,
+            'fast_exact_match_type' => null,
+            'icu_enabled' => false,
         ];
 
         foreach (array_merge($defaults, $overrides) as $key => $value) {
@@ -267,7 +271,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             ['pid' => 100, 'segment' => 'Hello world'],
             $this->anything(),
             null,
-            false
+            $this->isInstanceOf(QueueElement::class)
         )->willReturn($mtResult);
 
         $matchProcessor->expects($this->once())->method('sortMatches')->with($mtResult, $tmMatches)->willReturn($sortedMatches);
@@ -282,7 +286,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             ->willReturnCallback(static fn(array $tmData): array => $tmData);
 
         $segmentUpdater->expects($this->once())->method('setAnalysisValue')->willReturn(1);
-        $redisService->expects($this->once())->method('incrementAnalyzedCount')->with(100, 1, 2, 2);
+        $redisService->expects($this->once())->method('incrementAnalyzedCount')->with(100, 1, 1.5, 2.0);
         $projectCompletion->expects($this->once())->method('tryCloseProject')->with(
             100,
             'secret',

@@ -117,6 +117,15 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     /**
      * @throws ReflectionException
      */
+    public function destroyProjectAndJobCaches(int $pid): void
+    {
+        ProjectDao::destroyCacheById($pid);
+        (new JobDao())->destroyCacheByProjectId($pid);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     public function destroyAllCaches(int $pid, string $projectPassword): void
     {
         ProjectDao::destroyCacheById($pid);

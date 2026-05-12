@@ -6,10 +6,12 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\LoggerFactory;
+use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -96,11 +98,11 @@ class EngineService implements EngineServiceInterface
      * @param array<string, mixed> $config
      * @param FeatureSet $featureSet
      * @param int|null $mtPenalty
-     * @param bool $skipAnalysis
+     * @param QueueElement $queueElement
      *
      * @return array<string, mixed>
      */
-    public function getMTTranslation(array $config, FeatureSet $featureSet, ?int $mtPenalty, bool $skipAnalysis): array
+    public function getMTTranslation(array $config, FeatureSet $featureSet, ?int $mtPenalty, QueueElement $queueElement): array
     {
         $mt_result = [];
 
@@ -109,12 +111,46 @@ class EngineService implements EngineServiceInterface
             $mtEngine->setFeatureSet($featureSet);
 
             $mtEngine->setAnalysis();
-            $mtEngine->setSkipAnalysis($skipAnalysis);
+
+            $metadataDao = new ProjectsMetadataDao();
+            $lara_style = $metadataDao->get($queueElement->params->pid, 'lara_style') ?? null;
+            $enable_mt_analysis = $metadataDao->get($queueElement->params->pid, 'enable_mt_analysis');
+            $mtEngine->setSkipAnalysis(!($enable_mt_analysis->value ?? false));
+
+            $mt_qe_workflow_enabled = (bool)($queueElement->params->mt_qe_workflow_enabled ?? false);
+            if ($mt_qe_workflow_enabled) {
+                $mt_qe_config = $config['mt_qe_config'] ?? null;
+                if (!$mt_qe_config instanceof MTQEWorkflowParams) {
+                    $mt_qe_config = null;
+                }
+
+                $mtEngine->setSkipAnalysis(false);
+
+                if ($mt_qe_config !== null) {
+                    $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
+                }
+            }
 
             $engineConfig = $mtEngine->getConfigStruct();
             $engineConfig = array_merge($engineConfig, $config);
 
             $mtEngine->setMTPenalty($mtPenalty);
+
+            $engineConfig['all_job_tm_keys'] = $queueElement->params->tm_keys;
+            $engineConfig['include_score'] = $queueElement->params->mt_evaluation ?? false;
+            $engineConfig['tuid'] = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
+            $engineConfig['lara_style'] = (!empty($lara_style)) ? $lara_style->value : null;
+
+            if (!isset($engineConfig['job_id'])) {
+                $engineConfig['job_id'] = $queueElement->params->id_job;
+            }
+
+            $engineConfig = $featureSet->filter(
+                'analysisBeforeMTGetContribution',
+                $engineConfig,
+                $mtEngine,
+                $queueElement
+            );
 
             $mt_result = $mtEngine->get($engineConfig);
 

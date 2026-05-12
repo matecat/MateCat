@@ -71,6 +71,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                     );
                 }
 
+                $this->repository->destroyProjectAndJobCaches($pid);
+
                 foreach ($_analyzed_report as $job_info) {
                     $this->repository->initializeJobWordCount((int)$job_info['id_job'], (string)$job_info['password']);
                 }

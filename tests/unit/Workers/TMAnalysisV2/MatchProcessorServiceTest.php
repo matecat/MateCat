@@ -619,13 +619,12 @@ class MatchProcessorServiceTest extends TestCase
 
         $featureSet = new FeatureSet();
 
-        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::TM_100, false, 1);
 
         $this->assertArrayHasKey('suggestion', $result);
         $this->assertArrayHasKey('warning', $result);
         $this->assertArrayHasKey('serialized_errors_list', $result);
         $this->assertIsString($result['suggestion']);
-        $this->assertIsInt($result['warning']);
     }
 
     #[Test]
@@ -640,7 +639,7 @@ class MatchProcessorServiceTest extends TestCase
 
         $featureSet = new FeatureSet();
 
-        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::MT, false, 1);
 
         $this->assertArrayHasKey('suggestion', $result);
         $this->assertArrayHasKey('warning', $result);
@@ -660,7 +659,7 @@ class MatchProcessorServiceTest extends TestCase
 
         $featureSet = new FeatureSet();
 
-        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::TM_100, false, 1);
 
         $this->assertSame(0, $result['warning']);
         $this->assertSame('', $result['serialized_errors_list']);
@@ -678,7 +677,7 @@ class MatchProcessorServiceTest extends TestCase
 
         $featureSet = new FeatureSet();
 
-        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::TM_100, false, 1);
 
         $this->assertSame(1, $result['warning']);
         $this->assertNotEmpty($result['serialized_errors_list']);

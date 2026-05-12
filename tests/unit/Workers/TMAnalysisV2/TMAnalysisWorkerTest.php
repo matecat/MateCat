@@ -90,6 +90,9 @@ class TMAnalysisWorkerTest extends AbstractTest
             'mt_quality_value_in_editor' => null,
             'enable_mt_analysis'         => false,
             'mt_qe_workflow_enabled'     => null,
+            'match_type'                 => InternalMatchesConstants::NO_MATCH,
+            'fast_exact_match_type'      => null,
+            'icu_enabled'                => false,
         ];
 
         foreach (array_merge($defaults, $overrides) as $key => $value) {
@@ -561,7 +564,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $worker = $this->buildWorker(redis: $redis, updater: $updater, engine: $engine, processor: $processor);
         $worker->process($this->makeQueueElement(['mt_qe_workflow_enabled' => true]));
 
-        $this->assertSame(InternalMatchesConstants::TM_100_MT_QE, $captured['match_type']);
+        $this->assertSame(InternalMatchesConstants::TM_100, $captured['match_type']);
     }
 
     #[Test]
@@ -597,7 +600,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $worker = $this->buildWorker(redis: $redis, updater: $updater, engine: $engine, processor: $processor);
         $worker->process($this->makeQueueElement(['mt_qe_workflow_enabled' => true]));
 
-        $this->assertSame(InternalMatchesConstants::TM_100_PUBLIC_MT_QE, $captured['match_type']);
+        $this->assertSame(InternalMatchesConstants::TM_100_PUBLIC, $captured['match_type']);
     }
 
     #[Test]

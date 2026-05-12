@@ -10,6 +10,8 @@ use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterfa
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -31,7 +33,12 @@ class EngineServiceUnitTest extends AbstractTest
 
     private function makeFeatureSet(): FeatureSet
     {
-        return $this->createStub(FeatureSet::class);
+        $fs = $this->createStub(FeatureSet::class);
+        $fs->method('filter')->willReturnCallback(
+            static fn(string $method, mixed $config): mixed => $config
+        );
+
+        return $fs;
     }
 
     private function makeTmConfig(array $overrides = []): array
@@ -54,6 +61,22 @@ class EngineServiceUnitTest extends AbstractTest
             'source'       => 'en-US',
             'target'       => 'it-IT',
         ], $overrides);
+    }
+
+    private function makeQueueElement(): QueueElement
+    {
+        $element = new QueueElement();
+        $params  = new Params();
+        $params->pid = 100;
+        $params->id_job = 2;
+        $params->id_segment = 1;
+        $params->tm_keys = '[]';
+        $params->mt_evaluation = false;
+        $params->mt_qe_workflow_enabled = false;
+        $params->enable_mt_analysis = false;
+        $element->params = $params;
+
+        return $element;
     }
 
     private function makeEngineStub($returnValue): AbstractEngine
@@ -215,7 +238,7 @@ class EngineServiceUnitTest extends AbstractTest
         $mtEngine = $this->makeEngineStub($mtResult);
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
-        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, false);
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
 
         $this->assertEquals('Ciao mondo', $result['translation']);
     }
@@ -232,7 +255,7 @@ class EngineServiceUnitTest extends AbstractTest
         $mtEngine = $this->makeEngineStub($response);
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
-        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, false);
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
 
         $this->assertSame([], $result);
     }
@@ -240,7 +263,6 @@ class EngineServiceUnitTest extends AbstractTest
     #[Test]
     public function getMTTranslation_response_with_status_200_returns_empty_when_no_matches_key(): void
     {
-        // get_matches_as_array returns flat array — $result['matches'][0] doesn't exist → []
         $response = new GetMemoryResponse([
             'matches'         => [
                 [
@@ -265,10 +287,8 @@ class EngineServiceUnitTest extends AbstractTest
         $mtEngine = $this->makeEngineStub($response);
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
-        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, false);
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
 
-        // get_matches_as_array(1) returns flat numerically-indexed array,
-        // code accesses $mt_result['matches'][0] which doesn't exist → []
         $this->assertSame([], $result);
     }
 
@@ -279,7 +299,7 @@ class EngineServiceUnitTest extends AbstractTest
         $mtEngine = $this->makeEngineStub($mtResult);
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
-        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, false);
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
 
         $this->assertSame([], $result);
     }
@@ -297,7 +317,7 @@ class EngineServiceUnitTest extends AbstractTest
 
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
-        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, false);
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
 
         $this->assertSame([], $result);
     }

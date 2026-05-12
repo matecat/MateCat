@@ -106,17 +106,15 @@ class TMAnalysisWorker extends AbstractWorker
 
             try {
                 $tmMatches = $this->engineService->getTMMatches($config, $this->featureSet, $mtPenalty);
+            } catch (ReQueueException $rEx) {
+                $this->_doLog("--- (Worker $this->_workerPid) : RequeueException: {$rEx->getMessage()}");
+                throw $rEx;
             } catch (NotSupportedMTException) {
                 // Do nothing, skip the frame
                 $tmMatches = [];
             }
 
-            $skipAnalysis = !($params->enable_mt_analysis ?? false);
-            if (!empty($params->mt_qe_workflow_enabled)) {
-                $skipAnalysis = false;
-            }
-
-            $mtResult = $this->engineService->getMTTranslation($config, $this->featureSet, $mtPenalty, $skipAnalysis);
+            $mtResult = $this->engineService->getMTTranslation($config, $this->featureSet, $mtPenalty, $queueElement);
             $matches = $this->matchProcessor->sortMatches($mtResult, $tmMatches);
 
             if (empty($matches)) {
@@ -149,12 +147,17 @@ class TMAnalysisWorker extends AbstractWorker
                 $payableRates
             );
 
+            $icuEnabled = !empty($params->icu_enabled);
+
             $postProcessed = $this->matchProcessor->postProcessMatch(
                 $params->segment,
                 $params->source,
                 $params->target,
                 $bestMatch,
-                $this->featureSet
+                $this->featureSet,
+                $matchType,
+                $icuEnabled,
+                (int)$params->pid
             );
 
             if ($discountRate > 0) {
@@ -207,8 +210,8 @@ class TMAnalysisWorker extends AbstractWorker
             $this->redisService->incrementAnalyzedCount(
                 (int)$params->pid,
                 1,
-                (int)$tmData['eq_word_count'],
-                (int)$tmData['standard_word_count']
+                $eqWords,
+                $standardWords
             );
 
             $this->decrementSegmentsToAnalyzeOfWaitingProjects((int)$params->pid);
@@ -267,7 +270,7 @@ class TMAnalysisWorker extends AbstractWorker
         }
 
         $pid = (int)$queueElement->params->pid;
-        $rawWordCount = (int)$queueElement->params->raw_word_count;
+        $rawWordCount = (float)$queueElement->params->raw_word_count;
 
         $this->redisService->incrementAnalyzedCount($pid, 1, $rawWordCount, $rawWordCount);
         $this->decrementSegmentsToAnalyzeOfWaitingProjects($pid);
@@ -363,6 +366,7 @@ class TMAnalysisWorker extends AbstractWorker
         $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, AbstractEngine::class);
         if ($mtEngine instanceof MyMemory) {
             $_config['get_mt'] = true;
+            $_config['id_mt_engine'] = 0;  // Don't call MyMemory as MT separately — TMS call already includes MT via get_mt flag
         } else {
             $_config['get_mt'] = false;
         }
@@ -416,6 +420,11 @@ class TMAnalysisWorker extends AbstractWorker
     }
 
     /**
+     * Calculate the new score match by the Equivalent word mapping.
+     *
+     * RATIO: I change the value only if the new match is strictly better
+     * (in terms of percent paid per word) than the actual one.
+     *
      * @param array<string, mixed> $bestMatch
      * @param array<string, float|int> $equivalentWordMapping
      *
@@ -427,49 +436,120 @@ class TMAnalysisWorker extends AbstractWorker
         array $equivalentWordMapping,
     ): array {
         $tmMatchType = ($this->matchProcessor->isMtMatch($bestMatch) ? InternalMatchesConstants::MT : (string)($bestMatch['match'] ?? InternalMatchesConstants::MT));
-        $isIce = isset($bestMatch[InternalMatchesConstants::TM_ICE]) && $bestMatch[InternalMatchesConstants::TM_ICE];
+        $fastMatchType = strtoupper($queueElement->params->match_type);
+        $fastExactMatchType = $queueElement->params->fast_exact_match_type;
+
+        /* is Public TM */
         $publicTM = empty($bestMatch['memory_key']);
+        $isIce = isset($bestMatch[InternalMatchesConstants::TM_ICE]) && $bestMatch[InternalMatchesConstants::TM_ICE];
+
+        // When MTQE is enabled, the NO_MATCH and INTERNAL types are not defined in the payable rates. So fall back to the 100% rate, since it is overwritten by design.
+        $fastRatePaid = $equivalentWordMapping[$fastMatchType] ?? 100;
+
+        $tmMatchFuzzyBand = '';
+        $tmDiscount = 0;
+        $ind = null;
 
         if (stripos($tmMatchType, InternalMatchesConstants::MT) !== false) {
             $score = $bestMatch['score'] ?? 0;
+
             $tmMatchFuzzyBand = match (true) {
+                // First: ICE if score >= 0.9 (regardless of MTQE flag)
                 $score >= 0.9 => InternalMatchesConstants::ICE_MT,
+
+                // If not, and MTQE are disabled: generic MT
                 !$queueElement->params->mt_qe_workflow_enabled => InternalMatchesConstants::MT,
+
+                // With MTQE enabled, classify by thresholds
                 $score >= 0.8 => InternalMatchesConstants::TOP_QUALITY_MT,
                 $score >= 0.5 => InternalMatchesConstants::HIGHER_QUALITY_MT,
                 default => InternalMatchesConstants::STANDARD_QUALITY_MT,
             };
 
-            return [$tmMatchFuzzyBand, $equivalentWordMapping[$tmMatchFuzzyBand] ?? 100];
-        }
+            $tmDiscount = $equivalentWordMapping[$tmMatchFuzzyBand] ?? 0;
+        } else {
+            // Normalize TM match type to integer (e.g., "85%" -> 85)
+            $ind = intval($tmMatchType);
 
-        $ind = intval($tmMatchType);
-        $tmMatchFuzzyBand = InternalMatchesConstants::NO_MATCH;
+            if ($ind == 100) {
+                // Exact match (100%)
+                if ($isIce) {
+                    // In-Context Exact match: use ICE band and related discount
+                    $tmMatchFuzzyBand = InternalMatchesConstants::TM_ICE;
+                    $tmDiscount = $equivalentWordMapping[$tmMatchFuzzyBand] ?? 0;
+                } else {
+                    // 100% match: distinguish between Public TM and private TM
+                    $tmMatchFuzzyBand = $tempTmMatchFuzzyBand = $publicTM
+                        ? InternalMatchesConstants::TM_100_PUBLIC
+                        : InternalMatchesConstants::TM_100;
 
-        if ($ind == 100) {
-            if ($isIce) {
-                $tmMatchFuzzyBand = InternalMatchesConstants::TM_ICE;
-            } else {
-                $tmMatchFuzzyBand = $publicTM ? InternalMatchesConstants::TM_100_PUBLIC : InternalMatchesConstants::TM_100;
-                if (!empty($queueElement->params->mt_qe_workflow_enabled)) {
-                    $tmMatchFuzzyBand = $publicTM
-                        ? InternalMatchesConstants::TM_100_PUBLIC_MT_QE
-                        : InternalMatchesConstants::TM_100_MT_QE;
+                    // If MT+QE workflow is enabled, remap to the corresponding MT_QE alias
+                    if ($queueElement->params->mt_qe_workflow_enabled) {
+                        $tempTmMatchFuzzyBand = $publicTM
+                            ? InternalMatchesConstants::TM_100_PUBLIC_MT_QE
+                            : InternalMatchesConstants::TM_100_MT_QE;
+                    }
+
+                    // Pick discount using the (possibly remapped) fuzzy band
+                    $tmDiscount = $equivalentWordMapping[$tempTmMatchFuzzyBand] ?? 0;
                 }
+            } elseif ($ind < 50) {
+                $tmMatchFuzzyBand = InternalMatchesConstants::NO_MATCH;
+                $tmDiscount = $equivalentWordMapping[InternalMatchesConstants::NO_MATCH] ?? 0;
+            } elseif ($ind < 75) {
+                $tmMatchFuzzyBand = InternalMatchesConstants::TM_50_74;
+                $tmDiscount = $equivalentWordMapping[InternalMatchesConstants::TM_50_74] ?? 0;
+            } elseif ($ind <= 84) {
+                $tmMatchFuzzyBand = InternalMatchesConstants::TM_75_84;
+                $tmDiscount = $equivalentWordMapping[InternalMatchesConstants::TM_75_84] ?? 0;
+            } elseif ($ind <= 94) {
+                $tmMatchFuzzyBand = InternalMatchesConstants::TM_85_94;
+                $tmDiscount = $equivalentWordMapping[InternalMatchesConstants::TM_85_94] ?? 0;
+            } elseif ($ind <= 99) {
+                $tmMatchFuzzyBand = InternalMatchesConstants::TM_95_99;
+                $tmDiscount = $equivalentWordMapping[InternalMatchesConstants::TM_95_99] ?? 0;
             }
-        } elseif ($ind < 50) {
-            /** @noinspection PhpConditionAlreadyCheckedInspection */
-            $tmMatchFuzzyBand = InternalMatchesConstants::NO_MATCH;
-        } elseif ($ind < 75) {
-            $tmMatchFuzzyBand = InternalMatchesConstants::TM_50_74;
-        } elseif ($ind <= 84) {
-            $tmMatchFuzzyBand = InternalMatchesConstants::TM_75_84;
-        } elseif ($ind <= 94) {
-            $tmMatchFuzzyBand = InternalMatchesConstants::TM_85_94;
-        } elseif ($ind <= 99) {
-            $tmMatchFuzzyBand = InternalMatchesConstants::TM_95_99;
         }
 
-        return [$tmMatchFuzzyBand, $equivalentWordMapping[$tmMatchFuzzyBand] ?? 100];
+        // if MM says is ICE, return ICE
+        if ($isIce) {
+            return [$tmMatchFuzzyBand, $tmDiscount];
+        }
+
+        // if there is a repetition with a 100% match type, return 100%
+        if ($ind == 100 && $fastMatchType == InternalMatchesConstants::REPETITIONS) {
+            return [$tmMatchFuzzyBand, $tmDiscount];
+        }
+
+        // if there is a repetition from Fast, keep it in the REPETITIONS bucket
+        if ($fastMatchType == InternalMatchesConstants::REPETITIONS) {
+            return [$fastMatchType, $equivalentWordMapping[$fastMatchType] ?? 100];
+        }
+
+        // if Fast match type > TM match type, return it
+        // otherwise return the TM match type
+        if ($fastMatchType === InternalMatchesConstants::INTERNAL && !$queueElement->params->mt_qe_workflow_enabled) {
+            $indFast = intval($fastExactMatchType);
+
+            if ($indFast > $ind) {
+                return [$fastMatchType, $equivalentWordMapping[$fastMatchType] ?? 100];
+            }
+
+            return [$tmMatchFuzzyBand, $tmDiscount];
+        }
+
+        /**
+         * Apply the TM discount rate and/or force the value obtained from TM for
+         * matches between 50%-74% because is never returned in Fast Analysis; it's rate is set default as equals to NO_MATCH
+         */
+        if (
+            in_array($fastMatchType, [InternalMatchesConstants::INTERNAL, InternalMatchesConstants::REPETITIONS])
+            && $tmDiscount <= $fastRatePaid
+            || $fastMatchType == InternalMatchesConstants::NO_MATCH
+        ) {
+            return [$tmMatchFuzzyBand, $tmDiscount];
+        }
+
+        return [$fastMatchType, $equivalentWordMapping[$fastMatchType] ?? 100];
     }
 }

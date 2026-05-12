@@ -8,6 +8,7 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
 use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
 use Utils\Constants\Ices;
@@ -120,39 +121,69 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     /**
      * Post-process a TM match suggestion: tag check, space realignment, consistency check.
      *
+     * Faithfully reproduces the develop branch _updateRecord post-processing:
+     * - Uses the RESOLVED fuzzy band ($matchType) to decide MT-realignment vs tag-check-only
+     * - Passes $icuEnabled to initPostProcess (for ICU pattern comparison)
+     * - Uses project-specific subfiltering handlers for the MateCatFilter
+     * - The 'warning' field reflects ONLY the consistency check (second PostProcess instance)
+     *
      * @param string $segment source segment text (Layer 0)
      * @param string $source source language code
      * @param string $target target language code
-     * @param array<string, mixed> $match best TM match (contains 'translation', 'created_by', 'segment')
+     * @param array<string, mixed> $match best TM match (contains 'translation', 'segment', 'created_by')
      * @param FeatureSet $featureSet project feature set
+     * @param string $matchType resolved fuzzy band from scoring (e.g. InternalMatchesConstants::MT, TM_100, REPETITIONS)
+     * @param bool $icuEnabled whether ICU support is enabled for this project
+     * @param int $pid project ID (for subfiltering custom handlers)
      *
      * @return array<string, mixed> processed match data with keys: suggestion, warning, serialized_errors_list
      * @throws Exception
      */
-    public function postProcessMatch(string $segment, string $source, string $target, array $match, FeatureSet $featureSet): array
-    {
+    public function postProcessMatch(
+        string $segment,
+        string $source,
+        string $target,
+        array $match,
+        FeatureSet $featureSet,
+        string $matchType,
+        bool $icuEnabled,
+        int $pid,
+    ): array {
         $suggestion = $match['translation'] ?? '';
 
-        $filter = MateCatFilter::getInstance($featureSet, $source, $target);
+        $metadataDao = new ProjectsMetadataDao();
+        $filter = MateCatFilter::getInstance(
+            $featureSet,
+            $source,
+            $target,
+            [],
+            $metadataDao->getProjectStaticSubfilteringCustomHandlers($pid)
+        );
 
         /**
-         * if the first match is MT, perform QA realignment because some MT engines break tags
-         * also perform a tag ID check and mismatch validation
+         * if the resolved match type is an MT band, perform QA realignment because some MT engines break tags.
+         * Uses the RESOLVED fuzzy band, not raw created_by — matches develop's in_array($fuzzy_band, [...MT bands...])
          */
-        if ($this->isMtMatch($match)) {
+        if (in_array($matchType, [
+            InternalMatchesConstants::MT,
+            InternalMatchesConstants::ICE_MT,
+            InternalMatchesConstants::TOP_QUALITY_MT,
+            InternalMatchesConstants::HIGHER_QUALITY_MT,
+            InternalMatchesConstants::STANDARD_QUALITY_MT,
+        ])) {
             // Layer 1 here
             $check = $this->initPostProcess(
                 $match['segment'] ?? $segment,
                 $suggestion,
                 $source,
                 $target,
-                false,
+                $icuEnabled,
                 $featureSet
             );
             $check->realignMTSpaces();
         } else {
             // Otherwise, try to perform only the tagCheck
-            $check = $this->initPostProcess($segment, $suggestion, $source, $target, false, $featureSet);
+            $check = $this->initPostProcess($segment, $suggestion, $source, $target, $icuEnabled, $featureSet);
             $check->performTagCheckOnly();
         }
 
@@ -161,22 +192,22 @@ class MatchProcessorService implements MatchProcessorServiceInterface
 
         // perform a consistency check as setTranslation does
         //  to add spaces to translation if needed
-        $check2 = $this->initPostProcess($segment, $suggestion, $source, $target, false, $featureSet);
-        $check2->performConsistencyCheck();
+        $check = $this->initPostProcess($segment, $suggestion, $source, $target, $icuEnabled, $featureSet);
+        $check->performConsistencyCheck();
 
-        if (!$check2->thereAreErrors()) {
-            $suggestion = $check2->getTrgNormalized();
+        if (!$check->thereAreErrors()) {
+            $suggestion = $check->getTrgNormalized();
         } else {
-            $suggestion = $check2->getTargetSeg();
+            $suggestion = $check->getTargetSeg();
         }
 
-        $err_json2 = ($check2->thereAreErrors()) ? $check2->getErrorsJSON() : '';
+        $err_json2 = ($check->thereAreErrors()) ? $check->getErrorsJSON() : '';
 
         $suggestion = $filter->fromLayer1ToLayer0($suggestion);
 
         return [
             'suggestion'             => $suggestion,
-            'warning'                => (int)($check->thereAreErrors() || $check2->thereAreErrors()),
+            'warning'                => (int)$check->thereAreErrors(), // ONLY consistency check — matches develop
             'serialized_errors_list' => $this->mergeJsonErrors($err_json, $err_json2),
         ];
     }

@@ -29,5 +29,7 @@ interface ProjectCompletionRepositoryInterface
 
     public function initializeJobWordCount(int $jobId, string $password): void;
 
+    public function destroyProjectAndJobCaches(int $pid): void;
+
     public function destroyAllCaches(int $pid, string $projectPassword): void;
 }

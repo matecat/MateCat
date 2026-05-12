@@ -68,10 +68,10 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         LoggerFactory::doJsonLog("WARNING — timed out waiting for PROJECT_TOT_SEGMENTS for PID $pid");
     }
 
-    public function incrementAnalyzedCount(int $pid, int $numSegments, int $eqWc, int $stWc): void
+    public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void
     {
-        $this->redis->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, $eqWc * RedisKeys::WORD_COUNT_SCALE);
-        $this->redis->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, $stWc * RedisKeys::WORD_COUNT_SCALE);
+        $this->redis->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)($eqWc * RedisKeys::WORD_COUNT_SCALE));
+        $this->redis->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)($stWc * RedisKeys::WORD_COUNT_SCALE));
         $this->redis->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numSegments);
     }
 
