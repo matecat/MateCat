@@ -1,7 +1,6 @@
 import React, {forwardRef, useCallback, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {useVirtual} from 'react-virtual'
-import {st} from 'make-plural'
 
 const VirtualList = forwardRef(
   (

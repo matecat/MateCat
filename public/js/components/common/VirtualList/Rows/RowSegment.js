@@ -184,7 +184,6 @@ export const ProjectBar = ({
 
         const diff =
           rect.y - (projectBarCache.headerHeight + projectBarCache.paddingTop)
-        console.log('---------------> sid[', segment.sid, ']:', diff)
 
         if (diff < -30 && diff > -60) {
           document.dispatchEvent(
@@ -258,9 +257,11 @@ export const ProjectBar = ({
 
     const onScroll = () => {
       if (listRef.scrollTop < paddingTop) {
-        const newPaddingTop = paddingTop - listRef.scrollTop
+        const newPaddingTop = Math.floor(paddingTop - listRef.scrollTop)
         if (newPaddingTop > 10)
           ref.current.style.paddingTop = `${newPaddingTop}px`
+      } else {
+        ref.current.style.paddingTop = '14px'
       }
     }
 
@@ -289,7 +290,9 @@ export const ProjectBar = ({
         </div>
       ) : null}
       {file && file.weighted_words > 0 ? (
-        <div className="projectbar-wordcounter">
+        <div
+          className={`projectbar-wordcounter ${isBlinking ? 'sticky-project-bar-blink sticky-project-bar-blink-wordcounter' : ''}`}
+        >
           <span>
             Payable Words: <strong>{file.weighted_words}</strong>
           </span>
