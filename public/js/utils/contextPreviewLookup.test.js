@@ -1,4 +1,11 @@
-import {findElementByMetadata, walkNodePath} from './contextPreviewLookup'
+import {
+  findElementByMetadata,
+  walkNodePath,
+  findContainerByXpath,
+  ClientNodepathRegistry,
+  JcrContainerTextMatchStrategy,
+  clientNodepathRegistry,
+} from './contextPreviewLookup'
 
 describe('findElementByMetadata', () => {
   let container
@@ -121,6 +128,21 @@ describe('findElementByMetadata', () => {
           'x-attribute_name_value',
         ),
       ).toBeNull()
+    })
+
+    it('finds an element when the attribute value contains a colon (jcr:content)', () => {
+      container.innerHTML =
+        '<div data-node-path="/content/we-retail/language-masters/sq-al/women/jcr:content"><strong>Women</strong></div>'
+      const el = findElementByMetadata(
+        container,
+        'data-node-path=/content/we-retail/language-masters/sq-al/women/jcr:content',
+        'x-attribute_name_value',
+      )
+      expect(el).toBe(
+        container.querySelector(
+          '[data-node-path="/content/we-retail/language-masters/sq-al/women/jcr:content"]',
+        ),
+      )
     })
 
     it('returns null when resname cannot be parsed as name=value', () => {
@@ -284,5 +306,148 @@ describe('walkNodePath', () => {
     )
     expect(el).not.toBeNull()
     expect(el.textContent).toBe('Second')
+  })
+})
+
+describe('findContainerByXpath', () => {
+  let container
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it('resolves /html/body/... as container-relative', () => {
+    container.innerHTML = '<section id="s"><p>Text</p></section>'
+    const el = findContainerByXpath(container, '/html/body/section[@id="s"]')
+    expect(el).toBe(container.querySelector('section'))
+  })
+
+  it('resolves // prefix', () => {
+    container.innerHTML = '<section><p id="x">X</p></section>'
+    const el = findContainerByXpath(container, '//p[@id="x"]')
+    expect(el).toBe(container.querySelector('#x'))
+  })
+
+  it('returns null when path matches nothing', () => {
+    container.innerHTML = '<p>Hello</p>'
+    expect(findContainerByXpath(container, '//missing')).toBeNull()
+  })
+
+  it('returns null on malformed XPath', () => {
+    container.innerHTML = '<p>Hello</p>'
+    expect(findContainerByXpath(container, '[[invalid')).toBeNull()
+  })
+
+  it('returns null when container is null', () => {
+    expect(findContainerByXpath(null, '//p')).toBeNull()
+  })
+
+  it('returns null when xpath is empty', () => {
+    container.innerHTML = '<p>Hello</p>'
+    expect(findContainerByXpath(container, '')).toBeNull()
+  })
+})
+
+describe('ClientNodepathRegistry', () => {
+  let registry
+
+  beforeEach(() => {
+    registry = new ClientNodepathRegistry()
+  })
+
+  it('registers and resolves a strategy by client name', () => {
+    const strategy = {execute: jest.fn()}
+    registry.register('acme', strategy)
+    expect(registry.resolve('acme')).toBe(strategy)
+  })
+
+  it('returns null for an unregistered client name', () => {
+    expect(registry.resolve('unknown')).toBeNull()
+  })
+
+  it('overwrites a previous registration for the same name', () => {
+    const s1 = {execute: jest.fn()}
+    const s2 = {execute: jest.fn()}
+    registry.register('acme', s1)
+    registry.register('acme', s2)
+    expect(registry.resolve('acme')).toBe(s2)
+  })
+})
+
+describe('JcrContainerTextMatchStrategy', () => {
+  let container
+  const strategy = new JcrContainerTextMatchStrategy()
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(container)
+  })
+
+  it('finds element whose text matches within the JCR container', () => {
+    container.innerHTML = `
+      <section id="jcr-zone">
+        <p>Target Text</p>
+      </section>
+      <p>Target Text</p>
+    `
+    const result = strategy.execute(
+      container,
+      '/html/body/section[@id="jcr-zone"]',
+      'Target Text',
+    )
+    expect(result).toBe(container.querySelector('#jcr-zone p'))
+  })
+
+  it('returns null when the XPath container is not found', () => {
+    container.innerHTML = '<p>Target Text</p>'
+    expect(strategy.execute(container, '//missing', 'Target Text')).toBeNull()
+  })
+
+  it('returns null when no text match exists within the container', () => {
+    container.innerHTML = '<section id="s"><p>Other Text</p></section>'
+    expect(
+      strategy.execute(container, '/html/body/section[@id="s"]', 'Target Text'),
+    ).toBeNull()
+  })
+
+  it('returns null when path is empty', () => {
+    container.innerHTML = '<p>Target Text</p>'
+    expect(strategy.execute(container, '', 'Target Text')).toBeNull()
+  })
+
+  it('returns null when normSource is empty', () => {
+    container.innerHTML = '<section id="s"><p>Text</p></section>'
+    expect(strategy.execute(container, '/html/body/section[@id="s"]', '')).toBeNull()
+  })
+
+  it('handles XPath with attribute predicates for JCR-style data attributes', () => {
+    container.innerHTML = `
+      <div data-jcr-path="/content/jcr:content/par">
+        <p>Localised string</p>
+      </div>
+    `
+    const result = strategy.execute(
+      container,
+      '//div[@data-jcr-path="/content/jcr:content/par"]',
+      'Localised string',
+    )
+    expect(result).toBe(container.querySelector('p'))
+  })
+})
+
+describe('clientNodepathRegistry (module singleton)', () => {
+  it('has "jcr" registered by default', () => {
+    expect(clientNodepathRegistry.resolve('jcr')).toBeInstanceOf(
+      JcrContainerTextMatchStrategy,
+    )
   })
 })

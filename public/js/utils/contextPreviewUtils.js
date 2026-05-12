@@ -2,7 +2,7 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
-import {findElementByMetadata} from './contextPreviewLookup'
+import {findElementByMetadata, clientNodepathRegistry} from './contextPreviewLookup'
 
 const containerMaps = new WeakMap()
 
@@ -464,6 +464,19 @@ export const getSegmentNodeMap = (container) =>
  * @param {Object}  [options]
  * @param {boolean} [options.replaceWithTarget=false] - Substitute matched text with target
  */
+export const findElementByTextMatch = (container, searchText) => {
+  if (!container || !searchText) return null
+  const needle = searchText.replace(/\s+/g, ' ').trim().toLowerCase()
+  if (!needle) return null
+  for (const el of container.querySelectorAll(BLOCK_SELECTOR)) {
+    if (el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
+    if (el.querySelector(`[${SEGMENT_SIDS_ATTR}]`)) continue
+    const text = el.textContent.replace(/\s+/g, ' ').trim().toLowerCase()
+    if (text === needle) return el
+  }
+  return null
+}
+
 export const tagSegments = (
   container,
   segments,
@@ -563,7 +576,24 @@ export const tagSegments = (
       }
       continue
     }
-    const el = findElementByMetadata(container, resname, restype)
+    const colonIdx = resname.indexOf(':')
+    const clientName = colonIdx !== -1 ? resname.slice(0, colonIdx) : null
+    const clientStrategy = clientName ? clientNodepathRegistry.resolve(clientName) : null
+    let el
+    if (restype === 'x-attribute_name_value' && resname.includes('jcr:')) {
+      const containerEl = findElementByMetadata(container, resname, restype)
+      const segment = containerEl ? prepared.find((p) => p.sid === sid) : null
+      el = segment ? findElementByTextMatch(containerEl, segment.normSource) : null
+    } else if (clientStrategy) {
+      const clientPath = resname.slice(colonIdx + 1)
+      const segment = prepared.find((p) => p.sid === sid)
+      el = segment ? clientStrategy.execute(container, clientPath, segment.normSource) : null
+      if (!el) {
+        el = findElementByMetadata(container, resname, restype)
+      }
+    } else {
+      el = findElementByMetadata(container, resname, restype)
+    }
     if (el) {
       appendSid(el, sid)
       strategyResolved.add(sid)
@@ -571,7 +601,6 @@ export const tagSegments = (
       if (!pointMappedElements.has(el))
         pointMappedElements.set(el, new Set())
       pointMappedElements.get(el).add(sid)
-      // Mark the corresponding prepared entry as used so Pass 1 skips it
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
     }
