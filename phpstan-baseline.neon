@@ -21798,12 +21798,6 @@ parameters:
 			path: lib/Utils/Engines/Lara.php
 
 		-
-			message: '#^Variable \$laraGlossariesArray in empty\(\) always exists and is always falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: lib/Utils/Engines/Lara.php
-
-		-
 			message: '#^Method Utils\\Engines\\Lara\\HeaderField\:\:getArrayCopy\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

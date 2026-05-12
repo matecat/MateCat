@@ -325,7 +325,7 @@ class Lara extends AbstractEngine
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
                     'style' => $laraStyle,
-                    'glossaries' => implode(",", $laraGlossaries?->value ?? null),
+                    'glossaries' => isset($laraGlossaries) ? implode(",", $laraGlossaries->value) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
