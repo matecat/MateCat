@@ -269,14 +269,12 @@ class Lara extends AbstractEngine
                 }
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
-                $laraGlossariesArray = [];
 
                 if (!empty($_config['id_project'])) {
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
-                        $laraGlossariesArray = $laraGlossaries->value;
-                        $translateOptions->setGlossaries($laraGlossariesArray);
+                        $translateOptions->setGlossaries($laraGlossaries->value);
                     }
                 }
 
@@ -337,7 +335,7 @@ class Lara extends AbstractEngine
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
                     'style' => $laraStyle,
-                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
+                    'glossaries' => isset($laraGlossaries) ? implode(",", $laraGlossaries->value) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,

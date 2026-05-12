@@ -37,14 +37,8 @@ class SegmentDisabledService
     /**
      * Disable translation for a segment.
      *
+     * Idempotent — safe to call multiple times. If already disabled, returns immediately.
      * Persists the row via save(), then busts all related DAO caches.
-     *
-     * Note: segment_metadata has no UNIQUE constraint on (id_segment, meta_key).
-     * Under concurrent requests, two disable() calls may both pass the isDisabled()
-     * check and INSERT duplicate rows. This is benign:
-     *   - isDisabled() still returns true (non-empty result with meta_value='1')
-     *   - enable() uses DELETE WHERE, which removes ALL matching rows
-     *   - No data corruption or functional breakage occurs
      *
      * @param int $id_segment
      *
@@ -54,6 +48,10 @@ class SegmentDisabledService
      */
     public function disable(int $id_segment): void
     {
+        if ($this->isDisabled($id_segment)) {
+            return;
+        }
+
         $metadata = new SegmentMetadataStruct();
         $metadata->id_segment = $id_segment;
         $metadata->meta_key = 'translation_disabled';
