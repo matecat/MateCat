@@ -4,87 +4,51 @@ These issues **pre-date the service refactor** (PR #4570). They exist in the ori
 monolithic `TMAnalysisWorker` on `develop` and were carried over as-is. Documenting
 them here as known technical debt for future remediation.
 
-**Validated:** 2026-05-12 against refactored codebase. All issues confirmed present
-in current code. Former issue #6 (`forceSetSegmentAnalyzed` double-count) downgraded
-from HIGH to MEDIUM — cannot manifest without `MYSQL_ATTR_FOUND_ROWS` (see #7).
+**Last updated:** 2026-05-12 against refactored codebase. Severities reassessed after
+mitigations applied. Risk tolerance: project loss is acceptable; permanent silent
+failures are not.
 
 ---
 
-## CRITICAL
+## FIXED
 
-### 1. DB/Redis split-brain — lost-count / never-complete bug
+### 1. ~~DB/Redis split-brain — lost-count / never-complete bug~~ — FIXED
 
 **Where:** `TMAnalysisWorker::process()` — the gap between `setAnalysisValue()` (MySQL)
 and `incrementAnalyzedCount()` (Redis).
 
-**Scenario:** DB update succeeds and commits → Redis `INCRBY` throws (network blip,
-Predis timeout) → the Executor catches `Predis\Connection\ConnectionException` and
-requeues → on retry, `setAnalysisValue()` returns `0` (row already DONE) → worker
-skips all side effects → segment is DONE in MySQL but **never counted in Redis**.
-The project never completes.
+**Original scenario:** DB update succeeds and commits → Redis `INCRBY` throws →
+segment is DONE in MySQL but never counted in Redis → project never completes.
 
-**Impact:** The project's `num_analyzed` counter permanently lags behind reality.
-`tryCloseProject()` never fires.
+**Fix (two layers):**
+- **Layer 1:** `applyPostCommitSideEffects()` retries `incrementAnalyzedCount` with
+  exponential backoff (500ms initial, 7.5s total window) + Predis reconnect between
+  retries. Handles transient Redis blips.
+- **Layer 2 (root fix):** `tryCloseProject()` now has a DB-authoritative gate —
+  after Redis triggers a close attempt and the completion lock is acquired, MySQL
+  is queried via `getProjectSegmentsTranslationSummary()` to verify all segments
+  are actually DONE/SKIPPED before proceeding. If MySQL disagrees (Redis/MySQL
+  drift from sustained outage), the lock is released and the close is aborted.
+  Redis is the fast trigger, MySQL is the judge.
 
-### 2. Crash during project completion loses liveness
-
-**Where:** `ProjectCompletionService::tryCloseProject()`
-
-**Scenario:** Worker acquires the completion lock (NX, TTL 86400s) and calls
-`removeProjectFromQueue()` → process crashes (OOM, SIGKILL) before reaching the
-catch block → lock is held for 24 h, project is removed from the queue, and no
-other worker can retry closure.
-
-**Impact:** Project stuck in non-DONE state for up to 24 hours.
-
-### 3. Initialization is not crash-safe
+### 3. ~~Initialization is not crash-safe~~ — FIXED
 
 **Where:** `TMAnalysisWorker::initializeTMAnalysis()` /
 `AnalysisRedisService::acquireInitLock()`
 
-**Scenario:** The init-lock winner dies after acquiring the NX semaphore but before
-writing `PROJECT_TOT_SEGMENTS` → all other workers spin in `waitForInitialization()`
-up to 5 s then proceed without totals → `tryCloseProject()` returns early because
-`project_segments` is empty.
-
-**Impact:** All workers process segments but the project can never complete until
-the 86400 s lock TTL expires and a new winner re-initializes.
-
----
-
-## HIGH
-
-### 4. Non-atomic counter group
-
-**Where:** `AnalysisRedisService::incrementAnalyzedCount()` — three separate `INCRBY`
-calls for `eq_wc`, `st_wc`, and `num_done`.
-
-**Risk:** If a failure occurs between increments, word counts and segment count
-diverge. A Lua script or `MULTI/EXEC` pipeline would make them atomic.
-
-### 5. Duplicate delivery race on same segment
-
-**Where:** No per-segment claim/lock exists in the worker pipeline.
-
-**Risk:** If ActiveMQ delivers the same segment to two workers (redelivery, connection
-drop), both may compute results. Correctness depends entirely on the DAO's
-`WHERE tm_analysis_status NOT IN ('DONE','SKIPPED')` predicate returning `0`
-affected rows for the loser. InnoDB row-level locking serializes the UPDATEs, so
-the second worker always sees `affectedRows=0` — but this is an implicit guarantee,
-not an explicit contract.
+**Fix:** Init lock TTL reduced from 86400s to 30s. On timeout, losers re-try
+`acquireInitLock()` — if the winner crashed, the lock expired and a loser
+becomes the new winner and re-initializes from MySQL. New
+`initializeProjectCounters()` wraps all init writes in a Redis MULTI/EXEC
+transaction for guaranteed atomic ordering.
 
 ### 6. ~~Equality close condition is fragile~~ — FIXED
 
-**Where:** `ProjectCompletionService::tryCloseProject()` —
-`(int)$projectTotals['project_segments'] - (int)$projectTotals['num_analyzed'] <= 0`
+**Where:** `ProjectCompletionService::tryCloseProject()`
 
 **Fix:** Changed `=== 0` to `<= 0`. If `num_analyzed` ever exceeds `project_segments`
 (e.g., double-counting from issue #4's partial increment), the subtraction is negative
 and `<= 0` still triggers completion instead of leaving the project permanently stuck.
-
----
-
-## MEDIUM
 
 ### 7. ~~`forceSetSegmentAnalyzed()` has no terminal-state guard~~ — FIXED
 
@@ -95,21 +59,77 @@ and `<= 0` still triggers completion instead of leaving the project permanently 
 Under duplicate delivery, only the first worker can transition the segment —
 the second sees `affectedRows=0` regardless of `MYSQL_ATTR_FOUND_ROWS` config.
 
-### 8. TOCTOU in initialization wait
+### 8. ~~TOCTOU in initialization wait~~ — FIXED
 
 **Where:** `AnalysisRedisService::waitForInitialization()`
 
-**Risk:** Workers check for `PROJECT_TOT_SEGMENTS` but the baseline `num_analyzed`
-set by the winner may not be written yet. Workers could proceed with stale or
-missing baseline counts.
+**Fix:** Now polls for both `PROJECT_TOT_SEGMENTS` and `PROJECT_NUM_SEGMENTS_DONE`
+before letting losers proceed. Returns `bool` to enable re-try logic for issue #3.
 
-### 9. Lock TTL is operationally dangerous
+---
 
-**Where:** Both `acquireInitLock()` and `acquireCompletionLock()` use `'EX', 86400`.
+## MEDIUM
 
-**Risk:** A transient crash (OOM, network partition) holds the lock for 24 hours,
-turning a momentary failure into a day-long outage. Shorter TTLs with renewal
-would be more resilient.
+### 2. Crash during project completion — 24h delay
+
+**Where:** `ProjectCompletionService::tryCloseProject()`
+
+**Scenario:** Worker acquires the completion lock (NX, TTL 86400s) → process crashes
+after commit but before lock release → lock held for up to 24h.
+
+**Mitigations already applied:**
+- `removeProjectFromQueue()` moved after `commit()` — crash before commit leaves
+  project in queue for retry.
+- DB-authoritative gate ensures correctness even if the close is delayed.
+
+**Residual risk:** Crash in the narrow post-commit/pre-unlock window causes a
+24h delay. Self-healing (lock expires). Not permanent.
+
+**Future fix (P3):** Shorter completion lock TTL with renewal mechanism.
+
+### 4. Non-atomic per-segment counter group
+
+**Where:** `AnalysisRedisService::incrementAnalyzedCount()` — three separate `INCRBY`
+calls for `eq_wc`, `st_wc`, and `num_done`.
+
+**Mitigations already applied:**
+- Init path uses MULTI/EXEC via `initializeProjectCounters()`.
+- `<= 0` close condition (#6) means overcounting can't permanently block completion.
+- DB-authoritative gate (#1) means Redis counter drift doesn't prevent correct closure.
+
+**Residual risk:** Per-segment `incrementAnalyzedCount()` is still non-atomic.
+Partial failure can cause word count inaccuracy (cosmetic, not functional).
+
+**Future fix (P3):** Wrap per-segment `INCRBY` calls in MULTI/EXEC.
+
+### 5. Duplicate delivery race on same segment
+
+**Where:** No per-segment claim/lock exists in the worker pipeline.
+
+**Mitigations already applied:**
+- `setAnalysisValue()` has `WHERE tm_analysis_status NOT IN ('DONE','SKIPPED')`.
+- `forceSetSegmentAnalyzed()` has the same guard (#7).
+- InnoDB row-level locking serializes concurrent UPDATEs.
+
+**Residual risk:** Theoretical only — three independent defense layers would all
+need to fail simultaneously. No practical scenario identified.
+
+---
+
+## LOW
+
+### 9. Completion lock TTL is operationally long
+
+**Where:** `acquireCompletionLock()` uses `'EX', 86400`.
+
+**Mitigations already applied:**
+- Init lock reduced to 30s (#3).
+- Queue removal after commit (#2) limits blast radius.
+- DB-authoritative gate ensures correctness regardless of lock state.
+
+**Residual risk:** 24h delay on crash during completion. Self-healing.
+
+**Future fix (P3):** Shorter TTL with renewal mechanism.
 
 ---
 
@@ -117,9 +137,9 @@ would be more resilient.
 
 | Priority | Fix | Addresses |
 |----------|-----|-----------|
-| P0 | **DB-authoritative completion**: recompute segment counts from MySQL in `tryCloseProject()` instead of relying solely on Redis counters. | #1 (root fix) |
-| P1 | **Atomic side effects**: wrap `INCRBY` calls in a Lua script or `MULTI/EXEC`. | #4 |
-| P1 | **Crash-safe initialization**: use an explicit "init complete" flag; clean up partial state on failure. | #3, #8 |
-| P2 | **Shorter lock TTLs with renewal**: e.g., 60 s TTL with periodic extension while work is in progress. | #2, #3, #9 |
-| ~~P2~~ | ~~**Defensive close condition**: use `<= 0` instead of `=== 0`.~~ **DONE** | ~~#6~~ |
-| ~~P3~~ | ~~**Terminal-state guard on `forceSetSegmentAnalyzed`**: add `AND tm_analysis_status NOT IN ('DONE','SKIPPED')`.~~ **DONE** | ~~#7~~ |
+| ~~P0~~ | ~~**DB-authoritative completion**~~ **DONE** | ~~#1~~ |
+| ~~P1~~ | ~~**Crash-safe initialization**~~ **DONE** | ~~#3, #8~~ |
+| ~~P2~~ | ~~**Defensive close condition**~~ **DONE** | ~~#6~~ |
+| ~~P3~~ | ~~**Terminal-state guard on `forceSetSegmentAnalyzed`**~~ **DONE** | ~~#7~~ |
+| P3 | **Atomic per-segment side effects**: wrap `INCRBY` calls in MULTI/EXEC. | #4 |
+| P3 | **Shorter completion lock TTL with renewal**: e.g., 60s TTL with periodic extension. | #2, #9 |

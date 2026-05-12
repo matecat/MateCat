@@ -41,14 +41,29 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
             && $this->redisService->acquireCompletionLock($pid)
         ) {
             try {
+                // DB-authoritative gate: Redis triggered the close attempt, but MySQL
+                // is the source of truth. Verify all segments are actually DONE/SKIPPED
+                // before proceeding. This handles Redis/MySQL drift from issue #1
+                // (lost INCRBY after sustained Redis outage).
+                // Uses self-call to force master-read via transaction wrapper
+                // (ProxySQL routes reads outside transactions to slave).
+                $_full_report = $this->getProjectSegmentsTranslationSummary($pid);
+                $rollup       = array_pop($_full_report);
+                assert($rollup !== null);
+
+                $dbRemaining = (int)$rollup['project_segments'] - (int)$rollup['num_analyzed'];
+                if ($dbRemaining > 0) {
+                    LoggerFactory::doJsonLog("--- Redis triggered close for project $pid but MySQL says $dbRemaining segments remain. Releasing lock.");
+                    $this->redisService->releaseCompletionLock($pid);
+
+                    return;
+                }
+
+                $_analyzed_report = $_full_report;
+
                 LoggerFactory::doJsonLog("--- trying to initialize job total word count for project $pid.");
 
                 $this->repository->beginTransaction();
-
-                $_full_report = $this->repository->getProjectSegmentsTranslationSummary($pid);
-                $rollup       = array_pop($_full_report);
-                assert($rollup !== null);
-                $_analyzed_report = $_full_report;
 
                 LoggerFactory::doJsonLog("--- analysis project $pid finished: change status to DONE");
 
@@ -109,8 +124,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
     public function getProjectSegmentsTranslationSummary(int $pid): array
     {
         // Wrap in transaction to force master-read in read-replica environments.
-        // Note: tryCloseProject() has its own outer transaction, so this method
-        // is only called directly from initializeTMAnalysis (which has no transaction).
+        // Called from initializeTMAnalysis (no outer transaction) and from the
+        // DB-authoritative gate in tryCloseProject (before its transaction starts).
         $this->repository->beginTransaction();
         $result = $this->repository->getProjectSegmentsTranslationSummary($pid);
         $this->repository->commit();

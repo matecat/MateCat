@@ -218,6 +218,41 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
+    public function test_project_completion_service_has_db_authoritative_gate_before_transaction(): void
+    {
+        $source = $this->readSource($this->projectCompletionServicePath());
+
+        $methodPos = strpos($source, 'public function tryCloseProject');
+        $this->assertNotFalse($methodPos);
+
+        // DB gate must query MySQL via getProjectSegmentsTranslationSummary BEFORE beginTransaction
+        $summaryPos = strpos($source, 'getProjectSegmentsTranslationSummary(', $methodPos);
+        $this->assertNotFalse($summaryPos, 'Expected getProjectSegmentsTranslationSummary() call in tryCloseProject().');
+
+        $beginPos = strpos($source, '->beginTransaction()', $methodPos);
+        $this->assertNotFalse($beginPos, 'Expected beginTransaction() in tryCloseProject().');
+
+        $this->assertLessThan(
+            $beginPos,
+            $summaryPos,
+            'DB-authoritative gate (getProjectSegmentsTranslationSummary) must appear BEFORE beginTransaction — verify segments are DONE in MySQL before starting the completion transaction.'
+        );
+
+        // Must release lock and return early if MySQL disagrees
+        $dbRemainingPos = strpos($source, 'dbRemaining', $methodPos);
+        $this->assertNotFalse($dbRemainingPos, 'Expected $dbRemaining check in DB-authoritative gate.');
+
+        $releaseOnDriftPos = strpos($source, 'releaseCompletionLock(', $dbRemainingPos);
+        $this->assertNotFalse($releaseOnDriftPos, 'Expected releaseCompletionLock() when MySQL says segments remain (Redis/MySQL drift).');
+
+        $this->assertLessThan(
+            $beginPos,
+            $releaseOnDriftPos,
+            'Lock release on drift must happen BEFORE beginTransaction — do not start a transaction if MySQL disagrees.'
+        );
+    }
+
+    #[Test]
     public function test_project_completion_service_uses_defensive_lte_zero_close_condition(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
