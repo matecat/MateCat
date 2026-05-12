@@ -422,6 +422,14 @@ VALUES (11, 'ModernMT Lite', 'TM', 'Smart machine translation that learns from y
 INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
 VALUES (2, 'ModernMT Full', 'MT', 'ModernMT for subscribers', 'http://MMT', 'translate', 'memories/content', 'memories/content', null, '{"tmx_import_relative_url":"memories/content","api_key_check_auth_url":"users/me","user_update_activate":"memories/connect","context_get":"context-vector"}', 'Utils\\Engines\\MMT',
         '{"MMT-License":"XXXXX","MMT-context-analyzer":false}', '2', 14, 1, 1886428310);
+INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
+VALUES (900, 'FakeTMEngine', 'TM', 'Fake TM engine for integration tests', 'http://fake-tm', 'get', null, null, null,
+        '{}',
+        'Tests\\Unit\\Workers\\TMAnalysisV2\\FakeEngines\\FakeTMEngine', '{}', null, 0, 1, null);
+INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
+VALUES (901, 'FakeMTEngine', 'MT', 'Fake MT engine for integration tests', 'http://fake-mt', 'get', null, null, null,
+        '{}',
+        'Tests\\Unit\\Workers\\TMAnalysisV2\\FakeEngines\\FakeMTEngine', '{}', null, 0, 1, null);
 UPDATE engines
 SET id = 0
 WHERE id = 10;

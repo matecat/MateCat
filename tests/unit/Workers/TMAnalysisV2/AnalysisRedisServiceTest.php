@@ -286,4 +286,33 @@ class AnalysisRedisServiceTest extends TestCase
         $this->assertCount(1, $calls);
         $this->assertSame([RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid], $calls[0]['args']);
     }
+
+    #[Test]
+    public function waitForInitialization_returnsImmediately_whenKeyExists(): void
+    {
+        $pid = 42;
+        $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_TOT_SEGMENTS . $pid, '50');
+
+        $this->service->waitForInitialization($pid, 5000);
+
+        $getCalls = $this->redisSpy->getCallsFor('get');
+        $this->assertCount(1, $getCalls);
+        $this->assertSame([RedisKeys::PROJECT_TOT_SEGMENTS . $pid], $getCalls[0]['args']);
+    }
+
+    #[Test]
+    public function waitForInitialization_pollsMultipleTimes_whenKeyMissing(): void
+    {
+        $pid = 42;
+        // Don't set the key — it stays null
+
+        $start = hrtime(true);
+        $this->service->waitForInitialization($pid, 100);
+        $elapsedMs = (hrtime(true) - $start) / 1_000_000;
+
+        $getCalls = $this->redisSpy->getCallsFor('get');
+        // With maxWait=100, backoff starts at 50ms: iteration1 sleeps 50 (waited=50), iteration2 sleeps 100 (waited=150 > 100 exit)
+        $this->assertCount(2, $getCalls);
+        $this->assertGreaterThanOrEqual(100, $elapsedMs);
+    }
 }

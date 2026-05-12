@@ -3,6 +3,7 @@
 namespace Tests\Unit\Workers\TMAnalysisV2\FakeEngines;
 
 use Utils\Engines\AbstractEngine;
+use Utils\Logger\LoggerFactory;
 
 class FakeMTEngine extends AbstractEngine
 {
@@ -30,7 +31,7 @@ class FakeMTEngine extends AbstractEngine
         // Initialize minimal required properties
         $this->curl_additional_params = [];
         $this->featureSet = null;
-        $this->logger = null;
+        $this->logger = LoggerFactory::getLogger('FakeMTEngine');
         $this->_config = [
             'q' => null,
             'source' => null,

@@ -4,6 +4,9 @@ namespace Tests\Unit\Workers\TMAnalysisV2\FakeEngines;
 
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
+use Utils\Logger\LoggerFactory;
 
 class FakeTMEngine extends MyMemory
 {
@@ -31,7 +34,7 @@ class FakeTMEngine extends MyMemory
         // Initialize minimal required properties
         $this->curl_additional_params = [];
         $this->featureSet = null;
-        $this->logger = null;
+        $this->logger = LoggerFactory::getLogger('FakeTMEngine');
         $this->_config = [
             'dataRefMap' => [],
             'segment' => null,
@@ -59,42 +62,34 @@ class FakeTMEngine extends MyMemory
      */
     public function get(array $_config): GetMemoryResponse
     {
-        $response = new GetMemoryResponse([
+        return new GetMemoryResponse([
             'matches' => self::$cannedMatches,
             'responseStatus' => 200,
             'responseDetails' => 'OK',
         ]);
-
-        return $response;
     }
 
     /**
-     * No-op set method.
-     *
      * @param $_config
      *
-     * @return bool
+     * @return SetContributionResponse|null
      */
-    public function set($_config): bool
+    public function set($_config): ?SetContributionResponse
     {
-        return true;
+        return null;
     }
 
     /**
-     * No-op update method.
-     *
      * @param $_config
      *
-     * @return bool
+     * @return UpdateContributionResponse
      */
-    public function update($_config): bool
+    public function update($_config): UpdateContributionResponse
     {
-        return true;
+        return new UpdateContributionResponse([]);
     }
 
     /**
-     * No-op delete method.
-     *
      * @param $_config
      *
      * @return bool
