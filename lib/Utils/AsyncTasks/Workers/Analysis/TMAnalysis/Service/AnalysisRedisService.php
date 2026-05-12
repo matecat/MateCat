@@ -75,6 +75,11 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numSegments);
     }
 
+    public function setProjectAnalyzedCountTTL(int $pid, int $ttlSeconds = 86400): void
+    {
+        $this->redis->expire(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $ttlSeconds);
+    }
+
     /**
      * @return string[]
      */

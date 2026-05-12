@@ -276,7 +276,6 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $matchProcessor->expects($this->once())->method('sortMatches')->with($mtResult, $tmMatches)->willReturn($sortedMatches);
         $matchProcessor->method('isMtMatch')->willReturn(false);
-        $matchProcessor->expects($this->once())->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
         $matchProcessor->expects($this->once())->method('postProcessMatch')->willReturn([
             'suggestion' => 'Ciao mondo',
             'warning' => 0,
@@ -286,7 +285,8 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             ->willReturnCallback(static fn(array $tmData): array => $tmData);
 
         $segmentUpdater->expects($this->once())->method('setAnalysisValue')->willReturn(1);
-        $redisService->expects($this->once())->method('incrementAnalyzedCount')->with(100, 1, 1.5, 2.0);
+        // With empty payable_rates, discountRate=0 → eqWords=0.0, standardWords=0.0
+        $redisService->expects($this->once())->method('incrementAnalyzedCount')->with(100, 1, 0.0, 0.0);
         $projectCompletion->expects($this->once())->method('tryCloseProject')->with(
             100,
             'secret',

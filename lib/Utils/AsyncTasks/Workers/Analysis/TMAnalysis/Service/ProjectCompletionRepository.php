@@ -56,13 +56,22 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         ";
 
         try {
+            // Wrap in transaction to force master-read in read-replica environments
             $db = Database::obtain();
+            $db->begin();
             $stmt = $db->getConnection()->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute(['pid' => $pid]);
+            $result = $stmt->fetchAll();
+            $db->commit();
 
-            return $stmt->fetchAll();
+            return $result;
         } catch (PDOException $e) {
+            try {
+                Database::obtain()->rollback();
+            } catch (\Throwable) {
+                // Already rolled back or no active transaction
+            }
             LoggerFactory::doJsonLog($e->getMessage());
 
             throw new RuntimeException($e);

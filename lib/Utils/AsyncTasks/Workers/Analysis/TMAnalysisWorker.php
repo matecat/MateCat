@@ -141,11 +141,19 @@ class TMAnalysisWorker extends AbstractWorker
                 $payableRates
             );
 
-            [, $eqWords, $standardWords] = $this->matchProcessor->calculateWordDiscount(
-                $matchType,
-                (float)$params->raw_word_count,
-                $payableRates
-            );
+            $eqWords = $discountRate * (float)$params->raw_word_count / 100;
+            $standardWords = $eqWords;
+
+            if (in_array($matchType, [
+                InternalMatchesConstants::MT,
+                InternalMatchesConstants::ICE_MT,
+                InternalMatchesConstants::TOP_QUALITY_MT,
+                InternalMatchesConstants::HIGHER_QUALITY_MT,
+                InternalMatchesConstants::STANDARD_QUALITY_MT,
+            ])) {
+                //Reset the standard word count to be equal to other cat tools which do not have the MT in analysis
+                $standardWords = ($payableRates[InternalMatchesConstants::NO_MATCH] ?? 100) * (float)$params->raw_word_count / 100;
+            }
 
             $icuEnabled = !empty($params->icu_enabled);
 
@@ -159,10 +167,6 @@ class TMAnalysisWorker extends AbstractWorker
                 $icuEnabled,
                 (int)$params->pid
             );
-
-            if ($discountRate > 0) {
-                $eqWords = $discountRate * (float)$params->raw_word_count / 100;
-            }
 
             $suggestionJson = json_encode($matches);
 
@@ -194,7 +198,8 @@ class TMAnalysisWorker extends AbstractWorker
 
             try {
                 $updateRes = $this->segmentUpdater->setAnalysisValue($tmData);
-            } catch (Exception) {
+            } catch (Exception $e) {
+                $this->_doLog("**** " . $e->getMessage());
                 $this->_doLog("**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tmData['id_segment']}");
                 throw new ReQueueException("**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tmData['id_segment']}", self::ERR_REQUEUE);
             }
@@ -234,6 +239,7 @@ class TMAnalysisWorker extends AbstractWorker
      * @param QueueElement $queueElement
      * @throws EmptyElementException
      * @throws EndQueueException
+     * @throws Exception
      */
     protected function _endQueueCallback(QueueElement $queueElement): void
     {
@@ -256,6 +262,7 @@ class TMAnalysisWorker extends AbstractWorker
     /**
      * @param QueueElement $queueElement
      * @throws EmptyElementException
+     * @throws Exception
      */
     protected function _forceSetSegmentAnalyzed(QueueElement $queueElement): void
     {
@@ -301,6 +308,7 @@ class TMAnalysisWorker extends AbstractWorker
 
             $this->redisService->setProjectTotalSegments($pid, $projectSegments);
             $this->redisService->incrementAnalyzedCount($pid, $numAnalyzed, 0, 0);
+            $this->redisService->setProjectAnalyzedCountTTL($pid);
 
             $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
         } else {
@@ -383,12 +391,12 @@ class TMAnalysisWorker extends AbstractWorker
     }
 
     /**
-     * @throws EmptyElementException
+     * @throws Exception
      */
     private function decrementSegmentsToAnalyzeOfWaitingProjects(int $projectId): void
     {
         if (empty($projectId)) {
-            throw new EmptyElementException('Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
+            throw new Exception('Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
         }
 
         $workingJobs = $this->redisService->getWorkingProjects($this->_myContext->redis_key);

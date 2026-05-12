@@ -124,7 +124,6 @@ class TMAnalysisWorkerTest extends AbstractTest
         $engine->method('getMTTranslation')->willReturn([]);
         $processor->method('sortMatches')->willReturn([$match]);
         $processor->method('isMtMatch')->willReturn(false);
-        $processor->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
         $processor->method('postProcessMatch')->willReturn([
             'suggestion'             => 'Ciao mondo',
             'warning'                => 0,
@@ -169,7 +168,6 @@ class TMAnalysisWorkerTest extends AbstractTest
         $engine->expects($this->once())->method('getMTTranslation')->willReturn([]);
         $processor->expects($this->once())->method('sortMatches')->willReturn([$match]);
         $processor->method('isMtMatch')->willReturn(false);
-        $processor->expects($this->once())->method('calculateWordDiscount')->willReturn(['TM_75_84', 1.5, 2.0]);
         $processor->method('postProcessMatch')->willReturn([
             'suggestion'             => 'Ciao mondo',
             'warning'                => 0,
@@ -952,7 +950,6 @@ class TMAnalysisWorkerTest extends AbstractTest
         $processor->method('sortMatches')->willReturn([$match]);
         $processor->method('isMtMatch')->willReturn(false);
         // Return eqWords (999) > raw_word_count (2.0) → should be capped
-        $processor->method('calculateWordDiscount')->willReturn(['75%-84%', 999.0, 999.0]);
         $processor->method('postProcessMatch')->willReturn([
             'suggestion' => 'translated', 'warning' => 0, 'serialized_errors_list' => '',
         ]);
@@ -966,7 +963,8 @@ class TMAnalysisWorkerTest extends AbstractTest
         });
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater, engine: $engine, processor: $processor);
-        $worker->process($this->makeQueueElement(['raw_word_count' => 2.0]));
+        // payable_rates with rate > 100 so eq_word_count exceeds raw_word_count and gets capped
+        $worker->process($this->makeQueueElement(['raw_word_count' => 2.0, 'payable_rates' => '{"75%-84%": 9000}']));
 
         $this->assertEquals(2.0, $captured['eq_word_count']);
         $this->assertEquals(2.0, $captured['standard_word_count']);

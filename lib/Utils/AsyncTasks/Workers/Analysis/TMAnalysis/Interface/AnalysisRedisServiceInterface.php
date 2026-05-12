@@ -16,6 +16,8 @@ interface AnalysisRedisServiceInterface
 
     public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void;
 
+    public function setProjectAnalyzedCountTTL(int $pid, int $ttlSeconds = 86400): void;
+
     /**
      * @return string[]
      */
