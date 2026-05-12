@@ -107,6 +107,13 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
      */
     public function getProjectSegmentsTranslationSummary(int $pid): array
     {
-        return $this->repository->getProjectSegmentsTranslationSummary($pid);
+        // Wrap in transaction to force master-read in read-replica environments.
+        // Note: tryCloseProject() has its own outer transaction, so this method
+        // is only called directly from initializeTMAnalysis (which has no transaction).
+        $this->repository->beginTransaction();
+        $result = $this->repository->getProjectSegmentsTranslationSummary($pid);
+        $this->repository->commit();
+
+        return $result;
     }
 }
