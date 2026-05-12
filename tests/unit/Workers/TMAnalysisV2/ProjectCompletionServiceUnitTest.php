@@ -133,7 +133,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn(true);
         $redis->expects($this->once())->method('releaseCompletionLock')->with(100);
-        $redis->expects($this->once())->method('reAddProjectToQueue')->with('queue', 100);
+        $redis->expects($this->never())->method('removeProjectFromQueue');
 
         $repo = $this->createMock(ProjectCompletionRepositoryInterface::class);
         $repo->method('getProjectSegmentsTranslationSummary')
@@ -152,7 +152,6 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn(true);
         $redis->expects($this->once())->method('releaseCompletionLock');
-        $redis->expects($this->once())->method('reAddProjectToQueue');
 
         $repo = $this->createStub(ProjectCompletionRepositoryInterface::class);
         $repo->method('getProjectSegmentsTranslationSummary')

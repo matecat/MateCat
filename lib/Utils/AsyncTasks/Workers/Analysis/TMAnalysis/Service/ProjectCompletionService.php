@@ -41,8 +41,6 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
             && $this->redisService->acquireCompletionLock($pid)
         ) {
             try {
-                $this->redisService->removeProjectFromQueue($queueKey, $pid);
-
                 LoggerFactory::doJsonLog("--- trying to initialize job total word count for project $pid.");
 
                 $this->repository->beginTransaction();
@@ -79,6 +77,10 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
 
                 $this->repository->commit();
 
+                // Remove from queue AFTER commit — if the worker crashes before commit,
+                // the project stays in the queue and another worker can retry.
+                $this->redisService->removeProjectFromQueue($queueKey, $pid);
+
                 try {
                     $featureSet->run('afterTMAnalysisCloseProject', $pid, $_analyzed_report);
                 } catch (Exception $e) {
@@ -96,7 +98,6 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                 }
 
                 $this->redisService->releaseCompletionLock($pid);
-                $this->redisService->reAddProjectToQueue($queueKey, $pid);
             }
         }
     }

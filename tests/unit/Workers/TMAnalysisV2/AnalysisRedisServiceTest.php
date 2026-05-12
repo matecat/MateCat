@@ -244,19 +244,6 @@ class AnalysisRedisServiceTest extends TestCase
     }
 
     #[Test]
-    public function reAddProjectToQueue_callsRpushWithPidArray(): void
-    {
-        $queueKey = 'my_queue';
-        $pid      = 42;
-
-        $this->service->reAddProjectToQueue($queueKey, $pid);
-
-        $calls = $this->redisSpy->getCallsFor('rpush');
-        $this->assertCount(1, $calls);
-        $this->assertSame([$queueKey, [$pid]], $calls[0]['args']);
-    }
-
-    #[Test]
     public function getProjectWordCounts_makesFourGetCallsAndDividesWcBy1000(): void
     {
         $pid = 42;

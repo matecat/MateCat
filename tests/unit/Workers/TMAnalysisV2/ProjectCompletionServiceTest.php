@@ -109,22 +109,28 @@ class ProjectCompletionServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_re_add_project_to_queue_is_called_inside_throwable_catch(): void
+    public function test_remove_project_from_queue_appears_after_commit(): void
     {
         $source = $this->readSource();
 
-        $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
+        $methodPos = strpos($source, 'public function tryCloseProject');
+        $this->assertNotFalse($methodPos);
 
-        $reAddPos = strpos($source, 'reAddProjectToQueue(', $catchPos);
-        $this->assertNotFalse(
-            $reAddPos,
-            'Expected reAddProjectToQueue() call inside the \Throwable catch block.'
+        $commitPos = strpos($source, '->commit()', $methodPos);
+        $this->assertNotFalse($commitPos, 'Expected ->commit() call in tryCloseProject.');
+
+        $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
+        $this->assertNotFalse($removePos, 'Expected removeProjectFromQueue() call in tryCloseProject.');
+
+        $this->assertGreaterThan(
+            $commitPos,
+            $removePos,
+            'removeProjectFromQueue() must appear AFTER commit() — if the worker crashes before commit, the project must remain in the queue for retry.'
         );
     }
 
     #[Test]
-    public function test_rollback_appears_before_release_and_re_add_in_catch(): void
+    public function test_rollback_appears_before_release_in_catch(): void
     {
         $source = $this->readSource();
 
@@ -133,14 +139,11 @@ class ProjectCompletionServiceTest extends AbstractTest
 
         $rollbackPos  = strpos($source, '->rollback()', $catchPos);
         $releasePos   = strpos($source, 'releaseCompletionLock(', $catchPos);
-        $reAddPos     = strpos($source, 'reAddProjectToQueue(', $catchPos);
 
         $this->assertNotFalse($rollbackPos, 'Expected ->rollback() in catch block.');
         $this->assertNotFalse($releasePos, 'Expected releaseCompletionLock() in catch block.');
-        $this->assertNotFalse($reAddPos, 'Expected reAddProjectToQueue() in catch block.');
 
         $this->assertLessThan($releasePos, $rollbackPos, 'rollback() must appear before releaseCompletionLock().');
-        $this->assertLessThan($reAddPos, $releasePos, 'releaseCompletionLock() must appear before reAddProjectToQueue().');
     }
 
     #[Test]

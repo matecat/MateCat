@@ -103,11 +103,6 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis->lrem($queueKey, 0, (string)$pid);
     }
 
-    public function reAddProjectToQueue(string $queueKey, int $pid): void
-    {
-        $this->redis->rpush($queueKey, [$pid]);
-    }
-
     public function acquireCompletionLock(int $pid): bool
     {
         return (bool)$this->redis->set(

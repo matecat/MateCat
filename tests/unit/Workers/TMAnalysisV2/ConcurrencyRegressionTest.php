@@ -176,7 +176,28 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_project_completion_service_recovers_on_transaction_failure_with_rollback_and_requeue(): void
+    public function test_project_completion_service_removes_from_queue_after_commit_not_before(): void
+    {
+        $source = $this->readSource($this->projectCompletionServicePath());
+
+        $methodPos = strpos($source, 'public function tryCloseProject');
+        $this->assertNotFalse($methodPos);
+
+        $commitPos = strpos($source, '->commit()', $methodPos);
+        $this->assertNotFalse($commitPos, 'Expected ->commit() in tryCloseProject().');
+
+        $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
+        $this->assertNotFalse($removePos, 'Expected removeProjectFromQueue() in tryCloseProject().');
+
+        $this->assertGreaterThan(
+            $commitPos,
+            $removePos,
+            'removeProjectFromQueue() must appear AFTER commit() — crash-safety requires the project to stay in the queue until DB work is committed.'
+        );
+    }
+
+    #[Test]
+    public function test_project_completion_service_recovers_on_transaction_failure_with_rollback(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
 
@@ -194,9 +215,6 @@ class ConcurrencyRegressionTest extends AbstractTest
 
         $releasePos = strpos($source, 'releaseCompletionLock(', $catchPos);
         $this->assertNotFalse($releasePos, 'Expected releaseCompletionLock() in catch block — lock must be released on failure.');
-
-        $requeuePos = strpos($source, 'reAddProjectToQueue(', $catchPos);
-        $this->assertNotFalse($requeuePos, 'Expected reAddProjectToQueue() in catch block — project must be requeued for retry on failure.');
     }
 
     #[Test]

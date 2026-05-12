@@ -34,8 +34,6 @@ interface AnalysisRedisServiceInterface
 
     public function removeProjectFromQueue(string $queueKey, int $pid): void;
 
-    public function reAddProjectToQueue(string $queueKey, int $pid): void;
-
     public function acquireCompletionLock(int $pid): bool;
 
     public function releaseCompletionLock(int $pid): void;
