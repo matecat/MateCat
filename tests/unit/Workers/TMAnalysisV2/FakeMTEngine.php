@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Workers\TMAnalysisV2\FakeEngines;
+namespace unit\Workers\TMAnalysisV2;
 
 use Utils\Engines\AbstractEngine;
 use Utils\Logger\LoggerFactory;

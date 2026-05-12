@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Workers\TMAnalysisV2\FakeEngines;
+namespace unit\Workers\TMAnalysisV2;
 
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;

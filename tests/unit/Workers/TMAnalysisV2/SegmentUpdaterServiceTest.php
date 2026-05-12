@@ -1,5 +1,7 @@
 <?php
 
+namespace unit\Workers\TMAnalysisV2;
+
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\Attributes\Test;

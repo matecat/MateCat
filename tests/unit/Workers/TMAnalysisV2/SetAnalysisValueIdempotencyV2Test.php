@@ -56,7 +56,7 @@ class SetAnalysisValueIdempotencyV2Test extends AbstractTest
     #[Test]
     public function test_segment_updater_setAnalysisValue_returns_zero_when_segment_is_already_done(): void
     {
-        $service = new SegmentUpdaterService();
+        $service = new SegmentUpdaterService(Database::obtain());
 
         $affected = $service->setAnalysisValue([
             'id_segment'         => self::TEST_SEGMENT_ID,

@@ -10,8 +10,6 @@ use Predis\Client;
 use ReflectionClass;
 use ReflectionProperty;
 use TestHelpers\AbstractTest;
-use Tests\Unit\Workers\TMAnalysisV2\FakeEngines\FakeMTEngine;
-use Tests\Unit\Workers\TMAnalysisV2\FakeEngines\FakeTMEngine;
 use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
@@ -62,8 +60,8 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $conn->exec("
             INSERT IGNORE INTO engines (id, name, type, description, base_url, translate_relative_url, others, class_load, extra_parameters, penalty, active)
             VALUES
-                (900, 'FakeTMEngine', 'TM', 'Test', 'http://fake-tm', 'get', '{}', 'Tests\\\\Unit\\\\Workers\\\\TMAnalysisV2\\\\FakeEngines\\\\FakeTMEngine', '{}', 0, 1),
-                (901, 'FakeMTEngine', 'MT', 'Test', 'http://fake-mt', 'get', '{}', 'Tests\\\\Unit\\\\Workers\\\\TMAnalysisV2\\\\FakeEngines\\\\FakeMTEngine', '{}', 0, 1)
+(900, 'FakeTMEngine', 'TM', 'Test', 'http://fake-tm', 'get', '{}', 'unit\\\\Workers\\\\TMAnalysisV2\\\\FakeTMEngine', '{}', 0, 1),
+  (901, 'FakeMTEngine', 'MT', 'Test', 'http://fake-mt', 'get', '{}', 'unit\\\\Workers\\\\TMAnalysisV2\\\\FakeMTEngine', '{}', 0, 1)
         ");
     }
 

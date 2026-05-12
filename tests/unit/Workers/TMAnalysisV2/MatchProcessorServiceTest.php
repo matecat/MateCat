@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Workers\TMAnalysisV2;
+namespace unit\Workers\TMAnalysisV2;
 
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
