@@ -397,11 +397,21 @@ class TMAnalysisWorker extends AbstractWorker
      * worker exits early, permanently losing the Redis counter increment and
      * causing the project to never complete.
      *
-     * Retries Predis failures with exponential backoff (500 ms → 4 000 ms, 5
-     * attempts), destroying and recreating the Redis connection between retries
-     * to avoid reusing a corrupt socket. If all retries are exhausted the failure
-     * is logged at CRITICAL level and swallowed — the project will rely on operator
-     * intervention or a future DB-authoritative reconciliation pass.
+     * The three post-commit operations have different criticality levels and are
+     * therefore handled separately:
+     *
+     * 1. incrementAnalyzedCount — CRITICAL. Retried with exponential backoff
+     *    (500 ms → 4 000 ms, 5 attempts), destroying and recreating the Redis
+     *    connection between retries. If all retries are exhausted the failure is
+     *    logged at CRITICAL level and the method returns — the project will rely
+     *    on operator intervention or a future DB-authoritative reconciliation.
+     *
+     * 2. decrementSegmentsToAnalyzeOfWaitingProjects — BEST-EFFORT. Affects
+     *    queue ordering only, not project completion correctness. A failure is
+     *    logged and swallowed so it never blocks tryCloseProject.
+     *
+     * 3. tryCloseProject — ALWAYS RUNS after increment succeeds. Has its own
+     *    internal catch-all (never throws). Idempotent via completion lock.
      *
      * See: KNOWN_CONCURRENCY_ISSUES.md #1
      *
@@ -413,21 +423,15 @@ class TMAnalysisWorker extends AbstractWorker
         float $eqWords,
         float $standardWords
     ): void {
+        // 1. Retry loop for the critical counter increment
         $maxRetries = 5;
         $delayMs    = 500;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
                 $this->redisService->incrementAnalyzedCount($pid, 1, $eqWords, $standardWords);
-                $this->decrementSegmentsToAnalyzeOfWaitingProjects($pid);
-                $this->projectCompletion->tryCloseProject(
-                    $pid,
-                    $projectPassword,
-                    $this->_myContext->redis_key,
-                    $this->featureSet
-                );
 
-                return;
+                break;
             } catch (PredisConnectionException|PredisServerException $e) {
                 if ($attempt === $maxRetries) {
                     $this->_doLog(
@@ -451,6 +455,24 @@ class TMAnalysisWorker extends AbstractWorker
                 $delayMs *= 2; // 500 → 1000 → 2000 → 4000 ms
             }
         }
+
+        // 2. Best-effort decrement (queue ordering, not correctness)
+        try {
+            $this->decrementSegmentsToAnalyzeOfWaitingProjects($pid);
+        } catch (PredisConnectionException|PredisServerException $e) {
+            $this->_doLog(
+                "WARNING: decrement waiting segments failed for PID $pid,"
+                . " queue ordering may drift. Error: " . $e->getMessage()
+            );
+        }
+
+        // 3. Always attempt project completion (has internal catch-all, never throws)
+        $this->projectCompletion->tryCloseProject(
+            $pid,
+            $projectPassword,
+            $this->_myContext->redis_key,
+            $this->featureSet
+        );
     }
 
     /**
