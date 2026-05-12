@@ -21,6 +21,11 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis = $queueHandler->getRedisClient();
     }
 
+    public function reconnect(): void
+    {
+        $this->redis->disconnect();
+    }
+
     public function acquireInitLock(int $pid): bool
     {
         return (bool)$this->redis->set(

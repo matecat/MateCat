@@ -4,6 +4,8 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Predis\Connection\ConnectionException as PredisConnectionException;
+use Predis\Response\ServerException as PredisServerException;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -212,20 +214,18 @@ class TMAnalysisWorker extends AbstractWorker
             $this->_doLog("Row found: {$tmData['id_segment']}-{$tmData['id_job']} - UPDATED.");
             $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job updated.");
 
-            $this->redisService->incrementAnalyzedCount(
-                (int)$params->pid,
-                1,
-                $eqWords,
-                $standardWords
-            );
-
-            $this->decrementSegmentsToAnalyzeOfWaitingProjects((int)$params->pid);
-
-            $this->projectCompletion->tryCloseProject(
+            // ── POINT OF NO RETURN ────────────────────────────────────────────────
+            // MySQL committed. Redis failures MUST NOT escape to the Executor.
+            // If they did, the Executor would requeue the message, but on retry
+            // setAnalysisValue() returns 0 (segment already DONE) → early return →
+            // counter permanently lost → project never completes.
+            // See: KNOWN_CONCURRENCY_ISSUES.md #1
+            // ─────────────────────────────────────────────────────────────────────
+            $this->applyPostCommitSideEffects(
                 (int)$params->pid,
                 (string)$params->ppassword,
-                $this->_myContext->redis_key,
-                $this->featureSet
+                $eqWords,
+                $standardWords
             );
 
             $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job acknowledged.");
@@ -276,16 +276,12 @@ class TMAnalysisWorker extends AbstractWorker
             return;
         }
 
-        $pid = (int)$queueElement->params->pid;
-        $rawWordCount = (float)$queueElement->params->raw_word_count;
-
-        $this->redisService->incrementAnalyzedCount($pid, 1, $rawWordCount, $rawWordCount);
-        $this->decrementSegmentsToAnalyzeOfWaitingProjects($pid);
-        $this->projectCompletion->tryCloseProject(
-            $pid,
+        // POINT OF NO RETURN — DB committed
+        $this->applyPostCommitSideEffects(
+            (int)$queueElement->params->pid,
             (string)$queueElement->params->ppassword,
-            $this->_myContext->redis_key,
-            $this->featureSet
+            (float)$queueElement->params->raw_word_count,
+            (float)$queueElement->params->raw_word_count
         );
     }
 
@@ -392,6 +388,73 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * @throws Exception
+     */
+    /**
+     * Apply Redis side effects after MySQL has committed a segment as DONE.
+     *
+     * MUST NOT throw. Once MySQL commits, the Executor must not requeue the
+     * message — on retry setAnalysisValue() returns 0 (already DONE) and the
+     * worker exits early, permanently losing the Redis counter increment and
+     * causing the project to never complete.
+     *
+     * Retries Predis failures with exponential backoff (500 ms → 4 000 ms, 5
+     * attempts), destroying and recreating the Redis connection between retries
+     * to avoid reusing a corrupt socket. If all retries are exhausted the failure
+     * is logged at CRITICAL level and swallowed — the project will rely on operator
+     * intervention or a future DB-authoritative reconciliation pass.
+     *
+     * See: KNOWN_CONCURRENCY_ISSUES.md #1
+     *
+     * @throws Exception only if $pid is empty (programming error in caller)
+     */
+    private function applyPostCommitSideEffects(
+        int $pid,
+        string $projectPassword,
+        float $eqWords,
+        float $standardWords
+    ): void {
+        $maxRetries = 5;
+        $delayMs    = 500;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $this->redisService->incrementAnalyzedCount($pid, 1, $eqWords, $standardWords);
+                $this->decrementSegmentsToAnalyzeOfWaitingProjects($pid);
+                $this->projectCompletion->tryCloseProject(
+                    $pid,
+                    $projectPassword,
+                    $this->_myContext->redis_key,
+                    $this->featureSet
+                );
+
+                return;
+            } catch (PredisConnectionException|PredisServerException $e) {
+                if ($attempt === $maxRetries) {
+                    $this->_doLog(
+                        "CRITICAL: Redis side-effects permanently lost after $maxRetries retries"
+                        . " for PID $pid (eq=$eqWords, st=$standardWords)."
+                        . " Project may not auto-complete. Error: " . $e->getMessage()
+                    );
+
+                    return;
+                }
+
+                $this->_doLog(
+                    "WARNING: Redis failure (attempt $attempt/$maxRetries) for PID $pid."
+                    . " Reconnecting and retrying in {$delayMs}ms. Error: " . $e->getMessage()
+                );
+
+                // Destroy the connection so next command opens a fresh TCP socket
+                $this->redisService->reconnect();
+
+                usleep($delayMs * 1000);
+                $delayMs *= 2; // 500 → 1000 → 2000 → 4000 ms
+            }
+        }
+    }
+
+    /**
+     * @throws Exception if $projectId is empty (programming error)
      */
     private function decrementSegmentsToAnalyzeOfWaitingProjects(int $projectId): void
     {

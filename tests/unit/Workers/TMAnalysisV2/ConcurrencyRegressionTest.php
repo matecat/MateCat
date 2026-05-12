@@ -421,4 +421,233 @@ class ConcurrencyRegressionTest extends AbstractTest
             'RedisKeys must define WORD_COUNT_SCALE constant for integer-scaled Redis word counts.'
         );
     }
+
+    // ── Layer 1: post-commit Redis retry (KNOWN_CONCURRENCY_ISSUES.md #1) ──
+
+    #[Test]
+    public function test_worker_has_apply_post_commit_side_effects_method(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $this->assertStringContainsString(
+            'private function applyPostCommitSideEffects(',
+            $source,
+            'TMAnalysisWorker must have applyPostCommitSideEffects() to isolate post-commit Redis ops from the Executor requeue path.'
+        );
+    }
+
+    #[Test]
+    public function test_process_calls_apply_post_commit_side_effects_not_increment_directly(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        // Bound process() body tightly: from "public function process(" to the
+        // next method declaration. process() is followed by _endQueueCallback().
+        $processStart = strpos($source, 'public function process(');
+        $this->assertNotFalse($processStart);
+        $nextMethod = strpos($source, 'protected function _endQueueCallback(', $processStart + 1);
+        $this->assertNotFalse($nextMethod, 'Expected _endQueueCallback() after process().');
+        $processBody = substr($source, $processStart, $nextMethod - $processStart);
+
+        $this->assertStringContainsString(
+            'applyPostCommitSideEffects(',
+            $processBody,
+            'process() must delegate to applyPostCommitSideEffects() after DB commit.'
+        );
+
+        $this->assertStringNotContainsString(
+            'incrementAnalyzedCount(',
+            $processBody,
+            'process() must NOT call incrementAnalyzedCount() directly — must go through applyPostCommitSideEffects() to prevent requeue after DB commit.'
+        );
+    }
+
+    #[Test]
+    public function test_force_set_segment_analyzed_calls_apply_post_commit_side_effects(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $methodPos = strpos($source, 'protected function _forceSetSegmentAnalyzed(');
+        $this->assertNotFalse($methodPos);
+
+        $nextMethod = strpos($source, 'private function ', $methodPos);
+        $methodBody = substr($source, $methodPos, $nextMethod - $methodPos);
+
+        $this->assertStringContainsString(
+            'applyPostCommitSideEffects(',
+            $methodBody,
+            '_forceSetSegmentAnalyzed() must delegate to applyPostCommitSideEffects() after DB commit.'
+        );
+
+        $this->assertStringNotContainsString(
+            'incrementAnalyzedCount(',
+            $methodBody,
+            '_forceSetSegmentAnalyzed() must NOT call incrementAnalyzedCount() directly.'
+        );
+    }
+
+    #[Test]
+    public function test_apply_post_commit_side_effects_catches_predis_exceptions_and_does_not_rethrow(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $methodPos = strpos($source, 'private function applyPostCommitSideEffects(');
+        $this->assertNotFalse($methodPos, 'applyPostCommitSideEffects() must exist in TMAnalysisWorker.');
+
+        $nextMethod = strpos($source, "\n    private function ", $methodPos + 1);
+        if ($nextMethod === false) {
+            $nextMethod = strpos($source, "\n    public function ", $methodPos + 1);
+        }
+        $methodBody = substr($source, $methodPos, $nextMethod - $methodPos);
+
+        $this->assertStringContainsString(
+            'PredisConnectionException|PredisServerException',
+            $methodBody,
+            'applyPostCommitSideEffects() must catch both PredisConnectionException and PredisServerException.'
+        );
+
+        // Must NOT rethrow — swallowing is intentional to prevent Executor requeue
+        $this->assertStringNotContainsString(
+            'throw $e',
+            $methodBody,
+            'applyPostCommitSideEffects() must NOT rethrow Predis exceptions — rethrowing causes Executor requeue which permanently loses the counter.'
+        );
+
+        $this->assertStringNotContainsString(
+            'throw new',
+            $methodBody,
+            'applyPostCommitSideEffects() must NOT throw any exception — it is a fire-and-forget method after DB commit.'
+        );
+    }
+
+    #[Test]
+    public function test_apply_post_commit_side_effects_uses_exponential_backoff(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $methodPos = strpos($source, 'private function applyPostCommitSideEffects(');
+        $this->assertNotFalse($methodPos);
+
+        $nextMethod = strpos($source, "\n    private function ", $methodPos + 1);
+        if ($nextMethod === false) {
+            $nextMethod = strpos($source, "\n    public function ", $methodPos + 1);
+        }
+        $methodBody = substr($source, $methodPos, $nextMethod - $methodPos);
+
+        $this->assertStringContainsString(
+            'usleep(',
+            $methodBody,
+            'applyPostCommitSideEffects() must use usleep() for backoff between retries.'
+        );
+
+        $this->assertStringContainsString(
+            '$delayMs *= 2',
+            $methodBody,
+            'applyPostCommitSideEffects() must double the delay on each retry (exponential backoff).'
+        );
+
+        $this->assertStringContainsString(
+            '$delayMs    = 500',
+            $methodBody,
+            'applyPostCommitSideEffects() initial delay must be 500ms (not lower — allows Redis to recover).'
+        );
+    }
+
+    #[Test]
+    public function test_apply_post_commit_side_effects_reconnects_redis_between_retries(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $methodPos = strpos($source, 'private function applyPostCommitSideEffects(');
+        $this->assertNotFalse($methodPos);
+
+        $nextMethod = strpos($source, "\n    private function ", $methodPos + 1);
+        if ($nextMethod === false) {
+            $nextMethod = strpos($source, "\n    public function ", $methodPos + 1);
+        }
+        $methodBody = substr($source, $methodPos, $nextMethod - $methodPos);
+
+        $this->assertStringContainsString(
+            '->reconnect()',
+            $methodBody,
+            'applyPostCommitSideEffects() must call reconnect() between retries to destroy and recreate the Redis TCP connection.'
+        );
+
+        // reconnect() must appear BEFORE usleep() — disconnect first, then wait
+        $reconnectPos = strpos($methodBody, '->reconnect()');
+        $usleepPos = strpos($methodBody, 'usleep(', $reconnectPos);
+        $this->assertNotFalse($usleepPos, 'usleep() must appear after reconnect() — disconnect before sleeping.');
+    }
+
+    #[Test]
+    public function test_apply_post_commit_side_effects_logs_critical_on_exhaustion(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $methodPos = strpos($source, 'private function applyPostCommitSideEffects(');
+        $this->assertNotFalse($methodPos);
+
+        $nextMethod = strpos($source, "\n    private function ", $methodPos + 1);
+        if ($nextMethod === false) {
+            $nextMethod = strpos($source, "\n    public function ", $methodPos + 1);
+        }
+        $methodBody = substr($source, $methodPos, $nextMethod - $methodPos);
+
+        $this->assertStringContainsString(
+            'CRITICAL:',
+            $methodBody,
+            'applyPostCommitSideEffects() must log a CRITICAL message when all retries are exhausted.'
+        );
+    }
+
+    #[Test]
+    public function test_worker_imports_predis_exception_classes(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $this->assertStringContainsString(
+            'use Predis\Connection\ConnectionException as PredisConnectionException;',
+            $source,
+            'TMAnalysisWorker must import Predis\Connection\ConnectionException.'
+        );
+
+        $this->assertStringContainsString(
+            'use Predis\Response\ServerException as PredisServerException;',
+            $source,
+            'TMAnalysisWorker must import Predis\Response\ServerException.'
+        );
+    }
+
+    #[Test]
+    public function test_analysis_redis_service_interface_declares_reconnect(): void
+    {
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php');
+        $this->assertNotFalse($path);
+
+        $source = $this->readSource($path);
+
+        $this->assertStringContainsString(
+            'public function reconnect(): void;',
+            $source,
+            'AnalysisRedisServiceInterface must declare reconnect() for connection reset between retries.'
+        );
+    }
+
+    #[Test]
+    public function test_analysis_redis_service_reconnect_calls_disconnect(): void
+    {
+        $source = $this->readSource($this->analysisRedisServicePath());
+
+        $methodPos = strpos($source, 'public function reconnect()');
+        $this->assertNotFalse($methodPos, 'AnalysisRedisService must implement reconnect().');
+
+        $nextMethod = strpos($source, 'public function ', $methodPos + 1);
+        $methodBody = substr($source, $methodPos, $nextMethod - $methodPos);
+
+        $this->assertStringContainsString(
+            '->disconnect()',
+            $methodBody,
+            'reconnect() must call disconnect() on the Predis client to force a fresh TCP connection on next command.'
+        );
+    }
 }

@@ -4,6 +4,13 @@ namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface;
 
 interface AnalysisRedisServiceInterface
 {
+    /**
+     * Force-close the underlying Redis connection so the next command
+     * opens a fresh TCP socket. Used between retries after connection
+     * failures to avoid reusing a corrupt/dead socket.
+     */
+    public function reconnect(): void;
+
     public function acquireInitLock(int $pid): bool;
 
     public function setProjectTotalSegments(int $pid, int $total): void;
