@@ -37,7 +37,8 @@ class SegmentFilterDao extends AbstractDao
                AND jobs.password = :password
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-               AND st.status = :status";
+               AND st.status = :status
+            JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1";
 
         $data = [
             'id_job' => $chunk->id,
@@ -170,6 +171,7 @@ class SegmentFilterDao extends AbstractDao
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql ";
 
@@ -297,7 +299,7 @@ class SegmentFilterDao extends AbstractDao
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            JOIN (SELECT @curRow := -1) r --  using -1 here makes the sample start from the first segment
            WHERE 1
            $where->sql
@@ -325,7 +327,7 @@ class SegmentFilterDao extends AbstractDao
                AND jobs.id = :id_job
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-               JOIN segments s ON s.id = st.id_segment
+               JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
             WHERE 1
                $where->sql
                ORDER BY st.edit_distance $sqlSort
@@ -352,7 +354,7 @@ class SegmentFilterDao extends AbstractDao
                AND jobs.id = :id_job
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY CHAR_LENGTH(s.segment) $sqlSort
@@ -371,6 +373,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND st.locked = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -389,6 +392,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND st.match_type = :match_type
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -410,6 +414,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.match_type = 'ICE'
            AND locked = 1
            AND version_number = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -431,6 +436,7 @@ class SegmentFilterDao extends AbstractDao
            AND st.match_type = 'ICE'
            AND locked = 1
            AND version_number > 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -451,6 +457,7 @@ class SegmentFilterDao extends AbstractDao
                         AND jobs.id = :id_job
                         AND jobs.password = :password
                         AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
+                JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
                 WHERE 1
 
                         $where->sql
@@ -475,6 +482,7 @@ class SegmentFilterDao extends AbstractDao
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.match_type = :match_type_100_public 
            OR st.match_type = :match_type_100)
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
@@ -505,6 +513,7 @@ class SegmentFilterDao extends AbstractDao
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
            OR st.status = :status_draft " . $sql_condition . ")
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            " . $where->sql . "
            " . $sql_sp . "

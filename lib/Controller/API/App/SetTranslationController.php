@@ -26,6 +26,7 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentStruct;
@@ -57,7 +58,6 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-
     use APISourcePageGuesserTrait;
     use ICUSourceSegmentChecker;
 
@@ -137,6 +137,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         try {
             $this->data = $this->validateTheRequest();
+            $this->checkIfSegmentIsNotDisabled();
             $this->setSubFilteringBehavior();
             $this->checkSegmentSplitData();
             $this->initVersionHandler();
@@ -408,6 +409,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->response->json($result);
         } catch (Exception $exception) {
             $db->rollback();
+            $this->logger->error($exception->getMessage());
             throw $exception;
         }
     }
@@ -552,6 +554,23 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->logger->debug($data);
 
         return $data;
+    }
+
+    /**
+     * Throws if the segment is disabled for translation.
+     *
+     * @return void
+     * @throws RuntimeException If the segment is disabled.
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function checkIfSegmentIsNotDisabled(): void
+    {
+        $id_segment = (int)$this->data['id_segment'];
+
+        if ((new SegmentDisabledService())->isDisabled($id_segment)) {
+            throw new RuntimeException("Segment #" . $id_segment . " is disabled", -5);
+        }
     }
 
     /**

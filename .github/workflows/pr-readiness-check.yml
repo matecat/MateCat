@@ -1,0 +1,73 @@
+name: PR Readiness Checklist
+
+on:
+  pull_request:
+    types: [ opened, edited, reopened, synchronize, ready_for_review, labeled, unlabeled ]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  readiness-checklist:
+    name: Validate mandatory PR checklist
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.draft == false
+      && github.actor != 'dependabot[bot]'
+      && github.actor != 'renovate[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { validatePrChecklist, getTestFilesWithAdditions, getMigrationFilenames } = require('./.github/scripts/pr-readiness-check.js');
+            const pr = context.payload.pull_request;
+
+            const labels = (pr.labels || []).map((l) => l.name);
+            if (labels.includes('checklist-exception')) {
+              core.notice('Bypassing checklist — PR has label: checklist-exception');
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const migrationFilenames = getMigrationFilenames(files);
+            const testFilesWithAdditions = getTestFilesWithAdditions(files);
+
+            const errors = validatePrChecklist(pr.body || '', { migrationFilenames, testFilesWithAdditions });
+
+            if (errors.length > 0) {
+              core.setFailed(
+                [
+                  'PR readiness checklist incomplete:',
+                  '',
+                  ...errors,
+                  '',
+                  'Update the PR body checklist. To bypass, apply label: checklist-exception',
+                ].join('\n'),
+              );
+            }
+
+  readiness-tests:
+    name: PR checklist script tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run tests
+        run: node --test .github/scripts/pr-readiness-check.test.js

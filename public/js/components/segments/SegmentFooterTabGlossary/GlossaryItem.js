@@ -7,7 +7,7 @@ import {
   GlossaryDefinitionIcon,
   LockIcon,
   ModifyIcon,
-} from './SegmentFooterTabGlossary'
+} from './GlossaryConstants'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import LabelWithTooltip from '../../common/LabelWithTooltip'
 import Tooltip, {TOOLTIP_POSITION} from '../../common/Tooltip'

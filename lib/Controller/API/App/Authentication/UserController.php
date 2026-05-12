@@ -49,7 +49,8 @@ class UserController extends AbstractStatefulKleinController
      */
     public function changePasswordAsLoggedUser(): void
     {
-        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->user->email, '/api/app/user/password/change', 5);
+        $emailIdentifier = $this->user->email ?? 'BLANK_EMAIL';
+        $checkRateLimitEmail = $this->checkAndIncrementRateLimit($this->response, $emailIdentifier, '/api/app/user/password/change', 5);
         if ($checkRateLimitEmail instanceof Response) {
             $this->response = $checkRateLimitEmail;
 
@@ -60,16 +61,12 @@ class UserController extends AbstractStatefulKleinController
         $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
         $new_password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
 
-        try {
-            $this->validatePasswordRequirements($new_password, $new_password_confirmation);
+        $this->validatePasswordRequirements($new_password, $new_password_confirmation);
 
-            $cpModel = new ChangePasswordModel($this->user);
-            $cpModel->changePassword($old_password, $new_password);
+        $cpModel = new ChangePasswordModel($this->user);
+        $cpModel->changePassword($old_password, $new_password);
 
-            $this->broadcastLogout();
-        } finally {
-            $this->incrementRateLimitCounter($this->user->email, '/api/app/user/password/change');
-        }
+        $this->broadcastLogout();
 
         $this->response->code(200);
     }

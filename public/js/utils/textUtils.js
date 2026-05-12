@@ -1,6 +1,6 @@
 import {isUndefined} from 'lodash'
 import $ from 'jquery'
-import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
+import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textConstants'
 import CommonUtils from './commonUtils'
 import diff_match_patch from 'diff-match-patch'
 import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/tagModel'

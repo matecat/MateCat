@@ -9,7 +9,7 @@ import React, {
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../img/icons/Upload'
 import Trash from '../../../../../../img/icons/Trash'
-import {MTGlossaryStatus} from './MTGlossary'
+import {MTGlossaryStatus} from './MTGlossaryConstants'
 import {importMemoryGlossary} from '../../../../../api/importMemoryGlossary/importMemoryGlossary'
 import {updateMemoryGlossary} from '../../../../../api/updateMemoryGlossary/updateMemoryGlossary'
 import IconEdit from '../../../../icons/IconEdit'

@@ -264,7 +264,13 @@ const SegmentUtils = {
       config.project_completion_feature_enabled &&
       !config.isReview &&
       config.job_completion_current_phase === 'revise'
-    return projectCompletionCheck || segment.readonly
+
+    const isTranslationDisabled = segment?.metadata?.some(
+      ({meta_key, meta_value}) =>
+        meta_key === 'translation_disabled' && meta_value === '1',
+    )
+
+    return projectCompletionCheck || segment.readonly || isTranslationDisabled
   },
   getRelativeTransUnitCharactersCounter: ({
     sid,

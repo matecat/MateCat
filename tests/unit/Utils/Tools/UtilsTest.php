@@ -241,6 +241,45 @@ class UtilsTest extends AbstractTest
         $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
     }
 
+    #[Test]
+    public function testFriendlySlugReturnsHyphenForEmptyStringInput(): void
+    {
+        $result = Utils::friendlySlug('');
+        $this->assertEquals('-', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugHandlesValidAsciiSymbol(): void
+    {
+        $result = Utils::friendlySlug('hello-world');
+        $this->assertEquals('hello-world', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugStripsLogicalNegationSymbol(): void
+    {
+        $result = Utils::friendlySlug('hello¬world');
+        $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
+        $this->assertStringNotContainsString('¬', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugStripsBoxDrawingCharacter(): void
+    {
+        $result = Utils::friendlySlug('╚══test══╝');
+        $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
+        $this->assertStringNotContainsString('╚', $result);
+        $this->assertStringNotContainsString('═', $result);
+    }
+
+    #[Test]
+    public function testFriendlySlugStripsBlockGraphicSymbol(): void
+    {
+        $result = Utils::friendlySlug('hello░world');
+        $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
+        $this->assertStringNotContainsString('░', $result);
+    }
+
     // =========================================================================
     // Tests for replace_accents()
     // =========================================================================
@@ -663,7 +702,7 @@ class UtilsTest extends AbstractTest
         unset($_SERVER['HTTP_CLIENT_IP']);
         $_SERVER['HTTP_X_FORWARDED_FOR'] = '172.16.0.1, 10.0.0.1';
         $result = Utils::getRealIpAddr();
-        $this->assertEquals('172.16.0.1', $result);
+        $this->assertEquals('10.0.0.1', $result);
     }
 
     #[Test]
@@ -688,6 +727,65 @@ class UtilsTest extends AbstractTest
         unset($_SERVER['REMOTE_ADDR']);
         $result = Utils::getRealIpAddr();
         $this->assertNull($result);
+    }
+
+    #[Test]
+    public function testGetRealIpAddrIgnoresSpoofedFirstIpBehindAlb(): void
+    {
+        unset($_SERVER['HTTP_CLIENT_IP']);
+        unset($_SERVER['HTTP_X_FORWARDED']);
+        unset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']);
+        unset($_SERVER['HTTP_FORWARDED_FOR']);
+        unset($_SERVER['HTTP_FORWARDED']);
+        // Attacker sends X-Forwarded-For: 192.168.1.100
+        // ALB appends real IP: "192.168.1.100, 203.0.113.50"
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '192.168.1.100, 203.0.113.50';
+        unset($_SERVER['REMOTE_ADDR']);
+        $result = Utils::getRealIpAddr();
+        $this->assertEquals('203.0.113.50', $result);
+    }
+
+    #[Test]
+    public function testGetRealIpAddrSkipsInvalidTrailingIps(): void
+    {
+        unset($_SERVER['HTTP_CLIENT_IP']);
+        unset($_SERVER['HTTP_X_FORWARDED']);
+        unset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']);
+        unset($_SERVER['HTTP_FORWARDED_FOR']);
+        unset($_SERVER['HTTP_FORWARDED']);
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '1.2.3.4, not-an-ip, , 203.0.113.50';
+        unset($_SERVER['REMOTE_ADDR']);
+        $result = Utils::getRealIpAddr();
+        // Last VALID IP after reversing
+        $this->assertEquals('203.0.113.50', $result);
+    }
+
+    #[Test]
+    public function testGetRealIpAddrHandlesWhitespaceAroundIps(): void
+    {
+        unset($_SERVER['HTTP_CLIENT_IP']);
+        unset($_SERVER['HTTP_X_FORWARDED']);
+        unset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']);
+        unset($_SERVER['HTTP_FORWARDED_FOR']);
+        unset($_SERVER['HTTP_FORWARDED']);
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = ' 1.2.3.4 , 5.6.7.8 ';
+        unset($_SERVER['REMOTE_ADDR']);
+        $result = Utils::getRealIpAddr();
+        $this->assertEquals('5.6.7.8', $result);
+    }
+
+    #[Test]
+    public function testGetRealIpAddrPrefersForwardedForOverRemoteAddr(): void
+    {
+        unset($_SERVER['HTTP_CLIENT_IP']);
+        unset($_SERVER['HTTP_X_FORWARDED']);
+        unset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']);
+        unset($_SERVER['HTTP_FORWARDED_FOR']);
+        unset($_SERVER['HTTP_FORWARDED']);
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.50';
+        $_SERVER['REMOTE_ADDR'] = '10.0.0.1';
+        $result = Utils::getRealIpAddr();
+        $this->assertEquals('203.0.113.50', $result);
     }
 
     // =========================================================================
@@ -1740,4 +1838,3 @@ class UtilsTest extends AbstractTest
         parent::tearDown();
     }
 }
-

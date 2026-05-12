@@ -11,49 +11,36 @@ use Utils\Redis\RedisHandler;
 trait RateLimiterTrait
 {
     /**
-     * @param Response $response
-     * @param string $identifier
-     * @param string $route
-     * @param int $maxRetries
+     * Atomically increment the rate limit counter and check whether the limit has been exceeded.
+     * Uses Redis INCR (atomic) to avoid TOCTOU race conditions.
      *
-     * @return Response|null
+     * @param Response $response
+     * @param string   $identifier  Stable, attacker-invariant identifier (email, IP). NEVER a secret.
+     * @param string   $route       Static route pattern. NEVER include passwords, tokens, or secrets.
+     * @param int      $maxRetries
+     * @return Response|null  429 response if rate-limited, null if under limit.
      * @throws Exception
      */
-    public function checkRateLimitResponse(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
+    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
     {
-        $key = $this->getKey($identifier, $route);
+        $key   = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
-        if ($redis->get($key) and $redis->get($key) > $maxRetries) {
-            $response->code(429);
-            $response->header("Retry-After", $redis->ttl($key));
+        $current = $redis->incr($key);
 
-            // PENALTY: reset ttl
+        if ($current === 1) {
             $redis->expire($key, $this->getTtl());
+        }
 
+        if ($current > $maxRetries) {
+            $response->code(429);
+            // PENALTY: reset ttl first, then report accurate Retry-After
+            $redis->expire($key, $this->getTtl());
+            $response->header("Retry-After", $redis->ttl($key));
             return $response;
         }
 
         return null;
-    }
-
-    /**
-     * @param string $identifier
-     * @param string $route
-     *
-     * @throws Exception
-     */
-    public function incrementRateLimitCounter(string $identifier, string $route): void
-    {
-        $key = $this->getKey($identifier, $route);
-        $redis = $this->getRedis();
-
-        if (!$redis->get($key)) {
-            $redis->set($key, 1);
-            $redis->expire($key, $this->getTtl());
-        } else {
-            $redis->incr($key);
-        }
     }
 
     /**
@@ -93,6 +80,6 @@ trait RateLimiterTrait
         $date = new DateTime();
         $ttl = 60 - $date->format("s");
 
-        return 60 + $ttl;
+        return 60 + (int)$ttl;
     }
 }

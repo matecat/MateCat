@@ -193,17 +193,43 @@ class Utils
         $find = [' ', '&', '\r\n', '\n', '+', ','];
         $string = str_replace($find, '-', $string);
 
+        // Preserve original value before the empty-string placeholder is applied,
+        // so we can percent-encode it if the slug ends up empty or dash-only.
+        $originalForEncoding = $string;
+
         // avoid empty strings
         if (empty($string)) {
             $string = "-";
         }
 
-        //delete and replace rest of special chars
-        $find = ['/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/'];
-        $repl = ['', '-', ''];
+        // Percent-encode non-ASCII Unicode letters/numbers that fall outside ASCII slug
+        // characters; drop any other special characters (punctuation, symbols, etc.).
+        // The negative lookahead (?![a-z0-9]) excludes ASCII alphanumerics from the
+        // 'encode' branch so they are left untouched by the callback. The fallback
+        // branch catches remaining non-slug characters to drop.
+        $slug = preg_replace_callback(
+            '/(?P<encode>(?![a-z0-9])[\p{L}\p{N}])|[^a-z0-9\-<>]/u',
+            static function (array $matches): string {
+                return !empty($matches['encode']) ? rawurlencode($matches['encode']) : '';
+            },
+            $string
+        ) ?? '';
 
-        //return the friendly url
-        return preg_replace($find, $repl, $string);
+        // Consolidate multiple consecutive dashes
+        $slug = preg_replace('/-+/', '-', $slug) ?? '';
+
+        // Remove HTML tags
+        $slug = preg_replace('/<[^>]*>/', '', $slug) ?? '';
+
+        // Fall back to encoding the whole pre-placeholder value only for the rare
+        // case where every character was a non-letter/non-number special char
+        // (e.g. '@!#'). Whitespace-only input ($originalForEncoding === '') keeps
+        // the '-' placeholder for backward compatibility.
+        if (($slug === '-' || empty($slug)) && $originalForEncoding !== '') {
+            $slug = rawurlencode($originalForEncoding);
+        }
+
+        return $slug;
     }
 
     /**
@@ -359,24 +385,31 @@ class Utils
     }
 
     /**
+     * Returns the real client IP address.
+     *
+     * Behind AWS ALB, X-Forwarded-For contains: "client-supplied, ..., ALB-appended".
+     * The LAST valid IP is the one appended by the load balancer and is trustworthy.
+     *
      * @return string|null
      */
     public static function getRealIpAddr(): ?string
     {
         foreach (
             [
-                'HTTP_CLIENT_IP',
                 'HTTP_X_FORWARDED_FOR',
                 'HTTP_X_FORWARDED',
                 'HTTP_X_CLUSTER_CLIENT_IP',
                 'HTTP_FORWARDED_FOR',
                 'HTTP_FORWARDED',
+                'HTTP_CLIENT_IP',
                 'REMOTE_ADDR'
             ] as $key
         ) {
             if (isset($_SERVER[$key])) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
-                    if (filter_var(trim($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) !== false) {
+                $ips = array_reverse(explode(',', $_SERVER[$key]));
+                foreach ($ips as $ip) {
+                    $ip = trim($ip);
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) !== false) {
                         return $ip;
                     }
                 }

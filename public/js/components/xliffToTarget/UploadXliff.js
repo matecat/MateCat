@@ -1,13 +1,12 @@
 import React, {useCallback, useState} from 'react'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
-import {DeleteIcon} from '../segments/SegmentFooterTabGlossary'
+import {DeleteIcon} from '../segments/SegmentFooterTabGlossary/GlossaryConstants'
 import FileUploadIconBig from '../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
-import IconAdd from '../icons/IconAdd'
 import IconClose from '../icons/IconClose'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {xliffToTargetUpload} from '../../api/xliffToTargetUpload'
-import {getPrintableFileSize} from '../createProject/UploadFile'
+import {getPrintableFileSize} from '../createProject/UploadFileUtils'
 import {saveAs} from 'file-saver'
 
 const b64toBlob = (b64Data, contentType, sliceSize) => {
@@ -60,7 +59,8 @@ export const UploadXliff = () => {
     if (totalFiles > config.maxNumberFiles) {
       const excessFiles = totalFiles - config.maxNumberFiles
       fileList.slice(-excessFiles).forEach((f) => {
-        f.error = 'File limit exceeded'
+        f.error =
+          'Too many files uploaded. Please remove this file to continue.'
       })
     }
     setFiles((prevFiles) => prevFiles.concat(fileList))
