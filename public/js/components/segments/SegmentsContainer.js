@@ -178,7 +178,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
-  const stickyProjectBarRef = useRef()
 
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
@@ -415,29 +414,21 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   }, [])
 
   // set width and height of area
-  useEffect(
-    () => {
-      const onWindowResize = () => {
-        const headerHeight =
-          document.getElementsByTagName('header')[0].offsetHeight
-        const footerHeight =
-          document.getElementsByTagName('footer')[0].offsetHeight
+  useEffect(() => {
+    const onWindowResize = () => {
+      const headerHeight =
+        document.getElementsByTagName('header')[0].offsetHeight
+      const footerHeight =
+        document.getElementsByTagName('footer')[0].offsetHeight
 
-        setHeightArea(
-          window.innerHeight - (headerHeight + footerHeight) /* -
-          (stickyProjectBarRef.current?.offsetHeight ?? 0), */,
-        )
-      }
+      setHeightArea(window.innerHeight - (headerHeight + footerHeight))
+    }
 
-      onWindowResize()
-      window.addEventListener('resize', onWindowResize)
+    onWindowResize()
+    window.addEventListener('resize', onWindowResize)
 
-      return () => window.removeEventListener('resize', onWindowResize)
-    },
-    [
-      /* stickyProjectBarRef.current?.offsetHeight */
-    ],
-  )
+    return () => window.removeEventListener('resize', onWindowResize)
+  }, [])
 
   // add actions listener
   useEffect(() => {

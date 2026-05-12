@@ -82,8 +82,8 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  width: 89.5%;
-  left: 4.5%;
+  width: 100%;
+  padding-left: 5%;
   background-color: colors.$grey5;
 
   &.sticky-project-bar-compressed {
@@ -91,7 +91,8 @@
   }
 
   &.sticky-project-bar-slide-right {
-    width: 70.7%;
+    width: 70%;
+    padding-right: 2px;
   }
 
   .projectbar {
@@ -105,7 +106,16 @@
 
   .sticky-project-bar-blink {
     animation: blinkBackground 1s;
-    border-radius: 8px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+
+  .sticky-project-bar-blink-wordcounter {
+    animation: blinkBackground 1s;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 
   @keyframes blinkBackground {
