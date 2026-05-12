@@ -8,13 +8,6 @@ use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
 interface MatchProcessorServiceInterface extends MatchSorterInterface
 {
     /**
-     * @param array<string, mixed> $match
-     *
-     * @return array<string, mixed>|null
-     */
-    public function detectIcuErrors(string $source, string $target, array $match): ?array;
-
-    /**
      * @param string $segment source segment text (Layer 0)
      * @param string $source source language code
      * @param string $target target language code

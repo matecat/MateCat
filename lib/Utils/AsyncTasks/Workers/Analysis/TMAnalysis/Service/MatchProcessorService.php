@@ -45,42 +45,6 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     }
 
     /**
-     * Detect ICU MessageFormat errors between source and target in the match.
-     *
-     * @param string $source source language code
-     * @param string $target target language code
-     * @param array<string, mixed> $match match array containing 'segment' (source) and 'translation' (target)
-     *
-     * @return array<string, mixed>|null parsed errors array, or null if no ICU errors
-     */
-    public function detectIcuErrors(string $source, string $target, array $match): ?array
-    {
-        $rawSource = $match['segment'] ?? '';
-        $rawTarget = $match['translation'] ?? '';
-
-        [$comparator, $sourceContainsIcu] = $this->detectIcu(
-            $source,
-            $target,
-            $rawSource,
-            $rawTarget,
-            true,
-        );
-
-        if (!$sourceContainsIcu) {
-            return null;
-        }
-
-        $check = new PostProcess($rawSource, $rawTarget, $comparator, $sourceContainsIcu);
-        $errJson = $check->thereAreErrors() ? $check->getErrorsJSON() : '';
-
-        if ($errJson === '') {
-            return null;
-        }
-
-        return json_decode($errJson, true);
-    }
-
-    /**
      * Detect ICU MessageFormat patterns in the source segment.
      *
      * @param string $sourceLang source language code
