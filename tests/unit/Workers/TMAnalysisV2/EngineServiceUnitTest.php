@@ -261,7 +261,7 @@ class EngineServiceUnitTest extends AbstractTest
     }
 
     #[Test]
-    public function getMTTranslation_response_with_status_200_returns_empty_when_no_matches_key(): void
+    public function getMTTranslation_valid_response_returns_first_match(): void
     {
         $response = new GetMemoryResponse([
             'matches'         => [
@@ -280,6 +280,25 @@ class EngineServiceUnitTest extends AbstractTest
                     'tm_properties'    => null,
                 ],
             ],
+            'responseStatus'  => 200,
+            'responseDetails' => 'OK',
+        ]);
+
+        $mtEngine = $this->makeEngineStub($response);
+        $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
+
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
+
+        $this->assertNotEmpty($result, 'Valid GetMemoryResponse with matches must return first match, not empty');
+        $this->assertSame('Ciao', $result['translation']);
+        $this->assertSame('Hello', $result['segment']);
+    }
+
+    #[Test]
+    public function getMTTranslation_valid_response_with_no_matches_returns_empty(): void
+    {
+        $response = new GetMemoryResponse([
+            'matches'         => [],
             'responseStatus'  => 200,
             'responseDetails' => 'OK',
         ]);

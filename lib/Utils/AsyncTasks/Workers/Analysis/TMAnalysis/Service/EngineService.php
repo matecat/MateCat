@@ -157,7 +157,7 @@ class EngineService implements EngineServiceInterface
                     return [];
                 }
                 $mt_result = $mt_result->get_matches_as_array(1);
-                $mt_result = $mt_result['matches'][0] ?? [];
+                $mt_result = $mt_result[0] ?? [];
             }
 
             if (isset($mt_result['error']['code'])) {
