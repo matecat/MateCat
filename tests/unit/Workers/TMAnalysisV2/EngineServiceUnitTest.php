@@ -34,8 +34,8 @@ class EngineServiceUnitTest extends AbstractTest
     private function makeFeatureSet(): FeatureSet
     {
         $fs = $this->createStub(FeatureSet::class);
-        $fs->method('filter')->willReturnCallback(
-            static fn(string $method, mixed $config): mixed => $config
+        $fs->method('dispatchFilter')->willReturnCallback(
+            static fn(mixed $event): mixed => $event
         );
 
         return $fs;
@@ -92,73 +92,7 @@ class EngineServiceUnitTest extends AbstractTest
         return $engine;
     }
 
-    // ── getTMMatches: non-GetMemoryResponse paths ──────────────────────
-
-    #[Test]
-    public function getTMMatches_null_response_with_get_mt_throws_requeue(): void
-    {
-        $engine = $this->makeEngineStub(null);
-        $service = $this->makeEngineService($engine);
-
-        $this->expectException(ReQueueException::class);
-        $this->expectExceptionMessage('Empty field received even if MT was requested');
-
-        $service->getTMMatches($this->makeTmConfig(['get_mt' => true]), $this->makeFeatureSet(), null);
-    }
-
-    #[Test]
-    public function getTMMatches_null_response_without_get_mt_returns_empty(): void
-    {
-        $engine = $this->makeEngineStub(null);
-        $service = $this->makeEngineService($engine);
-
-        $result = $service->getTMMatches($this->makeTmConfig(['get_mt' => false]), $this->makeFeatureSet(), null);
-
-        $this->assertSame([], $result);
-    }
-
-    #[Test]
-    public function getTMMatches_empty_array_returns_empty(): void
-    {
-        $engine = $this->makeEngineStub([]);
-        $service = $this->makeEngineService($engine);
-
-        $result = $service->getTMMatches($this->makeTmConfig(['get_mt' => false]), $this->makeFeatureSet(), null);
-
-        $this->assertSame([], $result);
-    }
-
-    #[Test]
-    public function getTMMatches_raw_array_of_arrays_normalizes_matches(): void
-    {
-        $rawMatches = [
-            ['match' => 85, 'translation' => 'Ciao', 'ICE' => false],
-            ['match' => 90, 'translation' => 'Salve', 'ICE' => false],
-        ];
-        $engine = $this->makeEngineStub($rawMatches);
-        $service = $this->makeEngineService($engine);
-
-        $result = $service->getTMMatches($this->makeTmConfig(['get_mt' => false]), $this->makeFeatureSet(), null);
-
-        $this->assertCount(2, $result);
-        $this->assertEquals('Ciao', $result[0]['translation']);
-        $this->assertEquals('Salve', $result[1]['translation']);
-    }
-
-    #[Test]
-    public function getTMMatches_flat_array_wraps_as_single_match(): void
-    {
-        $flatMatch = ['match' => 85, 'translation' => 'Ciao', 'ICE' => false];
-        $engine = $this->makeEngineStub($flatMatch);
-        $service = $this->makeEngineService($engine);
-
-        $result = $service->getTMMatches($this->makeTmConfig(['get_mt' => false]), $this->makeFeatureSet(), null);
-
-        $this->assertCount(1, $result);
-        $this->assertEquals('Ciao', $result[0]['translation']);
-    }
-
-    // ── getTMMatches: GetMemoryResponse error paths ────────────────────
+    // ── getTMMatches: GetMemoryResponse paths ───────────────────────────
 
     #[Test]
     public function getTMMatches_response_with_error_throws_requeue(): void
@@ -232,10 +166,30 @@ class EngineServiceUnitTest extends AbstractTest
     // ── getMTTranslation paths ─────────────────────────────────────────
 
     #[Test]
-    public function getMTTranslation_returns_plain_array_result(): void
+    public function getMTTranslation_valid_response_returns_first_match_from_get_memory_response(): void
     {
-        $mtResult = ['translation' => 'Ciao mondo', 'match' => '75', 'created_by' => 'MT!'];
-        $mtEngine = $this->makeEngineStub($mtResult);
+        $response = new GetMemoryResponse([
+            'matches'         => [
+                [
+                    'id'               => '1',
+                    'segment'          => 'Hello',
+                    'translation'      => 'Ciao mondo',
+                    'match'            => 0.75,
+                    'quality'          => 74,
+                    'created-by'       => 'MT!',
+                    'last-updated-by'  => 'MT!',
+                    'create-date'      => '2024-01-01 12:00:00',
+                    'last-update-date' => '2024-01-01 12:00:00',
+                    'key'              => '',
+                    'ICE'              => false,
+                    'tm_properties'    => null,
+                ],
+            ],
+            'responseStatus'  => 200,
+            'responseDetails' => 'OK',
+        ]);
+
+        $mtEngine = $this->makeEngineStub($response);
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
         $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
@@ -304,18 +258,6 @@ class EngineServiceUnitTest extends AbstractTest
         ]);
 
         $mtEngine = $this->makeEngineStub($response);
-        $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
-
-        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
-
-        $this->assertSame([], $result);
-    }
-
-    #[Test]
-    public function getMTTranslation_error_code_in_result_returns_empty(): void
-    {
-        $mtResult = ['error' => ['code' => -1, 'message' => 'quota exceeded']];
-        $mtEngine = $this->makeEngineStub($mtResult);
         $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine);
 
         $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());

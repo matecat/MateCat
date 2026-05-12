@@ -3,6 +3,7 @@
 namespace unit\Workers\TMAnalysisV2;
 
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\LoggerFactory;
 
 class FakeMTEngine extends AbstractEngine
@@ -40,15 +41,18 @@ class FakeMTEngine extends AbstractEngine
     }
 
     /**
-     * Return canned translation from static property.
+     * Return canned translation wrapped in a GetMemoryResponse.
+     *
+     * Uses FakeGetMemoryResponse to bypass the MyMemory parsing pipeline
+     * while satisfying the EngineInterface return type contract.
      *
      * @param array $_config
      *
-     * @return array
+     * @return GetMemoryResponse
      */
-    public function get(array $_config): array
+    public function get(array $_config): GetMemoryResponse
     {
-        return self::$cannedTranslation;
+        return new FakeGetMemoryResponse(self::$cannedTranslation);
     }
 
     /**

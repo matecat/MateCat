@@ -147,36 +147,6 @@ class ProjectCompletionServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_feature_hook_exception_is_swallowed_not_rethrown(): void
-    {
-        $source = $this->readSource();
-
-        $hookPos = strpos($source, 'afterTMAnalysisCloseProject');
-        $this->assertNotFalse($hookPos, 'Expected afterTMAnalysisCloseProject hook call in tryCloseProject.');
-
-        $innerCatchPos = strpos($source, 'catch (Exception $e)', $hookPos);
-        $this->assertNotFalse(
-            $innerCatchPos,
-            'Expected a catch (Exception $e) block swallowing exceptions thrown by the feature hook.'
-        );
-
-        $outerCatchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($outerCatchPos);
-
-        $this->assertGreaterThan(
-            $hookPos,
-            $innerCatchPos,
-            'Inner catch(Exception) must appear after the hook call.'
-        );
-
-        $this->assertLessThan(
-            $outerCatchPos,
-            $innerCatchPos,
-            'Inner catch(Exception) for the feature hook must appear before the outer catch(\Throwable).'
-        );
-    }
-
-    #[Test]
     public function test_get_project_segments_summary_uses_group_by_rollup_sql(): void
     {
         $source = $this->readRepositorySource();

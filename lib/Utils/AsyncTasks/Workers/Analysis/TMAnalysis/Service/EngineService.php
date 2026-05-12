@@ -5,6 +5,7 @@ namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
@@ -143,12 +144,9 @@ class EngineService implements EngineServiceInterface
                 $engineConfig['job_id'] = $queueElement->params->id_job;
             }
 
-            $engineConfig = $featureSet->filter(
-                'analysisBeforeMTGetContribution',
-                $engineConfig,
-                $mtEngine,
-                $queueElement
-            );
+            $analysisEvent = new AnalysisBeforeMTGetContributionEvent($engineConfig, $mtEngine, $queueElement);
+            $featureSet->dispatchFilter($analysisEvent);
+            $engineConfig = $analysisEvent->getConfig();
 
             $mt_result = $mtEngine->get($engineConfig);
 

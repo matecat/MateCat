@@ -80,7 +80,7 @@ class GetMemoryResponse extends TMSAbstractResponse
             'key' => $match['key'] ?? '',
             'ICE' => $match['ICE'] ?? false,
             'source_note' => $match['source_note'] ?? null,
-            'target_note' => $match['target_note'] ?? null,
+            'target_note' => $match['target_note'] ?? '',
             'penalty' => $match['penalty'] ?? null,
         ]);
     }
