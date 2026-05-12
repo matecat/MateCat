@@ -187,7 +187,7 @@ class Executor implements SplObserver
                 /** @var QueueElement $queueElement */
                 $queueElement = $frameReadResult[1];
 
-                if (!$msgFrame instanceof Frame || !$queueElement instanceof QueueElement) {
+                if (!($msgFrame instanceof Frame) || !($queueElement instanceof QueueElement)) {
                     continue;
                 }
             } catch (Exception) {

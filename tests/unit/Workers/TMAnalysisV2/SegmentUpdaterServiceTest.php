@@ -205,7 +205,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         try {
             $service = new SegmentUpdaterService(Database::obtain());
 
-            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID, 2.0);
+            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
             $this->assertTrue($result);
 
@@ -225,7 +225,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
     {
         $service = new SegmentUpdaterService(Database::obtain());
 
-        $result = $service->forceSetSegmentAnalyzed(999999, 999999, 2.0);
+        $result = $service->forceSetSegmentAnalyzed(999999, 999999);
 
         $this->assertFalse($result);
     }
@@ -243,7 +243,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
         $service = new SegmentUpdaterService($db);
 
-        $result = $service->forceSetSegmentAnalyzed(1, 2, 5.0);
+        $result = $service->forceSetSegmentAnalyzed(1, 2);
 
         $this->assertFalse($result);
     }
@@ -263,7 +263,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
             $service = new SegmentUpdaterService(Database::obtain());
 
-            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID, 2.0);
+            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
             // NOT IN ('DONE','SKIPPED') guard → 0 affected rows → false
             $this->assertFalse($result);
@@ -287,7 +287,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
             $service = new SegmentUpdaterService(Database::obtain());
 
-            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID, 2.0);
+            $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
             $this->assertFalse($result);
         } finally {

@@ -196,7 +196,7 @@ class EngineService implements EngineServiceInterface
 
                 // Intermediate override: restrict to ICE matches only — drop all non-ICE ≤ 100.
                 if ($mt_qe_config->analysis_ignore_100) {
-                    if ((int)$match['match'] <= 100 && !$match[InternalMatchesConstants::TM_ICE]) {
+                    if ((int)$match['match'] <= 100 && !($match[InternalMatchesConstants::TM_ICE] ?? false)) {
                         return false;
                     }
                 }

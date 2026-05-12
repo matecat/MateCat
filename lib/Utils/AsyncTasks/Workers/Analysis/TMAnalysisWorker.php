@@ -268,8 +268,7 @@ class TMAnalysisWorker extends AbstractWorker
     {
         $segmentSet = $this->segmentUpdater->forceSetSegmentAnalyzed(
             (int)$queueElement->params->id_segment,
-            (int)$queueElement->params->id_job,
-            (float)$queueElement->params->raw_word_count
+            (int)$queueElement->params->id_job
         );
 
         if (!$segmentSet) {

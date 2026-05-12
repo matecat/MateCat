@@ -65,7 +65,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         } catch (PDOException $e) {
             LoggerFactory::doJsonLog($e->getMessage());
 
-            throw new RuntimeException($e);
+            throw new RuntimeException($e->getMessage(), 0, $e);
         }
     }
 

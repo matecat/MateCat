@@ -48,8 +48,8 @@ class MatchSorter implements MatchSorterInterface
             $conditions = [
                 [$aIsICE && !$bIsICE, -1],
                 [!$aIsICE && $bIsICE, 1],
-                [$this->isMtMatch($a), -1],
-                [$this->isMtMatch($b), 1]
+                [$this->isMtMatch($a) && !$this->isMtMatch($b), -1],
+                [!$this->isMtMatch($a) && $this->isMtMatch($b), 1]
             ];
 
             foreach ($conditions as [$condition, $result]) {

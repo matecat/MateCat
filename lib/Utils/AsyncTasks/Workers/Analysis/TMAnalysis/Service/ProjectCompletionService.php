@@ -49,7 +49,13 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                 // (ProxySQL routes reads outside transactions to slave).
                 $_full_report = $this->getProjectSegmentsTranslationSummary($pid);
                 $rollup       = array_pop($_full_report);
-                assert($rollup !== null);
+
+                if ($rollup === null) {
+                    LoggerFactory::doJsonLog("--- WARNING: empty rollup for project $pid. Releasing lock.");
+                    $this->redisService->releaseCompletionLock($pid);
+
+                    return;
+                }
 
                 $dbRemaining = (int)$rollup['project_segments'] - (int)$rollup['num_analyzed'];
                 if ($dbRemaining > 0) {

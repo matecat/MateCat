@@ -25,7 +25,7 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
         return SegmentTranslationDao::setAnalysisValue($tmData);
     }
 
-    public function forceSetSegmentAnalyzed(int $idSegment, int $idJob, float $rawWordCount): bool
+    public function forceSetSegmentAnalyzed(int $idSegment, int $idJob): bool
     {
         try {
             $stmt = $this->db->getConnection()->prepare(

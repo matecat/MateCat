@@ -425,11 +425,11 @@ VALUES (2, 'ModernMT Full', 'MT', 'ModernMT for subscribers', 'http://MMT', 'tra
 INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
 VALUES (900, 'FakeTMEngine', 'TM', 'Fake TM engine for integration tests', 'http://fake-tm', 'get', null, null, null,
         '{}',
-        'Tests\\Unit\\Workers\\TMAnalysisV2\\FakeEngines\\FakeTMEngine', '{}', null, 0, 1, null);
+        'unit\\Workers\\TMAnalysisV2\\FakeTMEngine', '{}', null, 0, 1, null);
 INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
 VALUES (901, 'FakeMTEngine', 'MT', 'Fake MT engine for integration tests', 'http://fake-mt', 'get', null, null, null,
         '{}',
-        'Tests\\Unit\\Workers\\TMAnalysisV2\\FakeEngines\\FakeMTEngine', '{}', null, 0, 1, null);
+        'unit\\Workers\\TMAnalysisV2\\FakeMTEngine', '{}', null, 0, 1, null);
 UPDATE engines
 SET id = 0
 WHERE id = 10;

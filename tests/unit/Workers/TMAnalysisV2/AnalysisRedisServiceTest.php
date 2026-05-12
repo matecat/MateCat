@@ -3,6 +3,7 @@
 namespace unit\Workers\TMAnalysisV2;
 
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Generator\Generator;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Utils\ActiveMQ\AMQHandler;
@@ -89,7 +90,7 @@ class AnalysisRedisServiceTest extends TestCase
     {
         $this->redisSpy = new RedisClientSpy();
 
-        $amqHandlerMock = @$this->createStub(AMQHandler::class);
+        $amqHandlerMock = (new Generator())->testDouble(AMQHandler::class, true);
         $amqHandlerMock->method('getRedisClient')->willReturn($this->redisSpy);
 
         $this->service = new AnalysisRedisService($amqHandlerMock);
