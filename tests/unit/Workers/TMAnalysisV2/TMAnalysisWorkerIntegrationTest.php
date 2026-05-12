@@ -19,10 +19,12 @@ use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorService
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysisWorker;
+use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
@@ -212,8 +214,15 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         );
 
         $this->assertIsString($source);
-        $this->assertStringNotContainsString('Database::obtain()', $source);
+        // Database::obtain() is allowed ONLY in the constructor for DI wiring
+        // It must NOT appear in process() or any other method
         $this->assertStringNotContainsString('SegmentTranslationDao::', $source);
+
+        // Extract everything after __construct to verify no DB calls in operational code
+        $constructorEnd = strpos($source, 'public function process(');
+        $this->assertNotFalse($constructorEnd);
+        $operationalCode = substr($source, $constructorEnd);
+        $this->assertStringNotContainsString('Database::obtain()', $operationalCode);
     }
 
     #[Test]
@@ -367,8 +376,8 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             $redisService ?? $this->createStub(AnalysisRedisServiceInterface::class),
             $segmentUpdater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
             $projectCompletion ?? $this->createStub(ProjectCompletionServiceInterface::class),
-            new EngineService(),
-            new MatchProcessorService(),
+            new EngineService(new DefaultEngineResolver()),
+            new MatchProcessorService(new MatchSorter()),
         );
 
         (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($worker, []);
@@ -756,5 +765,138 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $this->assertEquals(3, $config['num_result']);
         // FakeMTEngine is NOT MyMemory, so get_mt = false
         $this->assertFalse($config['get_mt']);
+    }
+
+    #[Test]
+    public function buildEngineConfig_includes_dialect_strict_when_set(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class)) extends TMAnalysisWorker {
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $element = $this->makeQueueElement([
+            'id_tms'           => 900,
+            'id_mt_engine'     => 901,
+            'tm_keys'          => '[]',
+            'dialect_strict'   => true,
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertTrue($config['dialect_strict']);
+    }
+
+    #[Test]
+    public function buildEngineConfig_includes_public_tm_penalty_when_set(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class)) extends TMAnalysisWorker {
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $element = $this->makeQueueElement([
+            'id_tms'             => 900,
+            'id_mt_engine'       => 901,
+            'tm_keys'            => '[]',
+            'public_tm_penalty'  => 5,
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertEquals(5, $config['public_tm_penalty']);
+    }
+
+    #[Test]
+    public function buildEngineConfig_parses_tm_keys_into_penalty_map(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class)) extends TMAnalysisWorker {
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $tmKeys = json_encode([
+            ['key' => 'abc123', 'r' => true, 'w' => false, 'owner' => true, 'penalty' => 0, 'tm' => true, 'glos' => false],
+            ['key' => 'def456', 'r' => true, 'w' => true, 'owner' => true, 'penalty' => 3, 'tm' => true, 'glos' => false],
+        ]);
+
+        $element = $this->makeQueueElement([
+            'id_tms'       => 900,
+            'id_mt_engine' => 901,
+            'tm_keys'      => $tmKeys,
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertArrayHasKey('id_user', $config);
+        $this->assertContains('abc123', $config['id_user']);
+        $this->assertContains('def456', $config['id_user']);
+        $this->assertArrayHasKey('penalty_key', $config);
+    }
+
+    #[Test]
+    public function buildEngineConfig_includes_mt_qe_config_when_workflow_enabled(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class)) extends TMAnalysisWorker {
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $mtqeParams = json_encode(['analysis_ignore_100' => true, 'analysis_ignore_101' => false]);
+
+        $element = $this->makeQueueElement([
+            'id_tms'                    => 900,
+            'id_mt_engine'              => 901,
+            'tm_keys'                   => '[]',
+            'mt_qe_workflow_enabled'    => true,
+            'mt_qe_workflow_parameters' => $mtqeParams,
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertTrue($config['mt_qe_workflow_enabled']);
+        $this->assertInstanceOf(MTQEWorkflowParams::class, $config['mt_qe_config']);
+    }
+
+    #[Test]
+    public function buildEngineConfig_sets_only_private_and_disables_tms_when_no_keys_and_no_mt(): void
+    {
+        $this->ensureFakeEnginesExist();
+
+        $worker = new class($this->createStub(AMQHandler::class)) extends TMAnalysisWorker {
+            public function exposedBuildEngineConfig(QueueElement $queueElement): array
+            {
+                return $this->buildEngineConfig($queueElement);
+            }
+        };
+
+        $element = $this->makeQueueElement([
+            'id_tms'       => 900,
+            'id_mt_engine' => 901,  // FakeMTEngine (not MyMemory) → get_mt = false
+            'tm_keys'      => '[]',
+            'only_private' => true,
+        ]);
+
+        $config = $worker->exposedBuildEngineConfig($element);
+
+        $this->assertTrue($config['onlyprivate']);
+        // only_private + no id_user + !get_mt → id_tms = 0
+        $this->assertEquals(0, $config['id_tms']);
     }
 }

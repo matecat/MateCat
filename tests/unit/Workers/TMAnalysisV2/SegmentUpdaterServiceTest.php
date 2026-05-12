@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
@@ -27,7 +28,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function test_service_can_be_instantiated_and_implements_interface(): void
     {
-        $service = new SegmentUpdaterService();
+        $service = new SegmentUpdaterService(Database::obtain());
         $this->assertInstanceOf(SegmentUpdaterServiceInterface::class, $service);
     }
 
@@ -140,7 +141,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $service = new SegmentUpdaterService();
+            $service = new SegmentUpdaterService(Database::obtain());
 
             $affected = $service->setAnalysisValue([
                 'id_segment'          => self::TEST_SEGMENT_ID,
@@ -178,7 +179,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
             $conn = Database::obtain()->getConnection();
             $conn->exec("UPDATE segment_translations SET tm_analysis_status = 'DONE' WHERE id_segment = " . self::TEST_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID);
 
-            $service = new SegmentUpdaterService();
+            $service = new SegmentUpdaterService(Database::obtain());
 
             $affected = $service->setAnalysisValue([
                 'id_segment'         => self::TEST_SEGMENT_ID,
@@ -200,7 +201,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $service = new SegmentUpdaterService();
+            $service = new SegmentUpdaterService(Database::obtain());
 
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID, 2.0);
 
@@ -220,10 +221,60 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function forceSetSegmentAnalyzed_returns_false_for_nonexistent_segment(): void
     {
-        $service = new SegmentUpdaterService();
+        $service = new SegmentUpdaterService(Database::obtain());
 
         $result = $service->forceSetSegmentAnalyzed(999999, 999999, 2.0);
 
         $this->assertFalse($result);
+    }
+
+    // ── Unit tests with injected IDatabase mock ─────────────────────────
+
+    #[Test]
+    public function forceSetSegmentAnalyzed_returns_false_on_pdo_exception(): void
+    {
+        $db = $this->createStub(IDatabase::class);
+        $db->method('update')->willThrowException(new \PDOException('Connection lost'));
+
+        $service = new SegmentUpdaterService($db);
+
+        $result = $service->forceSetSegmentAnalyzed(1, 2, 5.0);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function forceSetSegmentAnalyzed_returns_false_when_zero_rows_affected(): void
+    {
+        $db = $this->createStub(IDatabase::class);
+        $db->method('update')->willReturn(0);
+
+        $service = new SegmentUpdaterService($db);
+
+        $result = $service->forceSetSegmentAnalyzed(1, 2, 5.0);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function forceSetSegmentAnalyzed_returns_true_when_row_updated(): void
+    {
+        $db = $this->createStub(IDatabase::class);
+        $db->method('update')->willReturn(1);
+
+        $service = new SegmentUpdaterService($db);
+
+        $result = $service->forceSetSegmentAnalyzed(1, 2, 5.0);
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function constructor_accepts_idatabase_instance(): void
+    {
+        $db = $this->createStub(IDatabase::class);
+        $service = new SegmentUpdaterService($db);
+
+        $this->assertInstanceOf(SegmentUpdaterServiceInterface::class, $service);
     }
 }

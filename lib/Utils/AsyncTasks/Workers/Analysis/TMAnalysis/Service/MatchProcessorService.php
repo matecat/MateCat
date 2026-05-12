@@ -10,7 +10,6 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
 use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
-use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
 use Utils\LQA\ICUSourceSegmentDetector;
@@ -20,9 +19,9 @@ class MatchProcessorService implements MatchProcessorServiceInterface
 {
     private MatchSorterInterface $matchSorter;
 
-    public function __construct(?MatchSorterInterface $matchSorter = null)
+    public function __construct(MatchSorterInterface $matchSorter)
     {
-        $this->matchSorter = $matchSorter ?? new MatchSorter();
+        $this->matchSorter = $matchSorter;
     }
 
     /**

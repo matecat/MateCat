@@ -17,9 +17,9 @@ class EngineService implements EngineServiceInterface
 {
     private EngineResolverInterface $engineResolver;
 
-    public function __construct(?EngineResolverInterface $engineResolver = null)
+    public function __construct(EngineResolverInterface $engineResolver)
     {
-        $this->engineResolver = $engineResolver ?? new DefaultEngineResolver();
+        $this->engineResolver = $engineResolver;
     }
 
     /**

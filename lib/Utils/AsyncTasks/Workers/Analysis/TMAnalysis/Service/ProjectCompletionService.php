@@ -19,10 +19,10 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
 
     public function __construct(
         AnalysisRedisServiceInterface $redisService,
-        ?ProjectCompletionRepositoryInterface $repository = null,
+        ProjectCompletionRepositoryInterface $repository,
     ) {
         $this->redisService = $redisService;
-        $this->repository = $repository ?? new ProjectCompletionRepository();
+        $this->repository = $repository;
     }
 
     public function tryCloseProject(int $pid, string $projectPassword, string $queueKey, FeatureSet $featureSet): void

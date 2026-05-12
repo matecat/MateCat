@@ -3,6 +3,7 @@
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 
 class EngineServiceTest extends AbstractTest
@@ -26,7 +27,7 @@ class EngineServiceTest extends AbstractTest
     #[Test]
     public function test_service_can_be_instantiated(): void
     {
-        $service = new EngineService();
+        $service = new EngineService(new DefaultEngineResolver());
         $this->assertInstanceOf(EngineService::class, $service);
         $this->assertInstanceOf(EngineServiceInterface::class, $service);
     }

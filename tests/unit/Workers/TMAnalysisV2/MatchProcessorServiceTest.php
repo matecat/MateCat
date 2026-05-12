@@ -3,9 +3,11 @@
 namespace Tests\Unit\Workers\TMAnalysisV2;
 
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
+use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
 
@@ -16,7 +18,7 @@ class MatchProcessorServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new MatchProcessorService();
+        $this->service = new MatchProcessorService(new MatchSorter());
     }
 
     #[Test]
@@ -536,5 +538,149 @@ class MatchProcessorServiceTest extends TestCase
         $this->assertSame(TranslationStatus::STATUS_DRAFT, $result['status']);
         $this->assertFalse($result['locked']);
         $this->assertSame('preserved', $result['extra_field']);
+    }
+
+    // ── detectIcuErrors tests ───────────────────────────────────────────
+
+    #[Test]
+    public function detectIcuErrors_returns_null_when_source_has_no_icu_patterns(): void
+    {
+        $match = [
+            'segment'     => 'Hello world',
+            'translation' => 'Ciao mondo',
+        ];
+
+        $result = $this->service->detectIcuErrors('en-US', 'it-IT', $match);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function detectIcuErrors_returns_null_when_icu_patterns_match_correctly(): void
+    {
+        $match = [
+            'segment'     => '{count, plural, one {# item} other {# items}}',
+            'translation' => '{count, plural, one {# elemento} other {# elementi}}',
+        ];
+
+        $result = $this->service->detectIcuErrors('en-US', 'it-IT', $match);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function detectIcuErrors_returns_null_when_icu_source_has_valid_translation(): void
+    {
+        // Even when source has ICU and translation doesn't, PostProcess may not flag it as error
+        // since the comparator checks structural validity, not presence
+        $match = [
+            'segment'     => '{count, plural, one {# item} other {# items}}',
+            'translation' => 'Solo testo senza ICU',
+        ];
+
+        $result = $this->service->detectIcuErrors('en-US', 'it-IT', $match);
+
+        // PostProcess does not flag this as an error (outcome=0)
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function detectIcuErrors_handles_empty_segment_gracefully(): void
+    {
+        $match = [
+            'segment'     => '',
+            'translation' => '',
+        ];
+
+        $result = $this->service->detectIcuErrors('en-US', 'it-IT', $match);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function detectIcuErrors_handles_missing_keys_gracefully(): void
+    {
+        $result = $this->service->detectIcuErrors('en-US', 'it-IT', []);
+
+        $this->assertNull($result);
+    }
+
+    // ── postProcessMatch tests ──────────────────────────────────────────
+
+    #[Test]
+    public function postProcessMatch_for_tm_match_returns_suggestion_warning_and_errors(): void
+    {
+        $segment = 'Hello <g id="1">world</g>';
+        $match = [
+            'segment'     => 'Hello <g id="1">world</g>',
+            'translation' => 'Ciao <g id="1">mondo</g>',
+            'created_by'  => 'TM-User',
+        ];
+
+        $featureSet = new FeatureSet();
+
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+
+        $this->assertArrayHasKey('suggestion', $result);
+        $this->assertArrayHasKey('warning', $result);
+        $this->assertArrayHasKey('serialized_errors_list', $result);
+        $this->assertIsString($result['suggestion']);
+        $this->assertIsInt($result['warning']);
+    }
+
+    #[Test]
+    public function postProcessMatch_for_mt_match_runs_realign_and_returns_result(): void
+    {
+        $segment = 'Hello world';
+        $match = [
+            'segment'     => 'Hello world',
+            'translation' => 'Ciao mondo',
+            'created_by'  => 'MT!',
+        ];
+
+        $featureSet = new FeatureSet();
+
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+
+        $this->assertArrayHasKey('suggestion', $result);
+        $this->assertArrayHasKey('warning', $result);
+        $this->assertArrayHasKey('serialized_errors_list', $result);
+        $this->assertIsString($result['suggestion']);
+    }
+
+    #[Test]
+    public function postProcessMatch_for_plain_text_tm_match_returns_no_warning(): void
+    {
+        $segment = 'Simple text without tags';
+        $match = [
+            'segment'     => 'Simple text without tags',
+            'translation' => 'Testo semplice senza tag',
+            'created_by'  => 'TM-User',
+        ];
+
+        $featureSet = new FeatureSet();
+
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+
+        $this->assertSame(0, $result['warning']);
+        $this->assertSame('', $result['serialized_errors_list']);
+    }
+
+    #[Test]
+    public function postProcessMatch_detects_tag_mismatch_and_sets_warning(): void
+    {
+        $segment = 'Hello <g id="1">world</g>';
+        $match = [
+            'segment'     => 'Hello <g id="1">world</g>',
+            'translation' => 'Ciao mondo',  // missing tag
+            'created_by'  => 'TM-User',
+        ];
+
+        $featureSet = new FeatureSet();
+
+        $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet);
+
+        $this->assertSame(1, $result['warning']);
+        $this->assertNotEmpty($result['serialized_errors_list']);
     }
 }

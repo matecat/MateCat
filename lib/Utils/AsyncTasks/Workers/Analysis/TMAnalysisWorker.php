@@ -4,6 +4,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -15,10 +16,13 @@ use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorService
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionRepository;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
+use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
@@ -64,10 +68,10 @@ class TMAnalysisWorker extends AbstractWorker
         parent::__construct($queueHandler);
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
-        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService();
-        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService($this->redisService);
-        $this->engineService = $engineService ?? new EngineService();
-        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService();
+        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService(Database::obtain());
+        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService($this->redisService, new ProjectCompletionRepository());
+        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver());
+        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter());
     }
 
     /**

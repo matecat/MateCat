@@ -5,6 +5,7 @@ use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 
@@ -52,7 +53,7 @@ class ProjectCompletionServiceTest extends AbstractTest
     {
         $redisService ??= $this->createStub(AnalysisRedisServiceInterface::class);
 
-        return new ProjectCompletionService($redisService);
+        return new ProjectCompletionService($redisService, $this->createStub(ProjectCompletionRepositoryInterface::class));
     }
 
     #[Test]

@@ -317,7 +317,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         $source = $this->readSource($this->segmentUpdaterServicePath());
 
         $this->assertStringContainsString(
-            "\$affectedRows = \$db->update('segment_translations', \$data, \$where);",
+            "\$affectedRows = \$this->db->update('segment_translations', \$data, \$where);",
             $source,
             'forceSetSegmentAnalyzed must capture affected rows from DB update.'
         );
