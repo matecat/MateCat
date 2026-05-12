@@ -11,7 +11,16 @@ interface AnalysisRedisServiceInterface
      */
     public function reconnect(): void;
 
+    /**
+     * @phpstan-impure
+     */
     public function acquireInitLock(int $pid): bool;
+
+    /**
+     * Atomically initialize all project counters in a single MULTI/EXEC transaction.
+     * Writes PROJECT_TOT_SEGMENTS first, PROJECT_NUM_SEGMENTS_DONE last.
+     */
+    public function initializeProjectCounters(int $pid, int $projectSegments, int $numAnalyzed): void;
 
     public function setProjectTotalSegments(int $pid, int $total): void;
 
@@ -19,7 +28,11 @@ interface AnalysisRedisServiceInterface
 
     public function getProjectAnalyzedCount(int $pid): ?int;
 
-    public function waitForInitialization(int $pid, int $maxWaitMs = 5000): void;
+    /**
+     * Polls for both PROJECT_TOT_SEGMENTS and PROJECT_NUM_SEGMENTS_DONE.
+     * Returns true if init is complete, false on timeout (winner likely crashed).
+     */
+    public function waitForInitialization(int $pid, int $maxWaitMs = 5000): bool;
 
     public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void;
 

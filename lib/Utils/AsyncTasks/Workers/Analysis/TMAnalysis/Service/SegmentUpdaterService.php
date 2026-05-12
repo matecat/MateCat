@@ -27,11 +27,16 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
 
     public function forceSetSegmentAnalyzed(int $idSegment, int $idJob, float $rawWordCount): bool
     {
-        $data  = ['tm_analysis_status' => 'DONE'];
-        $where = ['id_segment' => $idSegment, 'id_job' => $idJob];
-
         try {
-            $affectedRows = $this->db->update('segment_translations', $data, $where);
+            $stmt = $this->db->getConnection()->prepare(
+                "UPDATE segment_translations
+                    SET tm_analysis_status = 'DONE'
+                  WHERE id_segment = :id_segment
+                    AND id_job = :id_job
+                    AND tm_analysis_status NOT IN ('DONE', 'SKIPPED')"
+            );
+            $stmt->execute([':id_segment' => $idSegment, ':id_job' => $idJob]);
+            $affectedRows = $stmt->rowCount();
         } catch (PDOException $e) {
             LoggerFactory::doJsonLog($e->getMessage());
             LoggerFactory::doJsonLog("**** DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters.");

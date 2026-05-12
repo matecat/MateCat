@@ -171,7 +171,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         $this->assertStringContainsString(
             "'EX', 86400",
             $source,
-            "Locks must have a TTL via 'EX', 86400 to prevent deadlocks on crash."
+            "Completion lock must have TTL 86400 to prevent permanent deadlocks on crash."
         );
     }
 
@@ -218,6 +218,36 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
+    public function test_project_completion_service_uses_defensive_lte_zero_close_condition(): void
+    {
+        $source = $this->readSource($this->projectCompletionServicePath());
+
+        $this->assertStringContainsString(
+            '<= 0',
+            $source,
+            'tryCloseProject() must use <= 0 (not === 0) to handle overcounted num_analyzed defensively.'
+        );
+
+        $this->assertStringNotContainsString(
+            "=== 0\n",
+            $source,
+            'tryCloseProject() must NOT use === 0 for the close condition — overcounted segments would leave the project stuck.'
+        );
+    }
+
+    #[Test]
+    public function test_segment_updater_force_set_has_not_in_done_skipped_where_guard(): void
+    {
+        $source = $this->readSource($this->segmentUpdaterServicePath());
+
+        $this->assertStringContainsString(
+            "tm_analysis_status NOT IN ('DONE', 'SKIPPED')",
+            $source,
+            'forceSetSegmentAnalyzed() must include WHERE guard to skip already-DONE/SKIPPED rows, preventing double-counting under MYSQL_ATTR_FOUND_ROWS.'
+        );
+    }
+
+    #[Test]
     public function test_analysis_redis_service_wait_for_initialization_uses_exponential_backoff(): void
     {
         $source = $this->readSource($this->analysisRedisServicePath());
@@ -232,9 +262,78 @@ class ConcurrencyRegressionTest extends AbstractTest
         $this->assertNotFalse($backoffPos, 'Expected exponential backoff ($sleepMs * 2) in waitForInitialization().');
 
         $this->assertStringContainsString(
-            'WARNING — timed out waiting for PROJECT_TOT_SEGMENTS',
+            'WARNING — timed out waiting for init completion',
             $source,
             'Expected timeout warning log in waitForInitialization().'
+        );
+    }
+
+    #[Test]
+    public function test_wait_for_initialization_checks_both_tot_segments_and_num_done(): void
+    {
+        $source = $this->readSource($this->analysisRedisServicePath());
+
+        $methodPos = strpos($source, 'public function waitForInitialization');
+        $this->assertNotFalse($methodPos);
+
+        $methodEnd = strpos($source, "\n    }\n", $methodPos);
+        $body = substr($source, $methodPos, $methodEnd - $methodPos);
+
+        $this->assertStringContainsString(
+            'PROJECT_TOT_SEGMENTS',
+            $body,
+            'waitForInitialization must check PROJECT_TOT_SEGMENTS.'
+        );
+        $this->assertStringContainsString(
+            'PROJECT_NUM_SEGMENTS_DONE',
+            $body,
+            'waitForInitialization must check PROJECT_NUM_SEGMENTS_DONE — both keys must exist before losers proceed (TOCTOU fix).'
+        );
+    }
+
+    #[Test]
+    public function test_initialize_project_counters_uses_transaction(): void
+    {
+        $source = $this->readSource($this->analysisRedisServicePath());
+
+        $methodPos = strpos($source, 'public function initializeProjectCounters');
+        $this->assertNotFalse($methodPos, 'Expected initializeProjectCounters() definition in AnalysisRedisService.');
+
+        $methodEnd = strpos($source, "\n    }\n", $methodPos);
+        $body = substr($source, $methodPos, $methodEnd - $methodPos);
+
+        $this->assertStringContainsString(
+            '->transaction(',
+            $body,
+            'initializeProjectCounters must use a Redis transaction (MULTI/EXEC) to guarantee atomic, ordered writes.'
+        );
+
+        $totPos = strpos($body, 'PROJECT_TOT_SEGMENTS');
+        $donePos = strpos($body, 'PROJECT_NUM_SEGMENTS_DONE');
+        $this->assertNotFalse($totPos);
+        $this->assertNotFalse($donePos);
+        $this->assertLessThan(
+            $donePos,
+            $totPos,
+            'PROJECT_TOT_SEGMENTS must be written BEFORE PROJECT_NUM_SEGMENTS_DONE — losers poll for the last key as the init-complete signal.'
+        );
+    }
+
+    #[Test]
+    public function test_init_lock_ttl_is_short_for_crash_safety(): void
+    {
+        $source = $this->readSource($this->analysisRedisServicePath());
+
+        $methodPos = strpos($source, 'public function acquireInitLock');
+        $this->assertNotFalse($methodPos);
+
+        $methodEnd = strpos($source, "\n    }\n", $methodPos);
+        $body = substr($source, $methodPos, $methodEnd - $methodPos);
+
+        $this->assertStringContainsString(
+            "'EX', 30",
+            $body,
+            'Init lock TTL must be 30s (not 86400s) — short enough to recover from crashed winners.'
         );
     }
 
@@ -335,9 +434,9 @@ class ConcurrencyRegressionTest extends AbstractTest
         $source = $this->readSource($this->segmentUpdaterServicePath());
 
         $this->assertStringContainsString(
-            "\$affectedRows = \$this->db->update('segment_translations', \$data, \$where);",
+            "tm_analysis_status NOT IN ('DONE', 'SKIPPED')",
             $source,
-            'forceSetSegmentAnalyzed must capture affected rows from DB update.'
+            'forceSetSegmentAnalyzed must use WHERE guard to skip DONE/SKIPPED rows, preventing double-counting.'
         );
 
         $this->assertStringContainsString(

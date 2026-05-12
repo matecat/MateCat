@@ -233,8 +233,11 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function forceSetSegmentAnalyzed_returns_false_on_pdo_exception(): void
     {
+        $pdo = $this->createStub(\PDO::class);
+        $pdo->method('prepare')->willThrowException(new \PDOException('Connection lost'));
+
         $db = $this->createStub(IDatabase::class);
-        $db->method('update')->willThrowException(new \PDOException('Connection lost'));
+        $db->method('getConnection')->willReturn($pdo);
 
         $service = new SegmentUpdaterService($db);
 
@@ -246,8 +249,15 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function forceSetSegmentAnalyzed_returns_false_when_zero_rows_affected(): void
     {
+        $stmt = $this->createStub(\PDOStatement::class);
+        $stmt->method('execute')->willReturn(true);
+        $stmt->method('rowCount')->willReturn(0);
+
+        $pdo = $this->createStub(\PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
         $db = $this->createStub(IDatabase::class);
-        $db->method('update')->willReturn(0);
+        $db->method('getConnection')->willReturn($pdo);
 
         $service = new SegmentUpdaterService($db);
 
@@ -259,8 +269,15 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function forceSetSegmentAnalyzed_returns_true_when_row_updated(): void
     {
+        $stmt = $this->createStub(\PDOStatement::class);
+        $stmt->method('execute')->willReturn(true);
+        $stmt->method('rowCount')->willReturn(1);
+
+        $pdo = $this->createStub(\PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
         $db = $this->createStub(IDatabase::class);
-        $db->method('update')->willReturn(1);
+        $db->method('getConnection')->willReturn($pdo);
 
         $service = new SegmentUpdaterService($db);
 

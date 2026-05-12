@@ -84,7 +84,7 @@ class AnalysisRedisServiceTest extends TestCase
         $calls = $this->redisSpy->getCallsFor('set');
         $this->assertCount(1, $calls);
         $this->assertSame(
-            [RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 1, 'EX', 86400, 'NX'],
+            [RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 1, 'EX', 30, 'NX'],
             $calls[0]['args']
         );
     }
@@ -275,31 +275,43 @@ class AnalysisRedisServiceTest extends TestCase
     }
 
     #[Test]
-    public function waitForInitialization_returnsImmediately_whenKeyExists(): void
+    public function waitForInitialization_returnsTrue_whenBothKeysExist(): void
     {
         $pid = 42;
         $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_TOT_SEGMENTS . $pid, '50');
+        $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, '10');
 
-        $this->service->waitForInitialization($pid, 5000);
+        $result = $this->service->waitForInitialization($pid, 5000);
 
+        $this->assertTrue($result);
         $getCalls = $this->redisSpy->getCallsFor('get');
-        $this->assertCount(1, $getCalls);
-        $this->assertSame([RedisKeys::PROJECT_TOT_SEGMENTS . $pid], $getCalls[0]['args']);
+        $this->assertCount(2, $getCalls);
     }
 
     #[Test]
-    public function waitForInitialization_pollsMultipleTimes_whenKeyMissing(): void
+    public function waitForInitialization_returnsFalse_whenTimeout(): void
     {
         $pid = 42;
-        // Don't set the key — it stays null
+        // Don't set either key — both stay null
 
         $start = hrtime(true);
-        $this->service->waitForInitialization($pid, 100);
+        $result = $this->service->waitForInitialization($pid, 100);
         $elapsedMs = (hrtime(true) - $start) / 1_000_000;
 
-        $getCalls = $this->redisSpy->getCallsFor('get');
-        // With maxWait=100, backoff starts at 50ms: iteration1 sleeps 50 (waited=50), iteration2 sleeps 100 (waited=150 > 100 exit)
-        $this->assertCount(2, $getCalls);
+        $this->assertFalse($result);
         $this->assertGreaterThanOrEqual(100, $elapsedMs);
+    }
+
+    #[Test]
+    public function waitForInitialization_waits_whenOnlyTotSegmentsExists(): void
+    {
+        $pid = 42;
+        // Only set PROJECT_TOT_SEGMENTS — PROJECT_NUM_SEGMENTS_DONE is missing (TOCTOU scenario)
+        $this->redisSpy->setReturnForKey(RedisKeys::PROJECT_TOT_SEGMENTS . $pid, '50');
+
+        $result = $this->service->waitForInitialization($pid, 100);
+
+        // Should timeout because second key is missing
+        $this->assertFalse($result);
     }
 }

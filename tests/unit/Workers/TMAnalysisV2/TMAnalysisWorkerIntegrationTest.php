@@ -261,7 +261,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $sortedMatches = [['match' => '75', 'created_by' => 'TM', 'suggestion' => 'Ciao mondo', 'memory_key' => 'tm-key-1']];
 
         $redisService->method('acquireInitLock')->willReturn(false);
-        $redisService->expects($this->once())->method('waitForInitialization')->with(100);
+        $redisService->expects($this->once())->method('waitForInitialization')->with(100)->willReturn(true);
         $redisService->method('getProjectTotalSegments')->willReturn(50);
         $redisService->method('getProjectAnalyzedCount')->willReturn(10);
         $redisService->method('getWorkingProjects')->willReturn([]);
@@ -399,6 +399,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     private function configureRedisStubAsLoser(AnalysisRedisServiceInterface $redisService): void
     {
         $redisService->method('acquireInitLock')->willReturn(false);
+        $redisService->method('waitForInitialization')->willReturn(true);
         $redisService->method('getProjectTotalSegments')->willReturn(50);
         $redisService->method('getProjectAnalyzedCount')->willReturn(10);
         $redisService->method('getWorkingProjects')->willReturn([]);

@@ -108,7 +108,7 @@ class TMAnalysisWorkerTest extends AbstractTest
     private function stubLockLoserInit(AnalysisRedisServiceInterface&Stub $redis): void
     {
         $redis->method('acquireInitLock')->willReturn(false);
-        $redis->method('waitForInitialization');
+        $redis->method('waitForInitialization')->willReturn(true);
         $redis->method('getProjectTotalSegments')->willReturn(50);
         $redis->method('getProjectAnalyzedCount')->willReturn(10);
     }
@@ -157,7 +157,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $completion = $this->createMock(ProjectCompletionServiceInterface::class);
 
         $redis->method('acquireInitLock')->willReturn(false);
-        $redis->method('waitForInitialization');
+        $redis->method('waitForInitialization')->willReturn(true);
         $redis->method('getProjectTotalSegments')->willReturn(50);
         $redis->method('getProjectAnalyzedCount')->willReturn(10);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -260,20 +260,19 @@ class TMAnalysisWorkerTest extends AbstractTest
     }
 
     #[Test]
-    public function process_when_init_lock_winner_calls_setProjectTotalSegments(): void
+    public function process_when_init_lock_winner_calls_initializeProjectCounters(): void
     {
         $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
         $completion = $this->createStub(ProjectCompletionServiceInterface::class);
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
         $redis->method('acquireInitLock')->willReturn(true);
-        $redis->method('incrementAnalyzedCount');
         $completion->method('getProjectSegmentsTranslationSummary')
             ->willReturn([['project_segments' => 10, 'num_analyzed' => 0]]);
 
         $redis->expects($this->once())
-            ->method('setProjectTotalSegments')
-            ->with(100, 10);
+            ->method('initializeProjectCounters')
+            ->with(100, 10, 0);
 
         $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
 
@@ -290,6 +289,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
 
         $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('waitForInitialization')->willReturn(true);
         $redis->method('getProjectTotalSegments')->willReturn(50);
         $redis->method('getProjectAnalyzedCount')->willReturn(10);
 
@@ -298,7 +298,7 @@ class TMAnalysisWorkerTest extends AbstractTest
             ->with(100);
 
         $redis->expects($this->never())
-            ->method('setProjectTotalSegments');
+            ->method('initializeProjectCounters');
 
         $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
 

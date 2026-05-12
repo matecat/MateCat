@@ -2,6 +2,7 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use Exception;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
@@ -31,9 +32,28 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         return (bool)$this->redis->set(
             RedisKeys::PROJECT_INIT_SEMAPHORE . $pid,
             1,
-            'EX', 86400,
+            'EX', 30,
             'NX'
         );
+    }
+
+    /**
+     * Atomically initialize all project counters in a single MULTI/EXEC transaction.
+     *
+     * ORDERING CONTRACT: PROJECT_TOT_SEGMENTS is written first, PROJECT_NUM_SEGMENTS_DONE last.
+     * waitForInitialization() polls for PROJECT_NUM_SEGMENTS_DONE as the "init complete" signal,
+     * so losers only proceed once all counters are written.
+     */
+    public function initializeProjectCounters(int $pid, int $projectSegments, int $numAnalyzed): void
+    {
+        $this->redis->transaction(function ($tx) use ($pid, $projectSegments, $numAnalyzed) {
+            $tx->setex(RedisKeys::PROJECT_TOT_SEGMENTS . $pid, 86400, $projectSegments);
+            $tx->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, 0);
+            $tx->incrby(RedisKeys::PROJ_ST_WORD_COUNT . $pid, 0);
+            $tx->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numAnalyzed);
+        });
+
+        $this->setProjectAnalyzedCountTTL($pid);
     }
 
     public function setProjectTotalSegments(int $pid, int $total): void
@@ -55,24 +75,30 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         return $val !== null ? (int)$val : null;
     }
 
-    public function waitForInitialization(int $pid, int $maxWaitMs = 5000): void
+    public function waitForInitialization(int $pid, int $maxWaitMs = 5000): bool
     {
         $waited  = 0;
         $sleepMs = 50;
 
         while ($waited < $maxWaitMs) {
-            $val = $this->redis->get(RedisKeys::PROJECT_TOT_SEGMENTS . $pid);
-            if ($val !== null) {
-                return;
+            $tot   = $this->redis->get(RedisKeys::PROJECT_TOT_SEGMENTS . $pid);
+            $count = $this->redis->get(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid);
+            if ($tot !== null && $count !== null) {
+                return true;
             }
             usleep($sleepMs * 1000);
             $waited  += $sleepMs;
-            $sleepMs  = min($sleepMs * 2, 500); // exponential backoff, cap 500 ms
+            $sleepMs  = min($sleepMs * 2, 500);
         }
 
-        LoggerFactory::doJsonLog("WARNING — timed out waiting for PROJECT_TOT_SEGMENTS for PID $pid");
+        LoggerFactory::doJsonLog("WARNING — timed out waiting for init completion for PID $pid");
+
+        return false;
     }
 
+    /**
+     * @throws Exception on Predis connection error
+     */
     public function incrementAnalyzedCount(int $pid, int $numSegments, float $eqWc, float $stWc): void
     {
         $this->redis->incrby(RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)($eqWc * RedisKeys::WORD_COUNT_SCALE));

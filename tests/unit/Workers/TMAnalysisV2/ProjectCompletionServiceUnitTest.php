@@ -52,6 +52,34 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     }
 
     #[Test]
+    public function tryCloseProject_still_fires_when_num_analyzed_exceeds_project_segments(): void
+    {
+        // Defensive: if num_analyzed > project_segments (double-count from issue #4),
+        // the <= 0 condition still triggers completion instead of leaving the project stuck.
+        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 12]);
+        $redis->method('acquireCompletionLock')->willReturn(true);
+        $redis->expects($this->once())->method('removeProjectFromQueue')->with('queue', 99);
+
+        $repo = $this->createMock(ProjectCompletionRepositoryInterface::class);
+        $repo->expects($this->once())->method('beginTransaction');
+        $repo->method('getProjectSegmentsTranslationSummary')->willReturn([
+            ['id_job' => 1, 'password' => 'abc', 'eq_wc' => 500, 'st_wc' => 600],
+            ['id_job' => null, 'password' => null, 'eq_wc' => 500, 'st_wc' => 600],
+        ]);
+        $repo->expects($this->once())->method('updateProjectAnalysisStatus')
+            ->with(99, 'DONE', 500.0, 600.0);
+        $repo->method('getProjectJobIds')->willReturn([
+            ['id' => 1, 'password' => 'abc'],
+        ]);
+        $repo->expects($this->once())->method('commit');
+        $repo->expects($this->once())->method('destroyAllCaches')->with(99, 'secret');
+
+        $service = new ProjectCompletionService($redis, $repo);
+        $service->tryCloseProject(99, 'secret', 'queue', $this->makeFeatureSet());
+    }
+
+    #[Test]
     public function tryCloseProject_returns_early_when_lock_not_acquired(): void
     {
         $redis = $this->makeRedisStub(['project_segments' => 10, 'num_analyzed' => 10], false);

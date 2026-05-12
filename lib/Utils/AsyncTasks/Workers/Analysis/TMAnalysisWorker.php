@@ -4,12 +4,12 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Predis\Connection\ConnectionException as PredisConnectionException;
-use Predis\Response\ServerException as PredisServerException;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Predis\Connection\ConnectionException as PredisConnectionException;
+use Predis\Response\ServerException as PredisServerException;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
@@ -293,22 +293,19 @@ class TMAnalysisWorker extends AbstractWorker
         $pid = (int)$params->pid;
 
         if ($this->redisService->acquireInitLock($pid)) {
-            $totalSegmentsData = $this->projectCompletion->getProjectSegmentsTranslationSummary($pid);
-            $totalSegments = array_pop($totalSegmentsData);
-            assert($totalSegments !== null);
-
-            $this->_doLog($totalSegments);
-
-            $projectSegments = (int)($totalSegments['project_segments'] ?? 0);
-            $numAnalyzed = (int)($totalSegments['num_analyzed'] ?? 0);
-
-            $this->redisService->setProjectTotalSegments($pid, $projectSegments);
-            $this->redisService->incrementAnalyzedCount($pid, $numAnalyzed, 0, 0);
-            $this->redisService->setProjectAnalyzedCountTTL($pid);
-
-            $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
+            $this->doInit($pid);
         } else {
-            $this->redisService->waitForInitialization($pid);
+            $ready = $this->redisService->waitForInitialization($pid);
+            if (!$ready) {
+                // Winner likely crashed — init lock TTL (30s) may have expired. Re-try.
+                $this->_doLog("--- (Worker $this->_workerPid) : init timeout for PID $pid, attempting re-init");
+                if ($this->redisService->acquireInitLock($pid)) {
+                    $this->doInit($pid);
+                } else {
+                    // Another loser beat us to re-init. Wait again.
+                    $this->redisService->waitForInitialization($pid);
+                }
+            }
             $_projectTotSegments = $this->redisService->getProjectTotalSegments($pid);
             $_analyzed = $this->redisService->getProjectAnalyzedCount($pid);
 
@@ -316,6 +313,22 @@ class TMAnalysisWorker extends AbstractWorker
         }
 
         $this->_doLog("--- (Worker $this->_workerPid) : fetched data for segment $sid-$jid. Project ID is $pid");
+    }
+
+    private function doInit(int $pid): void
+    {
+        $totalSegmentsData = $this->projectCompletion->getProjectSegmentsTranslationSummary($pid);
+        $totalSegments = array_pop($totalSegmentsData);
+        assert($totalSegments !== null);
+
+        $this->_doLog($totalSegments);
+
+        $projectSegments = (int)($totalSegments['project_segments'] ?? 0);
+        $numAnalyzed = (int)($totalSegments['num_analyzed'] ?? 0);
+
+        $this->redisService->initializeProjectCounters($pid, $projectSegments, $numAnalyzed);
+
+        $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
     }
 
     /**
@@ -492,7 +505,7 @@ class TMAnalysisWorker extends AbstractWorker
                 $found = true;
             }
             if ($found) {
-                $this->redisService->decrementWaitingSegments((string)$value);
+                $this->redisService->decrementWaitingSegments($value);
             }
         }
     }

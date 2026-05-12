@@ -37,7 +37,7 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
             return;
         }
 
-        if ((int)$projectTotals['project_segments'] - (int)$projectTotals['num_analyzed'] === 0
+        if ((int)$projectTotals['project_segments'] - (int)$projectTotals['num_analyzed'] <= 0
             && $this->redisService->acquireCompletionLock($pid)
         ) {
             try {
