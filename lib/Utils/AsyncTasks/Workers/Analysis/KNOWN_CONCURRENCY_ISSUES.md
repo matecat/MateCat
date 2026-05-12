@@ -4,6 +4,10 @@ These issues **pre-date the service refactor** (PR #4570). They exist in the ori
 monolithic `TMAnalysisWorker` on `develop` and were carried over as-is. Documenting
 them here as known technical debt for future remediation.
 
+**Validated:** 2026-05-12 against refactored codebase. All issues confirmed present
+in current code. Former issue #6 (`forceSetSegmentAnalyzed` double-count) downgraded
+from HIGH to MEDIUM — cannot manifest without `MYSQL_ATTR_FOUND_ROWS` (see #7).
+
 ---
 
 ## CRITICAL
@@ -65,28 +69,40 @@ diverge. A Lua script or `MULTI/EXEC` pipeline would make them atomic.
 **Risk:** If ActiveMQ delivers the same segment to two workers (redelivery, connection
 drop), both may compute results. Correctness depends entirely on the DAO's
 `WHERE tm_analysis_status NOT IN ('DONE','SKIPPED')` predicate returning `0`
-affected rows for the loser.
+affected rows for the loser. InnoDB row-level locking serializes the UPDATEs, so
+the second worker always sees `affectedRows=0` — but this is an implicit guarantee,
+not an explicit contract.
 
-### 6. `forceSetSegmentAnalyzed()` has no terminal-state guard
-
-**Where:** `SegmentUpdaterService::forceSetSegmentAnalyzed()`
-
-**Risk:** The `UPDATE` uses `WHERE id_segment = ? AND id_job = ?` without checking
-the current `tm_analysis_status`. Under duplicate delivery, both workers could
-see `affectedRows > 0` and double-increment Redis counters.
-
-### 7. Equality close condition is fragile
+### 6. Equality close condition is fragile
 
 **Where:** `ProjectCompletionService::tryCloseProject()` —
 `(int)$projectTotals['project_segments'] - (int)$projectTotals['num_analyzed'] === 0`
 
 **Risk:** If `num_analyzed` ever exceeds `project_segments` (e.g., double-counting
-from issue #6), the subtraction is negative and `=== 0` is never true. The project
-is permanently stuck. Using `<= 0` would be more defensive.
+from issue #4's partial increment, or a bug in initialization baseline), the
+subtraction is negative and `=== 0` is never true. The project is permanently stuck.
+Using `<= 0` would be more defensive.
 
 ---
 
 ## MEDIUM
+
+### 7. `forceSetSegmentAnalyzed()` has no terminal-state guard
+
+**Where:** `SegmentUpdaterService::forceSetSegmentAnalyzed()`
+
+**Risk:** The `UPDATE` uses `WHERE id_segment = ? AND id_job = ?` without checking
+the current `tm_analysis_status`. Under duplicate delivery, both workers could
+theoretically see `affectedRows > 0` and double-increment Redis counters.
+
+**Mitigating factor:** With the current PDO configuration (no `MYSQL_ATTR_FOUND_ROWS`)
+and InnoDB row-level locking, this **cannot actually manifest**. The sequence is:
+Worker A acquires row lock → changes PENDING→DONE → `affectedRows=1` → commits →
+Worker B acquires row lock → attempts DONE→DONE → no change → `affectedRows=0` →
+returns false → skips side effects. The double-count scenario requires
+`MYSQL_ATTR_FOUND_ROWS` (which reports matched rows, not changed rows) and that flag
+is not set anywhere in the codebase. Adding the WHERE guard is still recommended as
+defensive hardening against future PDO config changes.
 
 ### 8. TOCTOU in initialization wait
 
@@ -108,13 +124,11 @@ would be more resilient.
 
 ## Recommended Remediation (future PR)
 
-1. **Atomic side effects**: wrap `INCRBY` calls in a Lua script or `MULTI/EXEC`.
-2. **Terminal-state guard on `forceSetSegmentAnalyzed`**: add
-   `AND tm_analysis_status NOT IN ('DONE','SKIPPED')` to the `WHERE` clause.
-3. **Defensive close condition**: use `<= 0` instead of `=== 0`.
-4. **Crash-safe initialization**: use an explicit "init complete" flag, and clean up
-   partial state on failure.
-5. **Shorter lock TTLs with renewal**: e.g., 60 s TTL with periodic extension while
-   work is in progress.
-6. **DB-authoritative completion**: recompute segment counts from MySQL in
-   `tryCloseProject()` instead of relying solely on Redis counters.
+| Priority | Fix | Addresses |
+|----------|-----|-----------|
+| P0 | **DB-authoritative completion**: recompute segment counts from MySQL in `tryCloseProject()` instead of relying solely on Redis counters. | #1 (root fix), #6 |
+| P1 | **Atomic side effects**: wrap `INCRBY` calls in a Lua script or `MULTI/EXEC`. | #4 |
+| P1 | **Crash-safe initialization**: use an explicit "init complete" flag; clean up partial state on failure. | #3, #8 |
+| P2 | **Shorter lock TTLs with renewal**: e.g., 60 s TTL with periodic extension while work is in progress. | #2, #3, #9 |
+| P2 | **Defensive close condition**: use `<= 0` instead of `=== 0`. | #6 |
+| P3 | **Terminal-state guard on `forceSetSegmentAnalyzed`**: add `AND tm_analysis_status NOT IN ('DONE','SKIPPED')` to the WHERE clause (defensive hardening — currently mitigated by InnoDB + no FOUND_ROWS). | #7 |
