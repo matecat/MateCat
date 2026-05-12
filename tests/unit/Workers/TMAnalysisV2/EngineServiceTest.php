@@ -43,13 +43,13 @@ class EngineServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_getTMMatches_uses_EnginesFactory_getInstance_for_engine_creation(): void
+    public function test_getTMMatches_uses_engine_resolver_for_engine_creation(): void
     {
         $source = $this->readSource($this->engineServicePath());
         $this->assertStringContainsString(
-            'EnginesFactory::getInstance(',
+            '$this->engineResolver->getInstance(',
             $source,
-            'EngineService::getTMMatches must use EnginesFactory::getInstance() for engine creation.'
+            'EngineService::getTMMatches must use injected EngineResolverInterface for engine creation.'
         );
     }
 

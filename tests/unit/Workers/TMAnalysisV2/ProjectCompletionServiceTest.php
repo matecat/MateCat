@@ -19,10 +19,26 @@ class ProjectCompletionServiceTest extends AbstractTest
         return $path;
     }
 
+    private function repositorySourcePath(): string
+    {
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionRepository.php');
+        $this->assertNotFalse($path, 'ProjectCompletionRepository.php must exist at expected path.');
+
+        return $path;
+    }
+
     private function readSource(): string
     {
         $source = file_get_contents($this->sourcePath());
         $this->assertNotFalse($source, 'Could not read ProjectCompletionService.php source.');
+
+        return $source;
+    }
+
+    private function readRepositorySource(): string
+    {
+        $source = file_get_contents($this->repositorySourcePath());
+        $this->assertNotFalse($source, 'Could not read ProjectCompletionRepository.php source.');
 
         return $source;
     }
@@ -55,7 +71,7 @@ class ProjectCompletionServiceTest extends AbstractTest
     {
         $source = $this->readSource();
         $this->assertStringContainsString(
-            'catch (\Throwable $e)',
+            'catch (Throwable $e)',
             $source,
             'tryCloseProject must contain a catch (\Throwable $e) block to handle finalization failures.'
         );
@@ -66,7 +82,7 @@ class ProjectCompletionServiceTest extends AbstractTest
     {
         $source = $this->readSource();
 
-        $catchPos = strpos($source, 'catch (\Throwable $e)');
+        $catchPos = strpos($source, 'catch (Throwable $e)');
         $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
 
         $rollbackPos = strpos($source, '->rollback()', $catchPos);
@@ -81,7 +97,7 @@ class ProjectCompletionServiceTest extends AbstractTest
     {
         $source = $this->readSource();
 
-        $catchPos = strpos($source, 'catch (\Throwable $e)');
+        $catchPos = strpos($source, 'catch (Throwable $e)');
         $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
 
         $releasePos = strpos($source, 'releaseCompletionLock(', $catchPos);
@@ -96,7 +112,7 @@ class ProjectCompletionServiceTest extends AbstractTest
     {
         $source = $this->readSource();
 
-        $catchPos = strpos($source, 'catch (\Throwable $e)');
+        $catchPos = strpos($source, 'catch (Throwable $e)');
         $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
 
         $reAddPos = strpos($source, 'reAddProjectToQueue(', $catchPos);
@@ -111,7 +127,7 @@ class ProjectCompletionServiceTest extends AbstractTest
     {
         $source = $this->readSource();
 
-        $catchPos = strpos($source, 'catch (\Throwable $e)');
+        $catchPos = strpos($source, 'catch (Throwable $e)');
         $this->assertNotFalse($catchPos);
 
         $rollbackPos  = strpos($source, '->rollback()', $catchPos);
@@ -140,7 +156,7 @@ class ProjectCompletionServiceTest extends AbstractTest
             'Expected a catch (Exception $e) block swallowing exceptions thrown by the feature hook.'
         );
 
-        $outerCatchPos = strpos($source, 'catch (\Throwable $e)');
+        $outerCatchPos = strpos($source, 'catch (Throwable $e)');
         $this->assertNotFalse($outerCatchPos);
 
         $this->assertGreaterThan(
@@ -159,11 +175,11 @@ class ProjectCompletionServiceTest extends AbstractTest
     #[Test]
     public function test_get_project_segments_summary_uses_group_by_rollup_sql(): void
     {
-        $source = $this->readSource();
+        $source = $this->readRepositorySource();
         $this->assertStringContainsString(
             'GROUP BY id_job WITH ROLLUP',
             $source,
-            'getProjectSegmentsTranslationSummary() must use GROUP BY id_job WITH ROLLUP to produce totals row.'
+            'ProjectCompletionRepository::getProjectSegmentsTranslationSummary() must use GROUP BY id_job WITH ROLLUP to produce totals row.'
         );
     }
 
@@ -179,13 +195,13 @@ class ProjectCompletionServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_private_method_get_project_segments_translation_summary_declared(): void
+    public function test_public_method_get_project_segments_translation_summary_declared(): void
     {
         $source = $this->readSource();
         $this->assertStringContainsString(
-            'private function getProjectSegmentsTranslationSummary(',
+            'public function getProjectSegmentsTranslationSummary(',
             $source,
-            'Expected private method getProjectSegmentsTranslationSummary() to be declared in ProjectCompletionService.'
+            'Expected public method getProjectSegmentsTranslationSummary() to be declared in ProjectCompletionService.'
         );
     }
 

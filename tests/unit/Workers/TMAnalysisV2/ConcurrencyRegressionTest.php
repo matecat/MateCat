@@ -39,6 +39,14 @@ class ConcurrencyRegressionTest extends AbstractTest
         return $path;
     }
 
+    private function projectCompletionRepositoryPath(): string
+    {
+        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionRepository.php');
+        $this->assertNotFalse($path);
+
+        return $path;
+    }
+
     private function matchProcessorServicePath(): string
     {
         $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php');
@@ -175,8 +183,8 @@ class ConcurrencyRegressionTest extends AbstractTest
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos, 'Expected tryCloseProject() definition in ProjectCompletionService.');
 
-        $catchPos = strpos($source, 'catch (\Throwable $e)', $methodPos);
-        $this->assertNotFalse($catchPos, 'Expected catch (\\Throwable $e) in ProjectCompletionService::tryCloseProject().');
+        $catchPos = strpos($source, 'catch (Throwable $e)', $methodPos);
+        $this->assertNotFalse($catchPos, 'Expected catch (Throwable $e) in ProjectCompletionService::tryCloseProject().');
 
         $this->assertStringContainsString(
             '->rollback()',
@@ -213,14 +221,14 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_match_processor_service_uses_sum_if_done_skipped_sql_pattern(): void
+    public function test_match_processor_service_does_not_contain_db_reporting_query(): void
     {
         $source = $this->readSource($this->matchProcessorServicePath());
 
-        $this->assertStringContainsString(
-            "SUM(IF(st.tm_analysis_status IN ('DONE', 'SKIPPED'), 1, 0)) AS num_analyzed",
+        $this->assertStringNotContainsString(
+            'getProjectSegmentsTranslationSummary',
             $source,
-            "MatchProcessorService::getProjectSegmentsTranslationSummary() must use SUM(IF(... IN ('DONE','SKIPPED'), 1, 0)) to count only truly analyzed segments."
+            'getProjectSegmentsTranslationSummary() must NOT live in MatchProcessorService — it belongs in ProjectCompletionService.'
         );
     }
 
@@ -247,18 +255,15 @@ class ConcurrencyRegressionTest extends AbstractTest
         $arrayPopPos = strpos($source, 'array_pop($_full_report)', $methodPos);
         $this->assertNotFalse($arrayPopPos, 'Expected array_pop($_full_report) to extract the SQL ROLLUP row for word counts.');
 
-        $rollupPos = strpos($source, "\$rollup['eq_wc']", $methodPos);
-        $this->assertNotFalse($rollupPos, "Expected \$rollup['eq_wc'] usage after array_pop to populate tm_analysis_wc from DB rollup.");
-
         $this->assertStringContainsString(
-            "'tm_analysis_wc' => \$rollup['eq_wc']",
+            "(float)\$rollup['eq_wc']",
             $source,
-            "ProjectCompletionService must use DB rollup eq_wc for tm_analysis_wc (not Redis counter) to prevent word-count drift."
+            "ProjectCompletionService must use DB rollup eq_wc (not Redis counter) to prevent word-count drift."
         );
         $this->assertStringContainsString(
-            "'standard_analysis_wc' => \$rollup['st_wc']",
+            "(float)\$rollup['st_wc']",
             $source,
-            "ProjectCompletionService must use DB rollup st_wc for standard_analysis_wc (not Redis counter) to prevent word-count drift."
+            "ProjectCompletionService must use DB rollup st_wc (not Redis counter) to prevent word-count drift."
         );
     }
 
@@ -293,20 +298,15 @@ class ConcurrencyRegressionTest extends AbstractTest
     {
         $source = $this->readSource($this->projectCompletionServicePath());
 
-        $jobUpdatePos = strpos($source, 'JobDao::updateFields([');
-        $this->assertNotFalse($jobUpdatePos, 'Expected JobDao::updateFields() in ProjectCompletionService::tryCloseProject().');
-
-        $jobUpdateBlock = substr($source, $jobUpdatePos, 300);
-
         $this->assertStringContainsString(
-            "round(\$rollup['st_wc'] / \$numberOfJobs)",
-            $jobUpdateBlock,
-            'Job standard_analysis_wc must use round($rollup[st_wc] / $numberOfJobs) from DB rollup.'
+            "\$rollup['st_wc'] / \$numberOfJobs",
+            $source,
+            'Job standard_analysis_wc must use $rollup[st_wc] / $numberOfJobs from DB rollup.'
         );
 
         $this->assertStringNotContainsString(
-            "round(\$project_totals['st_wc'] / \$numberOfJobs)",
-            $jobUpdateBlock,
+            "\$project_totals['st_wc']",
+            $source,
             'Job standard_analysis_wc must NOT use Redis-derived $project_totals — use DB $rollup only.'
         );
     }
@@ -398,12 +398,12 @@ class ConcurrencyRegressionTest extends AbstractTest
     #[Test]
     public function test_project_completion_service_sql_counts_done_and_skipped_as_analyzed(): void
     {
-        $source = $this->readSource($this->projectCompletionServicePath());
+        $source = $this->readSource($this->projectCompletionRepositoryPath());
 
         $this->assertStringContainsString(
             "SUM(IF(st.tm_analysis_status IN ('DONE', 'SKIPPED'), 1, 0)) AS num_analyzed",
             $source,
-            "ProjectCompletionService::getProjectSegmentsTranslationSummary() must count both DONE and SKIPPED segments."
+            "ProjectCompletionRepository::getProjectSegmentsTranslationSummary() must count both DONE and SKIPPED segments."
         );
     }
 

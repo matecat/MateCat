@@ -28,12 +28,12 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
             $affectedRows = $db->update('segment_translations', $data, $where);
         } catch (PDOException $e) {
             LoggerFactory::doJsonLog($e->getMessage());
-            LoggerFactory::doJsonLog("**** DB failure in forceSetSegmentAnalyzed for segment {$idSegment}. NOT incrementing counters.");
+            LoggerFactory::doJsonLog("**** DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters.");
             return false;
         }
 
         if ($affectedRows === 0) {
-            LoggerFactory::doJsonLog("Segment {$idSegment} already DONE, skipping force-set side-effects.");
+            LoggerFactory::doJsonLog("Segment $idSegment already DONE, skipping force-set side-effects.");
             return false;
         }
 

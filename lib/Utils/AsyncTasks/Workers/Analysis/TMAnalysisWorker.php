@@ -19,9 +19,9 @@ use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
-use Utils\Engines\AbstractEngine;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -88,7 +88,7 @@ class TMAnalysisWorker extends AbstractWorker
 
         $this->_matches = null;
 
-        $this->_doLog("--- (Worker {$this->_workerPid}) : Segment {$params->id_segment} - Job {$params->id_job} found ");
+        $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job found ");
 
         $this->_checkForReQueueEnd($queueElement);
 
@@ -116,13 +116,13 @@ class TMAnalysisWorker extends AbstractWorker
             $matches = $this->matchProcessor->sortMatches($mtResult, $tmMatches);
 
             if (empty($matches)) {
-                $this->_doLog("--- (Worker {$this->_workerPid}) : No contribution found for this segment.");
+                $this->_doLog("--- (Worker $this->_workerPid) : No contribution found for this segment.");
                 $this->_forceSetSegmentAnalyzed($queueElement);
-                throw new EmptyElementException("--- (Worker {$this->_workerPid}) : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT);
+                throw new EmptyElementException("--- (Worker $this->_workerPid) : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT);
             }
 
             $this->_matches = $matches;
-            $this->_doLog("--- (Worker {$this->_workerPid}) : Segment {$params->id_segment} - Job {$params->id_job} matches retrieved.");
+            $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job matches retrieved.");
 
             $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
 
@@ -198,7 +198,7 @@ class TMAnalysisWorker extends AbstractWorker
             }
 
             $this->_doLog("Row found: {$tmData['id_segment']}-{$tmData['id_job']} - UPDATED.");
-            $this->_doLog("--- (Worker {$this->_workerPid}) : Segment {$params->id_segment} - Job {$params->id_job} updated.");
+            $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job updated.");
 
             $this->redisService->incrementAnalyzedCount(
                 (int)$params->pid,
@@ -212,21 +212,21 @@ class TMAnalysisWorker extends AbstractWorker
             $this->projectCompletion->tryCloseProject(
                 (int)$params->pid,
                 (string)$params->ppassword,
-                (string)$this->_myContext->redis_key,
+                $this->_myContext->redis_key,
                 $this->featureSet
             );
 
-            $this->_doLog("--- (Worker {$this->_workerPid}) : Segment {$params->id_segment} - Job {$params->id_job} acknowledged.");
+            $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job acknowledged.");
         } catch (ReQueueException $e) {
-            $this->_doLog("--- (Worker {$this->_workerPid}) : RequeueException: {$e->getMessage()}");
+            $this->_doLog("--- (Worker $this->_workerPid) : RequeueException: {$e->getMessage()}");
             throw $e;
         }
     }
 
     /**
+     * @param QueueElement $queueElement
+     * @throws EmptyElementException
      * @throws EndQueueException
-     * @throws ReflectionException
-     * @throws Exception
      */
     protected function _endQueueCallback(QueueElement $queueElement): void
     {
@@ -241,13 +241,13 @@ class TMAnalysisWorker extends AbstractWorker
     {
         if ($queueElement->params->raw_word_count == 0) {
             $this->_forceSetSegmentAnalyzed($queueElement);
-            $this->_doLog("--- (Worker {$this->_workerPid}) : empty word count segment. acknowledge and continue.");
-            throw new EmptyElementException("--- (Worker {$this->_workerPid}) : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT);
+            $this->_doLog("--- (Worker $this->_workerPid) : empty word count segment. acknowledge and continue.");
+            throw new EmptyElementException("--- (Worker $this->_workerPid) : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT);
         }
     }
 
     /**
-     * @throws ReflectionException
+     * @param QueueElement $queueElement
      * @throws EmptyElementException
      */
     protected function _forceSetSegmentAnalyzed(QueueElement $queueElement): void
@@ -270,7 +270,7 @@ class TMAnalysisWorker extends AbstractWorker
         $this->projectCompletion->tryCloseProject(
             $pid,
             (string)$queueElement->params->ppassword,
-            (string)$this->_myContext->redis_key,
+            $this->_myContext->redis_key,
             $this->featureSet
         );
     }
@@ -283,7 +283,7 @@ class TMAnalysisWorker extends AbstractWorker
         $pid = (int)$params->pid;
 
         if ($this->redisService->acquireInitLock($pid)) {
-            $totalSegmentsData = $this->matchProcessor->getProjectSegmentsTranslationSummary($pid);
+            $totalSegmentsData = $this->projectCompletion->getProjectSegmentsTranslationSummary($pid);
             $totalSegments = array_pop($totalSegmentsData);
             assert($totalSegments !== null);
 
@@ -295,16 +295,16 @@ class TMAnalysisWorker extends AbstractWorker
             $this->redisService->setProjectTotalSegments($pid, $projectSegments);
             $this->redisService->incrementAnalyzedCount($pid, $numAnalyzed, 0, 0);
 
-            $this->_doLog("--- (Worker {$this->_workerPid}) : found {$projectSegments} segments for PID {$pid}");
+            $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
         } else {
             $this->redisService->waitForInitialization($pid);
             $_projectTotSegments = $this->redisService->getProjectTotalSegments($pid);
             $_analyzed = $this->redisService->getProjectAnalyzedCount($pid);
 
-            $this->_doLog("--- (Worker {$this->_workerPid}) : found {$_projectTotSegments}, analyzed {$_analyzed} segments for PID {$pid} in Redis");
+            $this->_doLog("--- (Worker $this->_workerPid) : found $_projectTotSegments, analyzed $_analyzed segments for PID $pid in Redis");
         }
 
-        $this->_doLog("--- (Worker {$this->_workerPid}) : fetched data for segment {$sid}-{$jid}. Project ID is {$pid}");
+        $this->_doLog("--- (Worker $this->_workerPid) : fetched data for segment $sid-$jid. Project ID is $pid");
     }
 
     /**
@@ -353,7 +353,7 @@ class TMAnalysisWorker extends AbstractWorker
         $_config['mt_qe_workflow_enabled'] = (bool)($params->mt_qe_workflow_enabled ?? false);
 
         if ($_config['mt_qe_workflow_enabled']) {
-            $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? null, true) ?? []);
+            $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? '', true) ?? []);
         }
 
         $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, AbstractEngine::class);
@@ -383,7 +383,7 @@ class TMAnalysisWorker extends AbstractWorker
             throw new EmptyElementException('Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
         }
 
-        $workingJobs = $this->redisService->getWorkingProjects((string)$this->_myContext->redis_key);
+        $workingJobs = $this->redisService->getWorkingProjects($this->_myContext->redis_key);
 
         $found = false;
         foreach ($workingJobs as $value) {
@@ -454,6 +454,7 @@ class TMAnalysisWorker extends AbstractWorker
                 }
             }
         } elseif ($ind < 50) {
+            /** @noinspection PhpConditionAlreadyCheckedInspection */
             $tmMatchFuzzyBand = InternalMatchesConstants::NO_MATCH;
         } elseif ($ind < 75) {
             $tmMatchFuzzyBand = InternalMatchesConstants::TM_50_74;

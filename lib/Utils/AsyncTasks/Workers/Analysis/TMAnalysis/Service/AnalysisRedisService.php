@@ -3,6 +3,7 @@
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
 use Predis\Client;
+use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
@@ -13,7 +14,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
     private Client $redis;
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function __construct(AMQHandler $queueHandler)
     {
@@ -76,12 +77,12 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
 
     public function getWorkingProjects(string $queueKey): array
     {
-        return (array)$this->redis->lrange($queueKey, 0, -1);
+        return $this->redis->lrange($queueKey, 0, -1);
     }
 
     public function decrementWaitingSegments(string $qid): int
     {
-        return (int)$this->redis->decr(RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid);
+        return $this->redis->decr(RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid);
     }
 
     public function removeProjectFromQueue(string $queueKey, int $pid): void

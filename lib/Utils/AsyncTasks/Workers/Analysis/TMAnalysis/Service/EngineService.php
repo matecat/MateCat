@@ -6,8 +6,8 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\Engines\EnginesFactory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
@@ -15,6 +15,13 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class EngineService implements EngineServiceInterface
 {
+    private EngineResolverInterface $engineResolver;
+
+    public function __construct(?EngineResolverInterface $engineResolver = null)
+    {
+        $this->engineResolver = $engineResolver ?? new DefaultEngineResolver();
+    }
+
     /**
      * @param array<string, mixed> $config
      * @param FeatureSet $featureSet
@@ -27,7 +34,7 @@ class EngineService implements EngineServiceInterface
      */
     public function getTMMatches(array $config, FeatureSet $featureSet, ?int $mtPenalty): array
     {
-        $tmsEngine = EnginesFactory::getInstance((int)$config['id_tms']);
+        $tmsEngine = $this->engineResolver->getInstance((int)$config['id_tms']);
         $tmsEngine->setFeatureSet($featureSet);
 
         $engineConfig = $tmsEngine->getConfigStruct();
@@ -98,7 +105,7 @@ class EngineService implements EngineServiceInterface
         $mt_result = [];
 
         try {
-            $mtEngine = EnginesFactory::getInstance((int)$config['id_mt_engine']);
+            $mtEngine = $this->engineResolver->getInstance((int)$config['id_mt_engine']);
             $mtEngine->setFeatureSet($featureSet);
 
             $mtEngine->setAnalysis();
@@ -131,6 +138,11 @@ class EngineService implements EngineServiceInterface
 
     /**
      * Filters Translation Memory (TM) matches based on specific criteria defined in the MTQE workflow parameters.
+     * The MTQE workflow is designed to show and use as data analysis only TN >= 100.
+     *
+     * But there are 2 override flags that can be set in the MTQE workflow parameters:
+     * - If the "analysis_ignore_100" flag is set, matches with a score <= 100 are ignored unless they are ICE matches. Matches are restricted to ICEs.
+     * - If the "analysis_ignore_101" flag is set, all matches are ignored because we want to ignore everything below equal 101. All matches are restricted.
      *
      * @param array<int, array<string, mixed>> $matches An array of TM matches to be filtered.
      * @param bool $mt_qe_workflow_enabled
@@ -138,28 +150,23 @@ class EngineService implements EngineServiceInterface
      *
      * @return array<int, array<string, mixed>> The filtered array of TM matches.
      */
-    /**
-     * @param array<int, array<string, mixed>> $matches
-     * @param bool $mt_qe_workflow_enabled
-     * @param MTQEWorkflowParams|null $mt_qe_config
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function __filterTMMatches(array $matches, bool $mt_qe_workflow_enabled, ?MTQEWorkflowParams $mt_qe_config): array
+     private function __filterTMMatches(array $matches, bool $mt_qe_workflow_enabled, ?MTQEWorkflowParams $mt_qe_config): array
     {
         return array_filter($matches, function ($match) use ($mt_qe_config, $mt_qe_workflow_enabled) {
             if ($mt_qe_workflow_enabled) {
-                assert($mt_qe_config !== null);
+                // Strictest override: ignore everything ≤ 101 — no TM matches survive, MTQE score is the sole signal.
                 if ($mt_qe_config->analysis_ignore_101) {
                     return false;
                 }
 
+                // Intermediate override: restrict to ICE matches only — drop all non-ICE ≤ 100.
                 if ($mt_qe_config->analysis_ignore_100) {
                     if ((int)$match['match'] <= 100 && !$match[InternalMatchesConstants::TM_ICE]) {
                         return false;
                     }
                 }
 
+                // Default MTQE behaviour: keep only TM ≥ 100 (100% and ICE).
                 if ((int)$match['match'] < 100) {
                     return false;
                 }

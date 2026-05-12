@@ -259,13 +259,13 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_when_init_lock_winner_calls_setProjectTotalSegments(): void
     {
-        $redis     = $this->createMock(AnalysisRedisServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
         $redis->method('acquireInitLock')->willReturn(true);
         $redis->method('incrementAnalyzedCount');
-        $processor->method('getProjectSegmentsTranslationSummary')
+        $completion->method('getProjectSegmentsTranslationSummary')
             ->willReturn([['project_segments' => 10, 'num_analyzed' => 0]]);
 
         $redis->expects($this->once())
@@ -274,7 +274,7 @@ class TMAnalysisWorkerTest extends AbstractTest
 
         $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
 
-        $worker = $this->buildWorker(redis: $redis, processor: $processor, updater: $updater);
+        $worker = $this->buildWorker(redis: $redis, completion: $completion, updater: $updater);
 
         $this->expectException(EmptyElementException::class);
         $worker->process($this->makeQueueElement(['raw_word_count' => 0]));

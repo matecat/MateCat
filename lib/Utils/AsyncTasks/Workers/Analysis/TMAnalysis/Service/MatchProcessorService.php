@@ -7,78 +7,41 @@ use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
-use PDO;
-use PDOException;
-use RuntimeException;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
+use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
+use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
 use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\PostProcess;
-use Utils\Logger\LoggerFactory;
 
 class MatchProcessorService implements MatchProcessorServiceInterface
 {
+    private MatchSorterInterface $matchSorter;
+
+    public function __construct(?MatchSorterInterface $matchSorter = null)
+    {
+        $this->matchSorter = $matchSorter ?? new MatchSorter();
+    }
 
     /**
      * @param array<string, mixed> $match
      */
     public function isMtMatch(array $match): bool
     {
-        return stripos($match['created_by'] ?? '', InternalMatchesConstants::MT) !== false;
+        return $this->matchSorter->isMtMatch($match);
     }
 
     /**
-     * @param array<string, mixed> $mtResult
-     * @param array<int, array<string, mixed>> $tmMatches
+     * @param array<string, mixed>              $mtResult
+     * @param array<int, array<string, mixed>>  $tmMatches
      *
      * @return array<int, array<string, mixed>>
      */
     public function sortMatches(array $mtResult, array $tmMatches): array
     {
-        if (!empty($mtResult)) {
-            $tmMatches[] = $mtResult;
-        }
-
-        usort($tmMatches, $this->__compareScoreDesc(...));
-
-        return $tmMatches;
-    }
-
-    /**
-     * Compares two associative arrays based on their 'match' and 'ICE' values.
-     *
-     * @param array<string, mixed> $a
-     * @param array<string, mixed> $b
-     */
-    private function __compareScoreDesc(array $a, array $b): int
-    {
-        $aIsICE = (bool)($a['ICE'] ?? false);
-        $bIsICE = (bool)($b['ICE'] ?? false);
-
-        $aMatch = floatval($a['match']);
-        $bMatch = floatval($b['match']);
-
-        if ($aMatch == $bMatch) {
-            $conditions = [
-                [$aIsICE && !$bIsICE, -1],
-                [!$aIsICE && $bIsICE, 1],
-                [$this->isMtMatch($a), -1],
-                [$this->isMtMatch($b), 1]
-            ];
-
-            foreach ($conditions as [$condition, $result]) {
-                if ($condition) {
-                    return $result;
-                }
-            }
-
-            return 0;
-        }
-
-        return ($aMatch < $bMatch ? 1 : -1);
+        return $this->matchSorter->sortMatches($mtResult, $tmMatches);
     }
 
     /**
@@ -141,7 +104,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
         }
 
         $sourceValidator = new MessagePatternValidator($sourceLang, $rawSource);
-        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu($sourceValidator, $icuEnabled);
+        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu($sourceValidator, true);
 
         if (!$sourceContainsIcu) {
             return [null, false];
@@ -171,7 +134,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     {
         $suggestion = $match['translation'] ?? '';
 
-        $filter = MateCatFilter::getInstance($featureSet, $source, $target, []);
+        $filter = MateCatFilter::getInstance($featureSet, $source, $target);
 
         /**
          * if the first match is MT, perform QA realignment because some MT engines break tags
@@ -224,8 +187,12 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      * This method forces to set source/target languages and wires ICU detection
      * when ICU support is enabled.
      *
+     * @param string $source_seg
+     * @param string $target_seg
+     * @param string $source_lang
+     * @param string $target_lang
      * @param bool $icuEnabled
-     *
+     * @param FeatureSet|null $featureSet
      * @return PostProcess
      * @throws Exception
      */
@@ -341,52 +308,4 @@ class MatchProcessorService implements MatchProcessorServiceInterface
 
         return $tmData;
     }
-
-    /**
-     * This function is heavy, use, but only if it is necessary
-     *
-     * @param int $pid
-     *
-     * @return array<int, array<string, mixed>>
-     * @throws RuntimeException
-     */
-    public function getProjectSegmentsTranslationSummary(int $pid): array
-    {
-        //TOTAL and eq_word should be equals, BUT
-        //tm Analysis can fail on some rows because of external service nature, so use TOTAL field instead of eq_word
-        //to set the global word counter in job
-        //Ref: jobs.new_words
-        $query = "
-                SELECT
-                    id_job,
-                    password,
-                    SUM(eq_word_count) AS eq_wc,
-                    SUM(standard_word_count) AS st_wc,
-                    SUM( IF( COALESCE( eq_word_count, 0 ) = 0, raw_word_count, eq_word_count) ) as TOTAL,
-                    COUNT( s.id ) AS project_segments,
-                    SUM(IF(st.tm_analysis_status IN ('DONE', 'SKIPPED'), 1, 0)) AS num_analyzed
-                FROM segment_translations st
-                     JOIN segments s ON s.id = id_segment
-                     INNER JOIN jobs j ON j.id=st.id_job
-                WHERE j.id_project = :pid
-                AND s.show_in_cattool = 1
-                GROUP BY id_job WITH ROLLUP
-        ";
-
-        try {
-            $db = Database::obtain();
-            //Needed to address the query to the master database if exists
-            $stmt = $db->getConnection()->prepare($query);
-            $stmt->setFetchMode(PDO::FETCH_ASSOC);
-            $stmt->execute(['pid' => $pid]);
-            $results = $stmt->fetchAll();
-        } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
-
-            throw new RuntimeException($e);
-        }
-
-        return $results;
-    }
-
 }
