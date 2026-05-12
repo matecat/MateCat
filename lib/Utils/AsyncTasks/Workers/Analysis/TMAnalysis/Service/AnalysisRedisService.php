@@ -75,6 +75,9 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis->incrby(RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $numSegments);
     }
 
+    /**
+     * @return string[]
+     */
     public function getWorkingProjects(string $queueKey): array
     {
         return $this->redis->lrange($queueKey, 0, -1);

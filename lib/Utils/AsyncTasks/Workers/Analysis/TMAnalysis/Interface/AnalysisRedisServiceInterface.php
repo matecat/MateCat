@@ -16,6 +16,9 @@ interface AnalysisRedisServiceInterface
 
     public function incrementAnalyzedCount(int $pid, int $numSegments, int $eqWc, int $stWc): void;
 
+    /**
+     * @return string[]
+     */
     public function getWorkingProjects(string $queueKey): array;
 
     public function decrementWaitingSegments(string $qid): int;
@@ -28,5 +31,8 @@ interface AnalysisRedisServiceInterface
 
     public function releaseCompletionLock(int $pid): void;
 
+    /**
+     * @return array{project_segments: mixed, num_analyzed: mixed, eq_wc: float, st_wc: float}
+     */
     public function getProjectWordCounts(int $pid): array;
 }

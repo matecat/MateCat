@@ -153,7 +153,7 @@ class EngineService implements EngineServiceInterface
      private function __filterTMMatches(array $matches, bool $mt_qe_workflow_enabled, ?MTQEWorkflowParams $mt_qe_config): array
     {
         return array_filter($matches, function ($match) use ($mt_qe_config, $mt_qe_workflow_enabled) {
-            if ($mt_qe_workflow_enabled) {
+            if ($mt_qe_workflow_enabled && $mt_qe_config !== null) {
                 // Strictest override: ignore everything ≤ 101 — no TM matches survive, MTQE score is the sole signal.
                 if ($mt_qe_config->analysis_ignore_101) {
                     return false;

@@ -14,6 +14,6 @@ class DefaultEngineResolver implements EngineResolverInterface
      */
     public function getInstance(int $id): AbstractEngine
     {
-        return EnginesFactory::getInstance($id);
+        return EnginesFactory::getInstance($id, AbstractEngine::class);
     }
 }

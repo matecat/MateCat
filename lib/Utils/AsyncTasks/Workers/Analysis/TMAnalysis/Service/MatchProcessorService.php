@@ -279,6 +279,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      *
      * @param array<string, mixed> $tmData translation data array
      * @param object $params queue element params (must expose: target, pretranslate_100, mt_qe_workflow_enabled)
+     * @phpstan-param object&object{target: string, pretranslate_100: mixed, mt_qe_workflow_enabled: mixed} $params
      *
      * @return array<string, mixed>
      */
