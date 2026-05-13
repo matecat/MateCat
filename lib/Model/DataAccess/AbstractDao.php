@@ -6,7 +6,6 @@ use Exception;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use Throwable;
 use Utils\Logger\LoggerFactory;
@@ -53,6 +52,9 @@ abstract class AbstractDao
      */
     const string TABLE = '';
 
+    private const string FIND_BY_ID_SQL = "SELECT * FROM %s WHERE id = :id";
+    private const string UPDATE_STRUCT_SQL = " UPDATE %s SET %s WHERE %s ";
+
     public function __construct(?IDatabase $con = null)
     {
         if ($con == null) {
@@ -75,7 +77,7 @@ abstract class AbstractDao
      */
     public function findById(int $id, string $fetchClass, int $ttl = 0): ?IDaoStruct
     {
-        $sql = "SELECT * FROM " . static::TABLE . " WHERE id = :id";
+        $sql = sprintf(self::FIND_BY_ID_SQL, static::TABLE);
         $stmt = $this->database->getConnection()->prepare($sql);
         $keyMap = static::class . "::findById-" . $id;
 
@@ -93,10 +95,125 @@ abstract class AbstractDao
      */
     public function destroyFindByIdCache(int $id, string $fetchClass): bool
     {
-        $sql = "SELECT * FROM " . static::TABLE . " WHERE id = :id";
+        $sql = sprintf(self::FIND_BY_ID_SQL, static::TABLE);
         $stmt = $this->database->getConnection()->prepare($sql);
 
         return $this->_destroyObjectCache($stmt, $fetchClass, ['id' => $id]);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $where
+     * @return int
+     * @throws PDOException
+     */
+    public function updateFields(array $data = [], array $where = []): int
+    {
+        return $this->database->update(static::TABLE, $data, $where);
+    }
+
+    /**
+     * Updates the struct. The record is found via the primary
+     * key attributes provided by the struct.
+     *
+     * @param IDaoStruct $struct
+     * @param array{fields?: list<string>} $options
+     *
+     * @return int
+     * @throws Exception
+     */
+    public function updateStruct(IDaoStruct $struct, array $options = []): int
+    {
+        $attrs = $struct->toArray();
+
+        $fields = [];
+
+        if (isset($options['fields'])) {
+            if (!is_array($options['fields'])) {
+                throw new Exception('`fields` must be an array');
+            }
+            $fields = $options['fields'];
+        }
+
+        $sql = sprintf(
+            self::UPDATE_STRUCT_SQL,
+            static::TABLE,
+            static::buildUpdateSet($attrs, $fields),
+            static::buildPkeyCondition($attrs)
+        );
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+
+        if (!$struct instanceof AbstractDaoObjectStruct) {
+            throw new Exception('Struct must be an instance of AbstractDaoObjectStruct');
+        }
+
+        $data = array_merge(
+            $struct->toArray($fields),
+            static::structKeys($struct)
+        );
+
+        LoggerFactory::getLogger('dao')->debug([
+            'table' => static::TABLE,
+            'sql' => $sql,
+            'attr' => $attrs,
+            'fields' => $fields,
+            'struct' => $struct->toArray($fields),
+            'data' => $data
+        ]);
+
+        $stmt->execute($data);
+
+        // WARNING
+        // When updating a Mysql table with identical values, nothing's really affected so rowCount will return 0.
+        // If you need this value use this:
+        // https://www.php.net/manual/en/pdostatement.rowcount.php#example-1096
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Inserts a struct into the database.
+     *
+     * If an `auto_increment_field` is defined for the table, the last inserted is returned.
+     * Otherwise, it returns TRUE on success.
+     *
+     * Returns FALSE on failure.
+     *
+     * @param IDaoStruct $struct
+     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_fields?: array<string, string>}|null $options
+     *
+     * @return int|false
+     * @throws Exception
+     */
+    public function insertStruct(IDaoStruct $struct, ?array $options = []): int|false
+    {
+        $ignore = isset($options['ignore']) && $options['ignore'] == true;
+        $no_nulls = isset($options['no_nulls']) && $options['no_nulls'] == true;
+        $on_duplicate_fields = (!empty($options['on_duplicate_fields']) ? $options['on_duplicate_fields'] : []);
+
+        // TODO: allow the mask to be passed as option.
+        $mask = array_keys($struct->toArray());
+        /** @var list<string> $mask */
+        $mask = array_values(array_diff($mask, static::$auto_increment_field));
+
+        [$sql, $dupBindValues] = static::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields);
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+        $data = array_merge($struct->toArray($mask), $dupBindValues);
+
+        LoggerFactory::getLogger('dao')->debug(["SQL" => $sql, "values" => $data]);
+
+        $stmt->execute($data);
+
+        if (count(static::$auto_increment_field)) {
+            $id = $conn->lastInsertId();
+
+            return $id === false ? false : (int)$id;
+        } else {
+            return $stmt->rowCount();
+        }
     }
 
     /**

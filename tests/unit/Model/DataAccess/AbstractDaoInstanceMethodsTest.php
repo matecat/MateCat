@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace unit\Model\DataAccess;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\IDatabase;
 use PDO;
@@ -66,6 +67,12 @@ class TestStruct implements IDaoStruct
     }
 }
 
+class DaoObjectTestStruct extends AbstractDaoObjectStruct
+{
+    public ?int $id = null;
+    public string $name = '';
+}
+
 class TestableDao extends AbstractDao
 {
     protected static array $primary_keys = ['id'];
@@ -76,6 +83,18 @@ class AnotherTestableDao extends AbstractDao
 {
     protected static array $primary_keys = ['id'];
     const string TABLE = 'test_table';
+}
+
+class AutoIncrementTestableDao extends AbstractDao
+{
+    protected static array $primary_keys = ['id'];
+    const string TABLE = 'test_table';
+
+    public function __construct(?IDatabase $con = null)
+    {
+        parent::__construct($con);
+        static::$auto_increment_field = ['id'];
+    }
 }
 
 class FakeRedisClientForAbstractDaoTest extends Client
@@ -297,5 +316,181 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $this->assertSame('from-dao-one', $first?->name);
         $this->assertSame('from-dao-two', $second?->name);
+    }
+
+    #[Test]
+    public function test_updateFields_delegates_to_injected_database_update(): void
+    {
+        $database = $this->createMock(IDatabase::class);
+        $database
+            ->expects($this->once())
+            ->method('update')
+            ->with('test_table', ['status' => 'done'], ['id' => 1])
+            ->willReturn(1);
+
+        $dao = new TestableDao($database);
+
+        $result = $dao->updateFields(['status' => 'done'], ['id' => 1]);
+
+        $this->assertSame(1, $result);
+    }
+
+    #[Test]
+    public function test_updateStruct_builds_correct_sql_and_executes(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function (array $data): bool {
+                return $data['id'] === 5 && $data['name'] === 'updated';
+            }));
+        $stmt->expects($this->once())->method('rowCount')->willReturn(1);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())
+            ->method('prepare')
+            ->with($this->callback(function (string $sql): bool {
+                return str_contains($sql, 'UPDATE test_table')
+                    && str_contains($sql, 'SET')
+                    && str_contains($sql, 'name = :name')
+                    && str_contains($sql, 'WHERE')
+                    && str_contains($sql, 'id = :id');
+            }))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $dao = new TestableDao($database);
+        $struct = new DaoObjectTestStruct(['id' => 5, 'name' => 'updated']);
+
+        $result = $dao->updateStruct($struct);
+
+        $this->assertSame(1, $result);
+    }
+
+    #[Test]
+    public function test_updateStruct_with_fields_option_limits_set_clause(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function (array $data): bool {
+                return $data['id'] === 5 && $data['name'] === 'updated' && count($data) === 2;
+            }));
+        $stmt->expects($this->once())->method('rowCount')->willReturn(1);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())
+            ->method('prepare')
+            ->with($this->callback(function (string $sql): bool {
+                return str_contains($sql, 'UPDATE test_table')
+                    && str_contains($sql, 'SET')
+                    && str_contains($sql, 'name = :name')
+                    && !str_contains($sql, 'id = :id ,')
+                    && str_contains($sql, 'WHERE')
+                    && str_contains($sql, 'id = :id');
+            }))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $dao = new TestableDao($database);
+        $struct = new DaoObjectTestStruct(['id' => 5, 'name' => 'updated']);
+
+        $result = $dao->updateStruct($struct, ['fields' => ['name']]);
+
+        $this->assertSame(1, $result);
+    }
+
+    #[Test]
+    public function test_insertStruct_prepares_insert_and_returns_last_insert_id(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function (array $data): bool {
+                return array_key_exists('name', $data) && $data['name'] === 'created';
+            }));
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())
+            ->method('prepare')
+            ->with($this->callback(function (string $sql): bool {
+                return str_contains($sql, 'INSERT')
+                    && str_contains($sql, 'INTO test_table');
+            }))
+            ->willReturn($stmt);
+        $pdo->expects($this->once())->method('lastInsertId')->willReturn('99');
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $dao = new AutoIncrementTestableDao($database);
+        $struct = new DaoObjectTestStruct(['name' => 'created']);
+
+        $result = $dao->insertStruct($struct);
+
+        $this->assertSame(99, $result);
+    }
+
+    #[Test]
+    public function test_insertStruct_with_ignore_option(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())->method('execute');
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())
+            ->method('prepare')
+            ->with($this->callback(function (string $sql): bool {
+                return str_contains($sql, 'INSERT')
+                    && str_contains($sql, 'IGNORE')
+                    && str_contains($sql, 'INTO test_table');
+            }))
+            ->willReturn($stmt);
+        $pdo->expects($this->once())->method('lastInsertId')->willReturn('101');
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $dao = new AutoIncrementTestableDao($database);
+        $struct = new DaoObjectTestStruct(['name' => 'created']);
+
+        $result = $dao->insertStruct($struct, ['ignore' => true]);
+
+        $this->assertSame(101, $result);
+    }
+
+    #[Test]
+    public function test_insertStruct_with_on_duplicate_fields(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function (array $data): bool {
+                return array_key_exists('name', $data)
+                    && $data['name'] === 'created';
+            }));
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())
+            ->method('prepare')
+            ->with($this->callback(function (string $sql): bool {
+                return str_contains($sql, 'ON DUPLICATE KEY UPDATE');
+            }))
+            ->willReturn($stmt);
+        $pdo->expects($this->once())->method('lastInsertId')->willReturn('102');
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $dao = new AutoIncrementTestableDao($database);
+        $struct = new DaoObjectTestStruct(['name' => 'created']);
+
+        $result = $dao->insertStruct($struct, ['on_duplicate_fields' => ['name' => 'VALUES(name)']]);
+
+        $this->assertSame(102, $result);
     }
 }
