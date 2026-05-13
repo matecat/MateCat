@@ -23,6 +23,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use PDO;
 use PDOException;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Transport\Message;
@@ -31,6 +32,7 @@ use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\MMT;
@@ -109,6 +111,7 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * @throws PDOException
+     * @throws LogInvalidArgumentException
      */
     protected function _checkDatabaseConnection(): void
     {
@@ -184,7 +187,7 @@ class FastAnalysis extends AbstractDaemon
                 continue;
             }
 
-            $this->logger->debug("Projects found", $projects_list);
+            $this->logger->debug("Projects found", ['projects' => $projects_list]);
 
             $featureSet = new FeatureSet();
 
@@ -356,7 +359,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {
-        $myMemory = EnginesFactory::getInstance(1);
+        $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
         if (!$myMemory instanceof MyMemory) {
             throw new Exception("Expected MyMemory engine for id=1, got " . $myMemory::class);
         }
@@ -408,7 +411,7 @@ class FastAnalysis extends AbstractDaemon
         $this->logger->debug("Pid $pid: " . count($this->segments) . " segments");
         $this->logger->debug("Sending query to Matches analysis...");
 
-        $result = $myMemory->fastAnalysis($fastSegmentsRequest);
+        $result = $myMemory->fastAnalysis(array_values($fastSegmentsRequest));
 
         if (isset($result->error->code) && $result->error->code == -28) { //curl timed out
             throw new Exception("Matches Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE);
@@ -425,6 +428,7 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws LogInvalidArgumentException
      */
     public function cleanShutDown(): void
     {
@@ -472,6 +476,7 @@ class FastAnalysis extends AbstractDaemon
      * @param list<mixed> $bind_values
      *
      * @throws PDOException
+     * @throws LogInvalidArgumentException
      */
     protected function _executeInsert(array $tuple_list, array $bind_values): void
     {
@@ -654,7 +659,7 @@ class FastAnalysis extends AbstractDaemon
             return $e->getCode() * -1;
         }
 
-        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine']);
+        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
@@ -911,12 +916,14 @@ HD;
      * @param $id_mt_engine int
      *
      * @return Context|null
+     *
+     * @throws LogInvalidArgumentException
      */
     protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
     {
         $mtEngine = null;
         try {
-            $mtEngine = EnginesFactory::getInstance($id_mt_engine);
+            $mtEngine = EnginesFactory::getInstance($id_mt_engine, AbstractEngine::class);
         } catch (Exception $e) {
             $this->logger->debug("Caught Exception: " . $e->getMessage());
         }

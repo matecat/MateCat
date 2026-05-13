@@ -38,10 +38,12 @@ class DownloadOmegaTOutputDecorator
 
         //set the file Name
         $pathinfo = AbstractFilesStorage::pathinfo_fix($this->controller->getDefaultFileName($this->controller->getProject()));
-        $this->controller->setFilename($pathinfo['filename'] . "_" . $this->controller->getJob()->target . "." . $pathinfo['extension']);
+        $filename = is_array($pathinfo) ? ($pathinfo['filename'] ?? '') : '';
+        $extension = is_array($pathinfo) ? ($pathinfo['extension'] ?? '') : '';
+        $this->controller->setFilename($filename . "_" . $this->controller->getJob()->target . "." . $extension);
 
 
-        if ($pathinfo['extension'] != 'zip') {
+        if ($extension != 'zip') {
             $this->controller->setFilename($this->controller->getFilename() . ".zip");
         }
 
@@ -64,7 +66,7 @@ class DownloadOmegaTOutputDecorator
         $mt_id = uniqid('mt');
         $output_content[$tm_id] = [
             'document_content' => '',
-            'output_filename' => $pathinfo['filename'] . "_" . $this->controller->getJob()->target . "_TM . tmx"
+            'output_filename' => $filename . "_" . $this->controller->getJob()->target . "_TM . tmx"
         ];
 
         foreach ($tmFile as $content) {
@@ -73,7 +75,7 @@ class DownloadOmegaTOutputDecorator
 
         $output_content[$mt_id] = [
             'document_content' => '',
-            'output_filename' => $pathinfo['filename'] . "_" . $this->controller->getJob()->target . "_MT . tmx"
+            'output_filename' => $filename . "_" . $this->controller->getJob()->target . "_MT . tmx"
         ];
 
         foreach ($mtFile as $content) {
@@ -84,10 +86,13 @@ class DownloadOmegaTOutputDecorator
     }
 
     /**
+     * @param array<array{document_content: string, output_filename?: mixed}> $output_content
+     *
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
-    public function createOmegaTZip($output_content)
+    public function createOmegaTZip(array $output_content): void
     {
         $file = tempnam("/tmp", "zipmatecat");
 
@@ -111,17 +116,18 @@ class DownloadOmegaTOutputDecorator
 
         // Staff with content
         foreach ($output_content as $key => $f) {
-            $f['output_filename'] = AbstractDownloadController::forceOcrExtension($f['output_filename']);
+            $outputFilename = (string) ($f['output_filename'] ?? '');
+            $outputFilename = AbstractDownloadController::forceOcrExtension($outputFilename);
 
             //Php Zip bug, utf-8 not supported
-            $fName = preg_replace('/[^0-9a-zA-Z_.-]/u', "_", $f['output_filename']);
-            $fName = preg_replace('/_{2,}/', "_", $fName);
+            $fName = preg_replace('/[^0-9a-zA-Z_.-]/u', "_", $outputFilename) ?? $outputFilename;
+            $fName = preg_replace('/_{2,}/', "_", $fName) ?? $fName;
             $fName = str_replace('_.', ".", $fName);
             $fName = str_replace('._', ".", $fName);
             $fName = str_replace(".out.sdlxliff", ".sdlxliff", $fName);
 
             $nFinfo = AbstractFilesStorage::pathinfo_fix($fName);
-            $_name = $nFinfo['filename'];
+            $_name = is_array($nFinfo) ? ($nFinfo['filename'] ?? '') : $nFinfo;
             if (strlen($_name) < 3) {
                 $fName = substr(uniqid(), -5) . "_" . $fName;
             }
@@ -152,7 +158,7 @@ class DownloadOmegaTOutputDecorator
         $this->controller->setOutputContent($zip_content);
     }
 
-    private function getOmegatProjectFile($source, $target)
+    private function getOmegatProjectFile(string $source, string $target): string
     {
         $source = strtoupper($source);
         $target = strtoupper($target);
@@ -222,15 +228,8 @@ class DownloadOmegaTOutputDecorator
 
         $source_lang = substr($source, 0, 2);
         $target_lang = substr($target, 0, 2);
-        $sourceTokenizer = $omegatTokenizerMap[$source_lang];
-        $targetTokenizer = $omegatTokenizerMap[$target_lang];
-
-        if ($sourceTokenizer == null) {
-            $sourceTokenizer = $defaultTokenizer;
-        }
-        if ($targetTokenizer == null) {
-            $targetTokenizer = $defaultTokenizer;
-        }
+        $sourceTokenizer = $omegatTokenizerMap[$source_lang] ?? $defaultTokenizer;
+        $targetTokenizer = $omegatTokenizerMap[$target_lang] ?? $defaultTokenizer;
 
         return str_replace(
             ["@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@"],

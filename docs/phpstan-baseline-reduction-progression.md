@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 229 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 226 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (229 files)</summary>
+<summary>Click to expand full ledger (226 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -144,7 +144,6 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/Traits/APISourcePageGuesserTrait.php` | Phase 0 |
 | `lib/Controller/Traits/ChunkNotFoundHandlerTrait.php` | Phase 5C |
 | `lib/Controller/Traits/RateLimiterTrait.php` | Phase 5C |
-| `lib/Controller/Traits/SegmentDisabledTrait.php` | Phase 8A |
 | `lib/Controller/Traits/TimeLoggerTrait.php` | Phase 14 |
 | `lib/Controller/Views/QualityReportController.php` | Phase 13C |
 
@@ -185,7 +184,6 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Engines/Structs/GoogleTranslateStruct.php` | Phase 0 |
 | `lib/Model/Engines/Structs/IntentoStruct.php` | Phase 0 |
 | `lib/Model/Engines/Structs/LaraStruct.php` | Phase 0 |
-| `lib/Model/Engines/Structs/MicrosoftHubStruct.php` | Phase 0 |
 | `lib/Model/Engines/Structs/MMTStruct.php` | Phase 0 |
 | `lib/Model/Engines/Structs/NONEStruct.php` | Phase 0 |
 | `lib/Model/Engines/Structs/SmartMATEStruct.php` | Phase 0 |
@@ -273,7 +271,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `daemons/FastAnalysis.php` | Phase 4B |
-| `lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php` | Phase 4B |
+| `lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php` | Phase 5C |
 | `lib/Utils/AsyncTasks/Workers/Analysis/RedisKeys.php` | Phase 5C |
 | `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/DTO/AnalysisResult.php` | Phase 5C |
 | `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php` | Phase 5C |
@@ -297,7 +295,6 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/AsyncTasks/Workers/SetContributionMTWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/SetContributionWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/GlossaryWorker.php` | Phase 17 |
-| `lib/Utils/AsyncTasks/Workers/Traits/MatchesComparator.php` | Phase 4C |
 | `lib/Utils/AsyncTasks/Workers/Traits/ProjectWordCount.php` | Phase 4C |
 | `lib/Utils/Constants/EngineConstants.php` | Phase 6C |
 | `lib/Utils/Contribution/ContributionContexts.php` | Phase 4A |
