@@ -64,6 +64,42 @@ abstract class AbstractDao
     }
 
     /**
+     * @template T of IDaoStruct
+     *
+     * @param int $id
+     * @param class-string<T> $fetchClass
+     * @param int $ttl Cache TTL in seconds (0 = no cache)
+     *
+     * @return T|null
+     * @throws Exception
+     */
+    public function findById(int $id, string $fetchClass, int $ttl = 0): ?IDaoStruct
+    {
+        $sql = "SELECT * FROM " . static::TABLE . " WHERE id = :id";
+        $stmt = $this->database->getConnection()->prepare($sql);
+        $keyMap = static::class . "::findById-" . $id;
+
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, $fetchClass, ['id' => $id], $keyMap)[0] ?? null;
+    }
+
+    /**
+     * @template T of IDaoStruct
+     *
+     * @param int $id
+     * @param class-string<T> $fetchClass
+     *
+     * @return bool
+     * @throws PDOException
+     */
+    public function destroyFindByIdCache(int $id, string $fetchClass): bool
+    {
+        $sql = "SELECT * FROM " . static::TABLE . " WHERE id = :id";
+        $stmt = $this->database->getConnection()->prepare($sql);
+
+        return $this->_destroyObjectCache($stmt, $fetchClass, ['id' => $id]);
+    }
+
+    /**
      * @return Database|IDatabase
      */
     public function getDatabaseHandler(): Database|IDatabase
@@ -235,7 +271,7 @@ abstract class AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function _fetchObjectMap(PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null): array
+    protected function _fetchObjectMap(PDOStatement $stmt, string $fetchClass, array $bindParams, ?string $keyMap = null): array
     {
         if (empty($keyMap)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
@@ -380,7 +416,7 @@ abstract class AbstractDao
      *
      * @throws PDOException
      */
-    public static function updateFields(array $data = [], array $where = []): int
+    public static function staticUpdate(array $data = [], array $where = []): int
     {
         return Database::obtain()->update(static::TABLE, $data, $where);
     }
@@ -395,7 +431,7 @@ abstract class AbstractDao
      * @return int
      * @throws Exception
      */
-    public static function updateStruct(IDaoStruct $struct, array $options = []): int
+    public static function staticUpdateStruct(IDaoStruct $struct, array $options = []): int
     {
         $attrs = $struct->toArray();
 
@@ -452,7 +488,7 @@ abstract class AbstractDao
      * @return int|false
      * @throws Exception
      */
-    public static function insertStruct(IDaoStruct $struct, ?array $options = []): int|false
+    public static function staticInsertStruct(IDaoStruct $struct, ?array $options = []): int|false
     {
         $ignore = isset($options['ignore']) && $options['ignore'] == true;
         $no_nulls = isset($options['no_nulls']) && $options['no_nulls'] == true;
