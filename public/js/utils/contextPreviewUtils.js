@@ -2,7 +2,7 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
-import {findElementByMetadata, clientNodepathRegistry} from './contextPreviewLookup'
+import {findElementByMetadata} from './contextPreviewLookup'
 
 const containerMaps = new WeakMap()
 
@@ -559,14 +559,13 @@ export const tagSegments = (
   // text-matched SIDs from them after the full strategy pass.
   const pointMappedElements = new Map() // el → Set<sid>
 
-  for (const [sidStr, {resname, restype}] of Object.entries(metadataMap)) {
+  for (const [sidStr, {resname, restype, client_name}] of Object.entries(metadataMap)) {
     const sid = Number(sidStr)
     if (!resname || !restype) continue
     if (alreadyTagged.has(sid)) {
       strategyResolved.add(sid)
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
-      // Re-find the element so Pass 2 still excludes it on incremental calls
       const existingEl = findElementByMetadata(container, resname, restype)
       if (existingEl) {
         tier1Nodes.add(existingEl)
@@ -576,24 +575,14 @@ export const tagSegments = (
       }
       continue
     }
-    const colonIdx = resname.indexOf(':')
-    const clientName = colonIdx !== -1 ? resname.slice(0, colonIdx) : null
-    const clientStrategy = clientName ? clientNodepathRegistry.resolve(clientName) : null
-    let el
-    if (restype === 'x-attribute_name_value' && resname.includes('jcr:')) {
-      const containerEl = findElementByMetadata(container, resname, restype)
-      const segment = containerEl ? prepared.find((p) => p.sid === sid) : null
-      el = segment ? findElementByTextMatch(containerEl, segment.normSource) : null
-    } else if (clientStrategy) {
-      const clientPath = resname.slice(colonIdx + 1)
-      const segment = prepared.find((p) => p.sid === sid)
-      el = segment ? clientStrategy.execute(container, clientPath, segment.normSource) : null
-      if (!el) {
-        el = findElementByMetadata(container, resname, restype)
-      }
-    } else {
-      el = findElementByMetadata(container, resname, restype)
-    }
+    const segment = prepared.find((p) => p.sid === sid)
+    const el = findElementByMetadata(
+      container,
+      resname,
+      restype,
+      client_name,
+      segment?.normSource ?? null,
+    )
     if (el) {
       appendSid(el, sid)
       strategyResolved.add(sid)
@@ -730,6 +719,7 @@ export const extractSegmentContextFields = (segment) => {
     context_url: segment.context_url ?? null,
     resname: find('resname'),
     restype: find('restype'),
+    client_name: find('x-client-name'),
     screenshot: find('screenshot'),
   }
 }

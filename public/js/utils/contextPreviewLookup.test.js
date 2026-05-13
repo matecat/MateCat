@@ -3,7 +3,7 @@ import {
   walkNodePath,
   findContainerByXpath,
   ClientNodepathRegistry,
-  JcrContainerTextMatchStrategy,
+  AemContainerTextMatchStrategy,
   clientNodepathRegistry,
 } from './contextPreviewLookup'
 
@@ -156,12 +156,66 @@ describe('findElementByMetadata', () => {
     })
   })
 
-  describe('x-client_nodepath (stub)', () => {
-    it('returns null (documented stub)', () => {
+  describe('x-client_nodepath', () => {
+    it('returns null when clientName and normSource are absent', () => {
       container.innerHTML = '<p>Hello</p>'
       expect(
         findElementByMetadata(container, 'some/path', 'x-client_nodepath'),
       ).toBeNull()
+    })
+
+    it('returns null when clientName is absent', () => {
+      container.innerHTML =
+        '<div data-node-path="/content/jcr:content"><p>Hello</p></div>'
+      expect(
+        findElementByMetadata(
+          container,
+          'data-node-path=/content/jcr:content',
+          'x-client_nodepath',
+          null,
+          'Hello',
+        ),
+      ).toBeNull()
+    })
+
+    it('returns null for an unregistered clientName', () => {
+      container.innerHTML =
+        '<div data-node-path="/content/jcr:content"><p>Hello</p></div>'
+      expect(
+        findElementByMetadata(
+          container,
+          'data-node-path=/content/jcr:content',
+          'x-client_nodepath',
+          'unknown-client',
+          'Hello',
+        ),
+      ).toBeNull()
+    })
+
+    it('resolves via AEM strategy when clientName is "AEM"', () => {
+      container.innerHTML =
+        '<div data-node-path="/content/jcr:content"><p>Hello</p></div>'
+      const result = findElementByMetadata(
+        container,
+        'data-node-path=/content/jcr:content',
+        'x-client_nodepath',
+        'AEM',
+        'Hello',
+      )
+      expect(result).toBe(container.querySelector('p'))
+    })
+
+    it('is case-insensitive on clientName', () => {
+      container.innerHTML =
+        '<div data-node-path="/content/jcr:content"><p>Hello</p></div>'
+      const result = findElementByMetadata(
+        container,
+        'data-node-path=/content/jcr:content',
+        'x-client_nodepath',
+        'aem',
+        'Hello',
+      )
+      expect(result).toBe(container.querySelector('p'))
     })
   })
 
@@ -379,9 +433,9 @@ describe('ClientNodepathRegistry', () => {
   })
 })
 
-describe('JcrContainerTextMatchStrategy', () => {
+describe('AemContainerTextMatchStrategy', () => {
   let container
-  const strategy = new JcrContainerTextMatchStrategy()
+  const strategy = new AemContainerTextMatchStrategy()
 
   beforeEach(() => {
     container = document.createElement('div')
@@ -392,30 +446,40 @@ describe('JcrContainerTextMatchStrategy', () => {
     document.body.removeChild(container)
   })
 
-  it('finds element whose text matches within the JCR container', () => {
+  it('finds element whose text matches within the AEM attribute-located container', () => {
     container.innerHTML = `
-      <section id="jcr-zone">
+      <div data-node-path="/content/we-retail/sq-al/women/jcr:content">
         <p>Target Text</p>
-      </section>
+        <p>Other Text</p>
+      </div>
       <p>Target Text</p>
     `
     const result = strategy.execute(
       container,
-      '/html/body/section[@id="jcr-zone"]',
+      'data-node-path=/content/we-retail/sq-al/women/jcr:content',
       'Target Text',
     )
-    expect(result).toBe(container.querySelector('#jcr-zone p'))
+    expect(result).toBe(
+      container.querySelector('[data-node-path] p'),
+    )
   })
 
-  it('returns null when the XPath container is not found', () => {
+  it('returns null when the attribute-located container is not found', () => {
     container.innerHTML = '<p>Target Text</p>'
-    expect(strategy.execute(container, '//missing', 'Target Text')).toBeNull()
+    expect(
+      strategy.execute(container, 'data-node-path=/missing', 'Target Text'),
+    ).toBeNull()
   })
 
   it('returns null when no text match exists within the container', () => {
-    container.innerHTML = '<section id="s"><p>Other Text</p></section>'
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><p>Other Text</p></div>'
     expect(
-      strategy.execute(container, '/html/body/section[@id="s"]', 'Target Text'),
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Target Text',
+      ),
     ).toBeNull()
   })
 
@@ -425,29 +489,22 @@ describe('JcrContainerTextMatchStrategy', () => {
   })
 
   it('returns null when normSource is empty', () => {
-    container.innerHTML = '<section id="s"><p>Text</p></section>'
-    expect(strategy.execute(container, '/html/body/section[@id="s"]', '')).toBeNull()
-  })
-
-  it('handles XPath with attribute predicates for JCR-style data attributes', () => {
-    container.innerHTML = `
-      <div data-jcr-path="/content/jcr:content/par">
-        <p>Localised string</p>
-      </div>
-    `
-    const result = strategy.execute(
-      container,
-      '//div[@data-jcr-path="/content/jcr:content/par"]',
-      'Localised string',
-    )
-    expect(result).toBe(container.querySelector('p'))
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><p>Text</p></div>'
+    expect(
+      strategy.execute(container, 'data-node-path=/content/jcr:content', ''),
+    ).toBeNull()
   })
 })
 
 describe('clientNodepathRegistry (module singleton)', () => {
-  it('has "jcr" registered by default', () => {
-    expect(clientNodepathRegistry.resolve('jcr')).toBeInstanceOf(
-      JcrContainerTextMatchStrategy,
+  it('has "aem" registered by default', () => {
+    expect(clientNodepathRegistry.resolve('aem')).toBeInstanceOf(
+      AemContainerTextMatchStrategy,
     )
+  })
+
+  it('does not have "jcr" registered', () => {
+    expect(clientNodepathRegistry.resolve('jcr')).toBeNull()
   })
 })

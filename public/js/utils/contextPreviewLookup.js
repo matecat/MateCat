@@ -123,33 +123,46 @@ export class ClientNodepathRegistry {
   }
 }
 
-export class JcrContainerTextMatchStrategy {
+export class AemContainerTextMatchStrategy {
   execute(rootContainer, path, normSource) {
     if (!path || !normSource) return null
-    const jcrContainer = findContainerByXpath(rootContainer, path)
-    if (!jcrContainer) return null
-    return findElementByTextMatch(jcrContainer, normSource)
+    const aemContainer = findElementByMetadata(
+      rootContainer,
+      path,
+      'x-attribute_name_value',
+    )
+    if (!aemContainer) return null
+    return findElementByTextMatch(aemContainer, normSource)
   }
 }
 
 export const clientNodepathRegistry = new ClientNodepathRegistry()
-clientNodepathRegistry.register('jcr', new JcrContainerTextMatchStrategy())
+clientNodepathRegistry.register('aem', new AemContainerTextMatchStrategy())
 
 /**
  * Finds the DOM element in `container` that corresponds to a segment,
  * selecting the lookup strategy based on `restype`.
  *
  * Returns null when:
- * - restype is null, unknown, or x-client_nodepath (stub)
+ * - restype is null or unknown
+ * - restype is x-client_nodepath and clientName/normSource are absent or unregistered
  * - the element is not found
  * - any DOM exception is thrown
  *
  * @param {HTMLElement} container
  * @param {string|null} resname
  * @param {string|null} restype
+ * @param {string|null} [clientName]
+ * @param {string|null} [normSource]
  * @returns {HTMLElement|null}
  */
-export const findElementByMetadata = (container, resname, restype) => {
+export const findElementByMetadata = (
+  container,
+  resname,
+  restype,
+  clientName = null,
+  normSource = null,
+) => {
   if (!container || !resname || !restype) return null
 
   try {
@@ -178,9 +191,12 @@ export const findElementByMetadata = (container, resname, restype) => {
         )
       }
 
-      case 'x-client_nodepath':
-        // Stub — falls through to text-match
-        return null
+      case 'x-client_nodepath': {
+        if (!clientName || !normSource) return null
+        const strategy = clientNodepathRegistry.resolve(clientName.toLowerCase())
+        if (!strategy) return null
+        return strategy.execute(container, resname, normSource) ?? null
+      }
 
       default:
         return null

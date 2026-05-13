@@ -671,6 +671,7 @@ describe('extractSegmentContextFields', () => {
       context_url: 'https://example.com/page.html',
       resname: 'hero-title',
       restype: 'x-tag-id',
+      client_name: null,
       screenshot: null,
     })
   })
@@ -681,6 +682,7 @@ describe('extractSegmentContextFields', () => {
       context_url: null,
       resname: null,
       restype: null,
+      client_name: null,
       screenshot: null,
     })
   })
@@ -691,6 +693,7 @@ describe('extractSegmentContextFields', () => {
       context_url: null,
       resname: null,
       restype: null,
+      client_name: null,
       screenshot: null,
     })
   })
@@ -721,6 +724,7 @@ describe('extractSegmentContextFields', () => {
       context_url: 'https://example.com/page.html',
       resname: 'hero-title',
       restype: 'x-tag-id',
+      client_name: null,
       screenshot: 'https://example.com/screenshot.png',
     })
   })
@@ -732,6 +736,20 @@ describe('extractSegmentContextFields', () => {
     }
     const result = extractSegmentContextFields(seg)
     expect(result.screenshot).toBeNull()
+  })
+
+  it('extracts x-client-name from metadata as client_name', () => {
+    const seg = {
+      context_url: null,
+      metadata: [
+        {meta_key: 'resname', meta_value: 'data-node-path=/content/jcr:content'},
+        {meta_key: 'restype', meta_value: 'x-client_nodepath'},
+        {meta_key: 'x-client-name', meta_value: 'AEM'},
+      ],
+    }
+    const result = extractSegmentContextFields(seg)
+    expect(result.client_name).toBe('AEM')
+    expect(result.restype).toBe('x-client_nodepath')
   })
 })
 
@@ -1110,71 +1128,14 @@ describe('findElementByTextMatch', () => {
   })
 })
 
-describe('tagSegments — JCR interim dispatch', () => {
-  beforeEach(() => {
-    document.body.innerHTML = ''
-  })
-
-  it('tags element within the JCR XPath container using text-match', () => {
-    document.body.innerHTML = `
-      <section id="zone"><p>Segment Text</p></section>
-      <p>Segment Text</p>
-    `
-    tagSegments(
-      document.body,
-      [{sid: 1, source: 'Segment Text', target: ''}],
-      {metadataMap: {1: {resname: 'jcr:/html/body/section[@id="zone"]', restype: 'x-path'}}},
-    )
-    expect(getSidsFromElement(document.body.querySelector('#zone p'))).toContain(1)
-  })
-
-  it('falls through to standard text-match when JCR container not found', () => {
-    document.body.innerHTML = '<p>Fallback Text</p>'
-    tagSegments(
-      document.body,
-      [{sid: 1, source: 'Fallback Text', target: ''}],
-      {metadataMap: {1: {resname: 'jcr://missing-container', restype: 'x-path'}}},
-    )
-    expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
-  })
-
-  it('skips already-tagged element inside JCR container, picks the next one', () => {
-    document.body.innerHTML = `
-      <section id="zone">
-        <p data-context-sids="999">Match</p>
-        <p>Match</p>
-      </section>
-    `
-    tagSegments(
-      document.body,
-      [{sid: 1, source: 'Match', target: ''}],
-      {metadataMap: {1: {resname: 'jcr:/html/body/section[@id="zone"]', restype: 'x-path'}}},
-    )
-    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
-    expect(getSidsFromElement(document.body.querySelectorAll('p')[0])).toEqual([999])
-  })
-
-  it('JCR path with attribute predicate resolves correctly', () => {
-    document.body.innerHTML = `
-      <div id="par"><p>AEM content</p></div>
-    `
-    tagSegments(
-      document.body,
-      [{sid: 1, source: 'AEM content', target: ''}],
-      {metadataMap: {1: {resname: 'jcr:/html/body/div[@id="par"]', restype: 'x-path'}}},
-    )
-    expect(getSidsFromElement(document.body.querySelector('#par p'))).toContain(1)
-  })
-})
-
-describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', () => {
+describe('tagSegments — AEM x-client_nodepath dispatch', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
   })
 
   it('tags child block element matching source text within the attribute-located container', () => {
     document.body.innerHTML = `
-      <div data-jcr-path="/content/jcr:content/par">
+      <div data-node-path="/content/we-retail/jcr:content">
         <p>Segment Source</p>
         <p>Other</p>
       </div>
@@ -1185,8 +1146,9 @@ describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', (
       {
         metadataMap: {
           1: {
-            resname: 'data-jcr-path=/content/jcr:content/par',
-            restype: 'x-attribute_name_value',
+            resname: 'data-node-path=/content/we-retail/jcr:content',
+            restype: 'x-client_nodepath',
+            client_name: 'AEM',
           },
         },
       },
@@ -1194,13 +1156,13 @@ describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', (
     expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
     expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).not.toContain(1)
     expect(
-      getSidsFromElement(document.body.querySelector('[data-jcr-path]')),
+      getSidsFromElement(document.body.querySelector('[data-node-path]')),
     ).not.toContain(1)
   })
 
-  it('falls back to untagged (pass 1/2) when text not found in container', () => {
+  it('falls back to standard text-match (pass 2) when text not found in container', () => {
     document.body.innerHTML = `
-      <div data-jcr-path="/content/jcr:content/par">
+      <div data-node-path="/content/we-retail/jcr:content">
         <p>Wrong Text</p>
       </div>
       <p>Segment Source</p>
@@ -1211,8 +1173,9 @@ describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', (
       {
         metadataMap: {
           1: {
-            resname: 'data-jcr-path=/content/jcr:content/par',
-            restype: 'x-attribute_name_value',
+            resname: 'data-node-path=/content/we-retail/jcr:content',
+            restype: 'x-client_nodepath',
+            client_name: 'AEM',
           },
         },
       },
@@ -1220,9 +1183,27 @@ describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', (
     expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
   })
 
-  it('does NOT use scoped text-match when resname has no jcr:', () => {
+  it('falls back when container element not found', () => {
+    document.body.innerHTML = '<p>Segment Source</p>'
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Source', target: ''}],
+      {
+        metadataMap: {
+          1: {
+            resname: 'data-node-path=/content/missing',
+            restype: 'x-client_nodepath',
+            client_name: 'AEM',
+          },
+        },
+      },
+    )
+    expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
+  })
+
+  it('falls back to pass 2 text-match when client_name is absent', () => {
     document.body.innerHTML = `
-      <div data-id="zone">
+      <div data-node-path="/content/we-retail/jcr:content">
         <p>Segment Source</p>
       </div>
     `
@@ -1231,11 +1212,68 @@ describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', (
       [{sid: 1, source: 'Segment Source', target: ''}],
       {
         metadataMap: {
-          1: {resname: 'data-id=zone', restype: 'x-attribute_name_value'},
+          1: {
+            resname: 'data-node-path=/content/we-retail/jcr:content',
+            restype: 'x-client_nodepath',
+          },
         },
       },
     )
-    expect(getSidsFromElement(document.body.querySelector('[data-id="zone"]'))).toContain(1)
+    const tagged = document.body.querySelector('[data-context-sids]')
+    expect(tagged).not.toBeNull()
+    expect(getSidsFromElement(tagged)).toContain(1)
+  })
+
+  it('is case-insensitive on client_name ("aem" == "AEM")', () => {
+    document.body.innerHTML = `
+      <div data-node-path="/content/jcr:content">
+        <p>Hello</p>
+      </div>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Hello', target: ''}],
+      {
+        metadataMap: {
+          1: {
+            resname: 'data-node-path=/content/jcr:content',
+            restype: 'x-client_nodepath',
+            client_name: 'aem',
+          },
+        },
+      },
+    )
+    expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
+  })
+})
+
+describe('tagSegments — x-attribute_name_value without client_name (plain selector)', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('tags the matched element directly (no text-match)', () => {
+    document.body.innerHTML = `
+      <div data-node-path="/content/jcr:content">
+        <p>Segment Source</p>
+        <p>Other</p>
+      </div>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Source', target: ''}],
+      {
+        metadataMap: {
+          1: {
+            resname: 'data-node-path=/content/jcr:content',
+            restype: 'x-attribute_name_value',
+          },
+        },
+      },
+    )
+    expect(
+      getSidsFromElement(document.body.querySelector('[data-node-path]')),
+    ).toContain(1)
     expect(getSidsFromElement(document.body.querySelector('p'))).not.toContain(1)
   })
 
@@ -1247,7 +1285,7 @@ describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', (
       {
         metadataMap: {
           1: {
-            resname: 'data-jcr-path=/content/jcr:content/missing',
+            resname: 'data-node-path=/content/missing',
             restype: 'x-attribute_name_value',
           },
         },

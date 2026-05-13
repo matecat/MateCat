@@ -14,6 +14,7 @@ const CHANNEL_NAME = 'matecat-context-preview'
  *       resname,       // string|null — node selector/path value from XLIFF resname
  *       restype,       // string|null — one of: x-path | x-tag-id | x-css_class |
  *                      //               x-client_nodepath | x-attribute_name_value
+ *       client_name,   // string|null — factory key from x-client-name (required when restype is x-client_nodepath)
  *   }]}
  *     Sends the full segment mapping so ContextPreview can build the target panel.
  * - CatTool -> ContextPreview: {type: 'highlight', sid: number, source: string, target: string,

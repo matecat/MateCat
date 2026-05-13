@@ -135,7 +135,7 @@ const ContextPreview = () => {
           .filter((s) => s.resname && s.restype)
           .map((s) => [
             Number(s.sid),
-            {resname: s.resname, restype: s.restype},
+            {resname: s.resname, restype: s.restype, client_name: s.client_name ?? null},
           ]),
       ),
     [mappableSegments],
