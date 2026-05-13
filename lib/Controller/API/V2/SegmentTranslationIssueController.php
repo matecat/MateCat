@@ -23,6 +23,7 @@ use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use RuntimeException;
+use TypeError;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use View\API\V2\Json\TranslationIssueComment;
 
@@ -52,6 +53,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     /**
      * @throws ValidationError
      * @throws RuntimeException
+     * @throws Exception
      */
     public function create(): void {
         $data = [
@@ -93,6 +95,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): void {
         $data = [
@@ -115,31 +118,32 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         Database::obtain()->begin();
 
         $oldStruct = EntryDao::findById( $data[ 'id_issue' ] );
-        $data['source_page'] =  $oldStruct->source_page ;
 
-        if ( empty( $oldStruct ) ) {
+        if ( $oldStruct === null ) {
             throw new NotFoundException( "Issue not found", 404 );
         }
+
+        $data['source_page'] = $oldStruct->source_page;
 
         $chunkReviewDao = new ChunkReviewDao();
         $chunkReviewStruct = $chunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
-        if ( empty( $chunkReviewStruct ) ) {
+        if ( $chunkReviewStruct === null ) {
             throw new NotFoundException( "Job not found", 404 );
         }
 
         $jobStruct = $chunkReviewStruct->getChunk();
 
-        if ( empty( $jobStruct ) ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
-
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
         // This is the chunk review that will be updated
-        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage($jobStruct->id, $jobStruct->password, $oldStruct->source_page);
+        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage(
+            $jobStruct->id ?? throw new RuntimeException('Missing job id'),
+            $jobStruct->password ?? throw new RuntimeException('Missing job password'),
+            $oldStruct->source_page
+        );
 
-        if ( empty( $chunkReviewToBeUpdated ) ) {
+        if ( $chunkReviewToBeUpdated === null ) {
             throw new NotFoundException( "Job not found", 404 );
         }
 
@@ -152,7 +156,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         // remove old issue
         $model = $this->_getSegmentTranslationIssueModel(
             $chunkReviewToBeUpdated->id_job,
-            $chunkReviewToBeUpdated->review_password,
+            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
             $oldStruct
         );
 
@@ -161,7 +165,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         // create new issue
         $model = $this->_getSegmentTranslationIssueModel(
             $chunkReviewToBeUpdated->id_job,
-            $chunkReviewToBeUpdated->review_password,
+            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
             $newStruct
         );
 
@@ -193,26 +197,24 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws Exception
      */
     public function delete(): void {
+        $issue = $this->validator->issue ?? throw new RuntimeException('Missing issue');
+
         Database::obtain()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
             $this->request->param( 'id_job' ),
             $this->request->param( 'password' ),
-            $this->validator->issue
+            $issue
         );
 
         $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
-        if ( empty( $chunkReviewStruct ) ) {
+        if ( $chunkReviewStruct === null ) {
             throw new NotFoundException( "Job not found", 404 );
         }
 
         $jobStruct = $chunkReviewStruct->getChunk();
 
-        if ( empty( $jobStruct ) ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
-
-        $this->checkLoggedUserPermissions($this->validator->issue, $jobStruct, $this->user);
+        $this->checkLoggedUserPermissions($issue, $jobStruct, $this->user);
 
         $model->delete();
         Database::obtain()->commit();
@@ -239,6 +241,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
       * @throws AuthorizationError
       * @throws NotFoundException
       * @throws RuntimeException
+      * @throws TypeError
       */
       public function createComment(): void {
          $data = [
@@ -295,6 +298,10 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         return (int)$this->validator->translation->version_number;
     }
 
+    /**
+     * @throws AuthorizationError
+     * @throws Exception
+     */
     private function checkLoggedUserPermissions(EntryStruct $entry, JobStruct $job, UserStruct $loggerUser): void
     {
         if($entry->uid === $loggerUser->uid){
@@ -311,10 +318,15 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
-        $teamId = $job->getProject()->getTeam()->id;
+        $team = $job->getProject()->getTeam();
+
+        if ($team === null || $team->id === null) {
+            throw new AuthorizationError( "Team not found. Not Authorized", 401 );
+        }
+
         $mDao = new MembershipDao();
 
-        foreach ($mDao->getMemberListByTeamId($teamId) as $member){
+        foreach ($mDao->getMemberListByTeamId($team->id) as $member){
             if($member->uid === $loggerUser->uid){
                 return;
             }

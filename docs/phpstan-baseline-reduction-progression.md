@@ -6,14 +6,14 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,890 | −4,476 (−60.8%) |
+| **PHPStan baseline entries** | 7,366 | 2,876 | −4,490 (−61.0%) |
 | **PHPUnit tests** | ~2,248 | 4,332 | +2,084 (+92.7%) |
 | **PHPUnit assertions** | ~19,449 | 13,943 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 21.90% (150/685) | +13.42% (+97 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 42.00% (1,738/4,138) | +20.26% (+894 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 43.17% (15,091/34,955) | +21.98% (+7,818 lines) |
 | **New test files** | 235 | 291+ | +56 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 226 | +226 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 227 | +227 |
 
 ---
 
@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 226 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 227 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (226 files)</summary>
+<summary>Click to expand full ledger (227 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -130,6 +130,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
 | `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
 | `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
+| `lib/Controller/API/V2/SegmentTranslationIssueController.php` | Phase 5C |
 | `lib/Controller/API/V2/ChunkTranslationIssueController.php` | Phase 5C |
 | `lib/Controller/API/V2/KeyCheckController.php` | Phase 5C |
 | `lib/Controller/API/V3/LaraController.php` | Phase 0 |
@@ -1275,7 +1276,7 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 | ~~`GetSegmentsController.php`~~         | ~~27~~ | ~~59%~~ | ~~16~~ | ~~8~~ | Core editor endpoint |
 | ~~`ModernMTController.php`~~            | 26 | 34% | 9 | 15 | MT integration — heavy behavioral |
 | ~~`CattoolController.php`~~                 | ~~25~~ | ~~60%~~ | ~~15~~ | ~~1~~ | ✅ Done (Phase 23, +decorators, 28 tests) |
-| `SegmentTranslationIssueController.php` | 21 | 47% | 10 | 9 | LQA endpoint |
+| ~~`SegmentTranslationIssueController.php`~~ | ~~21~~ | ~~96%~~ | ~~21~~ | ~~0~~ | ✅ Done (22 tests, 55 assertions) |
 | `DownloadQRController.php`              | 18 | 66% | 12 | 6 | QR downloads |
 | ~~`GetWarningController.php`~~           | ~~17~~ | ~~23%~~ | ~~4~~ | ~~12~~ | ✅ Done (Phase 22) |
 
