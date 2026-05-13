@@ -182,6 +182,17 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
+  // return row height and checks if it have margin
+  const getRowHeightWithMargin = useCallback(({id, height}) => {
+    const {segment, nextSegmentId} = cachedSegmentsToJS.current.get(id)
+    const {segment: nextSegment} =
+      cachedSegmentsToJS.current.get(nextSegmentId) ?? {}
+
+    return segment.internal_id !== nextSegment?.internal_id
+      ? height + ROW_MARGIN
+      : height
+  }, [])
+
   const onChangeRowHeight = useCallback(
     (id, newHeight) => {
       rowsRenderedHeight.current.set(
@@ -401,17 +412,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       return props
     })
   }, [files, isSideOpen, segments])
-
-  // return row height and checks if it have margin
-  const getRowHeightWithMargin = useCallback(({id, height}) => {
-    const {segment, nextSegmentId} = cachedSegmentsToJS.current.get(id)
-    const {segment: nextSegment} =
-      cachedSegmentsToJS.current.get(nextSegmentId) ?? {}
-
-    return segment.internal_id !== nextSegment?.internal_id
-      ? height + ROW_MARGIN
-      : height
-  }, [])
 
   // set width and height of area
   useEffect(() => {
