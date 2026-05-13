@@ -7,6 +7,8 @@ use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\WordCount\CounterModel;
+use DomainException;
+use Exception;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -17,16 +19,25 @@ use Utils\Logger\LoggerFactory;
 
 class ProjectCompletionRepository implements ProjectCompletionRepositoryInterface
 {
+    /**
+     * @throws PDOException
+     */
     public function beginTransaction(): void
     {
         Database::obtain()->begin();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function commit(): void
     {
         Database::obtain()->commit();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function rollback(): void
     {
         Database::obtain()->rollback();
@@ -69,6 +80,9 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         }
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updateProjectAnalysisStatus(int $pid, string $status, float $eqWc, float $stWc): void
     {
         ProjectDao::updateFields(
@@ -84,6 +98,8 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     /**
      * @return array<int, array{id: int, password: string}>
      * @throws ReflectionException
+     * @throws Exception
+     * @throws DomainException
      */
     public function getProjectJobIds(int $pid): array
     {
@@ -100,6 +116,9 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         return $result;
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updateJobStandardWordCount(int $jobId, float $stWc): void
     {
         JobDao::updateFields(
@@ -116,6 +135,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyProjectAndJobCaches(int $pid): void
     {
@@ -125,6 +145,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
 
     /**
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyAllCaches(int $pid, string $projectPassword): void
     {

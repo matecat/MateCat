@@ -49,7 +49,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 1. **Maintain a fixed-files ledger** — a persistent list of every file we've already cleaned (see below).
 2. **Pick a new file** to clean from the baseline.
 3. **Fix all PHPStan errors** in that file.
-4. **Test the file alone with no baseline** (`cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress --error-format=table; cp phpstan-baseline.neon.bak phpstan-baseline.neon`) — it **must** report zero errors.
+4. **Test the file alone with no baseline** (`php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table`) — it **must** report zero errors.
 5. **Run PHPStan on the full codebase with the baseline** — this surfaces only **new** errors (ones not already recorded in the baseline).
 6. **For each new error found:**
    - If the error is in a file **on our fixed-files ledger** → **fix it** (that file must stay clean).
@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 183 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 229 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
-<!-- To verify: cp phpstan-baseline.neon phpstan-baseline.neon.bak && echo "" > phpstan-baseline.neon && php vendor/bin/phpstan analyse <file> --no-progress; cp phpstan-baseline.neon.bak phpstan-baseline.neon -->
+<!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (169 files)</summary>
+<summary>Click to expand full ledger (229 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -125,18 +125,25 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Templating/PHPTALWithAppend.php` | Phase 23 |
 | `plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php` | Phase 23 |
 | `lib/Controller/API/App/QualityFrameworkController.php` | Phase 13C |
+| `lib/Controller/API/App/QualityReportControllerAPI.php` | Phase 5C |
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
 | `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
 | `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
+| `lib/Controller/API/V2/ChunkTranslationIssueController.php` | Phase 5C |
+| `lib/Controller/API/V2/KeyCheckController.php` | Phase 5C |
 | `lib/Controller/API/V3/LaraController.php` | Phase 0 |
 | `lib/Controller/API/V3/ModernMTController.php` | Phase 21 |
+| `lib/Controller/API/V3/QualityReportControllerAPI.php` | Phase 5C |
+| `lib/Controller/API/V3/RevisionFeedbackController.php` | Phase 5C |
 | `lib/Controller/API/V3/SegmentAnalysisController.php` | Phase 8A |
 
 #### Controller Traits & Views
 | File | Cleaned In |
 |------|-----------|
 | `lib/Controller/Traits/APISourcePageGuesserTrait.php` | Phase 0 |
+| `lib/Controller/Traits/ChunkNotFoundHandlerTrait.php` | Phase 5C |
+| `lib/Controller/Traits/RateLimiterTrait.php` | Phase 5C |
 | `lib/Controller/Traits/SegmentDisabledTrait.php` | Phase 8A |
 | `lib/Controller/Traits/TimeLoggerTrait.php` | Phase 14 |
 | `lib/Controller/Views/QualityReportController.php` | Phase 13C |
@@ -202,8 +209,13 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Model/Jobs & LQA
 | File | Cleaned In |
 |------|-----------|
+| `lib/Model/Concerns/LogsMessages.php` | Phase 5C |
 | `lib/Model/Jobs/ChunkDao.php` | Phase 0 |
+| `lib/Model/Jobs/JobDao.php` | Phase 5C |
+| `lib/Model/Jobs/MetadataDao.php` | Phase 5C |
+| `lib/Model/JobSplitMerge/JobSplitMergeManager.php` | Phase 5C |
 | `lib/Model/LQA/CategoryDao.php` | Phase 0 |
+| `lib/Model/LQA/ChunkReviewDao.php` | Phase 5C |
 | `lib/Model/LQA/ModelDao.php` | Phase 0 |
 | `lib/Model/LQA/ModelStruct.php` | Phase 0 |
 
@@ -213,7 +225,9 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Projects/ManageModel.php` | Phase 14 |
 | `lib/Model/Projects/MetadataDao.php` | Phase 15 |
 | `lib/Model/Projects/ProjectDao.php` | Phase 15 |
+| `lib/Model/Projects/ProjectModel.php` | Phase 5C |
 | `lib/Model/Projects/ProjectStruct.php` | Phase 14 |
+| `lib/Model/Projects/ProjectTemplateDao.php` | Phase 5C |
 | `lib/Model/Projects/ProjectTemplateStruct.php` | Phase 0 |
 
 #### Model (other)
@@ -231,15 +245,19 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Search/MySQLReplaceEventDAO.php` | Phase 0 |
 | `lib/Model/Search/MySQLReplaceEventIndexDAO.php` | Phase 0 |
 | `lib/Model/Search/RedisReplaceEventIndexDAO.php` | Phase 0 |
+| `lib/Model/Segments/SegmentDisabledService.php` | Phase 5C |
+| `lib/Model/Segments/SegmentMetadataDao.php` | Phase 5C |
 | `lib/Model/Segments/SegmentOriginalDataDao.php` | Phase 0 |
 | `lib/Model/Segments/SegmentUIStruct.php` | Phase 0 |
 | `lib/Model/Teams/MembershipStruct.php` | Phase 0 |
+| `lib/Model/Teams/TeamDao.php` | Phase 5C |
 | `lib/Model/Teams/TeamModel.php` | Phase 6A |
 | `lib/Model/TmKeyManagement/MemoryKeyDao.php` | Phase 6C |
 | `lib/Model/TmKeyManagement/MemoryKeyStruct.php` | Phase 6C |
 | `lib/Model/TmKeyManagement/UserKeysModel.php` | Phase 6C |
 | `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
 | `lib/Model/Translators/TranslatorsModel.php` | Phase 6D |
+| `lib/Model/Users/UserDao.php` | Phase 5C |
 | `lib/Model/Xliff/DTO/AbstractXliffRule.php` | Phase 0 |
 | `lib/Model/Xliff/DTO/XliffRuleInterface.php` | Phase 0 |
 
@@ -254,12 +272,33 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Utils/Workers & Contribution
 | File | Cleaned In |
 |------|-----------|
+| `daemons/FastAnalysis.php` | Phase 4B |
+| `lib/Utils/AsyncTasks/Workers/Analysis/FastAnalysis.php` | Phase 4B |
+| `lib/Utils/AsyncTasks/Workers/Analysis/RedisKeys.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/DTO/AnalysisResult.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/EngineResolverInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/EngineServiceInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/MatchProcessorServiceInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/ProjectCompletionRepositoryInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/ProjectCompletionServiceInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/SegmentUpdaterServiceInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/AnalysisRedisService.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/DefaultEngineResolver.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/EngineService.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/MatchProcessorService.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionRepository.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/ProjectCompletionService.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Service/SegmentUpdaterService.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php` | Phase 5C |
 | `lib/Utils/AsyncTasks/Workers/GetContributionWorker.php` | Phase 4A |
+| `lib/Utils/AsyncTasks/Workers/Interface/MatchSorterInterface.php` | Phase 5C |
+| `lib/Utils/AsyncTasks/Workers/Service/MatchSorter.php` | Phase 5C |
 | `lib/Utils/AsyncTasks/Workers/SetContributionMTWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/SetContributionWorker.php` | Phase 5B |
+| `lib/Utils/AsyncTasks/Workers/GlossaryWorker.php` | Phase 17 |
 | `lib/Utils/AsyncTasks/Workers/Traits/MatchesComparator.php` | Phase 4C |
 | `lib/Utils/AsyncTasks/Workers/Traits/ProjectWordCount.php` | Phase 4C |
-| `lib/Utils/AsyncTasks/Workers/GlossaryWorker.php` | Phase 17 |
 | `lib/Utils/Constants/EngineConstants.php` | Phase 6C |
 | `lib/Utils/Contribution/ContributionContexts.php` | Phase 4A |
 | `lib/Utils/Contribution/GetContributionRequest.php` | Phase 4A |
@@ -290,6 +329,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Engines/MMT/MMTServiceApiException.php` | Phase 0 |
 | `lib/Utils/Engines/MMT.php` | Phase 14 |
 | `lib/Utils/Engines/NONE.php` | Phase 0 |
+| `lib/Utils/Engines/SmartMATE.php` | Phase 5C |
 | `lib/Utils/Engines/Results/ErrorResponse.php` | Phase 0 |
 | `lib/Utils/Engines/Results/MTResponse.php` | Phase 0 |
 | `lib/Utils/Engines/Results/MyMemory/AnalyzeResponse.php` | Phase 0 |
@@ -338,7 +378,6 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
-| `lib/Utils/Templating/PHPTALWithAppend.php` | Phase 0 |
 | `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/ShareKeyEmail.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/TmKeyManager.php` | Phase 6C |

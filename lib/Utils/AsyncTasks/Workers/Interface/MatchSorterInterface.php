@@ -16,7 +16,7 @@ interface MatchSorterInterface
      * @param array<string, mixed>              $mtResult
      * @param array<int, array<string, mixed>>  $tmMatches
      *
-     * @return array<int, array<string, mixed>>
+     * @return list<array<string, mixed>>
      */
     public function sortMatches(array $mtResult, array $tmMatches): array;
 }
