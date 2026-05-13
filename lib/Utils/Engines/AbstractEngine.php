@@ -222,6 +222,8 @@ abstract class AbstractEngine implements EngineInterface
      * @param array<int, mixed> $curl_options
      *
      * @return string|bool|null
+     * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function _call(string $url, array $curl_options = []): string|bool|null
     {
@@ -286,6 +288,8 @@ abstract class AbstractEngine implements EngineInterface
      * @param bool                 $isJsonRequest
      *
      * @return void
+     * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
     {
@@ -433,10 +437,13 @@ abstract class AbstractEngine implements EngineInterface
             $newEngineStruct = GoogleTranslateStruct::getStruct();
 
             $newEngineStruct->name = "Generic";
-            $newEngineStruct->uid = 0;
-            $newEngineStruct->type = EngineConstants::MT;
-            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
-            $newEngineStruct->others = [];
+             $newEngineStruct->uid = 0;
+             $newEngineStruct->type = EngineConstants::MT;
+             if (!is_array($newEngineStruct->extra_parameters)) {
+                 $newEngineStruct->extra_parameters = [];
+             }
+             $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
+             $newEngineStruct->others = [];
 
             $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);
 

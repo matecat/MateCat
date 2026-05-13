@@ -90,9 +90,11 @@ class MMTServiceApi
     /* - Instance --------------------------------------------------------------------------------------------------- */
 
     /**
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     */
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getAvailableLanguages(): ?array
     {
         return $this->send('GET', "$this->baseUrl/languages");
@@ -101,13 +103,15 @@ class MMTServiceApi
     /* - User ------------------------------------------------------------------------------------------------------- */
 
     /**
-     * @param string $name
-     * @param string $email
-     * @param string $stripeToken
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     */
+      * @param string $name
+      * @param string $email
+      * @param string $stripeToken
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function signup(string $name, string $email, string $stripeToken): ?array
     {
         return $this->send('POST', "$this->baseUrl/users", [
@@ -118,26 +122,30 @@ class MMTServiceApi
     }
 
     /**
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     */
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function me(): ?array
     {
         return $this->send('GET', "$this->baseUrl/users/me");
     }
 
     /**
-     * Get the Quality Estimation of a translation
-     *
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     */
+      * Get the Quality Estimation of a translation
+      *
+      * @param string $source
+      * @param string $target
+      * @param string $sentence
+      * @param string $translation
+      * @param string $mt_qe_engine_id
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function qualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id): ?array
     {
         return $this->send('GET', "$this->baseUrl/translate/qe", [
@@ -153,35 +161,41 @@ class MMTServiceApi
     /* Memory ------------------------------------------------------------------------------------------------------- */
 
     /**
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     */
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getAllMemories(): ?array
     {
         return $this->send('GET', "$this->baseUrl/memories");
     }
 
     /**
-     * @param string $id
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $id
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getMemoryById(string $id): ?array
     {
         return $this->send('GET', "$this->baseUrl/memories/$id");
     }
 
     /**
-     * @param string $name
-     * @param string|null $description
-     * @param string|null $externalId
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $name
+      * @param string|null $description
+      * @param string|null $externalId
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function createMemory(string $name, ?string $description = null, ?string $externalId = null): ?array
     {
         return $this->send('POST', "$this->baseUrl/memories", [
@@ -192,76 +206,88 @@ class MMTServiceApi
     }
 
     /**
-     * @param string $id
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $id
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function deleteMemory(string $id): ?array
     {
         return $this->send('DELETE', "$this->baseUrl/memories/$id");
     }
 
     /**
-     * @param string $id
-     * @param array<string, mixed> $data
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $id
+      * @param array<string, mixed> $data
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function importGlossary(string $id, array $data): ?array
     {
         return $this->send('POST', "$this->baseUrl/memories/$id/glossary", $data, true);
     }
 
     /**
-     * @param string $id
-     * @param array<string, mixed> $data
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $id
+      * @param array<string, mixed> $data
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function updateGlossary(string $id, array $data): ?array
     {
         return $this->send('PUT', "$this->baseUrl/memories/$id/glossary", $data);
     }
 
     /**
-     * @param string $uuid
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $uuid
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function importJobStatus(string $uuid): ?array
     {
         return $this->send('GET', "$this->baseUrl/import-jobs/$uuid");
     }
 
     /**
-     * @param string $id
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $id
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getMemory(string $id): ?array
     {
         return $this->send('GET', "$this->baseUrl/memories/$id");
     }
 
     /**
-     * @param string $id
-     * @param string $name
-     * @param string|null $description
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $id
+      * @param string $name
+      * @param string|null $description
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function updateMemory(string $id, string $name, ?string $description = null): ?array
     {
         return $this->send('PUT', "$this->baseUrl/memories/$id", [
@@ -271,12 +297,14 @@ class MMTServiceApi
     }
 
     /**
-     * @param array<string> $externalIds
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param array<string> $externalIds
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function connectMemories(array $externalIds): ?array
     {
         return $this->send('POST', "$this->baseUrl/memories/connect", [
@@ -285,18 +313,20 @@ class MMTServiceApi
     }
 
     /**
-     * @param array<string>|string $id
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     *
-     * @param string $session
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param array<string>|string $id
+      * @param string $source
+      * @param string $target
+      * @param string $sentence
+      * @param string $translation
+      *
+      * @param string $session
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function addToMemoryContent(array|string $id, string $source, string $target, string $sentence, string $translation, string $session): ?array
     {
         if (is_array($id)) {
@@ -320,28 +350,32 @@ class MMTServiceApi
     }
 
     /**
-     * @param string $uuid
-     *
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $uuid
+      *
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function jobStatus(string $uuid): void
     {
         $this->send('GET', "$this->baseUrl/import-jobs/$uuid/content", []);
     }
 
     /**
-     * @param string $tuid
-     * @param array<string> $memory_keys
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $session
-     *
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $tuid
+      * @param array<string> $memory_keys
+      * @param string $source
+      * @param string $target
+      * @param string $sentence
+      * @param string $translation
+      * @param string $session
+      *
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function updateMemoryContent(string $tuid, array $memory_keys, string $source, string $target, string $sentence, string $translation, string $session): void
     {
         foreach ($memory_keys as $memory) {
@@ -357,15 +391,16 @@ class MMTServiceApi
     }
 
     /**
-     * @param string $id
-     * @param string $tmx
-     * @param string|null $compression
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     * @throws RuntimeException
-     */
+      * @param string $id
+      * @param string $tmx
+      * @param string|null $compression
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function importIntoMemoryContent(string $id, string $tmx, ?string $compression = null): ?array
     {
         return $this->send('POST', "$this->baseUrl/memories/$id/content", [
@@ -375,12 +410,14 @@ class MMTServiceApi
     }
 
     /**
-     * @param string $uuid
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $uuid
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getImportJob(string $uuid): ?array
     {
         return $this->send('GET', "$this->baseUrl/import-jobs/$uuid");
@@ -389,16 +426,18 @@ class MMTServiceApi
     /* Translation -------------------------------------------------------------------------------------------------- */
 
     /**
-     * @param string $source
-     * @param array<string> $targets
-     * @param string $text
-     * @param array<string>|null $hints
-     * @param int|null $limit
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $source
+      * @param array<string> $targets
+      * @param string $text
+      * @param array<string>|null $hints
+      * @param int|null $limit
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getContextVectorFromText(string $source, array $targets, string $text, ?array $hints = null, ?int $limit = null): ?array
     {
         return $this->send('GET', "$this->baseUrl/context-vector", [
@@ -411,18 +450,19 @@ class MMTServiceApi
     }
 
     /**
-     * @param string $source
-     * @param array<string> $targets
-     * @param string $file
-     * @param string|null $compression
-     * @param array<string>|null $hints
-     * @param int|null $limit
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     * @throws RuntimeException
-     */
+      * @param string $source
+      * @param array<string> $targets
+      * @param string $file
+      * @param string|null $compression
+      * @param array<string>|null $hints
+      * @param int|null $limit
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function getContextVectorFromFile(string $source, array $targets, string $file, ?string $compression = null, ?array $hints = null, ?int $limit = null): ?array
     {
         return $this->send('GET', "$this->baseUrl/context-vector", [
@@ -436,24 +476,26 @@ class MMTServiceApi
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $text
-     * @param string|null $contextVector
-     * @param array<string>|null $hints
-     * @param string|null $projectId
-     * @param int|null $timeout
-     * @param string|null $priority
-     * @param string|null $session
-     * @param string|null $glossaries
-     * @param bool|null $ignoreGlossaryCase
-     * @param bool|null $include_score
-     * @param string|null $mt_qe_engine_id
-     *
-     * @return array<string, mixed>|null
-     * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
-     */
+      * @param string $source
+      * @param string $target
+      * @param string $text
+      * @param string|null $contextVector
+      * @param array<string>|null $hints
+      * @param string|null $projectId
+      * @param int|null $timeout
+      * @param string|null $priority
+      * @param string|null $session
+      * @param string|null $glossaries
+      * @param bool|null $ignoreGlossaryCase
+      * @param bool|null $include_score
+      * @param string|null $mt_qe_engine_id
+      *
+      * @return array<string, mixed>|null
+      * @throws MMTServiceApiException
+      * @throws MMTServiceApiRequestException
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
     public function translate(
         string $source,
         string $target,

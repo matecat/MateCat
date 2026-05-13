@@ -149,7 +149,7 @@ class ProjectCompletionRepositoryTest extends AbstractTest
 
         $projectDao = $this->createMock(ProjectDao::class);
         $projectDao->expects($this->once())
-            ->method('findById')
+            ->method('fetchById')
             ->with(9, ProjectStruct::class)
             ->willReturn($project);
 
@@ -196,7 +196,7 @@ class ProjectCompletionRepositoryTest extends AbstractTest
         $jobDao = $this->createMock(JobDao::class);
 
         $projectDao->expects($this->once())
-            ->method('destroyFindByIdCache')
+            ->method('destroyFetchByIdCache')
             ->with(44, ProjectStruct::class)
             ->willReturn(true);
 
@@ -217,7 +217,7 @@ class ProjectCompletionRepositoryTest extends AbstractTest
         $analysisDao = $this->createMock(AnalysisDao::class);
 
         $projectDao->expects($this->once())
-            ->method('destroyFindByIdCache')
+            ->method('destroyFetchByIdCache')
             ->with(88, ProjectStruct::class)
             ->willReturn(true);
         $jobDao->expects($this->once())

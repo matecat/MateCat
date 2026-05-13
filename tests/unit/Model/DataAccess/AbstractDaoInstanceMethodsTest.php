@@ -193,7 +193,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $dao = new TestableDao($database);
 
-        $result = $dao->findById(42, TestStruct::class);
+        $result = $dao->fetchById(42, TestStruct::class);
 
         $this->assertInstanceOf(TestStruct::class, $result);
         $this->assertSame(42, $result?->id);
@@ -216,7 +216,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $dao = new TestableDao($database);
 
-        $result = $dao->findById(42, TestStruct::class);
+        $result = $dao->fetchById(42, TestStruct::class);
 
         $this->assertNull($result);
     }
@@ -241,8 +241,8 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $dao = new TestableDao($database);
 
-        $first = $dao->findById(42, TestStruct::class, 60);
-        $second = $dao->findById(42, TestStruct::class, 60);
+        $first = $dao->fetchById(42, TestStruct::class, 60);
+        $second = $dao->fetchById(42, TestStruct::class, 60);
 
         $this->assertInstanceOf(TestStruct::class, $first);
         $this->assertInstanceOf(TestStruct::class, $second);
@@ -269,9 +269,9 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $dao = new TestableDao($database);
 
-        $dao->findById(42, TestStruct::class, 60);
-        $dao->destroyFindByIdCache(42, TestStruct::class);
-        $dao->findById(42, TestStruct::class, 60);
+        $dao->fetchById(42, TestStruct::class, 60);
+        $dao->destroyFetchByIdCache(42, TestStruct::class);
+        $dao->fetchById(42, TestStruct::class, 60);
 
         $this->assertTrue(true);
     }
@@ -311,8 +311,8 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $daoTwo = new AnotherTestableDao($databaseDaoTwo);
 
-        $first = $daoOne->findById(10, TestStruct::class, 60);
-        $second = $daoTwo->findById(10, TestStruct::class, 60);
+        $first = $daoOne->fetchById(10, TestStruct::class, 60);
+        $second = $daoTwo->fetchById(10, TestStruct::class, 60);
 
         $this->assertSame('from-dao-one', $first?->name);
         $this->assertSame('from-dao-two', $second?->name);

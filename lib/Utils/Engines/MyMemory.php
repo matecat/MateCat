@@ -43,6 +43,7 @@ use TypeError;
  * Date: 25/02/15
  * Time: 18.53
  *
+ * @property string $contribute_relative_url
  */
 class MyMemory extends AbstractEngine
 {
@@ -102,6 +103,7 @@ class MyMemory extends AbstractEngine
      * @param string|null $function
      *
      * @return TMSAbstractResponse
+     * @throws TypeError
      */
     protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): TMSAbstractResponse
     {
@@ -212,8 +214,20 @@ class MyMemory extends AbstractEngine
      * @throws ReQueueException
      * @throws ValidationError
      */
-    public function get(array $_config): GetMemoryResponse
-    {
+     /**
+      * @param array<string, mixed> $_config
+      *
+      * @return GetMemoryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      * @throws AuthenticationError
+      * @throws NotFoundException
+      * @throws ValidationError
+      * @throws EndQueueException
+      * @throws ReQueueException
+      */
+     public function get(array $_config): GetMemoryResponse
+     {
         $parameters = [];
         $parameters['q'] = $_config['segment'];
         $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
@@ -278,13 +292,15 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param array<string, mixed> $_config
-     *
-     * @return SetContributionResponse|null
-     */
-    public function set($_config): ?SetContributionResponse
-    {
+     /**
+      * @param array<string, mixed> $_config
+      *
+      * @return SetContributionResponse|null
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function set($_config): ?SetContributionResponse
+     {
         $parameters = $this->buildContributeParameters($_config);
 
         $this->call('contribute_relative_url', $parameters, true);
@@ -405,13 +421,15 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param array<string, mixed> $_config
-     *
-     * @return bool
-     */
-    public function delete($_config): bool
-    {
+     /**
+      * @param array<string, mixed> $_config
+      *
+      * @return bool
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function delete($_config): bool
+     {
         $parameters = [];
         $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
         $parameters['de'] = $_config['email'];
@@ -444,15 +462,17 @@ class MyMemory extends AbstractEngine
         return true;
     }
 
-    /**
-     * Check the entry status on myMemory
-     *
-     * @param string $uuid
-     *
-     * @return FileImportAndStatusResponse
-     */
-    public function entryStatus(string $uuid): TMSAbstractResponse
-    {
+     /**
+      * Check the entry status on myMemory
+      *
+      * @param string $uuid
+      *
+      * @return FileImportAndStatusResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function entryStatus(string $uuid): TMSAbstractResponse
+     {
         // 1 second timeout
         $this->_setAdditionalCurlParams([
                 CURLOPT_TIMEOUT => 1
@@ -464,21 +484,22 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * Post a file to myMemory
-     *
-     * Remove the first line from csv (source and target)
-     * and rewrite the csv because MyMemory doesn't want the header line
-     *
-     * @param string $file
-     * @param string $key
-     * @param string $name
-     *
-     * @return FileImportAndStatusResponse
-     * @throws RuntimeException
-     */
-    public function glossaryImport(string $file, string $key, string $name = ''): FileImportAndStatusResponse
-    {
+     /**
+      * Post a file to myMemory
+      *
+      * Remove the first line from csv (source and target)
+      * and rewrite the csv because MyMemory doesn't want the header line
+      *
+      * @param string $file
+      * @param string $key
+      * @param string $name
+      *
+      * @return FileImportAndStatusResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryImport(string $file, string $key, string $name = ''): FileImportAndStatusResponse
+     {
         $postFields = [
             'glossary' => $this->getCurlFile($file),
             'key' => trim($key),
@@ -497,16 +518,18 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $key
-     * @param string $keyName
-     * @param string $userEmail
-     * @param string $userName
-     *
-     * @return ExportResponse
-     */
-    public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
-    {
+     /**
+      * @param string $key
+      * @param string $keyName
+      * @param string $userEmail
+      * @param string $userName
+      *
+      * @return ExportResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
+     {
         $this->call('glossary_export_relative_url', [
             'key' => $key,
             'key_name' => $keyName,
@@ -517,17 +540,19 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $source
-     * @param string $target
-     * @param string $sourceLanguage
-     * @param string $targetLanguage
-     * @param array<string>|null $keys
-     *
-     * @return CheckGlossaryResponse
-     */
-    public function glossaryCheck(string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = []): CheckGlossaryResponse
-    {
+     /**
+      * @param string $source
+      * @param string $target
+      * @param string $sourceLanguage
+      * @param string $targetLanguage
+      * @param array<string>|null $keys
+      *
+      * @return CheckGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryCheck(string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = []): CheckGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             'source' => $source,
@@ -541,13 +566,15 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param array<string>|null $keys
-     *
-     * @return DomainsResponse
-     */
-    public function glossaryDomains(?array $keys = []): DomainsResponse
-    {
+     /**
+      * @param array<string>|null $keys
+      *
+      * @return DomainsResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryDomains(?array $keys = []): DomainsResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             'keys' => $keys,
@@ -557,16 +584,18 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $idSegment
-     * @param string $idJob
-     * @param string $password
-     * @param array<string, mixed> $term
-     *
-     * @return DeleteGlossaryResponse
-     */
-    public function glossaryDelete(string $idSegment, string $idJob, string $password, array $term): DeleteGlossaryResponse
-    {
+     /**
+      * @param string $idSegment
+      * @param string $idJob
+      * @param string $password
+      * @param array<string, mixed> $term
+      *
+      * @return DeleteGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryDelete(string $idSegment, string $idJob, string $password, array $term): DeleteGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             "id_segment" => $idSegment,
@@ -579,18 +608,20 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $id_job
-     * @param string $id_segment
-     * @param string $source
-     * @param string $sourceLanguage
-     * @param string $targetLanguage
-     * @param array<string>|null $keys
-     *
-     * @return GetGlossaryResponse
-     */
-    public function glossaryGet(string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): GetGlossaryResponse
-    {
+     /**
+      * @param string $id_job
+      * @param string $id_segment
+      * @param string $source
+      * @param string $sourceLanguage
+      * @param string $targetLanguage
+      * @param array<string>|null $keys
+      *
+      * @return GetGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryGet(string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): GetGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             "id_job" => $id_job,
@@ -606,16 +637,18 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $source
-     * @param string $sourceLanguage
-     * @param string $targetLanguage
-     * @param array<string>|null $keys
-     *
-     * @return SearchGlossaryResponse
-     */
-    public function glossarySearch(string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): SearchGlossaryResponse
-    {
+     /**
+      * @param string $source
+      * @param string $sourceLanguage
+      * @param string $targetLanguage
+      * @param array<string>|null $keys
+      *
+      * @return SearchGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossarySearch(string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): SearchGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             "source" => $source,
@@ -629,15 +662,17 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $sourceLanguage
-     * @param string $targetLanguage
-     * @param array<string>|null $keys
-     *
-     * @return KeysGlossaryResponse
-     */
-    public function glossaryKeys(string $sourceLanguage, string $targetLanguage, ?array $keys = []): KeysGlossaryResponse
-    {
+     /**
+      * @param string $sourceLanguage
+      * @param string $targetLanguage
+      * @param array<string>|null $keys
+      *
+      * @return KeysGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryKeys(string $sourceLanguage, string $targetLanguage, ?array $keys = []): KeysGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             'source_language' => $sourceLanguage,
@@ -649,16 +684,18 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $idSegment
-     * @param string $idJob
-     * @param string $password
-     * @param array<string, mixed> $term
-     *
-     * @return SetGlossaryResponse
-     */
-    public function glossarySet(string $idSegment, string $idJob, string $password, array $term): SetGlossaryResponse
-    {
+     /**
+      * @param string $idSegment
+      * @param string $idJob
+      * @param string $password
+      * @param array<string, mixed> $term
+      *
+      * @return SetGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossarySet(string $idSegment, string $idJob, string $password, array $term): SetGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             "id_segment" => $idSegment,
@@ -672,16 +709,18 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $idSegment
-     * @param string $idJob
-     * @param string $password
-     * @param array<string, mixed> $term
-     *
-     * @return UpdateGlossaryResponse
-     */
-    public function glossaryUpdate(string $idSegment, string $idJob, string $password, array $term): UpdateGlossaryResponse
-    {
+     /**
+      * @param string $idSegment
+      * @param string $idJob
+      * @param string $password
+      * @param array<string, mixed> $term
+      *
+      * @return UpdateGlossaryResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function glossaryUpdate(string $idSegment, string $idJob, string $password, array $term): UpdateGlossaryResponse
+     {
         $payload = [
             'de' => AppConfig::$MYMEMORY_API_KEY,
             "id_segment" => $idSegment,
@@ -694,17 +733,18 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     *
-     * @param string $filePath
-     * @param string $memoryKey
-     * @param UserStruct $user * Not used
-     *
-     * @return FileImportAndStatusResponse
-     * @throws RuntimeException
-     */
-    public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
-    {
+     /**
+      *
+      * @param string $filePath
+      * @param string $memoryKey
+      * @param UserStruct $user * Not used
+      *
+      * @return FileImportAndStatusResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
+     {
         $postFields = [
             'tmx' => $this->getCurlFile($filePath),
             'key' => trim($memoryKey)
@@ -715,13 +755,15 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
-    /**
-     * @param string $uuid
-     *
-     * @return FileImportAndStatusResponse
-     */
-    public function getImportStatus(string $uuid): FileImportAndStatusResponse
-    {
+     /**
+      * @param string $uuid
+      *
+      * @return FileImportAndStatusResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function getImportStatus(string $uuid): FileImportAndStatusResponse
+     {
         $parameters = ['uuid' => trim($uuid)];
         $this->call('tmx_status_relative_url', $parameters);
 
@@ -823,16 +865,17 @@ class MyMemory extends AbstractEngine
     }
 
     /******************************************/
-    /**
-     * Calls the MyMemory Fast Analysis endpoint to analyze a document
-     *
-     * @param array<int, array<string, mixed>> $segs_array
-     *
-     * @return AnalyzeResponse
-     * @throws Exception
-     */
-    public function fastAnalysis(array $segs_array): AnalyzeResponse
-    {
+     /**
+      * Calls the MyMemory Fast Analysis endpoint to analyze a document
+      *
+      * @param array<int, array<string, mixed>> $segs_array
+      *
+      * @return AnalyzeResponse
+      * @throws Exception
+      * @throws TypeError
+      */
+     public function fastAnalysis(array $segs_array): AnalyzeResponse
+     {
         $this->_setAdditionalCurlParams([
                 CURLOPT_TIMEOUT => 300
             ]
@@ -849,6 +892,8 @@ class MyMemory extends AbstractEngine
      * @param list<array<string, mixed>> $segments
      *
      * @throws RuntimeException
+     * @throws TypeError
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function callAnalyzeUrl(array $segments): void
     {
@@ -868,15 +913,17 @@ class MyMemory extends AbstractEngine
         $this->result = $this->_decode($rawValue, [], 'analyze_url');
     }
 
-    /**
-     * MyMemory private endpoint
-     *
-     * @param array<string, mixed> $config
-     *
-     * @return TagProjectionResponse
-     */
-    public function getTagProjection(array $config): TagProjectionResponse
-    {
+     /**
+      * MyMemory private endpoint
+      *
+      * @param array<string, mixed> $config
+      *
+      * @return TagProjectionResponse
+      * @throws RuntimeException
+      * @throws \Psr\Log\InvalidArgumentException
+      */
+     public function getTagProjection(array $config): TagProjectionResponse
+     {
         // set dataRefMap needed to instance
         // TagProjectionResponse class
         $this->_config['dataRefMap'] = $config['dataRefMap'] ?? [];

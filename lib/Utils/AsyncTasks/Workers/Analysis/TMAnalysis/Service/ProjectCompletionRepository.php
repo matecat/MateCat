@@ -111,7 +111,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function getProjectJobIds(int $pid): array
     {
-        $project = $this->projectDao->findById($pid, ProjectStruct::class);
+        $project = $this->projectDao->fetchById($pid, ProjectStruct::class);
         assert($project !== null);
 
         $jobs = $project->getChunks();
@@ -146,7 +146,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyProjectAndJobCaches(int $pid): void
     {
-        $this->projectDao->destroyFindByIdCache($pid, ProjectStruct::class);
+        $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
         $this->jobDao->destroyCacheByProjectId($pid);
     }
 
@@ -156,7 +156,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyAllCaches(int $pid, string $projectPassword): void
     {
-        $this->projectDao->destroyFindByIdCache($pid, ProjectStruct::class);
+        $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
         $this->jobDao->destroyCacheByProjectId($pid);
         $this->projectDao->destroyProjectPasswordCache($pid, $projectPassword);
         $this->analysisDao->destroyAnalysisProjectCache($pid);

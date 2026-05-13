@@ -75,7 +75,7 @@ abstract class AbstractDao
      * @return T|null
      * @throws Exception
      */
-    public function findById(int $id, string $fetchClass, int $ttl = 0): ?IDaoStruct
+    public function fetchById(int $id, string $fetchClass, int $ttl = 0): ?IDaoStruct
     {
         $sql = sprintf(self::FIND_BY_ID_SQL, static::TABLE);
         $stmt = $this->database->getConnection()->prepare($sql);
@@ -93,7 +93,7 @@ abstract class AbstractDao
      * @return bool
      * @throws PDOException
      */
-    public function destroyFindByIdCache(int $id, string $fetchClass): bool
+    public function destroyFetchByIdCache(int $id, string $fetchClass): bool
     {
         $sql = sprintf(self::FIND_BY_ID_SQL, static::TABLE);
         $stmt = $this->database->getConnection()->prepare($sql);
