@@ -4,6 +4,7 @@
  * findElementByMetadata selects the strategy based on `restype` and
  * returns the matching DOM element, or null on miss / error / stub.
  */
+import {findElementByTextMatch} from './contextPreviewUtils'
 
 /**
  * Regex that matches the 0-based node-path format produced by some CMS
@@ -80,6 +81,60 @@ export const walkNodePath = (container, path) => {
   return current === container ? null : current
 }
 
+export const findContainerByXpath = (rootContainer, xpath) => {
+  if (!rootContainer || !xpath) return null
+  try {
+    let expr = xpath
+    if (xpath.startsWith('/html/body/')) {
+      expr = '.' + xpath.slice('/html/body'.length)
+    } else if (xpath.startsWith('/html/body')) {
+      expr = '.'
+    } else if (xpath.startsWith('//')) {
+      expr = '.' + xpath
+    } else if (xpath.startsWith('/')) {
+      expr = '.' + xpath
+    }
+    const result = document.evaluate(
+      expr,
+      rootContainer,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    )
+    const node = result.singleNodeValue
+    if (!node) return null
+    return node.nodeType === Node.ATTRIBUTE_NODE ? node.ownerElement : node
+  } catch {
+    return null
+  }
+}
+
+export class ClientNodepathRegistry {
+  constructor() {
+    this._strategies = new Map()
+  }
+
+  register(clientName, strategy) {
+    this._strategies.set(clientName, strategy)
+  }
+
+  resolve(clientName) {
+    return this._strategies.get(clientName) ?? null
+  }
+}
+
+export class JcrContainerTextMatchStrategy {
+  execute(rootContainer, path, normSource) {
+    if (!path || !normSource) return null
+    const jcrContainer = findContainerByXpath(rootContainer, path)
+    if (!jcrContainer) return null
+    return findElementByTextMatch(jcrContainer, normSource)
+  }
+}
+
+export const clientNodepathRegistry = new ClientNodepathRegistry()
+clientNodepathRegistry.register('jcr', new JcrContainerTextMatchStrategy())
+
 /**
  * Finds the DOM element in `container` that corresponds to a segment,
  * selecting the lookup strategy based on `restype`.
@@ -106,36 +161,10 @@ export const findElementByMetadata = (container, resname, restype) => {
         return container.querySelector('.' + CSS.escape(resname))
 
       case 'x-path': {
-        // 0-based node-path format (e.g. "html[0]/body[0]/div[2]/h3[0]")
-        // — handled separately so it can be removed later without touching
-        // the standard XPath logic below.
         if (NODE_PATH_RE.test(resname)) {
           return walkNodePath(container, resname)
         }
-
-        let xpath = resname
-        if (resname.startsWith('/html/body/')) {
-          xpath = '.' + resname.slice('/html/body'.length)
-        } else if (resname.startsWith('/html/body')) {
-          // Exact match of /html/body (no trailing path) — map to container itself
-          xpath = '.'
-        } else if (resname.startsWith('//')) {
-          xpath = '.' + resname
-        } else if (resname.startsWith('/')) {
-          xpath = '.' + resname
-        }
-        const result = document.evaluate(
-          xpath,
-          container,
-          null,
-          XPathResult.FIRST_ORDERED_NODE_TYPE,
-          null,
-        )
-        const node = result.singleNodeValue
-        if (!node) return null
-        // XPaths may target attribute nodes (e.g. //img/@alt). Attr nodes have
-        // no getAttribute/setAttribute, so return the owning element instead.
-        return node.nodeType === Node.ATTRIBUTE_NODE ? node.ownerElement : node
+        return findContainerByXpath(container, resname)
       }
 
       case 'x-attribute_name_value': {
@@ -143,8 +172,9 @@ export const findElementByMetadata = (container, resname, restype) => {
         if (eqIdx === -1) return null
         const attrName = resname.slice(0, eqIdx)
         const attrValue = resname.slice(eqIdx + 1)
+        const escapedValue = attrValue.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
         return container.querySelector(
-          `[${CSS.escape(attrName)}="${CSS.escape(attrValue)}"]`,
+          `[${CSS.escape(attrName)}="${escapedValue}"]`,
         )
       }
 

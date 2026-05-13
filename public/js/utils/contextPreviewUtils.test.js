@@ -7,6 +7,7 @@ import {
   updateNodeTranslation,
   extractSegmentContextFields,
   isNodeHidden,
+  findElementByTextMatch,
 } from './contextPreviewUtils'
 
 describe('getSidsFromElement', () => {
@@ -1046,5 +1047,212 @@ describe('isNodeHidden', () => {
     const p = document.body.querySelector('p')
     p.checkVisibility = jest.fn(() => true)
     expect(isNodeHidden(p)).toBe(false)
+  })
+})
+
+// ─── findElementByTextMatch ──────────────────────────────────────────────────
+
+describe('findElementByTextMatch', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('finds the first block element matching text exactly (case-insensitive)', () => {
+    document.body.innerHTML = '<p>Hello World</p><p>Other</p>'
+    expect(findElementByTextMatch(document.body, 'hello world')).toBe(
+      document.body.querySelector('p'),
+    )
+  })
+
+  it('normalises whitespace before comparing', () => {
+    document.body.innerHTML = '<p>Hello   World</p>'
+    expect(findElementByTextMatch(document.body, 'Hello World')).toBe(
+      document.body.querySelector('p'),
+    )
+  })
+
+  it('returns null when no element matches', () => {
+    document.body.innerHTML = '<p>Hello</p>'
+    expect(findElementByTextMatch(document.body, 'Goodbye')).toBeNull()
+  })
+
+  it('skips elements that already carry a data-context-sids attribute', () => {
+    document.body.innerHTML = `
+      <p data-context-sids="1">Match</p>
+      <p>Match</p>
+    `
+    const result = findElementByTextMatch(document.body, 'Match')
+    expect(result).toBe(document.body.querySelectorAll('p')[1])
+  })
+
+  it('skips elements whose descendant is already tagged', () => {
+    document.body.innerHTML = `
+      <div>Match <span data-context-sids="1">x</span></div>
+      <p>Match</p>
+    `
+    expect(findElementByTextMatch(document.body, 'Match')).toBe(
+      document.body.querySelector('p'),
+    )
+  })
+
+  it('returns null when container is null', () => {
+    expect(findElementByTextMatch(null, 'text')).toBeNull()
+  })
+
+  it('returns null when searchText is empty', () => {
+    document.body.innerHTML = '<p>text</p>'
+    expect(findElementByTextMatch(document.body, '')).toBeNull()
+  })
+
+  it('returns null when searchText is whitespace only', () => {
+    document.body.innerHTML = '<p>text</p>'
+    expect(findElementByTextMatch(document.body, '   ')).toBeNull()
+  })
+})
+
+describe('tagSegments — JCR interim dispatch', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('tags element within the JCR XPath container using text-match', () => {
+    document.body.innerHTML = `
+      <section id="zone"><p>Segment Text</p></section>
+      <p>Segment Text</p>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Text', target: ''}],
+      {metadataMap: {1: {resname: 'jcr:/html/body/section[@id="zone"]', restype: 'x-path'}}},
+    )
+    expect(getSidsFromElement(document.body.querySelector('#zone p'))).toContain(1)
+  })
+
+  it('falls through to standard text-match when JCR container not found', () => {
+    document.body.innerHTML = '<p>Fallback Text</p>'
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Fallback Text', target: ''}],
+      {metadataMap: {1: {resname: 'jcr://missing-container', restype: 'x-path'}}},
+    )
+    expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
+  })
+
+  it('skips already-tagged element inside JCR container, picks the next one', () => {
+    document.body.innerHTML = `
+      <section id="zone">
+        <p data-context-sids="999">Match</p>
+        <p>Match</p>
+      </section>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Match', target: ''}],
+      {metadataMap: {1: {resname: 'jcr:/html/body/section[@id="zone"]', restype: 'x-path'}}},
+    )
+    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
+    expect(getSidsFromElement(document.body.querySelectorAll('p')[0])).toEqual([999])
+  })
+
+  it('JCR path with attribute predicate resolves correctly', () => {
+    document.body.innerHTML = `
+      <div id="par"><p>AEM content</p></div>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'AEM content', target: ''}],
+      {metadataMap: {1: {resname: 'jcr:/html/body/div[@id="par"]', restype: 'x-path'}}},
+    )
+    expect(getSidsFromElement(document.body.querySelector('#par p'))).toContain(1)
+  })
+})
+
+describe('tagSegments — x-attribute_name_value with jcr: scoped text-match', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('tags child block element matching source text within the attribute-located container', () => {
+    document.body.innerHTML = `
+      <div data-jcr-path="/content/jcr:content/par">
+        <p>Segment Source</p>
+        <p>Other</p>
+      </div>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Source', target: ''}],
+      {
+        metadataMap: {
+          1: {
+            resname: 'data-jcr-path=/content/jcr:content/par',
+            restype: 'x-attribute_name_value',
+          },
+        },
+      },
+    )
+    expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
+    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).not.toContain(1)
+    expect(
+      getSidsFromElement(document.body.querySelector('[data-jcr-path]')),
+    ).not.toContain(1)
+  })
+
+  it('falls back to untagged (pass 1/2) when text not found in container', () => {
+    document.body.innerHTML = `
+      <div data-jcr-path="/content/jcr:content/par">
+        <p>Wrong Text</p>
+      </div>
+      <p>Segment Source</p>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Source', target: ''}],
+      {
+        metadataMap: {
+          1: {
+            resname: 'data-jcr-path=/content/jcr:content/par',
+            restype: 'x-attribute_name_value',
+          },
+        },
+      },
+    )
+    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
+  })
+
+  it('does NOT use scoped text-match when resname has no jcr:', () => {
+    document.body.innerHTML = `
+      <div data-id="zone">
+        <p>Segment Source</p>
+      </div>
+    `
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Source', target: ''}],
+      {
+        metadataMap: {
+          1: {resname: 'data-id=zone', restype: 'x-attribute_name_value'},
+        },
+      },
+    )
+    expect(getSidsFromElement(document.body.querySelector('[data-id="zone"]'))).toContain(1)
+    expect(getSidsFromElement(document.body.querySelector('p'))).not.toContain(1)
+  })
+
+  it('falls back when container element not found', () => {
+    document.body.innerHTML = '<p>Segment Source</p>'
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Segment Source', target: ''}],
+      {
+        metadataMap: {
+          1: {
+            resname: 'data-jcr-path=/content/jcr:content/missing',
+            restype: 'x-attribute_name_value',
+          },
+        },
+      },
+    )
+    expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
   })
 })
