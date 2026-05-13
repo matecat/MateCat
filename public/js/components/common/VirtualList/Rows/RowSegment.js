@@ -103,21 +103,8 @@ RowSegment.propTypes = {
 
 export default RowSegment
 
-const projectBarCache = {
-  headerHeight: 0,
-  paddingTop: 0,
-}
-
-export const ProjectBar = ({
-  segment,
-  files,
-  sideOpen,
-  isSticky,
-  listRef,
-  scrollValue,
-}) => {
-  const [replacedSegment, setReplacedSegment] = useState()
-  const [isBlinking, setIsBlinking] = useState(false)
+export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
+  const [isFileChange, setIsFileChange] = useState(false)
 
   const ref = useRef()
   const previousFileIdRef = useRef()
@@ -141,81 +128,9 @@ export const ProjectBar = ({
     )
   }
 
-  useEffect(() => {
-    const onReplaceSegment = ({detail: {segment}}) => {
-      if (isSticky) setReplacedSegment(segment)
-    }
-    const onReplaceSegmentReset = ({detail: {sid}}) => {
-      if (isSticky)
-        setReplacedSegment((prevState) =>
-          prevState?.sid === sid ? undefined : prevState,
-        )
-    }
+  const currentSegment = segment
 
-    document.addEventListener(
-      'segmentProjectBar.replaceSegment',
-      onReplaceSegment,
-    )
-    document.addEventListener(
-      'segmentProjectBar.replaceSegmentReset',
-      onReplaceSegmentReset,
-    )
-
-    if (!isSticky) {
-      const rect = ref.current?.getBoundingClientRect() ?? {}
-      const isVisible =
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= window.innerHeight &&
-        rect.right <= window.innerWidth
-
-      if (isVisible) {
-        if (!projectBarCache.headerHeight) {
-          projectBarCache.headerHeight =
-            document.getElementsByTagName('header')[0]?.getBoundingClientRect()
-              .height || 0
-        }
-
-        if (!projectBarCache.paddingTop && ref.current) {
-          projectBarCache.paddingTop = parseInt(
-            window.getComputedStyle(ref.current).paddingTop.replace('px', ''),
-          )
-        }
-
-        const diff =
-          rect.y - (projectBarCache.headerHeight + projectBarCache.paddingTop)
-
-        if (diff < -30 && diff > -60) {
-          document.dispatchEvent(
-            new CustomEvent('segmentProjectBar.replaceSegment', {
-              detail: {segment},
-            }),
-          )
-        } else {
-          document.dispatchEvent(
-            new CustomEvent('segmentProjectBar.replaceSegmentReset', {
-              detail: {sid: segment.sid},
-            }),
-          )
-        }
-      }
-    }
-
-    return () => {
-      document.removeEventListener(
-        'segmentProjectBar.replaceSegment',
-        onReplaceSegment,
-      )
-      document.removeEventListener(
-        'segmentProjectBar.replaceSegmentReset',
-        onReplaceSegmentReset,
-      )
-    }
-  }, [isSticky, segment, scrollValue])
-
-  const currentSegment = replacedSegment || segment
-
-  const idFileSegment = SegmentUtils.getSegmentFileId(currentSegment)
+  const idFileSegment = SegmentUtils.getSegmentFileId(segment)
   const file = files ? files.find((file) => file.id == idFileSegment) : false
   let fileType = ''
   if (file) {
@@ -232,23 +147,36 @@ export const ProjectBar = ({
   classes = isFirstSegment ? classes + ' first-segment' : classes
 
   useEffect(() => {
-    const stopBlinking = () => setIsBlinking(false)
+    let tmOutReset
+    const stopFileChangeAnim = () => setIsFileChange(false)
     const filenameElement = ref.current.firstChild
+    const wordcounterElement = ref.current.children[1]
 
     if (
       isSticky &&
       idFileSegment !== previousFileIdRef.current &&
       typeof previousFileIdRef.current === 'number'
     ) {
-      filenameElement.addEventListener('animationend', stopBlinking)
-      setIsBlinking(true)
+      ref.current.style.animation = 'none'
+      filenameElement.style.animation = 'none'
+      wordcounterElement.style.animation = 'none'
+
+      tmOutReset = setTimeout(() => {
+        ref.current.style.animation = ''
+        filenameElement.style.animation = ''
+        wordcounterElement.style.animation = ''
+      }, 0)
+
+      filenameElement.addEventListener('animationend', stopFileChangeAnim)
+      setIsFileChange(true)
     }
 
     previousFileIdRef.current = idFileSegment
 
     return () => {
-      filenameElement.removeEventListener('animationend', stopBlinking)
-      stopBlinking()
+      clearTimeout(tmOutReset)
+      filenameElement.removeEventListener('animationend', stopFileChangeAnim)
+      stopFileChangeAnim()
     }
   }, [isSticky, idFileSegment])
 
@@ -275,11 +203,22 @@ export const ProjectBar = ({
     return () => listRef?.removeEventListener('scroll', onScroll)
   }, [isSticky, listRef])
 
+  const previousScrollTopRef = useRef(0)
+  const isScrollingReverseRef = useRef(false)
+  if (isSticky && listRef?.scrollTop !== previousScrollTopRef.current) {
+    isScrollingReverseRef.current =
+      listRef?.scrollTop < previousScrollTopRef.current
+  }
+  previousScrollTopRef.current = listRef?.scrollTop
+
   return (
-    <div ref={ref} className={'projectbar ' + classes}>
+    <div
+      ref={ref}
+      className={`projectbar ${isFileChange ? `sticky-project-bar-change-file-animation ${isScrollingReverseRef.current ? 'sticky-project-bar-change-file-animation-reverse' : ''}` : ''} ${classes}`}
+    >
       {file ? (
         <div
-          className={`projectbar-filename ${isBlinking ? 'sticky-project-bar-blink' : ''}`}
+          className={`projectbar-filename ${isFileChange ? 'sticky-project-bar-blink' : ''}`}
         >
           <span
             title={currentSegment.filename}
@@ -291,7 +230,7 @@ export const ProjectBar = ({
       ) : null}
       {file && file.weighted_words > 0 ? (
         <div
-          className={`projectbar-wordcounter ${isBlinking ? 'sticky-project-bar-blink sticky-project-bar-blink-wordcounter' : ''}`}
+          className={`projectbar-wordcounter ${isFileChange ? 'sticky-project-bar-blink sticky-project-bar-blink-wordcounter' : ''}`}
         >
           <span>
             Payable Words: <strong>{file.weighted_words}</strong>

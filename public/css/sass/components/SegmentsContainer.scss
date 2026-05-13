@@ -104,6 +104,14 @@
     padding-top: 10px;
   }
 
+  .sticky-project-bar-change-file-animation {
+    animation: changeFileAnimation 0.2s;
+  }
+
+  .sticky-project-bar-change-file-animation-reverse {
+    animation-direction: reverse;
+  }
+
   .sticky-project-bar-blink {
     animation: blinkBackground 1s;
     border-top-left-radius: 8px;
@@ -118,13 +126,34 @@
     border-bottom-right-radius: 8px;
   }
 
+  @keyframes changeFileAnimation {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    49% {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+
+    50% {
+      transform: translateY(20px);
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
   @keyframes blinkBackground {
     0% {
       background-color: transparent;
     }
 
     50% {
-      background-color: rgba(42, 140, 252, 0.3);
+      background-color: rgba(42, 140, 252, 0.25);
     }
 
     100% {
