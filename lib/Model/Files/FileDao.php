@@ -102,13 +102,10 @@ class FileDao extends AbstractDao
      */
     public static function getById(int $id, ?int $ttl = 0): ?FileStruct
     {
-        $thisDao = new self();
+        /** @var ?FileStruct $res */
+        $res = (new self())->fetchById($id, FileStruct::class, $ttl);
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM files where id = :id ");
-        $stmt->execute(['id' => $id]);
-
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id' => $id])[0] ?? null;
+        return $res;
     }
 
     /**

@@ -15,7 +15,6 @@ use Model\DataAccess\IDaoStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use PDO;
 use PDOException;
 use ReflectionException;
 use Utils\Tools\Utils;
@@ -56,22 +55,6 @@ class MembershipDao extends AbstractDao
     protected static string $_delete_member = "
         DELETE FROM teams_users WHERE uid = :uid AND id_team = :id_team
     ";
-
-    /**
-     * @param int $id
-     *
-     * @return MembershipStruct|false
-     * @throws PDOException
-     */
-    public function findById(int $id): MembershipStruct|false
-    {
-        $sql = " SELECT * FROM " . self::TABLE . " WHERE id = ? ";
-        $stmt = $this->getDatabaseHandler()->getConnection()->prepare($sql);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, self::STRUCT_TYPE);
-        $stmt->execute([$id]);
-
-        return $stmt->fetch();
-    }
 
     /**
      * Find ONE team for the given user. This is to enforce the temporary requirement to

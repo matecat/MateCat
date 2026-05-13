@@ -3387,12 +3387,6 @@ parameters:
 			path: lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php
 
 		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveUserAuthorizationModel\:\:__insertService\(\) should return Model\\ConnectedServices\\ConnectedServiceStruct but returns Model\\ConnectedServices\\ConnectedServiceStruct\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php
-
-		-
 			message: '#^Parameter \#1 \$token of method Model\\ConnectedServices\\ConnectedServiceDao\:\:updateOauthToken\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -5061,12 +5055,6 @@ parameters:
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
-			message: '#^Method Model\\LQA\\EntryValidator\:\:validate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
 			message: '#^Method Model\\LQA\\EntryValidator\:\:validateCategoryId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -5737,12 +5725,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Segments/ContextStruct.php
-
-		-
-			message: '#^Method Model\\Segments\\SegmentDao\:\:getById\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Segments/SegmentDao.php
 
 		-
 			message: '#^Method Model\\Segments\\SegmentMetadataCollection\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -12483,14 +12465,14 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobStruct.php
 
 		-
-			message: '#^Call to an undefined method Features\\Aligner\\Model\\Projects_ProjectDao\:\:destroyCacheById\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:changePassword\(\) has parameter \$newPass with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:changePassword\(\) has parameter \$newPass with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:changePassword\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 

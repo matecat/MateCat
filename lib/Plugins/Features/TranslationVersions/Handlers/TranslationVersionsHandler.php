@@ -239,7 +239,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         try {
             $translationEventsHandler->save(new BatchReviewProcessor());
             (new JobDao())->destroyCacheByProjectId($chunk->id_project);
-            ProjectDao::destroyCacheById($chunk->id_project);
+            (new ProjectDao())->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
         } catch (Exception $e) {
             throw new RuntimeException($e->getMessage(), -2000, $e);
         }

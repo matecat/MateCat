@@ -662,7 +662,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         //check tag mismatch
         //get the original source segment, first
         $dao = new SegmentDao(Database::obtain());
-        $this->segment = $dao->getById((int)$id_segment); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
+        $this->segment = $dao->fetchById((int)$id_segment, SegmentStruct::class); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         $this->id_job = (int)$id_job;
         $this->password = (string)$password;

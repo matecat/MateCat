@@ -23,24 +23,6 @@ class ConnectedServiceDao extends AbstractDao
     protected static array $auto_increment_field = ['id'];
 
     /**
-     * @param int $id
-     *
-     * @return ConnectedServiceStruct|false
-     * @throws PDOException
-     */
-    public function findById(int $id): ConnectedServiceStruct|false
-    {
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare(
-            "SELECT * FROM connected_services WHERE id = :id"
-        );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
-        $stmt->execute(['id' => $id]);
-
-        return $stmt->fetch();
-    }
-
-    /**
      * @param string $token
      * @param ConnectedServiceStruct $service
      *

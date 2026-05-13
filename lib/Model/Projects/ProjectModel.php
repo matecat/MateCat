@@ -8,6 +8,7 @@ use Model\Exceptions\ValidationError;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
@@ -147,7 +148,7 @@ class ProjectModel
     private function checkAssigneeChangeInPersonalTeam(int $id_team): void
     {
         $teamDao = new TeamDao();
-        $team = $teamDao->setCacheTTL(60 * 60 * 24)->findById($id_team);
+        $team = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class);
         if ($team === null) {
             throw new ValidationError('Team not found');
         }
@@ -242,7 +243,7 @@ class ProjectModel
         $teamDao = new TeamDao();
         $this->cacheTeamsToClean = array_values(array_unique($this->cacheTeamsToClean));
         foreach ($this->cacheTeamsToClean as $team_id) {
-            $teamInCacheToClean = $teamDao->setCacheTTL(60 * 60 * 24)->findById($team_id);
+            $teamInCacheToClean = $teamDao->setCacheTTL(60 * 60 * 24)->fetchById($team_id, TeamStruct::class);
             if ($teamInCacheToClean === null) {
                 continue;
             }
@@ -261,7 +262,7 @@ class ProjectModel
             return;
         }
         $projectDao = new ProjectDao();
-        $projectDao->destroyCacheById($id);
+        $projectDao->destroyFetchByIdCache($id, ProjectStruct::class);
     }
 
 }

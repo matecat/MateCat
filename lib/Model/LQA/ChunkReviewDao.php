@@ -121,17 +121,14 @@ class ChunkReviewDao extends AbstractDao
      *
      * @return ?ChunkReviewStruct
      * @throws PDOException
+     * @throws ReflectionException
      */
     public static function findById(int $id): ?ChunkReviewStruct
     {
-        $sql = "SELECT * FROM qa_chunk_reviews " .
-            " WHERE id = :id ";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
-        $stmt->execute(['id' => $id]);
+        /** @var ?ChunkReviewStruct $res */
+        $res = (new self())->fetchById($id, ChunkReviewStruct::class);
 
-        return $stmt->fetch() ?: null;
+        return $res;
     }
 
     /**

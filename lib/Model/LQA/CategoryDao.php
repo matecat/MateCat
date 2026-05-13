@@ -6,6 +6,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
 use PDOException;
+use ReflectionException;
 use TypeError;
 
 class CategoryDao extends AbstractDao
@@ -17,16 +18,14 @@ class CategoryDao extends AbstractDao
      *
      * @return CategoryStruct|null
      * @throws PDOException
+     * @throws ReflectionException
      */
     public static function findById(int $id): ?CategoryStruct
     {
-        $sql = "SELECT * FROM qa_categories WHERE id = :id LIMIT 1";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(['id' => $id]);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, CategoryStruct::class);
+        /** @var ?CategoryStruct $res */
+        $res = (new self())->fetchById($id, CategoryStruct::class);
 
-        return $stmt->fetch() ?: null;
+        return $res;
     }
 
     /**

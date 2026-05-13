@@ -74,8 +74,6 @@ class ProjectDao extends AbstractDao
      */
     protected static string $_sql_get_projects_for_team = "SELECT * FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
 
-    protected static string $sql_find_by_id = " SELECT * FROM projects WHERE id = :id ";
-
     /**
      * @param ProjectStruct $project
      * @param string $field
@@ -114,7 +112,7 @@ class ProjectDao extends AbstractDao
     {
         $id = $project->id ?? throw new DomainException("Project ID must not be null when changing password");
         $res = $this->updateField($project, 'password', $newPass);
-        $this->destroyCacheById($id);
+        $this->destroyFetchByIdCache($id, ProjectStruct::class);
 
         return $res;
     }
@@ -132,7 +130,7 @@ class ProjectDao extends AbstractDao
     {
         $id = $project->id ?? throw new DomainException("Project ID must not be null when changing name");
         $res = $this->updateField($project, 'name', $name);
-        $this->destroyCacheById($id);
+        $this->destroyFetchByIdCache($id, ProjectStruct::class);
 
         return $res;
     }
@@ -326,12 +324,8 @@ class ProjectDao extends AbstractDao
      */
     public static function staticFindById(int $id, int $ttl = 0): ?ProjectStruct
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(" SELECT * FROM projects WHERE id = :id ");
-
         /** @var ?ProjectStruct $res */
-        $res = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectStruct::class, ['id' => $id])[0] ?? null;
+        $res = (new self())->fetchById($id, ProjectStruct::class, $ttl ?: null);
 
         return $res;
     }
@@ -345,28 +339,10 @@ class ProjectDao extends AbstractDao
     public static function exists(int $id): bool
     {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(self::$sql_find_by_id);
+        $stmt = $conn->prepare("SELECT * FROM projects WHERE id = :id");
         $stmt->execute(['id' => $id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$row) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public static function destroyCacheById(int $id): bool
-    {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(self::$sql_find_by_id);
-
-        return $thisDao->_destroyObjectCache($stmt, ProjectStruct::class, ['id' => $id]);
+        return (bool)$stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /**

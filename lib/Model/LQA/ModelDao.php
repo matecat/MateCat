@@ -16,8 +16,6 @@ class ModelDao extends AbstractDao
 
     protected static array $auto_increment_field = ['id'];
 
-    protected static string $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
-
     /**
      * @param int $id
      * @param int $ttl
@@ -29,14 +27,10 @@ class ModelDao extends AbstractDao
      */
     public static function findById(int $id, int $ttl = 0): ?ModelStruct
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(self::$_sql_get_model_by_id);
+        /** @var ?ModelStruct $res */
+        $res = (new self())->fetchById($id, ModelStruct::class, $ttl ?: null);
 
-        /** @var list<ModelStruct> $result */
-        $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ModelStruct::class, ['id' => $id]);
-
-        return $result[0] ?? null;
+        return $res;
     }
 
     /**

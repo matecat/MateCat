@@ -87,7 +87,7 @@ class EntryValidator
     public function validate(): void
     {
         $dao = new SegmentDao(Database::obtain());
-        $this->segment = $dao->getById($this->struct->id_segment);
+        $this->segment = $dao->fetchById($this->struct->id_segment, SegmentStruct::class);
 
         if (!$this->segment) {
             throw new NotFoundException('segment not found');

@@ -128,29 +128,6 @@ class CommentDao extends AbstractDao
     }
 
     /**
-     * @param int $id
-     * @param int $ttl
-     *
-     * @return BaseCommentStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function getById(int $id, int $ttl = 86400): ?BaseCommentStruct
-    {
-        $stmt = $this->_getStatementForQuery("SELECT * from comments WHERE id = :id");
-
-        /** @var BaseCommentStruct[] $results */
-        $results = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, BaseCommentStruct::class, [
-            'id' => $id
-        ]);
-
-        /** @var BaseCommentStruct|null $res */
-        $res = $results[0] ?? null;
-
-        return $res;
-    }
-
-    /**
      * @param CommentStruct $obj
      *
      * @return CommentStruct

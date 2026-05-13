@@ -29,7 +29,6 @@ class TeamDao extends AbstractDao
     protected static array $auto_increment_field = ['id'];
     protected static array $primary_keys = ['id'];
 
-    protected static string $_query_find_by_id = " SELECT * FROM teams WHERE id = :id ";
     protected static string $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";
     protected static string $_query_get_user_teams = " SELECT * FROM teams WHERE created_by = :created_by ";
     protected static string $_update_team_by_id = " UPDATE teams SET name = :name WHERE id = :id ";
@@ -62,29 +61,6 @@ class TeamDao extends AbstractDao
         $stmt->execute([$teamStruct->id]);
 
         return $stmt->rowCount();
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return TeamStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function findById(int $id): ?TeamStruct
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_find_by_id);
-
-        /** @var TeamStruct|null $res */
-        $res = $this->_fetchObjectMap(
-            $stmt,
-            TeamStruct::class,
-            [
-                'id' => $id,
-            ]
-        )[0] ?? null;
-
-        return $res;
     }
 
     /**
@@ -134,7 +110,7 @@ class TeamDao extends AbstractDao
         }
 
         // get fresh cache from the primary database
-        (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($teamStruct->id);
+        (new TeamDao())->setCacheTTL(60 * 60 * 24)->fetchById($teamStruct->id, TeamStruct::class);
 
         $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
 
@@ -187,28 +163,6 @@ class TeamDao extends AbstractDao
             MembershipStruct::class,
             [
                 'id_team' => $team->id,
-            ]
-        );
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return bool
-     * @throws ReflectionException
-     * @throws PDOException
-     */
-    public function destroyCacheById(int $id): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::$_query_find_by_id);
-        $teamQuery = new TeamStruct();
-        $teamQuery->id = $id;
-
-        return $this->_destroyObjectCache(
-            $stmt,
-            TeamStruct::class,
-            [
-                'id' => $teamQuery->id,
             ]
         );
     }

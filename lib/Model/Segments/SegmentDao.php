@@ -137,35 +137,6 @@ class SegmentDao extends AbstractDao
     }
 
     /**
-     * @param int $id_segment
-     *
-     * @return SegmentStruct|null
-     * @throws PDOException
-     */
-    public function getById(int $id_segment): ?SegmentStruct
-    {
-        $conn = $this->database->getConnection();
-
-        $query = "select * from segments where id = :id";
-        $stmt = $conn->prepare($query);
-        $stmt->execute(['id' => $id_segment]);
-
-        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentStruct::class);
-
-        $result = $stmt->fetch();
-
-        if (!$result) {
-            //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
-            // We want to verify that the id cannot be empty or null.
-            // We want to log it to understand if this is a bug in the code or a delay in the database replication.
-            // SegmentDao::getById returns false if the id is not found in the database
-            LoggerFactory::getLogger('exception_handler')->debug("*** Segment not found in database. Skipping: " . $id_segment, $stmt->errorInfo());
-        }
-
-        return $result ?: null;
-    }
-
-    /**
      * @param array{id_before: int, id_segment: int, id_after: int} $id_list
      *
      * @return object

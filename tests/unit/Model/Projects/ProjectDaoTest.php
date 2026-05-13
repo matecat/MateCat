@@ -354,7 +354,7 @@ class ProjectDaoTest extends AbstractTest
     {
         $dao = new ProjectDao();
 
-        $this->assertIsBool(ProjectDao::destroyCacheById(self::PROJECT_ID_1));
+        $this->assertIsBool($dao->destroyFetchByIdCache(self::PROJECT_ID_1, ProjectStruct::class));
         $this->assertIsBool(ProjectDao::destroyCacheByIdAndPassword(self::PROJECT_ID_1, 'ppass-1'));
         $this->assertIsBool($dao->destroyCacheForProjectData(self::PROJECT_ID_1));
     }

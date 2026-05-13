@@ -6,9 +6,13 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
 use PDOException;
+use ReflectionException;
+use RuntimeException;
 
 class ApiKeyDao extends AbstractDao
 {
+
+    const string TABLE = 'api_keys';
 
     /**
      * @param string $key
@@ -29,7 +33,11 @@ class ApiKeyDao extends AbstractDao
 
     /**
      * @param ApiKeyStruct $obj
+     *
+     * @return ApiKeyStruct
      * @throws PDOException
+     * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function create(ApiKeyStruct $obj): ApiKeyStruct
     {
@@ -49,26 +57,10 @@ class ApiKeyDao extends AbstractDao
 
         $this->database->begin();
         $stmt->execute($values);
-        $result = $this->getById((int)$conn->lastInsertId());
+        $result = $this->fetchById((int)$conn->lastInsertId(), ApiKeyStruct::class);
         $this->database->commit();
 
-        return $result[0];
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return list<ApiKeyStruct>
-     * @throws PDOException
-     */
-    public function getById(int $id): array
-    {
-        $conn = $this->database->getConnection();
-
-        $stmt = $conn->prepare(" SELECT * FROM api_keys WHERE id = ? ");
-        $stmt->execute([$id]);
-
-        return array_values($stmt->fetchAll(PDO::FETCH_CLASS, ApiKeyStruct::class));
+        return $result ?? throw new RuntimeException('Failed to retrieve created API key');
     }
 
     /**
@@ -90,6 +82,8 @@ class ApiKeyDao extends AbstractDao
 
     /**
      * @param int $uid
+     *
+     * @return int
      * @throws PDOException
      */
     public function deleteByUid(int $uid): int

@@ -11,6 +11,8 @@ use TypeError;
 class EntryCommentDao extends AbstractDao
 {
 
+    const string TABLE = 'qa_entry_comments';
+
     /**
      * @param int $id_issue
      *
@@ -72,21 +74,6 @@ class EntryCommentDao extends AbstractDao
         $conn->commit();
 
         return $struct;
-    }
-
-    /**
-     * @param int $id
-     * @throws PDOException
-     */
-    public function findById(int $id): ?EntryCommentStruct
-    {
-        $sql = "SELECT * FROM qa_entry_comments WHERE id = ? ";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
-        $stmt->execute([$id]);
-
-        return $stmt->fetch() ?: null;
     }
 
     /**

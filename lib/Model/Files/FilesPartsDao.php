@@ -12,6 +12,8 @@ use ReflectionException;
 class FilesPartsDao extends AbstractDao
 {
 
+    const string TABLE = 'files_parts';
+
     /**
      * @param FilesPartsStruct $filesPartsStruct
      *
@@ -72,28 +74,6 @@ class FilesPartsDao extends AbstractDao
 
         /** @var  ShapelessConcreteStruct $result */
         $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, ['id' => $id])[0] ?? null;
-
-        return $result;
-    }
-
-    /**
-     * @param int $id
-     * @param int $ttl
-     *
-     * @return FilesPartsStruct|null
-     * @throws PDOException
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    public function getById(int $id, int $ttl = 0): ?FilesPartsStruct
-    {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $sql = "SELECT * FROM files_parts  WHERE id = :id ";
-        $stmt = $conn->prepare($sql);
-
-        /** @var  FilesPartsStruct $result */
-        $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['id' => $id])[0] ?? null;
 
         return $result;
     }

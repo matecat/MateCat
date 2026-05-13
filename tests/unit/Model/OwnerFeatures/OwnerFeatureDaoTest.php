@@ -193,7 +193,7 @@ class OwnerFeatureDaoTest extends AbstractTest
     {
         $id = $this->insertFixtureFeature('get_by_id_feature', true);
 
-        $result = OwnerFeatureDao::getById($id);
+        $result = (new OwnerFeatureDao($this->database))->fetchById($id, OwnerFeatureStruct::class);
 
         $this->assertNotNull($result);
         $this->assertInstanceOf(OwnerFeatureStruct::class, $result);
@@ -210,7 +210,7 @@ class OwnerFeatureDaoTest extends AbstractTest
     #[Test]
     public function test_get_by_id_returns_null_for_nonexistent_record(): void
     {
-        $result = OwnerFeatureDao::getById(PHP_INT_MAX);
+        $result = (new OwnerFeatureDao($this->database))->fetchById(PHP_INT_MAX, OwnerFeatureStruct::class);
         $this->assertNull($result);
     }
 }

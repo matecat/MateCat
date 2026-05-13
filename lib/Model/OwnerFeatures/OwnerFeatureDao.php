@@ -6,13 +6,14 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
-use PDO;
 use PDOException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 
 class OwnerFeatureDao extends AbstractDao
 {
+
+    const string TABLE = 'owner_features';
 
     const string query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
     const string query_user_id = "SELECT * FROM owner_features WHERE uid = :uid ORDER BY id";
@@ -22,6 +23,7 @@ class OwnerFeatureDao extends AbstractDao
      *
      * @return ?OwnerFeatureStruct
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function create(IDaoStruct $obj): ?OwnerFeatureStruct
     {
@@ -47,7 +49,7 @@ class OwnerFeatureDao extends AbstractDao
         $values = array_diff_key($obj->toArray(), ['id' => null]);
 
         $stmt->execute($values);
-        $record = $this->getById((int) $conn->lastInsertId());
+        $record = $this->fetchById((int) $conn->lastInsertId(), OwnerFeatureStruct::class);
         $conn->commit();
 
         return $record;
@@ -121,25 +123,6 @@ class OwnerFeatureDao extends AbstractDao
         $stmt = $thisDao->_getStatementForQuery(self::query_user_id);
 
         return $thisDao->_destroyObjectCache($stmt, OwnerFeatureStruct::class, ['uid' => $uid]);
-    }
-
-    /**
-     * Get owner feature by ID
-     *
-     * @param int $id
-     *
-     * @return ?OwnerFeatureStruct
-     * @throws PDOException
-     */
-    public static function getById(int $id): ?OwnerFeatureStruct
-    {
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare(" SELECT * FROM owner_features WHERE id = ? ");
-        $stmt->execute([$id]);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, OwnerFeatureStruct::class);
-
-        return $stmt->fetch() ?: null;
     }
 
 }

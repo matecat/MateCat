@@ -7,6 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
 use Model\DataAccess\Database;
@@ -161,7 +162,7 @@ class CommentController extends KleinController
         $user = $this->user;
         $idComment = $request['id_comment'];
         $commentDao = new CommentDao(Database::obtain());
-        $comment = $commentDao->getById($idComment);
+        $comment = $commentDao->fetchById($idComment, BaseCommentStruct::class, 86400);
 
         if (null === $comment) {
             throw new InvalidArgumentException("Comment not found.", -202);

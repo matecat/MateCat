@@ -16,6 +16,7 @@ use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
+use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\GDrive\RemoteFileService;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
@@ -691,7 +692,7 @@ class DownloadController extends AbstractDownloadController
         }
 
         $dao = new ConnectedServiceDao();
-        $connectedService = $dao->findById($remoteFile->connected_service_id);
+        $connectedService = $dao->fetchById($remoteFile->connected_service_id, ConnectedServiceStruct::class);
 
         if (!$connectedService || $connectedService->disabled_at) {
             throw new Exception('Connected service missing or disabled');

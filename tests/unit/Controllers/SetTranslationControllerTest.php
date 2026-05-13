@@ -1886,7 +1886,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'chunk', $chunk);
         $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
-        $this->setNamedProperty($controller, 'segment', $segmentDao->getById($segmentId));
+        $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
         $this->setNamedProperty($controller, 'request_password', $jobPassword);
@@ -1926,7 +1926,7 @@ class SetTranslationControllerTest extends AbstractTest
             'project' => $project,
             'revisionNumber' => 0,
             'chunk' => $chunk,
-            'segment' => $segmentDao->getById($segmentId),
+            'segment' => $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class),
         ]);
 
         $old = new SegmentTranslationStruct();
@@ -1985,7 +1985,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
         $this->setNamedProperty($controller, 'chunk', $chunk);
-        $this->setNamedProperty($controller, 'segment', $segmentDao->getById($segmentId));
+        $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
         $this->setNamedProperty($controller, 'request_password', $jobPassword);
@@ -2032,7 +2032,7 @@ class SetTranslationControllerTest extends AbstractTest
             'project' => $project,
             'revisionNumber' => 0,
             'chunk' => $chunk,
-            'segment' => $segmentDao->getById($segmentId),
+            'segment' => $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class),
         ]);
 
         $old = new SegmentTranslationStruct();

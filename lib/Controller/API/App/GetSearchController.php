@@ -20,6 +20,7 @@ use Model\Search\ReplaceEventStruct;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -401,7 +402,7 @@ class GetSearchController extends AbstractStatefulKleinController
             $db->begin();
 
             $old_translation = SegmentTranslationDao::findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
-            $segment = (new SegmentDao())->getById($tRow['id_segment']);
+            $segment = (new SegmentDao())->fetchById((int)$tRow['id_segment'], SegmentStruct::class);
 
             if ($old_translation === null || $segment === null) {
                 $db->rollback();
