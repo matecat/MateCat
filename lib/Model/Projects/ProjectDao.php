@@ -9,7 +9,6 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\JobStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
@@ -17,12 +16,11 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
-use Utils\Logger\LoggerFactory;
-use Utils\Tools\Utils;
 
 class ProjectDao extends AbstractDao
 {
     const string TABLE = "projects";
+    private const string SQL_DESTROY_PROJECT_PASSWORD_CACHE = '%s';
 
     /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
@@ -93,7 +91,7 @@ class ProjectDao extends AbstractDao
         $data[$field] = $value;
         $where = ["id" => $project->id];
 
-        $success = self::updateFields($data, $where);
+        $success = self::staticUpdate($data, $where);
 
         if ($success) {
             $project->$field = $value;
@@ -326,7 +324,7 @@ class ProjectDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function findById(int $id, int $ttl = 0): ?ProjectStruct
+    public static function staticFindById(int $id, int $ttl = 0): ?ProjectStruct
     {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
@@ -428,6 +426,18 @@ class ProjectDao extends AbstractDao
         $stmt = $conn->prepare(self::$_sql_get_by_id_and_password);
 
         return $thisDao->_destroyObjectCache($stmt, ProjectStruct::class, ['id' => $id, 'password' => $password]);
+    }
+
+    /**
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyProjectPasswordCache(int $id, string $password): bool
+    {
+        $sql = sprintf(self::SQL_DESTROY_PROJECT_PASSWORD_CACHE, self::$_sql_get_by_id_and_password);
+        $stmt = $this->database->getConnection()->prepare($sql);
+
+        return $this->_destroyObjectCache($stmt, ProjectStruct::class, ['id' => $id, 'password' => $password]);
     }
 
     /**
@@ -584,7 +594,7 @@ class ProjectDao extends AbstractDao
         $data['status_analysis'] = $status;
         $where = ["id" => $pid];
 
-        return self::updateFields($data, $where);
+        return self::staticUpdate($data, $where);
     }
 
     /**

@@ -7,7 +7,11 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\ProjectDao;
+use Model\Analysis\AnalysisDao;
+use Model\WordCount\CounterModel;
 use Predis\Connection\ConnectionException as PredisConnectionException;
 use Predis\Response\ServerException as PredisServerException;
 use ReflectionException;
@@ -71,7 +75,16 @@ class TMAnalysisWorker extends AbstractWorker
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
         $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService(Database::obtain());
-        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService($this->redisService, new ProjectCompletionRepository());
+        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
+            $this->redisService,
+            new ProjectCompletionRepository(
+                Database::obtain(),
+                new ProjectDao(),
+                new JobDao(),
+                new AnalysisDao(),
+                new CounterModel(),
+            )
+        );
         $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver());
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter());
     }

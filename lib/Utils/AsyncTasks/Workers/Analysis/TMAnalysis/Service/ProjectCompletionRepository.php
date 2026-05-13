@@ -3,9 +3,10 @@
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
 use Model\Analysis\AnalysisDao;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use DomainException;
 use Exception;
@@ -14,17 +15,25 @@ use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
-use Utils\Constants\ProjectStatus;
 use Utils\Logger\LoggerFactory;
 
 class ProjectCompletionRepository implements ProjectCompletionRepositoryInterface
 {
+    public function __construct(
+        private IDatabase $db,
+        private ProjectDao $projectDao,
+        private JobDao $jobDao,
+        private AnalysisDao $analysisDao,
+        private CounterModel $counterModel,
+    ) {
+    }
+
     /**
      * @throws PDOException
      */
     public function beginTransaction(): void
     {
-        Database::obtain()->begin();
+        $this->db->begin();
     }
 
     /**
@@ -32,7 +41,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function commit(): void
     {
-        Database::obtain()->commit();
+        $this->db->commit();
     }
 
     /**
@@ -40,7 +49,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function rollback(): void
     {
-        Database::obtain()->rollback();
+        $this->db->rollback();
     }
 
     /**
@@ -67,8 +76,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         ";
 
         try {
-            $db = Database::obtain();
-            $stmt = $db->getConnection()->prepare($query);
+            $stmt = $this->db->getConnection()->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute(['pid' => $pid]);
 
@@ -85,7 +93,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function updateProjectAnalysisStatus(int $pid, string $status, float $eqWc, float $stWc): void
     {
-        ProjectDao::updateFields(
+        $this->projectDao->updateFields(
             [
                 'status_analysis'      => $status,
                 'tm_analysis_wc'       => $eqWc,
@@ -103,7 +111,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function getProjectJobIds(int $pid): array
     {
-        $project = ProjectDao::findById($pid);
+        $project = $this->projectDao->findById($pid, ProjectStruct::class);
         assert($project !== null);
 
         $jobs = $project->getChunks();
@@ -121,7 +129,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function updateJobStandardWordCount(int $jobId, float $stWc): void
     {
-        JobDao::updateFields(
+        $this->jobDao->updateFields(
             ['standard_analysis_wc' => round($stWc)],
             ['id' => $jobId]
         );
@@ -129,8 +137,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
 
     public function initializeJobWordCount(int $jobId, string $password): void
     {
-        $counter = new CounterModel();
-        $counter->initializeJobWordCount($jobId, $password);
+        $this->counterModel->initializeJobWordCount($jobId, $password);
     }
 
     /**
@@ -139,8 +146,8 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyProjectAndJobCaches(int $pid): void
     {
-        ProjectDao::destroyCacheById($pid);
-        (new JobDao())->destroyCacheByProjectId($pid);
+        $this->projectDao->destroyFindByIdCache($pid, ProjectStruct::class);
+        $this->jobDao->destroyCacheByProjectId($pid);
     }
 
     /**
@@ -149,9 +156,9 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyAllCaches(int $pid, string $projectPassword): void
     {
-        ProjectDao::destroyCacheById($pid);
-        (new JobDao())->destroyCacheByProjectId($pid);
-        ProjectDao::destroyCacheByIdAndPassword($pid, $projectPassword);
-        AnalysisDao::destroyCacheByProjectId($pid);
+        $this->projectDao->destroyFindByIdCache($pid, ProjectStruct::class);
+        $this->jobDao->destroyCacheByProjectId($pid);
+        $this->projectDao->destroyProjectPasswordCache($pid, $projectPassword);
+        $this->analysisDao->destroyAnalysisProjectCache($pid);
     }
 }

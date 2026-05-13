@@ -17,8 +17,10 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use PDOException;
 use ReflectionException;
 
-final class AnalysisDao extends AbstractDao
+class AnalysisDao extends AbstractDao
 {
+
+    private const string SQL_DESTROY_ANALYSIS_PROJECT_CACHE = '%s';
 
 
     protected static string $_sql_get_project_Stats_volume_analysis = "
@@ -104,6 +106,18 @@ final class AnalysisDao extends AbstractDao
         $thisDao = new static();
 
         return $thisDao->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['pid' => $project_id]);
+    }
+
+    /**
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyAnalysisProjectCache(int $project_id): bool
+    {
+        $sql = sprintf(self::SQL_DESTROY_ANALYSIS_PROJECT_CACHE, self::$_sql_get_project_Stats_volume_analysis);
+        $stmt = $this->database->getConnection()->prepare($sql);
+
+        return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['pid' => $project_id]);
     }
 
 }
