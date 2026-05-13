@@ -1,19 +1,19 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-08 (last updated)  
-**Commits (refactor + fix + security + test):** 47
+**Date:** 2026-05-13 (last updated)  
+**Commits (refactor + fix + security + test):** 49
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,963 | −4,403 (−59.8%) |
-| **PHPUnit tests** | ~2,248 | 4,021 | +1,773 (+78.8%) |
-| **PHPUnit assertions** | ~19,449 | 24,463 | +5,014 (+25.8%) |
-| **Coverage — Classes** | 8.48% (53/625) | 19.94% (135/677) | +11.46% (+82 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 37.14% (1,517/4,085) | +15.40% (+673 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 36.68% (12,737/34,727) | +15.49% (+5,464 lines) |
+| **PHPStan baseline entries** | 7,366 | 2,890 | −4,476 (−60.8%) |
+| **PHPUnit tests** | ~2,248 | 4,332 | +2,084 (+92.7%) |
+| **PHPUnit assertions** | ~19,449 | 13,943 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 21.90% (150/685) | +13.42% (+97 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 42.00% (1,738/4,138) | +20.26% (+894 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 43.17% (15,091/34,955) | +21.98% (+7,818 lines) |
 | **New test files** | 235 | 291+ | +56 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 57+ | — |
+| **Files fully clean (0 PHPStan errors)** | 0 | 226 | +226 |
 
 ---
 
@@ -583,9 +583,9 @@ All 34 errors eliminated. Native param types, array shape PHPDocs, guards, 12 ne
 - Removed `$jobStruct?->` nullsafe operator (unnecessary after non-nullable return type)
 - 26 new tests (10 GetContributionRequest + 16 GetContributionWorker)
 
-#### 4B. `FastAnalysis.php` — ✅ DONE (commit `a21971d0a2`, −35 entries + daemon fix)
+#### 4B. `FastAnalysis.php` — ✅ DONE (commit `a21971d0a2` + `4c8b466ad1`, −42 entries + daemon fix)
 
-35 baseline entries eliminated + 1 non-baselined daemon error fixed. Key changes:
+42 baseline entries eliminated + 1 non-baselined daemon error fixed. Key changes:
 - `requireQueueHandler()` helper — eliminates 12 `method.nonObject` errors from nullable `?AMQHandler`
 - `instanceof MyMemory` narrowing — proper type-safe engine access for `fastAnalysis()`
 - `instanceof Database` guard for `ping()` — `IDatabase` lacks the method
@@ -593,6 +593,7 @@ All 34 errors eliminated. Native param types, array shape PHPDocs, guards, 12 ne
 - Array shape PHPDocs for properties (`$segments`, `$segment_hashes`, `$actual_project_row`)
 - `@throws PDOException` on `_checkDatabaseConnection()`
 - `@throws RuntimeException` on `cleanShutDown()`
+- `@throws LogInvalidArgumentException` on `_checkDatabaseConnection()`, `_executeInsert()`, `_getQueueAddressesByPriority()`, `cleanShutDown()`
 - `date_create()` → `new \DateTime()` (cannot return false)
 - `is_null(int)` → `!== 0` for `AppConfig::$INSTANCE_ID`
 - `(int)$id_job` cast for `MetadataDao::get()` calls
@@ -600,6 +601,9 @@ All 34 errors eliminated. Native param types, array shape PHPDocs, guards, 12 ne
 - `$queueInfo` null check before queue operations
 - `rpush()` wraps value in array as Predis requires
 - Fixed `AbstractEngine::syncMemories()` PHPDoc: `array<string, mixed>|null` → `list<array<string, mixed>>|null`
+- `array_values()` for `MyMemory::fastAnalysis()` list param
+- PSR-3 context array wrapper for `$projects_list` in logger calls
+- `AbstractEngine::class`/`MyMemory::class` template hints for `EnginesFactory::getInstance()`
 - Daemon entry: guard `getenv()` return before `realpath()`
 
 #### 4C. `TMAnalysisWorker.php` — ✅ DONE (commit `acc3c74c74`, −55 entries)
@@ -1188,11 +1192,15 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 - Added `void` return type to abstract `decorate()` method
 - Typed `$template` property as `PHPTALWithAppend` (was untyped)
 
-#### 23B. `DownloadOmegaTOutputDecorator.php` — ✅ DONE (−1 baseline entry)
+#### 23B. `DownloadOmegaTOutputDecorator.php` — ✅ DONE (−13 baseline entries)
 
 - Decoupled from `AbstractDecorator` hierarchy — it misused the inheritance (no template, returns `array` not `void`, never called via `appendDecorators()`)
 - Added own `AbstractDownloadController $controller` property/constructor
 - Typed `decorate()` return as `array<string, array{document_content: string, output_filename: string}>`
+- Added return/param types to `createOmegaTZip()` and `getOmegatProjectFile()`
+- Fixed optional `pathinfo()` keys with `??` default
+- Used null coalescing for tokenizer map lookup (was always-false `== null`)
+- Fixed `preg_replace` and `str_replace` null safety
 
 #### 23C. `CattoolController.php` — ✅ DONE (−21 baseline entries)
 
