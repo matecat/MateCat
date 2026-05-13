@@ -9,6 +9,17 @@ import globalFunctions from '../../globalFunctions'
 import CatToolStore from '../../stores/CatToolStore'
 window.React = React
 
+global.IntersectionObserver = class IntersectionObserver {
+  constructor(cb) {
+    this.cb = cb
+  }
+  observe() {
+    this.cb([{isIntersecting: true}])
+  }
+  unobserve() {}
+  disconnect() {}
+}
+
 window.config = {
   basepath: '/',
   password: '74ac64e1f60e',
