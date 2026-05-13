@@ -108,11 +108,11 @@ class FindProjectTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers ProjectDao::findById
+     * @covers ProjectDao::staticFindById
      */
     function test_findById()
     {
-        $result = $this->projectDao->findById($this->project['id']);
+        $result = $this->projectDao->staticFindById($this->project['id']);
         $this->assertTrue($result instanceof ProjectStruct);
 
         $this->assertEquals($this->project['id'], $result->id);

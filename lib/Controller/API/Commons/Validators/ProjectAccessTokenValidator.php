@@ -60,7 +60,7 @@ class ProjectAccessTokenValidator extends Base
      */
     public function _validate(): void
     {
-        $this->project = ProjectDao::findById(
+        $this->project = ProjectDao::staticFindById(
             $this->id_project
         );
 

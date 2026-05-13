@@ -28,7 +28,7 @@ if (empty($options))                               usage() ;
 if (!array_key_exists('file', $options))           usage() ;
 if (!array_key_exists('id_project', $options))     usage() ;
 
-$project = ProjectDao::findById( $options['id_project']);
+$project = ProjectDao::staticFindById( $options['id_project']);
 
 $content = file_get_contents( $options['file']);
 $json = json_decode( $content, true );

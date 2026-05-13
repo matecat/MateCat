@@ -856,7 +856,7 @@ class DownloadController extends AbstractDownloadController
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {
-        $project = ProjectDao::findById($this->job['id_project']) ?? throw new Exception('Project not found');
+        $project = ProjectDao::staticFindById($this->job['id_project']) ?? throw new Exception('Project not found');
 
         // this is the filesystem path
         $zipFile = (new FsFilesStorage())->getOriginalZipPath($project->create_date, $this->job['id_project'], $zipFileName);

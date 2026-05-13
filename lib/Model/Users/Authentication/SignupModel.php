@@ -60,7 +60,7 @@ class SignupModel
     {
         if ($this->__userAlreadyExists()) {
             $this->__updatePersistedUser();
-            UserDao::updateStruct($this->user, [
+            UserDao::staticUpdateStruct($this->user, [
                 'fields' => [
                     'salt',
                     'pass',
@@ -70,7 +70,7 @@ class SignupModel
             ]);
         } else {
             $this->__prepareNewUser();
-            $this->user->uid = UserDao::insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
+            $this->user->uid = UserDao::staticInsertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
 
             Database::obtain()->begin();
             (new TeamDao())->createPersonalTeam($this->user);
@@ -226,7 +226,7 @@ class SignupModel
         if ($user) {
             $user->initAuthToken();
 
-            UserDao::updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
+            UserDao::staticUpdateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
 
             $delivery = new ForgotPasswordEmail($user);
             $delivery->send();
@@ -267,7 +267,7 @@ class SignupModel
         $user->email_confirmed_at = Utils::mysqlTimestamp(time());
         $user->clearAuthToken();
 
-         UserDao::updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
+         UserDao::staticUpdateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
          (new UserDao)->destroyCacheByEmail($user->email ?? throw new RuntimeException('Missing user email'));
          (new UserDao)->destroyCacheByUid($user->uid ?? throw new RuntimeException('Missing user uid'));
 

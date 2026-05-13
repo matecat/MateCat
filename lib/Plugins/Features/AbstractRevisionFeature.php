@@ -212,7 +212,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
     protected function createChunkReviewRecords(ProjectStructure $projectStructure): void
     {
         $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to create chunk review records');
-        $project = ProjectDao::findById($idProject)
+        $project = ProjectDao::staticFindById($idProject)
             ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
         foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
@@ -245,7 +245,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
         $previousRevisionRecords = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure->idProject, 86400)
+        $project = ProjectDao::staticFindById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
         ChunkReviewDao::deleteByJobId($id_job);
@@ -291,7 +291,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
         $old_reviews = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure->idProject, 86400)
+        $project = ProjectDao::staticFindById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
         $reviewGroupedData = [];
@@ -362,7 +362,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $review->reviewed_words_count = $undo_data['reviewed_words_count'];
         $review->undo_data = null;
 
-        ChunkReviewDao::updateStruct($review, [
+        ChunkReviewDao::staticUpdateStruct($review, [
             'fields' => [
                 'is_pass',
                 'penalty_points',
@@ -449,7 +449,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $model_record = ModelDao::createModelFromJsonDefinition($model_json);
 
         $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to set QA model');
-        $project = ProjectDao::findById($idProject)
+        $project = ProjectDao::staticFindById($idProject)
             ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
         $dao = new ProjectDao(Database::obtain());

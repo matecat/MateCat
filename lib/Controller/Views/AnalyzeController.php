@@ -76,7 +76,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
         $jid = $postInput['jid'];
         $pass = $postInput['password'];
 
-        $projectStruct = ProjectDao::findById($pid, 60 * 60);
+        $projectStruct = ProjectDao::staticFindById($pid, 60 * 60);
 
         if (empty($projectStruct)) {
             $this->setView("project_not_found.html", [], 404);

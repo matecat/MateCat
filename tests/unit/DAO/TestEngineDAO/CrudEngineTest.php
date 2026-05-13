@@ -172,19 +172,19 @@ class CrudEngineTest extends AbstractTest
     /**
      * It doesn't update the struct of an engine because the
      * @throws Exception @group regression
-     * @covers EngineDAO::updateFields
+     * @covers EngineDAO::staticUpdate
      */
     #[Test]
     public function test_update_the_struct_of_engine_with_wrong_uid_avoiding_any_update()
     {
         $this->engine_struct_param->uid++;
-        $this->engine_DAO->updateFields($this->engine_struct_param->toArray(), [
+        $this->engine_DAO->staticUpdate($this->engine_struct_param->toArray(), [
             'id' => $this->engine_struct_param->id,
             'uid' => $this->engine_struct_param->uid
         ]);
 
         //update on the same object is null
-        $this->assertEquals(0, $this->engine_DAO->updateFields($this->engine_struct_param->toArray(), [
+        $this->assertEquals(0, $this->engine_DAO->staticUpdate($this->engine_struct_param->toArray(), [
             'id' => $this->engine_struct_param->id,
             'uid' => $this->engine_struct_param->uid
         ]));

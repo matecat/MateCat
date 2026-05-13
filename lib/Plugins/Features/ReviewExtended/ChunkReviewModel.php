@@ -181,7 +181,7 @@ class ChunkReviewModel implements IChunkReviewModel
             $this->chunk_review->is_pass = true;
         }
 
-        $update_result = ChunkReviewDao::updateStruct($this->chunk_review, [
+        $update_result = ChunkReviewDao::staticUpdateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',

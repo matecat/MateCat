@@ -663,7 +663,7 @@ class Lara extends AbstractEngine
     {
         try {
             // get jobs keys
-            $project = ProjectDao::findById($projectRow['id']);
+            $project = ProjectDao::staticFindById($projectRow['id']);
             if ($project === null) {
                 return;
             }

@@ -79,7 +79,7 @@ class DownloadOriginalController extends AbstractDownloadController
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[0]['id_project'];
 
-        $this->project = ProjectDao::findById($id_project) ?? throw new Exception("Project not found");
+        $this->project = ProjectDao::staticFindById($id_project) ?? throw new Exception("Project not found");
 
         $output_content = [];
 

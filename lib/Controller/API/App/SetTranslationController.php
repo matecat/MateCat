@@ -1035,7 +1035,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $newTotalJobPee = ($this->chunk['avg_post_editing_effort'] - $oldPee_weighted + $newPee_weighted);
             }
 
-            JobDao::updateFields(
+            JobDao::staticUpdate(
 
                 ['avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
@@ -1047,7 +1047,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         elseif ($oldSegmentStatus->isValidForEditLog()) {
             $newTotalJobPee = ($this->chunk['avg_post_editing_effort'] - $oldPee_weighted);
 
-            JobDao::updateFields(
+            JobDao::staticUpdate(
                 ['avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
                     'id' => $this->id_job,
@@ -1055,7 +1055,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 ]
             );
         } elseif ($jobTotalTTEForTranslation != 0) {
-            JobDao::updateFields(
+            JobDao::staticUpdate(
                 ['total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
                     'id' => $this->id_job,

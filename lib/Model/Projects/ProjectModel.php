@@ -91,7 +91,7 @@ class ProjectModel
             $newStruct->$field = $value;
         }
 
-        $result = ProjectDao::updateStruct($newStruct, [
+        $result = ProjectDao::staticUpdateStruct($newStruct, [
             'fields' => array_keys($this->willChange)
         ]);
 

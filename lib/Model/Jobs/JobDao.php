@@ -222,8 +222,6 @@ class JobDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_jobs_by_project);
 
-        $this->_destroyObjectCache($stmt, JobStruct::class, [$project_id, JobStatus::STATUS_DELETED]);
-
         return $this->_destroyObjectCache($stmt, JobStruct::class, [$project_id, JobStatus::STATUS_DELETED]);
     }
 
@@ -659,10 +657,10 @@ class JobDao extends AbstractDao
      */
     public static function updateForMerge(JobStruct $first_job, string $newPass): JobStruct
     {
-        static::updateStruct($first_job);
+        static::staticUpdateStruct($first_job);
 
         if ($newPass) {
-            self::updateFields(
+            self::staticUpdate(
                 [
                     'password' => $newPass,
                     'last_update' => date("Y-m-d H:i:s"),
@@ -744,7 +742,7 @@ class JobDao extends AbstractDao
      */
     public static function updateAllJobsStatusesByProjectId(int $id_project, string $new_status): void
     {
-        self::updateFields([
+        self::staticUpdate([
             'status_owner' => $new_status,
             'last_update' => date("Y-m-d H:i:s"),
         ],
@@ -763,7 +761,7 @@ class JobDao extends AbstractDao
      */
     public static function setJobComplete(JobStruct $jStruct): int
     {
-        return self::updateFields([
+        return self::staticUpdate([
             'completed' => 1,
             'last_update' => date("Y-m-d H:i:s"),
         ],
@@ -781,7 +779,7 @@ class JobDao extends AbstractDao
      */
     public static function updateJobStatus(JobStruct $jStruct, string $new_status): void
     {
-        self::updateFields([
+        self::staticUpdate([
             'status_owner' => $new_status,
             'last_update' => date("Y-m-d H:i:s"),
         ],

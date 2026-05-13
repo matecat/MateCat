@@ -271,7 +271,7 @@ class FastAnalysis extends AbstractDaemon
                      * Ensure we have fresh data from the master node
                      */
                     $metadataResult = Database::obtain()->transaction(function () use ($pid) {
-                        $projectStruct = ProjectDao::findById($pid);
+                        $projectStruct = ProjectDao::staticFindById($pid);
                         if ($projectStruct === null) {
                             return null;
                         }
@@ -453,7 +453,7 @@ class FastAnalysis extends AbstractDaemon
     protected function _updateProject(int $pid, string $status): void
     {
         Database::obtain()->transaction(function () use ($pid, $status) {
-            $project = ProjectDao::findById($pid);
+            $project = ProjectDao::staticFindById($pid);
             if ($project === null) {
                 $this->logger->debug("*** Project $pid: not found. Skip update.");
 

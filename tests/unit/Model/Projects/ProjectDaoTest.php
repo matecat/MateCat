@@ -138,21 +138,21 @@ class ProjectDaoTest extends AbstractTest
     public function updateFieldUpdatesStructAndDatabase(): void
     {
         $dao = new ProjectDao();
-        $project = ProjectDao::findById(self::PROJECT_ID_1);
+        $project = ProjectDao::staticFindById(self::PROJECT_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
 
         $updated = $dao->updateField($project, 'name', 'Project Alpha Updated');
 
         $this->assertSame('Project Alpha Updated', $updated->name);
-        $this->assertSame('Project Alpha Updated', ProjectDao::findById(self::PROJECT_ID_1)?->name);
+        $this->assertSame('Project Alpha Updated', ProjectDao::staticFindById(self::PROJECT_ID_1)?->name);
     }
 
     #[Test]
     public function changePasswordUpdatesProjectPassword(): void
     {
         $dao = new ProjectDao();
-        $project = ProjectDao::findById(self::PROJECT_ID_1);
+        $project = ProjectDao::staticFindById(self::PROJECT_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
 
@@ -166,20 +166,20 @@ class ProjectDaoTest extends AbstractTest
     public function changeNameUpdatesProjectName(): void
     {
         $dao = new ProjectDao();
-        $project = ProjectDao::findById(self::PROJECT_ID_1);
+        $project = ProjectDao::staticFindById(self::PROJECT_ID_1);
 
         $this->assertInstanceOf(ProjectStruct::class, $project);
 
         $dao->changeName($project, 'Project Alpha Renamed');
 
-        $this->assertSame('Project Alpha Renamed', ProjectDao::findById(self::PROJECT_ID_1)?->name);
+        $this->assertSame('Project Alpha Renamed', ProjectDao::staticFindById(self::PROJECT_ID_1)?->name);
     }
 
     #[Test]
     public function findByIdReturnsExistingAndNullForMissing(): void
     {
-        $this->assertInstanceOf(ProjectStruct::class, ProjectDao::findById(self::PROJECT_ID_1));
-        $this->assertNull(ProjectDao::findById(88889999));
+        $this->assertInstanceOf(ProjectStruct::class, ProjectDao::staticFindById(self::PROJECT_ID_1));
+        $this->assertNull(ProjectDao::staticFindById(88889999));
     }
 
     #[Test]
@@ -312,7 +312,7 @@ class ProjectDaoTest extends AbstractTest
 
         $this->assertTrue($ok);
 
-        $project = ProjectDao::findById(self::PROJECT_ID_1);
+        $project = ProjectDao::staticFindById(self::PROJECT_ID_1);
         $this->assertSame('DONE', $project?->status_analysis);
         $this->assertSame(123.0, (float)$project?->standard_analysis_wc);
     }
@@ -323,7 +323,7 @@ class ProjectDaoTest extends AbstractTest
         $affected = ProjectDao::changeProjectStatus(self::PROJECT_ID_1, 'BUSY');
 
         $this->assertSame(1, $affected);
-        $this->assertSame('BUSY', ProjectDao::findById(self::PROJECT_ID_1)?->status_analysis);
+        $this->assertSame('BUSY', ProjectDao::staticFindById(self::PROJECT_ID_1)?->status_analysis);
     }
 
     #[Test]

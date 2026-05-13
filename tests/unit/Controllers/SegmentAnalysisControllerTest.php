@@ -345,7 +345,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function getSegmentsForAProjectReturnsPaginatedResult(): void
     {
         $projectProp = $this->reflector->getProperty('project');
-        $project = (new ProjectDao())->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao())->staticFindById(self::TEST_PROJECT_ID);
         $projectProp->setValue($this->controller, $project);
 
         $projectDaoProp = $this->reflector->getProperty('projectDao');

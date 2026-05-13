@@ -192,7 +192,7 @@ class QualityReportModel
      */
     protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
     {
-        ChunkReviewDao::updateStruct($chunkReview, $options);
+        ChunkReviewDao::staticUpdateStruct($chunkReview, $options);
     }
 
     /**

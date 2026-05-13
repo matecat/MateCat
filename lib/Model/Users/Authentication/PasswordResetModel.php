@@ -81,7 +81,7 @@ class PasswordResetModel
 
         if (strtotime($this->user->confirmation_token_created_at) < strtotime('30 minutes ago')) {
             $this->user->clearAuthToken();
-            UserDao::updateStruct($this->user, ['fields' => ['confirmation_token']]);
+            UserDao::staticUpdateStruct($this->user, ['fields' => ['confirmation_token']]);
 
             throw new ValidationError('Auth token expired, repeat the operation.');
         }
@@ -125,7 +125,7 @@ class PasswordResetModel
             $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        UserDao::updateStruct($this->user, $fieldsToUpdate);
+        UserDao::staticUpdateStruct($this->user, $fieldsToUpdate);
         (new UserDao)->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
         (new UserDao)->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
     }

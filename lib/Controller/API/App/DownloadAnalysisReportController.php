@@ -39,7 +39,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         $_project_data = ProjectDao::getProjectAndJobData($projectId);
         $this->id_job = (int)$_project_data[0]['jid'];
 
-        $this->featureSet->loadForProject(ProjectDao::findById($projectId, 60 * 60 * 24) ?? throw new Exception("Project not found"));
+        $this->featureSet->loadForProject(ProjectDao::staticFindById($projectId, 60 * 60 * 24) ?? throw new Exception("Project not found"));
 
         $analysisStatus = new XTRFStatus($_project_data, $this->featureSet);
         $outputContent = $analysisStatus->fetchData()->getResultArray();
@@ -84,7 +84,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
             throw new InvalidArgumentException("Id project not provided");
         }
 
-        $project = ProjectDao::findById((int)$id_project);
+        $project = ProjectDao::staticFindById((int)$id_project);
 
         if (empty($project)) {
             throw new InvalidArgumentException("Wrong Id project provided", -10);

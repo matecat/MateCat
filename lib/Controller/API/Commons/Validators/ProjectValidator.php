@@ -85,7 +85,7 @@ class ProjectValidator extends Base
     protected function _validate(): void
     {
         if (!$this->project) {
-            $this->project = ProjectDao::findById($this->id_project);
+            $this->project = ProjectDao::staticFindById($this->id_project);
         }
 
         if (empty($this->project)) {

@@ -49,7 +49,7 @@ class RedeemableProject
     {
         if (!isset($this->project)) {
             if (isset($this->session['last_created_pid'])) {
-                $this->project = ProjectDao::findById($this->session['last_created_pid']);
+                $this->project = ProjectDao::staticFindById($this->session['last_created_pid']);
             }
         }
 
@@ -72,7 +72,7 @@ class RedeemableProject
             $this->project->id_team = $this->user->getPersonalTeam()->id;
             $this->project->id_assignee = $this->user->getUid();
 
-            ProjectDao::updateStruct($this->project, [
+            ProjectDao::staticUpdateStruct($this->project, [
                 'fields' => ['id_team', 'id_customer', 'id_assignee']
             ]);
 

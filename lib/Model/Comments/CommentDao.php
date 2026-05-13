@@ -203,7 +203,7 @@ class CommentDao extends AbstractDao
         try {
             $comment = $this->saveComment($obj);
 
-            self::updateFields(
+            self::staticUpdate(
                 ['resolve_date' => $obj->resolve_date],
                 [
                     'id_segment' => $obj->id_segment,

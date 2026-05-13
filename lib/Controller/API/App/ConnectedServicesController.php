@@ -70,7 +70,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
             $this->connectedServiceStruct->disabled_at = null;
         }
 
-        ConnectedServiceDao::updateStruct($this->connectedServiceStruct, ['fields' => ['disabled_at']]);
+        ConnectedServiceDao::staticUpdateStruct($this->connectedServiceStruct, ['fields' => ['disabled_at']]);
 
         $this->refreshClientSessionIfNotApi();
 

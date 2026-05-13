@@ -81,7 +81,7 @@ class TeamsProjectsController extends KleinController
      */
     protected function _appendSingleProjectTeamValidators(): TeamsProjectsController
     {
-        $this->project = ProjectDao::findById($this->request->param('id_project')); //check login and auth before request the project info
+        $this->project = ProjectDao::staticFindById($this->request->param('id_project')); //check login and auth before request the project info
         $this->appendValidator((new TeamProjectValidator($this))->setProject($this->project));
         $this->appendValidator((new ProjectExistsInTeamValidator($this))->setProject($this->project));
 

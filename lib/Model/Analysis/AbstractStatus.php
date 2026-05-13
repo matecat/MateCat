@@ -84,7 +84,7 @@ abstract class AbstractStatus
             $user->uid = -1;
         }
         $this->user = $user;
-        $this->project = ProjectDao::findById($_project_data[0]['pid'], 60 * 60);
+        $this->project = ProjectDao::staticFindById($_project_data[0]['pid'], 60 * 60);
         $this->_project_data = $_project_data;
         $this->featureSet = $features;
     }
