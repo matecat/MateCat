@@ -311,7 +311,10 @@ class ProjectManagerModel
      *   context_groups, project_metadata, projects, jobs
      *
      * @param int $idProject
-     * @param int $batchSize Max rows per batched DELETE (must be >= 1)
+     * @param int $batchSize Max rows per batched DELETE on segment-range
+     *                       tables (must be >= 1). File-scoped tables
+     *                       (files_parts) are batched by file ID chunks
+     *                       instead — see {@see deleteFileAndProjectScopedData()}.
      *
      * @throws InvalidArgumentException if $batchSize < 1
      * @throws PDOException
@@ -456,6 +459,11 @@ class ProjectManagerModel
     private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs): void
     {
         // --- File-scoped deletions (batched to avoid large DELETE spikes) ---
+        //
+        // files_parts stores tag key/value pairs per file (typically < 10 rows
+        // per file), so chunking by file ID keeps each DELETE small enough.
+        // For tables with unbounded per-key cardinality (e.g. segment_translations),
+        // the range-based deleteInBatches() method is used instead.
 
         // Collect all file IDs belonging to this project.
         $stmt = $conn->prepare("SELECT id FROM files WHERE id_project = :id_project");
