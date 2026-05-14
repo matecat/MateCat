@@ -115,7 +115,9 @@ export const updateNodeTranslation = (el, segments) => {
     group.sort((a, b) => Number(a.sid) - Number(b.sid))
     const targets = group.map((s) => {
       if (!s.target) return null
-      const stripped = stripSegmentTags(s.target).replace(/[\s\u200b]+/g, ' ').trim()
+      const stripped = stripSegmentTags(s.target)
+        .replace(/[\s\u200b]+/g, ' ')
+        .trim()
       return stripped || null
     })
     if (targets.some((t) => t === null)) return 'no-target'
@@ -387,7 +389,15 @@ export const stripSegmentTags = (text) => {
   if (!text) return ''
   return decodeHtmlEntities(
     removeTagsFromText(
-      excludeSomeTagsTransformToText(text, ['g', 'gCl', 'gSc', 'bx', 'ex', 'x'])
+      excludeSomeTagsTransformToText(text, [
+        'g',
+        'gCl',
+        'gSc',
+        'bx',
+        'ex',
+        'x',
+        'ph',
+      ])
         .replace(/##\$_[^$]+\$##/g, ' ')
         .replace(/\s+/g, ' ')
         .trim(),
@@ -559,7 +569,9 @@ export const tagSegments = (
   // text-matched SIDs from them after the full strategy pass.
   const pointMappedElements = new Map() // el → Set<sid>
 
-  for (const [sidStr, {resname, restype, client_name}] of Object.entries(metadataMap)) {
+  for (const [sidStr, {resname, restype, client_name}] of Object.entries(
+    metadataMap,
+  )) {
     const sid = Number(sidStr)
     if (!resname || !restype) continue
     if (alreadyTagged.has(sid)) {
@@ -587,8 +599,7 @@ export const tagSegments = (
       appendSid(el, sid)
       strategyResolved.add(sid)
       tier1Nodes.add(el)
-      if (!pointMappedElements.has(el))
-        pointMappedElements.set(el, new Set())
+      if (!pointMappedElements.has(el)) pointMappedElements.set(el, new Set())
       pointMappedElements.get(el).add(sid)
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
@@ -601,7 +612,10 @@ export const tagSegments = (
     const currentSids = getCachedSids(el)
     const toEvict = currentSids.filter((sid) => !pointSids.has(sid))
     if (toEvict.length) {
-      setSids(el, currentSids.filter((sid) => pointSids.has(sid)))
+      setSids(
+        el,
+        currentSids.filter((sid) => pointSids.has(sid)),
+      )
       for (const sid of toEvict) {
         alreadyTagged.delete(sid)
         const idx = prepared.findIndex((p) => p.sid === sid)
