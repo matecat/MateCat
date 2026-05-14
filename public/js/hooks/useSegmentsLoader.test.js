@@ -85,7 +85,7 @@ describe('useSegmentsLoader', () => {
       const {result} = renderHook(() => useSegmentsLoader(defaultProps), {
         wrapper: createWrapper(true),
       })
-      expect(result.current.isLoading).toBe(false)
+      expect(result.current.isLoading).toBe(true)
       expect(result.current.result).toBeUndefined()
     })
   })

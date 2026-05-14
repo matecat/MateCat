@@ -85,13 +85,13 @@ describe('VirtualList', () => {
     })
 
     it('renders header when provided', () => {
-      const header = <div data-testid="list-header">Header</div>
-      const {getByTestId} = renderVirtualList({header})
+      const overlapHeader = <div data-testid="list-header">Header</div>
+      const {getByTestId} = renderVirtualList({overlapHeader})
       expect(getByTestId('list-header')).toBeInTheDocument()
     })
 
     it('does not render header when not provided', () => {
-      const {queryByTestId} = renderVirtualList({header: undefined})
+      const {queryByTestId} = renderVirtualList({overlapHeader: undefined})
       expect(queryByTestId('list-header')).not.toBeInTheDocument()
     })
 
@@ -143,7 +143,7 @@ describe('VirtualList', () => {
 
     it('does not crash when scrollToIndex has index and align', () => {
       expect(() =>
-        renderVirtualList({scrollToIndex: {index: 2, align: 'start'}}),
+        renderVirtualList({scrollToIndex: {value: 2, align: 'start'}}),
       ).not.toThrow()
     })
   })

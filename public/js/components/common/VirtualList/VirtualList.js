@@ -13,7 +13,7 @@ const VirtualList = forwardRef(
       scrollToIndex = {},
       onRender,
       setFirstRowIdVisible,
-      header,
+      overlapHeader,
       itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
@@ -94,7 +94,7 @@ const VirtualList = forwardRef(
             position: 'relative',
           }}
         >
-          {header && header}
+          {overlapHeader && overlapHeader}
           {virtualItems.map((item) => (
             <div
               key={items[item.index].id ? items[item.index].id : item.index}
@@ -129,7 +129,7 @@ VirtualList.propTypes = {
   }),
   onRender: PropTypes.func.isRequired,
   setFirstRowIdVisible: PropTypes.func.isRequired,
-  header: PropTypes.node,
+  overlapHeader: PropTypes.node,
   itemStyle: PropTypes.func,
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,

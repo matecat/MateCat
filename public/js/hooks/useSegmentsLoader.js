@@ -92,7 +92,7 @@ function useSegmentsLoader({
         current.isLoading = false
       })
 
-    // setIsLoading(true)
+    setIsLoading(true)
     current.isLoading = true
 
     return () => {

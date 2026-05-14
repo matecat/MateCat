@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
@@ -13,10 +7,6 @@ import JobMetadataModal from '../../../modals/JobMetadataModal'
 import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
 import SegmentUtils from '../../../../utils/segmentUtils'
-import {se} from 'make-plural'
-import {head} from 'lodash'
-import {is} from 'immutable'
-import SegmentStore from '../../../../stores/SegmentStore'
 
 const LinkIcon = () => {
   return (
@@ -158,16 +148,16 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
       typeof previousFileIdRef.current === 'number'
     ) {
       ref.current.style.animation = 'none'
-      filenameElement.style.animation = 'none'
-      wordcounterElement.style.animation = 'none'
+      if (filenameElement) filenameElement.style.animation = 'none'
+      if (wordcounterElement) wordcounterElement.style.animation = 'none'
 
       tmOutReset = setTimeout(() => {
         ref.current.style.animation = ''
-        filenameElement.style.animation = ''
-        wordcounterElement.style.animation = ''
+        if (filenameElement) filenameElement.style.animation = ''
+        if (wordcounterElement) wordcounterElement.style.animation = ''
       }, 0)
 
-      filenameElement.addEventListener('animationend', stopFileChangeAnim)
+      filenameElement?.addEventListener('animationend', stopFileChangeAnim)
       setIsFileChange(true)
     }
 
@@ -175,7 +165,7 @@ export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
 
     return () => {
       clearTimeout(tmOutReset)
-      filenameElement.removeEventListener('animationend', stopFileChangeAnim)
+      filenameElement?.removeEventListener('animationend', stopFileChangeAnim)
       stopFileChangeAnim()
     }
   }, [isSticky, idFileSegment])

@@ -433,7 +433,11 @@ function SegmentFooter() {
       })
     })
 
-    if (ref.current) observer.observe(ref.current)
+    const {current} = ref
+
+    if (current) observer.observe(current)
+
+    return () => observer.disconnect()
   }, [])
 
   const isInitTabLoading = ({code}) => {

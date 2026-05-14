@@ -870,7 +870,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         }}
         overscan={OVERSCAN}
         height={heightArea}
-        header={getProjectBar()}
+        overlapHeader={getProjectBar()}
         onRender={(index) => {
           const props = getSegmentPropsBySid(essentialRows[index].id)
           return (
