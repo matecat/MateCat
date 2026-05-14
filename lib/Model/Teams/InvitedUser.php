@@ -72,7 +72,7 @@ class InvitedUser
       */
      public static function completeTeamSignUp(UserStruct $user, array $invitation): void
     {
-        $teamStruct = (new TeamDao)->findById($invitation['team_id']);
+        $teamStruct = (new TeamDao)->fetchById($invitation['team_id'], TeamStruct::class);
 
         $teamModel = new TeamModel($teamStruct);
         $teamModel->setUser($user);

@@ -187,7 +187,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         }
         $dao = new TeamDao();
 
-        return $dao->findById($this->id_team);
+        return $dao->fetchById($this->id_team, TeamStruct::class);
     }
 
     /**

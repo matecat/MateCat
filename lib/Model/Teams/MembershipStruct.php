@@ -94,7 +94,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
     {
         if (is_null($this->team)) {
             $id_team = $this->id_team ?? throw new DomainException("Membership team id must be set before loading team");
-            $this->team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($id_team)
+            $this->team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->fetchById($id_team, TeamStruct::class)
                 ?? throw new RuntimeException("Team not found for id: $id_team");
         }
 
