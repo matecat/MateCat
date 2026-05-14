@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
 use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
@@ -484,7 +485,8 @@ class ProjectManagerModelTest extends TestCase
             'segment_notes',                 // batched
             'segment_original_data',         // batched
             'segments',                      // batched
-            'files_parts',                   // subquery DELETE (by id_project via files)
+            'files',                         // SELECT file IDs
+            'files_parts',                   // batched DELETE by file IDs
             'files',                         // DELETE files
             'file_references',               // by id_project
             'file_metadata',
@@ -560,7 +562,8 @@ class ProjectManagerModelTest extends TestCase
         // No job-scoped or segment-scoped deletes
         $expected = [
             'jobs',                          // SELECT jobs (returns empty)
-            'files_parts',                   // subquery DELETE (by id_project via files)
+            'files',                         // SELECT file IDs
+            'files_parts',                   // batched DELETE by file IDs (2 IDs in 1 chunk)
             'files',                         // DELETE files
             'file_references',
             'file_metadata',
@@ -668,7 +671,7 @@ class ProjectManagerModelTest extends TestCase
         }
     }
 
-    public function testDeleteProjectWithNoFilesStillIssuesFilePartsDelete(): void
+    public function testDeleteProjectWithNoFilesSkipsFilesPartsDelete(): void
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
@@ -678,7 +681,7 @@ class ProjectManagerModelTest extends TestCase
         $model->deleteProject(42);
 
         $fpIndices = $this->queryIndicesForTable('files_parts');
-        self::assertCount(1, $fpIndices, 'files_parts DELETE always executes (subquery returns 0 rows when no files)');
+        self::assertCount(0, $fpIndices, 'files_parts DELETE should not execute when no file IDs are returned');
     }
 
     public function testDeleteProjectWithNonContiguousJobsDoesNotSpanGap(): void
@@ -723,7 +726,7 @@ class ProjectManagerModelTest extends TestCase
             fileIds: [],
         );
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('batchSize must be >= 1, got 0');
 
         $model->deleteProject(42, batchSize: 0);
@@ -736,7 +739,7 @@ class ProjectManagerModelTest extends TestCase
             fileIds: [],
         );
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('batchSize must be >= 1, got -5');
 
         $model->deleteProject(42, batchSize: -5);
@@ -777,5 +780,52 @@ class ProjectManagerModelTest extends TestCase
         $query = $this->preparedQueries[$indices[0]];
         self::assertStringContainsString('DELETE FROM file_references', $query);
         self::assertSame(['id_project' => 42], $this->executedValues[$indices[0]]);
+    }
+
+    public function testDeleteProjectBatchesFilesPartsInChunksOfFive(): void
+    {
+        // 12 file IDs → 3 chunks: [1,2,3,4,5], [6,7,8,9,10], [11,12]
+        $model = $this->createModelForDelete(
+            jobRows: [],
+            fileIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        );
+
+        $model->deleteProject(42);
+
+        // Collect only files_parts queries (should be 3 batched DELETEs)
+        $fpIndices = $this->queryIndicesForTable('files_parts');
+        self::assertCount(3, $fpIndices, 'files_parts should be deleted in 3 batches for 12 file IDs');
+
+        // Batch 1: 5 placeholders
+        $query1 = $this->preparedQueries[$fpIndices[0]];
+        self::assertStringContainsString('DELETE FROM files_parts WHERE id_file IN (?,?,?,?,?)', $query1);
+        self::assertSame([1, 2, 3, 4, 5], $this->executedValues[$fpIndices[0]]);
+
+        // Batch 2: 5 placeholders
+        $query2 = $this->preparedQueries[$fpIndices[1]];
+        self::assertStringContainsString('DELETE FROM files_parts WHERE id_file IN (?,?,?,?,?)', $query2);
+        self::assertSame([6, 7, 8, 9, 10], $this->executedValues[$fpIndices[1]]);
+
+        // Batch 3: 2 placeholders (remainder)
+        $query3 = $this->preparedQueries[$fpIndices[2]];
+        self::assertStringContainsString('DELETE FROM files_parts WHERE id_file IN (?,?)', $query3);
+        self::assertSame([11, 12], $this->executedValues[$fpIndices[2]]);
+    }
+
+    public function testDeleteProjectFilesPartsSingleChunkWhenFiveOrFewerFiles(): void
+    {
+        $model = $this->createModelForDelete(
+            jobRows: [],
+            fileIds: [10, 20, 30],
+        );
+
+        $model->deleteProject(42);
+
+        $fpIndices = $this->queryIndicesForTable('files_parts');
+        self::assertCount(1, $fpIndices, 'files_parts should be deleted in 1 batch for 3 file IDs');
+
+        $query = $this->preparedQueries[$fpIndices[0]];
+        self::assertStringContainsString('DELETE FROM files_parts WHERE id_file IN (?,?,?)', $query);
+        self::assertSame([10, 20, 30], $this->executedValues[$fpIndices[0]]);
     }
 }

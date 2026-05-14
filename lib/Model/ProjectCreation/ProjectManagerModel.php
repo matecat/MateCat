@@ -3,6 +3,7 @@
 namespace Model\ProjectCreation;
 
 use Exception;
+use InvalidArgumentException;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
@@ -312,13 +313,13 @@ class ProjectManagerModel
      * @param int $idProject
      * @param int $batchSize Max rows per batched DELETE (must be >= 1)
      *
-     * @throws \InvalidArgumentException if $batchSize < 1
+     * @throws InvalidArgumentException if $batchSize < 1
      * @throws PDOException
      */
     public function deleteProject(int $idProject, int $batchSize = 200): void
     {
         if ($batchSize < 1) {
-            throw new \InvalidArgumentException("batchSize must be >= 1, got $batchSize");
+            throw new InvalidArgumentException("batchSize must be >= 1, got $batchSize");
         }
 
         $conn = $this->dbHandler->getConnection();
@@ -454,13 +455,29 @@ class ProjectManagerModel
      */
     private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs): void
     {
-        // --- File-scoped deletions ---
-        $stmt = $conn->prepare(
-            "DELETE FROM files_parts WHERE id_file IN (
-                SELECT id FROM files WHERE id_project = :id_project
-            )"
-        );
+        // --- File-scoped deletions (batched to avoid large DELETE spikes) ---
+
+        // Collect all file IDs belonging to this project.
+        $stmt = $conn->prepare("SELECT id FROM files WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
+        /** @var list<int> $fileIds */
+        $fileIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Split file IDs into chunks of 5 to keep each DELETE small.
+        $fileIdChunks = array_chunk($fileIds, 5);
+        $lastChunkIndex = count($fileIdChunks) - 1;
+
+        foreach ($fileIdChunks as $i => $chunk) {
+            // Build a parameterised IN clause and delete matching files_parts rows.
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            $delStmt = $conn->prepare("DELETE FROM files_parts WHERE id_file IN ($placeholders)");
+            $delStmt->execute($chunk);
+
+            // Pause between batches (except after the last) to limit replication lag.
+            if ($i < $lastChunkIndex && self::$batchSleepMicroseconds > 0) {
+                usleep(self::$batchSleepMicroseconds);
+            }
+        }
 
         $stmt = $conn->prepare("DELETE FROM files WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
