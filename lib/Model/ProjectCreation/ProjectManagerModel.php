@@ -3,6 +3,7 @@
 namespace Model\ProjectCreation;
 
 use Exception;
+use InvalidArgumentException;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
@@ -312,13 +313,13 @@ class ProjectManagerModel
      * @param int $idProject
      * @param int $batchSize Max rows per batched DELETE (must be >= 1)
      *
-     * @throws \InvalidArgumentException if $batchSize < 1
+     * @throws InvalidArgumentException if $batchSize < 1
      * @throws PDOException
      */
     public function deleteProject(int $idProject, int $batchSize = 200): void
     {
         if ($batchSize < 1) {
-            throw new \InvalidArgumentException("batchSize must be >= 1, got $batchSize");
+            throw new InvalidArgumentException("batchSize must be >= 1, got $batchSize");
         }
 
         $conn = $this->dbHandler->getConnection();
@@ -331,7 +332,7 @@ class ProjectManagerModel
 
         $this->deleteJobScopedData($conn, $jobs, $batchSize);
         $this->deleteSegmentScopedData($conn, $jobs, $batchSize);
-        $this->deleteFileAndProjectScopedData($conn, $idProject, $jobs);
+        $this->deleteFileAndProjectScopedData($conn, $idProject, $jobs, $batchSize);
     }
 
     /**
@@ -443,24 +444,45 @@ class ProjectManagerModel
     /**
      * Phase 3 — Delete file-scoped data, project metadata, and root records.
      *
+     * files_parts is deleted using range-based batching on files_parts.id
+     * (the same pattern used for segments) to bound each DELETE to $batchSize
+     * rows and prevent row-lock spikes.  A subquery scopes the DELETE to
+     * only rows belonging to this project's files.
+     *
      * Tables: files_parts, files, file_references, file_metadata,
      * context_groups, project_metadata, projects, jobs.
      *
      * @param PDO $conn
      * @param int $idProject
      * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobs
+     * @param int $batchSize
      *
      * @throws PDOException
      */
-    private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs): void
+    private function deleteFileAndProjectScopedData(PDO $conn, int $idProject, array $jobs, int $batchSize): void
     {
-        // --- File-scoped deletions ---
+        // --- files_parts: range-based batched deletion ---
         $stmt = $conn->prepare(
-            "DELETE FROM files_parts WHERE id_file IN (
-                SELECT id FROM files WHERE id_project = :id_project
-            )"
+            "SELECT MIN(fp.id), MAX(fp.id)
+             FROM files_parts fp
+             JOIN files f ON fp.id_file = f.id
+             WHERE f.id_project = :id_project"
         );
         $stmt->execute(['id_project' => $idProject]);
+        [$minId, $maxId] = $stmt->fetch(PDO::FETCH_NUM);
+
+        if ($minId !== null) {
+            $this->deleteInBatches(
+                $conn,
+                "DELETE FROM files_parts
+                 WHERE id BETWEEN :start AND :end
+                   AND id_file IN (SELECT id FROM files WHERE id_project = :id_project)",
+                (int) $minId,
+                (int) $maxId,
+                $batchSize,
+                ['id_project' => $idProject]
+            );
+        }
 
         $stmt = $conn->prepare("DELETE FROM files WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
@@ -492,13 +514,13 @@ class ProjectManagerModel
     public static int $batchSleepMicroseconds = 300000;
 
     /**
-     * Executes DELETE statements in batches over a segment ID range to avoid
+     * Executes DELETE statements in batches over a primary-key range to avoid
      * large single-statement deletions that spike replication lag.
      *
      * @param PDO $conn
      * @param string $sql DELETE statement with :start and :end placeholders
-     * @param int $firstSegment
-     * @param int $lastSegment
+     * @param int $firstId
+     * @param int $lastId
      * @param int $batchSize
      * @param array<string, mixed> $extraParams Additional bound parameters (e.g. ['id_job' => 10])
      *
@@ -507,15 +529,15 @@ class ProjectManagerModel
     private function deleteInBatches(
         PDO   $conn,
         string $sql,
-        int    $firstSegment,
-        int    $lastSegment,
+        int    $firstId,
+        int    $lastId,
         int    $batchSize,
         array  $extraParams = []
     ): void {
-        $currentStart = $firstSegment;
+        $currentStart = $firstId;
 
-        while ($currentStart <= $lastSegment) {
-            $currentEnd = min($currentStart + $batchSize - 1, $lastSegment);
+        while ($currentStart <= $lastId) {
+            $currentEnd = min($currentStart + $batchSize - 1, $lastId);
 
             $params = array_merge($extraParams, [
                 'start' => $currentStart,
@@ -527,7 +549,7 @@ class ProjectManagerModel
 
             $currentStart = $currentEnd + 1;
 
-            if ($currentStart <= $lastSegment && self::$batchSleepMicroseconds > 0) {
+            if ($currentStart <= $lastId && self::$batchSleepMicroseconds > 0) {
                 usleep(self::$batchSleepMicroseconds);
             }
         }
