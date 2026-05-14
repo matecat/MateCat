@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {
   getSegmentNodeMap,
@@ -29,36 +29,43 @@ const useContextPreviewMessages = ({
 }) => {
   const [segments, setSegments] = useState([])
   const [currentContextUrl, setCurrentContextUrl] = useState(null)
+  const currentContextUrlRef = useRef(null)
+  const segmentsRef = useRef([])
 
   useEffect(() => {
     const handleMessage = (message) => {
       if (message.type === 'segments') {
         const incoming = message.segments ?? []
-        setSegments((prev) => {
-          const existingSids = new Set(prev.map((s) => s.sid))
-          const newSegments = incoming.filter((s) => !existingSids.has(s.sid))
-          return newSegments.length > 0 ? [...prev, ...newSegments] : prev
-        })
+        const existingSids = new Set(segmentsRef.current.map((s) => Number(s.sid)))
+        const newSegments = incoming.filter((s) => !existingSids.has(Number(s.sid)))
+        if (newSegments.length > 0) {
+          const next = [...segmentsRef.current, ...newSegments]
+          segmentsRef.current = next
+          setSegments(next)
+        }
       }
 
       if (message.type === 'highlight') {
         const numericSid = Number(message.sid)
-        setSegments((prev) => {
-          const seg = prev.find((s) => Number(s.sid) === numericSid)
-          const contextUrl = seg?.context_url ?? null
+        const seg = segmentsRef.current.find((s) => Number(s.sid) === numericSid)
+        const contextUrl = seg?.context_url ?? null
+        if (contextUrl !== currentContextUrlRef.current) {
+          currentContextUrlRef.current = contextUrl
           setCurrentContextUrl(contextUrl)
-          onHighlight(numericSid, contextUrl)
-          return prev
-        })
+        }
+        onHighlight(numericSid, contextUrl)
       }
 
       if (message.type === 'updateTranslation') {
         const {sid, target} = message
         const numericSid = Number(sid)
-        setSegments((prev) => {
+        const prev = segmentsRef.current
+        const idx = prev.findIndex((seg) => Number(seg.sid) === numericSid)
+        if (idx !== -1 && prev[idx].target !== target) {
           const updated = prev.map((seg) =>
             Number(seg.sid) === numericSid ? {...seg, target} : seg,
           )
+          segmentsRef.current = updated
           if (targetRef.current) {
             const map = getSegmentNodeMap(targetRef.current)
             const nodeIndices = map?.sidToNodeIndices.get(numericSid) ?? []
@@ -67,7 +74,6 @@ const useContextPreviewMessages = ({
               if (!el) return
               const result = updateNodeTranslation(el, updated)
               if (result === 'mismatch') {
-                // Revert the node text to source so stale translation is removed
                 const sids = getSidsFromElement(el)
                 const sourceSeg = updated.find(
                   (s) => sids.includes(Number(s.sid)) && s.source,
@@ -85,8 +91,7 @@ const useContextPreviewMessages = ({
             })
           }
           onTranslationUpdate(numericSid, target, updated)
-          return updated
-        })
+        }
       }
     }
 

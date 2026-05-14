@@ -121,10 +121,13 @@ const ContextPreview = () => {
 
   const {htmlContent, loading, error} = useContextDocument(currentContextUrl)
 
-  // Filter segments to only those with context_url
+  // Filter segments to only those matching the currently displayed context URL
   const mappableSegments = useMemo(
-    () => segments.filter((s) => s.context_url),
-    [segments],
+    () =>
+      currentContextUrl
+        ? segments.filter((s) => s.context_url === currentContextUrl)
+        : [],
+    [segments, currentContextUrl],
   )
 
   // Build metadataMap for tagSegments strategy pass
@@ -184,10 +187,10 @@ const ContextPreview = () => {
   const requestedAtRef = useRef({before: -1, after: -1})
 
   // Render the fetched HTML into panels once (or when viewMode changes)
-  const htmlRenderedRef = useRef({source: '', target: ''})
+  const htmlRenderedRef = useRef({source: '', target: '', url: null})
 
   useEffect(() => {
-    if (!currentContextUrl) htmlRenderedRef.current = {source: '', target: ''}
+    if (!currentContextUrl) htmlRenderedRef.current = {source: '', target: '', url: null}
   }, [currentContextUrl])
 
   useEffect(() => {
@@ -197,7 +200,7 @@ const ContextPreview = () => {
     if (contentView !== CONTENT_VIEWS.LIVE_PREVIEW) {
       if (sourceRef.current) sourceRef.current.innerHTML = ''
       if (targetRef.current) targetRef.current.innerHTML = ''
-      htmlRenderedRef.current = {source: '', target: ''}
+      htmlRenderedRef.current = {source: '', target: '', url: null}
       return
     }
 
@@ -218,6 +221,7 @@ const ContextPreview = () => {
       htmlRenderedRef.current.target = htmlContent + viewMode
       injected = true
     }
+    if (injected) htmlRenderedRef.current.url = currentContextUrl
     if (!injected) return
 
     const links = [
@@ -250,14 +254,15 @@ const ContextPreview = () => {
     return () => {
       cancelled = true
     }
-  }, [htmlContent, viewMode, contentView])
+  }, [htmlContent, viewMode, contentView, currentContextUrl])
 
   // Tag segments in panels when segments or HTML changes
   useEffect(() => {
     if (
       !mappableSegments.length ||
       !htmlReady ||
-      contentView !== CONTENT_VIEWS.LIVE_PREVIEW
+      contentView !== CONTENT_VIEWS.LIVE_PREVIEW ||
+      htmlRenderedRef.current.url !== currentContextUrl
     )
       return
     if (targetRef.current) {
@@ -550,7 +555,7 @@ const ContextPreview = () => {
         <div className="context-preview-toolbar__right">
           {highlightHidden && (
             <span className="context-preview-hidden-warning">
-              Segment preview not available
+              Segment not found in preview
             </span>
           )}
           {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
