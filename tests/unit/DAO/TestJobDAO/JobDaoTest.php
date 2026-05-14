@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace unit\DAO\TestJobDAO;
 
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
@@ -16,11 +15,10 @@ use Model\Users\UserStruct;
 use PDO;
 use PDOException;
 use PDOStatement;
-use PHPUnit\Framework\TestCase;
-use ReflectionClass;
+use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class JobDaoTest extends TestCase
+class JobDaoTest extends AbstractTest
 {
     private \PHPUnit\Framework\MockObject\Stub&IDatabase $dbStub;
     private \PHPUnit\Framework\MockObject\Stub&PDO $pdoStub;
@@ -32,26 +30,13 @@ class JobDaoTest extends TestCase
 
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        $this->stmtStub = $this->createStub(PDOStatement::class);
-        $this->stmtStub->queryString = '';
-
-        $this->pdoStub = $this->createStub(PDO::class);
-        $this->pdoStub->method('prepare')->willReturn($this->stmtStub);
-
-        $this->dbStub = $this->createStub(IDatabase::class);
-        $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
         $this->dbStub->method('begin')->willReturn($this->pdoStub);
-
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $this->dbStub);
     }
 
     protected function tearDown(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, null);
+        $this->resetDatabaseMock();
 
         AppConfig::$SKIP_SQL_CACHE = false;
 

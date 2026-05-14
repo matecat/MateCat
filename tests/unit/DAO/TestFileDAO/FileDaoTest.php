@@ -3,46 +3,35 @@
 namespace unit\DAO\TestFileDAO;
 
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Files\FileDao;
 use Model\Files\FileStruct;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
-use ReflectionClass;
+use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class FileDaoTest extends TestCase
+class FileDaoTest extends AbstractTest
 {
+    private IDatabase $dbStub;
     private \PDO $pdoStub;
     private PDOStatement $stmtStub;
-    private Database $dbStub;
 
     protected function setUp(): void
     {
+        parent::setUp();
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        $this->stmtStub = $this->createStub(PDOStatement::class);
-        $this->stmtStub->queryString = '';
-
-        $this->pdoStub = $this->createStub(PDO::class);
-        $this->pdoStub->method('prepare')->willReturn($this->stmtStub);
-
-        $this->dbStub = $this->createStub(Database::class);
-        $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
-
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $this->dbStub);
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
     }
 
     protected function tearDown(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, null);
+        $this->resetDatabaseMock();
 
         AppConfig::$SKIP_SQL_CACHE = false;
+        parent::tearDown();
     }
 
     #[Test]
@@ -270,9 +259,7 @@ class FileDaoTest extends TestCase
             ->with('files_job', ['id_job' => 5, 'id_file' => 10])
             ->willReturn('1');
 
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $dbMock);
+        $this->setDatabaseInstance($dbMock);
 
         FileDao::insertFilesJob(5, 10);
     }

@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace unit\DAO\TestCategoryDAO;
 
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
 use Model\LQA\ModelStruct;
 use PDO;
 use PDOStatement;
-use PHPUnit\Framework\TestCase;
-use ReflectionClass;
+use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class CategoryDaoTest extends TestCase
+class CategoryDaoTest extends AbstractTest
 {
     private \PHPUnit\Framework\MockObject\Stub&IDatabase $dbStub;
     private \PHPUnit\Framework\MockObject\Stub&PDO $pdoStub;
@@ -27,25 +25,12 @@ class CategoryDaoTest extends TestCase
 
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        $this->stmtStub = $this->createStub(PDOStatement::class);
-        $this->stmtStub->queryString = '';
-
-        $this->pdoStub = $this->createStub(PDO::class);
-        $this->pdoStub->method('prepare')->willReturn($this->stmtStub);
-
-        $this->dbStub = $this->createStub(IDatabase::class);
-        $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
-
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $this->dbStub);
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
     }
 
     protected function tearDown(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, null);
+        $this->resetDatabaseMock();
 
         AppConfig::$SKIP_SQL_CACHE = false;
 

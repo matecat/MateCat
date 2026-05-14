@@ -14,7 +14,6 @@ use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
-use ReflectionClass;
 use TestHelpers\AbstractTest;
 use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
@@ -33,27 +32,12 @@ class ChunkReviewDaoTest extends AbstractTest
         self::$originalSkipCache = AppConfig::$SKIP_SQL_CACHE;
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        $this->stmtStub = $this->createStub(PDOStatement::class);
-        $this->stmtStub->queryString = '';
-
-        $this->pdoStub = $this->createStub(PDO::class);
-        $this->pdoStub->method('prepare')->willReturn($this->stmtStub);
-
-        $this->dbStub = $this->createStub(IDatabase::class);
-        $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
-
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        
-        $prop->setValue(null, $this->dbStub);
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
     }
 
     protected function tearDown(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        
-        $prop->setValue(null, null);
+        $this->resetDatabaseMock();
 
         AppConfig::$SKIP_SQL_CACHE = self::$originalSkipCache;
 
@@ -538,10 +522,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($pdoMock);
 
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        
-        $prop->setValue(null, $dbMock);
+        $this->setDatabaseInstance($dbMock);
 
         $dao = new ChunkReviewDao($dbMock);
         $this->assertTrue($dao->exists(10, 'pw', 2));
@@ -564,10 +545,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($pdoMock);
 
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        
-        $prop->setValue(null, $dbMock);
+        $this->setDatabaseInstance($dbMock);
 
         $dao = new ChunkReviewDao($dbMock);
         $this->assertFalse($dao->exists(10, 'pw', null));
@@ -660,10 +638,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);
 
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        
-        $prop->setValue(null, $dbStub);
+        $this->setDatabaseInstance($dbStub);
 
         $dao = new ChunkReviewDao($dbStub);
         $dao->passFailCountsAtomicUpdate(1, [

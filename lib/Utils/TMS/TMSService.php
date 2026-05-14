@@ -7,6 +7,8 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use RuntimeException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
@@ -54,15 +56,19 @@ class TMSService
 
     private string $output_type;
     protected MatecatLogger $logger;
+    protected IDatabase $database;
 
     /**
      *
      * @param FeatureSet|null $featureSet
+     * @param IDatabase|null $database
      *
      * @throws Exception
      */
-    public function __construct(?FeatureSet $featureSet = null)
+    public function __construct(?FeatureSet $featureSet = null, ?IDatabase $database = null)
     {
+        $this->database = $database ?? Database::obtain();
+
         //get MyMemory service
         $mymemory_engine = EnginesFactory::getInstance(1);
 
@@ -73,17 +79,8 @@ class TMSService
         $this->mymemory_engine = $mymemory_engine;
 
         $this->output_type = 'translation';
+        $this->featureSet = $featureSet ?? new FeatureSet();
 
-        if ($featureSet == null) {
-            $featureSet = new FeatureSet();
-        }
-        $this->featureSet = $featureSet;
-
-        /**
-         * Set the initial value to a specific log file, if not already initialized by the Executor.
-         * This is useful when engines are used outside the TaskRunner context
-         * @see \Utils\TaskRunner\Executor::__construct()
-         */
         $this->logger = LoggerFactory::getLogger('engines');
     }
 
@@ -136,7 +133,7 @@ class TMSService
     /**
      * Saves the uploaded file and returns the file info.
      *
-     * @param array $files Raw files array (e.g. from $request->files()->all()).
+     * @param array<string, mixed> $files Raw files array (e.g. from $request->files()->all()).
      * @param bool $disable_upload_limit
      *
      * @return UploadElement
@@ -151,6 +148,8 @@ class TMSService
 
     /**
      * Import TMX file in MyMemory
+     *
+     * @return list<array{engine: string|null, message: string, file: string}>
      * @throws Exception
      */
     public function addTmxInMyMemory(TMSFile $file, UserStruct $user): array
@@ -176,6 +175,9 @@ class TMSService
                 default:
             }
 
+            if ($importStatus->id === null) {
+                throw new RuntimeException('MyMemory did not return a valid import ID');
+            }
             $file->setUuid($importStatus->id);
 
             $warnings = [];
@@ -201,6 +203,7 @@ class TMSService
     /**
      * @param UserStruct $user
      * @return EngineInterface[]
+     * @throws \Psr\Log\InvalidArgumentException
      */
     protected function getUserAdaptiveMTEngines(UserStruct $user): array
     {
@@ -227,7 +230,12 @@ class TMSService
                     $engineClassLoad = $engine->getEngineRecord()->class_load ?? throw new InvalidArgumentException('Engine class name is required to load adaptive MT metadata');
                     $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
+                        $engineId = $ownerMmtEngineMetaData->value;
+                        if (!is_numeric($engineId)) {
+                            $this->logger->debug("Invalid engine ID value for user $user->uid: " . print_r($engineId, true));
+                            continue;
+                        }
+                        $engine = EnginesFactory::getInstance((int)$engineId);
                         $userAdaptiveEngines[] = $engine;
                         $this->logger->debug("User [$user->uid, '$user->email'] found adaptive engine: {$engine->getEngineRecord()->class_load}");
                     }
@@ -266,7 +274,10 @@ class TMSService
             case "404":
                 throw new InvalidArgumentException('File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15);
             case "406":
-                throw new InvalidArgumentException($importStatus->responseDetails, -15);
+                $details = is_array($importStatus->responseDetails)
+                    ? (json_encode($importStatus->responseDetails) ?: 'Unknown error')
+                    : $importStatus->responseDetails;
+                throw new InvalidArgumentException($details, -15);
             case "403" :
 
                 if ($importStatus->responseDetails === 'HEADER DON\'T MATCH THE CORRECT STRUCTURE') {
@@ -280,10 +291,14 @@ class TMSService
             default:
         }
 
+        if ($importStatus->id === null) {
+            throw new RuntimeException('MyMemory did not return a valid glossary import ID');
+        }
         $file->setUuid($importStatus->id);
     }
 
     /**
+     * @return array{data: array<string, mixed>, completed: bool}
      * @throws Exception
      */
     public function _fileUploadStatus(string $uuid, string $type): array
@@ -321,7 +336,7 @@ class TMSService
     /**
      * @param string $uuid
      *
-     * @return array
+     * @return array{data: array<string, mixed>, completed: bool}
      * @throws Exception
      */
     public function glossaryUploadStatus(string $uuid): array
@@ -336,6 +351,8 @@ class TMSService
      * @param string $userName
      *
      * @return ExportResponse
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws RuntimeException
      */
     public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
     {
@@ -345,7 +362,7 @@ class TMSService
     /**
      * @param string $uuid
      *
-     * @return array
+     * @return array{data: array<string, mixed>, completed: bool}
      * @throws Exception
      */
     public function tmxUploadStatus(string $uuid): array
@@ -354,12 +371,16 @@ class TMSService
     }
 
     /**
-     * @param string $message
+     * @param string|array<string, mixed> $message
      *
      * @return string
      */
-    private function formatErrorMessage(string $message): string
+    private function formatErrorMessage(string|array $message): string
     {
+        if (is_array($message)) {
+            return json_encode($message) ?: 'Unknown error';
+        }
+
         if ($message === "THE CHARACTER SET PROVIDED IS INVALID.") {
             return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
         }
@@ -423,6 +444,9 @@ class TMSService
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
 
         $jobStruct = JobDao::getByIdAndPassword($jid, $jPassword);
+        if ($jobStruct === null) {
+            throw new RuntimeException("Job not found for id $jid and password $jPassword");
+        }
         $metadata = new JobsMetadataDao();
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
@@ -430,7 +454,7 @@ class TMSService
             $sourceLang,
             $targetLang,
             [],
-            $metadata->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password)
+            $metadata->getSubfilteringCustomHandlers($jid, $jPassword)
         );
         $tmpFile = new SplTempFileObject(15 * 1024 * 1024 /* 5MB */);
 
@@ -554,17 +578,19 @@ class TMSService
     }
 
     /**
-     * Export Job as Tmx File
+     * Export Job as CSV File
      *
-     * @param $jid
-     * @param $jPassword
-     * @param $sourceLang
-     * @param $targetLang
+     * @param int $jid
+     * @param string $jPassword
+     * @param string $sourceLang
+     * @param string $targetLang
      *
      * @return SplTempFileObject $tmpFile
      *
+     * @throws RuntimeException
+     * @throws \PDOException
      */
-    public function exportJobAsCSV($jid, $jPassword, $sourceLang, $targetLang): SplTempFileObject
+    public function exportJobAsCSV(int $jid, string $jPassword, string $sourceLang, string $targetLang): SplTempFileObject
     {
         $tmpFile = new SplTempFileObject(15 * 1024 * 1024 /* 15MB */);
 

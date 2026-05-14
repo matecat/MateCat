@@ -4,44 +4,32 @@ namespace unit\DAO\TestAnalysisDAO;
 
 use Model\Analysis\AnalysisDao;
 use Utils\Registry\AppConfig;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
-use ReflectionClass;
+use TestHelpers\AbstractTest;
 
-class AnalysisDaoTest extends TestCase
+class AnalysisDaoTest extends AbstractTest
 {
+    private IDatabase $dbStub;
     private \PDO $pdoStub;
     private PDOStatement $stmtStub;
 
     protected function setUp(): void
     {
+        parent::setUp();
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        $this->stmtStub = $this->createStub(PDOStatement::class);
-        $this->stmtStub->queryString = '';
-
-        $this->pdoStub = $this->createStub(PDO::class);
-        $this->pdoStub->method('prepare')->willReturn($this->stmtStub);
-
-        $dbStub = $this->createStub(Database::class);
-        $dbStub->method('getConnection')->willReturn($this->pdoStub);
-
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $dbStub);
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
     }
 
     protected function tearDown(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, null);
-
+        $this->resetDatabaseMock();
         AppConfig::$SKIP_SQL_CACHE = false;
+        parent::tearDown();
     }
 
     #[Test]

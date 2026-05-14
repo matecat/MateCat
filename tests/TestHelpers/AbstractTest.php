@@ -2,16 +2,16 @@
 
 namespace TestHelpers;
 
+use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PDO;
+use PDOStatement;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use ReflectionMethod;
+use Utils\Registry\AppConfig;
 
-/**
- * User: domenico
- * Date: 09/10/13
- * Time: 15.21
- *
- */
 abstract class AbstractTest extends TestCase
 {
 
@@ -39,6 +39,44 @@ abstract class AbstractTest extends TestCase
     }
 
     /**
+     * @return array{0: IDatabase, 1: PDO, 2: PDOStatement}
+     * @throws Exception
+     */
+    protected function createDatabaseMock(): array
+    {
+        $stmtStub = $this->createStub(PDOStatement::class);
+        $stmtStub->queryString = '';
+
+        $pdoStub = $this->createStub(PDO::class);
+        $pdoStub->method('prepare')->willReturn($stmtStub);
+
+        $dbStub = $this->createStub(IDatabase::class);
+        $dbStub->method('getConnection')->willReturn($pdoStub);
+
+        $ref = new ReflectionClass(Database::class);
+        $prop = $ref->getProperty('instance');
+        $prop->setValue(null, $dbStub);
+
+        return [$dbStub, $pdoStub, $stmtStub];
+    }
+
+    protected function resetDatabaseMock(): void
+    {
+        $ref = new ReflectionClass(Database::class);
+        $prop = $ref->getProperty('instance');
+        $prop->setValue(null, null);
+
+        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+    }
+
+    protected function setDatabaseInstance(?IDatabase $db): void
+    {
+        $ref = new ReflectionClass(Database::class);
+        $prop = $ref->getProperty('instance');
+        $prop->setValue(null, $db);
+    }
+
+    /**
      * @param IDatabase $database_instance
      * @return mixed
      */
@@ -51,28 +89,9 @@ abstract class AbstractTest extends TestCase
     }
 
     /**
-     * Return the raw query from a prepared query:
-     *
-     * Example
-     * ----------------------------------------
-     * Convert this:
-     *
-     * array(2) {
-     *    [0] => string(36) "SELECT * FROM engines WHERE id = :id"
-     *    [1] =>
-     *    array(1) {
-     *       'id' => int(10)
-     *    }
-     * }
-     *
-     * into this:
-     *
-     * SELECT * FROM engines WHERE id = 10
-     *
      * @param array $preparedQuery
      *
      * @return string
-     *
      */
     protected function getRawQuery(array $preparedQuery): string
     {
