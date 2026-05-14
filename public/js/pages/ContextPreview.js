@@ -555,7 +555,7 @@ const ContextPreview = () => {
         <div className="context-preview-toolbar__right">
           {highlightHidden && (
             <span className="context-preview-hidden-warning">
-              Segment preview not available
+              Segment not found in preview
             </span>
           )}
           {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&

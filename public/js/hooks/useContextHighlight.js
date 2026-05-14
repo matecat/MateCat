@@ -72,7 +72,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
           }
         }
       }
-      setHighlightHidden(hidden)
+      setHighlightHidden(hidden || total === 0)
       return total
     },
     [sourceRef, targetRef],
