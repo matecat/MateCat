@@ -11,7 +11,7 @@ use Utils\Registry\AppConfig;
 
 /**
  * @group  regression
- * @covers JobDao::getByProjectId
+ * @covers JobDao::getNotDeletedByProjectId
  * User: dinies
  * Date: 27/05/16
  * Time: 11.47
@@ -129,7 +129,7 @@ class GetByProjectIdTest extends AbstractTest
     #[Test]
     public function test_GetByProjectId()
     {
-        $actual_result = $this->job_Dao->getByProjectId($this->str_id_project);
+        $actual_result = $this->job_Dao->getNotDeletedByProjectId($this->str_id_project);
         $id = $actual_result['0']['id'];
         $this->assertEquals($this->id, $id);
         $password = $actual_result['0']['password'];

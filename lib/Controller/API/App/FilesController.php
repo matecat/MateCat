@@ -71,7 +71,7 @@ class FilesController extends AbstractStatefulKleinController
      */
     private function getFirstAndLastSegmentFromFileId(int $fileId): void
     {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
+        $fileInfo = (new JobDao())->getFilesInfoInJob($this->chunk, 60 * 5);
 
         if (empty($fileInfo)) {
             throw new NotFoundException('File id ' . $fileId . ' was not found');

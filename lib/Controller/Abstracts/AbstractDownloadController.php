@@ -45,7 +45,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     public function getJob(int $ttl = 0): JobStruct
     {
         if (empty($this->job)) {
-            $this->job = JobDao::getById($this->id_job, $ttl)[0];
+            $this->job = (new JobDao())->getNotDeletedById($this->id_job, $ttl)[0];
         }
 
         return $this->job;

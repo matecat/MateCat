@@ -122,8 +122,8 @@ class ChangePasswordController extends KleinController
                     ->dispatchRun(new ReviewPasswordChangedEvent((int)$id, $actual_pwd, $new_password, (int)$revision_number));
 
             } else { // change job password
-                $jStruct = JobDao::getByIdAndPassword($id, $actual_pwd);
                 $jDao = new JobDao();
+                $jStruct = $jDao->getByIdAndPassword($id, $actual_pwd);
 
                 $this->checkUserPermissions($jStruct->getProject(), $user);
 

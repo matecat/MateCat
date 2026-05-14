@@ -85,7 +85,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
 
         if (!empty($jid)) {
             // we are looking for a chunk
-            $chunkStruct = JobDao::getByIdAndPassword($jid, $pass);
+            $chunkStruct = (new JobDao())->getByIdAndPassword($jid, $pass);
             if (empty($chunkStruct) || $chunkStruct->isDeleted()) {
                 $this->setView("job_not_found.html", [], 404);
                 $this->render();

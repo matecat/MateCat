@@ -102,7 +102,7 @@ class ChunkPasswordValidator extends Base
      */
     protected function getChunkFromTranslatePassword(): void
     {
-        $this->chunk = JobDao::getByIdAndPassword($this->request->param('id_job'), $this->request->param('password'), $this->ttl);
+        $this->chunk = (new JobDao())->getByIdAndPassword($this->request->param('id_job'), $this->request->param('password'), $this->ttl);
         if (!empty($this->chunk)) {
             $this->chunkReview = (new ChunkReviewDao())->findChunkReviews($this->chunk, $this->ttl)[0] ?? null;
         }

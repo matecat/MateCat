@@ -549,7 +549,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $redisHandler->getConnection()->setex('job_completeness:' . $this->data['id_job'], 60 * 60 * 24 * 15, true); //15 days
 
             try {
-                JobDao::setJobComplete($this->data['chunk']);
+                (new JobDao())->setJobComplete($this->data['chunk']);
             } catch (Exception) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export($this->request->paramsPost()->all(), true);
                 $redisHandler->getConnection()->del('job_completeness:' . $this->data['id_job']);
@@ -1035,7 +1035,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $newTotalJobPee = ($this->chunk['avg_post_editing_effort'] - $oldPee_weighted + $newPee_weighted);
             }
 
-            JobDao::staticUpdate(
+            (new JobDao())->updateFields(
 
                 ['avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
@@ -1047,7 +1047,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         elseif ($oldSegmentStatus->isValidForEditLog()) {
             $newTotalJobPee = ($this->chunk['avg_post_editing_effort'] - $oldPee_weighted);
 
-            JobDao::staticUpdate(
+            (new JobDao())->updateFields(
                 ['avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
                     'id' => $this->id_job,
@@ -1055,7 +1055,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 ]
             );
         } elseif ($jobTotalTTEForTranslation != 0) {
-            JobDao::staticUpdate(
+            (new JobDao())->updateFields(
                 ['total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
                     'id' => $this->id_job,
@@ -1107,7 +1107,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             return;
         }
 
-        $ownerUid = JobDao::getOwnerUid((int)$this->data['id_job'], $this->data['password']);
+        $ownerUid = (new JobDao())->getOwnerUid((int)$this->data['id_job'], $this->data['password']);
         $filesParts = (new FilesPartsDao())->getBySegmentId((int)$this->data['id_segment']); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         if ($this->data['segment'] === null) {

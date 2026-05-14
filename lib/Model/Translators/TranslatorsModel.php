@@ -309,7 +309,7 @@ class TranslatorsModel
         $this->openTransaction();
         $jobDao = new JobDao();
         $jobDao->changePassword($this->jStruct, $newPassword);
-        $jobDao->destroyCache($this->jStruct);
+        $jobDao->destroyCacheByIdAndPassword($this->jStruct);
         $this->featureSet->dispatchRun(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
         $this->commitTransaction();
     }

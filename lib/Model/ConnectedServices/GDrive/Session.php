@@ -534,7 +534,7 @@ class Session
         $gdriveFile = $service->files->get($remoteFile->remote_id);
         $fileTitle = $gdriveFile->getName();
 
-        $job = JobDao::getById($id_job)[0];
+        $job = (new JobDao())->getNotDeletedById($id_job)[0];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
         $remoteFileService = $this->buildRemoteFile($gClient);

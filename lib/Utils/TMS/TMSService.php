@@ -443,7 +443,7 @@ class TMSService
     {
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
 
-        $jobStruct = JobDao::getByIdAndPassword($jid, $jPassword);
+        $jobStruct = (new JobDao())->getByIdAndPassword($jid, $jPassword);
         if ($jobStruct === null) {
             throw new RuntimeException("Job not found for id $jid and password $jPassword");
         }

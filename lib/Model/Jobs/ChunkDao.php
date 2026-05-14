@@ -23,7 +23,7 @@ class ChunkDao extends AbstractDao
      */
     public static function getByIdAndPassword(int $id_job, string $password, int $ttl = 0): JobStruct
     {
-        $fetched = JobDao::getByIdAndPassword($id_job, $password, $ttl);
+        $fetched = (new JobDao())->getByIdAndPassword($id_job, $password, $ttl);
 
         if ($fetched === null) {
             throw new NotFoundException('Job not found');
@@ -42,7 +42,7 @@ class ChunkDao extends AbstractDao
      */
     public static function getBySegmentTranslation(SegmentTranslationStruct $translation, int $ttl = 0): JobStruct
     {
-        return JobDao::getBySegmentTranslation($translation, $ttl);
+        return (new JobDao())->getBySegmentTranslation($translation, $ttl);
     }
 
     /**
@@ -56,7 +56,7 @@ class ChunkDao extends AbstractDao
      */
     public static function getByJobID(int $id_job, int $ttl = 0): array
     {
-        return JobDao::getById($id_job, $ttl);
+        return (new JobDao())->getNotDeletedById($id_job, $ttl);
     }
 
     /**
@@ -69,7 +69,7 @@ class ChunkDao extends AbstractDao
      */
     public function getByProjectID(int $id_project, int $ttl = 0): array
     {
-        return JobDao::getByProjectId($id_project, $ttl);
+        return (new JobDao())->getNotDeletedByProjectId($id_project, $ttl);
     }
 
     /**
@@ -83,7 +83,7 @@ class ChunkDao extends AbstractDao
      */
     public static function getByIdProjectAndIdJob(int $id_project, int $id_job, int $ttl = 0): array
     {
-        return JobDao::getByIdProjectAndIdJob($id_project, $id_job, $ttl);
+        return (new JobDao())->getByIdProjectAndIdJob($id_project, $id_job, $ttl);
     }
 
 }

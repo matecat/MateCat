@@ -814,7 +814,7 @@ class CatUtils
      */
     public static function getJobFromIdAndAnyPassword(int $jobId, string $jobPassword): ?JobStruct
     {
-        $job = JobDao::getByIdAndPassword($jobId, $jobPassword);
+        $job = (new JobDao())->getByIdAndPassword($jobId, $jobPassword);
 
         if (!$job) {
             $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($jobPassword, $jobId);
@@ -885,7 +885,7 @@ class CatUtils
         /** @var array<int, int> $idJobs */
         $idJobs = array_values(array_filter($idJobs, fn ($value) => $value !== null));
 
-        return JobDao::getSegmentTranslationsCount($idJobs);
+        return (new JobDao())->getSegmentTranslationsCount($idJobs);
     }
 
     /**

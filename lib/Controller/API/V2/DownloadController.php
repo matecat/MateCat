@@ -192,7 +192,7 @@ class DownloadController extends AbstractDownloadController
     private function processDownload(): void
     {
         // get Job Info, we need only a row of jobs (split)
-        $jobData = JobDao::getByIdAndPassword($this->id_job, $this->password);
+        $jobData = (new JobDao())->getByIdAndPassword($this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {

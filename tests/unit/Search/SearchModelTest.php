@@ -148,7 +148,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct[($key === 'target') ? 'trg' : 'src'] = $word;
 
         // jobData
-        $jobData = JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
 
         // instantiate the filters
         $featureSet = new FeatureSet();
@@ -180,7 +180,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct['key'] = 'target';
         $queryParamsStruct['trg'] = 'Ciao';
 
-        $jobData = JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
         $featureSet = new FeatureSet();
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);

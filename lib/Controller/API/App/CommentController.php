@@ -257,7 +257,7 @@ class CommentController extends KleinController
         $message = filter_var($this->request->param('message'), FILTER_UNSAFE_RAW);
         $message = htmlspecialchars((string)$message);
 
-        $job = JobDao::getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
+        $job = (new JobDao())->getByIdAndPassword((int)$id_job, (string)$password, 60 * 60 * 24);
 
         if (empty($job)) {
             throw new InvalidArgumentException("wrong password", -10);

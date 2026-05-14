@@ -71,7 +71,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         $id = $this->id ?? throw new DomainException("Project ID must not be null");
 
         return $this->cachable(__METHOD__, function () use ($id, $ttl) {
-            return JobDao::getByProjectId($id, $ttl);
+            return (new JobDao())->getNotDeletedByProjectId($id, $ttl);
         });
     }
 

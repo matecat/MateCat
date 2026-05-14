@@ -72,7 +72,7 @@ class SegmentAnalysisController extends KleinController
 
         $idJob = $this->request->param('id_job');
         $password = $this->request->param('password');
-        $segmentsCount = JobDao::getSegmentsCount($idJob, $password);
+        $segmentsCount = (new JobDao())->getSegmentsCount($idJob, $password);
 
         // raise exception if the job does not exist
         $jobStruct = ChunkDao::getByIdAndPassword($idJob, $password);
@@ -315,7 +315,7 @@ class SegmentAnalysisController extends KleinController
             $issues = $issuesAggregate[$segmentForAnalysis->id_job][$segmentForAnalysis->id];
         }
 
-        $jobStruct = JobDao::getByIdAndPassword((int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password)
+        $jobStruct = (new JobDao())->getByIdAndPassword((int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password)
             ?? throw new RuntimeException('Job not found for id_job=' . $segmentForAnalysis->id_job);
 
         /**

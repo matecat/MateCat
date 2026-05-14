@@ -123,7 +123,7 @@ class GetByIdAndPasswordTest extends AbstractTest
     #[Test]
     public function test_GetByIdAndPassword()
     {
-        $actual_result = $this->job_Dao->getByIdAndPassword($this->id, $this->str_password);
+        $actual_result = $this->job_Dao->getByIdAndPassword((int)$this->id, $this->str_password);
         $id = $actual_result['id'];
         $this->assertEquals($this->id, $id);
         $password = $actual_result['password'];

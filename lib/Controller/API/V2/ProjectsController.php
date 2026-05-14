@@ -143,7 +143,7 @@ class ProjectsController extends KleinController
         foreach ($chunks as $chunk) {
             // update a job only if it is NOT deleted
             if (!$chunk->isDeleted()) {
-                JobDao::updateJobStatus($chunk, $status);
+                (new JobDao())->updateJobStatus($chunk, $status);
 
                 $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);
                 SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));

@@ -43,7 +43,7 @@ class FilesInfoUtility
      */
     public function getInfo(bool $showMetadata = true): array
     {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
+        $fileInfo = (new JobDao())->getFilesInfoInJob($this->chunk, 60 * 5);
         $fileMetadataDao = new MetadataDao();
         $filePartsDao = new FilesPartsDao();
 

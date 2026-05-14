@@ -216,7 +216,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
         foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
-            $chunkStruct = JobDao::getById($id_job);
+            $chunkStruct = (new JobDao())->getNotDeletedById($id_job);
 
             $iMax = $projectStructure->create_2_pass_review ? 4 : 3;
 
@@ -250,12 +250,13 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         ChunkReviewDao::deleteByJobId($id_job);
 
-        $chunksStructArray = JobDao::getById($id_job);
+        $jobDao = new JobDao();
+        $chunksStructArray = $jobDao->getNotDeletedById($id_job);
 
         $reviews = [];
         foreach ($previousRevisionRecords as $review) {
             // check if $review belongs to a deleted job
-            $chunk = JobDao::getByIdAndPassword($review->id_job, $review->password);
+            $chunk = $jobDao->getByIdAndPassword($review->id_job, $review->password);
 
             if ($chunk !== null && !$chunk->isDeleted()) {
                 $reviews = array_merge(
@@ -306,7 +307,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         ChunkReviewDao::deleteByJobId($id_job);
 
-        $chunksStructArray = JobDao::getById($id_job);
+        $chunksStructArray = (new JobDao())->getNotDeletedById($id_job);
 
         $reviews = [];
         foreach ($reviewGroupedData as $source_page => $data) {

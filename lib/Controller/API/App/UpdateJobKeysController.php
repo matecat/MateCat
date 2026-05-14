@@ -149,7 +149,7 @@ class UpdateJobKeysController extends KleinController
 
         $jobDao = new JobDao(Database::obtain());
         $jobDao->staticUpdateStruct($request['jobData'], ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
-        $jobDao->destroyCache($request['jobData']);
+        $jobDao->destroyCacheByIdAndPassword($request['jobData']);
 
         $jobsMetadataDao = new MetadataDao();
 

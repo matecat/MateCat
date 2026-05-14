@@ -284,7 +284,7 @@ class JobCreationService
      */
     protected function insertJob(JobStruct $job): JobStruct
     {
-        return JobDao::createFromStruct($job);
+        return (new JobDao())->createFromStruct($job);
     }
 
     /**

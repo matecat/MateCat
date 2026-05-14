@@ -61,7 +61,7 @@ class CopyAllSourceToTargetController extends KleinController
             throw new InvalidArgumentException("Empty job password", -2);
         }
 
-        $job_data = JobDao::getByIdAndPassword($id_job, $pass);
+        $job_data = (new JobDao())->getByIdAndPassword((int)$id_job, (string)$pass);
 
         if (empty($job_data)) {
             throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);

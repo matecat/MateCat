@@ -83,7 +83,7 @@ class JobSplitMergeService
      */
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
-        return JobDao::getByIdAndPassword($id, $password);
+        return (new JobDao())->getByIdAndPassword($id, $password);
     }
 
     /**
@@ -128,7 +128,7 @@ class JobSplitMergeService
      */
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
-        JobDao::updateForMerge($job, $newPassword);
+        (new JobDao())->updateForMerge($job, $newPassword);
     }
 
     /**
@@ -136,7 +136,7 @@ class JobSplitMergeService
      */
     protected function deleteOnMerge(JobStruct $job): void
     {
-        JobDao::deleteOnMerge($job);
+        (new JobDao())->deleteOnMerge($job);
     }
 
     /**

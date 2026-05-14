@@ -69,7 +69,7 @@ trait HotSwap
     {
         //There should be more than one job per project, to be generic use a foreach
         $jobDao = new JobDao();
-        $jobStructs = $jobDao->getByProjectId($project_id, 60);
+        $jobStructs = $jobDao->getNotDeletedByProjectId($project_id, 60);
 
         $redisConn = (new RedisHandler())->getConnection();
         foreach ($jobStructs as $jobStruct) {

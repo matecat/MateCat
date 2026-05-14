@@ -332,7 +332,7 @@ class QualitySummary
      */
     protected function getReviewedWordsCountGroupedByFileParts(int $idJob, string $password, int $revisionNumber): array
     {
-        return JobDao::getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+        return (new JobDao())->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
     }
 
     /**

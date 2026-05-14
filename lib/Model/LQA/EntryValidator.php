@@ -93,7 +93,7 @@ class EntryValidator
             throw new NotFoundException('segment not found');
         }
 
-        $job = JobDao::getById($this->struct->id_job)[0];
+        $job = (new JobDao())->getNotDeletedById($this->struct->id_job)[0];
         $this->project = ProjectDao::staticFindById($job->id_project);
 
         $this->validateCategoryId();

@@ -333,12 +333,6 @@ parameters:
 			path: lib/Controller/API/App/CopyAllSourceToTargetController.php
 
 		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\JobDao\:\:getByIdAndPassword\(\) expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/CopyAllSourceToTargetController.php
-
-		-
 			message: '#^Parameter \#2 \$jPassword of method Model\\WordCount\\CounterModel\:\:initializeJobWordCount\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -669,12 +663,6 @@ parameters:
 			path: lib/Controller/API/App/OutsourceConfirmationController.php
 
 		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\JobDao\:\:getByIdAndPassword\(\) expects int, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/OutsourceConfirmationController.php
-
-		-
 			message: '#^Parameter \#1 \$jStruct of class Model\\Translators\\TranslatorsModel constructor expects Model\\Jobs\\JobStruct, Model\\Jobs\\JobStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -688,12 +676,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$jwtString of static method Utils\\Tools\\SimpleJWT\:\:getValidatedInstanceFromString\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/OutsourceConfirmationController.php
-
-		-
-			message: '#^Parameter \#2 \$password of static method Model\\Jobs\\JobDao\:\:getByIdAndPassword\(\) expects string, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/OutsourceConfirmationController.php
@@ -780,12 +762,6 @@ parameters:
 			message: '#^Method Controller\\API\\App\\SetChunkCompletedController\:\:validateTheRequest\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Controller/API/App/SetChunkCompletedController.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\JobDao\:\:getByIdAndPassword\(\) expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Controller/API/App/SetChunkCompletedController.php
 
 		-
@@ -9207,6 +9183,24 @@ parameters:
 			path: lib/Utils/XliffReplacer/XliffReplacerCallback.php
 
 		-
+			message: '#^Method Features\\Translated\:\:swapOff\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/Engines/Traits/HotSwap.php
+
+		-
+			message: '#^Property Model\\Jobs\\JobStruct\:\:\$id_mt_engine \(int\) does not accept string\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Utils/Engines/Traits/HotSwap.php
+
+		-
+			message: '#^Property Model\\Jobs\\JobStruct\:\:\$id_tms \(int\) does not accept string\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: lib/Utils/Engines/Traits/HotSwap.php
+
+		-
 			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
@@ -16611,26 +16605,8 @@ parameters:
 			path: plugins/translated/lib/Features/Translated.php
 
 		-
-			message: '#^Method Features\\Translated\:\:swapOff\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
 			message: '#^Method Features\\Translated\:\:tmAnalysisDisabled\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobStruct\:\:\$id_mt_engine \(int\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobStruct\:\:\$id_tms \(int\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: plugins/translated/lib/Features/Translated.php
 

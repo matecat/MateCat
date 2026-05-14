@@ -94,129 +94,9 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $dao = new JobDao($this->dbStub);
-        $dao->destroyCache($job);
+        $dao->destroyCacheByIdAndPassword($job);
 
-        $this->assertIsBool($dao->destroyCache($job));
-    }
-
-    public function testGetBySegmentTranslationReturnsJobStruct(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$job]);
-
-        $translation = new SegmentTranslationStruct();
-        $translation->id_job = 1;
-        $translation->id_segment = 150;
-
-        $result = JobDao::getBySegmentTranslation($translation);
-
-        $this->assertInstanceOf(JobStruct::class, $result);
-        $this->assertSame(1, $result->id);
-    }
-
-    public function testGetSegmentsCountReturnsIntWhenResultPresent(): void
-    {
-        $struct = new ShapelessConcreteStruct();
-        $struct->total = '42';
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = JobDao::getSegmentsCount(1, 'pass');
-
-        $this->assertSame(42, $result);
-    }
-
-    public function testGetSegmentsCountReturnsZeroWhenTotalEmpty(): void
-    {
-        $struct = new ShapelessConcreteStruct();
-        $struct->total = null;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = JobDao::getSegmentsCount(1, 'pass');
-
-        $this->assertSame(0, $result);
-    }
-
-    public function testGetSegmentsCountReturnsZeroWhenNoResult(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = JobDao::getSegmentsCount(1, 'pass');
-
-        $this->assertSame(0, $result);
-    }
-
-    public function testGetOwnerUidReturnsUidWhenFound(): void
-    {
-        $struct = new ShapelessConcreteStruct();
-        $struct->uid = 99;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = JobDao::getOwnerUid(1, 'pass');
-
-        $this->assertSame(99, $result);
-    }
-
-    public function testGetOwnerUidReturnsNullWhenEmpty(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = JobDao::getOwnerUid(1, 'pass');
-
-        $this->assertNull($result);
-    }
-
-    public function testGetOwnerUidReturnsNullWhenUidNotSet(): void
-    {
-        $struct = new ShapelessConcreteStruct();
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = JobDao::getOwnerUid(1, 'pass');
-
-        $this->assertNull($result);
-    }
-
-    public function testGetByIdAndPasswordReturnsJobStructWhenFound(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$job]);
-
-        $result = JobDao::getByIdAndPassword(1, 'abc123');
-
-        $this->assertInstanceOf(JobStruct::class, $result);
-        $this->assertSame(1, $result->id);
-    }
-
-    public function testGetByIdAndPasswordReturnsNullWhenNotFound(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = JobDao::getByIdAndPassword(999, 'nope');
-
-        $this->assertNull($result);
+        $this->assertIsBool($dao->destroyCacheByIdAndPassword($job));
     }
 
     public function testDestroyCacheByProjectIdDoesNotThrow(): void
@@ -228,20 +108,6 @@ class JobDaoTest extends AbstractTest
         $result = $dao->destroyCacheByProjectId(10);
 
         $this->assertIsBool($result);
-    }
-
-    public function testGetByProjectIdReturnsArrayOfJobs(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$job]);
-
-        $result = JobDao::getByProjectId(10);
-
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(JobStruct::class, $result[0]);
     }
 
     public function testGetSplitDataReturnsArrayOfStructs(): void
@@ -259,47 +125,6 @@ class JobDaoTest extends AbstractTest
 
         $this->assertCount(1, $result);
         $this->assertInstanceOf(ShapelessConcreteStruct::class, $result[0]);
-    }
-
-    public function testGetByIdReturnsArrayOfJobs(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$job]);
-
-        $result = JobDao::getById(1);
-
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(JobStruct::class, $result[0]);
-    }
-
-    public function testGetByIdProjectAndIdJobReturnsArray(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$job]);
-
-        $result = JobDao::getByIdProjectAndIdJob(10, 1);
-
-        $this->assertCount(1, $result);
-    }
-
-    public function testCreateFromStructReturnsJobWithId(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$job]);
-        $this->pdoStub->method('lastInsertId')->willReturn('55');
-
-        $result = JobDao::createFromStruct($job);
-
-        $this->assertInstanceOf(JobStruct::class, $result);
     }
 
     public function testUpdateOwnerReturnsAffectedRowCount(): void
@@ -441,7 +266,195 @@ class JobDaoTest extends AbstractTest
         $this->assertSame(1, $result);
     }
 
-    public function testUpdateForMergeUpdatesPasswordWhenProvided(): void
+    public function testInstanceGetBySegmentTranslationReturnsJobStruct(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+
+        $translation = new SegmentTranslationStruct();
+        $translation->id_job = 1;
+        $translation->id_segment = 150;
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getBySegmentTranslation($translation);
+
+        $this->assertInstanceOf(JobStruct::class, $result);
+        $this->assertSame(1, $result->id);
+    }
+
+    public function testInstanceGetSegmentsCountReturnsIntWhenResultPresent(): void
+    {
+        $struct = new ShapelessConcreteStruct();
+        $struct->total = '42';
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getSegmentsCount(1, 'pass');
+
+        $this->assertSame(42, $result);
+    }
+
+    public function testInstanceGetSegmentsCountReturnsZeroWhenTotalEmpty(): void
+    {
+        $struct = new ShapelessConcreteStruct();
+        $struct->total = null;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getSegmentsCount(1, 'pass');
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testInstanceGetSegmentsCountReturnsZeroWhenNoResult(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getSegmentsCount(1, 'pass');
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testInstanceGetOwnerUidReturnsUidWhenFound(): void
+    {
+        $struct = new ShapelessConcreteStruct();
+        $struct->uid = 99;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getOwnerUid(1, 'pass');
+
+        $this->assertSame(99, $result);
+    }
+
+    public function testInstanceGetOwnerUidReturnsNullWhenEmpty(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getOwnerUid(1, 'pass');
+
+        $this->assertNull($result);
+    }
+
+    public function testInstanceGetOwnerUidReturnsNullWhenUidNotSet(): void
+    {
+        $struct = new ShapelessConcreteStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getOwnerUid(1, 'pass');
+
+        $this->assertNull($result);
+    }
+
+    public function testInstanceGetByIdAndPasswordReturnsJobStructWhenFound(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getByIdAndPassword(1, 'abc123');
+
+        $this->assertInstanceOf(JobStruct::class, $result);
+        $this->assertSame(1, $result->id);
+    }
+
+    public function testInstanceGetByIdAndPasswordReturnsNullWhenNotFound(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getByIdAndPassword(999, 'nope');
+
+        $this->assertNull($result);
+    }
+
+    public function testInstanceGetNotDeletedByProjectIdReturnsArrayOfJobs(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getNotDeletedByProjectId(10);
+
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(JobStruct::class, $result[0]);
+    }
+
+    public function testInstanceGetNotDeletedByIdReturnsArrayOfJobs(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getNotDeletedById(1);
+
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(JobStruct::class, $result[0]);
+    }
+
+    public function testInstanceGetByIdProjectAndIdJobReturnsArray(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getByIdProjectAndIdJob(10, 1);
+
+        $this->assertCount(1, $result);
+    }
+
+    public function testInstanceCreateFromStructReturnsJobWithId(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+        $this->pdoStub->method('lastInsertId')->willReturn('55');
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->createFromStruct($job);
+
+        $this->assertInstanceOf(JobStruct::class, $result);
+    }
+
+    public function testInstanceUpdateForMergeUpdatesPasswordWhenProvided(): void
     {
         $job = $this->makeJobStruct();
 
@@ -449,12 +462,13 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
         $this->dbStub->method('update')->willReturn(1);
 
-        $result = JobDao::updateForMerge($job, 'newpass');
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->updateForMerge($job, 'newpass');
 
         $this->assertSame('newpass', $result->password);
     }
 
-    public function testUpdateForMergeKeepsPasswordWhenEmpty(): void
+    public function testInstanceUpdateForMergeKeepsPasswordWhenEmpty(): void
     {
         $job = $this->makeJobStruct();
         $originalPassword = $job->password;
@@ -463,32 +477,35 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
         $this->dbStub->method('update')->willReturn(1);
 
-        $result = JobDao::updateForMerge($job, '');
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->updateForMerge($job, '');
 
         $this->assertSame($originalPassword, $result->password);
     }
 
-    public function testDeleteOnMergeReturnsTrue(): void
+    public function testInstanceDeleteOnMergeReturnsTrue(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
 
         $job = $this->makeJobStruct();
-        $result = JobDao::deleteOnMerge($job);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->deleteOnMerge($job);
 
         $this->assertTrue($result);
     }
 
-    public function testDeleteOnMergeReturnsFalse(): void
+    public function testInstanceDeleteOnMergeReturnsFalse(): void
     {
         $this->stmtStub->method('execute')->willReturn(false);
 
         $job = $this->makeJobStruct();
-        $result = JobDao::deleteOnMerge($job);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->deleteOnMerge($job);
 
         $this->assertFalse($result);
     }
 
-    public function testGetFirstSegmentOfFilesInJobReturnsArray(): void
+    public function testInstanceGetFilesInfoInJobReturnsArray(): void
     {
         $struct = new ShapelessConcreteStruct();
         $struct->id_file = 1;
@@ -499,46 +516,50 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
         $job = $this->makeJobStruct();
-        $result = JobDao::getFirstSegmentOfFilesInJob($job);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getFilesInfoInJob($job);
 
         $this->assertCount(1, $result);
         $this->assertInstanceOf(ShapelessConcreteStruct::class, $result[0]);
     }
 
-    public function testUpdateAllJobsStatusesByProjectIdExecutes(): void
+    public function testInstanceUpdateAllJobsStatusesByProjectIdExecutes(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
         $this->dbStub->method('update')->willReturn(1);
 
-        JobDao::updateAllJobsStatusesByProjectId(10, 'cancelled');
+        $dao = new JobDao($this->dbStub);
+        $dao->updateAllJobsStatusesByProjectId(10, 'cancelled');
 
         $this->assertTrue(true);
     }
 
-    public function testSetJobCompleteReturnsRowCount(): void
+    public function testInstanceSetJobCompleteReturnsRowCount(): void
     {
         $this->dbStub->method('update')->willReturn(1);
 
         $job = $this->makeJobStruct();
-        $result = JobDao::setJobComplete($job);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->setJobComplete($job);
 
         $this->assertSame(1, $result);
     }
 
-    public function testUpdateJobStatusExecutes(): void
+    public function testInstanceUpdateJobStatusExecutes(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
         $this->dbStub->method('update')->willReturn(1);
 
         $job = $this->makeJobStruct();
-        JobDao::updateJobStatus($job, 'cancelled');
+        $dao = new JobDao($this->dbStub);
+        $dao->updateJobStatus($job, 'cancelled');
 
         $this->assertTrue(true);
     }
 
-    public function testGetReviewedWordsCountGroupedByFilePartsReturnsArray(): void
+    public function testInstanceGetReviewedWordsCountGroupedByFilePartsReturnsArray(): void
     {
         $struct = new ShapelessConcreteStruct();
         $struct->reviewed_words_count = '500';
@@ -547,12 +568,13 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = JobDao::getReviewedWordsCountGroupedByFileParts(1, 'pass', 2);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getReviewedWordsCountGroupedByFileParts(1, 'pass', 2);
 
         $this->assertCount(1, $result);
     }
 
-    public function testGetSegmentTranslationsCountReturnsTotalWhenPresent(): void
+    public function testInstanceGetSegmentTranslationsCountReturnsTotalWhenPresent(): void
     {
         $struct = new ShapelessConcreteStruct();
         $struct->total = '100';
@@ -561,23 +583,25 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = JobDao::getSegmentTranslationsCount([1, 2, 3]);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getSegmentTranslationsCount([1, 2, 3]);
 
         $this->assertSame(100, $result);
     }
 
-    public function testGetSegmentTranslationsCountReturnsNullWhenEmpty(): void
+    public function testInstanceGetSegmentTranslationsCountReturnsNullWhenEmpty(): void
     {
         $this->stmtStub->method('setFetchMode')->willReturn(true);
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $result = JobDao::getSegmentTranslationsCount([1, 2]);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getSegmentTranslationsCount([1, 2]);
 
         $this->assertNull($result);
     }
 
-    public function testGetSegmentTranslationsCountReturnsNullWhenTotalEmpty(): void
+    public function testInstanceGetSegmentTranslationsCountReturnsNullWhenTotalEmpty(): void
     {
         $struct = new ShapelessConcreteStruct();
         $struct->total = null;
@@ -586,12 +610,13 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = JobDao::getSegmentTranslationsCount([1, 2]);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getSegmentTranslationsCount([1, 2]);
 
         $this->assertNull($result);
     }
 
-    public function testHasACustomPayableRateReturnsTrueWhenFound(): void
+    public function testInstanceHasACustomPayableRateReturnsTrueWhenFound(): void
     {
         $struct = new ShapelessConcreteStruct();
 
@@ -599,18 +624,20 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = JobDao::hasACustomPayableRate(1);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->hasACustomPayableRate(1);
 
         $this->assertTrue($result);
     }
 
-    public function testHasACustomPayableRateReturnsFalseWhenNotFound(): void
+    public function testInstanceHasACustomPayableRateReturnsFalseWhenNotFound(): void
     {
         $this->stmtStub->method('setFetchMode')->willReturn(true);
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $result = JobDao::hasACustomPayableRate(1);
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->hasACustomPayableRate(1);
 
         $this->assertFalse($result);
     }
