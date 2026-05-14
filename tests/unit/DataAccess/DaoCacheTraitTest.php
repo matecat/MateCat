@@ -126,6 +126,7 @@ class DaoCacheTraitTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->harness = new DaoCacheTraitHarness();
         $this->redis = new FakeRedisClient();
         DaoCacheTraitHarness::setCacheConnection($this->redis);
@@ -136,6 +137,7 @@ class DaoCacheTraitTest extends AbstractTest
     {
         DaoCacheTraitHarness::setCacheConnection(null);
         AppConfig::$SKIP_SQL_CACHE = false;
+        parent::tearDown();
     }
 
     #[Test]

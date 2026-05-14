@@ -73,7 +73,7 @@ class ApiKeyDao extends AbstractDao
      */
     public function getByUid(int $uid): ?ApiKeyStruct
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND uid = :uid ");
         $stmt->execute(['uid' => $uid]);
 
@@ -96,7 +96,7 @@ class ApiKeyDao extends AbstractDao
             return 0;
         }
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("DELETE FROM api_keys WHERE id = :id ");
         $stmt->execute(['id' => $apiKey->id]);
 

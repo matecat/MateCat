@@ -346,19 +346,12 @@ class SegmentDao extends AbstractDao
                         LIMIT %u
                   ) AS TT2";
 
-        switch ($where) {
-            case 'after':
-                $subQuery = sprintf($queryAfter, $options_join_query, $options_conditions_query, $step, $step);
-                break;
-            case 'before':
-                $subQuery = sprintf($queryBefore, $options_join_query, $options_conditions_query, $step, $step);
-                break;
-            case 'center':
-                $subQuery = sprintf($queryCenter, $options_join_query, $options_conditions_query, $step, $step, $options_join_query, $options_conditions_query, $step);
-                break;
-            default:
-                throw new Exception("No direction selected");
-        }
+        $subQuery = match ($where) {
+            'after' => sprintf($queryAfter, $options_join_query, $options_conditions_query, $step, $step),
+            'before' => sprintf($queryBefore, $options_join_query, $options_conditions_query, $step, $step),
+            'center' => sprintf($queryCenter, $options_join_query, $options_conditions_query, $step, $step, $options_join_query, $options_conditions_query, $step),
+            default => throw new Exception("No direction selected"),
+        };
 
         $stmt = $db->prepare($subQuery);
         $conditions_values = array_merge([

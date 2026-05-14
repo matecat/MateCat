@@ -3,7 +3,6 @@
 namespace Model\LQA;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use TypeError;
@@ -23,7 +22,7 @@ class EntryCommentDao extends AbstractDao
     {
         $sql = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
             " ORDER BY create_date DESC ";
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
         $stmt->execute([$id_issue]);
@@ -54,8 +53,8 @@ class EntryCommentDao extends AbstractDao
             " VALUES " .
             " ( :uid, :id_qa_entry, :create_date, :comment, :source_page ) ";
 
-        $conn = Database::obtain()->getConnection();
-        Database::obtain()->begin();
+        $conn = $this->database->getConnection();
+        $this->database->begin();
 
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
@@ -90,7 +89,7 @@ class EntryCommentDao extends AbstractDao
             " IN ( " . implode(', ', $ids) . " ) " .
             " ORDER BY id_qa_entry, id ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute();
 
@@ -110,7 +109,7 @@ class EntryCommentDao extends AbstractDao
         $sql = "UPDATE qa_entry_comments SET id_qa_entry = :to
                WHERE id_qa_entry = :from ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'from' => $from,

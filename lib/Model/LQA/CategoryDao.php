@@ -195,7 +195,7 @@ class CategoryDao extends AbstractDao
     private static function extractOptions(array $json): array
     {
         $map = [];
-        $options = json_decode($json['options'], true);
+        $options = json_decode($json['options'] ?? '', true);
 
         if (!empty($options)) {
             foreach ($options as $key => $value) {

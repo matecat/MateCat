@@ -280,8 +280,8 @@ class TeamDao extends AbstractDao
      */
     public function updateTeamName(TeamStruct $org): TeamStruct
     {
-        Database::obtain()->begin();
-        $conn = Database::obtain()->getConnection();
+        $this->database->begin();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(self::$_update_team_by_id);
         $stmt->bindValue(':id', $org->id, PDO::PARAM_INT);
@@ -301,7 +301,7 @@ class TeamDao extends AbstractDao
      */
     public function deleteTeam(TeamStruct $team): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(static::$_sql_delete_empty_team);
         $stmt->execute([
             'id_team' => $team->id
