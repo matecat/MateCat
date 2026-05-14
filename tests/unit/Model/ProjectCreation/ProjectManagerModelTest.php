@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
 use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
@@ -398,12 +399,12 @@ class ProjectManagerModelTest extends AbstractTest
 
     /**
      * Creates a model whose mock PDO returns pre-configured rows for
-     * the jobs SELECT and the files SELECT used by deleteProject().
+     * the jobs SELECT and the files_parts MIN/MAX SELECT used by deleteProject().
      *
      * @param list<array{id: int, job_first_segment: int, job_last_segment: int}> $jobRows
-     * @param list<int> $fileIds
+     * @param array{int|null, int|null} $filesPartsRange  [minId, maxId] for files_parts (null = no rows)
      */
-    private function createModelForDelete(array $jobRows = [], array $fileIds = []): ProjectManagerModel
+    private function createModelForDelete(array $jobRows = [], array $filesPartsRange = [null, null]): ProjectManagerModel
     {
         $this->preparedQueries = [];
         $this->executedValues  = [];
@@ -418,14 +419,19 @@ class ProjectManagerModelTest extends AbstractTest
             }
         );
         $mockStmt->method('fetchAll')->willReturnCallback(
-            function () use (&$lastQuery, $jobRows, $fileIds): array {
+            function () use (&$lastQuery, $jobRows): array {
                 if (str_contains($lastQuery, 'FROM jobs')) {
                     return $jobRows;
                 }
-                if (str_contains($lastQuery, 'FROM files')) {
-                    return $fileIds;
-                }
                 return [];
+            }
+        );
+        $mockStmt->method('fetch')->willReturnCallback(
+            function () use (&$lastQuery, $filesPartsRange): array|false {
+                if (str_contains($lastQuery, 'files_parts')) {
+                    return $filesPartsRange;
+                }
+                return false;
             }
         );
 
@@ -462,7 +468,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 100, 'job_last_segment' => 200]],
-            fileIds: [5],
+            filesPartsRange: [1, 50],
         );
 
         $model->deleteProject(42);
@@ -484,7 +490,8 @@ class ProjectManagerModelTest extends AbstractTest
             'segment_notes',                 // batched
             'segment_original_data',         // batched
             'segments',                      // batched
-            'files_parts',                   // subquery DELETE (by id_project via files)
+            'files_parts',                   // SELECT MIN/MAX + batched DELETE
+            'files_parts',                   // batched DELETE (range 1-50 fits in 1 batch)
             'files',                         // DELETE files
             'file_references',               // by id_project
             'file_metadata',
@@ -501,7 +508,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 100, 'job_last_segment' => 200]],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42);
@@ -530,7 +537,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 100, 'job_last_segment' => 200]],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42);
@@ -550,7 +557,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [],
-            fileIds: [5, 8],
+            filesPartsRange: [10, 30],
         );
 
         $model->deleteProject(42);
@@ -560,7 +567,8 @@ class ProjectManagerModelTest extends AbstractTest
         // No job-scoped or segment-scoped deletes
         $expected = [
             'jobs',                          // SELECT jobs (returns empty)
-            'files_parts',                   // subquery DELETE (by id_project via files)
+            'files_parts',                   // SELECT MIN/MAX
+            'files_parts',                   // batched DELETE (range 10-30 fits in 1 batch)
             'files',                         // DELETE files
             'file_references',
             'file_metadata',
@@ -577,7 +585,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 500]],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42, batchSize: 200);
@@ -631,7 +639,7 @@ class ProjectManagerModelTest extends AbstractTest
                 ['id' => 10, 'job_first_segment' => 100, 'job_last_segment' => 300],
                 ['id' => 11, 'job_first_segment' => 301, 'job_last_segment' => 500],
             ],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42);
@@ -668,17 +676,21 @@ class ProjectManagerModelTest extends AbstractTest
         }
     }
 
-    public function testDeleteProjectWithNoFilesStillIssuesFilePartsDelete(): void
+    public function testDeleteProjectWithNoFilesSkipsFilesPartsDelete(): void
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42);
 
         $fpIndices = $this->queryIndicesForTable('files_parts');
-        self::assertCount(1, $fpIndices, 'files_parts DELETE always executes (subquery returns 0 rows when no files)');
+        // Only the SELECT MIN/MAX query, no DELETE
+        $fpDeleteIndices = array_values(array_filter($fpIndices, function (int $i): bool {
+            return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
+        }));
+        self::assertCount(0, $fpDeleteIndices, 'files_parts DELETE should not execute when MIN/MAX returns null');
     }
 
     public function testDeleteProjectWithNonContiguousJobsDoesNotSpanGap(): void
@@ -689,7 +701,7 @@ class ProjectManagerModelTest extends AbstractTest
                 ['id' => 10, 'job_first_segment' => 100, 'job_last_segment' => 200],
                 ['id' => 11, 'job_first_segment' => 500, 'job_last_segment' => 600],
             ],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42);
@@ -720,10 +732,10 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('batchSize must be >= 1, got 0');
 
         $model->deleteProject(42, batchSize: 0);
@@ -733,10 +745,10 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('batchSize must be >= 1, got -5');
 
         $model->deleteProject(42, batchSize: -5);
@@ -746,7 +758,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
-            fileIds: [],
+            filesPartsRange: [null, null],
         );
 
         $model->deleteProject(42);
@@ -766,7 +778,7 @@ class ProjectManagerModelTest extends AbstractTest
     {
         $model = $this->createModelForDelete(
             jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
-            fileIds: [5],
+            filesPartsRange: [1, 5],
         );
 
         $model->deleteProject(42);
@@ -777,5 +789,63 @@ class ProjectManagerModelTest extends AbstractTest
         $query = $this->preparedQueries[$indices[0]];
         self::assertStringContainsString('DELETE FROM file_references', $query);
         self::assertSame(['id_project' => 42], $this->executedValues[$indices[0]]);
+    }
+
+    public function testDeleteProjectBatchesFilesPartsByIdRange(): void
+    {
+        // files_parts.id range 1–500 with batchSize=200 → 3 batches: 1-200, 201-400, 401-500
+        $model = $this->createModelForDelete(
+            jobRows: [],
+            filesPartsRange: [1, 500],
+        );
+
+        $model->deleteProject(42, batchSize: 200);
+
+        $fpIndices = $this->queryIndicesForTable('files_parts');
+        $fpDeleteIndices = array_values(array_filter($fpIndices, function (int $i): bool {
+            return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
+        }));
+        self::assertCount(3, $fpDeleteIndices, 'files_parts should be deleted in 3 batches for range 1-500 with batchSize 200');
+
+        // Each DELETE must use BETWEEN on files_parts.id and include id_project filter
+        foreach ($fpDeleteIndices as $idx) {
+            self::assertStringContainsString('BETWEEN', $this->preparedQueries[$idx]);
+            self::assertStringContainsString('id_project', $this->preparedQueries[$idx]);
+        }
+
+        self::assertSame(
+            ['id_project' => 42, 'start' => 1, 'end' => 200],
+            $this->executedValues[$fpDeleteIndices[0]]
+        );
+        self::assertSame(
+            ['id_project' => 42, 'start' => 201, 'end' => 400],
+            $this->executedValues[$fpDeleteIndices[1]]
+        );
+        self::assertSame(
+            ['id_project' => 42, 'start' => 401, 'end' => 500],
+            $this->executedValues[$fpDeleteIndices[2]]
+        );
+    }
+
+    public function testDeleteProjectFilesPartsSingleBatchWhenRangeFitsInBatchSize(): void
+    {
+        // files_parts.id range 10–30 (21 rows max) with default batchSize 200 → 1 batch
+        $model = $this->createModelForDelete(
+            jobRows: [],
+            filesPartsRange: [10, 30],
+        );
+
+        $model->deleteProject(42);
+
+        $fpIndices = $this->queryIndicesForTable('files_parts');
+        $fpDeleteIndices = array_values(array_filter($fpIndices, function (int $i): bool {
+            return str_starts_with(trim($this->preparedQueries[$i]), 'DELETE');
+        }));
+        self::assertCount(1, $fpDeleteIndices, 'files_parts should be deleted in 1 batch when range fits batchSize');
+
+        self::assertSame(
+            ['id_project' => 42, 'start' => 10, 'end' => 30],
+            $this->executedValues[$fpDeleteIndices[0]]
+        );
     }
 }

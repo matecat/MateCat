@@ -54,10 +54,7 @@ let TranslationMatches = {
         segment: segment,
       })
 
-      modifiedTranslation(
-        segment.sid,
-        segment.translation !== '',
-      )
+      modifiedTranslation(segment.sid, segment.translation !== '')
     }
   },
 
@@ -66,11 +63,7 @@ let TranslationMatches = {
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
     if (isUndefined(segmentObj)) return
 
-    setSegmentContributions(
-      segmentObj.sid,
-      data.matches,
-      data.errors,
-    )
+    setSegmentContributions(segmentObj.sid, data.matches, data.errors)
 
     this.useSuggestionInEditArea(sid)
 
@@ -309,14 +302,15 @@ let TranslationMatches = {
 
     const jobLanguages = [config.source_code, config.target_code]
     // Keep only languages whose base code is 'en' or 'it'.
-    let allowed =
+    /*const allowed =
       jobLanguages
         .map((x) => x.split('-')[0])
         .filter((x) => ['en', 'it'].includes(x))
         .filter(
           // Remove duplicates, then check we have exactly two distinct matches.
           (value, index, array) => array.indexOf(value) === index,
-        ).length === 2
+        ).length === 2*/
+    const allowed = false //Temp disable Lara Think
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
