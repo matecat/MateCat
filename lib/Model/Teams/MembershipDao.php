@@ -17,7 +17,6 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
-use Utils\Tools\Utils;
 
 class MembershipDao extends AbstractDao
 {
@@ -269,15 +268,27 @@ class MembershipDao extends AbstractDao
             throw new Exception('this method requires to be wrapped in a transaction');
         }
 
-        $obj_arr = Utils::ensure_keys($obj_arr, ['members', 'team']);
+        if (!isset($obj_arr['members'], $obj_arr['team'])) {
+            throw new Exception('Missing required keys: members, team');
+        }
 
-        $users = (new UserDao)->getByEmails($obj_arr['members']);
+        if (!is_array($obj_arr['members'])) {
+            throw new Exception('members must be an array of email strings');
+        }
+
+        if (!$obj_arr['team'] instanceof TeamStruct) {
+            throw new Exception('team must be a TeamStruct instance');
+        }
+
+        /** @var list<string> $members */
+        $members = $obj_arr['members'];
+        $teamStruct = $obj_arr['team'];
+
+        $users = (new UserDao)->getByEmails($members);
 
         if (empty($users)) {
             return [];
         }
-
-        $teamStruct = $obj_arr['team'];
 
         $membersList = [];
 
@@ -297,11 +308,13 @@ class MembershipDao extends AbstractDao
                 $membersList[] = $membershipStruct;
 
                 $this->destroyCacheUserTeams($user);
-                $this->destroyCacheTeamByIdAndUser($teamStruct->id, $user);
+                if ($teamStruct->id !== null) {
+                    $this->destroyCacheTeamByIdAndUser($teamStruct->id, $user);
+                }
             }
         }
 
-        if (count($membersList)) {
+        if (count($membersList) && $teamStruct->id !== null) {
             $this->destroyCacheForListByTeamId($teamStruct->id);
         }
 

@@ -70,18 +70,24 @@ abstract class AbstractDao
      *
      * @param int $id
      * @param class-string<T> $fetchClass
-     * @param int $ttl Cache TTL in seconds (0 = no cache)
+     * @param int|null $ttl Cache TTL in seconds (0 = no cache)
      *
      * @return T|null
+     * @throws ReflectionException
+     * @throws PDOException
      * @throws Exception
      */
-    public function fetchById(int $id, string $fetchClass, int $ttl = 0): ?IDaoStruct
+    public function fetchById(int $id, string $fetchClass, ?int $ttl = null): ?IDaoStruct
     {
         $sql = sprintf(self::FIND_BY_ID_SQL, static::TABLE);
         $stmt = $this->database->getConnection()->prepare($sql);
-        $keyMap = static::class . "::findById-" . $id;
+        $keyMap = static::class . "::fetchById-" . $id;
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, $fetchClass, ['id' => $id], $keyMap)[0] ?? null;
+        if ($ttl !== null) {
+            $this->setCacheTTL($ttl);
+        }
+
+        return $this->_fetchObjectMap($stmt, $fetchClass, ['id' => $id], $keyMap)[0] ?? null;
     }
 
     /**

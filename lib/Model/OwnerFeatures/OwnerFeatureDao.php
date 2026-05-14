@@ -24,6 +24,7 @@ class OwnerFeatureDao extends AbstractDao
      * @return ?OwnerFeatureStruct
      * @throws PDOException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function create(IDaoStruct $obj): ?OwnerFeatureStruct
     {

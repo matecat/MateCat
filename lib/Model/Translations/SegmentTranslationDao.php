@@ -99,7 +99,7 @@ class SegmentTranslationDao extends AbstractDao
             $values = [];
 
             foreach ($list as $row) {
-                if (strlen($row->translation) > SegmentSize::LIMIT) {
+                if (strlen($row->translation ?? '') > SegmentSize::LIMIT) {
                     throw new PDOException("Translation size limit reached. Translation is larger than 65kb.", -2);
                 }
                 $values[] = $row->id_segment;

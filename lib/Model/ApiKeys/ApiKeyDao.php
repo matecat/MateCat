@@ -2,6 +2,7 @@
 
 namespace Model\ApiKeys;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
@@ -38,6 +39,7 @@ class ApiKeyDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws Exception
      */
     public function create(ApiKeyStruct $obj): ApiKeyStruct
     {
@@ -89,6 +91,10 @@ class ApiKeyDao extends AbstractDao
     public function deleteByUid(int $uid): int
     {
         $apiKey = $this->getByUid($uid);
+
+        if ($apiKey === null) {
+            return 0;
+        }
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("DELETE FROM api_keys WHERE id = :id ");

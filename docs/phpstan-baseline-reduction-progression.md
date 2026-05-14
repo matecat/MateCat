@@ -13,7 +13,7 @@
 | **Coverage — Methods** | 21.74% (844/3,883) | 42.00% (1,738/4,138) | +20.26% (+894 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 43.17% (15,091/34,955) | +21.98% (+7,818 lines) |
 | **New test files** | 235 | 291+ | +56 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 227 | +227 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 233 | +233 |
 
 ---
 
@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 227 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 233 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (227 files)</summary>
+<summary>Click to expand full ledger (233 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -218,6 +218,11 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/LQA/ModelDao.php` | Phase 0 |
 | `lib/Model/LQA/ModelStruct.php` | Phase 0 |
 
+#### Model/OwnerFeatures
+| File | Cleaned In |
+|------|-----------|
+| `lib/Model/OwnerFeatures/OwnerFeatureDao.php` | Phase 15 |
+
 #### Model/Projects
 | File | Cleaned In |
 |------|-----------|
@@ -248,6 +253,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Segments/SegmentMetadataDao.php` | Phase 5C |
 | `lib/Model/Segments/SegmentOriginalDataDao.php` | Phase 0 |
 | `lib/Model/Segments/SegmentUIStruct.php` | Phase 0 |
+| `lib/Model/Teams/MembershipDao.php` | Phase 15 |
 | `lib/Model/Teams/MembershipStruct.php` | Phase 0 |
 | `lib/Model/Teams/TeamDao.php` | Phase 5C |
 | `lib/Model/Teams/TeamModel.php` | Phase 6A |
@@ -312,6 +318,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Utils/Engines (full hierarchy)
 | File | Cleaned In |
 |------|-----------|
+| `lib/Utils/Engines/AbstractEngine.php` | Phase 0 |
 | `lib/Utils/Engines/Altlang.php` | Phase 0 |
 | `lib/Utils/Engines/Apertium.php` | Phase 0 |
 | `lib/Utils/Engines/DeepL.php` | Phase 0 |
@@ -324,8 +331,10 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Engines/Lara/Headers.php` | Phase 0 |
 | `lib/Utils/Engines/Lara/HttpClientInterface.php` | Phase 0 |
 | `lib/Utils/Engines/Lara/LaraClient.php` | Phase 0 |
+| `lib/Utils/Engines/MMT/MMTServiceApi.php` | Phase 14 |
 | `lib/Utils/Engines/MMT/MMTServiceApiException.php` | Phase 0 |
 | `lib/Utils/Engines/MMT.php` | Phase 14 |
+| `lib/Utils/Engines/MyMemory.php` | Phase 0 |
 | `lib/Utils/Engines/NONE.php` | Phase 0 |
 | `lib/Utils/Engines/SmartMATE.php` | Phase 5C |
 | `lib/Utils/Engines/Results/ErrorResponse.php` | Phase 0 |
@@ -346,6 +355,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Engines/Results/MyMemory/TagProjectionResponse.php` | Phase 0 |
 | `lib/Utils/Engines/Results/MyMemory/UpdateContributionResponse.php` | Phase 0 |
 | `lib/Utils/Engines/Results/TMSAbstractResponse.php` | Phase 14 |
+| `lib/Utils/Engines/Traits/HotSwap.php` | Phase 14 |
 | `lib/Utils/Engines/Traits/Oauth.php` | Phase 0 |
 | `lib/Utils/Engines/Validators/AltLangEngineValidator.php` | Phase 14 |
 | `lib/Utils/Engines/Validators/Contracts/EngineValidatorObject.php` | Phase 0 |

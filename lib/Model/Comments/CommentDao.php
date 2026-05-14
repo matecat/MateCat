@@ -169,6 +169,7 @@ class CommentDao extends AbstractDao
      * @param CommentStruct $obj
      *
      * @return CommentStruct
+     * @throws PDOException
      */
     public function resolveThread(CommentStruct $obj): CommentStruct
     {

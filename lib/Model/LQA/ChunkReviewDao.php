@@ -122,6 +122,7 @@ class ChunkReviewDao extends AbstractDao
      * @return ?ChunkReviewStruct
      * @throws PDOException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public static function findById(int $id): ?ChunkReviewStruct
     {

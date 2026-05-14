@@ -3291,12 +3291,6 @@ parameters:
 			path: lib/Model/Analysis/XTRFStatus.php
 
 		-
-			message: '#^Cannot access property \$id on Model\\ApiKeys\\ApiKeyStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyDao.php
-
-		-
 			message: '#^Method Model\\ApiKeys\\ApiKeyStruct\:\:getUser\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3325,12 +3319,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: lib/Model/Comments/BaseCommentStruct.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentDao\:\:resolveThread\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Comments/CommentDao.php
 
 		-
 			message: '#^Method Model\\Comments\\CommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -5051,13 +5039,13 @@ parameters:
 		-
 			message: '#^Method Model\\LQA\\EntryValidator\:\:validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
 			message: '#^Method Model\\LQA\\EntryValidator\:\:validateCategoryId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
@@ -5787,12 +5775,6 @@ parameters:
 			path: lib/Model/Teams/InvitedUser.php
 
 		-
-			message: '#^Parameter \#1 \$params of static method Utils\\Tools\\Utils\:\:ensure_keys\(\) expects array\<string, mixed\>, array\<int\|string, list\<string\>\|Model\\DataAccess\\IDaoStruct\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Teams/MembershipDao.php
-
-		-
 			message: '#^Method Model\\Teams\\PendingInvitations\:\:hasPendingInvitation\(\) has parameter \$id_team with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -5815,12 +5797,6 @@ parameters:
 			identifier: foreach.nonIterable
 			count: 1
 			path: lib/Model/Teams/TeamStruct.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationDao.php
 
 		-
 			message: '#^Class Model\\Translations\\SegmentTranslationStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
@@ -16958,8 +16934,4 @@ parameters:
 			count: 2
 			path: plugins/uber/lib/Features/Uber/Utils/NoteExtractor.php
 
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Model/Analysis/AnalysisDao.php
+	

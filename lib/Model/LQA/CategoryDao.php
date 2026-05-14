@@ -19,6 +19,7 @@ class CategoryDao extends AbstractDao
      * @return CategoryStruct|null
      * @throws PDOException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public static function findById(int $id): ?CategoryStruct
     {

@@ -103,7 +103,7 @@ class AnalysisDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_project_Stats_volume_analysis);
-        $thisDao = new static();
+        $thisDao = new self();
 
         return $thisDao->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['pid' => $project_id]);
     }
