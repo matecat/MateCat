@@ -81,6 +81,8 @@ class Apertium extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @throws TypeError
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function get(array $_config): GetMemoryResponse
     {

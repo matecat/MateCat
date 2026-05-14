@@ -356,6 +356,7 @@ class FastAnalysis extends AbstractDaemon
      *
      * @return AnalyzeResponse
      * @throws Exception
+     * @throws \TypeError
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {

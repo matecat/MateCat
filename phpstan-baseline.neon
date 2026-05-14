@@ -5049,12 +5049,6 @@ parameters:
 			path: lib/Model/LQA/EntryValidator.php
 
 		-
-			message: '#^Method Model\\LQA\\EntryValidator\:\:validateCategoryId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
 			message: '#^Property Model\\LQA\\EntryValidator\:\:\$errors type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6087,7 +6081,7 @@ parameters:
 			path: lib/Model/Users/RedeemableProject.php
 
 		-
-			message: '#^Parameter \#1 \$struct of static method Model\\DataAccess\\AbstractDao\:\:updateStruct\(\) expects Model\\DataAccess\\AbstractDaoObjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
+			message: '#^Parameter \#1 \$struct of static method Model\\DataAccess\\AbstractDao\:\:staticUpdateStruct\(\) expects Model\\DataAccess\\AbstractDaoObjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Users/RedeemableProject.php
@@ -8619,6 +8613,18 @@ parameters:
 			path: lib/Utils/TMS/TMSService.php
 
 		-
+			message: '#^Method Utils\\TMS\\TMSService\:\:glossaryExport\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/TMS/TMSService.php
+
+		-
+			message: '#^Method Utils\\TMS\\TMSService\:\:glossaryExport\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/TMS/TMSService.php
+
+		-
 			message: '#^Method Utils\\TMS\\TMSService\:\:glossaryUploadStatus\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11025,7 +11031,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
-			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
+			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
 			identifier: argument.type
 			count: 9
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
@@ -11451,7 +11457,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
-			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
+			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
 			identifier: argument.type
 			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
@@ -12297,13 +12303,13 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:updateFields\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:updateFields\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
@@ -13977,7 +13983,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateFields\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
@@ -16595,6 +16601,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\TMSService\:\:importTMXInTM\(\) has parameter \$tm_key with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\TMSService\:\:importTMXInTM\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 

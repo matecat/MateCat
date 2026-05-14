@@ -437,6 +437,7 @@ class Lara extends AbstractEngine
      *
      * @return float|null
      * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function getQualityEstimation(
         string $source,
