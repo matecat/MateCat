@@ -1302,16 +1302,16 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 
 #### TIER 3: Infrastructure/Models (cascade potential)
 
-| File | Errors | %doc | PHPDoc | Behavioral | Notes |
-|------|--------|------|--------|------------|-------|
-| `Model/Analysis/XTRFStatus.php` | 34 | 44% | 15 | 19 | Highest count, mixed |
-| `Utils/TaskRunner/TaskManager.php` | 33 | 9% | 3 | 28 | Almost all behavioral — hardest |
-| `GDrive/Session.php` | 29 | 68% | 20 | 9 | GDrive integration |
-| `Utils/Tools/PostEditing.php` | 27 | 29% | 8 | 19 | Heavy behavioral |
+| File                                | Errors | %doc | PHPDoc | Behavioral | Notes |
+|-------------------------------------|--------|------|--------|------------|-------|
+| `Model/Analysis/XTRFStatus.php`     | 34 | 44% | 15 | 19 | Highest count, mixed |
+| `Utils/TaskRunner/TaskManager.php`  | 33 | 9% | 3 | 28 | Almost all behavioral — hardest |
+| `GDrive/Session.php`                | 29 | 68% | 20 | 9 | GDrive integration |
+| `Utils/Tools/PostEditing.php`       | 27 | 29% | 8 | 19 | Heavy behavioral |
 | `Model/Analysis/AbstractStatus.php` | 25 | 56% | 14 | 9 | Analysis base class |
 | ~~`QualityReportSegmentModel.php`~~ | ~~25~~ | ~~68%~~ | ~~17~~ | ~~3~~ | ✅ Done (Phase 13, DI refactored, 80% methods) |
-| `Model/WordCount/CounterModel.php` | 23 | 21% | 5 | 18 | Heavy behavioral |
-| `Utils/TMS/TMSService.php` | 23 | 52% | 12 | 11 | TM service |
+| ~~`Model/WordCount/.php`~~          | 23 | 21% | 5 | 18 | Heavy behavioral |
+| ~~`Utils/TMS/TMSService.php`~~      | 23 | 52% | 12 | 11 | TM service |
 
 **Subtotal Tier 3:** ~219 entries
 

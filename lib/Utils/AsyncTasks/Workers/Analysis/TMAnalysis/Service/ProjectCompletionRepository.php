@@ -135,6 +135,9 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
         );
     }
 
+    /**
+     * @throws \PDOException
+     */
     public function initializeJobWordCount(int $jobId, string $password): void
     {
         $this->counterModel->initializeJobWordCount($jobId, $password);

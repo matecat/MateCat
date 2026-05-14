@@ -20,20 +20,9 @@ class WordCounterDao extends AbstractDao
 {
 
     /**
-     * Update the word count for the job
-     *
-     * We perform an update in join with the `jobs` table
-     * because we want to update the word count only for the current chunk
-     *
-     * Update the status of segment_translation is needed to avoid duplicated calls
-     * (The second call fails for status condition)
-     *
-     * @param WordCountStruct $wStruct
-     *
-     * @return int
      * @throws PDOException
      */
-    public static function updateWordCount(WordCountStruct $wStruct)
+    public function updateWordCount(WordCountStruct $wStruct): int
     {
         $db = Database::obtain();
 
