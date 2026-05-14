@@ -6,6 +6,9 @@ import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {LaraGlossary} from '../LaraGlossary/LaraGlossary'
 import {Select} from '../../../../common/Select'
+import {laraStyleguides} from '../../../../../api/laraStyleguides/laraStyleguides'
+import {error} from 'jquery'
+import {laraAuth} from '../../../../../api/laraAuth'
 
 export const LARA_STYLES = {
   FAITHFUL: 'faithful',
@@ -49,6 +52,8 @@ export const LARA_STYLES_OPTIONS = [
 export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
+  const [styleGuidesOptions, setStyleGuidesOptions] = React.useState([])
+
   const {control, setValue} = useOptions()
 
   const setGlossaries = useCallback(
@@ -63,6 +68,14 @@ export const LaraOptions = ({isCattoolPage}) => {
     )
       setValue('lara_style', LARA_STYLES.FAITHFUL)
   }, [currentProjectTemplate?.mt?.extra, setValue])
+
+  useEffect(() => {
+    laraAuth({idJob: 102, password: 'ccbb23cf3dca'}).then((response) => {
+      laraStyleguides(response)
+        .then((data) => console.log(data))
+        .catch((error) => console.log(error))
+    })
+  }, [])
 
   return (
     <div className="options-container-content">
@@ -121,6 +134,41 @@ export const LaraOptions = ({isCattoolPage}) => {
               activeOption={LARA_STYLES_OPTIONS.find(
                 ({id}) => id === (value ?? LARA_STYLES.FAITHFUL),
               )}
+              checkSpaceToReverse={true}
+              onSelect={(option) => onChange(option.id)}
+              isDisabled={disabled}
+              maxHeightDroplist={300}
+            />
+          )}
+        />
+      </div>
+      <div className="mt-params-option">
+        <div>
+          <h3>Style guide</h3>
+          <p>
+            Select a style guide to be applied to Lara's translations (activates
+            Lara Prose for the project).
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="lara_style_guide"
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Select
+              name={name}
+              isPortalDropdown={true}
+              dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
+              options={styleGuidesOptions.map((option) => ({
+                ...option,
+                name: (
+                  <div className="option-dropdown-with-descrition-select-content">
+                    {option.name}
+                    <p>{option.description}</p>
+                  </div>
+                ),
+              }))}
+              activeOption={styleGuidesOptions.find(({id}) => id === value)}
               checkSpaceToReverse={true}
               onSelect={(option) => onChange(option.id)}
               isDisabled={disabled}
