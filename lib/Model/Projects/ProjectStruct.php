@@ -10,7 +10,6 @@ use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ModelDao;
@@ -226,9 +225,9 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         $id = $this->id ?? throw new DomainException("Project ID must not be null");
 
         return $this->cachable(__METHOD__, function () use ($id, $ttl) {
-            $dao = new ChunkDao(Database::obtain());
+            $dao = new JobDao();
 
-            return $dao->setCacheTTL($ttl)->getByProjectID($id);
+            return $dao->setCacheTTL($ttl)->getNotDeletedByProjectId($id);
         });
     }
 

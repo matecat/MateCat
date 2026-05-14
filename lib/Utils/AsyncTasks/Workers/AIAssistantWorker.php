@@ -4,7 +4,6 @@ namespace Utils\AsyncTasks\Workers;
 
 use Exception;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\ChunkDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;

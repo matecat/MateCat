@@ -18,7 +18,7 @@ use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
 use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
 use Model\Files\FilesMetadataMarshaller;
 use Model\Files\MetadataDao as FilesMetadataDao;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -339,7 +339,7 @@ class GetSegmentsController extends KleinController
      */
     protected function findJob(int $jid, string $password): \Model\Jobs\JobStruct
     {
-        return ChunkDao::getByIdAndPassword($jid, $password);
+        return (new JobDao())->getByIdAndPasswordOrFail($jid, $password);
     }
 
     protected function createSegmentDao(): SegmentDao

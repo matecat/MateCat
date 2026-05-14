@@ -12,7 +12,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -206,7 +206,7 @@ abstract class AbstractStatus
             }
 
             if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
-                $chunkStruct = ChunkDao::getByIdAndPassword($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
+                $chunkStruct = (new JobDao())->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
                 $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user, $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);

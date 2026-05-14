@@ -1373,7 +1373,7 @@ class SetTranslationControllerTest extends AbstractTest
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Eval set', 2);
 
         $controller = $this->createControllerWithoutConstructor();
-        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject();
         $this->setNamedProperty($controller, 'chunk', $chunk);
         $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
@@ -1678,7 +1678,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 884004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source', 2);
 
-        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject();
 
         $controller = $this->createControllerWithoutConstructor();
@@ -1880,7 +1880,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 894004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source persist', 2);
 
-        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject();
 
         $controller = $this->createControllerWithoutConstructor();
@@ -1979,7 +1979,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 898004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source propagation', 2);
 
-        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject();
 
         $controller = $this->createControllerWithoutConstructor();
@@ -2117,7 +2117,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 897004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Init version', 2);
 
-        $chunk = \Model\Jobs\ChunkDao::getByIdAndPassword($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject();
 
         $controller = $this->createControllerWithoutConstructor();

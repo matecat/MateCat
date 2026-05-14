@@ -27,7 +27,6 @@ use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Files\FilesPartsDao;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -651,7 +650,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         }
 
         //to get Job Info, we need only a row of jobs (split)
-        $chunk = ChunkDao::getByIdAndPassword((int)$id_job, $password);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail((int)$id_job, $password);
         $this->chunk = $chunk;
 
         //add check for job status archived.

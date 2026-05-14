@@ -9,7 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
@@ -33,7 +33,7 @@ class GetTagProjectionController extends KleinController
     public function call(): void
     {
         $request = $this->validateTheRequest();
-        $jobStruct = ChunkDao::getByIdAndPassword($request['id_job'], $request['password']);
+        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
         /**

@@ -11,7 +11,6 @@ use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\EntryDao;
@@ -75,7 +74,7 @@ class SegmentAnalysisController extends KleinController
         $segmentsCount = (new JobDao())->getSegmentsCount($idJob, $password);
 
         // raise exception if the job does not exist
-        $jobStruct = ChunkDao::getByIdAndPassword($idJob, $password);
+        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($idJob, $password);
         $this->project = $jobStruct->getProject();
 
         $mt_qe_workflow_enabled = !empty($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));

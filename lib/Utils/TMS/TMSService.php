@@ -15,7 +15,6 @@ use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\TMSService\TMSServiceDao;
@@ -494,7 +493,7 @@ class TMSService
                 break;
         }
 
-        $chunks = ChunkDao::getByJobID($jid);
+        $chunks = (new JobDao())->getNotDeletedById($jid);
 
         foreach ($result as $k => $row) {
             /**

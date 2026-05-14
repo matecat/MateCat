@@ -395,6 +395,35 @@ class JobDaoTest extends AbstractTest
         $this->assertNull($result);
     }
 
+    public function testGetByIdAndPasswordOrFailReturnsJobStructWhenFound(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$job]);
+
+        $dao = new JobDao($this->dbStub);
+        $result = $dao->getByIdAndPasswordOrFail(1, 'abc123');
+
+        $this->assertInstanceOf(JobStruct::class, $result);
+        $this->assertSame(1, $result->id);
+    }
+
+    public function testGetByIdAndPasswordOrFailThrowsNotFoundExceptionWhenNotFound(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new JobDao($this->dbStub);
+
+        $this->expectException(\Model\Exceptions\NotFoundException::class);
+        $this->expectExceptionMessage('Job not found');
+
+        $dao->getByIdAndPasswordOrFail(999, 'nope');
+    }
+
     public function testInstanceGetNotDeletedByProjectIdReturnsArrayOfJobs(): void
     {
         $job = $this->makeJobStruct();

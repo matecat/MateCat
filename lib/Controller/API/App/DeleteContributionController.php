@@ -9,7 +9,7 @@ use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TypeError;
@@ -52,7 +52,7 @@ class DeleteContributionController extends KleinController
 //        $received_password = $request[ 'received_password' ];
 
         //check Job password
-        $jobStruct = ChunkDao::getByIdAndPassword($id_job, $password);
+        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
         $tm_keys = $jobStruct['tm_keys'];

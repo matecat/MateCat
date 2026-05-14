@@ -6,7 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use DOMDocument;
 use Exception;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentModel;
 
@@ -48,7 +48,7 @@ class DownloadQRController extends KleinController
             throw new AuthorizationError('Invalid format. Allowed formats are [' . implode(', ', $this->allowedFormats) . ']');
         }
 
-        $chunk = ChunkDao::getByIdAndPassword($idJob, $password);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail($idJob, $password);
 
         $prefix = "QR_" . $idJob . "_" . $password . "_";
         $filePath = tempnam("/tmp", $prefix);

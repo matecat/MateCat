@@ -13,7 +13,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
 use Model\Files\FilesPartsDao;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -55,7 +55,7 @@ class GetContributionController extends KleinController
         $id_segment = $request['id_segment'];
         $password = $request['password'];
 
-        $jobStruct = ChunkDao::getByIdAndPassword($id_job, $password);
+        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
         $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($id_segment);
 
         $projectStruct = $jobStruct->getProject();

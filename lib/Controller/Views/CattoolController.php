@@ -20,7 +20,7 @@ use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -111,7 +111,7 @@ class CattoolController extends BaseKleinViewController
             $result['chunk'] = $chunkReviewStruct->getChunk();
             $result['chunkReviewStruct'] = $chunkReviewStruct;
         } else {
-            $result['chunk'] = ChunkDao::getByIdAndPassword($job_id, $password);
+            $result['chunk'] = (new JobDao())->getByIdAndPasswordOrFail($job_id, $password);
         }
 
         return (object)$result;

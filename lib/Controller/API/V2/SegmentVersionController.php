@@ -9,7 +9,7 @@ use Controller\API\Commons\Validators\SegmentValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use View\API\V2\Json\SegmentVersion;
@@ -43,7 +43,7 @@ class SegmentVersionController extends KleinController
             $this->request->param('id_segment')
         );
 
-        $chunk = ChunkDao::getByIdAndPassword($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -68,7 +68,7 @@ class SegmentVersionController extends KleinController
             $this->request->param('version_number')
         );
 
-        $chunk = ChunkDao::getByIdAndPassword($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();

@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
@@ -539,6 +540,28 @@ class JobDao extends AbstractDao
             'id_job' => $id_job,
             'password' => $password
         ])[0] ?? null;
+    }
+
+    /**
+     * @param int $id_job
+     * @param string $password
+     * @param int $ttl
+     *
+     * @return JobStruct
+     * @throws Exception
+     * @throws NotFoundException
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function getByIdAndPasswordOrFail(int $id_job, string $password, int $ttl = 0): JobStruct
+    {
+        $job = $this->getByIdAndPassword($id_job, $password, $ttl);
+
+        if ($job === null) {
+            throw new NotFoundException('Job not found');
+        }
+
+        return $job;
     }
 
     /**

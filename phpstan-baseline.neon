@@ -813,12 +813,6 @@ parameters:
 			path: lib/Controller/API/App/SplitSegmentController.php
 
 		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\ChunkDao\:\:getByIdAndPassword\(\) expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/SplitSegmentController.php
-
-		-
 			message: '#^Parameter \#3 \$Filter of static method Utils\\Tools\\CatUtils\:\:parseSegmentSplit\(\) expects Matecat\\SubFiltering\\MateCatFilter, Matecat\\SubFiltering\\AbstractFilter given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1187,18 +1181,6 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\Commons\\Validators\\JobPasswordValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/JobPasswordValidator.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of static method Model\\Jobs\\ChunkDao\:\:getByIdAndPassword\(\) expects int, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/JobPasswordValidator.php
-
-		-
-			message: '#^Parameter \#2 \$password of static method Model\\Jobs\\ChunkDao\:\:getByIdAndPassword\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/Commons/Validators/JobPasswordValidator.php
 
@@ -2873,12 +2855,6 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\AnalyzeController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/Views/AnalyzeController.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Jobs\\ChunkDao\:\:getByProjectID\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Controller/Views/AnalyzeController.php
 

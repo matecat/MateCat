@@ -14,7 +14,7 @@ use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Segments\SegmentDao;
@@ -236,7 +236,7 @@ class GetWarningController extends KleinController
      */
     private function getChunkAndLoadProjectFeatures(string $id_job, string $password): JobStruct
     {
-        $chunk = ChunkDao::getByIdAndPassword((int) $id_job, $password);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail((int) $id_job, $password);
         $this->featureSet->loadForProject($chunk->getProject());
 
         return $chunk;

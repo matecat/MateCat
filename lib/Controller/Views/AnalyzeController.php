@@ -17,7 +17,6 @@ use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Utils\AsyncTasks\Workers\Analysis\Health;
@@ -97,7 +96,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
                 'project_access_token' => sha1($projectStruct->id . $projectStruct->password),
             ]);
         } else {
-            $chunks = (new ChunkDao)->getByProjectID($projectStruct->id);
+            $chunks = (new JobDao())->getNotDeletedByProjectId((int)$projectStruct->id);
 
             $notDeleted = array_filter($chunks, function ($element) {
                 return !$element->isDeleted(); //retain only jobs which are not deleted

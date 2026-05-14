@@ -15,7 +15,6 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -92,7 +91,7 @@ class ChunkPasswordValidator extends Base
         if (empty($this->chunkReview)) {
             throw new NotFoundException('Not found.');
         }
-        $this->chunk = ChunkDao::getByIdAndPassword($this->chunkReview->id_job, $this->chunkReview->password, $this->ttl);
+        $this->chunk = (new JobDao())->getByIdAndPasswordOrFail($this->chunkReview->id_job, $this->chunkReview->password, $this->ttl);
         $this->chunk->setIsReview(true);
         $this->chunk->setSourcePage($this->chunkReview->source_page);
     }

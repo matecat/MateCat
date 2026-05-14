@@ -257,7 +257,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         $id = $this->id ?? throw new DomainException("Job ID must not be null");
 
         return $this->cachable(__METHOD__, function () use ($id) {
-            return ChunkDao::getByJobID($id);
+            return (new JobDao())->getNotDeletedById($id);
         });
     }
 

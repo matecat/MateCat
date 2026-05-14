@@ -12,7 +12,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -236,7 +236,7 @@ class GetSearchController extends AbstractStatefulKleinController
      */
     private function getJobData(int $job_id, string $password): JobStruct
     {
-        return ChunkDao::getByIdAndPassword($job_id, $password);
+        return (new JobDao())->getByIdAndPasswordOrFail($job_id, $password);
     }
 
     /**
@@ -387,7 +387,7 @@ class GetSearchController extends AbstractStatefulKleinController
     {
         $db = Database::obtain();
 
-        $chunk = ChunkDao::getByIdAndPassword($id_job, $password);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
         $project = ProjectDao::findByJobId($id_job);
 
         if ($project === null) {
