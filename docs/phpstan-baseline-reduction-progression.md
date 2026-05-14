@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-14 (last updated)  
-**Commits (refactor + fix + security + test):** 49
+**Commits (refactor + fix + security + test):** 341
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,824 | −4,542 (−61.7%) |
-| **PHPUnit tests** | ~2,248 | 4,849 | +2,601 (+115.7%) |
-| **PHPUnit assertions** | ~19,449 | 15,796 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 24.53% (168/685) | +16.05% (+115 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 48.08% (1,988/4,135) | +26.34% (+1,144 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 50.50% (17,618/34,889) | +29.31% (+10,345 lines) |
-| **New test files** | 235 | 349 | +114 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 237 | +237 |
+| **PHPStan baseline entries** | 7,366 | 2,774 | −4,592 (−62.4%) |
+| **PHPUnit tests** | ~2,248 | 4,885 | +2,637 (+117.3%) |
+| **PHPUnit assertions** | ~19,449 | 16,169 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 24.71% (169/684) | +16.23% (+116 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 48.80% (2,016/4,131) | +27.06% (+1,172 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 51.16% (17,870/34,929) | +29.97% (+10,597 lines) |
+| **New test files** | 235 | 346 | +111 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 236 | +236 |
 
 ---
 
@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 237 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 236 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (237 files)</summary>
+<summary>Click to expand full ledger (236 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -216,7 +216,6 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `lib/Model/Concerns/LogsMessages.php` | Phase 5C |
-| `lib/Model/Jobs/ChunkDao.php` | Phase 0 |
 | `lib/Model/Jobs/JobDao.php` | Phase 5C |
 | `lib/Model/Jobs/MetadataDao.php` | Phase 5C |
 | `lib/Model/JobSplitMerge/JobSplitMergeManager.php` | Phase 5C |
@@ -778,18 +777,18 @@ Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 3,829 |
-| **Assertions** | 23,909 |
+| **Total tests** | 4,885 |
+| **Assertions** | 16,169 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
 ### Coverage Analysis
 
-- **Class coverage more than doubled** (8.48% → 19.94%) — 82 additional classes now have test coverage, primarily structs, DAO files, controllers, and QR models that were previously untested.
-- **Method coverage jumped +15.40%** (21.74% → 37.14%) — 673 additional methods covered, driven by new typed accessors, controller test harnesses, and QR model DI refactors.
-- **Line coverage grew by +15.49%** (21.19% → 36.68%) — 5,464 additional lines covered while total lines grew by only 407.
-- **Total classes grew by 52** (625 → 677) — new struct types, validators, exceptions, and test infrastructure added.
-- **Total methods grew by 202** (3,883 → 4,085) — new typed accessors, factory methods, and protected DI wrappers.
+- **Class coverage nearly tripled** (8.48% → 24.71%) — 116 additional classes now have test coverage, primarily structs, DAO files, controllers, and QR models that were previously untested.
+- **Method coverage more than doubled** (21.74% → 48.80%) — 1,172 additional methods covered, driven by new typed accessors, controller test harnesses, and QR model DI refactors.
+- **Line coverage grew by +29.97%** (21.19% → 51.16%) — 10,597 additional lines covered while total lines grew by only 609.
+- **Total classes grew by 59** (625 → 684) — new struct types, validators, exceptions, and test infrastructure added.
+- **Total methods grew by 248** (3,883 → 4,131) — new typed accessors, factory methods, and protected DI wrappers.
 
 ---
 
@@ -1261,8 +1260,8 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 
 ## Remaining Baseline Analysis
 
-**Core baseline:** 2,481 entries in ~433 files  
-**Plugin baseline:** ~733 entries (mostly aligner plugin — separate concern)  
+**Core baseline:** 1,671 entries in ~383 files  
+**Plugin baseline:** ~1,103 entries (mostly aligner plugin — separate concern)  
 **By error type:** PHPDoc-only=~1,500 (59%), Behavioral=~700 (27%), Other=~327 (12%)
 
 ### Phase 6 Candidates — Prioritized
