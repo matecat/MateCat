@@ -134,7 +134,7 @@ class ChunkReviewModel implements IChunkReviewModel
         $chunkReviewDao = new ChunkReviewDao();
         $chunkReviewDao->passFailCountsAtomicUpdate($this->chunk_review->id, $data);
 
-        $project->getFeaturesSet()->dispatchRun(new ChunkReviewUpdatedEvent(
+        $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             1,
             $this,
@@ -192,7 +192,7 @@ class ChunkReviewModel implements IChunkReviewModel
         );
 
         // External call by Plugins
-        $project->getFeaturesSet()->dispatchRun(new ChunkReviewUpdatedEvent(
+        $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             $update_result,
             $this,

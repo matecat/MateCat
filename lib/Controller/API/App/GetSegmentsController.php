@@ -33,9 +33,9 @@ use Model\Segments\SegmentUIStruct;
 use PDOException;
 use ReflectionException;
 use RuntimeException;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
-use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController
@@ -220,7 +220,7 @@ class GetSegmentsController extends KleinController
         $result['data']['files'] = $res;
         $result['data']['where'] = $where;
         $filterGetSegmentsResultEvent = new FilterGetSegmentsResultEvent($result['data'], $job);
-        $featureSet->dispatchFilter($filterGetSegmentsResultEvent);
+        $featureSet->dispatch($filterGetSegmentsResultEvent);
         $result['data'] = $filterGetSegmentsResultEvent->getData();
 
         $this->response->json($result);
@@ -281,7 +281,7 @@ class GetSegmentsController extends KleinController
 
         if (is_array($notes)) {
             $prepareNotesForRenderingEvent = new PrepareNotesForRenderingEvent($notes);
-            $this->featureSet->dispatchFilter($prepareNotesForRenderingEvent);
+            $this->featureSet->dispatch($prepareNotesForRenderingEvent);
             $notes = $prepareNotesForRenderingEvent->getNotes();
         }
 

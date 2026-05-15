@@ -81,7 +81,7 @@ class ProjectCompletionStatusModel
                 $chunk->password,
                 $chunk->id
             );
-            $featureSet->dispatchFilter($filterJobPasswordToReviewPasswordEvent);
+            $featureSet->dispatch($filterJobPasswordToReviewPasswordEvent);
             $revise['password'] = $filterJobPasswordToReviewPasswordEvent->getPassword();
 
             $response['translate'][] = $translate;

@@ -14,7 +14,6 @@ use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -153,7 +152,7 @@ abstract class AbstractStatus
     protected function isOutsourceEnabled($targetLang, $id_customer, $idJob): bool
     {
         $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($targetLang, (string)$id_customer, (int)$idJob);
-        $this->featureSet->dispatchFilter($outsourceAvailableInfoEvent);
+        $this->featureSet->dispatch($outsourceAvailableInfoEvent);
         $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin does not trigger the hook

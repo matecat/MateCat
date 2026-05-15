@@ -19,7 +19,7 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
  *
  * Verifies:
  * - Calls checkForProjectAssignment
- * - Calls features->dispatchRun(new ValidateProjectCreationEvent(...))
+ * - Calls features->dispatch(new ValidateProjectCreationEvent(...))
  * - Throws EndQueueException when errors exist after validation
  * - Does not throw when no errors
  */
@@ -69,9 +69,11 @@ class ValidateBeforeCreationTest extends AbstractTest
     {
         // Set up features to inject an error during validateProjectCreation
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchRun')
+        $features->method('dispatch')
             ->willReturnCallback(function (ValidateProjectCreationEvent $event) {
                 $event->projectStructure->result['errors'][] = ['code' => -99, 'message' => 'Validation failed'];
+
+                return $event;
             });
 
         $this->pm->initForTest(

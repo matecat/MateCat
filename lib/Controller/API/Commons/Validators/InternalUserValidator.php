@@ -25,9 +25,7 @@ class InternalUserValidator extends LoginValidator
     public function _validate(): void
     {
         parent::_validate();
-        $event = $this->controller->getFeatureSet()->dispatchFilter(
-            new IsAnInternalUserEvent($this->controller->getUser()->email)
-        );
+        $event = $this->controller->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->controller->getUser()->email));
         $event->isInternal() ?: throw new AuthorizationError('Forbidden, please contact support for generating a valid API key');
     }
 

@@ -212,7 +212,7 @@ class FastAnalysis extends AbstractDaemon
                     $perform_Tms_Analysis = false;
                     $status = ProjectStatus::STATUS_DONE;
 
-                    $featureSet->dispatchRun(new TmAnalysisDisabledEvent($pid));
+                    $featureSet->dispatch(new TmAnalysisDisabledEvent($pid));
 
                     $this->logger->debug('Perform Analysis FALSE');
                 }

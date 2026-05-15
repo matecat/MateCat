@@ -232,7 +232,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $repo->expects($this->once())->method('destroyAllCaches');
 
         $featureSet = $this->createStub(FeatureSet::class);
-        $featureSet->method('dispatchRun')->willThrowException(new Exception('Hook failed'));
+        $featureSet->method('dispatch')->willThrowException(new Exception('Hook failed'));
 
         $service = new ProjectCompletionService($redis, $repo);
         $service->tryCloseProject(1, 'p', 'q', $featureSet);

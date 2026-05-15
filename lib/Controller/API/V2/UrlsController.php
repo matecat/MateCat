@@ -54,7 +54,7 @@ class UrlsController extends KleinController
         $formatted = new ProjectUrls($projectData);
 
         $projectUrlsEvent = new ProjectUrlsEvent($formatted);
-        $this->featureSet->dispatchFilter($projectUrlsEvent);
+        $this->featureSet->dispatch($projectUrlsEvent);
         $formatted = $projectUrlsEvent->getFormatted();
 
         $this->response->json(['urls' => $formatted->render()]);

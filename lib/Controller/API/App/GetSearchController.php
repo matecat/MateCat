@@ -25,7 +25,6 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
-use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
@@ -499,7 +498,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             // setTranslationCommitted
             try {
-                $this->featureSet->dispatchRun(new SetTranslationCommittedEvent([
+                $this->featureSet->dispatch(new SetTranslationCommittedEvent([
                     'translation' => $new_translation,
                     'old_translation' => $old_translation,
                     'propagated_ids' => $propagationTotal['propagated_ids'],

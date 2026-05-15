@@ -4281,24 +4281,6 @@ parameters:
 			path: lib/Model/EditLog/EditLogSegmentStruct.php
 
 		-
-			message: '#^Method Model\\FeaturesBase\\FeatureSet\:\:dispatchFilter\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FeaturesBase/FeatureSet.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\FeatureSet\:\:dispatchRun\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FeaturesBase/FeatureSet.php
-
-		-
-			message: '#^Template type T of method Model\\FeaturesBase\\FeatureSet\:\:dispatchRun\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: lib/Model/FeaturesBase/FeatureSet.php
-
-		-
 			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendFieldToAnalysisObjectEvent\:\:__construct\(\) has parameter \$metadata with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

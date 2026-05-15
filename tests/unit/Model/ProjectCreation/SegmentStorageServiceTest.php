@@ -127,7 +127,7 @@ class SegmentStorageServiceTest extends AbstractTest
      */
     private function stubFeaturesPassThrough(): void
     {
-        $this->features->method('dispatchFilter')
+        $this->features->method('dispatch')
             ->willReturnCallback(function ($event) {
                 return $event;
             });
@@ -262,7 +262,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubSequence(1, 300);
 
         // sanitizeOriginalDataMap returns the map, correctTagErrors returns modified segment
-        $this->features->method('dispatchFilter')
+        $this->features->method('dispatch')
             ->willReturnCallback(function ($event) {
                 if ($event instanceof SanitizeOriginalDataMapEvent) {
                     return $event; // pass-through
@@ -400,7 +400,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubSequence(1, 900);
 
         // Simulate a plugin adding a field
-        $this->features->method('dispatchFilter')
+        $this->features->method('dispatch')
             ->willReturnCallback(function ($event) {
                 if ($event instanceof AppendFieldToAnalysisObjectEvent) {
                     $metadata = $event->getMetadata();

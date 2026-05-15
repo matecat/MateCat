@@ -73,7 +73,7 @@ class JobCreationService
         $rates = PayableRates::getPayableRates((string)$projectStructure->source_language, $target);
 
         $filterPayableRatesEvent = new FilterPayableRatesEvent($rates, (string)$projectStructure->source_language, $target);
-        $this->features->dispatchFilter($filterPayableRatesEvent);
+        $this->features->dispatch($filterPayableRatesEvent);
 
         return [
             (string)json_encode($filterPayableRatesEvent->getRates()),
@@ -265,7 +265,7 @@ class JobCreationService
             $tmKeysJson = $this->buildTmKeysJson($projectStructure);
             $job = $this->buildJobStruct($projectStructure, $target, $payableRates, $tmKeysJson, $minMaxSegmentsId, $filesWordCount);
 
-            $this->features->dispatchRun(new ValidateJobCreationEvent($job, $projectStructure));
+            $this->features->dispatch(new ValidateJobCreationEvent($job, $projectStructure));
             $job = $this->insertJob($job);
 
             $this->updateJobTracking($projectStructure, $job, $payableRates, $minMaxSegmentsId);

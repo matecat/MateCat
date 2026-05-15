@@ -181,14 +181,14 @@ class TagChecker
     {
         if ($this->featureSet && $this->qaInstance) {
             $checkTagMismatchEvent = new CheckTagMismatchEvent(ErrorManager::ERR_NONE, $this->qaInstance);
-            $this->featureSet->dispatchFilter($checkTagMismatchEvent);
+            $this->featureSet->dispatch($checkTagMismatchEvent);
             $this->errorManager->addError($checkTagMismatchEvent->getErrorCode());
         }
 
         if ($srcNodeCount != $trgNodeCount) {
             if ($this->featureSet && $this->qaInstance) {
                 $checkTagMismatchEvent = new CheckTagMismatchEvent(ErrorManager::ERR_COUNT, $this->qaInstance);
-                $this->featureSet->dispatchFilter($checkTagMismatchEvent);
+                $this->featureSet->dispatch($checkTagMismatchEvent);
                 $errorCode = $checkTagMismatchEvent->getErrorCode();
             } else {
                 $errorCode = ErrorManager::ERR_COUNT;
@@ -208,7 +208,7 @@ class TagChecker
     {
         if ($this->featureSet && $this->qaInstance) {
             $checkTagPositionsEvent = new CheckTagPositionsEvent(ErrorManager::ERR_NONE, $this->qaInstance);
-            $this->featureSet->dispatchFilter($checkTagPositionsEvent);
+            $this->featureSet->dispatch($checkTagPositionsEvent);
             $customCheckTagPositions = $checkTagPositionsEvent->getErrorCode();
         } else {
             $customCheckTagPositions = ErrorManager::ERR_NONE;

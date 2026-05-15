@@ -32,6 +32,7 @@ class FeatureSetDispatchTest extends AbstractTest
         \Plugins\Features\TestDispatchPsr14ThrowsGeneric::$invoked = false;
         \Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked = false;
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = null;
+        \Plugins\Features\TestDispatchPsr14ThrowsDomain::$invoked = false;
     }
 
     #[Test]
@@ -77,7 +78,7 @@ class FeatureSetDispatchTest extends AbstractTest
 
         $event = new DispatchFilterEvent();
 
-        $result = $featureSet->dispatchFilter($event);
+        $result = $featureSet->dispatch($event);
 
         self::assertSame($event, $result);
         self::assertTrue(\Plugins\Features\TestDispatchFilterPassThrough::$invoked);
@@ -94,7 +95,7 @@ class FeatureSetDispatchTest extends AbstractTest
 
         $event = new DispatchFilterEvent();
 
-        $result = $featureSet->dispatchFilter($event);
+        $result = $featureSet->dispatch($event);
 
         self::assertSame($event, $result);
         self::assertTrue(\Plugins\Features\TestDispatchFilterThrowsGeneric::$invoked);
@@ -113,7 +114,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(ValidationError::class);
-        $featureSet->dispatchFilter(new DispatchFilterEvent());
+        $featureSet->dispatch(new DispatchFilterEvent());
     }
 
     #[Test]
@@ -127,7 +128,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(NotFoundException::class);
-        $featureSet->dispatchFilter(new DispatchFilterEvent());
+        $featureSet->dispatch(new DispatchFilterEvent());
     }
 
     #[Test]
@@ -141,7 +142,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(AuthenticationError::class);
-        $featureSet->dispatchFilter(new DispatchFilterEvent());
+        $featureSet->dispatch(new DispatchFilterEvent());
     }
 
     #[Test]
@@ -155,7 +156,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(ReQueueException::class);
-        $featureSet->dispatchFilter(new DispatchFilterEvent());
+        $featureSet->dispatch(new DispatchFilterEvent());
     }
 
     #[Test]
@@ -169,7 +170,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(EndQueueException::class);
-        $featureSet->dispatchFilter(new DispatchFilterEvent());
+        $featureSet->dispatch(new DispatchFilterEvent());
     }
 
     #[Test]
@@ -182,7 +183,7 @@ class FeatureSetDispatchTest extends AbstractTest
 
         $event = new DispatchRunEvent();
 
-        $featureSet->dispatchRun($event);
+        $featureSet->dispatch($event);
 
         self::assertTrue(\Plugins\Features\TestDispatchRunHandler::$invoked);
         self::assertSame(['test_dispatch_run_handler'], $event->trace);
@@ -200,7 +201,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $event = new DispatchRunEvent();
-        $featureSet->dispatchRun($event);
+        $featureSet->dispatch($event);
 
         self::assertTrue(\Plugins\Features\TestDispatchRunThrowsGeneric::$invoked);
         self::assertTrue(\Plugins\Features\TestDispatchRunAfterGeneric::$invoked);
@@ -216,7 +217,7 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(NotFoundException::class);
-        $featureSet->dispatchRun(new DispatchRunEvent());
+        $featureSet->dispatch(new DispatchRunEvent());
     }
 
     #[Test]
@@ -229,7 +230,24 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(AuthenticationError::class);
-        $featureSet->dispatchRun(new DispatchRunEvent());
+        $featureSet->dispatch(new DispatchRunEvent());
+    }
+
+    #[Test]
+    public function dispatchExternalEventSwallowsDomainExceptionAndContinues(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_throws_domain']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_after_generic']),
+        ]);
+
+        $event = new FromLayer0ToLayer1Event();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14ThrowsDomain::$invoked);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked);
     }
 }
 
@@ -437,5 +455,19 @@ class TestDispatchPsr14AfterGeneric extends BaseFeature
         if ($event instanceof \Tests\Unit\Features\Hook\FromLayer0ToLayer1Event) {
             $event->trace[] = self::FEATURE_CODE;
         }
+    }
+}
+
+class TestDispatchPsr14ThrowsDomain extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_throws_domain';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+        unset($event);
+        throw new \Model\Exceptions\ValidationError('domain exception in external event');
     }
 }

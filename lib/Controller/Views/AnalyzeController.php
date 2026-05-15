@@ -122,7 +122,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
         $model = $analysisStatus->fetchData()->getResult();
 
         $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
-        $this->featureSet->dispatchFilter($appendInitialTemplateVarsEvent);
+        $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
 
         $this->addParamsToView([
             'pid' => $projectStruct->id,

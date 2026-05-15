@@ -11,7 +11,6 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use TypeError;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
@@ -119,7 +118,7 @@ class EngineService implements EngineServiceInterface
             }
 
             $analysisEvent = new AnalysisBeforeMTGetContributionEvent($engineConfig, $mtEngine, $queueElement);
-            $featureSet->dispatchFilter($analysisEvent);
+            $featureSet->dispatch($analysisEvent);
             $engineConfig = $analysisEvent->getConfig();
 
             $engineResponse = $mtEngine->get($engineConfig);

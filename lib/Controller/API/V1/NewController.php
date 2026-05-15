@@ -47,6 +47,7 @@ use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
@@ -70,7 +71,6 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use TypeError;
 
 class NewController extends KleinController
 {
@@ -406,7 +406,7 @@ class NewController extends KleinController
                      * Uber plugin callback
                      */
                     $encodeInstructionsEvent = new EncodeInstructionsEvent($value);
-                    $this->featureSet->dispatchFilter($encodeInstructionsEvent);
+                    $this->featureSet->dispatch($encodeInstructionsEvent);
 
                     return $encodeInstructionsEvent->getValue();
                 }
@@ -801,7 +801,7 @@ class NewController extends KleinController
         }
 
         $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
-        $this->featureSet->dispatchFilter($filterCreateProjectFeaturesEvent);
+        $this->featureSet->dispatch($filterCreateProjectFeaturesEvent);
 
         return $filterCreateProjectFeaturesEvent->getProjectFeatures();
     }

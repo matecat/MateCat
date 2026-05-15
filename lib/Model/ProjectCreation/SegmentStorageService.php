@@ -158,7 +158,7 @@ class SegmentStorageService
             // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
             // to allow the correct tag handling by the plugins
             $sanitizeEvent = new SanitizeOriginalDataMapEvent($originalDataMap);
-            $this->features->dispatchFilter($sanitizeEvent);
+            $this->features->dispatch($sanitizeEvent);
             $map = $sanitizeEvent->getOriginalDataMap();
 
             // persist an original data map if present
@@ -168,7 +168,7 @@ class SegmentStorageService
                 $projectStructure->segments[$fid][$position]->segment,
                 $map
             );
-            $this->features->dispatchFilter($correctTagErrorsEvent);
+            $this->features->dispatch($correctTagErrorsEvent);
             $projectStructure->segments[$fid][$position]->segment = $correctTagErrorsEvent->getSegment();
         }
 
@@ -201,7 +201,7 @@ class SegmentStorageService
          * but only to eventually add new fields
          */
         $appendFieldEvent = new AppendFieldToAnalysisObjectEvent($metadata, $projectStructure);
-        $this->features->dispatchFilter($appendFieldEvent);
+        $this->features->dispatch($appendFieldEvent);
 
         return $appendFieldEvent->getMetadata();
     }

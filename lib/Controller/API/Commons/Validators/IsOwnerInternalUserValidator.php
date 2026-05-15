@@ -35,9 +35,7 @@ class IsOwnerInternalUserValidator extends Base
      */
     public function _validate(): void
     {
-        $event = $this->controller->getFeatureSet()->dispatchFilter(
-            new IsAnInternalUserEvent($this->jobStruct->owner)
-        );
+        $event = $this->controller->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->jobStruct->owner));
         $event->isInternal() ?: throw new AuthorizationError('Forbidden, Lara Think only accepts requests from internal users');
     }
 

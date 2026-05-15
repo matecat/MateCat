@@ -33,10 +33,10 @@ use Model\Segments\SegmentMetadataMapper;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
-use RuntimeException;
 use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
@@ -440,7 +440,7 @@ class ProjectManager
         $this->checkForProjectAssignment();
 
         SecondPassReview::loadAndValidateQualityFramework($this->projectStructure);
-        $this->features->dispatchRun(new ValidateProjectCreationEvent($this->projectStructure));
+        $this->features->dispatch(new ValidateProjectCreationEvent($this->projectStructure));
 
         if (count($this->projectStructure->result['errors']) > 0) {
             $this->log($this->projectStructure->result['errors']);
@@ -587,7 +587,7 @@ class ProjectManager
                 );
             }
 
-            $this->features->dispatchRun(new BeforeProjectCreationEvent(
+            $this->features->dispatch(new BeforeProjectCreationEvent(
                 $this->projectStructure,
                 [
                     'total_project_segments' => $this->total_segments,
@@ -755,7 +755,7 @@ class ProjectManager
             (new ProjectDao())->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
             (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
-            $this->features->dispatchRun(new PostProjectCreateEvent($this->projectStructure));
+            $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 
             $projectId = $this->projectStructure->id_project
                 ?? throw new RuntimeException('Project id must be available before updating analysis status');
@@ -1023,7 +1023,7 @@ class ProjectManager
     protected function insertInstructions(int $fid, array|string $value): void
     {
         $event = new DecodeInstructionsEvent($value);
-        $this->features->dispatchFilter($event);
+        $this->features->dispatch($event);
         $value = $event->getValue();
 
         $this->filesMetadataDao->insert((int)$this->projectStructure->id_project, $fid, 'instructions', (string)$value);
@@ -1046,7 +1046,7 @@ class ProjectManager
     private function insertSegmentNotesForFile(): void
     {
         $event = new HandleJsonNotesBeforeInsertEvent($this->projectStructure);
-        $this->features->dispatchFilter($event);
+        $this->features->dispatch($event);
         $this->projectStructure = $event->getProjectStructure();
         $this->getProjectManagerModel()->bulkInsertSegmentNotesAndMetadata($this->projectStructure->notes);
     }

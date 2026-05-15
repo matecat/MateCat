@@ -105,7 +105,7 @@ class SizeRestriction
     {
         try {
             $characterLengthCountEvent = new CharacterLengthCountEvent($this->cleanedString);
-            $this->featureSet->dispatchFilter($characterLengthCountEvent);
+            $this->featureSet->dispatch($characterLengthCountEvent);
             $featureCounts = $characterLengthCountEvent->getFilterable();
 
             if (is_array($featureCounts)) {

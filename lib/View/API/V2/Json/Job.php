@@ -142,7 +142,7 @@ class Job
 
         // is outsource available?
         $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($chunk->target, (string)$chunk->getProject()->id_customer, (int)$chunk->id);
-        $featureSet->dispatchFilter($outsourceAvailableInfoEvent);
+        $featureSet->dispatch($outsourceAvailableInfoEvent);
         $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin doesn't trigger the hook
@@ -229,7 +229,7 @@ class Job
         $formatted = new ProjectUrls($projectData);
 
         $projectUrlsEvent = new ProjectUrlsEvent($formatted);
-        $featureSet->dispatchFilter($projectUrlsEvent);
+        $featureSet->dispatch($projectUrlsEvent);
         $formatted = $projectUrlsEvent->getFormatted();
         if (!$formatted instanceof ProjectUrls) {
             throw new Exception('Invalid projectUrls hook payload');

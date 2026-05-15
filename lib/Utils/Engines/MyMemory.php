@@ -10,6 +10,8 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\FilterMyMemoryGetParametersEvent;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Users\UserStruct;
+use RuntimeException;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Engines\Results\MyMemory\AuthKeyResponse;
@@ -34,8 +36,6 @@ use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
-use RuntimeException;
-use TypeError;
 
 /**
  * Created by PhpStorm.
@@ -281,7 +281,7 @@ class MyMemory extends AbstractEngine
 
         $filterMyMemoryGetParametersEvent = new FilterMyMemoryGetParametersEvent($parameters, $_config);
         if ($this->featureSet !== null) {
-            $this->featureSet->dispatchFilter($filterMyMemoryGetParametersEvent);
+            $this->featureSet->dispatch($filterMyMemoryGetParametersEvent);
             $parameters = $filterMyMemoryGetParametersEvent->getParameters();
         }
 

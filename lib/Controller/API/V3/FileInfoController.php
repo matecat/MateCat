@@ -18,9 +18,9 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use InvalidArgumentException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
-use PDOException;
 use Model\Files\FilesInfoUtility;
 use Model\Projects\ProjectStruct;
+use PDOException;
 use ReflectionException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -114,7 +114,7 @@ class FileInfoController extends KleinController
         $filesInfoUtility = new FilesInfoUtility($this->chunk);
 
         $decodeInstructionsEvent = new DecodeInstructionsEvent($instructions);
-        $this->featureSet->dispatchFilter($decodeInstructionsEvent);
+        $this->featureSet->dispatch($decodeInstructionsEvent);
         $instructions = $decodeInstructionsEvent->getValue();
 
         if (empty($instructions)) {

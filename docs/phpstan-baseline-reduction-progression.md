@@ -87,7 +87,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 266 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 267 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
@@ -200,6 +200,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Model/FeaturesBase (Events)
 | File | Cleaned In |
 |------|-----------|
+| `lib/Model/FeaturesBase/FeatureSet.php` | Phase 24 |
 | `lib/Model/FeaturesBase/Hook/Event/Filter/AnalysisBeforeMTGetContributionEvent.php` | Phase 5B |
 | `lib/Model/FeaturesBase/Hook/Event/Filter/FilterRevisionChangeNotificationListEvent.php` | Phase 0 |
 | `lib/Model/FeaturesBase/Hook/Event/Filter/RewriteContributionContextsEvent.php` | Phase 0 |

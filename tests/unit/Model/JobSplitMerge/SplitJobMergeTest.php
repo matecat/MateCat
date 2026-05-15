@@ -331,9 +331,9 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeTwoChunks();
         $ps = $this->makeSplitProjectStructure($chunks);
 
-        $this->features->expects($this->once())
-            ->method('dispatchRun')
-            ->with($this->isInstanceOf(PostJobSplittedEvent::class));
+        $this->features->expects($this->once())->method('dispatch')
+            ->with($this->isInstanceOf(PostJobSplittedEvent::class))
+            ->willReturnArgument(0);
 
         $this->service->splitJob($ps);
     }
@@ -575,9 +575,9 @@ class SplitJobMergeTest extends AbstractTest
         $chunks = $this->makeJobChunksForMerge();
         $ps = new SplitMergeProjectData(999);
 
-        $this->features->expects($this->once())
-            ->method('dispatchRun')
-            ->with($this->isInstanceOf(PostJobMergedEvent::class));
+        $this->features->expects($this->once())->method('dispatch')
+            ->with($this->isInstanceOf(PostJobMergedEvent::class))
+            ->willReturnArgument(0);
 
         $this->service->mergeALL($ps, $chunks);
     }

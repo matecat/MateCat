@@ -21,14 +21,13 @@ use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\Jobs\JobDao;
-use Model\Jobs\LexiQaAndTagProjectionLanguages;
-use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobStruct;
+use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
-use RuntimeException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
@@ -36,6 +35,7 @@ use Model\Teams\TeamModel;
 use Model\Users\UserDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
+use RuntimeException;
 use stdClass;
 use Utils\Constants\SourcePages;
 use Utils\Constants\Teams;
@@ -274,7 +274,7 @@ class CattoolController extends BaseKleinViewController
         // reset the feature set and load only the features for the current project (plus the autoloaded ones)
         $this->featureSet->loadForProject($chunkStruct->getProject());
         $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
-        $this->featureSet->dispatchFilter($appendInitialTemplateVarsEvent);
+        $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
         $this->addParamsToView([
             'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes()),
         ]);

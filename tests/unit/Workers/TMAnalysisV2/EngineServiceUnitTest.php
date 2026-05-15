@@ -34,7 +34,7 @@ class EngineServiceUnitTest extends AbstractTest
     private function makeFeatureSet(): FeatureSet
     {
         $fs = $this->createStub(FeatureSet::class);
-        $fs->method('dispatchFilter')->willReturnCallback(
+        $fs->method('dispatch')->willReturnCallback(
             static fn(mixed $event): mixed => $event
         );
 

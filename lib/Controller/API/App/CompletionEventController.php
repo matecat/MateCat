@@ -76,7 +76,7 @@ class CompletionEventController extends KleinController
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
-        $this->featureSet->dispatchRun(new AlterChunkReviewStructEvent($this->event));
+        $this->featureSet->dispatch(new AlterChunkReviewStructEvent($this->event));
 
         (new ChunkCompletionEventDao())->deleteEvent($this->event);
         Database::obtain()->commit();

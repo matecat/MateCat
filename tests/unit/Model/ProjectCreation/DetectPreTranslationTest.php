@@ -50,7 +50,7 @@ class DetectPreTranslationTest extends AbstractTest
     public function returnsNullWhenPreTranslationsDisabled(): void
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')
+        $features->method('dispatch')
             ->willReturnCallback(function (PopulatePreTranslationsEvent $event): PopulatePreTranslationsEvent {
                 $event->setDefault(false);
                 return $event;
@@ -330,7 +330,7 @@ class DetectPreTranslationTest extends AbstractTest
     private function createDefaultFeaturesStub(): FeatureSet
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')->willReturnArgument(0);
+        $features->method('dispatch')->willReturnArgument(0);
 
         return $features;
     }

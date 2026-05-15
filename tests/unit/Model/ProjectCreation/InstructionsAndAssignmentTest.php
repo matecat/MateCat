@@ -55,8 +55,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
     public function insertInstructionsPassesValueThroughFeatureFilter(): void
     {
         $features = $this->createMock(FeatureSet::class);
-        $features->expects($this->once())
-            ->method('dispatchFilter')
+        $features->expects($this->once())->method('dispatch')
             ->with($this->callback(function (DecodeInstructionsEvent $event): bool {
                 return $event->getValue() === 'raw instructions';
             }))
@@ -84,7 +83,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
     public function insertInstructionsUsesProjectIdFromStructure(): void
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')
+        $features->method('dispatch')
             ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
                 return $event;
             });
@@ -109,7 +108,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
     public function insertInstructionsFilterReturnsTransformedValue(): void
     {
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')
+        $features->method('dispatch')
             ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
                 if ($event->getValue() === 'base64data') {
                     $event->setValue('plain text result');
@@ -167,7 +166,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $team = $this->makeTeam(10);
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')->willReturnArgument(0);
+        $features->method('dispatch')->willReturnArgument(0);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -193,7 +192,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $team = $this->makeTeam(7, 'Original');
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')->willReturnArgument(0);
+        $features->method('dispatch')->willReturnArgument(0);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -222,7 +221,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $team = $this->makeTeam(3, 'Cache Team');
 
         $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatchFilter')->willReturnArgument(0);
+        $features->method('dispatch')->willReturnArgument(0);
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),

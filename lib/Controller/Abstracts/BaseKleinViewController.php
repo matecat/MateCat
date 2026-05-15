@@ -5,24 +5,25 @@ namespace Controller\Abstracts;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Exception;
-use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Klein\App;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
-use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\Oauth\Facebook\FacebookProvider;
 use Model\ConnectedServices\Oauth\Github\GithubProvider;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use PHPTAL;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Templating\PHPTALWithAppend;
 use Utils\Tools\Utils;
+
 /**
  * Created by PhpStorm.
  * User: fregini
@@ -90,7 +91,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'user_plugins'} = new PHPTalMap($this->getFeatureSet()->getCodes());
         $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
         $this->view->{'userMail'} = $this->getUser()->email ?? '';
-        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->getFeatureSet()->dispatchFilter(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];

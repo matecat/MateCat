@@ -11,8 +11,8 @@ use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\Jobs\JobDao;
-use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -512,7 +512,7 @@ class JobSplitMergeService
 
         $this->getCart()->deleteCart();
 
-        $this->features->dispatchRun(new PostJobSplittedEvent($data));
+        $this->features->dispatch(new PostJobSplittedEvent($data));
     }
 
     /**
@@ -608,7 +608,7 @@ class JobSplitMergeService
         $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
-        $this->features->dispatchRun(new PostJobMergedEvent($data, $chunk));
+        $this->features->dispatch(new PostJobMergedEvent($data, $chunk));
 
         $jobDao = $this->createJobDao();
 

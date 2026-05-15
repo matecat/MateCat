@@ -344,7 +344,7 @@ class GetContributionController extends KleinController
         );
 
         $rewriteContributionContextsEvent = new RewriteContributionContextsEvent($segmentsList, $request);
-        $this->featureSet->dispatchFilter($rewriteContributionContextsEvent);
+        $this->featureSet->dispatch($rewriteContributionContextsEvent);
         $segmentsList = $rewriteContributionContextsEvent->getSegmentsList();
         $request = $rewriteContributionContextsEvent->getRequestData();
 

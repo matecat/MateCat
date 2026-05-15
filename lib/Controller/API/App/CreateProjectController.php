@@ -7,8 +7,8 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
-use Exception;
 use DomainException;
+use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
@@ -29,6 +29,7 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Model\Xliff\XliffConfigTemplateStruct;
+use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
@@ -48,7 +49,6 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use TypeError;
 
 class CreateProjectController extends AbstractStatefulKleinController
 {
@@ -763,7 +763,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectFeatures = [];
 
         $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
-        $this->featureSet->dispatchFilter($filterCreateProjectFeaturesEvent);
+        $this->featureSet->dispatch($filterCreateProjectFeaturesEvent);
 
         return $filterCreateProjectFeaturesEvent->getProjectFeatures();
     }

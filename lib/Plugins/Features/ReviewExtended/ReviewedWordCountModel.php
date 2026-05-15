@@ -9,9 +9,8 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use PDOException;
-use RuntimeException;
 use Model\DataAccess\TransactionalTrait;
+use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentStruct;
@@ -21,12 +20,13 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentStruct;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
-use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
+use PDOException;
 use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -369,7 +369,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         }
 
         $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
-        $this->_chunk->getProject()->getFeaturesSet()->dispatchFilter($filterRevisionChangeNotificationListEvent);
+        $this->_chunk->getProject()->getFeaturesSet()->dispatch($filterRevisionChangeNotificationListEvent);
         $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {

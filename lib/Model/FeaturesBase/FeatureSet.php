@@ -15,9 +15,12 @@ use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Plugins\Features\BaseFeature;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -41,6 +44,8 @@ class FeatureSet implements EventDispatcherInterface
 
     protected bool $_ignoreDependencies = false;
 
+    private LoggerInterface $logger;
+
     /**
      * @return BasicFeatureStruct[]
      */
@@ -59,6 +64,8 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function __construct(?array $features = null)
     {
+        $this->logger = LoggerFactory::getLogger('feature_set');
+
         if (is_null($features)) {
             $this->loadFromMandatory();
         } else {
@@ -87,7 +94,7 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadFromString(string $string): void
     {
-        $this->loadFromCodes(FeatureSet::splitString($string));
+        $this->loadFromCodes($this->splitString($string));
     }
 
     /**
@@ -125,7 +132,7 @@ class FeatureSet implements EventDispatcherInterface
     public function loadForProject(ProjectStruct $project): void
     {
         $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
-        $featureCodes = (!empty($featureStrings)) ? FeatureSet::splitString($featureStrings) : [];
+        $featureCodes = (!empty($featureStrings)) ? $this->splitString($featureStrings) : [];
 
         $this->clear();
         $this->_setIgnoreDependencies(true);
@@ -156,7 +163,6 @@ class FeatureSet implements EventDispatcherInterface
     {
         if ($_metadata === []) {
             // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
-            return;
         }
 
         // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
@@ -237,29 +243,13 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * @throws \Psr\Log\InvalidArgumentException
-     */
-    public function dispatch(object $event): object
-    {
-        $shortName = (new \ReflectionClass($event))->getShortName();
-        $hookName = lcfirst(str_replace('Event', '', $shortName));
-
-        foreach ($this->features as $feature) {
-            try {
-                $obj = $feature->toNewObject();
-                if (method_exists($obj, $hookName)) {
-                    $obj->$hookName($event);
-                }
-            } catch (\Throwable $e) {
-                LoggerFactory::getLogger('feature_set')->error("Exception running hook " . $hookName . ": " . $e->getMessage());
-            }
-        }
-
-        return $event;
-    }
-
-    /**
-     * @template T of FilterEvent
+     * PSR-14 dispatch entry point.
+     *
+     * Routes to the appropriate internal dispatcher based on event type:
+     * - FilterEvent/RunEvent: uses hookName() (no reflection), re-throws domain exceptions
+     * - External events (subfiltering PSR-14): derives hook name from class name, swallows all exceptions
+     *
+     * @template T of object
      * @param T $event
      * @return T
      *
@@ -269,55 +259,34 @@ class FeatureSet implements EventDispatcherInterface
      * @throws ValidationError
      * @throws NotFoundException
      */
-    public function dispatchFilter(FilterEvent $event): FilterEvent
+    public function dispatch(object $event): object
     {
-        $hookName = $event::hookName();
+        if ($event instanceof FilterEvent || $event instanceof RunEvent) {
+            $hookName = $event::hookName();
+        } else {
+            $shortName = (new ReflectionClass($event))->getShortName();
+            $hookName  = lcfirst(str_replace('Event', '', $shortName));
+        }
+
+        $rethrowDomainExceptions = ($event instanceof FilterEvent || $event instanceof RunEvent);
 
         foreach ($this->features as $feature) {
-            $obj = $feature->toNewObject();
-
-            if (method_exists($obj, $hookName)) {
-                try {
+            try {
+                $obj = $feature->toNewObject();
+                if (method_exists($obj, $hookName)) {
                     $obj->$hookName($event);
-                } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
-                    throw $e;
-                } catch (Exception $e) {
-                    LoggerFactory::getLogger('feature_set')->error("Exception running filter " . $hookName . ": " . $e->getMessage());
                 }
+            } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+                if ($rethrowDomainExceptions) {
+                    throw $e;
+                }
+                $this->logger->error("Exception running hook " . $hookName . ": " . $e->getMessage());
+            } catch (Throwable $e) {
+                $this->logger->error("Exception running hook " . $hookName . ": " . $e->getMessage());
             }
         }
 
         return $event;
-    }
-
-    /**
-     * @template T of RunEvent
-     * @param RunEvent $event
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     */
-    public function dispatchRun(RunEvent $event): void
-    {
-        $hookName = $event::hookName();
-
-        foreach ($this->features as $feature) {
-            $obj = $feature->toNewObject();
-
-            if (method_exists($obj, $hookName)) {
-                try {
-                    $obj->$hookName($event);
-                } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
-                    throw $e;
-                } catch (Exception $e) {
-                    LoggerFactory::getLogger('feature_set')->error(
-                        "Exception running hook " . $hookName . ": " . $e->getMessage()
-                    );
-                }
-            }
-        }
     }
 
     /**
@@ -473,7 +442,7 @@ class FeatureSet implements EventDispatcherInterface
      *
      * @return array<string>
      */
-    public static function splitString(string $string): array
+    public function splitString(string $string): array
     {
         return array_filter(explode(',', trim($string)));
     }

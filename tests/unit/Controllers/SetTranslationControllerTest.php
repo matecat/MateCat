@@ -1258,9 +1258,9 @@ class SetTranslationControllerTest extends AbstractTest
 
         $featureSet = $this->createMock(FeatureSet::class);
         $featureSet
-            ->expects(self::once())
-            ->method('dispatchRun')
-            ->with(self::isInstanceOf(SetTranslationCommittedEvent::class));
+            ->expects(self::once())->method('dispatch')
+            ->with(self::isInstanceOf(SetTranslationCommittedEvent::class))
+            ->willReturnArgument(0);
         $this->setNamedProperty($controller, 'featureSet', $featureSet);
 
         $newTranslation = new SegmentTranslationStruct();
@@ -1910,9 +1910,9 @@ class SetTranslationControllerTest extends AbstractTest
         $this->setNamedProperty($controller, 'VersionsHandler', $versionsHandler);
 
         $featureSet = $this->createMock(FeatureSet::class);
-        $featureSet->expects(self::once())
-            ->method('dispatchRun')
-            ->with(self::isInstanceOf(PostAddSegmentTranslationEvent::class));
+        $featureSet->expects(self::once())->method('dispatch')
+            ->with(self::isInstanceOf(PostAddSegmentTranslationEvent::class))
+            ->willReturnArgument(0);
         $this->setNamedProperty($controller, 'featureSet', $featureSet);
 
         $this->setProperty($controller, [

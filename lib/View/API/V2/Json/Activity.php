@@ -49,7 +49,7 @@ class Activity
             }
 
             $filterActivityLogEntryEvent = new FilterActivityLogEntryEvent($record);
-            $featureSet->dispatchFilter($filterActivityLogEntryEvent);
+            $featureSet->dispatch($filterActivityLogEntryEvent);
             $filteredRecord = $filterActivityLogEntryEvent->getRecord();
 
             $formatted = [

@@ -357,7 +357,8 @@ class GetSegmentsControllerTest extends AbstractTest
         $segment_notes = [10 => $notes];
 
         $featureSet = $this->createMock(FeatureSet::class);
-        $featureSet->expects(self::once())->method('dispatchFilter');
+        $featureSet->expects(self::once())->method('dispatch')
+            ->willReturnArgument(0);
         $this->setFeatureSetInstance($featureSet);
 
         $this->callPrivate('attachNotes', $segment, $segment_notes);

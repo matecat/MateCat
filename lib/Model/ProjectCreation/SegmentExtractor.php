@@ -19,10 +19,10 @@ use Model\Files\FilesPartsStruct;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\S3FilesStorage;
+use Model\Segments\SegmentMetadataMapper;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
-use Model\Segments\SegmentMetadataMapper;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionException;
@@ -325,7 +325,7 @@ class SegmentExtractor
 
             $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCountEvent = new WordCountEvent($wordCount);
-            $this->features->dispatchFilter($wordCountEvent);
+            $this->features->dispatch($wordCountEvent);
             $wordCount = $wordCountEvent->getWordCount();
 
             $sourceLayer0 = $this->filter->fromRawXliffToLayer0($seg_source['raw-content']);
@@ -539,7 +539,7 @@ class SegmentExtractor
         ProjectStructure $projectStructure,
     ): ?array {
         $populatePreTranslationsEvent = new PopulatePreTranslationsEvent(true);
-        $this->features->dispatchFilter($populatePreTranslationsEvent);
+        $this->features->dispatch($populatePreTranslationsEvent);
         if (!$populatePreTranslationsEvent->getDefault()) {
             return null;
         }

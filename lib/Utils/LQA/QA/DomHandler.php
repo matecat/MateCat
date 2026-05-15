@@ -356,7 +356,7 @@ class DomHandler
 
         if (null !== $this->featureSet) {
             $injectExcludedTagsInQaEvent = new InjectExcludedTagsInQaEvent([]);
-            $this->featureSet->dispatchFilter($injectExcludedTagsInQaEvent);
+            $this->featureSet->dispatch($injectExcludedTagsInQaEvent);
             $tagsToBeExcludedFromChecks = $injectExcludedTagsInQaEvent->getExcludedTags();
         }
 

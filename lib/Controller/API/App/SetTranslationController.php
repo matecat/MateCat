@@ -364,7 +364,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         /**
          * @see ProjectCompletion
          */
-        $this->getFeatureSet()->dispatchRun(new PostAddSegmentTranslationEvent([
+        $this->getFeatureSet()->dispatch(new PostAddSegmentTranslationEvent([
             'chunk' => $this->data['chunk'],
             'is_review' => (bool)$this->isRevision(),
             'logged_user' => $this->user
@@ -493,7 +493,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $result['warning']['id'] = 0;
         }
 
-        $this->getFeatureSet()->dispatchRun(new SetTranslationCommittedEvent([
+        $this->getFeatureSet()->dispatch(new SetTranslationCommittedEvent([
             'translation' => $newTranslation,
             'old_translation' => $oldTranslation,
             'propagated_ids' => $propagationTotal['segments_for_propagation']['propagated_ids'] ?? null,
@@ -882,7 +882,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         );
 
         $event = new RewriteContributionContextsEvent($segmentsList, $this->data);
-        $this->getFeatureSet()->dispatchFilter($event);
+        $this->getFeatureSet()->dispatch($event);
         $segmentsList = $event->getSegmentsList();
 
         if (isset($segmentsList->id_before->segment)) {
@@ -1158,7 +1158,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->data['project'],
             $this->data['segment']
         );
-        $this->getFeatureSet()->dispatchFilter($setTranslationEvent);
+        $this->getFeatureSet()->dispatch($setTranslationEvent);
         $contributionStruct = $setTranslationEvent->getContributionStruct();
 
         //assert there is not an exception by following the flow
@@ -1174,7 +1174,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $this->data['segment'],
                 $this->filter
             );
-            $this->getFeatureSet()->dispatchFilter($newContributionStructEvent);
+            $this->getFeatureSet()->dispatch($newContributionStructEvent);
             $newContributionStruct = $newContributionStructEvent->getContributionStruct();
             Set::contributionMT($newContributionStruct);
         }

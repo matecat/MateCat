@@ -118,8 +118,7 @@ class ChangePasswordController extends KleinController
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
                 $jStruct->getProject()
-                    ->getFeaturesSet()
-                    ->dispatchRun(new ReviewPasswordChangedEvent((int)$id, $actual_pwd, $new_password, (int)$revision_number));
+                    ->getFeaturesSet()->dispatch(new ReviewPasswordChangedEvent((int)$id, $actual_pwd, $new_password, (int)$revision_number));
 
             } else { // change job password
                 $jDao = new JobDao();
@@ -129,8 +128,7 @@ class ChangePasswordController extends KleinController
 
                 $jDao->changePassword($jStruct, $new_password);
                 $jStruct->getProject()
-                    ->getFeaturesSet()
-                    ->dispatchRun(new JobPasswordChangedEvent($jStruct, $actual_pwd));
+                    ->getFeaturesSet()->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
             }
 
             // invalidate ChunkReviewDao cache for the job
