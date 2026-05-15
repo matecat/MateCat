@@ -23,7 +23,6 @@ use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterMyMemoryGetParametersEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterPayableRatesEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
-use Model\FeaturesBase\Hook\Event\Filter\FromLayer0ToLayer1Event;
 use Model\FeaturesBase\Hook\Event\Filter\HandleJsonNotesBeforeInsertEvent;
 use Model\FeaturesBase\Hook\Event\Filter\InjectExcludedTagsInQaEvent;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
@@ -84,7 +83,6 @@ class FilterEventSubclassTest extends AbstractTest
             'FilterMyMemoryGetParameters' => [FilterMyMemoryGetParametersEvent::class, 'filterMyMemoryGetParameters'],
             'FilterPayableRates' => [FilterPayableRatesEvent::class, 'filterPayableRates'],
             'FilterRevisionChangeNotificationList' => [FilterRevisionChangeNotificationListEvent::class, 'filterRevisionChangeNotificationList'],
-            'FromLayer0ToLayer1' => [FromLayer0ToLayer1Event::class, 'fromLayer0ToLayer1'],
             'HandleJsonNotesBeforeInsert' => [HandleJsonNotesBeforeInsertEvent::class, 'handleJsonNotesBeforeInsert'],
             'InjectExcludedTagsInQa' => [InjectExcludedTagsInQaEvent::class, 'injectExcludedTagsInQa'],
             'IsAnInternalUser' => [IsAnInternalUserEvent::class, 'isAnInternalUser'],
@@ -467,18 +465,5 @@ class FilterEventSubclassTest extends AbstractTest
 
         $event->setMetadata(['new_key' => 'new_val']);
         self::assertSame(['new_key' => 'new_val'], $event->getMetadata());
-    }
-
-    #[Test]
-    public function fromLayer0ToLayer1EventGetSet(): void
-    {
-        $pipeline = new Pipeline('en-US', 'it-IT');
-        $event = new FromLayer0ToLayer1Event($pipeline);
-
-        self::assertSame($pipeline, $event->getChannel());
-
-        $pipeline2 = new Pipeline('fr-FR', 'de-DE');
-        $event->setChannel($pipeline2);
-        self::assertSame($pipeline2, $event->getChannel());
     }
 }
