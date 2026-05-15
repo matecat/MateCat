@@ -15,6 +15,7 @@ use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectStruct;
 use Model\Segments\ContextStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentUIStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -31,6 +32,7 @@ class TestableGetSegmentsController extends GetSegmentsController
     public ?ProjectMetadataDao $fakeProjectMetadataDao = null;
     public ?FilesMetadataDao $fakeFilesMetadataDao = null;
     public ?JobMetadataDao $fakeJobMetadataDao = null;
+    public ?SegmentMetadataDao $fakeSegmentMetadataDao = null;
 
     public function __construct()
     {
@@ -68,6 +70,11 @@ class TestableGetSegmentsController extends GetSegmentsController
     protected function createJobMetadataDao(): JobMetadataDao
     {
         return $this->fakeJobMetadataDao ?? new JobMetadataDao();
+    }
+
+    protected function createSegmentMetadataDao(): SegmentMetadataDao
+    {
+        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao();
     }
 }
 
@@ -439,6 +446,10 @@ class GetSegmentsControllerTest extends AbstractTest
         $filesMetaDao = $this->createStub(FilesMetadataDao::class);
         $filesMetaDao->method('setCacheTTL')->willReturn($filesMetaDao);
         $this->controller->fakeFilesMetadataDao = $filesMetaDao;
+
+        $segmentMetaDao = $this->createStub(SegmentMetadataDao::class);
+        $segmentMetaDao->method('getAllInRange')->willReturn([]);
+        $this->controller->fakeSegmentMetadataDao = $segmentMetaDao;
 
         $this->setFeatureSet();
 

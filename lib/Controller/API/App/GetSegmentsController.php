@@ -26,6 +26,7 @@ use Model\Segments\ContextGroupDao;
 use Model\Segments\ContextStruct;
 use Model\Segments\ContextUrlResolver;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Model\Segments\SegmentUIStruct;
@@ -117,6 +118,14 @@ class GetSegmentsController extends KleinController
         $filesMetadataDao = $this->createFilesMetadataDao();
         $fileContextUrls = [];
 
+        $segmentMetadataMap = [];
+        if (!empty($data)) {
+            $start = (int)$data[0]['sid'];
+            $last = end($data);
+            $stop = (int)$last['sid'];
+            $segmentMetadataMap = $this->createSegmentMetadataDao()->getAllInRange($start, $stop);
+        }
+
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
 
@@ -190,7 +199,7 @@ class GetSegmentsController extends KleinController
             $seg['translation'] = $Filter->fromLayer1ToLayer2($Filter->realignIDInLayer1($seg['segment'], $seg['translation']));
             $seg['segment'] = $Filter->fromLayer1ToLayer2($seg['segment']);
 
-            $segmentMetadata = SegmentMetadataDao::getAll($seg['sid']);
+            $segmentMetadata = $segmentMetadataMap[(int)$seg['sid']] ?? new SegmentMetadataCollection([]);
             $seg['metadata'] = $segmentMetadata->jsonSerialize();
             $seg['context_url'] = ContextUrlResolver::resolve(
                 $segmentMetadata,
@@ -360,5 +369,10 @@ class GetSegmentsController extends KleinController
     protected function createJobMetadataDao(): MetadataDao
     {
         return new MetadataDao();
+    }
+
+    protected function createSegmentMetadataDao(): SegmentMetadataDao
+    {
+        return new SegmentMetadataDao();
     }
 }

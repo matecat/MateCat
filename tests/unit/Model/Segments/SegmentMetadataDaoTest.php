@@ -233,4 +233,72 @@ class SegmentMetadataDaoTest extends AbstractTest
 
         $this->assertIsBool($result);
     }
+
+    // ─── getAllInRange ────────────────────────────────────────────────
+
+    #[Test]
+    public function testGetAllInRangeReturnsGroupedCollections(): void
+    {
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_b', 'val_b'));
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_2, 'key_a', 'val_c'));
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_d'));
+
+        $dao = new SegmentMetadataDao();
+        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
+
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+
+        $this->assertArrayHasKey(self::SEGMENT_ID_1, $result);
+        $this->assertArrayHasKey(self::SEGMENT_ID_2, $result);
+        $this->assertArrayHasKey(self::SEGMENT_ID_3, $result);
+
+        $this->assertInstanceOf(SegmentMetadataCollection::class, $result[self::SEGMENT_ID_1]);
+        $this->assertInstanceOf(SegmentMetadataCollection::class, $result[self::SEGMENT_ID_2]);
+        $this->assertInstanceOf(SegmentMetadataCollection::class, $result[self::SEGMENT_ID_3]);
+
+        $this->assertCount(2, $result[self::SEGMENT_ID_1]);
+        $this->assertCount(1, $result[self::SEGMENT_ID_2]);
+        $this->assertCount(1, $result[self::SEGMENT_ID_3]);
+    }
+
+    #[Test]
+    public function testGetAllInRangeReturnsEmptyArrayWhenNoDataInRange(): void
+    {
+        $dao = new SegmentMetadataDao();
+        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
+
+        $this->assertIsArray($result);
+        $this->assertCount(0, $result);
+    }
+
+    #[Test]
+    public function testGetAllInRangeExcludesSegmentsOutsideRange(): void
+    {
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_b'));
+
+        $dao = new SegmentMetadataDao();
+        // Range covers only SEGMENT_ID_1 and SEGMENT_ID_2 (not 3)
+        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_2, 0);
+
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey(self::SEGMENT_ID_1, $result);
+        $this->assertArrayNotHasKey(self::SEGMENT_ID_3, $result);
+    }
+
+    #[Test]
+    public function testGetAllInRangeCollectionsAreFunctional(): void
+    {
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'context-url', 'https://example.com'));
+        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'resname', 'block1'));
+
+        $dao = new SegmentMetadataDao();
+        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, 0);
+
+        $collection = $result[self::SEGMENT_ID_1];
+        $this->assertSame('https://example.com', $collection->find(\Model\Segments\SegmentMetadataMarshaller::CONTEXT_URL));
+        $this->assertSame('block1', $collection->find(\Model\Segments\SegmentMetadataMarshaller::RESNAME));
+    }
 }

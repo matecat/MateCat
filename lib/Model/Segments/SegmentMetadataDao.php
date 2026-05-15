@@ -151,6 +151,46 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
+     * Fetch all metadata for segments in a range, grouped by segment ID.
+     *
+     * Single query replaces N per-segment getAll() calls.
+     * Used by GetSegmentsController to pre-load before the rendering loop.
+     *
+     * @param int $startSid First segment ID (inclusive)
+     * @param int $stopSid  Last segment ID (inclusive)
+     * @param int $ttl      Cache TTL in seconds (default: 1 day)
+     *
+     * @return array<int, SegmentMetadataCollection> keyed by id_segment
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function getAllInRange(int $startSid, int $stopSid, int $ttl = 86400): array
+    {
+        $conn = $this->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare(
+            "SELECT * FROM " . self::TABLE . " WHERE id_segment BETWEEN ? AND ? ORDER BY id_segment"
+        );
+
+        /** @var SegmentMetadataStruct[] $results */
+        $results = $this->setCacheTTL($ttl)->_fetchObjectMap(
+            $stmt,
+            SegmentMetadataStruct::class,
+            [$startSid, $stopSid]
+        );
+
+        $grouped = [];
+        foreach ($results as $struct) {
+            $grouped[(int)$struct->id_segment][] = $struct;
+        }
+
+        return array_map(
+            static fn(array $structs) => new SegmentMetadataCollection($structs),
+            $grouped
+        );
+    }
+
+    /**
      * @throws ReflectionException
      * @throws PDOException
      */
