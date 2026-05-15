@@ -164,11 +164,11 @@ class TranslationIssueModel
         );
 
         if (!$version_record) {
-            TranslationVersionDao::staticInsertStruct($struct);
+            (new TranslationVersionDao())->insertStruct($struct);
         } else {
             // in case the record exists, we have to update it with the diff anyway
             $version_record->raw_diff = $string_to_save;
-            TranslationVersionDao::staticUpdateStruct($version_record, ['fields' => ['raw_diff']]);
+            (new TranslationVersionDao())->updateStruct($version_record, ['fields' => ['raw_diff']]);
         }
     }
 

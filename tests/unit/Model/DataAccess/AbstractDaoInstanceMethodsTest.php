@@ -464,7 +464,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function test_insertStruct_with_on_duplicate_fields(): void
+    public function test_insertStruct_with_on_duplicate_update(): void
     {
         $stmt = $this->createMock(PDOStatement::class);
         $stmt->expects($this->once())
@@ -489,7 +489,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
         $dao = new AutoIncrementTestableDao($database);
         $struct = new DaoObjectTestStruct(['name' => 'created']);
 
-        $result = $dao->insertStruct($struct, ['on_duplicate_fields' => ['name' => 'VALUES(name)']]);
+        $result = $dao->insertStruct($struct, ['on_duplicate_update' => ['name' => 'VALUES(name)']]);
 
         $this->assertSame(102, $result);
     }

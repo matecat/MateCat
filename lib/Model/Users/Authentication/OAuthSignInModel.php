@@ -142,7 +142,7 @@ class OAuthSignInModel
     protected function _createNewUser(): void
     {
         $this->user->create_date = Utils::mysqlTimestamp(time());
-        $this->user->uid = UserDao::staticInsertStruct($this->user) ?: throw new RuntimeException('User uid must be set after OAuth insert');
+        $this->user->uid = (new UserDao())->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after OAuth insert');
 
         $dao = new TeamDao();
         $dao->getDatabaseHandler()->begin();
@@ -156,7 +156,7 @@ class OAuthSignInModel
     protected function _updateExistingUser(UserStruct $existing_user): void
     {
         $this->user->uid = $existing_user->uid;
-        UserDao::staticUpdateStruct($this->user, [
+        (new UserDao())->updateStruct($this->user, [
             'fields' =>
                 ['oauth_access_token']
         ]);

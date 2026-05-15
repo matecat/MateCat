@@ -69,7 +69,7 @@ class SplitDAO extends AbstractDao
     {
         $obj = $this->sanitize($obj);
 
-        $res = self::staticInsertStruct($obj, [
+        $res = $this->insertStruct($obj, [
             'no_nulls' => true,
             'on_duplicate_update' => [
                 'id_segment' => 'value',

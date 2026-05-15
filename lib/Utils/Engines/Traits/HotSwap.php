@@ -88,7 +88,7 @@ trait HotSwap
             }
 
             if ($update) {
-                $jobDao->staticUpdateStruct($jobStruct, [
+                $jobDao->updateStruct($jobStruct, [
                     'fields' => [
                         'id_tms',
                         'id_mt_engine'

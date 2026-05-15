@@ -332,6 +332,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     /**
      * @throws \Exception
+     * @throws \TypeError
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
@@ -363,7 +364,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $review->reviewed_words_count = $undo_data['reviewed_words_count'];
         $review->undo_data = null;
 
-        ChunkReviewDao::staticUpdateStruct($review, [
+        (new ChunkReviewDao())->updateStruct($review, [
             'fields' => [
                 'is_pass',
                 'penalty_points',

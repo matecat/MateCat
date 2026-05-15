@@ -5973,24 +5973,6 @@ parameters:
 			path: lib/Model/Users/RedeemableProject.php
 
 		-
-			message: '#^Cannot access property \$id_assignee on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Cannot access property \$id_customer on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Cannot access property \$id_team on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
 			message: '#^Cannot access property \$name on Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -6023,18 +6005,6 @@ parameters:
 		-
 			message: '#^Method Model\\Users\\RedeemableProject\:\:tryToRedeem\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Parameter \#1 \$project of method Model\\Jobs\\JobDao\:\:updateOwner\(\) expects Model\\Projects\\ProjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Parameter \#1 \$struct of static method Model\\DataAccess\\AbstractDao\:\:staticUpdateStruct\(\) expects Model\\DataAccess\\AbstractDaoObjectStruct, Model\\Projects\\ProjectStruct\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Model/Users/RedeemableProject.php
 
@@ -6169,12 +6139,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Xliff/XliffConfigTemplateStruct.php
-
-		-
-			message: '#^Method Plugins\\Features\\AbstractRevisionFeature\:\:projectCompletionEventSaved\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/AbstractRevisionFeature.php
 
 		-
 			message: '#^Method Plugins\\Features\\BaseFeature\:\:getBuildFiles\(\) return type has no value type specified in iterable type array\.$#'

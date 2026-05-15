@@ -13,6 +13,7 @@ use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Url\CanonicalRoutes;
 
 class RedeemableProject
@@ -68,15 +69,16 @@ class RedeemableProject
     public function redeem(): void
     {
         if ($this->isPresent() && $this->isRedeemable()) {
-            $this->project->id_customer = $this->user->getEmail();
-            $this->project->id_team = $this->user->getPersonalTeam()->id;
-            $this->project->id_assignee = $this->user->getUid();
+            $project = $this->project ?? throw new RuntimeException('Project must be set after isPresent() check');
+            $project->id_customer = $this->user->getEmail() ?? throw new \RuntimeException('User email must be set for project redemption');
+            $project->id_team = $this->user->getPersonalTeam()->id;
+            $project->id_assignee = $this->user->getUid();
 
-            ProjectDao::staticUpdateStruct($this->project, [
+            (new ProjectDao())->updateStruct($project, [
                 'fields' => ['id_team', 'id_customer', 'id_assignee']
             ]);
 
-            (new JobDao())->updateOwner($this->project, $this->user);
+            (new JobDao())->updateOwner($project, $this->user);
         }
 
         $this->clear();

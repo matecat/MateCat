@@ -163,7 +163,7 @@ class TranslationEventsHandler
             $eventStruct->final_revision = $eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
         }
 
-        $eventStruct->id = TranslationEventDao::staticInsertStruct($eventStruct);
+        $eventStruct->id = (new TranslationEventDao())->insertStruct($eventStruct);
     }
 
     /**

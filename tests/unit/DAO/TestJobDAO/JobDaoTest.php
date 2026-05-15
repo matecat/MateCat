@@ -30,14 +30,19 @@ class JobDaoTest extends AbstractTest
 
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
+        $this->stmtStub = $this->createStub(PDOStatement::class);
+        $this->stmtStub->queryString = '';
+
+        $this->pdoStub = $this->createStub(PDO::class);
+        $this->pdoStub->method('prepare')->willReturn($this->stmtStub);
+
+        $this->dbStub = $this->createStub(IDatabase::class);
+        $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
         $this->dbStub->method('begin')->willReturn($this->pdoStub);
     }
 
     protected function tearDown(): void
     {
-        $this->resetDatabaseMock();
-
         AppConfig::$SKIP_SQL_CACHE = false;
 
         parent::tearDown();

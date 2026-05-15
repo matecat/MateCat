@@ -241,7 +241,7 @@ class TranslatorsModel
         $translatorStruct->source = $this->jStruct['source'];
         $translatorStruct->target = $this->jStruct['target'];
 
-        $jTranslatorsDao->staticInsertStruct($translatorStruct, [
+        $jTranslatorsDao->insertStruct($translatorStruct, [
             'no_nulls' => true,
             'on_duplicate_update' => [
                 'delivery_date' => 'value',
@@ -278,7 +278,7 @@ class TranslatorsModel
         $existentProfileStruct = $tProfileDao->getByProfile($profileStruct);
 
         if (empty($existentProfileStruct)) {
-            $insertId = $tProfileDao->staticInsertStruct($profileStruct, [
+            $insertId = $tProfileDao->insertStruct($profileStruct, [
                 'no_nulls' => true
             ]);
 

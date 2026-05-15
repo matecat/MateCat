@@ -187,7 +187,7 @@ abstract class AbstractDao
      * Returns FALSE on failure.
      *
      * @param IDaoStruct $struct
-     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_fields?: array<string, string>}|null $options
+     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_update?: array<string, string>}|null $options
      *
      * @return int|false
      * @throws Exception
@@ -196,14 +196,14 @@ abstract class AbstractDao
     {
         $ignore = isset($options['ignore']) && $options['ignore'] == true;
         $no_nulls = isset($options['no_nulls']) && $options['no_nulls'] == true;
-        $on_duplicate_fields = (!empty($options['on_duplicate_fields']) ? $options['on_duplicate_fields'] : []);
+        $on_duplicate_update = (!empty($options['on_duplicate_update']) ? $options['on_duplicate_update'] : []);
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys($struct->toArray());
         /** @var list<string> $mask */
         $mask = array_values(array_diff($mask, static::$auto_increment_field));
 
-        [$sql, $dupBindValues] = static::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields);
+        [$sql, $dupBindValues] = static::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_update);
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
@@ -351,7 +351,7 @@ abstract class AbstractDao
      */
     protected function _getStatementForQuery(string $query): PDOStatement
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         return $conn->prepare($query);
     }
@@ -453,14 +453,14 @@ abstract class AbstractDao
      * @param array<int|string, mixed> $mask array of attributes to include in the update
      * @param bool $ignore Use INSERT IGNORE query type
      * @param bool $no_nulls Exclude NULL fields when build the sql
-     * @param array<string, string> $on_duplicate_fields
+     * @param array<string, string> $on_duplicate_update
      *
      * @return array{0: string, 1: array<string, scalar|null>} [sql, dupBindValues]
      * @throws Exception
      */
-     public static function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): array
+     public static function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array
     {
-        return Database::buildInsertStatement(static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_fields);
+        return Database::buildInsertStatement(static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update);
     }
 
 
@@ -542,103 +542,6 @@ abstract class AbstractDao
     public static function staticUpdate(array $data = [], array $where = []): int
     {
         return Database::obtain()->update(static::TABLE, $data, $where);
-    }
-
-    /**
-     * Updates the struct. The record is found via the primary
-     * key attributes provided by the struct.
-     *
-     * @param AbstractDaoObjectStruct $struct
-     * @param array{fields?: list<string>} $options
-     *
-     * @return int
-     * @throws Exception
-     */
-    public static function staticUpdateStruct(IDaoStruct $struct, array $options = []): int
-    {
-        $attrs = $struct->toArray();
-
-        $fields = [];
-
-        if (isset($options['fields'])) {
-            if (!is_array($options['fields'])) {
-                throw new Exception('`fields` must be an array');
-            }
-            $fields = $options['fields'];
-        }
-
-        $sql = " UPDATE " . static::TABLE;
-        $sql .= " SET " . static::buildUpdateSet($attrs, $fields);
-        $sql .= " WHERE " . static::buildPkeyCondition($attrs);
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-
-        $data = array_merge(
-            $struct->toArray($fields),
-            self::structKeys($struct)
-        );
-
-        LoggerFactory::getLogger('dao')->debug([
-            'table' => static::TABLE,
-            'sql' => $sql,
-            'attr' => $attrs,
-            'fields' => $fields,
-            'struct' => $struct->toArray($fields),
-            'data' => $data
-        ]);
-
-        $stmt->execute($data);
-
-        // WARNING
-        // When updating a Mysql table with identical values, nothing's really affected so rowCount will return 0.
-        // If you need this value use this:
-        // https://www.php.net/manual/en/pdostatement.rowcount.php#example-1096
-        return $stmt->rowCount();
-    }
-
-    /**
-     * Inserts a struct into the database.
-     *
-     * If an `auto_increment_field` is defined for the table, the last inserted is returned.
-     * Otherwise, it returns TRUE on success.
-     *
-     * Returns FALSE on failure.
-     *
-     * @param IDaoStruct $struct
-     * @param array{ignore?: bool, no_nulls?: bool, on_duplicate_update?: array<string, string>}|null $options
-     *
-     * @return int|false
-     * @throws Exception
-     */
-    public static function staticInsertStruct(IDaoStruct $struct, ?array $options = []): int|false
-    {
-        $ignore = isset($options['ignore']) && $options['ignore'] == true;
-        $no_nulls = isset($options['no_nulls']) && $options['no_nulls'] == true;
-        $on_duplicate_fields = (!empty($options['on_duplicate_update']) ? $options['on_duplicate_update'] : []);
-
-        // TODO: allow the mask to be passed as option.
-        $mask = array_keys($struct->toArray());
-        /** @var list<string> $mask */
-        $mask = array_values(array_diff($mask, static::$auto_increment_field));
-
-        [$sql, $dupBindValues] = self::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields);
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $data = array_merge($struct->toArray($mask), $dupBindValues);
-
-        LoggerFactory::getLogger('dao')->debug(["SQL" => $sql, "values" => $data]);
-
-        $stmt->execute($data);
-
-        if (count(static::$auto_increment_field)) {
-            $id = $conn->lastInsertId();
-
-            return $id === false ? false : (int)$id;
-        } else {
-            return $stmt->rowCount();
-        }
     }
 
 }

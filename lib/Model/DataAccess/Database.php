@@ -324,7 +324,7 @@ class Database implements IDatabase
      * @param array<string> $mask array of attributes to include in the update
      * @param bool $ignore Use INSERT IGNORE query type
      * @param bool $no_nulls Exclude NULL fields when build the sql
-     * @param array<string, string> $on_duplicate_fields
+     * @param array<string, string> $on_duplicate_update
      *
      * @return array{0: string, 1: array<string, mixed>}
      *
@@ -332,13 +332,13 @@ class Database implements IDatabase
      *
      * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): array
+    public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array
     {
         if (empty($table)) {
             throw new Exception('TABLE constant is not defined');
         }
 
-        if ($ignore && !empty($on_duplicate_fields)) {
+        if ($ignore && !empty($on_duplicate_update)) {
             throw new Exception('INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.');
         }
 
@@ -349,9 +349,9 @@ class Database implements IDatabase
 
         $valuesToBind = [];
         $duplicate_statement = "";
-        if (!empty($on_duplicate_fields)) {
+        if (!empty($on_duplicate_update)) {
             $duplicate_statement = " ON DUPLICATE KEY UPDATE ";
-            foreach ($on_duplicate_fields as $key => $value) {
+            foreach ($on_duplicate_update as $key => $value) {
                 if ($no_nulls && is_null($attrs[$key])) {
                     /*
                      *

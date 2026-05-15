@@ -84,7 +84,7 @@ class GDriveUserAuthorizationModel
 
         $service->expired_at = null;
         $service->disabled_at = null;
-        $dao->staticUpdateStruct($service);
+        $dao->updateStruct($service);
     }
 
     /**
@@ -104,7 +104,7 @@ class GDriveUserAuthorizationModel
         $service->setEncryptedAccessToken($this->token);
         $dao = new ConnectedServiceDao();
 
-        $lastId = $dao->staticInsertStruct($service);
+        $lastId = $dao->insertStruct($service);
 
         if ($lastId === false) {
             throw new Exception('Unable to insert connected service');

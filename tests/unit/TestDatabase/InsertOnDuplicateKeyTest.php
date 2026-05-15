@@ -177,7 +177,7 @@ class InsertOnDuplicateKeyTest extends AbstractTest
         $struct1->name = 'Struct1';
         $struct1->status = 'active';
 
-        TestUpsertDao::staticInsertStruct($struct1, ['no_nulls' => true]);
+        (new TestUpsertDao($this->databaseInstance))->insertStruct($struct1, ['no_nulls' => true]);
 
         // Verify initial insert
         $stmt = $this->databaseInstance->getConnection()->prepare(
@@ -195,7 +195,7 @@ class InsertOnDuplicateKeyTest extends AbstractTest
         $struct2->status = 'inactive';
 
         // Upsert with literal 'overridden' for status
-        TestUpsertDao::staticInsertStruct(
+        (new TestUpsertDao($this->databaseInstance))->insertStruct(
             $struct2,
             [
                 'no_nulls' => true,

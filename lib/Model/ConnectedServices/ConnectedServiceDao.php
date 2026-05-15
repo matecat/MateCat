@@ -34,7 +34,7 @@ class ConnectedServiceDao extends AbstractDao
         $service->updated_at = Utils::mysqlTimestamp(time());
         $service->setEncryptedAccessToken($token);
 
-        $this->staticUpdateStruct($service, ['fields' => ['oauth_access_token', 'updated_at']]);
+        $this->updateStruct($service, ['fields' => ['oauth_access_token', 'updated_at']]);
 
         return $service;
     }
@@ -50,7 +50,7 @@ class ConnectedServiceDao extends AbstractDao
     {
         $service->expired_at = Utils::mysqlTimestamp($time);
 
-        return $this->staticUpdateStruct($service, ['fields' => ['expired_at']]);
+        return $this->updateStruct($service, ['fields' => ['expired_at']]);
     }
 
     /**

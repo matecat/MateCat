@@ -97,7 +97,7 @@ class TeamDao extends AbstractDao
             'type' => $params['type']
         ]);
 
-        $orgId = TeamDao::staticInsertStruct($teamStruct);
+        $orgId = $this->insertStruct($teamStruct);
         $teamStruct->id = (int)$orgId;
 
 

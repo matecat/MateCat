@@ -300,7 +300,7 @@ class MembershipDao extends AbstractDao
                 'is_admin' => $teamStruct->created_by == $user->uid
             ]));
 
-            $lastId = self::staticInsertStruct($membershipStruct, ['ignore' => true]);
+            $lastId = $this->insertStruct($membershipStruct, ['ignore' => true]);
 
             if ($lastId) {
                 $membershipStruct->id = $lastId;

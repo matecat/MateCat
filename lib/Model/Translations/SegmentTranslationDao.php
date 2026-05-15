@@ -443,7 +443,7 @@ class SegmentTranslationDao extends AbstractDao
             $values['fields'][] = 'version_number';
         }
 
-        return SegmentTranslationDao::staticUpdateStruct($translation_struct, $values);
+        return (new SegmentTranslationDao())->updateStruct($translation_struct, $values);
     }
 
     /**

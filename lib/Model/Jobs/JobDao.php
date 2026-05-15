@@ -4,7 +4,6 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
@@ -101,7 +100,7 @@ class JobDao extends AbstractDao
      */
     public function destroyCacheByProjectId(int $project_id): bool
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(self::$_sql_get_jobs_by_project);
 
         return $this->_destroyObjectCache($stmt, JobStruct::class, [$project_id, JobStatus::STATUS_DELETED]);
@@ -199,7 +198,7 @@ class JobDao extends AbstractDao
             throw new PDOException("Invalid empty value: password.");
         }
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(self::$_sql_update_password);
         $stmt->execute([
             'id' => $jStruct->id,
@@ -274,7 +273,7 @@ class JobDao extends AbstractDao
                     WHERE id = :id 
                     AND password = :password ";
 
-        $stmt = Database::obtain()->getConnection()->prepare($sql);
+        $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([
             'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
             'total_time_to_edit' => $jStruct->total_time_to_edit,
@@ -355,7 +354,7 @@ class JobDao extends AbstractDao
                         avg_post_editing_effort = ?
                 ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($query);
 
         foreach ($values as $k => $v) {
@@ -418,7 +417,7 @@ class JobDao extends AbstractDao
             'total_raw_wc' => $total_raw_wc,
         ];
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($query);
         $stmt->execute($values);
 

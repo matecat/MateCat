@@ -1,14 +1,14 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-14 (last updated)  
+**Date:** 2026-05-15 (last updated)  
 **Commits (refactor + fix + security + test):** 341
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,774 | −4,592 (−62.4%) |
-| **PHPUnit tests** | ~2,248 | 4,885 | +2,637 (+117.3%) |
-| **PHPUnit assertions** | ~19,449 | 16,169 | — |
+| **PHPStan baseline entries** | 7,366 | 2,768 | −4,598 (−62.4%) |
+| **PHPUnit tests** | ~2,248 | 4,926 | +2,678 (+119.1%) |
+| **PHPUnit assertions** | ~19,449 | 16,420 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 24.71% (169/684) | +16.23% (+116 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 48.80% (2,016/4,131) | +27.06% (+1,172 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 51.16% (17,870/34,929) | +29.97% (+10,597 lines) |
@@ -1248,6 +1248,38 @@ All 17 in-file PHPStan errors eliminated (14 baseline entries removed). Key chan
 - `HomeDecorator.php` (aligner): added `: void` return type to `decorate()`; 2 pre-existing errors added to baseline
 - Net baseline reduction: **−41 entries** (43 removed, 2 added for pre-existing aligner errors)
 - **28 new tests** across 4 test files (68 assertions, 0 warnings)
+
+---
+
+### Phase 24: Static DAO Method Removal (`staticInsertStruct` + `staticUpdateStruct`)
+
+**Goal:** Eliminate `AbstractDao::staticInsertStruct()` and `AbstractDao::staticUpdateStruct()` — migrate all callers to instance `insertStruct()` / `updateStruct()`, then delete the static methods.
+
+#### 24A. `staticInsertStruct` removal — ✅ DONE (−6 baseline entries)
+
+Migrated 13 call sites across 12 files to instance `insertStruct()`:
+- **Instance-context** (`$this->insertStruct()` / `$dao->insertStruct()`): TranslatorsModel, GDriveUserAuthorizationModel, MembershipDao, SplitDAO, OutsourceConfirmationController, TeamDao
+- **Static-context** (`(new XDao())->insertStruct()`): OAuthSignInModel, SignupModel, TranslationIssueModel, TranslationEventsHandler
+- **Test**: InsertOnDuplicateKeyTest updated
+- Unified option key: `on_duplicate_fields` → `on_duplicate_update` (matches SQL semantics)
+- Renamed internal `$on_duplicate_fields` variables → `$on_duplicate_update` in AbstractDao + Database
+- Fixed pre-existing typo: `$datastaticInsertStruct` → `$data` (line 633)
+- Removed `staticInsertStruct()` method entirely (zero callers remain)
+
+#### 24B. `staticUpdateStruct` removal — ✅ DONE (−6 baseline entries)
+
+Migrated 22 call sites across 18 files to instance `updateStruct()`:
+- **Instance-context** (`$this->updateStruct()` / `$dao->updateStruct()`): ConnectedServiceDao (2), GDriveUserAuthorizationModel, UpdateJobKeysController, HotSwap, EngineDAO
+- **Static-context** (`(new XDao())->updateStruct()`): ChunkReviewModel, TranslationIssueModel, AbstractRevisionFeature, ConnectedServicesController, QualityReportModel, ProjectModel, RedeemableProject, SignupModel (3), OAuthSignInModel, ChangePasswordModel, PasswordResetModel (2), SegmentTranslationDao, CreateTeamMembershipTask
+- Removed `staticUpdateStruct()` method entirely (zero callers remain)
+- Fixed null-safety in `RedeemableProject::redeem()` — narrowed `?ProjectStruct` to local non-null variable, guarded `getEmail()` return
+- Added `@throws \TypeError` to `AbstractRevisionFeature::projectCompletionEventSaved()`
+
+#### Summary
+
+- **Net baseline reduction:** −6 entries (2,774 → 2,768)
+- **Files modified:** 20 (lib) + 2 (tests) + 1 (internal_scripts)
+- **On-ledger files verified clean:** AbstractDao, EngineDAO, ProjectModel, QualityReportModel, HotSwap, AbstractRevisionFeature
 
 ---
 

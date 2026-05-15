@@ -213,7 +213,7 @@ class EngineDAO extends AbstractDao
             throw new Exception("Array given is empty. Please set at least one value.");
         }
 
-        return static::staticUpdateStruct($obj, ['fields' => $fieldsToUpdate]);
+        return $this->updateStruct($obj, ['fields' => $fieldsToUpdate]);
     }
 
     /**
