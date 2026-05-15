@@ -7,17 +7,15 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
-use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\FeaturesBase\Hook\Event\Filter\FromLayer0ToLayer1Event;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
 use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Plugins\Features\BaseFeature;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
@@ -32,9 +30,9 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * management of features, including loading, merging, filtering, and various
  * dependency-related operations for projects and users.
  *
- * Implements FeatureSetInterface.
+ * Implements EventDispatcherInterface.
  */
-class FeatureSet implements FeatureSetInterface
+class FeatureSet implements EventDispatcherInterface
 {
     /**
      * @var BasicFeatureStruct[]
@@ -152,10 +150,15 @@ class FeatureSet implements FeatureSetInterface
      * Note: The filterProjectDependencies hook was removed (no handler existed).
      * This method is kept as a public extension point — override in subclasses if needed.
      *
-     * @param array<string, mixed> $metadata
+     * @param array<string, mixed> $_metadata
      */
-    public function loadProjectDependenciesFromProjectMetadata(array $metadata): void
+    public function loadProjectDependenciesFromProjectMetadata(array $_metadata): void
     {
+        if ($_metadata === []) {
+            // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
+            return;
+        }
+
         // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
     }
 
@@ -233,44 +236,23 @@ class FeatureSet implements FeatureSetInterface
         }, $returnable));
     }
 
-    /**
-     * @throws EndQueueException
-     * @throws AuthenticationError
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws NotFoundException
-     */
-    public function customizeFromLayer0ToLayer1(Pipeline $pipeline): Pipeline
+    public function dispatch(object $event): object
     {
-        $event = $this->dispatchFilter(new FromLayer0ToLayer1Event($pipeline));
+        $shortName = (new \ReflectionClass($event))->getShortName();
+        $hookName = lcfirst(str_replace('Event', '', $shortName));
 
-        /** @var FromLayer0ToLayer1Event $event */
-        return $event->getChannel();
-    }
+        foreach ($this->features as $feature) {
+            try {
+                $obj = $feature->toNewObject();
+                if (method_exists($obj, $hookName)) {
+                    $obj->$hookName($event);
+                }
+            } catch (\Throwable) {
+                // swallow — same pattern as existing dispatchFilter()
+            }
+        }
 
-    public function customizeFromLayer1ToLayer2(Pipeline $pipeline): Pipeline
-    {
-        return $pipeline;
-    }
-
-    public function customizeFromLayer2ToLayer1(Pipeline $pipeline): Pipeline
-    {
-        return $pipeline;
-    }
-
-    public function customizeFromRawXliffToLayer0(Pipeline $pipeline): Pipeline
-    {
-        return $pipeline;
-    }
-
-    public function customizeFromLayer0ToRawXliff(Pipeline $pipeline): Pipeline
-    {
-        return $pipeline;
-    }
-
-    public function customizeFromLayer1ToLayer0(Pipeline $pipeline): Pipeline
-    {
-        return $pipeline;
+        return $event;
     }
 
     /**

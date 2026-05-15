@@ -28,7 +28,44 @@ class FeatureSetDispatchTest extends AbstractTest
         \Plugins\Features\TestDispatchFilterAfterGeneric::$invoked = false;
         \Plugins\Features\TestDispatchFilterAfterRethrow::$invoked = false;
         \Plugins\Features\TestDispatchRunHandler::$invoked = false;
+        \Plugins\Features\TestDispatchPsr14PassThrough::$invoked = false;
+        \Plugins\Features\TestDispatchPsr14ThrowsGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked = false;
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = null;
+    }
+
+    #[Test]
+    public function dispatchInvokesDerivedHookAndReturnsSameEventInstance(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_pass_through'])
+        ]);
+
+        $event = new FromLayer0ToLayer1Event();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14PassThrough::$invoked);
+        self::assertSame(['test_dispatch_psr14_pass_through'], $event->trace);
+    }
+
+    #[Test]
+    public function dispatchSwallowsGenericExceptionsAndContinues(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_after_generic']),
+        ]);
+
+        $event = new FromLayer0ToLayer1Event();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14ThrowsGeneric::$invoked);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked);
+        self::assertSame(['test_dispatch_psr14_after_generic'], $event->trace);
     }
 
     #[Test]
@@ -216,6 +253,11 @@ class DispatchRunEvent extends RunEvent
     }
 }
 
+class FromLayer0ToLayer1Event
+{
+    public array $trace = [];
+}
+
 namespace Plugins\Features;
 
 use Exception;
@@ -246,7 +288,7 @@ class TestDispatchFilterThrowsGeneric extends BaseFeature
     public function dispatchFilterHook(FilterEvent $event): void
     {
         self::$invoked = true;
-        throw new Exception('generic failure');
+        throw new Exception('generic failure on ' . $event::class);
     }
 }
 
@@ -273,7 +315,7 @@ class TestDispatchFilterThrowsHandled extends BaseFeature
 
     public function dispatchFilterHook(FilterEvent $event): void
     {
-        throw self::$throwable ?? new Exception('missing throwable');
+        throw self::$throwable ?? new Exception('missing throwable for ' . $event::class);
     }
 }
 
@@ -321,7 +363,7 @@ class TestDispatchRunThrowsGeneric extends BaseFeature
     public function dispatchRunHook(RunEvent $event): void
     {
         self::$invoked = true;
-        throw new Exception('generic run failure');
+        throw new Exception('generic run failure on ' . $event::class);
     }
 }
 
@@ -348,6 +390,52 @@ class TestDispatchRunThrowsHandled extends BaseFeature
 
     public function dispatchRunHook(RunEvent $event): void
     {
-        throw self::$throwable ?? new Exception('missing throwable');
+        throw self::$throwable ?? new Exception('missing throwable for ' . $event::class);
+    }
+}
+
+class TestDispatchPsr14PassThrough extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_pass_through';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+
+        if ($event instanceof \Tests\Unit\Features\Hook\FromLayer0ToLayer1Event) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchPsr14ThrowsGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_throws_generic';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+        unset($event);
+        throw new Exception('generic psr14 failure');
+    }
+}
+
+class TestDispatchPsr14AfterGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_after_generic';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+
+        if ($event instanceof \Tests\Unit\Features\Hook\FromLayer0ToLayer1Event) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
     }
 }

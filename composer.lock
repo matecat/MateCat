@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d943db4811810bd9562248961cc6aa5",
+    "content-hash": "32ae61876c9ea477231ee2c0749f37a6",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1976,17 +1976,11 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v4.0.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "7d4074abe5b96f5aa67a7adb36daa9f302ea72d6"
-            },
+            "version": "4.1.0",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/7d4074abe5b96f5aa67a7adb36daa9f302ea72d6",
-                "reference": "7d4074abe5b96f5aa67a7adb36daa9f302ea72d6",
-                "shasum": ""
+                "type": "path",
+                "url": "/home/hashashiyyin/PhpstormProjects/subfiltering",
+                "reference": "f005df702444c8b87c16223f61bd9eaadbeda08b"
             },
             "require": {
                 "ext-dom": "*",
@@ -1995,7 +1989,8 @@
                 "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
-                "phpstan/phpstan": "@stable"
+                "phpstan/phpstan": "@stable",
+                "psr/event-dispatcher": "^1.0"
             },
             "require-dev": {
                 "ext-json": "*",
@@ -2007,7 +2002,11 @@
                     "Matecat\\SubFiltering\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Matecat\\SubFiltering\\Tests\\": "tests/"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -2031,10 +2030,12 @@
                 "subfiltering"
             ],
             "support": {
-                "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v4.0.4"
+                "issues": "https://github.com/matecat/subfiltering/issues"
             },
-            "time": "2026-04-30T12:20:26+00:00"
+            "transport-options": {
+                "symlink": false,
+                "relative": false
+            }
         },
         {
             "name": "matecat/whole-text-finder",
@@ -3551,6 +3552,56 @@
                 "source": "https://github.com/php-fig/container/tree/1.1.2"
             },
             "time": "2021-11-05T16:50:12+00:00"
+        },
+        {
+            "name": "psr/event-dispatcher",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/event-dispatcher.git",
+                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/event-dispatcher/zipball/dbefd12671e8a14ec7f180cab83036ed26714bb0",
+                "reference": "dbefd12671e8a14ec7f180cab83036ed26714bb0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\EventDispatcher\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Standard interfaces for event handling.",
+            "keywords": [
+                "events",
+                "psr",
+                "psr-14"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/event-dispatcher/issues",
+                "source": "https://github.com/php-fig/event-dispatcher/tree/1.0.0"
+            },
+            "time": "2019-01-08T18:20:26+00:00"
         },
         {
             "name": "psr/http-client",
@@ -5388,59 +5439,6 @@
                 }
             ],
             "time": "2024-05-06T16:37:16+00:00"
-        },
-        {
-            "name": "dg/bypass-finals",
-            "version": "v1.9.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/dg/bypass-finals.git",
-                "reference": "920a7da2f3c1422fd83f9ec4df007af53dc4018b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/dg/bypass-finals/zipball/920a7da2f3c1422fd83f9ec4df007af53dc4018b",
-                "reference": "920a7da2f3c1422fd83f9ec4df007af53dc4018b",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1"
-            },
-            "require-dev": {
-                "nette/tester": "^2.3",
-                "phpstan/phpstan": "^0.12"
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "src/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause",
-                "GPL-2.0-only",
-                "GPL-3.0-only"
-            ],
-            "authors": [
-                {
-                    "name": "David Grudl",
-                    "homepage": "https://davidgrudl.com"
-                }
-            ],
-            "description": "Removes final keyword from source code on-the-fly and allows mocking of final methods and classes",
-            "keywords": [
-                "finals",
-                "mocking",
-                "phpunit",
-                "testing",
-                "unit"
-            ],
-            "support": {
-                "issues": "https://github.com/dg/bypass-finals/issues",
-                "source": "https://github.com/dg/bypass-finals/tree/v1.9.0"
-            },
-            "time": "2025-01-16T00:46:05+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -7450,6 +7448,6 @@
         "ext-intl": "*",
         "ext-redis": "*"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
 }

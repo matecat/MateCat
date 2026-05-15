@@ -1,4 +1,16 @@
 {
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/hashashiyyin/PhpstormProjects/subfiltering",
+            "options": {
+                "symlink": false,
+                "versions": {
+                    "matecat/subfiltering": "4.1.0"
+                }
+            }
+        }
+    ],
     "require-dev": {
         "phpunit/phpunit": "^12",
         "phpmd/phpmd": "^2.15",
@@ -18,7 +30,7 @@
         "matecat/klein": "^3.2",
         "matecat/lara-php": "^v2.0.0-beta.1",
         "matecat/simple-s3": "^v2.0.0",
-        "matecat/subfiltering": "~v4.0",
+        "matecat/subfiltering": "^4.1",
         "matecat/whole-text-finder": "^2.0",
         "matecat/xliff-parser": "~v3.0",
         "matecat/icu-intl": "^v1",
@@ -29,6 +41,7 @@
         "phptal/phptal": "^1.10.0",
         "predis/predis": "^v3",
         "psr/log": "^3.0",
+        "psr/event-dispatcher": "^1.0",
         "stevenmaguire/oauth2-microsoft": "^2.2",
         "stomp-php/stomp-php": "^5.0",
         "swaggest/json-schema": "^0.12.42",
