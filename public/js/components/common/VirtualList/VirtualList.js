@@ -12,6 +12,8 @@ const VirtualList = forwardRef(
       height,
       scrollToIndex = {},
       onRender,
+      setFirstRowIdVisible,
+      overlapHeader,
       itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
@@ -28,6 +30,18 @@ const VirtualList = forwardRef(
       estimateSize: useCallback((index) => items[index].height, [items]),
       overscan,
     })
+
+    const getFirstVisibleIndex = () => {
+      const parent = ref.current
+
+      const scrollOffset = parent?.scrollTop ?? 0
+
+      const firstVisible = virtualItems.find((item) => item.end > scrollOffset)
+
+      return firstVisible?.index ?? null
+    }
+
+    const firstRowIdVisible = items[getFirstVisibleIndex()]?.id
 
     const scrollToIndexDebounceTmOut = useRef()
 
@@ -62,6 +76,10 @@ const VirtualList = forwardRef(
         }`
     }, [ref, width, height])
 
+    useEffect(() => {
+      setFirstRowIdVisible(firstRowIdVisible)
+    }, [firstRowIdVisible, setFirstRowIdVisible])
+
     return (
       <div
         ref={ref}
@@ -76,6 +94,7 @@ const VirtualList = forwardRef(
             position: 'relative',
           }}
         >
+          {overlapHeader && overlapHeader}
           {virtualItems.map((item) => (
             <div
               key={items[item.index].id ? items[item.index].id : item.index}
@@ -109,6 +128,8 @@ VirtualList.propTypes = {
     align: PropTypes.string,
   }),
   onRender: PropTypes.func.isRequired,
+  setFirstRowIdVisible: PropTypes.func.isRequired,
+  overlapHeader: PropTypes.node,
   itemStyle: PropTypes.func,
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,

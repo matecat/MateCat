@@ -106,6 +106,23 @@ const DELAY_MESSAGE = 7000
 
 const isMac = isMacOS()
 
+class SegmentFooterHeight {
+  constructor() {
+    this.map = new Map()
+  }
+
+  getHeight(sid) {
+    return this.map.get(sid) || 0
+  }
+
+  setHeight(sid, value) {
+    this.map.clear()
+    this.map.set(sid, value)
+  }
+}
+
+const segmentFooterHeight = new SegmentFooterHeight()
+
 function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
@@ -129,9 +146,11 @@ function SegmentFooter() {
   const [activeTab, setActiveTab] = useState(undefined)
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
+  const [canDisplayContent, setCanDisplayContent] = useState(false)
 
   const {segment, clientConnected, multiMatchLangs} = useContext(SegmentContext)
 
+  const ref = useRef()
   const previousActiveTab = useRef()
 
   const getHideMatchesCookie = useCallback(() => {
@@ -407,6 +426,20 @@ function SegmentFooter() {
     return () => clearTimeout(timeout)
   }, [message])
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) setCanDisplayContent(true)
+      })
+    })
+
+    const {current} = ref
+
+    if (current) observer.observe(current)
+
+    return () => observer.disconnect()
+  }, [])
+
   const isInitTabLoading = ({code}) => {
     switch (code) {
       case 'tm':
@@ -625,28 +658,42 @@ function SegmentFooter() {
     )
   }
 
+  if (canDisplayContent && ref.current) {
+    segmentFooterHeight.setHeight(segment.sid, ref.current.offsetHeight)
+  }
+
   return (
-    <div className="footer toggle">
-      <ul className="submenu">
-        {tabItems.filter(({enabled}) => enabled).map((tab) => getListItem(tab))}
-        {message && <li className="footer-message">{message}</li>}
-      </ul>
-      {tabItems
-        .filter(({enabled}) => enabled)
-        .map((tab) =>
-          getTabContainer(
-            tab,
-            tab.open && !getHideMatchesCookie() ? 'active' : '',
-          ),
-        )}
-      <div className="addtmx-tr white-tx">
-        <a
-          className="open-popup-addtm-tr"
-          onClick={() => CatToolActions.openSettingsPanel()}
-        >
-          Add private resources
-        </a>
-      </div>
+    <div ref={ref} className="footer toggle">
+      {canDisplayContent ? (
+        <>
+          <ul className="submenu">
+            {tabItems
+              .filter(({enabled}) => enabled)
+              .map((tab) => getListItem(tab))}
+            {message && <li className="footer-message">{message}</li>}
+          </ul>
+          {tabItems
+            .filter(({enabled}) => enabled)
+            .map((tab) =>
+              getTabContainer(
+                tab,
+                tab.open && !getHideMatchesCookie() ? 'active' : '',
+              ),
+            )}
+          <div className="addtmx-tr white-tx">
+            <a
+              className="open-popup-addtm-tr"
+              onClick={() => CatToolActions.openSettingsPanel()}
+            >
+              Add private resources
+            </a>
+          </div>
+        </>
+      ) : (
+        <div
+          style={{height: `${segmentFooterHeight.getHeight(segment.sid)}px`}}
+        ></div>
+      )}
     </div>
   )
 }

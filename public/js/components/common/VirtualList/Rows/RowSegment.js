@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
@@ -47,79 +47,6 @@ function RowSegment({
     onChangeRowHeight(id, newHeight)
   }, [id, newHeight, height, hasRendered, onChangeRowHeight])
 
-  const getProjectBar = () => {
-    const openInstructionsModal = (id_file) => {
-      const props = {
-        showCurrent: true,
-        files: CatToolStore.getJobFilesInfo(),
-        currentFile: id_file,
-      }
-      const styleContainer = {
-        minWidth: 600,
-        minHeight: 400,
-        maxWidth: 900,
-      }
-      ModalsActions.showModalComponent(
-        JobMetadataModal,
-        props,
-        'File notes',
-        styleContainer,
-      )
-    }
-
-    const {segment, files, sideOpen} = restProps
-    const idFileSegment = SegmentUtils.getSegmentFileId(segment)
-    if (idFileSegment !== parseInt(currentFileId)) {
-      const file = files
-        ? files.find((file) => file.id == idFileSegment)
-        : false
-      let fileType = ''
-      if (file) {
-        fileType = file.file_name ? file.file_name.split('.').slice(-1) : ''
-        //check metadata for jsont2 files
-        fileType = file.metadata?.['data-type']
-          ? file.metadata?.['data-type']
-          : fileType
-      }
-      let classes = sideOpen ? 'slide-right' : ''
-      const isFirstSegment =
-        files?.length &&
-        parseInt(segment.sid) === parseInt(files[0].first_segment)
-      classes = isFirstSegment ? classes + ' first-segment' : classes
-
-      return (
-        <div className={'projectbar ' + classes}>
-          {file ? (
-            <div className={'projectbar-filename'}>
-              <span
-                title={segment.filename}
-                className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
-              >
-                {file.file_name}
-              </span>
-            </div>
-          ) : null}
-          {file && file.weighted_words > 0 ? (
-            <div className="projectbar-wordcounter">
-              <span>
-                Payable Words: <strong>{file.weighted_words}</strong>
-              </span>
-            </div>
-          ) : null}
-          {CommonUtils.fileHasInstructions(file) ? (
-            <div
-              className={'button-notes'}
-              onClick={() => openInstructionsModal(idFileSegment)}
-            >
-              <LinkIcon />
-              <span>View notes</span>
-            </div>
-          ) : null}
-        </div>
-      )
-    }
-  }
-
   const isFirstSegmentOfGroup =
     previousSegment?.internal_id !== restProps.segment.internal_id &&
     restProps.segment.internal_id === nextSegment?.internal_id
@@ -138,12 +65,16 @@ function RowSegment({
           ? 'row-border-radius-bottom'
           : ''
 
+  const idFileSegment = SegmentUtils.getSegmentFileId(restProps.segment)
+
   return (
     <div
       ref={ref}
       className={`row${isLastRow ? ' last-row' : ''} ${borderRadiusCssClasses}`}
     >
-      {getProjectBar()}
+      {idFileSegment !== parseInt(currentFileId) && (
+        <ProjectBar {...restProps} />
+      )}
       {collectionTypeSeparator}
       <Segment {...restProps} />
     </div>
@@ -161,3 +92,150 @@ RowSegment.propTypes = {
 }
 
 export default RowSegment
+
+export const ProjectBar = ({segment, files, sideOpen, isSticky, listRef}) => {
+  const [isFileChange, setIsFileChange] = useState(false)
+
+  const ref = useRef()
+  const previousFileIdRef = useRef()
+
+  const openInstructionsModal = (id_file) => {
+    const props = {
+      showCurrent: true,
+      files: CatToolStore.getJobFilesInfo(),
+      currentFile: id_file,
+    }
+    const styleContainer = {
+      minWidth: 600,
+      minHeight: 400,
+      maxWidth: 900,
+    }
+    ModalsActions.showModalComponent(
+      JobMetadataModal,
+      props,
+      'File notes',
+      styleContainer,
+    )
+  }
+
+  const currentSegment = segment
+
+  const idFileSegment = SegmentUtils.getSegmentFileId(segment)
+  const file = files ? files.find((file) => file.id == idFileSegment) : false
+  let fileType = ''
+  if (file) {
+    fileType = file.file_name ? file.file_name.split('.')[1] : ''
+    //check metadata for jsont2 files
+    fileType = file.metadata?.['data-type']
+      ? file.metadata?.['data-type']
+      : fileType
+  }
+  let classes = sideOpen ? 'slide-right' : ''
+  const isFirstSegment =
+    files?.length &&
+    parseInt(currentSegment.sid) === parseInt(files[0].first_segment)
+  classes = isFirstSegment ? classes + ' first-segment' : classes
+
+  useEffect(() => {
+    let tmOutReset
+    const stopFileChangeAnim = () => setIsFileChange(false)
+    const filenameElement = ref.current.firstChild
+    const wordcounterElement = ref.current.children[1]
+
+    if (
+      isSticky &&
+      idFileSegment !== previousFileIdRef.current &&
+      typeof previousFileIdRef.current === 'number'
+    ) {
+      ref.current.style.animation = 'none'
+      if (filenameElement) filenameElement.style.animation = 'none'
+      if (wordcounterElement) wordcounterElement.style.animation = 'none'
+
+      tmOutReset = setTimeout(() => {
+        ref.current.style.animation = ''
+        if (filenameElement) filenameElement.style.animation = ''
+        if (wordcounterElement) wordcounterElement.style.animation = ''
+      }, 0)
+
+      filenameElement?.addEventListener('animationend', stopFileChangeAnim)
+      setIsFileChange(true)
+    }
+
+    previousFileIdRef.current = idFileSegment
+
+    return () => {
+      clearTimeout(tmOutReset)
+      filenameElement?.removeEventListener('animationend', stopFileChangeAnim)
+      stopFileChangeAnim()
+    }
+  }, [isSticky, idFileSegment])
+
+  useEffect(() => {
+    let paddingTop = 0
+
+    const onScroll = () => {
+      if (listRef.scrollTop < paddingTop) {
+        const newPaddingTop = Math.floor(paddingTop - listRef.scrollTop)
+        if (newPaddingTop > 10)
+          ref.current.style.paddingTop = `${newPaddingTop}px`
+      } else {
+        ref.current.style.paddingTop = '14px'
+      }
+    }
+
+    if (isSticky) {
+      paddingTop = parseInt(
+        window.getComputedStyle(ref.current).paddingTop.replace('px', ''),
+      )
+      listRef?.addEventListener('scroll', onScroll)
+    }
+
+    return () => listRef?.removeEventListener('scroll', onScroll)
+  }, [isSticky, listRef])
+
+  const previousScrollTopRef = useRef(0)
+  const isScrollingReverseRef = useRef(false)
+  if (isSticky && listRef?.scrollTop !== previousScrollTopRef.current) {
+    isScrollingReverseRef.current =
+      listRef?.scrollTop < previousScrollTopRef.current
+  }
+  previousScrollTopRef.current = listRef?.scrollTop
+
+  return (
+    <div
+      ref={ref}
+      className={`projectbar ${isFileChange ? `sticky-project-bar-change-file-animation ${isScrollingReverseRef.current ? 'sticky-project-bar-change-file-animation-reverse' : ''}` : ''} ${classes}`}
+    >
+      {file ? (
+        <div
+          className={`projectbar-filename ${isFileChange ? 'sticky-project-bar-blink' : ''}`}
+        >
+          <span
+            title={currentSegment.filename}
+            className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
+          >
+            {file.file_name}
+          </span>
+        </div>
+      ) : null}
+      {file && file.weighted_words > 0 ? (
+        <div
+          className={`projectbar-wordcounter ${isFileChange ? 'sticky-project-bar-blink sticky-project-bar-blink-wordcounter' : ''}`}
+        >
+          <span>
+            Payable Words: <strong>{file.weighted_words}</strong>
+          </span>
+        </div>
+      ) : null}
+      {CommonUtils.fileHasInstructions(file) ? (
+        <div
+          className={'button-notes'}
+          onClick={() => openInstructionsModal(idFileSegment)}
+        >
+          <LinkIcon />
+          <span>View notes</span>
+        </div>
+      ) : null}
+    </div>
+  )
+}

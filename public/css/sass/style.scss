@@ -302,9 +302,6 @@ section.opened .warnings {
   justify-content: flex-start;
   padding: 40px 115px 10px 4.5%;
   align-items: center;
-  &.first-segment {
-    padding-top: 25px;
-  }
   span.fileFormat {
     padding: 10px 15px 9px 47px;
     background-size: 25px !important;
@@ -346,10 +343,17 @@ section.opened .warnings {
   }
   .projectbar-wordcounter {
     min-width: 140px;
-    display: list-item;
-    list-style-type: disc;
-    list-style-position: inside;
+    display: flex;
+    height: 35px;
     font-size: 16px;
+    align-items: center;
+    padding-right: 8px;
+
+    > span {
+      display: list-item;
+      list-style-type: disc;
+      list-style-position: inside;
+    }
   }
 }
 
@@ -870,10 +874,9 @@ body #outer {
     background-size: 30px 30px !important;
     width: 30px;
     height: 30px;
-    z-index: 1;
+    z-index: 2;
   }
   &.loadingBefore {
-    margin-top: 20px;
     #loader-getMoreSegments {
       display: block;
       top: 70px;
