@@ -6,14 +6,14 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,746 | −4,620 (−62.7%) |
-| **PHPUnit tests** | ~2,248 | 4,926 | +2,678 (+119.1%) |
-| **PHPUnit assertions** | ~19,449 | 16,441 | — |
+| **PHPStan baseline entries** | 7,366 | 2,733 | −4,633 (−62.9%) |
+| **PHPUnit tests** | ~2,248 | 4,939 | +2,691 (+119.7%) |
+| **PHPUnit assertions** | ~19,449 | 16,481 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 24.71% (169/684) | +16.23% (+116 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 48.80% (2,016/4,131) | +27.06% (+1,172 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 51.16% (17,870/34,929) | +29.97% (+10,597 lines) |
-| **New test files** | 235 | 346 | +111 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 264 | +264 |
+| **New test files** | 235 | 347 | +112 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 266 | +266 |
 
 ---
 
@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 264 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 266 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (264 files)</summary>
+<summary>Click to expand full ledger (266 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -421,6 +421,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
+| `lib/Utils/TaskRunner/Commons/SignalHandlerTrait.php` | Phase 26 |
+| `lib/Utils/TaskRunner/Executor.php` | Phase 26 |
 | `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/ShareKeyEmail.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/TmKeyManager.php` | Phase 6C |
@@ -1350,6 +1352,43 @@ ActivityLogDao, AnalysisDao, ChunkCompletionEventDao, ChunkCompletionUpdateDao, 
 - **Files added to ledger:** 28 (19 already clean + 9 fixed)
 - **Ledger total:** 236 → 264 (+28)
 - **4,926 tests pass, PHPStan clean**
+
+---
+
+### Phase 26: `Executor.php` + `SignalHandlerTrait.php` — PHPStan clean + tests
+
+**Goal:** Fix all 12 PHPStan errors in `lib/Utils/TaskRunner/Executor.php`, add tests.
+
+#### Errors fixed (12 → 0)
+
+| Error | Fix |
+|-------|-----|
+| `method_exists()` always true | Removed redundant check — `AbstractWorker` always has `getLogMsg()` |
+| `attach()` on null (×1) | Used local `$workerInstance` variable after `instanceof` check |
+| `process()` on null (×1) | Added local `$worker` with null guard + `continue` |
+| `setContext()` on null (×1) | Same — calls on `$workerInstance` (non-null) |
+| `setPid()` on null (×1) | Same |
+| `_myProcessExists` missing param type | Added `string $pid` |
+| `_readAMQFrame` missing `@throws InvalidArgumentException` | Added annotation |
+| `installHandler` missing `@throws RuntimeException` | Added `@throws` to `SignalHandlerTrait::installHandler()` |
+| `@var $msgFrame Frame` parse error | Fixed to `/** @var Frame $msgFrame */` |
+| `@var array` not subtype of `non-empty-list<string>` | Changed to `non-empty-list<string>` |
+| Property assign `object` to `?AbstractWorker` | Added `instanceof AbstractWorker` check + `WorkerClassException` |
+| `new static()` unsafe | Changed to `new self()` (no subclasses) |
+
+#### Additional changes
+
+- **`SignalHandlerTrait.php`**: Added `@throws RuntimeException` to `installHandler()` (cascading fix for AbstractDaemon too)
+- **Script guard**: Wrapped `Bootstrap::start()` in `class_exists` check for testability; guarded bottom-of-file script execution with JSON argv validation
+- **Cascading**: Removed 1 stale `AbstractDaemon::installHandler()` baseline entry
+
+#### Summary
+
+- **Net baseline reduction:** −13 entries (2,746 → 2,733) — 12 Executor + 1 AbstractDaemon
+- **Files added to ledger:** 2 (Executor.php, SignalHandlerTrait.php)
+- **Ledger total:** 264 → 266 (+2)
+- **New tests:** 13 in `tests/unit/TaskRunner/ExecutorTest.php` (33 assertions)
+- **4,939 tests pass, PHPStan clean**
 
 ---
 

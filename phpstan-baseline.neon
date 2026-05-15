@@ -8249,12 +8249,6 @@ parameters:
 			path: lib/Utils/TaskRunner/Commons/AbstractDaemon.php
 
 		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractDaemon\:\:installHandler\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractDaemon.php
-
-		-
 			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractDaemon\:\:main\(\) has parameter \$args with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -8427,78 +8421,6 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: lib/Utils/TaskRunner/Commons/ContextList.php
-
-		-
-			message: '#^Call to function method_exists\(\) with Utils\\TaskRunner\\Commons\\AbstractWorker and ''getLogMsg'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Cannot call method attach\(\) on Utils\\TaskRunner\\Commons\\AbstractWorker\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Cannot call method process\(\) on Utils\\TaskRunner\\Commons\\AbstractWorker\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Cannot call method setContext\(\) on Utils\\TaskRunner\\Commons\\AbstractWorker\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Cannot call method setPid\(\) on Utils\\TaskRunner\\Commons\\AbstractWorker\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Executor\:\:_myProcessExists\(\) has parameter \$pid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Executor\:\:_readAMQFrame\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Executor\:\:installHandler\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$msgFrame Frame\)\: Unexpected token "\$msgFrame", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^PHPDoc tag @var with type array is not subtype of native type non\-empty\-list\<string\>\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Property Utils\\TaskRunner\\Executor\:\:\$_worker \(Utils\\TaskRunner\\Commons\\AbstractWorker\|null\) does not accept object\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Utils/TaskRunner/Executor.php
 
 		-
 			message: '#^Call to Utils\\TaskRunner\\TaskManager\:\:_balanceQueues\(\) on a separate line has no effect\.$#'
