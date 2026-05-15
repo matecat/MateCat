@@ -9,7 +9,6 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 use Utils\Constants\EngineConstants;
-use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 
 readonly class ProjectMetadataService

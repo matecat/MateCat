@@ -3,13 +3,13 @@
 namespace Plugins\Features;
 
 use Exception;
-use RuntimeException;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\Jobs\JobStruct;
+use RuntimeException;
 use Utils\Tools\Utils;
 
 class ProjectCompletion extends BaseFeature

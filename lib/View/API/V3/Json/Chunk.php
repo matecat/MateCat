@@ -8,8 +8,8 @@
 
 namespace View\API\V3\Json;
 
-use Exception;
 use DomainException;
+use Exception;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\Exceptions\NotFoundException;

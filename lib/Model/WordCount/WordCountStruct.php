@@ -11,7 +11,6 @@ namespace Model\WordCount;
 
 use JsonSerializable;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use TypeError;
 

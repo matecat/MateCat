@@ -9,7 +9,6 @@ use DivisionByZeroError;
 use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use RuntimeException;
 use Utils\Templating\PHPTalBoolean;

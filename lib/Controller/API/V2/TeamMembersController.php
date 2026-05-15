@@ -19,9 +19,9 @@ use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Membership;
-use RuntimeException;
 
 class TeamMembersController extends KleinController
 {

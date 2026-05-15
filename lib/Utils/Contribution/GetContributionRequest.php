@@ -15,7 +15,6 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Utils\Engines\AbstractEngine;

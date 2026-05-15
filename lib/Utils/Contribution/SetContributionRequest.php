@@ -15,7 +15,6 @@ use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobStruct;
 use Stringable;
 use Utils\Constants\TranslationStatus;
-use Utils\TaskRunner\Commons\Params;
 
 /**
  * Class SetContributionRequest

@@ -8,7 +8,6 @@ use Model\Concerns\LogsMessages;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Utils\Logger\LoggerFactory;

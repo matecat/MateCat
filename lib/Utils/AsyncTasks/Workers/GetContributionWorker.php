@@ -11,16 +11,15 @@ namespace Utils\AsyncTasks\Workers;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
-use TypeError;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
-use Utils\TmKeyManagement\TmKeyStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
 use Utils\AsyncTasks\Workers\Service\MatchSorter;
@@ -37,6 +36,7 @@ use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
 
 class GetContributionWorker extends AbstractWorker

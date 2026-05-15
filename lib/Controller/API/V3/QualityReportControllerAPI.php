@@ -8,11 +8,11 @@
 
 namespace Controller\API\V3;
 
-use DivisionByZeroError;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DivisionByZeroError;
 use Exception;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
@@ -21,9 +21,9 @@ use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
 use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
-use PDOException;
 use TypeError;
 use Utils\Registry\AppConfig;
 

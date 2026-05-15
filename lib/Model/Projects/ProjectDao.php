@@ -2,8 +2,8 @@
 
 namespace Model\Projects;
 
-use Exception;
 use DomainException;
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;

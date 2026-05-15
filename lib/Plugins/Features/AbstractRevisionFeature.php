@@ -3,7 +3,6 @@
 namespace Plugins\Features;
 
 use Controller\API\Commons\Exceptions\ValidationError;
-use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use DomainException;
 use Exception;
 use Klein\Klein;

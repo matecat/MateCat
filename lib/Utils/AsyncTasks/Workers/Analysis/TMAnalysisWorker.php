@@ -3,14 +3,14 @@
 namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
+use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectDao;
-use Model\Analysis\AnalysisDao;
 use Model\WordCount\CounterModel;
 use Predis\Connection\ConnectionException as PredisConnectionException;
 use Predis\Response\ServerException as PredisServerException;

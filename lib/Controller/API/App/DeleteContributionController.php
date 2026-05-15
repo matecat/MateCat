@@ -18,7 +18,6 @@ use Utils\Engines\EnginesFactory;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
-use Utils\TmKeyManagement\TmKeyStruct;
 
 class DeleteContributionController extends KleinController
 {

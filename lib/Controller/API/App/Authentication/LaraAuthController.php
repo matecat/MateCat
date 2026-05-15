@@ -22,7 +22,6 @@ use Klein\Response;
 use Klein\ServiceProvider;
 use Lara\LaraException;
 use Model\Jobs\JobStruct;
-use Model\TmKeyManagement\MemoryKeyStruct;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Lara\Headers;

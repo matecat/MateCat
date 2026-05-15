@@ -2,7 +2,6 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
-use Exception;
 use Model\FeaturesBase\FeatureSet;
 use RuntimeException;
 use Throwable;

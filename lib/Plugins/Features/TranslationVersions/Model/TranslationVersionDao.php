@@ -2,6 +2,7 @@
 
 namespace Plugins\Features\TranslationVersions\Model;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
@@ -11,7 +12,6 @@ use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
 use PDOException;
-use Exception;
 use Utils\Tools\Utils;
 
 class TranslationVersionDao extends AbstractDao

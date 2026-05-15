@@ -5,7 +5,6 @@ namespace Model\FeaturesBase;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Plugins\Features\BaseFeature;
-use Plugins\Features\IBaseFeature;
 
 /**
  * Class BasicFeatureStruct

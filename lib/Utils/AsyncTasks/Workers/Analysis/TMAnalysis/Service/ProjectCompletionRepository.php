@@ -2,14 +2,14 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use DomainException;
+use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
-use DomainException;
-use Exception;
 use PDO;
 use PDOException;
 use ReflectionException;

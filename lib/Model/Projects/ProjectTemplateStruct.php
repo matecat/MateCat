@@ -8,7 +8,6 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao;
 use stdClass;
 use TypeError;
 

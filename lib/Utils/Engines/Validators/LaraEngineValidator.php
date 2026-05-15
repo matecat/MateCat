@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use Lara\LaraException;
 use Model\Engines\Structs\EngineStruct;
 use ReflectionException;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\MMT\MMTServiceApi;
@@ -23,7 +24,6 @@ use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Registry\AppConfig;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
-use TypeError;
 
 class LaraEngineValidator extends AbstractValidator
 {

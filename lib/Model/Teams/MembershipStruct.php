@@ -15,8 +15,8 @@ use Model\DataAccess\IDaoStruct;
 use Model\Users\MetadataStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use RuntimeException;
 use ReflectionException;
+use RuntimeException;
 
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {

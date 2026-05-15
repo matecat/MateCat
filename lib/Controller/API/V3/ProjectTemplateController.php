@@ -13,12 +13,12 @@ use Model\Projects\ProjectTemplateStruct;
 use PDOException;
 use ReflectionException;
 use stdClass;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use TypeError;
 
 /**
  * @phpstan-import-type HydrationInput from ProjectTemplateStruct

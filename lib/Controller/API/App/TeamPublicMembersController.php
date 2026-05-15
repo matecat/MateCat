@@ -7,8 +7,8 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Model\Teams\MembershipDao;
 use ReflectionException;
-use View\API\V2\Json\Membership;
 use RuntimeException;
+use View\API\V2\Json\Membership;
 
 class TeamPublicMembersController extends KleinController
 {

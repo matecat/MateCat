@@ -13,8 +13,8 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\LQA\EntryDao;
-use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use RuntimeException;
+use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 
 class ChunkTranslationIssueController extends KleinController
 {

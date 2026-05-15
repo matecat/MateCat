@@ -10,7 +10,6 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;

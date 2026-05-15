@@ -12,8 +12,8 @@ use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
-use TypeError;
 use Model\Filters\DTO\Yaml;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable

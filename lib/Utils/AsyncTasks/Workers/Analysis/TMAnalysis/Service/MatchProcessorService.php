@@ -2,8 +2,8 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
-use Exception;
 use DomainException;
+use Exception;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;

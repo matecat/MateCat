@@ -23,6 +23,7 @@ use Model\Engines\Structs\YandexTranslateStruct;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\AltLangEngineValidator;
@@ -32,7 +33,6 @@ use Utils\Engines\Validators\GoogleTranslateEngineValidator;
 use Utils\Engines\Validators\IntentoEngineValidator;
 use Utils\Engines\Validators\LaraEngineValidator;
 use Utils\Engines\Validators\MMTEngineValidator;
-use TypeError;
 
 class EngineController extends KleinController
 {

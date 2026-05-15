@@ -4,7 +4,6 @@ namespace Model\Files;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use PDOException;
 use ReflectionException;

@@ -8,12 +8,12 @@
 
 namespace Model\QualityReport;
 
-use PDOException;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use PDO;
+use PDOException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 

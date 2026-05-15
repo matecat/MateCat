@@ -14,7 +14,6 @@ use Model\Users\UserStruct;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyStruct;
 
 class UserKeysModel
 {

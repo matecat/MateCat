@@ -5,7 +5,6 @@ namespace Model\Jobs;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
-use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;

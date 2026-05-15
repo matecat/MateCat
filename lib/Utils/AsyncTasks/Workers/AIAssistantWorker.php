@@ -3,16 +3,11 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\FeaturesBase\FeatureSet;
-use Model\Segments\SegmentOriginalDataDao;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\AIClientFactory;
-use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
-use Utils\Engines\EnginesFactory;
-use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;

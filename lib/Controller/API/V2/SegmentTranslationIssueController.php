@@ -8,7 +8,6 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Exception;
-use Model\Comments\CommentDao;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;

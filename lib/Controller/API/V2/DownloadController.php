@@ -7,7 +7,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
 use Google_Service_Drive_DriveFile;
-use Matecat\Locales\Languages;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
