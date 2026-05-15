@@ -203,9 +203,11 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
+     * @throws Exception
      * @throws NotFoundException
      * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws ValidationError
      */
     public static function modifyEntry(EntryStruct $entryStruct): EntryStruct
@@ -264,11 +266,12 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
-     * @throws ReflectionException
-     * @throws ValidationError
+     * @throws Exception
      * @throws NotFoundException
      * @throws PDOException
+     * @throws ReflectionException
      * @throws TypeError
+     * @throws ValidationError
      */
     public static function createEntry(EntryStruct $entryStruct): EntryStruct
     {

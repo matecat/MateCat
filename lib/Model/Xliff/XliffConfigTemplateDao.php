@@ -77,15 +77,16 @@ final class XliffConfigTemplateDao extends AbstractDao
         return self::save($templateStruct);
     }
 
-    /**
-     * @param XliffConfigTemplateStruct $templateStruct
-     * @param string $json
-     * @param int $uid
-     *
-     * @return XliffConfigTemplateStruct
-     * @throws Exception
-     */
-    public static function editFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
+     /**
+      * @param XliffConfigTemplateStruct $templateStruct
+      * @param string $json
+      * @param int $uid
+      *
+      * @return XliffConfigTemplateStruct
+      * @throws Exception
+      * @throws TypeError
+      */
+     public static function editFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
     {
         $templateStruct->hydrateFromJSON($json, $uid);
 
@@ -131,17 +132,18 @@ final class XliffConfigTemplateDao extends AbstractDao
         return $result;
     }
 
-    /**
-     * WARNING Use this method only when no user authentication is needed or when it is already performed
-     *
-     * @param int $id
-     * @param int $ttl
-     *
-     * @return XliffConfigTemplateStruct|null
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public static function getById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
+     /**
+      * WARNING Use this method only when no user authentication is needed or when it is already performed
+      *
+      * @param int $id
+      * @param int $ttl
+      *
+      * @return XliffConfigTemplateStruct|null
+      * @throws ReflectionException
+      * @throws Exception
+      * @throws TypeError
+      */
+     public static function getById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [

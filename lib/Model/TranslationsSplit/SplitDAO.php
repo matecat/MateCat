@@ -96,8 +96,15 @@ class SplitDAO extends AbstractDao
     {
         parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
-        $input->source_chunk_lengths = ($input->source_chunk_lengths !== null) ? json_encode($input->source_chunk_lengths) : null;
-        $input->target_chunk_lengths = ($input->target_chunk_lengths !== null) ? json_encode($input->target_chunk_lengths) : null;
+        if ($input->source_chunk_lengths !== null) {
+            $encoded = json_encode($input->source_chunk_lengths);
+            $input->source_chunk_lengths = ($encoded !== false) ? $encoded : null;
+        }
+
+        if ($input->target_chunk_lengths !== null) {
+            $encoded = json_encode($input->target_chunk_lengths);
+            $input->target_chunk_lengths = ($encoded !== false) ? $encoded : null;
+        }
 
         return $input;
     }
@@ -107,7 +114,6 @@ class SplitDAO extends AbstractDao
      * @param SegmentSplitStruct $obj
      *
      * @return void
-     * @throws Exception
      */
     protected function _validatePrimaryKey(IDaoStruct $obj): void
     {

@@ -75,6 +75,8 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -177,6 +179,7 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return CustomPayableRateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function update(CustomPayableRateStruct $customPayableRateStruct): CustomPayableRateStruct
     {
@@ -263,6 +266,7 @@ class CustomPayableRateDao extends AbstractDao
      * @return CustomPayableRateStruct
      * @throws InvalidValue
      * @throws Exception
+     * @throws TypeError
      */
     public static function editFromJSON(CustomPayableRateStruct $customPayableRateStruct, string $json): CustomPayableRateStruct
     {

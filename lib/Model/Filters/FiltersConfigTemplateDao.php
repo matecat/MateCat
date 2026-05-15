@@ -67,6 +67,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function editFromJSON(FiltersConfigTemplateStruct $templateStruct, string $json, int $uid): FiltersConfigTemplateStruct
     {
@@ -85,6 +86,8 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @return array<string, mixed>
      * @throws ReflectionException
      * @throws TypeError
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -263,6 +266,7 @@ class FiltersConfigTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private static function destroyQueryPaginated(int $uid): void
     {

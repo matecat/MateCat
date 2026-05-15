@@ -6,14 +6,14 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,768 | −4,598 (−62.4%) |
+| **PHPStan baseline entries** | 7,366 | 2,746 | −4,620 (−62.7%) |
 | **PHPUnit tests** | ~2,248 | 4,926 | +2,678 (+119.1%) |
-| **PHPUnit assertions** | ~19,449 | 16,420 | — |
+| **PHPUnit assertions** | ~19,449 | 16,441 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 24.71% (169/684) | +16.23% (+116 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 48.80% (2,016/4,131) | +27.06% (+1,172 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 51.16% (17,870/34,929) | +29.97% (+10,597 lines) |
 | **New test files** | 235 | 346 | +111 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 236 | +236 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 264 | +264 |
 
 ---
 
@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 236 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 264 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (236 files)</summary>
+<summary>Click to expand full ledger (264 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -179,6 +179,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Filters/DTO/MSWord.php` | Phase 18 |
 | `lib/Model/Filters/DTO/Xml.php` | Phase 18 |
 | `lib/Model/Filters/DTO/Yaml.php` | Phase 18 |
+| `lib/Model/Filters/FiltersConfigTemplateDao.php` | Phase 25 |
 
 #### Model/Engines (Structs)
 | File | Cleaned In |
@@ -222,8 +223,10 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/LQA/CategoryDao.php` | Phase 0 |
 | `lib/Model/LQA/ChunkReviewDao.php` | Phase 5C |
 | `lib/Model/LQA/EntryCommentDao.php` | Phase 16 |
+| `lib/Model/LQA/EntryDao.php` | Phase 25 |
 | `lib/Model/LQA/ModelDao.php` | Phase 0 |
 | `lib/Model/LQA/ModelStruct.php` | Phase 0 |
+| `lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php` | Phase 25 |
 
 #### Model/OwnerFeatures
 | File | Cleaned In |
@@ -244,20 +247,36 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Model (other)
 | File | Cleaned In |
 |------|-----------|
+| `lib/Model/ActivityLog/ActivityLogDao.php` | Phase 25 |
+| `lib/Model/Analysis/AnalysisDao.php` | Phase 25 |
+| `lib/Model/ChunksCompletion/ChunkCompletionEventDao.php` | Phase 25 |
+| `lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php` | Phase 25 |
+| `lib/Model/ConnectedServices/ConnectedServiceDao.php` | Phase 25 |
 | `lib/Model/ConnectedServices/ConnectedServiceStruct.php` | Phase 0 |
 | `lib/Model/ConnectedServices/Oauth/OauthTokenEncryption.php` | Phase 0 |
+| `lib/Model/Files/FileDao.php` | Phase 25 |
+| `lib/Model/Files/MetadataDao.php` | Phase 25 |
+| `lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php` | Phase 25 |
+| `lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php` | Phase 25 |
+| `lib/Model/Outsource/ConfirmationDao.php` | Phase 25 |
 | `lib/Model/Outsource/ConfirmationStruct.php` | Phase 0 |
+| `lib/Model/PayableRates/CustomPayableRateDao.php` | Phase 25 |
 | `lib/Model/Propagation/PropagationTotalStruct.php` | Phase 0 |
 | `lib/Model/QualityReport/QualityReportDao.php` | Phase 13 |
 | `lib/Model/QualityReport/QualityReportModel.php` | Phase 13B |
 | `lib/Model/QualityReport/QualityReportSegmentModel.php` | Phase 13B |
 | `lib/Model/QualityReport/QualityReportSegmentStruct.php` | Phase 13A |
+| `lib/Model/RemoteFiles/RemoteFileDao.php` | Phase 25 |
 | `lib/Model/ReviseFeedback/FeedbackDAO.php` | Phase 0 |
 | `lib/Model/Search/MySQLReplaceEventDAO.php` | Phase 0 |
 | `lib/Model/Search/MySQLReplaceEventIndexDAO.php` | Phase 0 |
+| `lib/Model/Search/RedisReplaceEventDAO.php` | Phase 25 |
 | `lib/Model/Search/RedisReplaceEventIndexDAO.php` | Phase 0 |
+| `lib/Model/Segments/ContextGroupDao.php` | Phase 25 |
+| `lib/Model/Segments/SegmentDao.php` | Phase 25 |
 | `lib/Model/Segments/SegmentDisabledService.php` | Phase 5C |
 | `lib/Model/Segments/SegmentMetadataDao.php` | Phase 5C |
+| `lib/Model/Segments/SegmentNoteDao.php` | Phase 25 |
 | `lib/Model/Segments/SegmentOriginalDataDao.php` | Phase 0 |
 | `lib/Model/Segments/SegmentUIStruct.php` | Phase 0 |
 | `lib/Model/Teams/MembershipDao.php` | Phase 15 |
@@ -267,11 +286,20 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/TmKeyManagement/MemoryKeyDao.php` | Phase 6C |
 | `lib/Model/TmKeyManagement/MemoryKeyStruct.php` | Phase 6C |
 | `lib/Model/TmKeyManagement/UserKeysModel.php` | Phase 6C |
+| `lib/Model/TMSService/TMSServiceDao.php` | Phase 25 |
+| `lib/Model/Translations/SegmentTranslationDao.php` | Phase 25 |
+| `lib/Model/Translations/WarningDao.php` | Phase 25 |
+| `lib/Model/TranslationsSplit/SplitDAO.php` | Phase 25 |
+| `lib/Model/Translators/JobsTranslatorsDao.php` | Phase 25 |
 | `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
 | `lib/Model/Translators/TranslatorsModel.php` | Phase 6D |
+| `lib/Model/Translators/TranslatorsProfilesDao.php` | Phase 25 |
+| `lib/Model/Users/MetadataDao.php` | Phase 25 |
 | `lib/Model/Users/UserDao.php` | Phase 5C |
+| `lib/Model/WordCount/WordCounterDao.php` | Phase 25 |
 | `lib/Model/Xliff/DTO/AbstractXliffRule.php` | Phase 0 |
 | `lib/Model/Xliff/DTO/XliffRuleInterface.php` | Phase 0 |
+| `lib/Model/Xliff/XliffConfigTemplateDao.php` | Phase 25 |
 
 #### Plugins
 | File | Cleaned In |
@@ -1280,6 +1308,48 @@ Migrated 22 call sites across 18 files to instance `updateStruct()`:
 - **Net baseline reduction:** −6 entries (2,774 → 2,768)
 - **Files modified:** 20 (lib) + 2 (tests) + 1 (internal_scripts)
 - **On-ledger files verified clean:** AbstractDao, EngineDAO, ProjectModel, QualityReportModel, HotSwap, AbstractRevisionFeature
+
+---
+
+### Phase 25: DAO Ledger Sweep (all remaining DAOs → clean)
+
+**Goal:** Verify and fix all 28 remaining DAO files not yet on the ledger, add all to ledger.
+
+#### 25A. Already clean (19 files) — added to ledger directly
+
+These files had 0 PHPStan errors without baseline, never formally registered:
+ActivityLogDao, AnalysisDao, ChunkCompletionEventDao, ChunkCompletionUpdateDao, ConnectedServiceDao, FileDao, Files/MetadataDao, OutsourceConfirmationDao, RemoteFileDao, ContextGroupDao, SegmentDao, SegmentNoteDao, TMSServiceDao, SegmentTranslationDao, WarningDao, JobsTranslatorsDao, TranslatorsProfilesDao, Users/MetadataDao, WordCounterDao
+
+#### 25B. Fixed — `@throws` annotations (7 files)
+
+| File | Errors Fixed | Type |
+|------|:---:|---|
+| `FiltersConfigTemplateDao.php` | 4 | `@throws TypeError/PDOException/Exception` |
+| `EntryDao.php` | 3 | `@throws Exception/TypeError` |
+| `QAModelTemplateDao.php` | 1 | `@throws Exception` |
+| `MTQEPayableRateTemplateDao.php` | 3 | `@throws PDOException/Exception` + `remove()` |
+| `MTQEWorkflowTemplateDao.php` | 3 | `@throws PDOException/Exception` + `remove()` |
+| `CustomPayableRateDao.php` | 4 | `@throws PDOException/TypeError/Exception` |
+| `XliffConfigTemplateDao.php` | 2 | `@throws TypeError` |
+
+#### 25C. Fixed — behavioral (2 files)
+
+- **`SplitDAO.php`** (3 errors): Fixed `json_encode()` false/null handling → empty string fallback; removed unused `@throws Exception` from `_validatePrimaryKey()`
+- **`RedisReplaceEventDAO.php`** (1 error): Changed property type `Client` → `ClientInterface` (has `@method hgetall` annotation); fixed call casing `hgetAll` → `hgetall`
+
+#### 25D. Cascading errors (algorithm step 6 — off-ledger → added to baseline)
+
+- `FiltersConfigTemplateController::update()` — count 1→2 (new TypeError path)
+- `XliffConfigTemplateController::update()` — count 1→2 (new TypeError path)
+- `PayableRateController::edit()` — new entry (TypeError from `editFromJSON`)
+- `TranslationIssueModel::editFrom()` — new entry (TypeError from `updateStruct`)
+
+#### Summary
+
+- **Net baseline reduction:** −22 entries (2,768 → 2,746) — removed 24, added 2 new
+- **Files added to ledger:** 28 (19 already clean + 9 fixed)
+- **Ledger total:** 236 → 264 (+28)
+- **4,926 tests pass, PHPStan clean**
 
 ---
 

@@ -61,6 +61,8 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @return array<string, mixed>
      * @throws TypeError
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -93,6 +95,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private static function destroyQueryPaginated(int $uid): void
     {
@@ -223,6 +226,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @return int
      * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function remove(int $id, int $uid): int
     {

@@ -7,7 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use PDOException;
-use Predis\Client;
+use Predis\ClientInterface;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
 
@@ -17,9 +17,9 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
     const string TABLE = 'replace_events';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
-    private Client $redis;
+    private ClientInterface $redis;
 
     /**
      * @var int
@@ -51,7 +51,7 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
     {
         $results = [];
 
-        foreach ($this->redis->hgetAll($this->getRedisKey($id_job, $version)) as $value) {
+        foreach ($this->redis->hgetall($this->getRedisKey($id_job, $version)) as $value) {
             $results[] = unserialize($value);
         }
 

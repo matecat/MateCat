@@ -795,7 +795,7 @@ parameters:
 			path: lib/Controller/API/App/SetCurrentSegmentController.php
 
 		-
-			message: '#^Parameter \#1 \$value of function count expects array\|Countable, array\|string given\.$#'
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/SetCurrentSegmentController.php
@@ -2297,7 +2297,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\FiltersConfigTemplateController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
@@ -2541,6 +2541,12 @@ parameters:
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\PayableRateController\:\:edit\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/PayableRateController.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -2681,7 +2687,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/V3/XliffConfigTemplateController.php
 
 		-
@@ -4653,30 +4659,6 @@ parameters:
 			path: lib/Model/FilesStorage/S3FilesStorage.php
 
 		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
-			message: '#^Method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateDao.php
-
-		-
 			message: '#^Call to an undefined method object\:\:fromArray\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -4892,23 +4874,8 @@ parameters:
 			count: 1
 			path: lib/Model/LQA/EntryCommentStruct.php
 
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:createEntry\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
 
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:modifyEntry\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
 
-		-
-			message: '#^Method Model\\LQA\\EntryDao\:\:modifyEntry\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryDao.php
 
 		-
 			message: '#^Cannot access property \$id on Model\\LQA\\CategoryStruct\|null\.$#'
@@ -5018,11 +4985,6 @@ parameters:
 			count: 1
 			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateCategoryStruct.php
 
-		-
-			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php
 
 		-
 			message: '#^Method Model\\LQA\\QAModelTemplate\\QAModelTemplatePassfailStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -5096,23 +5058,8 @@ parameters:
 			count: 1
 			path: lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php
 
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
 
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
 
-		-
-			message: '#^Method Model\\MTQE\\PayableRate\\MTQEPayableRateTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php
 
 		-
 			message: '#^Method Model\\MTQE\\Templates\\DTO\\MTQEWorkflowParams\:\:__toString\(\) should return string but returns string\|false\.$#'
@@ -5126,23 +5073,8 @@ parameters:
 			count: 1
 			path: lib/Model/MTQE/Templates/DTO/MTQEWorkflowParams.php
 
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:destroyQueryPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
-		-
-			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php
 
 		-
 			message: '#^Method Model\\MTQE\\Templates\\MTQEWorkflowTemplateStruct\:\:__toString\(\) should return string but returns string\|false\.$#'
@@ -5264,29 +5196,9 @@ parameters:
 			count: 1
 			path: lib/Model/Pagination/PaginationParameters.php
 
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
 
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
 
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
 
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateDao\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateDao.php
 
 		-
 			message: '#^Argument of an invalid type array\|string supplied for foreach, only iterables are supported\.$#'
@@ -5558,11 +5470,6 @@ parameters:
 			count: 1
 			path: lib/Model/ProjectCreation/TmKeyService.php
 
-		-
-			message: '#^Call to an undefined method Predis\\Client\:\:hgetAll\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Model/Search/RedisReplaceEventDAO.php
 
 		-
 			message: '#^PHPDoc tag @return with type mixed is not subtype of native type int\.$#'
@@ -5768,23 +5675,8 @@ parameters:
 			count: 1
 			path: lib/Model/TranslationsSplit/SegmentSplitStruct.php
 
-		-
-			message: '#^Method Model\\TranslationsSplit\\SplitDAO\:\:_validatePrimaryKey\(\) has Exception in PHPDoc @throws tag but it''s not thrown\.$#'
-			identifier: throws.unusedType
-			count: 1
-			path: lib/Model/TranslationsSplit/SplitDAO.php
 
-		-
-			message: '#^Property Model\\TranslationsSplit\\SegmentSplitStruct\:\:\$source_chunk_lengths \(array\|string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/TranslationsSplit/SplitDAO.php
 
-		-
-			message: '#^Property Model\\TranslationsSplit\\SegmentSplitStruct\:\:\$target_chunk_lengths \(array\|string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/TranslationsSplit/SplitDAO.php
 
 		-
 			message: '#^Method Model\\Users\\Authentication\\ChangePasswordModel\:\:changePassword\(\) has parameter \$new_password with no type specified\.$#'
@@ -6116,17 +6008,7 @@ parameters:
 			count: 1
 			path: lib/Model/Xliff/DTO/XliffRulesModel.php
 
-		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:editFromJSON\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
 
-		-
-			message: '#^Method Model\\Xliff\\XliffConfigTemplateDao\:\:getById\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Xliff/XliffConfigTemplateDao.php
 
 		-
 			message: '#^Method Model\\Xliff\\XliffConfigTemplateStruct\:\:hydrateRulesFromDataArray\(\) has parameter \$rules with no value type specified in iterable type array\.$#'
@@ -6587,6 +6469,12 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$id_job of static method Model\\LQA\\ChunkReviewDao\:\:findByIdJobAndPasswordAndSourcePage\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: lib/Plugins/Features/ReviewExtended/TranslationIssueModel.php
+
+		-
+			message: '#^Method Plugins\\Features\\ReviewExtended\\TranslationIssueModel\:\:editFrom\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Plugins/Features/ReviewExtended/TranslationIssueModel.php
 

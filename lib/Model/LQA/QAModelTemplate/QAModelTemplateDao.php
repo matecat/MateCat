@@ -552,6 +552,7 @@ final class QAModelTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     protected static function destroyQueryPaginated(
         int $uid
