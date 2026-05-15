@@ -236,6 +236,9 @@ class FeatureSet implements EventDispatcherInterface
         }, $returnable));
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     public function dispatch(object $event): object
     {
         $shortName = (new \ReflectionClass($event))->getShortName();
@@ -247,8 +250,8 @@ class FeatureSet implements EventDispatcherInterface
                 if (method_exists($obj, $hookName)) {
                     $obj->$hookName($event);
                 }
-            } catch (\Throwable) {
-                // swallow — same pattern as existing dispatchFilter()
+            } catch (\Throwable $e) {
+                LoggerFactory::getLogger('feature_set')->error("Exception running hook " . $hookName . ": " . $e->getMessage());
             }
         }
 
