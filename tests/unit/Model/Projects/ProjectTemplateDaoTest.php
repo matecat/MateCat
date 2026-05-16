@@ -126,7 +126,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $saved = $this->dao->save($struct);
         $this->assertGreaterThan(0, $saved->id);
 
-        $byId = $this->dao->getById($saved->id);
+        $byId = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
         $this->assertNotNull($byId);
         $this->assertStringStartsWith('lifecycle-template-', $byId->name);
 
@@ -142,7 +142,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $saved->is_default = true;
         $this->dao->update($saved);
 
-        $updated = $this->dao->getById($saved->id);
+        $updated = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
         $this->assertNotNull($updated);
         $this->assertStringStartsWith('lifecycle-template-updated-', $updated->name);
         $this->assertTrue($updated->pretranslate_100);
@@ -151,7 +151,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $removed = $this->dao->remove($saved->id, self::TEST_UID);
         $this->assertSame(1, $removed);
-        $this->assertNull($this->dao->getById($saved->id));
+        $this->assertNull($this->dao->fetchById($saved->id, ProjectTemplateStruct::class));
     }
 
     #[Test]
@@ -171,7 +171,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $this->dao->markAsNotDefault(self::TEST_UID, $second->id);
 
-        $reloadedFirst = $this->dao->getById($first->id);
+        $reloadedFirst = $this->dao->fetchById($first->id, ProjectTemplateStruct::class);
         $this->assertNotNull($reloadedFirst);
         $this->assertFalse($reloadedFirst->is_default);
     }
@@ -207,8 +207,8 @@ class ProjectTemplateDaoTest extends AbstractTest
         $affected = $this->dao->removeSubTemplateByIdAndUser(42, self::TEST_UID, 'payable_rate_template_id');
         $this->assertSame(2, $affected);
 
-        $firstReloaded = $this->dao->getById($first->id);
-        $secondReloaded = $this->dao->getById($second->id);
+        $firstReloaded = $this->dao->fetchById($first->id, ProjectTemplateStruct::class);
+        $secondReloaded = $this->dao->fetchById($second->id, ProjectTemplateStruct::class);
 
         $this->assertNotNull($firstReloaded);
         $this->assertNotNull($secondReloaded);
@@ -231,7 +231,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $this->dao->editFromJSON($created, $editPayload, $created->id, $user);
 
-        $reloaded = $this->dao->getById($created->id);
+        $reloaded = $this->dao->fetchById($created->id, ProjectTemplateStruct::class);
         $this->assertNotNull($reloaded);
         $this->assertStringStartsWith('edited-json-template-', $reloaded->name);
         $this->assertTrue($reloaded->pretranslate_100);

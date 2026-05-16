@@ -36,7 +36,6 @@ class ProjectTemplateDao extends AbstractDao
 {
     const string TABLE = 'project_templates';
 
-    const string query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
     const string query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid";
     const string query_default = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
     const string query_paginated = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
@@ -345,27 +344,6 @@ class ProjectTemplateDao extends AbstractDao
 
     /**
      * @param int $id
-     * @param int $ttl
-     *
-     * @return ProjectTemplateStruct|null
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    public function getById(int $id, int $ttl = 60): ?ProjectTemplateStruct
-    {
-        $stmt = $this->_getStatementForQuery(self::query_by_id);
-        /**
-         * @var ProjectTemplateStruct[] $result
-         */
-        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectTemplateStruct::class, [
-            'id' => $id,
-        ]);
-
-        return $result[0] ?? null;
-    }
-
-    /**
-     * @param int $id
      * @param int $uid
      * @param int $ttl
      *
@@ -493,7 +471,7 @@ class ProjectTemplateDao extends AbstractDao
             $this->markAsNotDefault($projectTemplateStruct->uid, $projectTemplateStruct->id);
         }
 
-        $this->destroyQueryByIdCache($conn, $projectTemplateStruct->id);
+        $this->destroyFetchByIdCache($projectTemplateStruct->id, ProjectTemplateStruct::class);
         $this->destroyQueryByIdAndUserCache($conn, $projectTemplateStruct->id, $projectTemplateStruct->uid);
         $this->destroyQueryPaginated($projectTemplateStruct->uid);
 
@@ -571,7 +549,7 @@ class ProjectTemplateDao extends AbstractDao
             'icu_enabled' => $projectTemplateStruct->icu_enabled
         ]);
 
-        $this->destroyQueryByIdCache($conn, $id);
+        $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
         $this->destroyQueryByIdAndUserCache($conn, $id, $projectTemplateStruct->uid);
         $this->destroyQueryPaginated($projectTemplateStruct->uid);
 
@@ -614,7 +592,7 @@ class ProjectTemplateDao extends AbstractDao
 
         foreach ($stmt->fetchAll() as $project) {
             $this->destroyDefaultTemplateCache($conn, $uid);
-            $this->destroyQueryByIdCache($conn, $project['id']);
+            $this->destroyFetchByIdCache($project['id'], ProjectTemplateStruct::class);
             $this->destroyQueryByIdAndUserCache($conn, $project['id'], $uid);
             $this->destroyQueryPaginated($uid);
         }
@@ -635,7 +613,7 @@ class ProjectTemplateDao extends AbstractDao
         $stmt = $conn->prepare("DELETE FROM " . self::TABLE . " WHERE id = :id ");
         $stmt->execute(['id' => $id]);
 
-        $this->destroyQueryByIdCache($conn, $id);
+        $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
         $this->destroyQueryByIdAndUserCache($conn, $id, $uid);
         $this->destroyQueryPaginated($uid);
 
@@ -657,25 +635,11 @@ class ProjectTemplateDao extends AbstractDao
             'uid' => $uid,
         ]);
 
-        $this->destroyQueryByIdCache($conn, $id);
+        $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
         $this->destroyQueryByIdAndUserCache($conn, $id, $uid);
         $this->destroyQueryPaginated($uid);
 
         return $stmt->rowCount();
-    }
-
-    /**
-     * @param PDO $conn
-     * @param int $id
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     * @throws \Psr\Log\InvalidArgumentException
-     */
-    private function destroyQueryByIdCache(PDO $conn, int $id): void
-    {
-        $stmt = $conn->prepare(self::query_by_id);
-        $this->_destroyObjectCache($stmt, ProjectTemplateStruct::class, ['id' => $id,]);
     }
 
     /**
