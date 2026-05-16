@@ -2547,30 +2547,6 @@ parameters:
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:validateJSON\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$error of class Utils\\Validator\\JSONSchema\\Errors\\JSONValidatorException constructor expects Swaggest\\JsonSchema\\Exception\\Error, array given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$jsonSchema of static method Utils\\Validator\\JSONSchema\\JSONValidator\:\:getValidJSONSchema\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
 			message: '#^Call to an undefined method Throwable\:\:getFormattedError\(\)\.$#'
 			identifier: method.notFound
 			count: 1

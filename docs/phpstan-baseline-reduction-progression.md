@@ -1,19 +1,19 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-15 (last updated)  
+**Date:** 2026-05-16 (last updated)  
 **Commits (refactor + fix + security + test):** 341
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,733 | −4,633 (−62.9%) |
+| **PHPStan baseline entries** | 7,366 | 2,722 | −4,644 (−63.1%) |
 | **PHPUnit tests** | ~2,248 | 4,939 | +2,691 (+119.7%) |
 | **PHPUnit assertions** | ~19,449 | 16,481 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 24.71% (169/684) | +16.23% (+116 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 48.80% (2,016/4,131) | +27.06% (+1,172 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 51.16% (17,870/34,929) | +29.97% (+10,597 lines) |
-| **New test files** | 235 | 347 | +112 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 266 | +266 |
+| **New test files** | 235 | 348 | +113 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 267 | +267 |
 
 ---
 
@@ -135,6 +135,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/V2/KeyCheckController.php` | Phase 5C |
 | `lib/Controller/API/V3/LaraController.php` | Phase 0 |
 | `lib/Controller/API/V3/ModernMTController.php` | Phase 21 |
+| `lib/Controller/API/V3/ProjectTemplateController.php` | Phase 25+ |
 | `lib/Controller/API/V3/QualityReportControllerAPI.php` | Phase 5C |
 | `lib/Controller/API/V3/RevisionFeedbackController.php` | Phase 5C |
 | `lib/Controller/API/V3/SegmentAnalysisController.php` | Phase 8A |
