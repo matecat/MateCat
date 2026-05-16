@@ -2553,12 +2553,6 @@ parameters:
 			path: lib/Controller/API/V3/ProjectTemplateController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:delete\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\ProjectTemplateController\:\:validateJSON\(\) has parameter \$json with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2574,24 +2568,6 @@ parameters:
 			message: '#^Parameter \#1 \$jsonSchema of static method Utils\\Validator\\JSONSchema\\JSONValidator\:\:getValidJSONSchema\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 2
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$uid of static method Model\\Projects\\ProjectTemplateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Projects\\ProjectTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/ProjectTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Projects\\ProjectTemplateDao\:\:remove\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: lib/Controller/API/V3/ProjectTemplateController.php
 
 		-

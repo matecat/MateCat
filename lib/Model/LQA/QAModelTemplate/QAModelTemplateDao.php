@@ -129,7 +129,7 @@ final class QAModelTemplateDao extends AbstractDao
                 'id_template' => $id
             ]);
 
-            ProjectTemplateDao::removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
+            (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
 
             $conn->commit();
 

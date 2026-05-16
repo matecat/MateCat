@@ -234,7 +234,7 @@ final class XliffConfigTemplateDao extends AbstractDao
         self::destroyQueryByUidCache($conn, $uid);
         self::destroyQueryPaginated($uid);
 
-        ProjectTemplateDao::removeSubTemplateByIdAndUser($id, $uid, 'xliff_config_template_id');
+        (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'xliff_config_template_id');
 
         return $stmt->rowCount();
     }

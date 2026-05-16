@@ -555,7 +555,7 @@ class SegmentTranslationDao extends AbstractDao
         array $data,
         array $where
     ): void {
-        (new static())->updateFields($data, $where);
+        (new self())->updateFields($data, $where);
     }
 
     /**

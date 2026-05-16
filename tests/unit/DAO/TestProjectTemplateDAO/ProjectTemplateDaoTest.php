@@ -11,6 +11,14 @@ use TestHelpers\AbstractTest;
 
 class ProjectTemplateDaoTest extends AbstractTest
 {
+    private ProjectTemplateDao $dao;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->dao = new ProjectTemplateDao();
+    }
+
     #[Test]
     public function createFromJSONThrowsWhenUserUidIsNull(): void
     {
@@ -20,7 +28,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('uid');
 
-        ProjectTemplateDao::staticCreateFromJSON((object)['name' => 'test'], $user);
+        $this->dao->createFromJSON((object)['name' => 'test'], $user);
     }
 
     #[Test]
@@ -34,7 +42,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('uid');
 
-        ProjectTemplateDao::staticEditFromJSON($struct, (object)['name' => 'test'], 1, $user);
+        $this->dao->editFromJSON($struct, (object)['name' => 'test'], 1, $user);
     }
 
     #[Test]
@@ -47,6 +55,6 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('id');
 
-        ProjectTemplateDao::update($struct);
+        $this->dao->update($struct);
     }
 }

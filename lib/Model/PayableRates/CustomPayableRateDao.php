@@ -231,7 +231,7 @@ class CustomPayableRateDao extends AbstractDao
         self::destroyQueryPaginated($uid);
 
         $queryAffected = $stmt->rowCount();
-        ProjectTemplateDao::removeSubTemplateByIdAndUser($id, $uid, 'payable_rate_template_id');
+        (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'payable_rate_template_id');
 
         return $queryAffected;
     }

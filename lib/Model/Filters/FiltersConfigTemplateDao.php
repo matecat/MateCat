@@ -216,7 +216,7 @@ class FiltersConfigTemplateDao extends AbstractDao
         self::destroyQueryByIdAndUserCache($conn, $id, $uid);
         self::destroyQueryPaginated($uid);
 
-        ProjectTemplateDao::removeSubTemplateByIdAndUser($id, $uid, 'filters_template_id');
+        (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'filters_template_id');
 
         return $stmt->rowCount();
     }

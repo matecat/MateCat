@@ -25,10 +25,13 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
  */
 class ProjectTemplateController extends KleinController
 {
+    private ProjectTemplateDao $projectTemplateDao;
+
     protected function afterConstruct(): void
     {
         parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
+        $this->projectTemplateDao = new ProjectTemplateDao();
     }
 
     /**
@@ -62,8 +65,8 @@ class ProjectTemplateController extends KleinController
             $pagination = 200;
         }
 
-        $uid = $this->getUser()->uid;
-        return $this->response->json(ProjectTemplateDao::getAllPaginated($uid, "/api/v3/project-template?page=", (int)$currentPage, (int)$pagination));
+        $uid = $this->getUser()->uid ?? throw new Exception("User UID must not be null");
+        return $this->response->json($this->projectTemplateDao->getAllPaginated($uid, "/api/v3/project-template?page=", (int)$currentPage, (int)$pagination));
     }
 
     /**
@@ -75,7 +78,7 @@ class ProjectTemplateController extends KleinController
     {
         $id = (int)$this->request->param('id');
 
-        $model = ProjectTemplateDao::staticGetByIdAndUser($id, $this->getUser()->uid);
+        $model = $this->projectTemplateDao->getByIdAndUser($id, $this->getUser()->uid ?? throw new Exception("User UID must not be null"));
 
         if (empty($model)) {
             throw new Exception('Model not found', 404);
@@ -106,7 +109,7 @@ class ProjectTemplateController extends KleinController
             $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
-            $struct = ProjectTemplateDao::staticCreateFromJSON($decodedObject, $this->getUser());
+            $struct = $this->projectTemplateDao->createFromJSON($decodedObject, $this->getUser());
 
             $this->response->code(201);
 
@@ -144,22 +147,22 @@ class ProjectTemplateController extends KleinController
 
             // mark all templates as not default
             if ($id == 0) {
-                ProjectTemplateDao::markAsNotDefault($uid, 0);
+                $this->projectTemplateDao->markAsNotDefault($uid, 0);
 
-                return $this->response->json(ProjectTemplateDao::getDefaultTemplate($uid));
+                return $this->response->json($this->projectTemplateDao->getDefaultTemplate($uid));
             }
 
-            $model = ProjectTemplateDao::staticGetByIdAndUser($id, $uid);
+            $model = $this->projectTemplateDao->getByIdAndUser($id, $uid);
 
             if (empty($model)) {
                 throw new NotFoundException('Model not found');
             }
 
-            $struct = ProjectTemplateDao::staticEditFromJSON($model, $decodedObject, $id, $this->getUser());
+            $struct = $this->projectTemplateDao->editFromJSON($model, $decodedObject, $id, $this->getUser());
 
             return $this->response->json($struct);
         } catch (JSONValidatorException $exception) {
-            throw new JSONValidatorException($exception->getFormattedError("project-template"));
+            throw new JSONValidatorException($exception->getFormattedError("project-template")); //XXX FIX JsonValidatorException expects Error not array
         }
     }
 
@@ -167,12 +170,13 @@ class ProjectTemplateController extends KleinController
      * Delete an entry
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
      */
     public function delete(): Response
     {
         $id = (int)$this->request->param('id');
 
-        $count = ProjectTemplateDao::remove($id, $this->getUser()->uid);
+        $count = $this->projectTemplateDao->remove($id, $this->getUser()->uid ?? throw new Exception("User UID must not be null"));
 
         if ($count == 0) {
             throw new NotFoundException('Model not found');
@@ -202,7 +206,7 @@ class ProjectTemplateController extends KleinController
         $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
         return $this->response->json(
-            ProjectTemplateDao::getDefaultTemplate($uid)
+            $this->projectTemplateDao->getDefaultTemplate($uid)
         );
     }
 

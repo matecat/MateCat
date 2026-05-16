@@ -570,7 +570,7 @@ class ProjectDao extends AbstractDao
         $data['status_analysis'] = $status;
         $where = ["id" => $pid];
 
-        return (new static())->updateFields($data, $where);
+        return (new self())->updateFields($data, $where);
     }
 
     /**
