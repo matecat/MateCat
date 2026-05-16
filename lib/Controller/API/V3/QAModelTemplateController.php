@@ -7,7 +7,9 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\Response;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use RuntimeException;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
@@ -42,6 +44,7 @@ class QAModelTemplateController extends KleinController
      *
      * @return Response
      * @throws Exception
+     * @throws TypeError
      */
     public function index(): Response
     {
@@ -53,7 +56,7 @@ class QAModelTemplateController extends KleinController
                 $pagination = 200;
             }
 
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
             return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, "/api/v3/qa_model_template?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
@@ -70,6 +73,7 @@ class QAModelTemplateController extends KleinController
      * create new template
      *
      * @return Response
+     * @throws TypeError
      */
     public function create(): Response
     {
@@ -80,11 +84,12 @@ class QAModelTemplateController extends KleinController
                 throw new Exception('Method not allowed', 405);
             }
 
-            $json = $this->request->body();
+             $json = $this->request->body();
 
-            $this->validateJSON($json);
+             $this->validateJSON($json);
 
-            $model = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
+             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+             $model = QAModelTemplateDao::createFromJSON($json ?? throw new RuntimeException('Missing request body'), $uid);
 
             $this->response->code(201);
 
@@ -109,13 +114,15 @@ class QAModelTemplateController extends KleinController
 
     /**
      * @return Response
+     * @throws TypeError
      */
     public function delete(): Response
     {
         try {
             $id = (int)$this->request->param('id');
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
-            $deleted = QAModelTemplateDao::remove($id, $this->getUser()->uid);
+            $deleted = QAModelTemplateDao::remove($id, $uid);
 
             if (empty($deleted)) {
                 throw new Exception('Model not found', 404);
@@ -138,26 +145,28 @@ class QAModelTemplateController extends KleinController
      * edit model
      *
      * @return Response
+     * @throws TypeError
      */
     public function edit(): Response
     {
         try {
             $id = (int)$this->request->param('id');
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
             $model = QAModelTemplateDao::get([
                 'id' => $id,
-                'uid' => $this->getUser()->uid
+                'uid' => $uid
             ]);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
             }
 
-            $json = $this->request->body();
+             $json = $this->request->body();
 
-            $this->validateJSON($json);
+             $this->validateJSON($json);
 
-            $model = QAModelTemplateDao::editFromJSON($model, $json);
+             $model = QAModelTemplateDao::editFromJSON($model, $json ?? throw new RuntimeException('Missing request body'));
 
             $this->response->code(200);
 
@@ -186,15 +195,17 @@ class QAModelTemplateController extends KleinController
      *
      * @return Response
      * @throws Exception
+     * @throws TypeError
      */
     public function view(): Response
     {
         try {
-            (int)$id = $this->request->param('id');
+            $id = (int)$this->request->param('id');
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
             $model = QAModelTemplateDao::get([
                 'id' => $id,
-                'uid' => $this->getUser()->uid
+                'uid' => $uid
             ]);
 
             if (empty($model)) {
@@ -271,13 +282,16 @@ class QAModelTemplateController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function default(): Response
     {
+        $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+
         $this->response->status()->setCode(200);
 
         return $this->response->json(
-            QAModelTemplateDao::getDefaultTemplate($this->getUser()->uid)
+            QAModelTemplateDao::getDefaultTemplate($uid)
         );
     }
 

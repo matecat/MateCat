@@ -103,7 +103,7 @@ class JobsController extends KleinController
     {
         (new ProjectAccessValidator($this, $this->project))->validate();
 
-        JobDao::updateJobStatus($this->chunk, $status);
+        (new JobDao())->updateJobStatus($this->chunk, $status);
         $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($this->chunk);
         SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
         $this->response->json(['code' => 1, 'data' => "OK", 'status' => $status]);

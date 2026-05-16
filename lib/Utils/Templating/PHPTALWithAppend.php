@@ -5,21 +5,50 @@ namespace Utils\Templating;
 use PHPTAL;
 
 /**
- * Created by PhpStorm.
- * User: fregini
- * Date: 02/05/16
- * Time: 11:09
+ * @property string $basepath
+ * @property string $hostpath
+ * @property string $build_number
+ * @property string $support_mail
+ * @property PHPTalBoolean $enableMultiDomainApi
+ * @property int $ajaxDomainsNumber
+ * @property int $maxFileSize
+ * @property int $maxTMXFileSize
+ * @property array<string, array<int, array{key: string, value: string}>>|null $flashMessages
+ * @property PHPTalMap $user_plugins
+ * @property PHPTalBoolean $isLoggedIn
+ * @property string $userMail
+ * @property PHPTalBoolean $isAnInternalUser
+ * @property list<string> $footer_js
+ * @property list<string> $config_js
+ * @property list<string> $css_resources
+ * @property string $googleAuthURL
+ * @property string $githubAuthUrl
+ * @property string $linkedInAuthUrl
+ * @property string $microsoftAuthUrl
+ * @property string $facebookAuthUrl
+ * @property PHPTalBoolean $googleDriveEnabled
+ * @property string $gdriveAuthURL
+ * @property string $x_nonce_unique_id
+ * @property string|null $x_self_ajax_location_hosts
+ * @property string $vite_html
+ * @property PHPTalBoolean $project_completion_feature_enabled
+ * @property string $job_completion_current_phase
+ * @property string|int $job_completion_last_event_id
+ * @property PHPTalBoolean $job_marked_complete
+ * @property PHPTalBoolean $mark_as_complete_button_enabled
+ * @property PHPTalBoolean|bool $footer_show_revise_link
  */
 class PHPTALWithAppend extends PHPTAL
 {
 
+    /** @var array<string, list<mixed>> */
     protected array $internal_store = [];
 
     /**
      *
      * This method populates an array of arrays that can be used
      * to push values on the template so that plugins can append
-     * their own JavaScripts or assets.
+     * their own JavaScript or assets.
      *
      * @param string $name
      * @param mixed $value

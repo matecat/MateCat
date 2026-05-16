@@ -11,6 +11,7 @@ namespace Model\QualityReport;
 use ArrayObject;
 use DateMalformedStringException;
 use DateTime;
+use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\DataAccess\Database;
@@ -20,10 +21,12 @@ use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\Users\UserDao;
+use PDOException;
 use Plugins\Features\ReviewExtended\IChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\RevisionFactory;
 use ReflectionException;
+use TypeError;
 
 
 class QualityReportModel
@@ -34,12 +37,16 @@ class QualityReportModel
      */
     protected JobStruct $chunk;
 
+    /** @var array<string, mixed> */
     protected array $quality_report_structure = [];
 
+    /** @var ArrayObject<string, mixed> */
     private ArrayObject $current_file;
 
+    /** @var ArrayObject<string, mixed> */
     private ArrayObject $current_segment;
 
+    /** @var ArrayObject<string, mixed> */
     private ArrayObject $current_issue;
 
     private ?ChunkReviewStruct $chunk_review = null;
@@ -49,19 +56,25 @@ class QualityReportModel
      */
     private ?IChunkReviewModel $chunk_review_model = null;
 
-    private array $all_segments = [];
-
     private ?string $date_format = null;
 
     private float $avg_time_to_edit = 0.0;
     private float $avg_edit_distance = 0.0;
 
-    /**
-     * @param JobStruct $chunk
-     */
-    public function __construct(JobStruct $chunk)
-    {
+    private QualityReportDao $qualityReportDao;
+    private ChunkReviewDao $chunkReviewDao;
+    private FeedbackDAO $feedbackDao;
+
+    public function __construct(
+        JobStruct $chunk,
+        ?QualityReportDao $qualityReportDao = null,
+        ?ChunkReviewDao $chunkReviewDao = null,
+        ?FeedbackDAO $feedbackDao = null,
+    ) {
         $this->chunk = $chunk;
+        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao();
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+        $this->feedbackDao = $feedbackDao ?? new FeedbackDAO();
     }
 
     public function getChunk(): JobStruct
@@ -75,22 +88,24 @@ class QualityReportModel
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function getStructure(): array
     {
-        $records = QualityReportDao::getSegmentsForQualityReport($this->chunk);
+        $records = $this->getSegmentsForQualityReport();
 
         return $this->buildQualityReportStructure($records);
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getChunkReview(): ChunkReviewStruct
     {
         if ($this->chunk_review == null) {
-            $this->chunk_review = (new ChunkReviewDao())->findChunkReviews($this->chunk)[0];
+            $this->chunk_review = $this->chunkReviewDao->findChunkReviews($this->chunk)[0];
         }
 
         return $this->chunk_review;
@@ -110,7 +125,7 @@ class QualityReportModel
     public function getChunkReviewModel(): IChunkReviewModel
     {
         if ($this->chunk_review_model == null) {
-            $this->chunk_review_model = RevisionFactory::initFromProject($this->getProject())->getChunkReviewModel($this->getChunkReview());
+            $this->chunk_review_model = $this->createRevisionFactory()->getChunkReviewModel($this->getChunkReview());
         }
 
         return $this->chunk_review_model;
@@ -118,6 +133,7 @@ class QualityReportModel
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function resetScore(int $event_id): void
     {
@@ -127,13 +143,13 @@ class QualityReportModel
             'penalty_points' => $chunkReview->penalty_points,
             'reviewed_words_count' => $chunkReview->reviewed_words_count,
             'is_pass' => $chunkReview->is_pass
-        ]);
+        ]) ?: null;
 
         $chunkReview->penalty_points = 0;
         $chunkReview->reviewed_words_count = 0;
-        $chunkReview->is_pass = 1;
+        $chunkReview->is_pass = true;
 
-        ChunkReviewDao::updateStruct($chunkReview, [
+        $this->updateChunkReview($chunkReview, [
             'fields' => [
                 'undo_data',
                 'penalty_points',
@@ -151,21 +167,58 @@ class QualityReportModel
         $this->date_format = $format;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     * @throws PDOException
+     */
+    protected function getSegmentsForQualityReport(): array
+    {
+        return QualityReportDao::getSegmentsForQualityReport($this->chunk);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function createRevisionFactory(): RevisionFactory
+    {
+        return RevisionFactory::initFromProject($this->getProject());
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunkReview
+     * @param array<string, mixed> $options
+     * @throws Exception
+     */
+    protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
+    {
+        (new ChunkReviewDao())->updateStruct($chunkReview, $options);
+    }
+
+    /**
+     * @throws PDOException
+     */
     private function __setAverages(): void
     {
-        $dao = new QualityReportDao();
-        $avgs = $dao->getAverages($this->getChunk());
+        $avgs = $this->qualityReportDao->getAverages($this->getChunk());
+
+        if ($avgs === false) {
+            $this->avg_edit_distance = 0.0;
+            $this->avg_time_to_edit = 0.0;
+            return;
+        }
 
         $this->avg_edit_distance = round($avgs['avg_edit_distance'] / 1000, 2);
         $this->avg_time_to_edit = round($avgs['avg_time_to_edit'] / 1000, 2);
     }
 
     /**
-     * @param array $records
+     * @param array<int, array<string, mixed>> $records
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws DateMalformedStringException
      * @throws Exception
+     * @throws PDOException
      */
     protected function buildQualityReportStructure(array $records): array
     {
@@ -195,6 +248,9 @@ class QualityReportModel
         return $this->quality_report_structure;
     }
 
+    /** @return array<string, mixed>
+     * @throws DomainException
+     */
     protected function getAndDecodePossiblyProjectMetadataJson(): array
     {
         return $this->getProject()->getAllMetadataAsKeyValue();
@@ -206,15 +262,15 @@ class QualityReportModel
      */
     protected function _attachReviewsData(): void
     {
-        $chunk_reviews = (new ChunkReviewDao())->findChunkReviews($this->chunk);
+        $chunk_reviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
 
         $this->quality_report_structure['chunk']['reviews'] = [];
         foreach ($chunk_reviews as $chunk_review) {
             // try to load Revision Extended but should not load the Improved ( deprecated )
-            $chunkReviewModel = RevisionFactory::initFromProject($this->getProject())->getChunkReviewModel($chunk_review);
+            $chunkReviewModel = $this->createRevisionFactory()->getChunkReviewModel($chunk_review);
 
             $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($chunk_review->source_page);
-            $feedback = (new FeedbackDAO())->getFeedback($this->chunk->id, $chunk_review->review_password, $revisionNumber);
+            $feedback = $this->feedbackDao->getFeedback($this->chunk->id, $chunk_review->review_password, $revisionNumber);
 
             $this->quality_report_structure['chunk']['reviews'][] = [
                 'revision_number' => $revisionNumber,
@@ -241,13 +297,14 @@ class QualityReportModel
         if (!empty($completion_event) && isset($completion_event['uid'])) {
             $userDao = new UserDao(Database::obtain());
             $user = $userDao->getByUid($completion_event['uid']);
-            $name = $user->fullName();
+            $name = $user?->fullName() ?? '';
         }
 
         return $name;
     }
 
     /**
+     * @param array<int, array<string, mixed>> $records
      * @throws DateMalformedStringException
      */
     private function buildFilesSegmentsNestedTree(array $records): void
@@ -279,6 +336,7 @@ class QualityReportModel
         }
     }
 
+    /** @param array<string, mixed> $record */
     private function structureNestSegment(array $record): void
     {
         if ($record['original_translation'] == null) {
@@ -299,12 +357,11 @@ class QualityReportModel
             'qa_checks' => []
         ]);
 
-        $this->all_segments[] = $this->current_segment;
-
         $this->current_file['segments'][] = $this->current_segment;
     }
 
     /**
+     * @param array<string, mixed> $record
      * @throws DateMalformedStringException
      */
     private function structureNestIssue(array $record): void
@@ -329,6 +386,7 @@ class QualityReportModel
     }
 
     /**
+     * @param array<string, mixed> $record
      * @throws DateMalformedStringException
      */
     private function structureNestComment(array $record): void
@@ -342,6 +400,7 @@ class QualityReportModel
         $this->current_issue['comments'][] = $comment;
     }
 
+    /** @param array<string, mixed> $record */
     private function structureNestFile(array $record): void
     {
         $this->current_file = new ArrayObject([
@@ -356,15 +415,18 @@ class QualityReportModel
     /**
      * @throws DateMalformedStringException
      */
-    private function filterDate($date)
+    private function filterDate(?string $date): ?string
     {
-        $out = $date;
-        if ($this->date_format != null) {
-            $datetime = new DateTime($date);
-            $out = $datetime->format($this->date_format);
+        if ($date === null) {
+            return null;
         }
 
-        return $out;
+        if ($this->date_format !== null) {
+            $datetime = new DateTime($date);
+            return $datetime->format($this->date_format);
+        }
+
+        return $date;
     }
 
 }

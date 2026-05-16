@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
@@ -18,6 +19,7 @@ use Utils\Registry\AppConfig;
  * Time: 18:47
  *
  */
+#[Group('PersistenceNeeded')]
 class MMTEngineTest extends AbstractTest
 {
 

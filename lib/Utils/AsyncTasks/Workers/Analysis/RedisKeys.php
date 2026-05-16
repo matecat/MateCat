@@ -66,4 +66,10 @@ class RedisKeys
      */
     const string PROJECT_ENDING_SEMAPHORE = 'proj_end_lock:';
 
+    /**
+     * Scale factor for storing fractional word counts as integers in Redis.
+     * Multiply before INCRBY, divide after GET.
+     */
+    const int WORD_COUNT_SCALE = 1000;
+
 }

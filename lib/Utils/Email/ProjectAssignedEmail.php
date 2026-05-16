@@ -9,9 +9,9 @@
 namespace Utils\Email;
 
 
+use DomainException;
 use Exception;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -31,6 +31,9 @@ class ProjectAssignedEmail extends AbstractEmail
      */
     private array $jobs;
 
+    /**
+     * @throws DomainException
+     */
     public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee)
     {
         $this->user = $user;

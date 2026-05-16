@@ -34,6 +34,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function getByJob(): void
     {
@@ -92,12 +93,12 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      * This function sorts the $keys array based on $job_keyList.
      * $keys can contain shared and/or hidden keys
      *
-     * @param $keys
-     * @param $jobKeyList
+     * @param list<ClientTmKeyStruct> $keys
+     * @param list<array<string, mixed>> $jobKeyList
      *
-     * @return array
+     * @return list<ClientTmKeyStruct>
      */
-    private function sortKeysInTheRightOrder($keys, $jobKeyList): array
+    private function sortKeysInTheRightOrder(array $keys, array $jobKeyList): array
     {
         $sortedKeys = [];
 
@@ -107,7 +108,10 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                     return true;
                 }
 
-                // compare only the last 5 chars (hidden keys)
+                if ($key->key === null) {
+                    return false;
+                }
+
                 return substr($jobKey['key'], -5) === substr($key->key, -5);
             });
 
@@ -120,7 +124,9 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
         if (!empty($sortedKeys)) {
             $sortedKeys = array_map(function (ClientTmKeyStruct $jobKey) {
-                $jobKey->name = html_entity_decode($jobKey->name);
+                if ($jobKey->name !== null) {
+                    $jobKey->name = html_entity_decode($jobKey->name);
+                }
 
                 return $jobKey;
             }, $sortedKeys);
@@ -132,6 +138,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function getByUserAndKey(): void
     {
@@ -157,13 +164,15 @@ class TmKeyManagementController extends AbstractStatefulKleinController
     /**
      * @param MemoryKeyStruct $memoryKey
      *
-     * @return array
+     * @return list<string>
      * @throws Exception
+     * @throws \TypeError
      */
     private function _checkForAdaptiveEngines(MemoryKeyStruct $memoryKey): array
     {
         // load tmx in engines with adaptivity
         $engineList = EngineConstants::getAvailableEnginesList();
+        $uid = $this->getUser()->uid ?? throw new Exception('User not authenticated');
 
         $response = [];
 
@@ -175,12 +184,19 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                 $engine = EnginesFactory::createTempInstance($struct);
 
                 if ($engine->isAdaptiveMT()) {
-                    //retrieve OWNER EnginesFactory License
-                    $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($this->getUser()->uid, $engine->getEngineRecord()->class_load); // engine_id
+                     //retrieve OWNER EnginesFactory License
+                     $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
+                        $engineId = $ownerMmtEngineMetaData->value;
+                        if (!is_numeric($engineId)) {
+                            continue;
+                        }
+                        $engine = EnginesFactory::getInstance((int)$engineId);
                         if ($engine->getMemoryIfMine($memoryKey)) {
-                            $response[] = $engine->getEngineRecord()->getEngineType();
+                            $engineType = $engine->getEngineRecord()->getEngineType();
+                            if ($engineType !== null) {
+                                $response[] = $engineType;
+                            }
                         }
                     }
                 }

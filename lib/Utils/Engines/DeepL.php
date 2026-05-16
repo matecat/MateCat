@@ -5,9 +5,10 @@ namespace Utils\Engines;
 use DomainException;
 use Exception;
 use Model\Projects\MetadataDao;
+use TypeError;
 use Utils\Engines\DeepL\DeepLApiClient;
 use Utils\Engines\DeepL\DeepLApiException;
-use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 
 class DeepL extends AbstractEngine
@@ -23,6 +24,7 @@ class DeepL extends AbstractEngine
     /**
      * @return DeepLApiClient
      * @throws Exception
+     * @throws TypeError
      */
     protected function _getClient(): DeepLApiClient
     {
@@ -37,13 +39,14 @@ class DeepL extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return MTResponse[]
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
         $rawValue = json_decode($rawValue, true);
 
@@ -69,7 +72,7 @@ class DeepL extends AbstractEngine
         $target = $parameters['target_lang'];
         $segment = $parameters['text'][0];
 
-        return (new Matches([
+        $match = new Matches([
             'source' => $source,
             'target' => $target,
             'raw_segment' => $segment,
@@ -77,14 +80,22 @@ class DeepL extends AbstractEngine
             'match' => "85%",
             'created-by' => $this->getMTName(),
             'create-date' => date("Y-m-d"),
-        ]))->getMatches(1);
+        ]);
+        $match->featureSet($this->featureSet);
+
+        $response = new GetMemoryResponse(null);
+        $response->matches = [$match];
+
+        return $response;
     }
 
     /**
      * @inheritDoc
+     * @param array<string, mixed> $_config
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         $source = explode("-", $_config['source']);
         $target = explode("-", $_config['target']);
@@ -110,9 +121,9 @@ class DeepL extends AbstractEngine
             'target_lang' => $target[0],
 
             // glossaries (only for DeepL)
-            'formality' => $deepLFormality?->value ?? null,
-            'glossary_id' => $deepLIdGlossary?->value ?? null,
-            'model_type' => $deepLEngineType?->value ?? null
+            'formality' => $deepLFormality?->value,
+            'glossary_id' => $deepLIdGlossary?->value,
+            'model_type' => $deepLEngineType?->value
         ];
 
         $this->_setAdditionalCurlParams(
@@ -126,11 +137,13 @@ class DeepL extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true, true);
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
     /**
      * @inheritDoc
+     * @param mixed $_config
+     * @throws DomainException
      */
     public function set(mixed $_config)
     {
@@ -139,6 +152,8 @@ class DeepL extends AbstractEngine
 
     /**
      * @inheritDoc
+     * @param mixed $_config
+     * @throws DomainException
      */
     public function update(mixed $_config)
     {
@@ -147,6 +162,8 @@ class DeepL extends AbstractEngine
 
     /**
      * @inheritDoc
+     * @param mixed $_config
+     * @throws DomainException
      */
     public function delete(mixed $_config): bool
     {
@@ -154,9 +171,10 @@ class DeepL extends AbstractEngine
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function glossaries(): array
     {
@@ -166,9 +184,10 @@ class DeepL extends AbstractEngine
     /**
      * @param string $id
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function getGlossary(string $id): array
     {
@@ -178,9 +197,10 @@ class DeepL extends AbstractEngine
     /**
      * @param string $id
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function deleteGlossary(string $id): array
     {
@@ -188,11 +208,12 @@ class DeepL extends AbstractEngine
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function createGlossary(array $data): array
     {
@@ -202,9 +223,10 @@ class DeepL extends AbstractEngine
     /**
      * @param string $id
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function getGlossaryEntries(string $id): array
     {

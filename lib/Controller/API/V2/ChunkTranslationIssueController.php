@@ -13,12 +13,16 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\LQA\EntryDao;
+use RuntimeException;
 use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 
 class ChunkTranslationIssueController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
+    /**
+     * @throws RuntimeException
+     */
     public function index(): void
     {
         $this->return404IfTheJobWasDeleted();

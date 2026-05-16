@@ -13,6 +13,7 @@ namespace View\API\V2\Json;
 use Exception;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterActivityLogEntryEvent;
 use Utils\Tools\Utils;
 
 class Activity
@@ -37,28 +38,31 @@ class Activity
         $featureSet = new FeatureSet();
 
         foreach ($this->data as $record) {
+            if (!$record instanceof ActivityLogStruct) {
+                continue;
+            }
+
             if (empty($record->email)) {
                 $record->first_name = "Anonymous";
                 $record->last_name = "User";
                 $record->email = "Unknown";
             }
 
-            /**
-             * @var $record ActivityLogStruct
-             */
-            $record = $featureSet->filter('filterActivityLogEntry', $record);
+            $filterActivityLogEntryEvent = new FilterActivityLogEntryEvent($record);
+            $featureSet->dispatch($filterActivityLogEntryEvent);
+            $filteredRecord = $filterActivityLogEntryEvent->getRecord();
 
             $formatted = [
-                'id' => (int)$record->ID,
-                'action' => $record->getAction($record->action),
-                'email' => $record->email,
-                'event_date' => Utils::api_timestamp($record->event_date),
-                'first_name' => $record->first_name,
-                'id_job' => (int)$record->id_job,
-                'id_project' => (int)$record->id_project,
-                'ip' => $record->ip,
-                'last_name' => $record->last_name,
-                'uid' => (int)$record->uid
+                'id' => (int)$filteredRecord->ID,
+                'action' => $filteredRecord->getAction($filteredRecord->action),
+                'email' => $filteredRecord->email,
+                'event_date' => Utils::api_timestamp($filteredRecord->event_date),
+                'first_name' => $filteredRecord->first_name,
+                'id_job' => (int)$filteredRecord->id_job,
+                'id_project' => (int)$filteredRecord->id_project,
+                'ip' => $filteredRecord->ip,
+                'last_name' => $filteredRecord->last_name,
+                'uid' => (int)$filteredRecord->uid
             ];
 
             $out[] = $formatted;

@@ -8,16 +8,19 @@ const usePortal = (el) => {
   })
 
   const createPortal = useCallback((targetEl) => {
+    let created = false
     if (targetEl === document.body) {
       targetEl = document.createElement('div')
       targetEl.className = 'portal-container'
       document.body.appendChild(targetEl)
+      created = true
     }
 
-    const Portal = ({children}) => ReactDOM.createPortal(children, targetEl)
+    const Portal = ({children}) =>
+      targetEl ? ReactDOM.createPortal(children, targetEl) : null
 
     const remove = () => {
-      if (targetEl.parentNode) {
+      if (created && targetEl && targetEl.parentNode) {
         targetEl.parentNode.removeChild(targetEl)
       }
     }

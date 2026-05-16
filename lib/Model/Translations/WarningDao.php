@@ -3,10 +3,12 @@
 
 namespace Model\Translations;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
 use Model\Warnings\GlobalWarningStruct;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
 
@@ -23,9 +25,15 @@ class WarningDao extends AbstractDao
         ";
 
     /**
+     * @param array<int, int> $projectIds
+     *
+     * @return array<int, WarningsCountStruct>
+     *
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
-    public function getWarningsByProjectIds($projectIds): array
+    public function getWarningsByProjectIds(array $projectIds): array
     {
         $statuses[] = TranslationStatus::STATUS_TRANSLATED;
         $statuses[] = TranslationStatus::STATUS_APPROVED;
@@ -60,6 +68,7 @@ class WarningDao extends AbstractDao
      * @param JobStruct $chunk
      *
      * @return int
+     * @throws PDOException
      */
     public function getErrorsByChunk(JobStruct $chunk): int
     {
@@ -78,15 +87,17 @@ class WarningDao extends AbstractDao
         return $result['count'] ?? 0;
     }
 
-    protected function _buildResult(array $array_result)
-    {
-        // TODO: Implement _buildResult() method.
-    }
-
     /**
+     * @param int $jid
+     * @param string $jpassword
+     *
+     * @return array<int, GlobalWarningStruct>
+     *
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
-    public static function getWarningsByJobIdAndPassword($jid, $jpassword): array
+    public static function getWarningsByJobIdAndPassword(int $jid, string $jpassword): array
     {
         $thisDao = new self();
         $db = $thisDao->getDatabaseHandler();

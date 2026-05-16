@@ -22,6 +22,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
+use PDOException;
 use ReflectionException;
 use Throwable;
 use View\API\V2\Json\Project;
@@ -80,7 +81,7 @@ class TeamsProjectsController extends KleinController
      */
     protected function _appendSingleProjectTeamValidators(): TeamsProjectsController
     {
-        $this->project = ProjectDao::findById($this->request->param('id_project')); //check login and auth before request the project info
+        $this->project = ProjectDao::staticFindById($this->request->param('id_project')); //check login and auth before request the project info
         $this->appendValidator((new TeamProjectValidator($this))->setProject($this->project));
         $this->appendValidator((new ProjectExistsInTeamValidator($this))->setProject($this->project));
 
@@ -99,9 +100,9 @@ class TeamsProjectsController extends KleinController
     }
 
     /**
-     * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function getByName(): void
     {

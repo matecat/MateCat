@@ -8,7 +8,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
@@ -100,7 +100,7 @@ class SplitSegmentController extends KleinController
         }
 
         // check Job password
-        $jobStruct = ChunkDao::getByIdAndPassword($id_job, $password);
+        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail((int)$id_job, $password);
 
         $this->featureSet->loadForProject($jobStruct->getProject());
 

@@ -2,6 +2,7 @@
 
 namespace Model\Pagination;
 
+use Exception;
 use Model\DataAccess\DaoCacheTrait;
 use PDO;
 use ReflectionException;
@@ -34,6 +35,7 @@ class Pager
      *
      * @return array
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getPagination(int $totals, PaginationParameters $paginationParameters): array
     {
@@ -70,6 +72,8 @@ class Pager
 
         $paginationStatement->setFetchMode(PDO::FETCH_CLASS, $paginationParameters->getFetchClass());
         $paginationStatement->execute($paginationParameters->getBindParams());
+
+        /** @var list<mixed> $result */
         $result = $paginationStatement->fetchAll();
 
         if (!empty($paginationParameters->getCacheKeyMap())) {

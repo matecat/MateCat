@@ -15,6 +15,7 @@ use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Email\WelcomeEmail;
 use Utils\Tools\Utils;
 
@@ -56,9 +57,8 @@ class OAuthSignInModel
      */
     public function setAccessToken(string $token): void
     {
-        $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
-            json_encode($token)
-        );
+        $encoded = json_encode($token) ?: $token;
+        $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt($encoded);
     }
 
     public function getUser(): UserStruct
@@ -102,11 +102,15 @@ class OAuthSignInModel
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     protected function _updateProfilePicture(): void
     {
+        $uid = $this->user->uid ?? throw new RuntimeException('User uid must be set before updating profile picture');
+        $profilePictureUrl = $this->profilePictureUrl ?? throw new RuntimeException('Profile picture url must be set before updating profile picture');
+
         $dao = new MetadataDao();
-        $dao->set($this->user->uid, $this->provider . '_picture', $this->profilePictureUrl);
+        $dao->set($uid, $this->provider . '_picture', $profilePictureUrl);
     }
 
     public function setProfilePicture(?string $pictureUrl = null): void
@@ -116,11 +120,14 @@ class OAuthSignInModel
 
     /**
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     protected function _updateProvider(): void
     {
+        $uid = $this->user->uid ?? throw new RuntimeException('User uid must be set before updating provider metadata');
+
         $dao = new MetadataDao();
-        $dao->set($this->user->uid, 'oauth_provider', $this->provider);
+        $dao->set($uid, 'oauth_provider', $this->provider);
     }
 
     public function setProvider(string $provider): void
@@ -135,7 +142,7 @@ class OAuthSignInModel
     protected function _createNewUser(): void
     {
         $this->user->create_date = Utils::mysqlTimestamp(time());
-        $this->user->uid = UserDao::insertStruct($this->user);
+        $this->user->uid = (new UserDao())->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after OAuth insert');
 
         $dao = new TeamDao();
         $dao->getDatabaseHandler()->begin();
@@ -149,7 +156,7 @@ class OAuthSignInModel
     protected function _updateExistingUser(UserStruct $existing_user): void
     {
         $this->user->uid = $existing_user->uid;
-        UserDao::updateStruct($this->user, [
+        (new UserDao())->updateStruct($this->user, [
             'fields' =>
                 ['oauth_access_token']
         ]);

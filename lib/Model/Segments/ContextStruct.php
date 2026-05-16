@@ -24,10 +24,11 @@ class ContextStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     public int $id_segment;
     public ?int $id_file = null;
     /**
-     * @var string|array
+     * @var array<string, mixed>|string
      */
     public mixed $context_json;
 
+    /** @param array<string, mixed> $array_params */
     public function __construct(array $array_params = [], $decode = true)
     {
         parent::__construct($array_params);

@@ -4,6 +4,7 @@ namespace Utils\Validator;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
+use Exception;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\LQA\ChunkReviewDao;
 use ReflectionException;
@@ -12,6 +13,12 @@ use Utils\Validator\Contracts\ValidatorObject;
 
 class IsJobRevisionValidator extends AbstractValidator
 {
+    private ChunkReviewDao $chunkReviewDao;
+
+    public function __construct(?ChunkReviewDao $chunkReviewDao = null)
+    {
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+    }
 
     /**
      * Validates the provided ValidatorObject for specific criteria, ensuring required parameters are present
@@ -22,6 +29,7 @@ class IsJobRevisionValidator extends AbstractValidator
      * @throws ValidationError If the required parameters are missing.
      * @throws DomainException
      * @throws ReflectionException
+     * @throws Exception
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
@@ -34,7 +42,7 @@ class IsJobRevisionValidator extends AbstractValidator
         }
 
         /** @var ShapelessConcreteStruct $data */
-        $data = (new ChunkReviewDao())->isTOrR1OrR2($object['jid'], $object['password']);
+        $data = $this->chunkReviewDao->isTOrR1OrR2($object['jid'], $object['password']);
 
         if (empty($data) || ($data->t == 0 and $data->r1 == 0 and $data->r2 == 0)) {
             throw new DomainException('Invalid combination jid/password');

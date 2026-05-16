@@ -17,7 +17,7 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
     /**
      * MAP to convert the values to the right string definition
      * (easy to put in another file or change localization)
-     * @var array
+     * @var array<int, string>
      */
     protected static array $actionsStrings = [
 
@@ -80,6 +80,7 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     const int TRANSLATION_DELIVERED = 101;
 
+    /** @var list<array<string, mixed>> */
     protected array $cached_results = [];
 
     /**
@@ -102,10 +103,7 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public int $action;
 
-    /**
-     * @var string
-     */
-    public string $ip;
+    public ?string $ip = null;
 
     /**
      * @var ?int

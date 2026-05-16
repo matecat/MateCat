@@ -4,6 +4,8 @@ namespace Utils\LQA\QA;
 
 use Exception;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\CheckTagMismatchEvent;
+use Model\FeaturesBase\Hook\Event\Filter\CheckTagPositionsEvent;
 use Utils\LQA\QA;
 use Utils\Tools\CatUtils;
 
@@ -37,7 +39,7 @@ class TagChecker
     /** @var FeatureSet|null Feature set for plugin customizations */
     protected ?FeatureSet $featureSet = null;
 
-    /** @var array Tags with position errors */
+    /** @var list<string> Tags with position errors */
     protected array $tagPositionError = [];
 
     /** @var QA|null Parent QA instance for feature set callbacks */
@@ -134,6 +136,9 @@ class TagChecker
         $this->targetSegLang = $lang;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getTagPositionError(): array
     {
         return $this->tagPositionError;
@@ -175,13 +180,19 @@ class TagChecker
     protected function checkTagCountMismatch(int $srcNodeCount, int $trgNodeCount): int
     {
         if ($this->featureSet && $this->qaInstance) {
-            $this->errorManager->addError($this->featureSet->filter('checkTagMismatch', ErrorManager::ERR_NONE, $this->qaInstance));
+            $checkTagMismatchEvent = new CheckTagMismatchEvent(ErrorManager::ERR_NONE, $this->qaInstance);
+            $this->featureSet->dispatch($checkTagMismatchEvent);
+            $this->errorManager->addError($checkTagMismatchEvent->getErrorCode());
         }
 
         if ($srcNodeCount != $trgNodeCount) {
-            $errorCode = ($this->featureSet && $this->qaInstance)
-                ? $this->featureSet->filter('checkTagMismatch', ErrorManager::ERR_COUNT, $this->qaInstance)
-                : ErrorManager::ERR_COUNT;
+            if ($this->featureSet && $this->qaInstance) {
+                $checkTagMismatchEvent = new CheckTagMismatchEvent(ErrorManager::ERR_COUNT, $this->qaInstance);
+                $this->featureSet->dispatch($checkTagMismatchEvent);
+                $errorCode = $checkTagMismatchEvent->getErrorCode();
+            } else {
+                $errorCode = ErrorManager::ERR_COUNT;
+            }
             $this->errorManager->addError($errorCode);
         }
 
@@ -195,9 +206,13 @@ class TagChecker
      */
     public function checkTagPositions(): void
     {
-        $customCheckTagPositions = ($this->featureSet && $this->qaInstance)
-            ? $this->featureSet->filter('checkTagPositions', ErrorManager::ERR_NONE, $this->qaInstance)
-            : ErrorManager::ERR_NONE;
+        if ($this->featureSet && $this->qaInstance) {
+            $checkTagPositionsEvent = new CheckTagPositionsEvent(ErrorManager::ERR_NONE, $this->qaInstance);
+            $this->featureSet->dispatch($checkTagPositionsEvent);
+            $customCheckTagPositions = $checkTagPositionsEvent->getErrorCode();
+        } else {
+            $customCheckTagPositions = ErrorManager::ERR_NONE;
+        }
 
         if ($customCheckTagPositions !== true) {
             $this->performTagPositionCheck($this->sourceSeg, $this->targetSeg);
@@ -246,6 +261,12 @@ class TagChecker
         }
     }
 
+    /**
+     * @param list<string> $_opening_toCheck
+     * @param list<string> $_selfClosing_toCheck
+     *
+     * @return array<int, string>
+     */
     private function normalizeTags(array $_opening_toCheck, array $_selfClosing_toCheck): array
     {
         $_normalizedTags = array_filter($_opening_toCheck, function ($v) {
@@ -261,6 +282,11 @@ class TagChecker
         return $_normalizedTags;
     }
 
+    /**
+     * @param array<string> $tags
+     *
+     * @return list<string>
+     */
     private function extractIdAttributes(array $tags): array
     {
         $matches = [];
@@ -276,6 +302,11 @@ class TagChecker
         return $matches;
     }
 
+    /**
+     * @param array<string> $tags
+     *
+     * @return list<string>
+     */
     private function extractEquivTextAttributes(array $tags): array
     {
         $matches = [];
@@ -291,6 +322,10 @@ class TagChecker
         return $matches;
     }
 
+    /**
+     * @param array<int, string> $src
+     * @param array<int, string> $trg
+     */
     private function checkTagPositionsAndAddTagOrderError(array $src, array $trg): void
     {
         foreach ($trg as $pos => $value) {
@@ -304,6 +339,11 @@ class TagChecker
         }
     }
 
+    /**
+     * @param list<string> $src
+     * @param list<string> $trg
+     * @param list<string> $originalTargetValues
+     */
     private function checkContentAndAddTagMismatchError(array $src, array $trg, array $originalTargetValues): void
     {
         foreach ($trg as $pos => $value) {
@@ -394,9 +434,17 @@ class TagChecker
         }
 
         $this->domHandler->setTrgDom($this->domHandler->loadDom($this->targetSeg, ErrorManager::ERR_TARGET));
-        $this->domHandler->setNormalizedTrgDOM($this->domHandler->getTrgDom());
+
+        $trgDom = $this->domHandler->getTrgDom();
+        if ($trgDom !== null) {
+            $this->domHandler->setNormalizedTrgDOM($trgDom);
+        }
     }
 
+    /**
+     * @param array<string> $source_tags
+     * @param array<string> $target_tags
+     */
     private function checkWhiteSpaces(array $source_tags, array $target_tags): void
     {
         $diffS = array_diff($target_tags, $source_tags);
@@ -406,6 +454,9 @@ class TagChecker
         $this->checkDiff($diffT);
     }
 
+    /**
+     * @param array<string> $diff
+     */
     private function checkDiff(array $diff = []): void
     {
         foreach ($diff as $diffItem) {
@@ -417,4 +468,3 @@ class TagChecker
         }
     }
 }
-

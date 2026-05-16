@@ -6,6 +6,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -18,6 +19,8 @@ class MetadataDao extends AbstractDao
     /**
      * @param int $id
      * @return MetadataStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function allByProjectId(int $id): array
@@ -40,6 +43,7 @@ class MetadataDao extends AbstractDao
      * @param string|null $metadataKey An optional metadata key to target specific metadata within the project's cache. If null, the entire project's metadata cache will be destroyed.
      *
      * @return bool Returns true if the metadata cache was successfully destroyed, otherwise false.
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyMetadataCache(int $project_id, ?string $metadataKey = null): bool
@@ -63,6 +67,8 @@ class MetadataDao extends AbstractDao
      * @param int $id_project
      * @param string $key
      * @return MetadataStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function get(int $id_project, string $key): ?MetadataStruct
@@ -88,6 +94,7 @@ class MetadataDao extends AbstractDao
      * @param string $value
      *
      * @return boolean
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function set(int $id_project, string $key, string $value): bool
@@ -109,7 +116,7 @@ class MetadataDao extends AbstractDao
         $this->destroyMetadataCache($id_project);
         $this->destroyMetadataCache($id_project, $key);
 
-        return $conn->lastInsertId();
+        return $stmt->rowCount() > 0;
     }
 
     /**
@@ -118,6 +125,7 @@ class MetadataDao extends AbstractDao
      * @param int $id_project
      * @param array<string, string> $metadata key => value pairs to upsert
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function bulkSet(int $id_project, array $metadata): void
@@ -154,6 +162,7 @@ class MetadataDao extends AbstractDao
 
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function delete(int $id_project, string $key): void
@@ -178,21 +187,17 @@ class MetadataDao extends AbstractDao
         return "{$key}_chunk_{$chunk->id}_$chunk->password";
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
      * @param int $id_project
      *
-     * @return array|null
+     * @return array<string, mixed>
      */
-    public function getProjectStaticSubfilteringCustomHandlers(int $id_project): ?array
+    public function getProjectStaticSubfilteringCustomHandlers(int $id_project): array
     {
         try {
             $subfiltering = $this->setCacheTTL(86400)->get($id_project, ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
 
-            return $subfiltering?->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return $subfiltering->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }

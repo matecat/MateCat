@@ -24,8 +24,11 @@ namespace Model\DataAccess;
 trait TransactionalTrait
 {
 
-    private static bool $__transactionStarted = false;
+    protected static bool $__transactionStarted = false;
 
+    /**
+     * @throws \PDOException
+     */
     protected function openTransaction(): void
     {
         if (!Database::obtain()->getConnection()->inTransaction()) {
@@ -34,6 +37,9 @@ trait TransactionalTrait
         }
     }
 
+    /**
+     * @throws \PDOException
+     */
     protected function commitTransaction(): void
     {
         if (static::$__transactionStarted) {
@@ -42,6 +48,9 @@ trait TransactionalTrait
         }
     }
 
+    /**
+     * @throws \PDOException
+     */
     protected function rollbackTransaction(): void
     {
         if (static::$__transactionStarted) {

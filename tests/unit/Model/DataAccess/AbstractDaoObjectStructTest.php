@@ -200,6 +200,53 @@ class AbstractDaoObjectStructTest extends AbstractTest
         $this->assertSame(date('c', $ts), $this->struct->email);
     }
 
+    #[Test]
+    public function setTimestampThrowsDomainExceptionForUnknownAttribute(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessageMatches('/Unknown property/');
+
+        $this->struct->setTimestamp('nonexistent_attribute', time());
+    }
+
+    #[Test]
+    public function constructorThrowsDomainExceptionForUnknownProperty(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessageMatches('/Unknown property/');
+
+        new ConcreteTestStruct(['unknown_property' => 'value']);
+    }
+
+    // ── toArray() with mask ──────────────────────────────────────────
+
+    #[Test]
+    public function toArrayWithMaskReturnsOnlySpecifiedProperties(): void
+    {
+        $this->struct->name  = 'Eve';
+        $this->struct->age   = 28;
+        $this->struct->email = 'eve@example.com';
+
+        $result = $this->struct->toArray(['name', 'email']);
+
+        $this->assertSame(['name' => 'Eve', 'email' => 'eve@example.com'], $result);
+        $this->assertArrayNotHasKey('age', $result);
+    }
+
+    #[Test]
+    public function toArrayWithNullMaskReturnsAllPublicProperties(): void
+    {
+        $this->struct->name  = 'Frank';
+        $this->struct->age   = 35;
+        $this->struct->email = 'frank@test.com';
+
+        $result = $this->struct->toArray(null);
+
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('age', $result);
+        $this->assertArrayHasKey('email', $result);
+    }
+
     // ── getArrayCopy() ────────────────────────────────────────────
 
     #[Test]

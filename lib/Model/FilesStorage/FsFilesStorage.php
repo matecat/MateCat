@@ -4,11 +4,13 @@ namespace Model\FilesStorage;
 
 use Exception;
 use FilesystemIterator;
+use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -166,12 +168,12 @@ class FsFilesStorage extends AbstractFilesStorage
     /**
      * Rebuild the filename that will be taken from disk in the cache directory
      *
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
-     * @return bool|string
+     * @return false|string
      */
-    public function getOriginalFromCache($hash, $lang): false|string
+    public function getOriginalFromCache(string $hash, string $lang): false|string
     {
         //compose path
         $cacheTree = implode(DIRECTORY_SEPARATOR, static::composeCachePath($hash));
@@ -193,7 +195,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $hash
      * @param string $lang
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getXliffFromCache(string $hash, string $lang): false|string
     {
@@ -219,6 +221,8 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string|null $newFileName
      *
      * @return bool
+     * @throws UnexpectedValueException
+     * @throws Exception
      */
     public function moveFromCacheToFileDir(string $dateHashPath, string $lang, string $idFile, ?string $newFileName = null): bool
     {
@@ -229,8 +233,8 @@ class FsFilesStorage extends AbstractFilesStorage
         $fileDir = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
 
-        $this->logger->debug($fileDir);
-        $this->logger->debug($cacheDir);
+        $this->logger?->debug($fileDir);
+        $this->logger?->debug($cacheDir);
 
         $res = true;
         //check if it doesn't exist
@@ -248,17 +252,11 @@ class FsFilesStorage extends AbstractFilesStorage
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
-        $this->logger->debug($origDir);
+        $this->logger?->debug($origDir);
 
         $origFilePath = $this->getSingleFileInPath($origDir);
-        $tmpOrigFileName = $origFilePath;
-        if (is_file($origFilePath)) {
-            /*
-             * Force the new filename if it is provided
-             */
-            if (!empty($newFileName)) {
-                $tmpOrigFileName = $newFileName;
-            }
+        if (is_string($origFilePath) && is_file($origFilePath)) {
+            $tmpOrigFileName = !empty($newFileName) ? $newFileName : $origFilePath;
             $res &= link($origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . static::basename_fix($tmpOrigFileName));
         }
 
@@ -267,24 +265,29 @@ class FsFilesStorage extends AbstractFilesStorage
          * Force the new filename if it is provided
          */
         $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
-        $this->logger->debug($d);
+        $this->logger?->debug($d);
         $convertedFilePath = $this->getSingleFileInPath($d);
 
-        $this->logger->debug($convertedFilePath);
+        if (!is_string($convertedFilePath)) {
+            throw new UnexpectedValueException('Internal Error: Failed to create/copy the file on disk from cache.', -13);
+        }
+
+        $this->logger?->debug($convertedFilePath);
 
         $tmpConvertedFilePath = $convertedFilePath;
         if (!empty($newFileName)) {
             if (!XliffFiles::isXliff($newFileName)) {
+                /** @var string $convertedExtension */
                 $convertedExtension = static::pathinfo_fix($convertedFilePath, PATHINFO_EXTENSION);
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
 
-        $this->logger->debug($convertedFilePath);
+        $this->logger?->debug($convertedFilePath);
 
         $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix($tmpConvertedFilePath);
 
-        $this->logger->debug($dest);
+        $this->logger?->debug($dest);
 
         $res &= link($convertedFilePath, $dest);
 
@@ -301,7 +304,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $id
      * @param string $dateHashPath
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getOriginalFromFileDir(string $id, string $dateHashPath): false|string
     {
@@ -325,7 +328,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $id
      * @param string $dateHashPath
      *
-     * @return bool|string
+     * @return false|string
      */
     public function getXliffFromFileDir(string $id, string $dateHashPath): false|string
     {
@@ -341,7 +344,7 @@ class FsFilesStorage extends AbstractFilesStorage
     /**
      * @param string $dirToScan
      *
-     * @return array
+     * @return array{conversionHashes: array<string, mixed>, zipHashes: list<string>}
      */
     public function getHashesFromDir(string $dirToScan): array
     {
@@ -381,13 +384,15 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $uploadSession
      *
      * @return void
+     * @throws UnexpectedValueException
+     * @throws Exception
      */
     public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void
     {
         $destination = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         self::ensureDirectoryExists($destination);
 
-        /** @var RecursiveDirectoryIterator $iterator */
+        /** @var SplFileInfo $item */
         foreach (
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS),
@@ -395,14 +400,41 @@ class FsFilesStorage extends AbstractFilesStorage
             ) as $item
         ) {
             if ($item->isDir()) {
+                /**
+                 * RecursiveIteratorIterator at the C level delegates unknown method calls to
+                 * the active sub-iterator (RecursiveDirectoryIterator).
+                 *
+                 * It's PHP SPL's internal "magic proxy" at the C level.
+                 * Unlikely to break (it's been like this since PHP 5.1+), but it's not contractual.
+                 *
+                 * @noinspection PhpUndefinedMethodInspection
+                 */
                 mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
+                /**
+                 * RecursiveIteratorIterator at the C level delegates unknown method calls to
+                 * the active sub-iterator (RecursiveDirectoryIterator).
+                 *
+                 * It's PHP SPL's internal "magic proxy" at the C level.
+                 * Unlikely to break (it's been like this since PHP 5.1+), but it's not contractual.
+                 *
+                 * @noinspection PhpUndefinedMethodInspection
+                 */
                 $subPathName = $iterator->getSubPathName();
 
                 if (stripos($subPathName, "|") !== false) {
                     // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
                     $short_hash = sha1($subPathName);
 
+                    /**
+                     * RecursiveIteratorIterator at the C level delegates unknown method calls to
+                     * the active sub-iterator (RecursiveDirectoryIterator).
+                     *
+                     * It's PHP SPL's internal "magic proxy" at the C level.
+                     * Unlikely to break (it's been like this since PHP 5.1+), but it's not contractual.
+                     *
+                     * @noinspection PhpUndefinedMethodInspection
+                     */
                     //TODO check this separator: could be the same for S3 and FS ?
                     $pathParts = explode("|", $iterator->getSubPathName());
                     $lang = array_pop($pathParts);
@@ -435,7 +467,10 @@ class FsFilesStorage extends AbstractFilesStorage
 
     /**
      * @param string $id_project
-     * @param array $segments_metadata
+     * @param array<string|int, mixed> $segments_metadata
+     *
+     * @return void
+     * @throws UnexpectedValueException
      */
     public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void
     {
@@ -448,11 +483,17 @@ class FsFilesStorage extends AbstractFilesStorage
     /**
      * @param int $id_project
      *
-     * @return array
+     * @return array<string|int, mixed>
+     * @throws UnexpectedValueException
      */
     public static function getFastAnalysisData(int $id_project): array
     {
-        $analysisData = unserialize(file_get_contents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser"));
+        $rawContent = file_get_contents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser");
+        if ($rawContent === false) {
+            throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
+        }
+
+        $analysisData = unserialize($rawContent);
         if ($analysisData === false) {
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }
@@ -483,6 +524,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $zipPath
      *
      * @return bool
+     * @throws Exception
      */
     public function cacheZipArchive(string $hash, string $zipPath): bool
     {
@@ -525,28 +567,30 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $projectID
      *
      * @return bool
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool
     {
         $datePath = $this->getDatePath($create_date);
 
-        $fileName = static::basename_fix($this->getSingleFileInPath($this->zipDir . DIRECTORY_SEPARATOR . $zipHash));
+        $zipFilePath = $this->getSingleFileInPath($this->zipDir . DIRECTORY_SEPARATOR . $zipHash);
+        if (!is_string($zipFilePath)) {
+            return false;
+        }
 
-        //destination dir
+        $fileName = static::basename_fix($zipFilePath);
+
         $newZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
 
-        //check if it doesn't exist
-        //make files' directory structure
         $res = $this->ensureDirectoryExists($newZipDir);
         if (!$res) {
             return false;
         }
 
-        //link original
-        $outcome1 = link($this->getSingleFileInPath($this->zipDir . DIRECTORY_SEPARATOR . $zipHash), $newZipDir . DIRECTORY_SEPARATOR . $fileName);
+        $outcome1 = link($zipFilePath, $newZipDir . DIRECTORY_SEPARATOR . $fileName);
 
         if (!$outcome1) {
-            //Failed to copy the original file zip
             return false;
         }
 
@@ -561,10 +605,16 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $zipName
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string
     {
-        $datePath = date_create($projectDate)->format('Ymd');
+        $date = date_create($projectDate);
+        if ($date === false) {
+            throw new InvalidArgumentException("Invalid date string: '$projectDate'");
+        }
+
+        $datePath = $date->format('Ymd');
 
         return $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
     }
@@ -574,10 +624,16 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param string $projectID
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     public function getOriginalZipDir(string $projectDate, string $projectID): string
     {
-        $datePath = date_create($projectDate)->format('Ymd');
+        $date = date_create($projectDate);
+        if ($date === false) {
+            throw new InvalidArgumentException("Invalid date string: '$projectDate'");
+        }
+
+        $datePath = $date->format('Ymd');
 
         return $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
     }

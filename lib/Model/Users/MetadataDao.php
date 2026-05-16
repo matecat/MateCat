@@ -2,9 +2,11 @@
 
 namespace Model\Users;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -15,6 +17,11 @@ class MetadataDao extends AbstractDao
     const string _query_metadata_by_uid_key = "SELECT * FROM user_metadata WHERE uid = :uid AND `key` = :key ";
 
     /**
+     * @param array<int, int> $UIDs
+     *
+     * @return array<int|string, list<MetadataStruct>>
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getAllByUidList(array $UIDs): array
@@ -28,14 +35,13 @@ class MetadataDao extends AbstractDao
             " uid IN( " . str_repeat('?,', count($UIDs) - 1) . '?' . " ) "
         );
 
-        /**
-         * @var $rs MetadataStruct[]
-         */
         $rs = $this->_fetchObjectMap(
             $stmt,
             MetadataStruct::class,
             $UIDs
         );
+
+        /** @var MetadataStruct[] $rs */
 
         $resultSet = [];
         foreach ($rs as $metaDataRow) {
@@ -45,7 +51,13 @@ class MetadataDao extends AbstractDao
         return $resultSet;
     }
 
-    public function getAllByUid($uid): array
+    /**
+     * @param int $uid
+     *
+     * @return array<int, MetadataStruct>
+     * @throws PDOException
+     */
+    public function getAllByUid(int $uid): array
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
@@ -59,16 +71,18 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param $uid
-     * @param $key
+     * @param int $uid
+     * @param string $key
      *
      * @return MetadataStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
-    public function get($uid, $key): ?MetadataStruct
+    public function get(int $uid, string $key): ?MetadataStruct
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid_key);
-        /** @var $result MetadataStruct */
+        /** @var MetadataStruct[] $result */
         $result = $this->_fetchObjectMap($stmt, MetadataStruct::class, [
             'uid' => $uid,
             'key' => $key
@@ -78,9 +92,13 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @param int $uid
+     * @param string $key
+     *
+     * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheKey($uid, $key): bool
+    public function destroyCacheKey(int $uid, string $key): bool
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid_key);
 
@@ -90,9 +108,10 @@ class MetadataDao extends AbstractDao
     /**
      * @param int $uid
      * @param string $key
-     * @param array|string $value
+     * @param array<int|string, mixed>|string $value
      *
      * @return MetadataStruct
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function set(int $uid, string $key, array|string $value): MetadataStruct
@@ -126,6 +145,7 @@ class MetadataDao extends AbstractDao
      * @param int $uid
      * @param string $key
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function delete(int $uid, string $key): void
@@ -142,10 +162,4 @@ class MetadataDao extends AbstractDao
         ]);
         $this->destroyCacheKey($uid, $key);
     }
-
-    protected function _buildResult(array $array_result)
-    {
-        // TODO: Implement _buildResult() method.
-    }
-
 }

@@ -9,8 +9,10 @@
 namespace View\API\V2\Json;
 
 
+use Exception;
 use Model\Teams\MembershipStruct;
 use ReflectionException;
+use RuntimeException;
 
 class Membership
 {
@@ -20,13 +22,22 @@ class Membership
      */
     protected array $data;
 
+    /**
+     * @param MembershipStruct[] $data
+     *
+     * @throws \TypeError
+     */
     public function __construct($data)
     {
         $this->data = $data;
     }
 
     /**
+     * @return array<string, mixed>
+     *
+     * @throws Exception
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function renderItem(MembershipStruct $membership): array
     {
@@ -35,9 +46,7 @@ class Membership
             'id_team' => $membership->id_team,
         ];
 
-        if (!is_null($membership->getUser())) {
-            $out['user'] = User::renderItem($membership->getUser());
-        }
+        $out['user'] = User::renderItem($membership->getUser());
 
         $metadata = UserMetadata::renderMetadataCollection($membership->getUserMetadata());
         if (!empty($metadata)) {
@@ -50,7 +59,11 @@ class Membership
     }
 
     /**
+     * @return list<array<string, mixed>>
+     *
+     * @throws Exception
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function render(): array
     {
@@ -63,7 +76,11 @@ class Membership
     }
 
     /**
+     * @return list<array<string, mixed>>
+     *
+     * @throws Exception
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function renderPublic(): array
     {
@@ -79,15 +96,15 @@ class Membership
     }
 
     /**
+     * @return array<string, mixed>|false
+     *
+     * @throws Exception
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function renderItemPublic(MembershipStruct $membership): false|array
     {
-        if (!is_null($membership->getUser())) {
-            return User::renderItemPublic($membership->getUser());
-        } else {
-            return false;
-        }
+        return User::renderItemPublic($membership->getUser());
     }
 
 

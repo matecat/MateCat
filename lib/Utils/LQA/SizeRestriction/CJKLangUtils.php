@@ -9,11 +9,11 @@ class CJKLangUtils
     const string KOREAN_REGEX = '/[\x{3130}-\x{318F}\x{AC00}-\x{D7AF}]/u';
 
     /**
-     * @param $string
+     * @param string $string
      *
      * @return int
      */
-    public static function getMatches($string): int
+    public static function getMatches(string $string): int
     {
         $count = 0;
 

@@ -20,10 +20,7 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import {
-  SETTINGS_PANEL_TABS,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {SETTINGS_PANEL_TABS, SettingsPanel} from '../components/settingsPanel'
 import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
@@ -49,6 +46,16 @@ import {CatToolInterface} from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import ContextPreviewChannel from '../utils/contextPreviewChannel'
+import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
+import useResizable from '../hooks/useResizable'
+import IconRedirect from '../components/icons/IconRedirect'
+import IconDown from '../components/icons/IconDown'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+} from '../components/common/Button/Button'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -79,7 +86,128 @@ function CatTool() {
 
   const startSegmentIdRef = useRef()
   const callbackAfterSegmentsResponseRef = useRef()
+  const {
+    height: contextPreviewHeight,
+    isDragging: isResizing,
+    handleMouseDown: onResizeMouseDown,
+  } = useResizable({initialHeight: 500, minHeight: 100})
 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [segmentHasPreview, setSegmentHasPreview] = useState(false)
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
+  const popupWindowRef = useRef(null)
+  const previewDesiredOpenRef = useRef(false)
+
+  const togglePreview = useCallback(() => {
+    setIsPreviewOpen((prev) => {
+      const next = !prev
+      previewDesiredOpenRef.current = next
+      if (!prev && popupWindowRef.current && !popupWindowRef.current.closed) {
+        popupWindowRef.current.close()
+        popupWindowRef.current = null
+        setIsPopupOpen(false)
+      }
+      return next
+    })
+  }, [])
+
+  useHotkeys(
+    Shortcuts.cattol.events.toggleContextPreview.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    () => togglePreview(),
+    {enableOnContentEditable: true},
+  )
+
+  const openPreviewInNewWindow = useCallback(() => {
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.focus()
+    } else {
+      const width = Math.round(window.screen.width * 0.8)
+      const height = Math.round(window.screen.height * 0.8)
+      const left = Math.round((window.screen.width - width) / 2)
+      const top = Math.round((window.screen.height - height) / 2)
+      popupWindowRef.current = window.open(
+        contextPreviewUrl,
+        'contextPreviewWindow',
+        `width=${width},height=${height},left=${left},top=${top}`,
+      )
+    }
+    setIsPreviewOpen(false)
+    setIsPopupOpen(true)
+  }, [contextPreviewUrl])
+
+  const closePopupAndOpenInline = useCallback(() => {
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.close()
+    }
+    popupWindowRef.current = null
+    setIsPopupOpen(false)
+    setIsPreviewOpen(true)
+    previewDesiredOpenRef.current = true
+  }, [])
+
+  // Detect when the popup window is manually closed by the user
+  useEffect(() => {
+    if (!isPopupOpen) return
+    const interval = setInterval(() => {
+      if (!popupWindowRef.current || popupWindowRef.current.closed) {
+        popupWindowRef.current = null
+        setIsPopupOpen(false)
+        setIsPreviewOpen(previewDesiredOpenRef.current)
+      }
+    }, 500)
+    return () => clearInterval(interval)
+  }, [isPopupOpen])
+
+  useEffect(() => {
+    return ContextPreviewChannel.onMessage((message) => {
+      if (message.type === 'segmentClicked' && message.sid) {
+        SegmentActions.openSegment(message.sid)
+      }
+
+      if (message.type === 'requestSegments') {
+        const segments = SegmentStore.getAllSegments()
+        if (segments && segments.length) {
+          const segmentsList = []
+          for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i]
+            segmentsList.push({
+              sid: seg.sid,
+              source: seg.segment,
+              target: seg.translation,
+              internal_id: seg.internal_id,
+              ...extractSegmentContextFields(seg),
+            })
+          }
+          ContextPreviewChannel.sendMessage({
+            type: 'segments',
+            segments: segmentsList,
+          })
+          const currentSid = SegmentStore.getCurrentSegmentId()
+          if (currentSid) {
+            ContextPreviewChannel.sendMessage({
+              type: 'highlight',
+              sid: currentSid,
+            })
+          }
+        }
+      }
+
+      if (message.type === 'loadMoreSegments' && message.where) {
+        const segmentId =
+          message.where === 'after'
+            ? SegmentStore.getLastSegmentId()
+            : SegmentStore.getFirstSegmentId()
+        setOptions((prevState) => ({
+          ...prevState,
+          segmentId,
+          where: message.where,
+        }))
+      }
+    })
+  }, [])
   const {isLoading: isLoadingSegments, result: segmentsResult} =
     useSegmentsLoader({
       segmentId: options?.segmentId
@@ -223,6 +351,39 @@ function CatTool() {
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
+    const onSegmentOpened = (sid) => {
+      const segFromById = SegmentStore.getSegmentById(sid)
+      const segment =
+        segFromById?.toJS?.() ||
+        SegmentStore.getAllSegments().find((seg) => seg.sid == sid)
+      const {context_url, screenshot} = extractSegmentContextFields(
+        segment ?? {},
+      )
+
+      const hasContent = Boolean(context_url || screenshot)
+      setSegmentHasPreview(hasContent)
+      if (hasContent) {
+        if (!popupWindowRef.current || popupWindowRef.current.closed) {
+          setIsPreviewOpen(previewDesiredOpenRef.current)
+        }
+      } else {
+        setIsPreviewOpen(false)
+      }
+      ContextPreviewChannel.sendMessage({
+        type: 'highlight',
+        sid: Number(sid),
+        context_url: context_url ?? null,
+      })
+    }
+    let lastOpenedSid = null
+    const onSegmentsRendered = () => {
+      const current = SegmentStore.getCurrentSegment()
+      if (!current) return
+      const sid = current.sid
+      if (sid === lastOpenedSid) return
+      lastOpenedSid = sid
+      onSegmentOpened(sid)
+    }
     const checkAnalysisState = ({analysis_complete}) => {
       setIsAnalysisCompleted(analysis_complete)
 
@@ -266,6 +427,10 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
+    SegmentStore.addListener(
+      SegmentConstants.RENDER_SEGMENTS,
+      onSegmentsRendered,
+    )
     CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     const getJobMetadata = ({jobMetadata}) => setJobMetadata(jobMetadata)
@@ -289,6 +454,10 @@ function CatTool() {
       SegmentStore.removeListener(
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.RENDER_SEGMENTS,
+        onSegmentsRendered,
       )
       CatToolStore.removeListener(
         CatToolConstants.SET_PROGRESS,
@@ -334,10 +503,6 @@ function CatTool() {
 
     const {segmentId, data} = segmentsResult
     if (where === 'center') {
-      // Init segments
-      // TODO: da verificare se serve: $(document).trigger('segments:load', data)
-      $(document).trigger('segments:load', data)
-
       if (
         !Object.entries(data.files)
           .map(([, value]) => value.segments)
@@ -381,6 +546,24 @@ function CatTool() {
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       CommonUtils.dispatchCustomEvent('segmentsAdded', {resp: data.files})
     }
+    const segmentsFlat = Object.entries(data.files)
+      .map(([, value]) => value.segments)
+      .flat()
+    const segmentsList = []
+    for (let i = 0; i < segmentsFlat.length; i++) {
+      const seg = segmentsFlat[i]
+      segmentsList.push({
+        sid: seg.sid,
+        source: seg.segment,
+        target: seg.translation,
+        internal_id: seg.internal_id,
+        ...extractSegmentContextFields(seg),
+      })
+    }
+    ContextPreviewChannel.sendMessage({
+      type: 'segments',
+      segments: segmentsList,
+    })
     if (config.isReview) {
       SegmentActions.addPreloadedIssuesToSegment()
     }
@@ -537,6 +720,76 @@ function CatTool() {
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
+      <div
+        id="context-preview-wrapper"
+        className={
+          !isPreviewOpen || isPopupOpen
+            ? `context-preview-wrapper--collapsed${!segmentHasPreview && !isPopupOpen ? ' context-preview-wrapper--tab-hidden' : ''}`
+            : undefined
+        }
+        style={{
+          display:
+            isPreviewOpen && !segmentHasPreview && !isPopupOpen
+              ? 'none'
+              : undefined,
+        }}
+      >
+        {isPreviewOpen && !isPopupOpen ? (
+          <>
+            <div
+              className="context-preview__resize-handle"
+              onMouseDown={onResizeMouseDown}
+            />
+            <div className="context-preview__header">
+              <Button
+                className="context-preview__header-btn"
+                mode={BUTTON_MODE.GHOST}
+                size={BUTTON_SIZE.SMALL}
+                onClick={togglePreview}
+                title="Close preview"
+              >
+                Close
+                <IconDown size={16} />
+              </Button>
+              <span className="context-preview__header-title">
+                Visual context
+              </span>
+              <Button
+                className="context-preview__header-btn"
+                mode={BUTTON_MODE.GHOST}
+                size={BUTTON_SIZE.SMALL}
+                onClick={openPreviewInNewWindow}
+                title="Open in another tab"
+              >
+                Open in another tab
+                <IconRedirect size={16} />
+              </Button>
+            </div>
+            <div
+              className="context-preview__container"
+              id="context-preview"
+              style={{
+                height: contextPreviewHeight,
+                pointerEvents: isResizing ? 'none' : undefined,
+              }}
+            >
+              <iframe src={contextPreviewUrl} />
+            </div>
+          </>
+        ) : (
+          <div
+            className="context-preview__tab"
+            onClick={isPopupOpen ? closePopupAndOpenInline : togglePreview}
+            role="button"
+            tabIndex={0}
+          >
+            <span className="context-preview__tab-title">Visual context</span>
+            <span className="context-preview__tab-icon">
+              <IconDown size={16} />
+            </span>
+          </div>
+        )}
+      </div>
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
@@ -568,7 +821,7 @@ function CatTool() {
           }}
         />
       )}
-      {isUserLogged && (
+      {isUserLogged && !isLoadingSegments && (
         <CattoolFooter
           idProject={config.id_project}
           idJob={config.id_job}

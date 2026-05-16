@@ -23,10 +23,10 @@ trait RecursiveArrayCopy
      * If a mask is provided, only the properties specified in the mask will be included.
      * Nested objects and arrays are recursively converted into arrays.
      *
-     * @param array|null $mask An optional array of property names to include in the result.
-     * @param object|null $class An optional object to reflect. Defaults to the current object.
+     * @param list<string>|null $mask An optional array of property names to include in the result.
+     * @param object|null       $class An optional object to reflect. Defaults to the current object.
      *
-     * @return array An associative array of the object's public properties.
+     * @return array<string, mixed>
      */
     public function toArray(array $mask = null, object $class = null): array
     {

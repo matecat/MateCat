@@ -4,12 +4,15 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\LQA\ModelDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PDOException;
 use ReflectionException;
+use TypeError;
 
 class QualityFrameworkController extends KleinController
 {
@@ -24,6 +27,9 @@ class QualityFrameworkController extends KleinController
      * Render a QF from project credentials
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws TypeError
+     * @throws Exception
+     * @throws PDOException
      */
     public function project(): void
     {
@@ -37,9 +43,12 @@ class QualityFrameworkController extends KleinController
     /**
      * @param ProjectStruct $projectStruct
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws TypeError
+     * @throws Exception
+     * @throws PDOException
      */
     private function renderQualityFramework(ProjectStruct $projectStruct): array
     {
@@ -59,7 +68,8 @@ class QualityFrameworkController extends KleinController
         $json['template_model'] = null;
 
         if ($qaModel->qa_model_template_id) {
-            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id, 'uid' => $this->getUser()->uid]);
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id, 'uid' => $uid]);
 
             if ($parentTemplate === null) {
                 return $json;

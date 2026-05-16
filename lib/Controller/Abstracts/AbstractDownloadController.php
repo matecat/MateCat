@@ -31,21 +31,21 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     protected ?string $_user_provided_filename = null;
 
-    /**
-     * @var JobStruct
-     */
     protected JobStruct $job;
+
+    protected ProjectStruct $project;
 
     /**
      * @param int $ttl
      *
      * @return JobStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getJob(int $ttl = 0): JobStruct
     {
         if (empty($this->job)) {
-            $this->job = JobDao::getById($this->id_job, $ttl)[0];
+            $this->job = (new JobDao())->getNotDeletedById($this->id_job, $ttl)[0];
         }
 
         return $this->job;
@@ -64,9 +64,15 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         return $this;
     }
 
-    protected function setMimeType()
+    protected function setMimeType(): void
     {
         $extension = AbstractFilesStorage::pathinfo_fix($this->_filename, PATHINFO_EXTENSION);
+
+        if (!is_string($extension)) {
+            $this->mimeType = self::$OCTET_STREAM;
+
+            return;
+        }
 
         switch (strtolower($extension)) {
             case "xlf":
@@ -104,11 +110,6 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @var ProjectStruct
-     */
-    protected ProjectStruct $project;
-
-    /**
      * @return ProjectStruct
      */
     public function getProject(): ProjectStruct
@@ -116,15 +117,25 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         return $this->project;
     }
 
-    protected function unlockToken($tokenContent = null)
+    /**
+     * @param array<string, mixed>|null $tokenContent
+     */
+    protected function unlockToken(?array $tokenContent = null): void
     {
         if (!empty($this->downloadToken)) {
+            $cookieValue = json_encode(
+                empty($tokenContent)
+                    ? ["code" => 0, "message" => "Download complete."]
+                    : $tokenContent
+            );
+
+            if ($cookieValue === false) {
+                return;
+            }
+
             CookieManager::setCookie(
                 $this->downloadToken,
-                (empty($tokenContent) ? json_encode([
-                    "code" => 0,
-                    "message" => "Download complete."
-                ]) : json_encode($tokenContent)),
+                $cookieValue,
                 [
                     'expires' => time() + 600,
                     'path' => '/',
@@ -138,11 +149,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         }
     }
 
-    /**
-     * Set No Cache headers
-     *
-     */
-    protected function nocache()
+    protected function nocache(): void
     {
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -152,24 +159,26 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * Download the file
-     *
      * @param bool $forceXliff
+     *
+     * @throws Exception
      */
-    public function finalize(bool $forceXliff = false)
+    public function finalize(bool $forceXliff = false): void
     {
         try {
             $this->unlockToken();
 
             if (empty($this->project)) {
-                $this->project = ProjectDao::findByJobId($this->id_job);
+                $this->project = ProjectDao::findByJobId($this->id_job)
+                    ?? throw new Exception('Project not found for job ' . $this->id_job);
             }
 
             if (empty($this->_filename)) {
                 $this->_filename = $this->getDefaultFileName($this->project);
             }
 
-            $isGDriveProject = ProjectDao::isGDriveProject($this->project->id);
+            $projectId = $this->project->id ?? throw new Exception('Project not found');
+            $isGDriveProject = ProjectDao::isGDriveProject((int)$projectId);
 
             if (!$isGDriveProject || $forceXliff === true) {
                 ob_get_contents();
@@ -197,17 +206,15 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * If more than one file constitutes the project, then the filename is the project name.
-     * If the project is made of just one file, then the filename for download is the file name itself.
-     *
-     * @param $project ProjectStruct
+     * @param ProjectStruct $project
      *
      * @return string
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getDefaultFileName(ProjectStruct $project): string
     {
-        $files = FileDao::getByProjectId($project->id);
+        $files = FileDao::getByProjectId((int)$project->id);
 
         if (count($files) > 1) {
             return $this->project->name . ".zip";
@@ -219,10 +226,9 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     /**
      * @param ZipContentObject[] $output_content
      * @param string|null $outputFile
-     *
      * @param ?bool $isOriginalFile
      *
-     * @return string The zip binary
+     * @return string
      * @throws Exception
      */
     protected static function composeZip(array $output_content, ?string $outputFile = null, ?bool $isOriginalFile = false): string
@@ -264,6 +270,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         $zip_content = file_get_contents($outputFile);
         unlink($outputFile);
 
+        if ($zip_content === false) {
+            throw new Exception('Failed to read zip file: ' . $outputFile);
+        }
+
         return $zip_content;
     }
 
@@ -275,6 +285,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     public static function forceOcrExtension(string $filename): string
     {
         $pathinfo = AbstractFilesStorage::pathinfo_fix($filename);
+
+        if (!is_array($pathinfo) || !isset($pathinfo['extension'], $pathinfo['basename'])) {
+            return $filename;
+        }
 
         switch (strtolower($pathinfo['extension'])) {
             case 'pdf':

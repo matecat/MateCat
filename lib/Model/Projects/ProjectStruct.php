@@ -3,12 +3,13 @@
 namespace Model\Projects;
 
 use ArrayAccess;
+use DomainException;
+use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ModelDao;
@@ -16,9 +17,13 @@ use Model\LQA\ModelStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use PDOException;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
 
@@ -57,16 +62,22 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @param int $ttl
      *
      * @return JobStruct[]
+     *
+     * @throws DomainException
      */
     public function getJobs(int $ttl = 0): array
     {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
-            return JobDao::getByProjectId($this->id, $ttl);
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
+            return (new JobDao())->getNotDeletedByProjectId($id, $ttl);
         });
     }
 
     /**
      * @return int
+     *
+     * @throws DomainException
      */
     public function getJobsCount(): int
     {
@@ -77,25 +88,30 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         return count($this->getJobs());
     }
 
-    /**
-     * Proxy to set metadata for the current project
-     *
-     * @param string $key
-     * @param string $value
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    public function setMetadata(string $key, string $value): bool
+     /**
+      * Proxy to set metadata for the current project
+      *
+      * @param string $key
+      * @param string $value
+      *
+      * @return bool
+      * @throws DomainException
+      * @throws ReflectionException
+      * @throws PDOException
+      */
+     public function setMetadata(string $key, string $value): bool
     {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
         $dao = new MetadataDao(Database::obtain());
 
-        return $dao->set($this->id, $key, $value);
+        return $dao->set($id, $key, $value);
     }
 
     /**
      *
-     * @return array
+     * @return array<string, string>
+     *
+     * @throws DomainException
      */
     public function getAllMetadataAsKeyValue(): array
     {
@@ -113,25 +129,33 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @param string $key
      *
      * @return ?string
+     *
+     * @throws DomainException
      */
     public function getMetadataValue(string $key): mixed
     {
-        return $this->cachable(__METHOD__ . ":" . $key, function () use ($key) {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__ . ":" . $key, function () use ($id, $key) {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL(60 * 60)->get($this->id, $key)?->value;
+            return $mDao->setCacheTTL(60 * 60)->get($id, $key)?->value;
         });
     }
 
     /**
      * @return MetadataStruct[]
+     *
+     * @throws DomainException
      */
     public function getAllMetadata(): array
     {
-        return $this->cachable(__METHOD__, function () {
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
+
+        return $this->cachable(__METHOD__, function () use ($id) {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL(60 * 60)->allByProjectId($this->id);
+            return $mDao->setCacheTTL(60 * 60)->allByProjectId($id);
         });
     }
 
@@ -143,23 +167,26 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         return $this->cachable(__METHOD__, function () {
             $dao = new ProjectDao();
 
+            $projectId = $this->id !== null ? [$this->id] : [];
+
             /** @var RemoteFileServiceNameStruct[] */
-            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([$this->id])[0] ?? null;
+            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName($projectId)[0] ?? null;
         });
     }
 
-    /**
-     * @return null|TeamStruct
-     * @throws ReflectionException
-     */
-    public function getTeam(): ?TeamStruct
+     /**
+      * @return null|TeamStruct
+      * @throws ReflectionException
+      * @throws Exception
+      */
+     public function getTeam(): ?TeamStruct
     {
         if (is_null($this->id_team)) {
             return null;
         }
         $dao = new TeamDao();
 
-        return $dao->findById($this->id_team);
+        return $dao->fetchById($this->id_team, TeamStruct::class);
     }
 
     /**
@@ -168,7 +195,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return bool
      *
      */
-    public function isFeatureEnabled($feature_code): bool
+    public function isFeatureEnabled(string $feature_code): bool
     {
         return in_array($feature_code, $this->getFeaturesSet()->getCodes());
     }
@@ -190,18 +217,24 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @param int $ttl
      *
      * @return JobStruct[]
+     *
+     * @throws DomainException
      */
     public function getChunks(int $ttl = 0): array
     {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
-            $dao = new ChunkDao(Database::obtain());
+        $id = $this->id ?? throw new DomainException("Project ID must not be null");
 
-            return $dao->setCacheTTL($ttl)->getByProjectID($this->id);
+        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
+            $dao = new JobDao();
+
+            return $dao->setCacheTTL($ttl)->getNotDeletedByProjectId($id);
         });
     }
 
     /**
      * @return string
+     *
+     * @throws DomainException
      */
     public function getWordCountType(): string
     {
@@ -216,7 +249,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         }
     }
 
-    public function hasFeature($feature_code): bool
+    public function hasFeature(string $feature_code): bool
     {
         return in_array($feature_code, $this->getFeaturesSet()->getCodes());
     }

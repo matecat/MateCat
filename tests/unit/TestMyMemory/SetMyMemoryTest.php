@@ -20,6 +20,7 @@ use Utils\Registry\AppConfig;
  * Date: 02/05/16
  * Time: 18.22
  */
+#[Group('PersistenceNeeded')]
 class SetMyMemoryTest extends AbstractTest
 {
 

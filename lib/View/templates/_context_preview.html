@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Context Preview - Matecat</title>
+<!--    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>-->
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
+
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+      var config = {
+        basepath: '${basepath | string:/}',
+        hostpath: '${hostpath | string:/}',
+        id_project: ${id_project | string:0},
+        password: '${password | string:}',
+      };
+    </script>
+
+</head>
+<body class="context-preview-page">
+
+<div class="context-preview__page"></div>
+
+<div class="notifications-wrapper"></div>
+
+<div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
+
+<div metal:use-macro="templates/common.html/footer_includes"/>
+
+</body>
+</html>
+

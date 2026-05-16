@@ -9,14 +9,20 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\Response;
 use Model\Projects\ProjectTemplateDao;
+use Model\Projects\ProjectTemplateStruct;
 use PDOException;
 use ReflectionException;
+use stdClass;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
+/**
+ * @phpstan-import-type HydrationInput from ProjectTemplateStruct
+ */
 class ProjectTemplateController extends KleinController
 {
     protected function afterConstruct(): void
@@ -28,6 +34,7 @@ class ProjectTemplateController extends KleinController
     /**
      * @param $json
      *
+     * @phpstan-return HydrationInput
      * @return object
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
@@ -120,6 +127,7 @@ class ProjectTemplateController extends KleinController
      *
      * @return Response
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): Response
     {
@@ -130,7 +138,7 @@ class ProjectTemplateController extends KleinController
             }
 
             $id = (int)$this->request->param('id');
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
             $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
@@ -182,23 +190,26 @@ class ProjectTemplateController extends KleinController
      */
     public function schema(): Response
     {
-        return $this->response->json(json_decode($this->getProjectTemplateModelSchema()));
+        return $this->response->json($this->getProjectTemplateModelSchema());
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function default(): Response
     {
+        $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+
         return $this->response->json(
-            ProjectTemplateDao::getDefaultTemplate($this->getUser()->uid)
+            ProjectTemplateDao::getDefaultTemplate($uid)
         );
     }
 
     /**
-     * @return string
+     * @return stdClass
      */
-    private function getProjectTemplateModelSchema(): string
+    private function getProjectTemplateModelSchema(): stdClass
     {
         $skeletonSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/project_template.json'));
         $contentSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/subfiltering_handlers.json'));

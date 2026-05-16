@@ -13,6 +13,7 @@ use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
@@ -190,7 +191,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * Instantiate and hydrate a DTO from array data, then assign it to the proper property.
      *
      * @param class-string $dtoClass Fully qualified DTO class name.
-     * @param array $data DTO payload.
+     * @param array<string, mixed> $data DTO payload.
      *
      * @return void
      */
@@ -228,7 +229,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * Hydrate all known DTOs from the provided associative array.
      * Values may be arrays or JSON-encoded strings.
      *
-     * @param array $json Input data keyed by dto name.
+     * @param array<string, mixed> $json Input data keyed by dto name.
      *
      * @return void
      */
@@ -280,6 +281,8 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
      * @param int|null $uid Optional user id to use if not present in JSON.
      *
      * @return FiltersConfigTemplateStruct
+     * @throws DomainException
+     * @throws TypeError
      *
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): FiltersConfigTemplateStruct

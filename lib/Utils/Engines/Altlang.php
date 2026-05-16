@@ -6,8 +6,9 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use TypeError;
 use Utils\Constants\EngineConstants;
-use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -30,6 +31,7 @@ class Altlang extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -53,14 +55,16 @@ class Altlang extends AbstractEngine
 
     /**
      * @param mixed $rawValue
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @param null $function
      *
-     * @return array
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): GetMemoryResponse
     {
+        $original = ['text' => ''];
         $all_args = func_get_args();
 
         if (is_string($rawValue)) {
@@ -91,27 +95,25 @@ class Altlang extends AbstractEngine
     }
 
     /**
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
-     * @return array|TMSAbstractResponse|void
+     * @return GetMemoryResponse
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         // Fallback on MyMemory in case of not supported source/target combination
         if (!$this->checkLanguageCombination($_config['source'], $_config['target'])) {
             /** @var MyMemory $myMemory */
-            $myMemory = EnginesFactory::getInstance(1);
+            $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
 
-            $result = $myMemory->get($_config);
-            $this->result = $result->get_matches_as_array();
-
-            return $this->result;
+            return $myMemory->get($_config);
         }
 
         $parameters = [
@@ -132,30 +134,43 @@ class Altlang extends AbstractEngine
 
         $this->call("translate_relative_url", $parameters, true, true);
 
-        // fix missing info
-        if (empty($this->result['raw_segment'])) {
-            $this->result['raw_segment'] = $_config['segment'];
+        $response = $this->_getResultAsGetMemoryResponse();
+
+        // fix missing info on first match
+        if (!empty($response->matches)) {
+            $match = $response->matches[0];
+            if (empty($match->raw_segment)) {
+                $match->raw_segment = $_config['segment'];
+            }
+            if (empty($match->segment)) {
+                $match->segment = $_config['segment'];
+            }
         }
 
-        if (empty($this->result['segment'])) {
-            $this->result['segment'] = $_config['segment'];
-        }
-
-        return $this->result;
+        return $response;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function set($_config): bool
     {
         //if engine does not implement SET method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function update($_config): bool
     {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
+    /**
+     * @param mixed $_config
+     */
     public function delete($_config): bool
     {
         //if engine does not implement DELETE method, exit

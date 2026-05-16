@@ -69,7 +69,7 @@ class SplitDAO extends AbstractDao
     {
         $obj = $this->sanitize($obj);
 
-        $res = self::insertStruct($obj, [
+        $res = $this->insertStruct($obj, [
             'no_nulls' => true,
             'on_duplicate_update' => [
                 'id_segment' => 'value',
@@ -96,8 +96,15 @@ class SplitDAO extends AbstractDao
     {
         parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
-        $input->source_chunk_lengths = ($input->source_chunk_lengths !== null) ? json_encode($input->source_chunk_lengths) : null;
-        $input->target_chunk_lengths = ($input->target_chunk_lengths !== null) ? json_encode($input->target_chunk_lengths) : null;
+        if ($input->source_chunk_lengths !== null) {
+            $encoded = json_encode($input->source_chunk_lengths);
+            $input->source_chunk_lengths = ($encoded !== false) ? $encoded : null;
+        }
+
+        if ($input->target_chunk_lengths !== null) {
+            $encoded = json_encode($input->target_chunk_lengths);
+            $input->target_chunk_lengths = ($encoded !== false) ? $encoded : null;
+        }
 
         return $input;
     }
@@ -107,7 +114,6 @@ class SplitDAO extends AbstractDao
      * @param SegmentSplitStruct $obj
      *
      * @return void
-     * @throws Exception
      */
     protected function _validatePrimaryKey(IDaoStruct $obj): void
     {
@@ -115,15 +121,19 @@ class SplitDAO extends AbstractDao
 
 
     /**
-     * @param $array_result SegmentSplitStruct[]
+     * @param list<SegmentSplitStruct> $array_result
      *
-     * @return SegmentSplitStruct[]
+     * @return list<SegmentSplitStruct>
      */
     protected function _buildResult(array $array_result): array
     {
         foreach ($array_result as $item) {
-            $item->source_chunk_lengths = json_decode($item->source_chunk_lengths, true);
-            $item->target_chunk_lengths = json_decode($item->target_chunk_lengths, true);
+            if (is_string($item->source_chunk_lengths)) {
+                $item->source_chunk_lengths = json_decode($item->source_chunk_lengths, true);
+            }
+            if (is_string($item->target_chunk_lengths)) {
+                $item->target_chunk_lengths = json_decode($item->target_chunk_lengths, true);
+            }
         }
 
         return $array_result;

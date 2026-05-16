@@ -18,6 +18,10 @@ class LaraGlossaryValidator extends AbstractValidator
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
+        if ($object->glossaryString === null) {
+            throw new Exception("lara_glossaries is not a valid JSON");
+        }
+
         $laraGlossariesArray = json_decode($object->glossaryString, true);
 
         if (!is_array($laraGlossariesArray)) {

@@ -1,5 +1,7 @@
 <?php
 
+namespace unit\Engines\Matches;
+
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\Results\MyMemory\Matches;
@@ -13,11 +15,11 @@ class MatchesTest extends AbstractTest
     {
         $match = new Matches([]);
 
-        $this->assertEquals($match->id, "0");
-        $this->assertEquals($match->create_date, "1970-01-01 00:00:00");
-        $this->assertEquals($match->last_update_date, "1970-01-01 00:00:00");
-        $this->assertEquals($match->usage_count, 0);
-        $this->assertEquals($match->match, 0);
+        $this->assertEquals("0", $match->id);
+        $this->assertEquals("1970-01-01 00:00:00", $match->create_date);
+        $this->assertEquals("1970-01-01 00:00:00", $match->last_update_date);
+        $this->assertEquals(0, $match->usage_count);
+        $this->assertEquals(0, $match->match);
     }
 
     #[Test]
@@ -38,14 +40,14 @@ class MatchesTest extends AbstractTest
 
         $matches = $match->getMatches();
 
-        $this->assertEquals($matches['id'], "234");
-        $this->assertEquals($matches['source'], 'en-US');
-        $this->assertEquals($matches['target'], 'it-IT');
-        $this->assertEquals($matches['segment'], 'This is a fancy match');
-        $this->assertEquals($matches['translation'], 'Questa è una traduzione fantastica');
-        $this->assertEquals($matches['match'], '85%');
-        $this->assertEquals($matches['created_by'], 'MT-Altlang');
-        $this->assertEquals($matches['create_date'], $createDate);
+        $this->assertEquals("234", $matches['id']);
+        $this->assertEquals('en-US', $matches['source']);
+        $this->assertEquals('it-IT', $matches['target']);
+        $this->assertEquals('This is a fancy match', $matches['segment']);
+        $this->assertEquals('Questa è una traduzione fantastica', $matches['translation']);
+        $this->assertEquals('85%', $matches['match']);
+        $this->assertEquals('MT-Altlang', $matches['created_by']);
+        $this->assertEquals($createDate, $matches['create_date']);
     }
 
     #[Test]
@@ -74,25 +76,25 @@ class MatchesTest extends AbstractTest
 
         $matches = $match->getMatches(2, [], 'en-US', 'fr-FR');
 
-        $this->assertEquals($matches['id'], "123134123");
-        $this->assertEquals($matches['source'], 'en-US');
-        $this->assertEquals($matches['target'], 'fr-FR');
-        $this->assertEquals($matches['segment'], 'This is a sample page for Demo purposes.');
-        $this->assertEquals($matches['translation'], 'Ceci est un exemple de page à des fins de démonstration');
-        $this->assertEquals($matches['match'], '100%');
-        $this->assertEquals($matches['created_by'], 'Public TM');
-        $this->assertEquals($matches['create_date'], '2024-12-30 15:56:32');
-        $this->assertEquals($matches['quality'], 74);
-        $this->assertEquals($matches['usage_count'], 2);
+        $this->assertEquals("123134123", $matches['id']);
+        $this->assertEquals('en-US', $matches['source']);
+        $this->assertEquals('fr-FR', $matches['target']);
+        $this->assertEquals('This is a sample page for Demo purposes.', $matches['segment']);
+        $this->assertEquals('Ceci est un exemple de page à des fins de démonstration', $matches['translation']);
+        $this->assertEquals('100%', $matches['match']);
+        $this->assertEquals('Public TM', $matches['created_by']);
+        $this->assertEquals('2024-12-30 15:56:32', $matches['create_date']);
+        $this->assertEquals(74, $matches['quality']);
+        $this->assertEquals(2, $matches['usage_count']);
         $this->assertTrue($matches['ICE']);
-        $this->assertEquals($matches['memory_key'], 'FDSFDSFDS8FDSFDS8FSD');
-        $this->assertEquals($matches['tm_properties'], [
+        $this->assertEquals('FDSFDSFDS8FDSFDS8FSD', $matches['memory_key']);
+        $this->assertEquals([
             ["type" => "x-project_id", "value" => "86"],
             ["type" => "x-project_id", "value" => "654"],
-        ]);
-        $this->assertEquals($matches['prop'], [
+        ], $matches['tm_properties']);
+        $this->assertEquals([
             'test' => 'value'
-        ]);
+        ], $matches['prop']);
     }
 
     #[Test]
@@ -114,14 +116,14 @@ class MatchesTest extends AbstractTest
 
         $matches = $match->getMatches();
 
-        $this->assertEquals($matches['id'], "234");
-        $this->assertEquals($matches['source'], 'en-US');
-        $this->assertEquals($matches['target'], 'it-IT');
-        $this->assertEquals($matches['segment'], 'This is a fancy match');
-        $this->assertEquals($matches['translation'], 'Questa è una traduzione fantastica');
-        $this->assertEquals($matches['match'], '85%');
-        $this->assertEquals($matches['score'], 0.901);
-        $this->assertEquals($matches['created_by'], 'MT-Lara');
-        $this->assertEquals($matches['create_date'], $createDate);
+        $this->assertEquals("234", $matches['id']);
+        $this->assertEquals('en-US', $matches['source']);
+        $this->assertEquals('it-IT', $matches['target']);
+        $this->assertEquals('This is a fancy match', $matches['segment']);
+        $this->assertEquals('Questa è una traduzione fantastica', $matches['translation']);
+        $this->assertEquals('85%', $matches['match']);
+        $this->assertEquals(0.901, $matches['score']);
+        $this->assertEquals('MT-Lara', $matches['created_by']);
+        $this->assertEquals($createDate, $matches['create_date']);
     }
 }

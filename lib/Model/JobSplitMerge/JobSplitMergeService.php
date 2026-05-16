@@ -8,9 +8,11 @@ use Model\Analysis\AnalysisDao;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\Jobs\JobDao;
-use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -20,6 +22,7 @@ use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
 use ReflectionException;
+use RuntimeException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Logger\MatecatLogger;
@@ -80,7 +83,7 @@ class JobSplitMergeService
      */
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
-        return JobDao::getByIdAndPassword($id, $password);
+        return (new JobDao())->getByIdAndPassword($id, $password);
     }
 
     /**
@@ -125,7 +128,7 @@ class JobSplitMergeService
      */
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
-        JobDao::updateForMerge($job, $newPassword);
+        (new JobDao())->updateForMerge($job, $newPassword);
     }
 
     /**
@@ -133,7 +136,7 @@ class JobSplitMergeService
      */
     protected function deleteOnMerge(JobStruct $job): void
     {
-        JobDao::deleteOnMerge($job);
+        (new JobDao())->deleteOnMerge($job);
     }
 
     /**
@@ -162,6 +165,8 @@ class JobSplitMergeService
 
     /**
      * Create a new TranslatorsModel instance — overridable in tests.
+     *
+     * @throws \TypeError
      */
     protected function createTranslatorsModel(JobStruct $job): TranslatorsModel
     {
@@ -356,6 +361,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split (nullable)
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -375,6 +381,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -459,14 +466,14 @@ class JobSplitMergeService
                 JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
             ];
 
-            foreach ($metadata as $key) {
-                $_data = $jobsMetadataDao->get($jobToSplit->id, $jobToSplit->password, $key);
+             foreach ($metadata as $key) {
+                 $_data = $jobsMetadataDao->get($jobToSplit->id, $jobToSplit->password, $key);
 
-                if (!empty($_data)) {
-                    $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $_data->value);
-                    $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id, $jobToSplit->password, $key);
-                }
-            }
+                 if (!empty($_data)) {
+                     $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $_data->value);
+                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id ?? throw new RuntimeException('Missing job id'), $jobToSplit->password ?? throw new RuntimeException('Missing job password'), $key);
+                 }
+             }
 
             $stmt->closeCursor();
             unset($stmt);
@@ -497,15 +504,15 @@ class JobSplitMergeService
             }
         }
 
-        $this->createJobDao()->destroyCacheByProjectId($data->idProject);
+         $this->createJobDao()->destroyCacheByProjectId($data->idProject);
 
-        $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
-        $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id, $projectStruct->password);
+         $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
+         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
 
         $this->getCart()->deleteCart();
 
-        $this->features->run('postJobSplitted', $data);
+        $this->features->dispatch(new PostJobSplittedEvent($data));
     }
 
     /**
@@ -575,10 +582,10 @@ class JobSplitMergeService
                     JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
                 ];
 
-                foreach ($metadata as $key) {
-                    $jobsMetadataDao->delete($_jStruct->id, $_jStruct->password, $key);
-                    $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($_jStruct->id, $_jStruct->password, $key);
-                }
+                 foreach ($metadata as $key) {
+                     $jobsMetadataDao->delete($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
+                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($_jStruct->id ?? throw new RuntimeException('Missing job id'), $_jStruct->password ?? throw new RuntimeException('Missing job password'), $key);
+                 }
             }
         }
 
@@ -601,7 +608,7 @@ class JobSplitMergeService
         $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
-        $this->features->run('postJobMerged', $data, $chunk);
+        $this->features->dispatch(new PostJobMergedEvent($data, $chunk));
 
         $jobDao = $this->createJobDao();
 
@@ -612,7 +619,7 @@ class JobSplitMergeService
         $jobDao->destroyCacheByProjectId($data->idProject);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
 
-        $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
-        $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id, $projectStruct->password);
+         $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
+         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
     }
 }

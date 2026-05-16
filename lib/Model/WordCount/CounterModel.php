@@ -13,23 +13,21 @@ namespace Model\WordCount;
 use BadMethodCallException;
 use Exception;
 use LogicException;
+use PDOException;
 use ReflectionClass;
 use Utils\Constants\TranslationStatus;
 
 class CounterModel
 {
 
-    /**
-     * @var WordCountStruct|null
-     */
     protected ?WordCountStruct $oldWCount = null;
     protected string $newStatus;
     protected string $oldStatus;
+    private WordCounterDao $wordCounterDao;
 
+    /** @var array<string, string> */
     protected static array $constCache = [];
-    /**
-     * @var WordCountStruct[]
-     */
+    /** @var WordCountStruct[] */
     private array $values = [];
 
     /**
@@ -40,13 +38,11 @@ class CounterModel
         return $this->values;
     }
 
-    /**
-     * @param WordCountStruct|null $oldWCount
-     */
-    public function __construct(WordCountStruct $oldWCount = null)
+    public function __construct(?WordCountStruct $oldWCount = null, ?WordCounterDao $wordCounterDao = null)
     {
         $reflect = new ReflectionClass(TranslationStatus::class);
         self::$constCache = array_flip($reflect->getConstants());
+        $this->wordCounterDao = $wordCounterDao ?? new WordCounterDao();
 
         if ($oldWCount !== null) {
             $this->setOldWordCount($oldWCount);
@@ -56,6 +52,7 @@ class CounterModel
     /**
      * @param string $status
      *
+     * @throws BadMethodCallException
      */
     protected function _verifyStatus(string $status): void
     {
@@ -69,18 +66,28 @@ class CounterModel
         $this->oldWCount = $oldWCount;
     }
 
+    /**
+     * @throws BadMethodCallException
+     */
     public function setNewStatus(string $new_status): void
     {
         $this->_verifyStatus($new_status);
         $this->newStatus = $new_status;
     }
 
+    /**
+     * @throws BadMethodCallException
+     */
     public function setOldStatus(string $old_status): void
     {
         $this->_verifyStatus($old_status);
         $this->oldStatus = $old_status;
     }
 
+    /**
+     * @throws LogicException
+     * @throws BadMethodCallException
+     */
     public function setUpdatedValues(float $weighted_words_amount, int $raw_words_amount): void
     {
         $this->values[] = $this->getUpdatedValues($weighted_words_amount, $raw_words_amount);
@@ -91,6 +98,7 @@ class CounterModel
      * @param int $raw_words_amount
      *
      * @return WordCountStruct
+     * @throws LogicException
      */
     public function getUpdatedValues(float $weighted_words_amount, int $raw_words_amount): WordCountStruct
     {
@@ -130,12 +138,17 @@ class CounterModel
      *
      * @return WordCountStruct
      * @throws Exception
+     * @throws LogicException
      */
     public function updateDB(array $_wordCount_Struct_Array): WordCountStruct
     {
+        if ($this->oldWCount === null) {
+            throw new LogicException(__METHOD__ . " Error: old word count is not defined.");
+        }
+
         $differentialCountStruct = $this->sumDifferentials($_wordCount_Struct_Array);
 
-        $res = WordCounterDao::updateWordCount($differentialCountStruct);
+        $res = $this->wordCounterDao->updateWordCount($differentialCountStruct);
 
         if ($res <= 0) {
             throw new Exception("Failed to update counter", $res);
@@ -169,9 +182,14 @@ class CounterModel
      * @param WordCountStruct[] $wordCount_Struct
      *
      * @return WordCountStruct
+     * @throws LogicException
      */
     public function sumDifferentials(array $wordCount_Struct): WordCountStruct
     {
+        if ($this->oldWCount === null) {
+            throw new LogicException(__METHOD__ . " Error: old word count is not defined.");
+        }
+
         $newWCount = new WordCountStruct();
         $newWCount->setIdSegment($this->oldWCount->getIdSegment());
         $newWCount->setOldStatus($this->oldStatus);
@@ -198,25 +216,29 @@ class CounterModel
         return $newWCount;
     }
 
-    public function initializeJobWordCount(int $id_job, string $jPassword, WordCounterDao $wordCounterDao = null): WordCountStruct
+    /**
+     * @throws PDOException
+     */
+    public function initializeJobWordCount(int $id_job, string $jPassword, ?WordCounterDao $wordCounterDao = null): WordCountStruct
     {
-        if (!$wordCounterDao) {
-            $wordCounterDao = new WordCounterDao();
-        }
+        $dao = $wordCounterDao ?? $this->wordCounterDao;
 
-        $_details = $wordCounterDao->getStatsForJob($id_job, null, $jPassword);
+        $_details = $dao->getStatsForJob($id_job, null, $jPassword);
 
+        /** @var array<string, mixed>|null $_job_details */
         $_job_details = array_pop($_details); //get the row
         $job_details = [];
 
-        foreach ($_job_details as $key => $value) {
-            $k = explode("_", $key); // EX: split TOTAL_RAW
-            if (!empty($k[1])) {
-                $job_details[$k[0]]['raw'] = $value;
-            } elseif ($k[0] != 'id') {
-                $job_details[$k[0]]['weighted'] = $value;
-            } else {
-                $job_details[$key] = $value;
+        if (is_array($_job_details)) {
+            foreach ($_job_details as $key => $value) {
+                $k = explode("_", $key); // EX: split TOTAL_RAW
+                if (!empty($k[1])) {
+                    $job_details[$k[0]]['raw'] = $value;
+                } elseif ($k[0] != 'id') {
+                    $job_details[$k[0]]['weighted'] = $value;
+                } else {
+                    $job_details[$key] = $value;
+                }
             }
         }
 
@@ -237,19 +259,18 @@ class CounterModel
         $wStruct->setApproved2RawWords($job_details[TranslationStatus::STATUS_APPROVED2]['raw']);
         $wStruct->setRejectedRawWords($job_details[TranslationStatus::STATUS_REJECTED]['raw']);
 
-        $wordCounterDao->initializeWordCount($wStruct);
+        $dao->initializeWordCount($wStruct);
 
         return $wStruct;
     }
 
     /**
-     *
-     * @param      $name
-     * @param bool $raw_count
+     * @param string $name
+     * @param bool   $raw_count
      *
      * @return string
      */
-    private function methodNameForStatusCall($name, bool $raw_count = false): string
+    private function methodNameForStatusCall(string $name, bool $raw_count = false): string
     {
         return ucfirst(strtolower($name)) . ($raw_count ? "Raw" : "") . 'Words';
     }

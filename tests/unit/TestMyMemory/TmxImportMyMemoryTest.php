@@ -21,6 +21,7 @@ use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -33,6 +34,7 @@ use Utils\Tools\Utils;
 error_reporting(~E_DEPRECATED);
 
 
+#[Group('PersistenceNeeded')]
 class TmxImportMyMemoryTest extends AbstractTest
 {
 

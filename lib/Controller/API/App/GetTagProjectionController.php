@@ -9,7 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
@@ -33,7 +33,7 @@ class GetTagProjectionController extends KleinController
     public function call(): void
     {
         $request = $this->validateTheRequest();
-        $jobStruct = ChunkDao::getByIdAndPassword($request['id_job'], $request['password']);
+        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
         /**
@@ -116,7 +116,7 @@ class GetTagProjectionController extends KleinController
         }
 
         if (empty($id_job)) {
-            $msg = "\n\n Critical. Quit. \n\n " . var_export($_POST, true);
+            $msg = "\n\n Critical. Quit. \n\n " . var_export($this->request->paramsPost()->all(), true);
             $this->logger->debug($msg);
             Utils::sendErrMailReport($msg);
 

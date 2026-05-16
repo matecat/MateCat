@@ -27,12 +27,14 @@ class ProjectCreationStatusController extends KleinController
      */
     public function get(): void
     {
+        $idProject = (int)$this->request->param('id_project');
+
         // validate id_project
         if (!is_numeric($this->request->param('id_project'))) {
             throw new Exception("ID project is not a valid integer", -1);
         }
 
-        $result = ProjectQueue::getPublishedResults($this->request->param('id_project'));
+        $result = ProjectQueue::getPublishedResults($idProject);
 
         if (empty($result)) {
             $this->_letsWait();
@@ -41,15 +43,12 @@ class ProjectCreationStatusController extends KleinController
                 throw new Exception($error['message'], (int)$error['code']);
             }
         } else {
-            // project is created, find it with password
+            // project is created, verify password authorization
             try {
-                $project = ProjectDao::findByIdAndPassword($this->request->param('id_project'), $this->request->param('password'));
+                ProjectDao::findByIdAndPassword($idProject, $this->request->param('password'));
             } catch (NotFoundException) {
                 throw new AuthorizationError('Not Authorized.');
             }
-
-            $featureSet = $project->getFeaturesSet();
-            $result = $featureSet->filter('filterCreationStatus', $result, $project);
 
             if (empty($result['id_project'])) {
                 $this->_letsWait();

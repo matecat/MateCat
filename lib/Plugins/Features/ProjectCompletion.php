@@ -6,7 +6,10 @@ use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
+use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\Jobs\JobStruct;
+use RuntimeException;
 use Utils\Tools\Utils;
 
 class ProjectCompletion extends BaseFeature
@@ -17,8 +20,9 @@ class ProjectCompletion extends BaseFeature
     /**
      * @throws Exception
      */
-    public function postAddSegmentTranslation(array $params): void
+    public function postAddSegmentTranslation(PostAddSegmentTranslationEvent $event): void
     {
+        $params = $event->context;
         $params = Utils::ensure_keys($params, ['is_review', 'chunk']);
 
         // Here we need to find or update the corresponding record,
@@ -36,7 +40,7 @@ class ProjectCompletion extends BaseFeature
             $chunk_completion_update_struct->uid = $params['logged_user']->uid;
         }
 
-        $chunk_completion_update_struct->setTimestamp('last_translation_at', strtotime('now'));
+        $chunk_completion_update_struct->setTimestamp('last_translation_at', time());
 
         $dao = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase($chunk);
@@ -52,13 +56,19 @@ class ProjectCompletion extends BaseFeature
         }
     }
 
-    public function job_password_changed(JobStruct $job, $old_password): void
+    /**
+     * @throws RuntimeException
+     */
+    public function jobPasswordChanged(JobPasswordChangedEvent $event): void
     {
+        $idJob = $event->job->id ?? throw new RuntimeException('Job id is required when updating completion passwords');
+        $password = $event->job->password ?? throw new RuntimeException('Job password is required when updating completion passwords');
+
         $dao = new ChunkCompletionUpdateDao();
-        $dao->updatePassword($job->id, $job->password, $old_password);
+        $dao->updatePassword($idJob, $password, $event->oldPassword);
 
         $dao = new ChunkCompletionEventDao();
-        $dao->updatePassword($job->id, $job->password, $old_password);
+        $dao->updatePassword($idJob, $password, $event->oldPassword);
     }
 
 }

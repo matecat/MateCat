@@ -9,6 +9,7 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
@@ -31,6 +32,7 @@ class ContextGroupDao extends AbstractDao
      *
      * @return ProjectStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getAllByProject(ProjectStruct $project): array
     {
@@ -47,8 +49,9 @@ class ContextGroupDao extends AbstractDao
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function getBySegmentID($sid): ?ContextStruct
+    public function getBySegmentID(int $sid): ?ContextStruct
     {
         $stmt = $this->_getStatementForQuery(self::$query_get_by_segment_id);
 
@@ -64,8 +67,9 @@ class ContextGroupDao extends AbstractDao
     /**
      * @return ContextStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function getByFileID($fid): array
+    public function getByFileID(int $fid): array
     {
         $stmt = $this->_getStatementForQuery(self::$query_get_all_by_file_id);
 
@@ -79,13 +83,14 @@ class ContextGroupDao extends AbstractDao
     }
 
     /**
-     * @param $start
-     * @param $stop
+     * @param int $start
+     * @param int $stop
      *
      * @return ContextStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function getBySIDRange($start, $stop): array
+    public function getBySIDRange(int $start, int $stop): array
     {
         $stmt = $this->_getStatementForQuery(self::$query_get_by_segment_range);
 

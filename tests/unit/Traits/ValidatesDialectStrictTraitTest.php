@@ -5,7 +5,7 @@ namespace unit\Traits;
 use InvalidArgumentException;
 use Matecat\Locales\Languages;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Controller\Traits\ValidatesDialectStrictTrait;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
@@ -20,7 +20,7 @@ class DialectStrictValidator
     }
 }
 
-class ValidatesDialectStrictTraitTest extends TestCase
+class ValidatesDialectStrictTraitTest extends AbstractTest
 {
     private DialectStrictValidator $validator;
     private Languages $langHandler;

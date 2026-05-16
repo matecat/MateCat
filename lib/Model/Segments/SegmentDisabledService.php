@@ -31,8 +31,7 @@ class SegmentDisabledService
             'translation_disabled'
         );
 
-        /** @var SegmentMetadataStruct[] $metadata */
-        return !empty($metadata) && $metadata[0]->meta_value === '1';
+        return $metadata !== null && $metadata->meta_value === '1';
     }
 
     /**
@@ -59,7 +58,7 @@ class SegmentDisabledService
         $metadata->meta_value = "1";
 
         SegmentMetadataDao::save($metadata);
-        SegmentMetadataDao::destroyCache($id_segment, $metadata->meta_key);
+        SegmentMetadataDao::destroyGetCache($id_segment, $metadata->meta_key);
         SegmentMetadataDao::destroyGetAllCache($id_segment);
         SegmentMetadataDao::destroyGetBySegmentIdsCache($metadata->meta_key);
     }
@@ -81,7 +80,7 @@ class SegmentDisabledService
     {
         $key = 'translation_disabled';
         SegmentMetadataDao::delete($id_segment, $key);
-        SegmentMetadataDao::destroyCache($id_segment, $key);
+        SegmentMetadataDao::destroyGetCache($id_segment, $key);
         SegmentMetadataDao::destroyGetAllCache($id_segment);
         SegmentMetadataDao::destroyGetBySegmentIdsCache($key);
     }

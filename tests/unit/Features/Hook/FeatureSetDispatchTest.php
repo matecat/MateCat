@@ -1,0 +1,473 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Features\Hook;
+
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\FilterEvent;
+use Model\FeaturesBase\Hook\RunEvent;
+use PHPUnit\Framework\Attributes\Test;
+use TestHelpers\AbstractTest;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+
+class FeatureSetDispatchTest extends AbstractTest
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        \Plugins\Features\TestDispatchFilterPassThrough::$invoked = false;
+        \Plugins\Features\TestDispatchFilterThrowsGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchFilterAfterGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchFilterAfterRethrow::$invoked = false;
+        \Plugins\Features\TestDispatchRunHandler::$invoked = false;
+        \Plugins\Features\TestDispatchPsr14PassThrough::$invoked = false;
+        \Plugins\Features\TestDispatchPsr14ThrowsGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = null;
+        \Plugins\Features\TestDispatchPsr14ThrowsDomain::$invoked = false;
+    }
+
+    #[Test]
+    public function dispatchInvokesDerivedHookAndReturnsSameEventInstance(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_pass_through'])
+        ]);
+
+        $event = new FromLayer0ToLayer1Event();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14PassThrough::$invoked);
+        self::assertSame(['test_dispatch_psr14_pass_through'], $event->trace);
+    }
+
+    #[Test]
+    public function dispatchSwallowsGenericExceptionsAndContinues(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_after_generic']),
+        ]);
+
+        $event = new FromLayer0ToLayer1Event();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14ThrowsGeneric::$invoked);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked);
+        self::assertSame(['test_dispatch_psr14_after_generic'], $event->trace);
+    }
+
+    #[Test]
+    public function dispatchFilterInvokesHookHandlersWithEventAndReturnsSameEventInstance(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_pass_through'])
+        ]);
+
+        $event = new DispatchFilterEvent();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchFilterPassThrough::$invoked);
+        self::assertSame(['test_dispatch_filter_pass_through'], $event->trace);
+    }
+
+    #[Test]
+    public function dispatchFilterSwallowsGenericExceptionsAndContinues(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_generic']),
+        ]);
+
+        $event = new DispatchFilterEvent();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchFilterThrowsGeneric::$invoked);
+        self::assertTrue(\Plugins\Features\TestDispatchFilterAfterGeneric::$invoked);
+        self::assertSame(['test_dispatch_filter_after_generic'], $event->trace);
+    }
+
+    #[Test]
+    public function dispatchFilterRethrowsValidationError(): void
+    {
+        \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new ValidationError('validation');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
+        ]);
+
+        $this->expectException(ValidationError::class);
+        $featureSet->dispatch(new DispatchFilterEvent());
+    }
+
+    #[Test]
+    public function dispatchFilterRethrowsNotFoundException(): void
+    {
+        \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new NotFoundException('not found');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
+        ]);
+
+        $this->expectException(NotFoundException::class);
+        $featureSet->dispatch(new DispatchFilterEvent());
+    }
+
+    #[Test]
+    public function dispatchFilterRethrowsAuthenticationError(): void
+    {
+        \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new AuthenticationError('auth');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
+        ]);
+
+        $this->expectException(AuthenticationError::class);
+        $featureSet->dispatch(new DispatchFilterEvent());
+    }
+
+    #[Test]
+    public function dispatchFilterRethrowsReQueueException(): void
+    {
+        \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new ReQueueException('requeue');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
+        ]);
+
+        $this->expectException(ReQueueException::class);
+        $featureSet->dispatch(new DispatchFilterEvent());
+    }
+
+    #[Test]
+    public function dispatchFilterRethrowsEndQueueException(): void
+    {
+        \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new EndQueueException('endqueue');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
+        ]);
+
+        $this->expectException(EndQueueException::class);
+        $featureSet->dispatch(new DispatchFilterEvent());
+    }
+
+    #[Test]
+    public function dispatchRunInvokesOnlyFeaturesWithMatchingHookMethod(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_handler']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_no_handler']),
+        ]);
+
+        $event = new DispatchRunEvent();
+
+        $featureSet->dispatch($event);
+
+        self::assertTrue(\Plugins\Features\TestDispatchRunHandler::$invoked);
+        self::assertSame(['test_dispatch_run_handler'], $event->trace);
+    }
+
+    #[Test]
+    public function dispatchRunSwallowsGenericExceptionAndContinues(): void
+    {
+        \Plugins\Features\TestDispatchRunThrowsGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchRunAfterGeneric::$invoked = false;
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_after_generic']),
+        ]);
+
+        $event = new DispatchRunEvent();
+        $featureSet->dispatch($event);
+
+        self::assertTrue(\Plugins\Features\TestDispatchRunThrowsGeneric::$invoked);
+        self::assertTrue(\Plugins\Features\TestDispatchRunAfterGeneric::$invoked);
+    }
+
+    #[Test]
+    public function dispatchRunRethrowsNotFoundException(): void
+    {
+        \Plugins\Features\TestDispatchRunThrowsHandled::$throwable = new NotFoundException('not found');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_handled']),
+        ]);
+
+        $this->expectException(NotFoundException::class);
+        $featureSet->dispatch(new DispatchRunEvent());
+    }
+
+    #[Test]
+    public function dispatchRunRethrowsAuthenticationError(): void
+    {
+        \Plugins\Features\TestDispatchRunThrowsHandled::$throwable = new AuthenticationError('auth');
+
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_handled']),
+        ]);
+
+        $this->expectException(AuthenticationError::class);
+        $featureSet->dispatch(new DispatchRunEvent());
+    }
+
+    #[Test]
+    public function dispatchExternalEventSwallowsDomainExceptionAndContinues(): void
+    {
+        $featureSet = new FeatureSet([
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_throws_domain']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_after_generic']),
+        ]);
+
+        $event = new FromLayer0ToLayer1Event();
+
+        $result = $featureSet->dispatch($event);
+
+        self::assertSame($event, $result);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14ThrowsDomain::$invoked);
+        self::assertTrue(\Plugins\Features\TestDispatchPsr14AfterGeneric::$invoked);
+    }
+}
+
+class DispatchFilterEvent extends FilterEvent
+{
+    public array $trace = [];
+
+    public static function hookName(): string
+    {
+        return 'dispatchFilterHook';
+    }
+}
+
+class DispatchRunEvent extends RunEvent
+{
+    public array $trace = [];
+
+    public static function hookName(): string
+    {
+        return 'dispatchRunHook';
+    }
+}
+
+class FromLayer0ToLayer1Event
+{
+    public array $trace = [];
+}
+
+namespace Plugins\Features;
+
+use Exception;
+use Model\FeaturesBase\Hook\FilterEvent;
+use Model\FeaturesBase\Hook\RunEvent;
+
+class TestDispatchFilterPassThrough extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_filter_pass_through';
+
+    public static bool $invoked = false;
+
+    public function dispatchFilterHook(FilterEvent $event): void
+    {
+        self::$invoked = true;
+        if ($event instanceof \Tests\Unit\Features\Hook\DispatchFilterEvent) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchFilterThrowsGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_filter_throws_generic';
+
+    public static bool $invoked = false;
+
+    public function dispatchFilterHook(FilterEvent $event): void
+    {
+        self::$invoked = true;
+        throw new Exception('generic failure on ' . $event::class);
+    }
+}
+
+class TestDispatchFilterAfterGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_filter_after_generic';
+
+    public static bool $invoked = false;
+
+    public function dispatchFilterHook(FilterEvent $event): void
+    {
+        self::$invoked = true;
+        if ($event instanceof \Tests\Unit\Features\Hook\DispatchFilterEvent) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchFilterThrowsHandled extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_filter_throws_handled';
+
+    public static ?Exception $throwable = null;
+
+    public function dispatchFilterHook(FilterEvent $event): void
+    {
+        throw self::$throwable ?? new Exception('missing throwable for ' . $event::class);
+    }
+}
+
+class TestDispatchFilterAfterRethrow extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_filter_after_rethrow';
+
+    public static bool $invoked = false;
+
+    public function dispatchFilterHook(FilterEvent $event): void
+    {
+        self::$invoked = true;
+        if ($event instanceof \Tests\Unit\Features\Hook\DispatchFilterEvent) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchRunHandler extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_run_handler';
+
+    public static bool $invoked = false;
+
+    public function dispatchRunHook(RunEvent $event): void
+    {
+        self::$invoked = true;
+        if ($event instanceof \Tests\Unit\Features\Hook\DispatchRunEvent) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchRunNoHandler extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_run_no_handler';
+}
+
+class TestDispatchRunThrowsGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_run_throws_generic';
+
+    public static bool $invoked = false;
+
+    public function dispatchRunHook(RunEvent $event): void
+    {
+        self::$invoked = true;
+        throw new Exception('generic run failure on ' . $event::class);
+    }
+}
+
+class TestDispatchRunAfterGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_run_after_generic';
+
+    public static bool $invoked = false;
+
+    public function dispatchRunHook(RunEvent $event): void
+    {
+        self::$invoked = true;
+        if ($event instanceof \Tests\Unit\Features\Hook\DispatchRunEvent) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchRunThrowsHandled extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_run_throws_handled';
+
+    public static ?Exception $throwable = null;
+
+    public function dispatchRunHook(RunEvent $event): void
+    {
+        throw self::$throwable ?? new Exception('missing throwable for ' . $event::class);
+    }
+}
+
+class TestDispatchPsr14PassThrough extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_pass_through';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+
+        if ($event instanceof \Tests\Unit\Features\Hook\FromLayer0ToLayer1Event) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchPsr14ThrowsGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_throws_generic';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+        unset($event);
+        throw new Exception('generic psr14 failure');
+    }
+}
+
+class TestDispatchPsr14AfterGeneric extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_after_generic';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+
+        if ($event instanceof \Tests\Unit\Features\Hook\FromLayer0ToLayer1Event) {
+            $event->trace[] = self::FEATURE_CODE;
+        }
+    }
+}
+
+class TestDispatchPsr14ThrowsDomain extends BaseFeature
+{
+    public const string FEATURE_CODE = 'test_dispatch_psr14_throws_domain';
+
+    public static bool $invoked = false;
+
+    public function fromLayer0ToLayer1(object $event): void
+    {
+        self::$invoked = true;
+        unset($event);
+        throw new \Model\Exceptions\ValidationError('domain exception in external event');
+    }
+}

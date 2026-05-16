@@ -31,6 +31,9 @@ class HeaderField
         return $this->value;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getArrayCopy(): array
     {
         return [$this->key => $this->value];

@@ -98,8 +98,6 @@ class QA
     public const string WARNING = ErrorManager::WARNING;
     public const string INFO = ErrorManager::INFO;
 
-    public const string SIZE_RESTRICTION = SizeRestrictionChecker::SIZE_RESTRICTION;
-
     // ========== Component Instances ==========
 
     /** @var ErrorManager Manages error codes, messages, and exception lists */
@@ -419,7 +417,13 @@ class QA
      */
     public function getExceptionList(): array
     {
-        return $this->errorManager->getExceptionList();
+        $exceptionList = $this->errorManager->getExceptionList();
+
+        return [
+            self::ERROR => $exceptionList[self::ERROR] ?? [],
+            self::WARNING => $exceptionList[self::WARNING] ?? [],
+            self::INFO => $exceptionList[self::INFO] ?? [],
+        ];
     }
 
     /**
@@ -520,7 +524,13 @@ class QA
      */
     public static function JSONtoExceptionList(string $jsonString): array
     {
-        return ErrorManager::JSONtoExceptionList($jsonString);
+        $exceptionList = ErrorManager::JSONtoExceptionList($jsonString);
+
+        return [
+            self::ERROR => $exceptionList[self::ERROR] ?? [],
+            self::WARNING => $exceptionList[self::WARNING] ?? [],
+            self::INFO => $exceptionList[self::INFO] ?? [],
+        ];
     }
 
     // ========== Main Check Methods ==========
@@ -658,6 +668,7 @@ class QA
      *
      * @return void
      * @throws DOMException If DOM structure preparation fails
+     * @throws Exception
      */
     public function prepareDOMStructures(): void
     {
@@ -678,8 +689,13 @@ class QA
     {
         if (!$this->thereAreErrors()) {
             $normalizedTrgDOM = $this->domHandler->getNormalizedTrgDOM();
+            if ($normalizedTrgDOM === null) {
+                throw new LogicException(__METHOD__ . " call when normalized target DOM is null.");
+            }
+
             // Extract content from root wrapper element
-            preg_match('/<root>(.*)<\/root>/us', $normalizedTrgDOM->saveXML($normalizedTrgDOM->documentElement), $matches);
+            $normalizedXml = $normalizedTrgDOM->saveXML($normalizedTrgDOM->documentElement) ?: '';
+            preg_match('/<root>(.*)<\/root>/us', $normalizedXml, $matches);
             return $this->preprocessor->cleanOutputContent($matches[1] ?? '');
         }
 

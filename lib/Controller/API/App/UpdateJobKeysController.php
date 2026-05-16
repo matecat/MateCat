@@ -11,7 +11,6 @@ use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
@@ -149,7 +148,7 @@ class UpdateJobKeysController extends KleinController
 
         $jobDao = new JobDao(Database::obtain());
         $jobDao->updateStruct($request['jobData'], ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
-        $jobDao->destroyCache($request['jobData']);
+        $jobDao->destroyCacheByIdAndPassword($request['jobData']);
 
         $jobsMetadataDao = new MetadataDao();
 
@@ -190,7 +189,7 @@ class UpdateJobKeysController extends KleinController
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = ChunkDao::getByIdAndPassword((int)$job_id, $job_pass);
+        $jobData = (new JobDao())->getByIdAndPasswordOrFail((int)$job_id, $job_pass);
 
         // validate $tm_keys
         try {

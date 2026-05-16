@@ -7,28 +7,35 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\FilterEvent;
+use Model\FeaturesBase\Hook\RunEvent;
 use Model\OwnerFeatures\OwnerFeatureDao;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
 use Plugins\Features\BaseFeature;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * Created by PhpStorm.
- * User: fregini/ostico
- * Date: 3/11/16
- * Time: 11:00 AM
+ * Class FeatureSet
+ *
+ * Represents a set of features provided in the system. This class allows the
+ * management of features, including loading, merging, filtering, and various
+ * dependency-related operations for projects and users.
+ *
+ * Implements EventDispatcherInterface.
  */
-class FeatureSet implements FeatureSetInterface
+class FeatureSet implements EventDispatcherInterface
 {
     /**
      * @var BasicFeatureStruct[]
@@ -36,6 +43,8 @@ class FeatureSet implements FeatureSetInterface
     private array $features = [];
 
     protected bool $_ignoreDependencies = false;
+
+    private LoggerInterface $logger;
 
     /**
      * @return BasicFeatureStruct[]
@@ -49,33 +58,31 @@ class FeatureSet implements FeatureSetInterface
      * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
      * Otherwise, it is populated with mandatory features.
      *
-     * @param $features
+     * @param BasicFeatureStruct[]|null $features
      *
      * @throws Exception
      */
-    public function __construct($features = null)
+    public function __construct(?array $features = null)
     {
+        $this->logger = LoggerFactory::getLogger('feature_set');
+
         if (is_null($features)) {
             $this->loadFromMandatory();
         } else {
             $_features = [];
             foreach ($features as $feature) {
-                if (property_exists($feature, 'feature_code')) {
-                    $_features[$feature->feature_code] = $feature;
-                } else {
-                    throw new Exception('`feature_code` property not found on ' . var_export($feature, true));
-                }
+                $_features[$feature->feature_code] = $feature;
             }
             $this->merge($_features);
         }
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getCodes(): array
     {
-        return array_values(array_map(function ($feature) {
+        return array_values(array_map(function (BasicFeatureStruct $feature): string {
             return $feature->feature_code;
         }, $this->features));
     }
@@ -87,7 +94,7 @@ class FeatureSet implements FeatureSetInterface
      */
     public function loadFromString(string $string): void
     {
-        $this->loadFromCodes(FeatureSet::splitString($string));
+        $this->loadFromCodes($this->splitString($string));
     }
 
     /**
@@ -125,7 +132,7 @@ class FeatureSet implements FeatureSetInterface
     public function loadForProject(ProjectStruct $project): void
     {
         $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
-        $featureCodes = (!empty($featureStrings)) ? FeatureSet::splitString($featureStrings) : [];
+        $featureCodes = (!empty($featureStrings)) ? $this->splitString($featureStrings) : [];
 
         $this->clear();
         $this->_setIgnoreDependencies(true);
@@ -145,25 +152,20 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @param array<string, mixed> $metadata
+     * Load additional feature dependencies from project metadata.
      *
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws Exception
+     * Note: The filterProjectDependencies hook was removed (no handler existed).
+     * This method is kept as a public extension point — override in subclasses if needed.
+     *
+     * @param array<string, mixed> $_metadata
      */
-    public function loadProjectDependenciesFromProjectMetadata(array $metadata): void
+    public function loadProjectDependenciesFromProjectMetadata(array $_metadata): void
     {
-        $project_dependencies = [];
-        $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata);
-        $features = [];
-        foreach ($project_dependencies as $dependency) {
-            $features [$dependency] = new BasicFeatureStruct(['feature_code' => $dependency]);
+        if ($_metadata === []) {
+            // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
         }
 
-        $this->merge($features);
+        // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
     }
 
     /**
@@ -227,80 +229,64 @@ class FeatureSet implements FeatureSetInterface
     {
         $features = OwnerFeatureDao::getByIdCustomer($id_customer);
 
-        $objs = array_map(function ($feature) {
-            /* @var $feature BasicFeatureStruct */
+        $objs = array_map(function (BasicFeatureStruct $feature): BaseFeature {
             return $feature->toNewObject();
         }, $features);
 
-        $returnable = array_filter($objs, function (?BaseFeature $obj) {
+        $returnable = array_filter($objs, function (BaseFeature $obj): bool {
             return $obj->isAutoActivableOnProject();
         });
 
-        $this->merge(array_map(function (BaseFeature $feature) {
+        $this->merge(array_map(function (BaseFeature $feature): BasicFeatureStruct {
             return $feature->getFeatureStruct();
         }, $returnable));
     }
 
     /**
-     * Returns the filtered subject variable passed to all enabled features.
+     * PSR-14 dispatch entry point.
      *
-     * @param string $method
-     * @param mixed $filterable
+     * Routes to the appropriate internal dispatcher based on event type:
+     * - FilterEvent/RunEvent: uses hookName() (no reflection), re-throws domain exceptions
+     * - External events (subfiltering PSR-14): derives hook name from class name, swallows all exceptions
      *
-     * @return mixed
+     * @template T of object
+     * @param T $event
+     * @return T
      *
-     * @throws NotFoundException
-     * @throws ValidationError
+     * @throws EndQueueException
      * @throws AuthenticationError
      * @throws ReQueueException
-     * @throws EndQueueException
+     * @throws ValidationError
+     * @throws NotFoundException
      */
-    public function filter(string $method, mixed $filterable): mixed
+    public function dispatch(object $event): object
     {
-        $args = array_slice(func_get_args(), 1);
+        if ($event instanceof FilterEvent || $event instanceof RunEvent) {
+            $hookName = $event::hookName();
+        } else {
+            $shortName = (new ReflectionClass($event))->getShortName();
+            $hookName  = lcfirst(str_replace('Event', '', $shortName));
+        }
+
+        $rethrowDomainExceptions = ($event instanceof FilterEvent || $event instanceof RunEvent);
 
         foreach ($this->features as $feature) {
-            $obj = $feature->toNewObject();
-
-            if (method_exists($obj, $method)) {
-                array_shift($args);
-                array_unshift($args, $filterable);
-
-                try {
-                    /**
-                     * There may be the need to avoid a filter to be executed before or after other ones.
-                     * To solve this problem, we could always pass the last argument to call_user_func_array which
-                     * contains a list of executed feature codes.
-                     *
-                     * Example: $args + [ $executed_features ]
-                     *
-                     * This way plugins have the chance to decide whether to change the value, throw an exception or
-                     * do whatever they need to based on the behaviour of the other features.
-                     *
-                     */
-                    $filterable = call_user_func_array([$obj, $method], $args);
-                } /** @noinspection PhpRedundantCatchClauseInspection */
-                catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
-                    throw $e;
-                } catch (Exception $e) {
-                    LoggerFactory::getLogger('feature_set')->error("Exception running filter " . $method . ": " . $e->getMessage());
+            try {
+                $obj = $feature->toNewObject();
+                if (method_exists($obj, $hookName)) {
+                    $obj->$hookName($event);
                 }
+            } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+                if ($rethrowDomainExceptions) {
+                    throw $e;
+                }
+                $this->logger->error("Exception running hook " . $hookName . ": " . $e->getMessage());
+            } catch (Throwable $e) {
+                $this->logger->error("Exception running hook " . $hookName . ": " . $e->getMessage());
             }
         }
 
-        return $filterable;
-    }
-
-
-    /**
-     * @param string $method
-     */
-    public function run(string $method): void
-    {
-        $args = array_slice(func_get_args(), 1);
-        foreach ($this->features as $feature) {
-            $this->runOnFeature($method, $feature, $args);
-        }
+        return $event;
     }
 
     /**
@@ -403,7 +389,7 @@ class FeatureSet implements FeatureSetInterface
      * Updates the PluginsLoader array with new features. Ensures no duplicates are created.
      * Loads dependencies as needed.
      *
-     * @param $new_features BasicFeatureStruct[]
+     * @param array<string, BasicFeatureStruct> $new_features
      *
      * @throws Exception
      */
@@ -448,11 +434,15 @@ class FeatureSet implements FeatureSetInterface
             }
         }
 
-        $this->features = $this->filter('filterFeaturesMerged', $this->features);
         $this->sortFeatures();
     }
 
-    public static function splitString(string $string): array
+    /**
+     * @param string $string
+     *
+     * @return array<string>
+     */
+    public function splitString(string $string): array
     {
         return array_filter(explode(',', trim($string)));
     }
@@ -471,7 +461,7 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @return array
+     * @return array<string, BasicFeatureStruct>
      */
     private function getAutoloadPlugins(): array
     {
@@ -484,27 +474,6 @@ class FeatureSet implements FeatureSetInterface
         }
 
         return $features;
-    }
-
-    /**
-     * Runs a command on a single feautre
-     *
-     * @param string $method
-     * @param BasicFeatureStruct $feature
-     * @param array $args
-     *
-     * @return void
-     */
-    private function runOnFeature(string $method, BasicFeatureStruct $feature, array $args): void
-    {
-        $name = PluginsLoader::getPluginClass($feature->feature_code);
-        if ($name) {
-            $obj = new $name($feature);
-
-            if (method_exists($obj, $method)) {
-                call_user_func_array([$obj, $method], $args);
-            }
-        }
     }
 
 }

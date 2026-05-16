@@ -219,9 +219,11 @@ class SegmentDisableIntegrationTest extends AbstractTest
      * @param array $metadata Array of SegmentMetadataStruct
      * @return array Filtered entries with meta_key = 'translation_disabled'
      */
-    private function filterDisabledMetadata(array $metadata): array
+    private function filterDisabledMetadata(iterable $metadata): array
     {
-        return array_values(array_filter($metadata, static function ($entry) {
+        $items = is_array($metadata) ? $metadata : iterator_to_array($metadata);
+
+        return array_values(array_filter($items, static function ($entry) {
             return $entry->meta_key === 'translation_disabled';
         }));
     }

@@ -7,11 +7,13 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
+use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -27,6 +29,7 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Model\Xliff\XliffConfigTemplateStruct;
+use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
@@ -53,9 +56,15 @@ class CreateProjectController extends AbstractStatefulKleinController
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
 
+    /** @var array<string, mixed> */
     private array $data = [];
+
+    /** @var array<string, mixed> */
     private array $metadata = [];
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         return $this->data;
@@ -68,10 +77,11 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
-        $this->featureSet->loadFromUserEmail($this->user->email);
+        $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $this->data = $this->validateTheRequest();
 
         // SET SOURCE COOKIE
@@ -107,7 +117,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->data['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
-        $engine = EnginesFactory::getInstance($this->data['mt_engine']);
+        $engine = EnginesFactory::getInstance($this->data['mt_engine'], AbstractEngine::class);
 
         $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
 
@@ -133,7 +143,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         ProjectQueue::sendProject($projectStructure);
 
         $this->clearSessionFiles();
-        $this->assignLastCreatedPid($projectStructure->id_project);
+        $this->assignLastCreatedPid($projectStructure->id_project ?? throw new DomainException('Missing project id'));
 
         $this->response->json([
             'data' => [
@@ -153,8 +163,9 @@ class CreateProjectController extends AbstractStatefulKleinController
      * additional transformations, such as decoding JSON, merging and filtering arrays, as well as
      * applying default values where necessary.
      *
-     * @return array An associative array containing sanitized and processed request data.
+     * @return array<string, mixed> An associative array containing sanitized and processed request data.
      * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -230,7 +241,7 @@ class CreateProjectController extends AbstractStatefulKleinController
                 )
             ) : [];
 
-        $arFiles = explode('@@SEP@@', html_entity_decode($file_name, ENT_QUOTES, 'UTF-8'));
+        $arFiles = explode('@@SEP@@', html_entity_decode($file_name ?: '', ENT_QUOTES, 'UTF-8'));
 
         if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
             throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
@@ -257,7 +268,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         $private_tm_key = array_map(self::sanitizeTmKeyArr(...), $array_keys);
         $only_private = (!is_null($get_public_matches) && !$get_public_matches);
-        $due_date = (empty($due_date) ? null : Utils::mysqlTimestamp($due_date));
+        $due_date = (empty($due_date) ? null : Utils::mysqlTimestamp((int)$due_date));
 
         ['mt_engine' => $mt_engine, 'engine' => $engineStruct] = $this->validateMtEngine($mt_engine);
 
@@ -404,7 +415,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['target_lang'],
             $data['mt_engine']
         );
-        $data['team'] = $this->setTeam($id_team);
+        $data['team'] = $this->setTeam($id_team ?: null);
 
         $this->setMetadataFromPostInput($data);
 
@@ -416,17 +427,23 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @param int|null $mt_engine
      *
-     * @return array<int|string, AbstractEngine|null>
+     * @return array{mt_engine: int, engine: AbstractEngine|null}
+     * @throws InvalidArgumentException
+     * @throws TypeError
      */
     private function validateMtEngine(?int $mt_engine = 0): array
     {
-        $mt_engine = ($mt_engine != null ? $mt_engine : 0);
+        $mt_engine = $mt_engine ?? 0;
 
         $engineStruct = null;
         // any other engine than Match
-        if ($mt_engine !== null and $mt_engine > 1) {
+        if ($mt_engine > 1) {
             try {
-                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser(
+                    $mt_engine,
+                    $this->user->uid ?? throw new TypeError('User not authenticated'),
+                    AbstractEngine::class,
+                );
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage());
             }
@@ -435,11 +452,10 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param $elem
-     *
-     * @return array
+     * @param array<string, mixed> $elem
+     * @return array<string, mixed>
      */
-    private static function sanitizeTmKeyArr($elem): array
+    private static function sanitizeTmKeyArr(array $elem): array
     {
         $element = new TmKeyStruct($elem);
         $element->complete_format = true;
@@ -451,9 +467,7 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * This function sets metadata property from input params.
      *
-     * @param array $data
-     *
-     * @throws Exception
+     * @param array<string, mixed> $data
      */
     private function setMetadataFromPostInput(array $data = []): void
     {
@@ -473,6 +487,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      * @param int|null $public_tm_penalty
      *
      * @return int|null
+     * @throws InvalidArgumentException
      */
     private function validatePublicTMPenalty(?int $public_tm_penalty = null): ?int
     {
@@ -485,12 +500,17 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     /**
      * @param Languages $lang_handler
-     * @param           $source_lang
+     * @param string|false|null $source_lang
      *
      * @return string
+     * @throws InvalidArgumentException
      */
-    private function validateSourceLang(Languages $lang_handler, $source_lang): string
+    private function validateSourceLang(Languages $lang_handler, string|false|null $source_lang): string
     {
+        if (!is_string($source_lang) || $source_lang === '') {
+            throw new InvalidArgumentException("Missing source language.", -3);
+        }
+
         try {
             $lang_handler->validateLanguage($source_lang);
         } catch (Exception $e) {
@@ -502,12 +522,17 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     /**
      * @param Languages $lang_handler
-     * @param           $target_lang
+     * @param string|false|null $target_lang
      *
      * @return string
+     * @throws InvalidArgumentException
      */
-    private function validateTargetLangs(Languages $lang_handler, $target_lang): string
+    private function validateTargetLangs(Languages $lang_handler, string|false|null $target_lang): string
     {
+        if (!is_string($target_lang) || $target_lang === '') {
+            throw new InvalidArgumentException("Missing target language.", -4);
+        }
+
         $targets = explode(',', $target_lang);
         $targets = array_map('trim', $targets);
         $targets = array_unique($targets);
@@ -533,6 +558,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      * @param null $mmt_glossaries
      *
      * @return string|null
+     * @throws InvalidArgumentException
      */
     private function validateMMTGlossaries($mmt_glossaries = null): ?string
     {
@@ -558,11 +584,12 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * Validate `lara_glossaries` string
      *
-     * @param null $lara_glossaries
+     * @param string|false|null $lara_glossaries
      *
      * @return string|null
+     * @throws InvalidArgumentException
      */
-    private function validateLaraGlossaries($lara_glossaries = null): ?string
+    private function validateLaraGlossaries(string|false|null $lara_glossaries = null): ?string
     {
         if (!empty($lara_glossaries)) {
             try {
@@ -589,6 +616,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @return QAModelTemplateStruct|null
      * @throws Exception
+     * @throws TypeError
      */
     private function validateQaModelTemplate(
         $qa_model_template = null,
@@ -601,7 +629,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $json = [
                 "model" => $model,
             ];
-            $json = json_encode($json);
+            $json = json_encode($json) ?: '{}';
 
             $validatorObject = new JSONValidatorObject($json);
             $validator = new JSONValidator('qa_model.json', true);
@@ -609,13 +637,14 @@ class CreateProjectController extends AbstractStatefulKleinController
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
             $QAModelTemplateStruct->hydrateFromJSON($json);
-            $QAModelTemplateStruct->uid = $this->user->uid;
+            $QAModelTemplateStruct->uid = $this->user->uid ?? throw new TypeError('User not authenticated');
 
             return $QAModelTemplateStruct;
-        } elseif (!empty($qa_model_template_id) and $qa_model_template_id > 0) {
+        } elseif (!empty($qa_model_template_id)) {
+            $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
             $qaModelTemplate = QAModelTemplateDao::get([
                 'id' => $qa_model_template_id,
-                'uid' => $this->getUser()->uid
+                'uid' => $uid
             ]);
 
             // check if qa_model template exists
@@ -637,13 +666,14 @@ class CreateProjectController extends AbstractStatefulKleinController
      *
      * @return CustomPayableRateStruct|null
      * @throws Exception
+     * @throws TypeError
      */
     private function validatePayableRateTemplate(
         $payable_rate_template = null,
         $payable_rate_template_id = null
     ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
-        $userId = $this->getUser()->uid;
+        $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
         if (!empty($payable_rate_template)) {
             $json = html_entity_decode($payable_rate_template);
@@ -654,7 +684,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $payableRateModelTemplate = new CustomPayableRateStruct();
             $payableRateModelTemplate->hydrateFromJSON($json);
             $payableRateModelTemplate->uid = $userId;
-        } elseif (!empty($payable_rate_template_id) and $payable_rate_template_id > 0) {
+        } elseif (!empty($payable_rate_template_id)) {
             $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser($payable_rate_template_id, $userId);
             $payableRateModelTemplate?->getBreakdownsArray();
             if (null === $payableRateModelTemplate) {
@@ -669,7 +699,7 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * @param null $filters_extraction_parameters
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      * @throws Exception
      */
     private function validateFiltersExtractionParameters($filters_extraction_parameters = null): ?array
@@ -690,8 +720,9 @@ class CreateProjectController extends AbstractStatefulKleinController
      * @param null $xliff_parameters
      * @param null $xliff_parameters_template_id
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      * @throws Exception
+     * @throws TypeError
      */
     private function validateXliffParameters($xliff_parameters = null, $xliff_parameters_template_id = null): ?array
     {
@@ -704,18 +735,18 @@ class CreateProjectController extends AbstractStatefulKleinController
 
             $xliffConfigTemplate = new XliffConfigTemplateStruct();
             $xliffConfigTemplate->hydrateFromJSON($json);
-            $xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
+            $xliff_parameters = $xliffConfigTemplate->rules?->getArrayCopy() ?? [];
         } elseif (!empty($xliff_parameters_template_id)) {
             $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser(
                 $xliff_parameters_template_id,
-                $this->getUser()->uid
+                $this->getUser()->uid ?? throw new TypeError('User not authenticated')
             );
 
             if ($xliffConfigTemplate === null) {
                 throw new Exception("xliff_parameters_template_id not valid");
             }
 
-            $xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
+            $xliff_parameters = $xliffConfigTemplate->rules?->getArrayCopy() ?? [];
         }
 
         return $xliff_parameters;
@@ -724,31 +755,29 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * @param int $mt_engine
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function appendFeaturesToProject(int $mt_engine): array
     {
         $projectFeatures = [];
 
-        return $this->featureSet->filter(
-            'filterCreateProjectFeatures',
-            $projectFeatures,
-            $this,
-            $mt_engine
-        );
+        $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
+        $this->featureSet->dispatch($filterCreateProjectFeaturesEvent);
+
+        return $filterCreateProjectFeaturesEvent->getProjectFeatures();
     }
 
     /**
-     * @param      $target_langs
-     * @param      $mt_engine
+     * @param string $target_langs
+     * @param int|null $mt_engine
      *
-     * @return array|null
+     * @return array<string, int|null>
      * @see filterCreateProjectFeatures callback
      * @see NewController::appendFeaturesToProject()
      * @deprecated
      */
-    private function generateTargetEngineAssociation($target_langs, $mt_engine): ?array
+    private function generateTargetEngineAssociation(string $target_langs, ?int $mt_engine): array
     { // TODO YYY remove map association, MMT now supports all languages. Remove from ProjectManager also
         $assoc = [];
 
@@ -760,20 +789,20 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param null $id_team
+     * @param string|false|null $id_team
      *
-     * @return TeamStruct|null
+     * @return TeamStruct
      * @throws Exception
      */
-    private function setTeam($id_team = null): ?TeamStruct
+    private function setTeam(string|false|null $id_team = null): TeamStruct
     {
-        if (is_null($id_team)) {
+        if ($id_team === null || $id_team === false || $id_team === '') {
             return $this->user->getPersonalTeam();
         }
 
         // check for the team to be allowed
         $dao = new MembershipDao();
-        $team = $dao->findTeamByIdAndUser($id_team, $this->user);
+        $team = $dao->findTeamByIdAndUser((int)$id_team, $this->user);
 
         if (!$team) {
             throw new Exception('Team and user memberships do not match');
@@ -791,15 +820,17 @@ class CreateProjectController extends AbstractStatefulKleinController
      * random password, queue submission, project sanitization) are
      * intentionally left in {@see create()}.
      *
-     * @param array $data Validated request data from validateTheRequest()
-     * @param array $metadata Project metadata from setMetadataFromPostInput()
-     * @param array $filesFound Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param array<string, mixed> $data Validated request data from validateTheRequest()
+     * @param array<string, mixed> $metadata Project metadata from setMetadataFromPostInput()
+     * @param array<string, mixed> $filesFound Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
      * @param string $uploadToken Upload directory token
      * @param UserStruct $user Authenticated user
      * @param AbstractEngine $engine MT engine instance (for getConfigurationParameters())
-     * @param array|null $gdriveSession GDrive session data from $_SESSION, or null
+     * @param array<string, mixed>|null $gdriveSession GDrive session data from $_SESSION, or null
      *
      * @return ProjectStructure
+     * @throws TypeError
+     * @throws DomainException
      */
     protected function buildProjectStructure(
         array $data,
@@ -873,8 +904,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->metadata = $metadata;
         $projectStructure->userIsLogged = true;
         $projectStructure->uid = $user->uid;
-        $projectStructure->id_customer = $user->email;
-        $projectStructure->owner = $user->email;
+        $projectStructure->id_customer = $user->email ?? '';
+        $projectStructure->owner = $user->email ?? '';
 
         //set features override
         $projectStructure->project_features = $data['project_features'];
@@ -882,13 +913,16 @@ class CreateProjectController extends AbstractStatefulKleinController
         return $projectStructure;
     }
 
+    /**
+     * @throws Exception
+     */
     private function clearSessionFiles(): void
     {
         $gdriveSession = new Session();
         $gdriveSession->clearFileListFromSession();
     }
 
-    private function assignLastCreatedPid($pid): void
+    private function assignLastCreatedPid(int $pid): void
     {
         $_SESSION['redeem_project'] = false;
         $_SESSION['last_created_pid'] = $pid;

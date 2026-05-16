@@ -28,6 +28,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
      * @throws ReflectionException
      * @throws AuthorizationError
      * @throws Exception
+     * @throws \TypeError
      */
     public function confirm(): void
     {
@@ -46,7 +47,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
             throw new AuthorizationError("Invalid Job");
         }
 
-        $jStruct = (JobDao::getByIdAndPassword($params['id_job'], $params['password']));
+        $jStruct = ((new JobDao())->getByIdAndPassword((int)$params['id_job'], (string)$params['password']));
         $translatorModel = new TranslatorsModel($jStruct, 0);
         $jTranslatorStruct = $translatorModel->getTranslator();
 

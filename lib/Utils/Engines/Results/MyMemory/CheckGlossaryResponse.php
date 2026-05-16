@@ -2,20 +2,24 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
-use Exception;
+use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 
 class CheckGlossaryResponse extends TMSAbstractResponse
 {
 
-    public $matches = [];
+    /**
+     * @var array<int, mixed>
+     */
+    public array $matches = [];
 
-    public function __construct($response)
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
     {
-        if (!is_array($response)) {
-            throw new Exception("Invalid Response", -1);
-        }
-
         $this->matches = $response['matches'] ?? [];
     }
 

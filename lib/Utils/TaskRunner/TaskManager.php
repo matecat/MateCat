@@ -224,7 +224,7 @@ class TaskManager extends AbstractDaemon
                 $this->logger->debug($msg);
             } else {
                 // child process runs from here
-                pcntl_exec("/usr/bin/php", [__DIR__ . DIRECTORY_SEPARATOR . "Executor.php", json_encode($context)]);
+                pcntl_exec("/usr/bin/php", [__DIR__ . DIRECTORY_SEPARATOR . "executor_worker.php", json_encode($context)]);
                 posix_kill(posix_getpid(), SIGTERM); //this line of code will never be executed
                 exit;
             }

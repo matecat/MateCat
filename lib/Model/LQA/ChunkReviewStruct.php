@@ -4,7 +4,7 @@ namespace Model\LQA;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Utils\Tools\Utils;
 
@@ -42,13 +42,13 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
     public function getChunk(): JobStruct
     {
         return $this->cachable(__METHOD__, function () {
-            return ChunkDao::getByIdAndPassword($this->id_job, $this->password);
+            return (new JobDao())->getByIdAndPasswordOrFail($this->id_job, $this->password);
         });
     }
 
     public function getUndoData()
     {
-        return json_decode($this->undo_data, true);
+        return $this->undo_data !== null ? json_decode($this->undo_data, true) : null;
     }
 
 }

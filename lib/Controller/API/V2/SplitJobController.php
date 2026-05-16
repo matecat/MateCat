@@ -11,11 +11,11 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
-use Model\Projects\MetadataDao;
-use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use TypeError;
 
 class SplitJobController extends KleinController
 {
@@ -37,11 +37,8 @@ class SplitJobController extends KleinController
             $request['split_raw_words']
         );
 
-        /** @var SplitMergeProjectData $data */
         $data = $projectStructure['data'];
-        /** @var JobSplitMergeManager $pManager */
         $pManager = $projectStructure['pManager'];
-        /** @var ProjectStruct $project */
         $project = $projectStructure['project'];
 
         $jobStructs = $this->checkMergeAccess($request['job_id'], $project->getJobs());
@@ -64,8 +61,6 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        /** @var  $pManager JobSplitMergeManager */
-        /** @var  $data SplitMergeProjectData */
         [, $data] = $this->checkSplit($request);
 
         $this->response->json([
@@ -75,6 +70,7 @@ class SplitJobController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function apply(): void
     {
@@ -84,8 +80,6 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        /** @var  $pManager JobSplitMergeManager */
-        /** @var  $data SplitMergeProjectData */
         [$pManager, $data] = $this->checkSplit($request);
         $pManager->applySplit($data);
 
@@ -95,7 +89,10 @@ class SplitJobController extends KleinController
     }
 
     /**
+     * @param array{project_id: int, project_pass: string, job_id: int, job_pass: string, split_raw_words: bool, num_split: int, split_values: list<int>} $request
+     *
      * @return array{0: JobSplitMergeManager, 1: SplitMergeProjectData}
+     *
      * @throws Exception
      */
     private function checkSplit(array $request): array
@@ -106,15 +103,12 @@ class SplitJobController extends KleinController
             $request['split_raw_words']
         );
 
-        /** @var SplitMergeProjectData $data */
         $data = $projectStructure['data'];
-        /** @var JobSplitMergeManager $pManager */
         $pManager = $projectStructure['pManager'];
-        /** @var ProjectStruct $project */
         $project = $projectStructure['project'];
         $count_type = $projectStructure['count_type'];
 
-        $this->checkSplitAccess($project, $request['job_id'], $request['job_pass'], $project->getJobs());
+        $this->checkSplitAccess($request['job_id'], $request['job_pass'], $project->getJobs());
 
         $data->jobToSplit = $request['job_id'];
         $data->jobToSplitPass = $request['job_pass'];
@@ -127,7 +121,10 @@ class SplitJobController extends KleinController
     /**
      * Compatibility between the v2/v3 (api_v2_routes.php) API and the internal API obtained through the Elvis operator.
      * This covers the differences in the named parameters.
-     * @return array
+     *
+     * @return array{project_id: int, project_pass: string, job_id: int, job_pass: string|false, split_raw_words: bool, num_split: int, split_values: list<int>}
+     *
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
@@ -143,9 +140,9 @@ class SplitJobController extends KleinController
         $job_pass = filter_var($this->request->param('job_pass'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]) ?:
             filter_var($this->request->param('job_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
-        $split_raw_words = filter_var($this->request->param('split_raw_words'), FILTER_VALIDATE_BOOLEAN);
+        $split_raw_words = filter_var($this->request->param('split_raw_words'), FILTER_VALIDATE_BOOLEAN) ?? false;
         $num_split = filter_var($this->request->param('num_split'), FILTER_SANITIZE_NUMBER_INT);
-        $split_values = is_array($this->request->param('split_values')) ? filter_var_array($this->request->param('split_values'), FILTER_SANITIZE_NUMBER_INT) : [];
+        $split_values = is_array($this->request->param('split_values')) ? array_values(array_map('intval', $this->request->param('split_values'))) : [];
 
         if (empty($project_id)) {
             throw new InvalidArgumentException("No id project provided", -1);
@@ -171,16 +168,13 @@ class SplitJobController extends KleinController
     }
 
     /**
-     * @param int $project_id
-     * @param string $project_pass
-     * @param bool $split_raw_words
+     * @return array{data: SplitMergeProjectData, pManager: JobSplitMergeManager, count_type: string, project: ProjectStruct}
      *
-     * @return array
      * @throws NotFoundException
      * @throws ReflectionException
      * @throws Exception
      */
-    private function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
+    protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
         $count_type = $split_raw_words ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
         $project_struct = ProjectDao::findByIdAndPassword($project_id, $project_pass, 60 * 60);
@@ -210,29 +204,25 @@ class SplitJobController extends KleinController
     }
 
     /**
-     * @param ProjectStruct $project_struct
-     * @param int $jid
-     * @param string $job_pass
-     * @param array $jobList
+     * @param JobStruct[] $jobList
      *
      * @throws AuthenticationError
+     * @throws InvalidArgumentException
      */
-    private function checkSplitAccess(ProjectStruct $project_struct, int $jid, string $job_pass, array $jobList): void
+    private function checkSplitAccess(int $jid, string $job_pass, array $jobList): void
     {
         $jobToSplit = $this->filterJobsById($jid, $jobList);
 
-        if (array_shift($jobToSplit)->password != $job_pass) {
+        if ($jobToSplit[0]->password != $job_pass) {
             throw new InvalidArgumentException("Access denied", -10);
         }
-
-        $project_struct->getFeaturesSet()->run('checkSplitAccess', $jobList);
     }
 
     /**
-     * @param int $jid
-     * @param array $jobList
+     * @param JobStruct[] $jobList
      *
-     * @return array
+     * @return JobStruct[]
+     *
      * @throws AuthenticationError
      */
     private function filterJobsById(int $jid, array $jobList): array

@@ -88,7 +88,7 @@ class GlossaryFilesController extends KleinController
      */
     public function check(): void
     {
-        $stdResult = $this->TMService->uploadFile();
+        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
         if (!isset($this->tm_key) or $this->tm_key === "") {
@@ -121,7 +121,7 @@ class GlossaryFilesController extends KleinController
      */
     public function import(): void
     {
-        $stdResult = $this->TMService->uploadFile();
+        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
         if (!isset($this->tm_key) or $this->tm_key === "") {

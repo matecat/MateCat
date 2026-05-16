@@ -15,7 +15,6 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Utils\Engines\AbstractEngine;
@@ -29,24 +28,29 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public ?int $id_job = null;
     public ?string $password = null;
 
+    /** @var ?array<string, mixed> */
     public ?array $jobStruct = [];
 
+    /** @var array<string, string> */
     public array $dataRefMap = [];
 
     /**
-     * @var ?array
+     * @var ?array<string, mixed>
      */
     public ?array $projectStruct = [];
 
     public ?string $translation = null; // is set in the case of Lara Think
 
+    /** @var array{context_before: ?string, segment: ?string, context_after: ?string} */
     public array $contexts = [
         'context_before' => null,
         'segment' => null,
         'context_after' => null
     ];
 
+    /** @var ?list<string> */
     public ?array $context_list_before = null;
+    /** @var ?list<string> */
     public ?array $context_list_after = null;
 
     /**
@@ -55,7 +59,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public string $id_client;
 
     /**
-     * @var ?array
+     * @var ?array<string, mixed>
      */
     public ?array $user = [];
 
@@ -84,6 +88,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public bool $fromTarget = false;
 
+    /** @var list<string> */
     public array $crossLangTargets = [];
 
     public bool $dialect_strict = false;
@@ -93,10 +98,12 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool $mt_evaluation = false;
     public int $mt_quality_value_in_editor = 86;
     public bool $mt_qe_workflow_enabled = false;
+    /** @var ?array<string, mixed> */
     public ?array $mt_qe_workflow_parameters = null;
 
     public ?int $public_tm_penalty = null;
 
+    /** @var ?list<string> */
     public ?array $subfiltering_handlers = [];
     public ?string $lara_style = null;
 
@@ -151,20 +158,14 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     }
 
 
-    /**
-     * @return ?JobStruct
-     */
-    public function getJobStruct(): ?JobStruct
+    public function getJobStruct(): JobStruct
     {
-        return new JobStruct($this->jobStruct);
+        return new JobStruct($this->jobStruct ?? []);
     }
 
-    /**
-     * @return ProjectStruct|null
-     */
-    public function getProjectStruct(): ?ProjectStruct
+    public function getProjectStruct(): ProjectStruct
     {
-        return new ProjectStruct($this->projectStruct);
+        return new ProjectStruct($this->projectStruct ?? []);
     }
 
     /**
@@ -176,7 +177,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public function getTMEngine(FeatureSet $featureSet): AbstractEngine
     {
         if ($this->tmEngine == null) {
-            $this->tmEngine = EnginesFactory::getInstance($this->getJobStruct()->id_tms);
+            $this->tmEngine = EnginesFactory::getInstance($this->getJobStruct()->id_tms, AbstractEngine::class);
             $this->tmEngine->setFeatureSet($featureSet);
         }
 
@@ -192,24 +193,21 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public function getMTEngine(FeatureSet $featureSet): AbstractEngine
     {
         if ($this->mt_engine == null) {
-            $this->mt_engine = EnginesFactory::getInstance($this->getJobStruct()->id_mt_engine);
+            $this->mt_engine = EnginesFactory::getInstance($this->getJobStruct()->id_mt_engine, AbstractEngine::class);
             $this->mt_engine->setFeatureSet($featureSet);
         }
 
         return $this->mt_engine;
     }
 
-    public function getContexts(): object
+    public function getContexts(): ContributionContexts
     {
-        return (object)$this->contexts;
+        return ContributionContexts::fromArray($this->contexts);
     }
 
-    /**
-     * @return ?UserStruct
-     */
-    public function getUser(): ?UserStruct
+    public function getUser(): UserStruct
     {
-        return new UserStruct($this->user);
+        return new UserStruct($this->user ?? []);
     }
 
     /**

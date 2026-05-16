@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Group;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 01/07/16
  * Time: 12.02
  */
+#[Group('PersistenceNeeded')]
 class FindProjectTest extends AbstractTest
 {
 
@@ -106,11 +108,11 @@ class FindProjectTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers ProjectDao::findById
+     * @covers ProjectDao::staticFindById
      */
     function test_findById()
     {
-        $result = $this->projectDao->findById($this->project['id']);
+        $result = $this->projectDao->staticFindById($this->project['id']);
         $this->assertTrue($result instanceof ProjectStruct);
 
         $this->assertEquals($this->project['id'], $result->id);

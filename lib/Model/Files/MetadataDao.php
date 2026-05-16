@@ -8,8 +8,10 @@
 
 namespace Model\Files;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
@@ -17,6 +19,8 @@ class MetadataDao extends AbstractDao
 
     const string  TABLE = 'file_metadata';
     const string  _query_metadata_by_project_id_file = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file ";
+    const string  _query_get_by_key                  = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key ";
+    const string  _query_get_by_key_and_parts        = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
 
     /**
      * @param int $id_project
@@ -25,18 +29,28 @@ class MetadataDao extends AbstractDao
      *
      * @return MetadataStruct[]|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getByJobIdProjectAndIdFile(int $id_project, int $id_file, int $ttl = 0): ?array
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_project_id_file);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
+        $list = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_project' => $id_project,
             'id_file' => $id_file,
         ]);
+
+        if ($list) {
+            foreach ($list as $metaStruct) {
+                $metaStruct->value = FilesMetadataMarshaller::unMarshall($metaStruct);
+            }
+        }
+
+        return $list;
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobIdProjectAndIdFile(int $id_project, int $id_file): bool
@@ -44,6 +58,35 @@ class MetadataDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_project_id_file);
 
         return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['id_project' => $id_project, 'id_file' => $id_file,]);
+    }
+
+    /**
+     * Destroy cached result for a specific get() call.
+     *
+     * Must reconstruct the same query and params used in get() so that
+     * _destroyObjectCache computes the matching cache key.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyGetCache(int $id_project, int $id_file, string $key, ?int $filePartsId = null): bool
+    {
+        $params = [
+            'id_project' => $id_project,
+            'id_file'    => $id_file,
+            'key'        => $key,
+        ];
+
+        if ($filePartsId) {
+            $query = self::_query_get_by_key_and_parts;
+            $params['files_parts_id'] = $filePartsId;
+        } else {
+            $query = self::_query_get_by_key;
+        }
+
+        $stmt = $this->_getStatementForQuery($query);
+
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, $params);
     }
 
     /**
@@ -55,14 +98,10 @@ class MetadataDao extends AbstractDao
      *
      * @return MetadataStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function get(int $id_project, int $id_file, string $key, ?int $filePartsId = null, int $ttl = 0): ?MetadataStruct
     {
-        $query = "SELECT * FROM " . self::TABLE . " WHERE " .
-            " id_project = :id_project " .
-            " AND id_file = :id_file " .
-            " AND `key` = :key ";
-
         $params = [
             'id_project' => $id_project,
             'id_file' => $id_file,
@@ -70,13 +109,21 @@ class MetadataDao extends AbstractDao
         ];
 
         if ($filePartsId) {
-            $query .= " AND `files_parts_id` = :files_parts_id";
+            $query = self::_query_get_by_key_and_parts;
             $params['files_parts_id'] = $filePartsId;
+        } else {
+            $query = self::_query_get_by_key;
         }
 
         $stmt = $this->_getStatementForQuery($query);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, $params)[0] ?? null;
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, $params)[0] ?? null;
+
+        if ($result) {
+            $result->value = FilesMetadataMarshaller::unMarshall($result);
+        }
+
+        return $result;
     }
 
     /**
@@ -88,6 +135,7 @@ class MetadataDao extends AbstractDao
      *
      * @return MetadataStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function insert(int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null): ?MetadataStruct
     {
@@ -106,6 +154,9 @@ class MetadataDao extends AbstractDao
             'value' => $value
         ]);
 
+        $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
+        $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+
         return $this->get($id_project, $id_file, $key, $filePartsId);
     }
 
@@ -118,6 +169,7 @@ class MetadataDao extends AbstractDao
      *
      * @return MetadataStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function update(int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null): ?MetadataStruct
     {
@@ -141,16 +193,21 @@ class MetadataDao extends AbstractDao
 
         $stmt->execute($args);
 
+        $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
+        $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+
         return $this->get($id_project, $id_file, $key, $filePartsId);
     }
 
     /**
      * @param int $id_project
      * @param int $id_file
-     * @param array $metadata
+     * @param array<string, string|null> $metadata
      * @param int|null $filePartsId
      *
      * @return bool|null
+     * @throws ReflectionException
+     * @throws PDOException
      */
     public function bulkInsert(int $id_project, int $id_file, array $metadata = [], ?int $filePartsId = null): bool|null
     {
@@ -181,7 +238,16 @@ class MetadataDao extends AbstractDao
             $conn = Database::obtain()->getConnection();
             $stmt = $conn->prepare($sql);
 
-            return $stmt->execute($bind_values);
+            $result = $stmt->execute($bind_values);
+
+            $this->destroyCacheByJobIdProjectAndIdFile($id_project, $id_file);
+            foreach ($metadata as $key => $value) {
+                if ($value !== null and $value !== '') {
+                    $this->destroyGetCache($id_project, $id_file, $key, $filePartsId);
+                }
+            }
+
+            return $result;
         }
 
         return null;

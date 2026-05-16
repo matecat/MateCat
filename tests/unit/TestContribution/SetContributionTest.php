@@ -10,6 +10,7 @@
 
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -23,6 +24,7 @@ use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 
+#[Group('PersistenceNeeded')]
 class SetContributionTest extends AbstractTest
 {
 
@@ -200,6 +202,80 @@ class SetContributionTest extends AbstractTest
         //init the worker client with the stub Handler
         WorkerClient::init($stub);
         Set::contribution($contributionStruct);
+    }
+
+    #[Test]
+    public function testGetPropWithStringProps(): void
+    {
+        $request = new SetContributionRequest();
+        $request->jobStruct = new JobStruct([
+            'id' => 1999999,
+            'password' => '1d7903464318',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'id_project' => 22222222,
+        ]);
+        $request->props = '{"isConcordance":"0","id_file":"123"}';
+
+        $result = $request->getProp();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('isConcordance', $result);
+        $this->assertEquals('0', $result['isConcordance']);
+    }
+
+    #[Test]
+    public function testGetPropWithArrayProps(): void
+    {
+        $request = new SetContributionRequest();
+        $request->jobStruct = new JobStruct([
+            'id' => 1999999,
+            'password' => '1d7903464318',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'id_project' => 22222222,
+        ]);
+        $request->props = ['isConcordance' => '0', 'id_file' => '123'];
+
+        $result = $request->getProp();
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('isConcordance', $result);
+    }
+
+    #[Test]
+    public function testGetPropWithInvalidJsonString(): void
+    {
+        $request = new SetContributionRequest();
+        $request->jobStruct = new JobStruct([
+            'id' => 1999999,
+            'password' => '1d7903464318',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'id_project' => 22222222,
+        ]);
+        $request->props = 'not-valid-json';
+
+        $result = $request->getProp();
+
+        // Should fallback to empty array merged with job TM props
+        $this->assertIsArray($result);
+    }
+
+    #[Test]
+    public function testToStringReturnsJson(): void
+    {
+        $request = new SetContributionRequest();
+        $request->id_file = 1;
+        $request->id_segment = 2;
+        $request->id_job = 3;
+        $request->job_password = 'abc';
+        $request->jobStruct = new JobStruct();
+
+        $result = (string) $request;
+        $this->assertJson($result);
+        $decoded = json_decode($result, true);
+        $this->assertEquals(2, $decoded['id_segment']);
     }
 
 }

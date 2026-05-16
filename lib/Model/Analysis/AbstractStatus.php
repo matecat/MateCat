@@ -10,10 +10,10 @@ use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -83,7 +83,7 @@ abstract class AbstractStatus
             $user->uid = -1;
         }
         $this->user = $user;
-        $this->project = ProjectDao::findById($_project_data[0]['pid'], 60 * 60);
+        $this->project = ProjectDao::staticFindById($_project_data[0]['pid'], 60 * 60);
         $this->_project_data = $_project_data;
         $this->featureSet = $features;
     }
@@ -151,7 +151,9 @@ abstract class AbstractStatus
      */
     protected function isOutsourceEnabled($targetLang, $id_customer, $idJob): bool
     {
-        $outsourceAvailableInfo = $this->featureSet->filter('outsourceAvailableInfo', $targetLang, $id_customer, $idJob);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($targetLang, (string)$id_customer, (int)$idJob);
+        $this->featureSet->dispatch($outsourceAvailableInfoEvent);
+        $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin does not trigger the hook
         if (!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)) {
@@ -203,7 +205,7 @@ abstract class AbstractStatus
             }
 
             if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
-                $chunkStruct = ChunkDao::getByIdAndPassword($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
+                $chunkStruct = (new JobDao())->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
                 $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user, $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);

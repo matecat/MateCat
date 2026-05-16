@@ -4,7 +4,7 @@ namespace unit\Model\ProjectCreation;
 
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
 /**
  * Unit tests for the error recording pattern via {@see ProjectStructure::addError()}.
@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  *
  * @see ProjectStructureTest for lower-level addError() unit tests
  */
-class ErrorRecordingTest extends TestCase
+class ErrorRecordingTest extends AbstractTest
 {
     // =========================================================================
     // addError() — error recording

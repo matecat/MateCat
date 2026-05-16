@@ -2,6 +2,7 @@
 
 namespace Utils\XliffReplacer;
 
+use DomainException;
 use Exception;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
@@ -61,6 +62,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
     /**
      * @inheritDoc
      * @throws Exception
+     * @throws DomainException
      */
     public function thereAreErrors(int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null): bool
     {

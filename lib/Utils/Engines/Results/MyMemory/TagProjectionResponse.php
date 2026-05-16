@@ -18,16 +18,15 @@ class TagProjectionResponse extends TMSAbstractResponse
 {
 
     /**
-     * TagProjectionResponse constructor.
-     *
-     * @param          $response
-     * @param array $dataRefMap
+     * @param array<string, mixed> $response
+     * @param array<string, mixed> $dataRefMap
      *
      * @throws Exception
      */
-    public function __construct($response, array $dataRefMap = [])
+    public function __construct(array $response, array $dataRefMap = [])
     {
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
+        /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($featureSet, null, null, $dataRefMap);
         $this->responseData = isset($response['data']['translation']) ? $Filter->fromLayer1ToLayer2($response['data']['translation']) : '';
     }

@@ -5,32 +5,35 @@ namespace Plugins\Features\ProjectCompletion\Decorator;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
+use DivisionByZeroError;
+use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
+use RuntimeException;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Tools\CatUtils;
 
 class CatDecorator extends AbstractDecorator
 {
 
+    /** @var array<string, mixed> */
     private array $stats;
 
     private string $current_phase;
-    /**
-     * @var CatDecoratorArguments|null
-     */
-    private ?CatDecoratorArguments $arguments;
+
+    private CatDecoratorArguments $arguments;
 
     /**
-     * @param CatDecoratorArguments|null $arguments
-     *
-     * @return void
      * @throws Exception
+     * @throws DivisionByZeroError
      */
     public function decorate(?ArgumentInterface $arguments = null): void
     {
+        if (!$arguments instanceof CatDecoratorArguments) {
+            throw new RuntimeException('CatDecorator requires CatDecoratorArguments, got ' . get_debug_type($arguments));
+        }
+
         $this->arguments = $arguments;
         $job = $this->arguments->getJob();
 
@@ -41,34 +44,40 @@ class CatDecorator extends AbstractDecorator
         $dao = new ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase($this->arguments->getJob());
 
-        $this->template->{'project_completion_feature_enabled'} = new PHPTalBoolean(true);
-        $this->template->{'job_completion_current_phase'} = $this->current_phase;
+        $this->template->project_completion_feature_enabled = new PHPTalBoolean(true);
+        $this->template->job_completion_current_phase = $this->current_phase;
 
         if ($lastCompletionEvent) {
-            $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent['id_event'];
+            $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'];
             $this->varsForComplete();
         } else {
             $this->varsForUncomplete();
         }
     }
 
+    /**
+     * @throws DomainException
+     */
     private function varsForUncomplete(): void
     {
-        $this->template->{'job_marked_complete'} = new PHPTalBoolean(false);
+        $this->template->job_marked_complete = new PHPTalBoolean(false);
 
         if ($this->completable()) {
-            $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean(true);
+            $this->template->mark_as_complete_button_enabled = new PHPTalBoolean(true);
         } else {
-            $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean(false);
+            $this->template->mark_as_complete_button_enabled = new PHPTalBoolean(false);
         }
     }
 
     private function varsForComplete(): void
     {
-        $this->template->{'job_marked_complete'} = new PHPTalBoolean(true);
-        $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean(false);
+        $this->template->job_marked_complete = new PHPTalBoolean(true);
+        $this->template->mark_as_complete_button_enabled = new PHPTalBoolean(false);
     }
 
+    /**
+     * @throws DomainException
+     */
     private function completable(): bool
     {
         if ($this->arguments->getJob()->getProject()->getWordCountType() != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {

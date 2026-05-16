@@ -12,6 +12,7 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
+use TypeError;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
@@ -22,8 +23,9 @@ class DownloadOriginalController extends AbstractDownloadController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
-    public function index()
+    public function index(): void
     {
         $filterArgs = [
             'filename' => [
@@ -44,29 +46,30 @@ class DownloadOriginalController extends AbstractDownloadController
 
         $__postInput = filter_var_array($this->request->params(), $filterArgs);
 
-        //NOTE: This is for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI Test scripts
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
-
-        $this->_user_provided_filename = $__postInput['filename'];
-        $this->id_job = $__postInput['id_job'];
-        $this->password = $__postInput['password'];
+        $this->_user_provided_filename = $__postInput['filename'] ?: null;
+        $this->id_job = (int)($__postInput['id_job'] ?? 0);
+        $this->password = (string)($__postInput['password'] ?? '');
 
         // get Job Info, we need only a row of jobs ( split )
-        $jobData = JobDao::getByIdAndPassword((int)$this->id_job, $this->password);
+        $jobData = (new JobDao())->getByIdAndPassword((int)$this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
             $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
+            if (empty($chunkReviewStruct)) {
+                $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
+                $this->logger->debug($msg);
+                return;
+            }
             $jobData = $chunkReviewStruct->getChunk();
         }
 
         // check for Password correctness
         if (empty($jobData)) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export($_POST, true) . "\n";
+            $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
             $this->logger->debug($msg);
 
-            return null;
+            return;
         }
 
         //get storage object
@@ -76,7 +79,7 @@ class DownloadOriginalController extends AbstractDownloadController
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[0]['id_project'];
 
-        $this->project = ProjectDao::findById($id_project);
+        $this->project = ProjectDao::staticFindById($id_project) ?? throw new Exception("Project not found");
 
         $output_content = [];
 
@@ -111,6 +114,10 @@ class DownloadOriginalController extends AbstractDownloadController
         if (count($output_content) > 1) {
             $this->setFilename($this->getDefaultFileName($this->project));
             $pathInfo = AbstractFilesStorage::pathinfo_fix($this->_filename);
+
+            if (!is_array($pathInfo)) {
+                throw new Exception("pathinfo_fix returned non-array value");
+            }
 
             if ($pathInfo['extension'] != 'zip') {
                 $this->setFilename($pathInfo['basename'] . ".zip");

@@ -16,7 +16,7 @@ class ValidatorObject implements ArrayAccess
     /**
      * @param stdClass $object
      *
-     * @return ValidatorObject
+     * @return static
      */
     public static function fromObject(stdClass $object): ValidatorObject
     {
@@ -29,9 +29,9 @@ class ValidatorObject implements ArrayAccess
     }
 
     /**
-     * @param array $array
+     * @param array<string, mixed> $array
      *
-     * @return ValidatorObject
+     * @return static
      */
     public static function fromArray(array $array): ValidatorObject
     {

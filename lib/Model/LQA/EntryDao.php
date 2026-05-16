@@ -2,6 +2,7 @@
 
 namespace Model\LQA;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -9,20 +10,19 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class EntryDao extends AbstractDao
 {
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
-     * @param array $ids
+     * @param array<int, int> $ids
      *
      * @return ShapelessConcreteStruct[]
+     * @throws PDOException
      */
     public static function getBySegmentIds(array $ids = []): array
     {
@@ -51,7 +51,10 @@ class EntryDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
-    public static function updateRepliesCount($id): bool
+    /**
+     * @throws PDOException
+     */
+    public static function updateRepliesCount(int $id): bool
     {
         $sql = "UPDATE qa_entries SET replies_count = " .
             " ( SELECT count(*) FROM " .
@@ -66,6 +69,9 @@ class EntryDao extends AbstractDao
         return $stmt->execute(['id' => $id]);
     }
 
+    /**
+     * @throws PDOException
+     */
     public static function deleteEntry(EntryStruct $record): bool
     {
         $sql = "UPDATE qa_entries SET deleted_at = :deleted_at WHERE id = :id ";
@@ -80,11 +86,12 @@ class EntryDao extends AbstractDao
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
      * @return ?EntryStruct
+     * @throws PDOException
      */
-    public static function findById($id): ?EntryStruct
+    public static function findById(int $id): ?EntryStruct
     {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
             " FROM qa_entries " .
@@ -103,6 +110,7 @@ class EntryDao extends AbstractDao
      * @param JobStruct $chunk
      *
      * @return ShapelessConcreteStruct[]
+     * @throws PDOException
      */
     public static function findAllByChunk(JobStruct $chunk): array
     {
@@ -131,6 +139,7 @@ class EntryDao extends AbstractDao
      * @param int $source_page
      *
      * @return EntryWithCategoryStruct[]
+     * @throws PDOException
      */
     public static function findByIdSegmentAndSourcePage(int $id_segment, int $id_job, int $source_page): array
     {
@@ -163,6 +172,7 @@ class EntryDao extends AbstractDao
      * @param int $version
      *
      * @return EntryStruct[]
+     * @throws PDOException
      */
     public static function findAllByTranslationVersion(int $id_segment, int $id_job, int $version): array
     {
@@ -193,8 +203,11 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
+     * @throws Exception
      * @throws NotFoundException
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws ValidationError
      */
     public static function modifyEntry(EntryStruct $entryStruct): EntryStruct
@@ -253,9 +266,12 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
-     * @throws ReflectionException
-     * @throws ValidationError
+     * @throws Exception
      * @throws NotFoundException
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws TypeError
+     * @throws ValidationError
      */
     public static function createEntry(EntryStruct $entryStruct): EntryStruct
     {
@@ -311,7 +327,7 @@ class EntryDao extends AbstractDao
         );
 
         $stmt->execute($values);
-        $lastId = $conn->lastInsertId();
+        $lastId = (int)$conn->lastInsertId();
 
         $entryStruct->id = $lastId;
 
@@ -371,6 +387,8 @@ class EntryDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function getIssuesGroupedByIdFilePart(int $id_job, string $password, int $revisionNumber, int $idFilePart = null, int $ttl = 0): array

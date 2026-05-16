@@ -6,6 +6,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
@@ -20,7 +21,7 @@ use TestHelpers\AbstractTest;
  * - Hello Hello world 4WD &amp; ampoule %{variable}%
  * - Hello world &#13;&#13;
  * - This unit has a &quot;comment&quot; too;
- * - Hello world qarkullimit” &amp; faturës.
+ * - Hello world qarkullimit" &amp; faturës.
  *
  * ############################################
  * # TRANSLATIONS (used for target tests)     #
@@ -30,6 +31,7 @@ use TestHelpers\AbstractTest;
  * - Anche questa unità ha un &quot;commento&quot;;
  * - Ciao mondo
  */
+#[Group('PersistenceNeeded')]
 class SearchModelTest extends AbstractTest
 {
 
@@ -103,6 +105,27 @@ class SearchModelTest extends AbstractTest
         $this->_launchSearchAndVerifyResults('source', 'too', 1, [3], true);
     }
 
+    #[Test]
+    public function testSearchWithStatusFilter(): void
+    {
+        $allResults = $this->_searchWithStatus('all');
+        $translatedResults = $this->_searchWithStatus('TRANSLATED');
+
+        $this->assertLessThanOrEqual($allResults['count'], $translatedResults['count']);
+        foreach ($translatedResults['sid_list'] as $sid) {
+            $this->assertContains($sid, $allResults['sid_list']);
+        }
+    }
+
+    #[Test]
+    public function testSearchWithStatusInjectionAttempt(): void
+    {
+        $result = $this->_searchWithStatus("'; DROP TABLE segments; --");
+
+        $this->assertEquals(0, $result['count']);
+        $this->assertEmpty($result['sid_list']);
+    }
+
     /**
      * @param string $key
      * @param string $word
@@ -125,7 +148,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct[($key === 'target') ? 'trg' : 'src'] = $word;
 
         // jobData
-        $jobData = JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
 
         // instantiate the filters
         $featureSet = new FeatureSet();
@@ -144,5 +167,25 @@ class SearchModelTest extends AbstractTest
         ];
 
         $this->assertEquals($expected, $searchModel->search(true));
+    }
+
+    private function _searchWithStatus(string $status): array
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job = $this->jobId;
+        $queryParamsStruct->password = $this->jobPwd;
+        $queryParamsStruct->status = $status;
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested = false;
+        $queryParamsStruct['key'] = 'target';
+        $queryParamsStruct['trg'] = 'Ciao';
+
+        $jobData = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
+        $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
+
+        $searchModel = new SearchModel($queryParamsStruct, $filters);
+        return $searchModel->search(true);
     }
 }

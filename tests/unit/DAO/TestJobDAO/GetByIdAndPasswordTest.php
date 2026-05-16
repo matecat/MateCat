@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -15,6 +16,7 @@ use Utils\Registry\AppConfig;
  * Date: 27/05/16
  * Time: 11.47
  */
+#[Group('PersistenceNeeded')]
 class GetByIdAndPasswordTest extends AbstractTest
 {
     /**
@@ -121,7 +123,7 @@ class GetByIdAndPasswordTest extends AbstractTest
     #[Test]
     public function test_GetByIdAndPassword()
     {
-        $actual_result = $this->job_Dao->getByIdAndPassword($this->id, $this->str_password);
+        $actual_result = $this->job_Dao->getByIdAndPassword((int)$this->id, $this->str_password);
         $id = $actual_result['id'];
         $this->assertEquals($this->id, $id);
         $password = $actual_result['password'];

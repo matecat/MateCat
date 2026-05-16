@@ -3,23 +3,33 @@
 namespace Utils\Engines\Results\MyMemory;
 
 use Exception;
+use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 
 class GetMemoryResponse extends TMSAbstractResponse
 {
     /**
-     * @var Matches[]|array
+     * @var Matches[]
      */
     public array $matches = [];
 
-    public function __construct($result)
+    /**
+     * @param array<string, mixed>|int|null $result
+     *
+     * @throws TypeError
+     */
+    public function __construct(array|int|null $result)
     {
+        if (!is_array($result)) {
+            return;
+        }
+
         $this->responseData = $result['responseData'] ?? '';
         $this->responseDetails = $result['responseDetails'] ?? '';
         $this->responseStatus = (int)($result['responseStatus'] ?? 200);
         $this->mtLangSupported = $result['mtLangSupported'] ?? true;
 
-        if (is_array($result) and !empty($result) and array_key_exists('matches', $result)) {
+        if (!empty($result) and array_key_exists('matches', $result)) {
             $matches = $result['matches'];
             if (is_array($matches) and !empty($matches)) {
                 foreach ($matches as $match) {
@@ -30,11 +40,12 @@ class GetMemoryResponse extends TMSAbstractResponse
     }
 
     /**
-     * @param $match
+     * @param array<string, mixed> $match
      *
      * @return Matches
+     * @throws TypeError
      */
-    private function buildMyMemoryMatch($match): Matches
+    private function buildMyMemoryMatch(array $match): Matches
     {
         if ($match['last-update-date'] == "0000-00-00 00:00:00") {
             $match['last-update-date'] = "1970-01-01 00:00:00";
@@ -69,7 +80,7 @@ class GetMemoryResponse extends TMSAbstractResponse
             'key' => $match['key'] ?? '',
             'ICE' => $match['ICE'] ?? false,
             'source_note' => $match['source_note'] ?? null,
-            'target_note' => $match['target_note'] ?? null,
+            'target_note' => $match['target_note'] ?? '',
             'penalty' => $match['penalty'] ?? null,
         ]);
     }
@@ -78,15 +89,16 @@ class GetMemoryResponse extends TMSAbstractResponse
      * Get matches as array
      *
      * @param int $layerNum
-     * @param array $dataRefMap
-     * @param null $source
-     * @param null $target
-     * @param array|null $subfiltering_handlers
+     * @param array<string, mixed> $dataRefMap
+     * @param string|null $source
+     * @param string|null $target
+     * @param array<string, mixed>|null $subfiltering_handlers
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws Exception
+     * @throws TypeError
      */
-    public function get_matches_as_array(int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null, ?array $subfiltering_handlers = []): array
+    public function get_matches_as_array(int $layerNum = 2, array $dataRefMap = [], ?string $source = null, ?string $target = null, ?array $subfiltering_handlers = []): array
     {
         $matchesArray = [];
 

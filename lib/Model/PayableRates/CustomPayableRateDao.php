@@ -11,8 +11,10 @@ use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;
 use PDO;
+use PDOException;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 use Utils\Tools\Utils;
 
@@ -32,9 +34,9 @@ class CustomPayableRateDao extends AbstractDao
     private static ?CustomPayableRateDao $instance = null;
 
     /**
-     * @return CustomPayableRateDao|null
+     * @return CustomPayableRateDao
      */
-    private static function getInstance(): ?CustomPayableRateDao
+    private static function getInstance(): CustomPayableRateDao
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -46,7 +48,7 @@ class CustomPayableRateDao extends AbstractDao
     /**
      * @param int $uid
      *
-     * @return array
+     * @return array{id: int, uid: int, payable_rate_template_name: string, version: int, breakdowns: array{default: array<string, mixed>}, createdAt: string|null, modifiedAt: string|null}
      * @throws Exception
      */
     public static function getDefaultTemplate(int $uid): array
@@ -71,8 +73,10 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $pagination
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -95,6 +99,8 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $ttl
      *
      * @return CustomPayableRateStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getById(int $id, int $ttl = 60): ?CustomPayableRateStruct
@@ -104,9 +110,7 @@ class CustomPayableRateDao extends AbstractDao
             'id' => $id,
         ]);
 
-        /**
-         * @var $result CustomPayableRateStruct[]
-         */
+        /** @var CustomPayableRateStruct[] $result */
         return $result[0] ?? null;
     }
 
@@ -116,6 +120,8 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $ttl
      *
      * @return CustomPayableRateStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?CustomPayableRateStruct
@@ -126,9 +132,7 @@ class CustomPayableRateDao extends AbstractDao
             'uid' => $uid,
         ]);
 
-        /**
-         * @var $result CustomPayableRateStruct[]
-         */
+        /** @var CustomPayableRateStruct[] $result */
         return $result[0] ?? null;
     }
 
@@ -137,9 +141,12 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return CustomPayableRateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function save(CustomPayableRateStruct $customPayableRateStruct): CustomPayableRateStruct
     {
+        $uid = $customPayableRateStruct->uid ?? throw new Exception("CustomPayableRateStruct::uid must not be null when saving");
+
         $sql = "INSERT INTO " . self::TABLE .
             " ( `uid`, `version`, `name`, `breakdowns`, `created_at`, `modified_at` ) " .
             " VALUES " .
@@ -150,19 +157,19 @@ class CustomPayableRateDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            'uid' => $customPayableRateStruct->uid,
+            'uid' => $uid,
             'version' => 1,
             'name' => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
             'now' => $now,
         ]);
 
-        $customPayableRateStruct->id = $conn->lastInsertId();
+        $customPayableRateStruct->id = (int)$conn->lastInsertId();
         $customPayableRateStruct->version = 1;
         $customPayableRateStruct->created_at = $now;
         $customPayableRateStruct->modified_at = $now;
 
-        self::destroyQueryPaginated($customPayableRateStruct->uid);
+        self::destroyQueryPaginated($uid);
 
         return $customPayableRateStruct;
     }
@@ -172,25 +179,29 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return CustomPayableRateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function update(CustomPayableRateStruct $customPayableRateStruct): CustomPayableRateStruct
     {
+        $id = $customPayableRateStruct->id ?? throw new Exception("CustomPayableRateStruct::id must not be null when updating");
+        $uid = $customPayableRateStruct->uid ?? throw new Exception("CustomPayableRateStruct::uid must not be null when updating");
+
         $sql = "UPDATE " . self::TABLE . " SET `uid` = :uid, `version` = :version, `name` = :name, `breakdowns` = :breakdowns, `modified_at` = :now WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            'id' => $customPayableRateStruct->id,
-            'uid' => $customPayableRateStruct->uid,
+            'id' => $id,
+            'uid' => $uid,
             'version' => ($customPayableRateStruct->version + 1),
             'name' => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        self::destroyQueryByIdCache($conn, $customPayableRateStruct->id);
-        self::destroyQueryByIdAndUserCache($conn, $customPayableRateStruct->id, $customPayableRateStruct->uid);
-        self::destroyQueryPaginated($customPayableRateStruct->uid);
+        self::destroyQueryByIdCache($conn, $id);
+        self::destroyQueryByIdAndUserCache($conn, $id, $uid);
+        self::destroyQueryPaginated($uid);
 
         return $customPayableRateStruct;
     }
@@ -200,7 +211,9 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $uid
      *
      * @return int
+     * @throws PDOException
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function remove(int $id, int $uid): int
     {
@@ -232,6 +245,7 @@ class CustomPayableRateDao extends AbstractDao
      *
      * @return CustomPayableRateStruct
      * @throws Exception
+     * @throws TypeError
      */
     public static function createFromJSON(string $json, int $uid = null): CustomPayableRateStruct
     {
@@ -252,6 +266,7 @@ class CustomPayableRateDao extends AbstractDao
      * @return CustomPayableRateStruct
      * @throws InvalidValue
      * @throws Exception
+     * @throws TypeError
      */
     public static function editFromJSON(CustomPayableRateStruct $customPayableRateStruct, string $json): CustomPayableRateStruct
     {
@@ -264,6 +279,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param PDO $conn
      * @param int $id
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private static function destroyQueryByIdCache(PDO $conn, int $id): void
@@ -277,6 +293,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $id
      * @param int $uid
      *
+     * @throws PDOException
      * @throws ReflectionException
      */
     private
@@ -293,6 +310,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param int $uid
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private
     static function destroyQueryPaginated(
@@ -309,6 +327,7 @@ class CustomPayableRateDao extends AbstractDao
      * @param string $name
      *
      * @return string
+     * @throws PDOException
      */
     public static function assocModelToJob(int $modelId, int $idJob, int $version, string $name): string
     {
@@ -326,6 +345,6 @@ class CustomPayableRateDao extends AbstractDao
             'model_name' => $name,
         ]);
 
-        return $conn->lastInsertId();
+        return (string)$conn->lastInsertId();
     }
 }

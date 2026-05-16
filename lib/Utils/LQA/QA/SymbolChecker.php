@@ -107,8 +107,8 @@ class SymbolChecker
         $cleaned_source = str_replace($symbols, "", $sourceSeg);
         $cleaned_target = str_replace($symbols, "", $targetSeg);
 
-        $cleaned_source = preg_replace('/##\$_..\$##/', "", $cleaned_source);
-        $cleaned_target = preg_replace('/##\$_..\$##/', "", $cleaned_target);
+        $cleaned_source = preg_replace('/##\$_..\$##/', "", $cleaned_source) ?? $cleaned_source;
+        $cleaned_target = preg_replace('/##\$_..\$##/', "", $cleaned_target) ?? $cleaned_target;
 
         foreach ($specialSymbols as $sym) {
             $symbolOccurrencesInSource = mb_substr_count($cleaned_source, $sym);
@@ -140,4 +140,3 @@ class SymbolChecker
         };
     }
 }
-

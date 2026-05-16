@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterDao;
 use TestHelpers\AbstractTest;
@@ -11,6 +12,7 @@ use Utils\Registry\AppConfig;
  * @group regression
  * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao
  */
+#[Group('PersistenceNeeded')]
 class SegmentFilterDaoTest extends AbstractTest
 {
     protected Database $database_instance;

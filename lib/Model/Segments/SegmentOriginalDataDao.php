@@ -2,8 +2,10 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use PDOException;
 use ReflectionException;
 
 class SegmentOriginalDataDao extends AbstractDao
@@ -15,6 +17,8 @@ class SegmentOriginalDataDao extends AbstractDao
      *
      * @return SegmentOriginalDataStruct|null
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public static function getBySegmentId(int $id_segment, int $ttl = 86400): ?SegmentOriginalDataStruct
     {
@@ -33,8 +37,9 @@ class SegmentOriginalDataDao extends AbstractDao
      * @param int $id_segment
      * @param int $ttl
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getSegmentDataRefMap(int $id_segment, int $ttl = 86400): array
     {
@@ -51,7 +56,8 @@ class SegmentOriginalDataDao extends AbstractDao
 
     /**
      * @param int $id_segment
-     * @param array $map
+     * @param array<string, mixed> $map
+     * @throws PDOException
      */
     public static function insertRecord(int $id_segment, array $map): void
     {
@@ -64,8 +70,11 @@ class SegmentOriginalDataDao extends AbstractDao
 
         // remove any carriage return or extra space from the map
         $json = json_encode($map);
+        if ($json === false) {
+            $json = '{}';
+        }
         $string = str_replace(["\\n", "\\r"], '', $json);
-        $string = trim(preg_replace('/\s+/', ' ', $string));
+        $string = trim(preg_replace('/\s+/', ' ', $string) ?? $string);
 
         $stmt->execute([
             'id_segment' => $id_segment,
@@ -73,4 +82,3 @@ class SegmentOriginalDataDao extends AbstractDao
         ]);
     }
 }
-

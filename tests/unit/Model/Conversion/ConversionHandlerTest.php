@@ -21,6 +21,7 @@ use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
 use Model\Filters\FiltersConfigTemplateStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use ReflectionClass;
@@ -36,6 +37,7 @@ use Utils\Redis\RedisHandler;
  * All external I/O dependencies are injected via the constructor, so every test
  * uses standard PHPUnit stubs/mocks — no testable subclass required.
  */
+#[Group('PersistenceNeeded')]
 class ConversionHandlerTest extends AbstractTest
 {
     private string $tmpDir;

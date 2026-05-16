@@ -60,10 +60,11 @@ class UserController extends AbstractStatefulKleinController
             $user = $this->user;
             $user->first_name = $data['first_name'];
             $user->last_name = $data['last_name'];
+            $uid = $user->uid ?? throw new Exception('User not authenticated');
 
             $userDao = new UserDao();
             $userDao->updateUser($user);
-            $userDao->destroyCacheByUid($user->uid);
+            $userDao->destroyCacheByUid($uid);
 
             AuthenticationHelper::refreshSession($_SESSION);
 

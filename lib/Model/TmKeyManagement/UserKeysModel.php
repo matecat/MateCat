@@ -14,11 +14,11 @@ use Model\Users\UserStruct;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyStruct;
 
 class UserKeysModel
 {
 
+    /** @var array{totals: array<int, ClientTmKeyStruct>, job_keys: list<ClientTmKeyStruct>} */
     protected array $_user_keys = ['totals' => [], 'job_keys' => []];
 
     protected UserStruct $user;
@@ -35,8 +35,9 @@ class UserKeysModel
      * @param string $jobKeys
      * @param int $ttl
      *
-     * @return array
+     * @return array{totals: array<int, ClientTmKeyStruct>, job_keys: list<ClientTmKeyStruct>}
      * @throws Exception
+     * @throws \TypeError
      */
     public function getKeys(string $jobKeys, int $ttl = 0): array
     {
@@ -54,22 +55,17 @@ class UserKeysModel
 
         $reverse_lookup_user_personal_keys = ['pos' => [], 'elements' => []];
 
-        /**
-         * Set these keys as editable for the client
-         *
-         * @var $keyList MemoryKeyStruct[]
-         */
-
+        /** @var MemoryKeyStruct[] $keyList */
         foreach ($keyList as $_j => $key) {
-            /**
-             * @var $_client_tm_key TmKeyStruct
-             */
+            $tmKey = $key->tm_key;
+            if ($tmKey === null) {
+                continue;
+            }
 
-            //create a reverse lookup
-            $reverse_lookup_user_personal_keys['pos'][$_j] = $key->tm_key->key;
+            $reverse_lookup_user_personal_keys['pos'][$_j] = $tmKey->key;
             $reverse_lookup_user_personal_keys['elements'][$_j] = $key;
 
-            $this->_user_keys['totals'][$_j] = new ClientTmKeyStruct($key->tm_key);
+            $this->_user_keys['totals'][$_j] = new ClientTmKeyStruct($tmKey);
         }
 
         /*
@@ -77,12 +73,7 @@ class UserKeysModel
          */
         $job_keyList = json_decode($jobKeys, true);
 
-        /**
-         * Start this N^2 cycle from keys of the job,
-         * these should be statistically lesser than the keys of the user
-         *
-         * @var $keyList array
-         */
+        /** @var array<int, array<string, mixed>> $job_keyList */
         foreach ($job_keyList as $jobKey) {
             $jobKey = new ClientTmKeyStruct($jobKey);
             $jobKey->complete_format = true;
@@ -111,7 +102,7 @@ class UserKeysModel
                     }
 
                     //copy the is_shared value from the key inside the Keyring into the key coming from job
-                    $jobKey->setShared($reverse_lookup_user_personal_keys['elements'][$_index_position]->tm_key->isShared());
+                    $jobKey->setShared($reverse_lookup_user_personal_keys['elements'][$_index_position]->tm_key?->isShared() ?? false);
 
                     unset($this->_user_keys['totals'][$_index_position]);
                 } else {

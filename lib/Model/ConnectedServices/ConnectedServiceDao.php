@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDao;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
 use PDO;
+use PDOException;
 use Utils\Tools\Utils;
 
 class ConnectedServiceDao extends AbstractDao
@@ -16,25 +17,10 @@ class ConnectedServiceDao extends AbstractDao
     const string TABLE = 'connected_services';
     const string GDRIVE_SERVICE = 'gdrive';
 
+    /** @var list<string> */
     protected static array $primary_keys = ['id'];
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
-
-    /**
-     * @param $id
-     *
-     * @return ConnectedServiceStruct|false
-     */
-    public function findById($id): ConnectedServiceStruct|false
-    {
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare(
-            "SELECT * FROM connected_services WHERE id = :id"
-        );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
-        $stmt->execute(['id' => $id]);
-
-        return $stmt->fetch();
-    }
 
     /**
      * @param string $token
@@ -54,13 +40,13 @@ class ConnectedServiceDao extends AbstractDao
     }
 
     /**
-     * @param                        $time
+     * @param int $time
      * @param ConnectedServiceStruct $service
      *
      * @return int
      * @throws Exception
      */
-    public function setServiceExpired($time, ConnectedServiceStruct $service): int
+    public function setServiceExpired(int $time, ConnectedServiceStruct $service): int
     {
         $service->expired_at = Utils::mysqlTimestamp($time);
 
@@ -70,6 +56,7 @@ class ConnectedServiceDao extends AbstractDao
     /**
      * Sets the default ConnectedService
      * @throws ValidationError
+     * @throws PDOException
      */
     public function setDefaultService(ConnectedServiceStruct $service): void
     {
@@ -92,11 +79,12 @@ class ConnectedServiceDao extends AbstractDao
 
     /**
      * @param UserStruct $user
-     * @param                  $id_service
+     * @param int $id_service
      *
      * @return ?ConnectedServiceStruct
+     * @throws PDOException
      */
-    public function findServiceByUserAndId(UserStruct $user, $id_service): ?ConnectedServiceStruct
+    public function findServiceByUserAndId(UserStruct $user, int $id_service): ?ConnectedServiceStruct
     {
         $conn = $this->database->getConnection();
 
@@ -117,6 +105,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param UserStruct $user
      *
      * @return ConnectedServiceStruct[]
+     * @throws PDOException
      */
     public function findServicesByUser(UserStruct $user): array
     {
@@ -140,6 +129,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param string $name
      *
      * @return ConnectedServiceStruct|null
+     * @throws PDOException
      */
 
     public function findDefaultServiceByUserAndName(UserStruct $user, string $name): ?ConnectedServiceStruct
@@ -166,6 +156,7 @@ class ConnectedServiceDao extends AbstractDao
      * @param string $email
      *
      * @return ?ConnectedServiceStruct
+     * @throws PDOException
      */
     public function findUserServicesByNameAndEmail(UserStruct $user, string $service, string $email): ?ConnectedServiceStruct
     {
@@ -184,7 +175,4 @@ class ConnectedServiceDao extends AbstractDao
         return $stmt->fetch() ?: null;
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
 }

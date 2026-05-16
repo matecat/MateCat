@@ -13,6 +13,7 @@ use DomainException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use TypeError;
 
 class MTQEWorkflowTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -34,6 +35,8 @@ class MTQEWorkflowTemplateStruct extends AbstractDaoSilentStruct implements Json
      * @param null $uid
      *
      * @return $this
+     * @throws DomainException
+     * @throws TypeError
      */
     public function hydrateFromJSON(string $json, $uid = null): MTQEWorkflowTemplateStruct
     {

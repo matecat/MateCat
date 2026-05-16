@@ -4,13 +4,15 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
+use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -18,13 +20,14 @@ use Model\Search\ReplaceEventStruct;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
-use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Registry\AppConfig;
 use Utils\Search\ReplaceHistory;
@@ -39,6 +42,11 @@ class GetSearchController extends AbstractStatefulKleinController
         $this->appendValidator(new LoginValidator($this));
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws DomainException
+     * @throws RuntimeException
+     */
     public function search(): void
     {
         $request = $this->validateTheRequest();
@@ -55,6 +63,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
     /**
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     public function replaceAll(): void
@@ -65,18 +74,22 @@ class GetSearchController extends AbstractStatefulKleinController
 
         // and then hydrate the $search_results array
         foreach ($res['sid_list'] as $segmentId) {
-            $search_results[] = SegmentTranslationDao::findBySegmentAndJob($segmentId, $request['queryParams']['job'])->toArray();
+            $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($segmentId, $request['queryParams']['job']);
+            if ($segmentTranslation === null) {
+                continue;
+            }
+            $search_results[] = $segmentTranslation->toArray();
         }
 
         // set the replacement in queryParams
         $request['queryParams']['replacement'] = $request['replace'];
 
         // update segment translations
-        $this->updateSegments($search_results, $request['job'], $request['password'], $request['queryParams'], $request['id_segment'] ?? null, $request['revisionNumber']);
+        $this->updateSegments($search_results, $request['job'], (string)$request['password'], $request['queryParams'], $request['id_segment'] ?? null, isset($request['revisionNumber']) ? (int)$request['revisionNumber'] : null);
 
         // and save replace events
         $srh = $this->getReplaceHistory($request['job']);
-        $replace_version = ($srh->getCursor() + 1);
+        $replace_version = (string)($srh->getCursor() + 1);
 
         foreach ($search_results as $tRow) {
             $this->saveReplacementEvent($replace_version, $tRow, $srh, $request['queryParams']);
@@ -94,6 +107,7 @@ class GetSearchController extends AbstractStatefulKleinController
     // not is use
 
     /**
+     * @throws TypeError
      * @throws Exception
      */
     public function redoReplaceAll(): void
@@ -101,7 +115,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $request = $this->validateTheRequest();
         $shr = $this->getReplaceHistory($request['job']);
         $search_results = $this->getSegmentForRedoReplaceAll($shr);
-        $this->updateSegments($search_results, $request['job'], $request['password'], $request['queryParams'], $request['id_segment'] ?? null, $request['revisionNumber']);
+        $this->updateSegments($search_results, $request['job'], (string)$request['password'], $request['queryParams'], $request['id_segment'] ?? null, isset($request['revisionNumber']) ? (int)$request['revisionNumber'] : null);
         $shr->redo();
 
         $this->response->json([
@@ -112,6 +126,7 @@ class GetSearchController extends AbstractStatefulKleinController
     // not is use
 
     /**
+     * @throws TypeError
      * @throws Exception
      */
     public function undoReplaceAll(): void
@@ -119,7 +134,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $request = $this->validateTheRequest();
         $shr = $this->getReplaceHistory($request['job']);
         $search_results = $this->getSegmentForUndoReplaceAll($shr);
-        $this->updateSegments($search_results, $request['job'], $request['password'], $request['queryParams'], $request['id_segment'] ?? null, $request['revisionNumber']);
+        $this->updateSegments($search_results, $request['job'], (string)$request['password'], $request['queryParams'], $request['id_segment'] ?? null, isset($request['revisionNumber']) ? (int)$request['revisionNumber'] : null);
         $shr->undo();
 
         $this->response->json([
@@ -128,7 +143,22 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
-     * @return array
+     * @return array{
+     *     job: int,
+     *     token: string|false,
+     *     source: string|false,
+     *     target: string|false,
+     *     status: string|false,
+     *     replace: string|false,
+     *     password: string|false,
+     *     isMatchCaseRequested: bool,
+     *     isExactMatchRequested: bool,
+     *     inCurrentChunkOnly: bool,
+     *     revisionNumber: string|false|null,
+     *     queryParams: SearchQueryParamsStruct
+     * }
+     *
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
@@ -201,27 +231,22 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param $job_id
-     * @param $password
-     *
-     * @return JobStruct|null
      * @throws Exception
      */
-    private function getJobData($job_id, $password): ?JobStruct
+    private function getJobData(int $job_id, string $password): JobStruct
     {
-        return ChunkDao::getByIdAndPassword((int)$job_id, $password);
+        return (new JobDao())->getByIdAndPasswordOrFail($job_id, $password);
     }
 
     /**
-     * @param $job_id
-     *
+     * @param int $job_id
      * @return ReplaceHistory
      */
-    private function getReplaceHistory($job_id): ReplaceHistory
+    private function getReplaceHistory(int $job_id): ReplaceHistory
     {
         // ReplaceHistory init
-        $srh_driver = (isset(AppConfig::$REPLACE_HISTORY_DRIVER) and '' !== AppConfig::$REPLACE_HISTORY_DRIVER) ? AppConfig::$REPLACE_HISTORY_DRIVER : 'redis';
-        $srh_ttl = (isset(AppConfig::$REPLACE_HISTORY_TTL) and 0 !== AppConfig::$REPLACE_HISTORY_TTL) ? AppConfig::$REPLACE_HISTORY_TTL : 300;
+        $srh_driver = ('' !== AppConfig::$REPLACE_HISTORY_DRIVER) ? AppConfig::$REPLACE_HISTORY_DRIVER : 'redis';
+        $srh_ttl = (0 !== AppConfig::$REPLACE_HISTORY_TTL) ? AppConfig::$REPLACE_HISTORY_TTL : 300;
 
         return ReplaceHistoryFactory::create($job_id, $srh_driver, $srh_ttl);
     }
@@ -229,23 +254,28 @@ class GetSearchController extends AbstractStatefulKleinController
     /**
      * @param SearchQueryParamsStruct $queryParams
      * @param JobStruct $jobStruct
-     *
      * @return SearchModel
-     * @throws Exception
+     * @throws RuntimeException
      */
     private function getSearchModel(SearchQueryParamsStruct $queryParams, JobStruct $jobStruct): SearchModel
     {
-        /** @var MateCatFilter $filter */
         $metadata = new MetadataDao();
+
+        if ($jobStruct->id === null || $jobStruct->password === null) {
+            throw new RuntimeException("Job struct has null id or password");
+        }
+
         $filter = MateCatFilter::getInstance($this->getFeatureSet(), $jobStruct->source, $jobStruct->target, [], $metadata->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password));
+
+        if (!$filter instanceof MateCatFilter) {
+            throw new RuntimeException("Expected MateCatFilter instance");
+        }
 
         return new SearchModel($queryParams, $filter);
     }
 
     /**
-     * @param ReplaceHistory $srh
-     *
-     * @return array
+     * @return array<int, array{id_segment: int, id_job: int, translation: string|null, status: string}>
      */
     private function getSegmentForRedoReplaceAll(ReplaceHistory $srh): array
     {
@@ -267,9 +297,7 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param ReplaceHistory $srh
-     *
-     * @return array
+     * @return array<int, array{id_segment: int, id_job: int, translation: string|null, status: string}>
      */
     private function getSegmentForUndoReplaceAll(ReplaceHistory $srh): array
     {
@@ -300,39 +328,45 @@ class GetSearchController extends AbstractStatefulKleinController
 
     /**
      * @param array{
-     *     queryParams: string,
-     *     source?: string,
-     *     target?: string,
+     *     queryParams: SearchQueryParamsStruct,
+     *     source?: string|false,
+     *     target?: string|false,
+     *     status?: string|false,
      *     status_only?: bool,
-     *     inCurrentJobOnly: bool,
+     *     inCurrentChunkOnly?: bool,
      *     job: int,
-     *     password: string
+     *     password: string|false
      * } $request
      *
-     * @return array
+     * @return array<string, mixed>
+     *
+     * @throws DomainException
+     * @throws RuntimeException
      */
     private function doSearch(array $request): array
     {
-        $queryParams = $request['queryParams'];
+        $queryParams = $request['queryParams'] instanceof SearchQueryParamsStruct
+            ? $request['queryParams']
+            : new SearchQueryParamsStruct($request['queryParams']);
 
         if (!empty($request['source']) and !empty($request['target'])) {
             $queryParams['key'] = 'coupled';
-            $queryParams['src'] = html_entity_decode($request['source']); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
-            $queryParams['trg'] = $request['target'];
+            $queryParams['src'] = html_entity_decode((string)$request['source']); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
+            $queryParams['trg'] = (string)$request['target'];
         } elseif (!empty($request['source'])) {
             $queryParams['key'] = 'source';
-            $queryParams['src'] = html_entity_decode($request['source']); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
+            $queryParams['src'] = html_entity_decode((string)$request['source']); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
         } elseif (!empty($request['target'])) {
             $queryParams['key'] = 'target';
-            $queryParams['trg'] = $request['target'];
+            $queryParams['trg'] = (string)$request['target'];
         } else {
             $queryParams['key'] = 'status_only';
         }
 
         try {
             $inCurrentChunkOnly = $queryParams['inCurrentChunkOnly'];
-            $jodData = $this->getJobData($request['job'], $request['password']);
-            $searchModel = $this->getSearchModel($queryParams, $jodData);
+            $jobData = $this->getJobData($request['job'], (string)$request['password']);
+            $searchModel = $this->getSearchModel($queryParams, $jobData);
 
             return $searchModel->search($inCurrentChunkOnly);
         } catch (Exception) {
@@ -341,24 +375,25 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param array $search_results
-     * @param int $id_job
-     * @param string $password
-     * @param string|null $id_segment
-     * @param SearchQueryParamsStruct $queryParams
-     * @param int|null $revisionNumber
+     * @param array<int, array<string, mixed>> $search_results
      *
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     private function updateSegments(array $search_results, int $id_job, string $password, SearchQueryParamsStruct $queryParams, ?string $id_segment = null, ?int $revisionNumber = null): void
     {
         $db = Database::obtain();
 
-        $chunk = ChunkDao::getByIdAndPassword($id_job, $password);
+        $chunk = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
         $project = ProjectDao::findByJobId($id_job);
-        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($chunk, $this->user, $project, $id_segment);
+
+        if ($project === null) {
+            throw new NotFoundException("Project not found for job $id_job");
+        }
+
+        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($chunk, $this->user, $project, $id_segment !== null ? (int)$id_segment : null);
 
         // loop all segments to replace
         foreach ($search_results as $tRow) {
@@ -366,7 +401,12 @@ class GetSearchController extends AbstractStatefulKleinController
             $db->begin();
 
             $old_translation = SegmentTranslationDao::findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
-            $segment = (new SegmentDao())->getById($tRow['id_segment']);
+            $segment = (new SegmentDao())->fetchById((int)$tRow['id_segment'], SegmentStruct::class);
+
+            if ($old_translation === null || $segment === null) {
+                $db->rollback();
+                continue;
+            }
 
             // Propagation
             $propagationTotal = [
@@ -393,7 +433,7 @@ class GetSearchController extends AbstractStatefulKleinController
                     $propagationTotal = SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $chunk,
-                        $id_segment,
+                        (int)($id_segment ?? $tRow['id_segment']),
                         $project
                     );
                 } catch (Exception $e) {
@@ -407,13 +447,13 @@ class GetSearchController extends AbstractStatefulKleinController
             }
 
             $filter = MateCatFilter::getInstance($this->getFeatureSet(), $chunk->source, $chunk->target);
-            $replacedTranslation = $filter->fromLayer1ToLayer0($this->getReplacedSegmentTranslation($tRow['translation'], $queryParams));
+            $replacedTranslation = $filter->fromLayer1ToLayer0($this->getReplacedSegmentTranslation((string)($tRow['translation'] ?? ''), $queryParams));
             $replacedTranslation = Utils::stripBOM($replacedTranslation);
 
             // Setup $new_translation
             $new_translation = new SegmentTranslationStruct();
             $new_translation->id_segment = $tRow['id_segment'];
-            $new_translation->id_job = $chunk->id;
+            $new_translation->id_job = $id_job;
             $new_translation->status = $this->getNewStatus($old_translation, $revisionNumber);
             $new_translation->time_to_edit = $old_translation->time_to_edit;
             $new_translation->segment_hash = $segment->segment_hash;
@@ -458,7 +498,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             // setTranslationCommitted
             try {
-                $this->featureSet->run('setTranslationCommitted', [
+                $this->featureSet->dispatch(new SetTranslationCommittedEvent([
                     'translation' => $new_translation,
                     'old_translation' => $old_translation,
                     'propagated_ids' => $propagationTotal['propagated_ids'],
@@ -466,7 +506,7 @@ class GetSearchController extends AbstractStatefulKleinController
                     'segment' => $segment,
                     'user' => $this->user,
                     'source_page_code' => ReviewUtils::revisionNumberToSourcePage($revisionNumber)
-                ]);
+                ]));
             } catch (Exception $e) {
                 $this->logger->debug("Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString());
 
@@ -478,7 +518,6 @@ class GetSearchController extends AbstractStatefulKleinController
     /**
      * @param SegmentTranslationStruct $translationStruct
      * @param int|null $revisionNumber
-     *
      * @return string
      */
     private function getNewStatus(SegmentTranslationStruct $translationStruct, ?int $revisionNumber = null): string
@@ -497,15 +536,14 @@ class GetSearchController extends AbstractStatefulKleinController
     /**
      * @param string $translation
      * @param SearchQueryParamsStruct $queryParams
-     *
      * @return string
      */
     private function getReplacedSegmentTranslation(string $translation, SearchQueryParamsStruct $queryParams): string
     {
         $replacedSegmentTranslation = WholeTextFinder::findAndReplace(
             $translation,
-            $queryParams->target,
-            $queryParams->replacement,
+            $queryParams->target ?? '',
+            $queryParams->replacement ?? '',
             true,
             $queryParams->isExactMatchRequested,
             $queryParams->isMatchCaseRequested,
@@ -516,12 +554,13 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param string $replace_version
-     * @param                         $tRow
-     * @param ReplaceHistory $srh
-     * @param SearchQueryParamsStruct $queryParams
+     * @param array<string, mixed> $tRow
+     *
+     * @throws DomainException
+     * @throws TypeError
+     * @throws Exception
      */
-    private function saveReplacementEvent(string $replace_version, $tRow, ReplaceHistory $srh, SearchQueryParamsStruct $queryParams): void
+    private function saveReplacementEvent(string $replace_version, array $tRow, ReplaceHistory $srh, SearchQueryParamsStruct $queryParams): void
     {
         $event = new ReplaceEventStruct();
         $event->replace_version = $replace_version;
@@ -532,7 +571,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $event->target = $queryParams['target'];
         $event->replacement = $queryParams['replacement'];
         $event->translation_before_replacement = $tRow['translation'];
-        $event->translation_after_replacement = $this->getReplacedSegmentTranslation($tRow['translation'], $queryParams);
+        $event->translation_after_replacement = $this->getReplacedSegmentTranslation((string)($tRow['translation'] ?? ''), $queryParams);
         $event->status = $tRow['status'];
 
         $srh->save($event);

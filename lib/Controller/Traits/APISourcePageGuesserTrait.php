@@ -20,6 +20,7 @@ trait APISourcePageGuesserTrait
 
     /**
      * @return bool|null
+     * @throws LogicException
      */
     protected function isRevision(): ?bool
     {

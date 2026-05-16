@@ -2,6 +2,7 @@
 
 namespace Utils\LQA\QA;
 
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
 
 /**
@@ -18,9 +19,6 @@ use Model\Segments\SegmentMetadataStruct;
  */
 class SizeRestrictionChecker
 {
-    /** @var string Metadata key for size restriction */
-    public const string SIZE_RESTRICTION = "sizeRestriction";
-
     /** @var ErrorManager Error manager for reporting size errors */
     private ErrorManager $errorManager;
 
@@ -48,7 +46,7 @@ class SizeRestrictionChecker
     public function setCharactersCount(int $charactersCount, ?SegmentMetadataStruct $limit = null): void
     {
         $this->charactersCount = $charactersCount;
-        $this->limit = $limit ?? new SegmentMetadataStruct(['meta_value' => 0, 'meta_key' => 'sizeRestriction']);
+        $this->limit = $limit ?? new SegmentMetadataStruct(['meta_value' => 0, 'meta_key' => SegmentMetadataMarshaller::SIZE_RESTRICTION->value]);
     }
 
     /**
@@ -76,7 +74,7 @@ class SizeRestrictionChecker
             return true;
         }
 
-        if (($this->limit ?? null) && ($this->limit->meta_key ?? null) == self::SIZE_RESTRICTION) {
+        if (($this->limit ?? null) && ($this->limit->meta_key ?? null) == SegmentMetadataMarshaller::SIZE_RESTRICTION->value) {
             // Ignore sizeRestriction = 0
             if ($this->limit->meta_value == 0) {
                 return true;

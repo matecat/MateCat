@@ -17,15 +17,22 @@ class UploadHandler
     const string DIRSEP = "//";
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $options;
 
+    /** @var array<string, mixed> */
+    private array $files;
+
     protected MatecatLogger $logger;
 
-    function __construct()
+    /**
+     * @param array<string, mixed> $files
+     */
+    function __construct(array $files = [])
     {
         $this->logger = LoggerFactory::getLogger("upload_handler");
+        $this->files  = $files;
 
         $this->options = [
             'script_url' => $this->getFullUrl() . '/',
@@ -50,29 +57,21 @@ class UploadHandler
 
     protected function getFullUrl(): string
     {
-        $https = AppConfig::$PROTOCOL === 'https';
-
-        /** @noinspection HttpUrlsUsage */
-        return
-            ($https ? 'https://' : 'http://') .
-            (!empty($_SERVER['REMOTE_USER']) ? $_SERVER['REMOTE_USER'] . '@' : '') .
-            ($_SERVER['HTTP_HOST'] ?? (
-                ($_SERVER['SERVER_NAME'] ?? '') .
-                ($https && ($_SERVER['SERVER_PORT'] ?? 0) === 443 || ($_SERVER['SERVER_PORT'] ?? 0) === 80 ? '' : ':' . $_SERVER['SERVER_PORT']))) .
+        return rtrim(AppConfig::$HTTPHOST, '/') .
             rtrim($_SERVER['REQUEST_URI'] ?? '', '/');
     }
 
-    protected function set_file_delete_url($file): void
+    protected function set_file_delete_url(stdClass $file): void
     {
         $file->delete_url = $this->options['script_url']
-            . '?file=' . rawurlencode($file->name);
+            . '?file=' . rawurlencode((string)$file->name);
         $file->delete_type = $this->options['delete_type'];
         if ($file->delete_type !== 'DELETE') {
             $file->delete_url .= '&_method=DELETE';
         }
     }
 
-    protected function get_file_object($file_name): ?stdClass
+    protected function get_file_object(string $file_name): ?stdClass
     {
         $file_path = $this->options['upload_dir'] . $file_name;
         if (is_file($file_path) && $file_name[0] !== '.') {
@@ -88,6 +87,9 @@ class UploadHandler
         return null;
     }
 
+    /**
+     * @return list<stdClass>
+     */
     protected function get_file_objects(): array
     {
         return array_values(
@@ -150,7 +152,8 @@ class UploadHandler
         // check if is a TMX
         // for TMX the limit is different (300Mb vs 100Mb)
         $file_pathinfo = pathinfo($file->name);
-        $max_file_size = ($file_pathinfo['extension'] === 'tmx') ? $this->options['max_tmx_file_size'] : $this->options['max_file_size'];
+        $extension = $file_pathinfo['extension'] ?? '';
+        $max_file_size = ($extension === 'tmx') ? $this->options['max_tmx_file_size'] : $this->options['max_file_size'];
 
         if ($max_file_size && (
                 $file_size > $max_file_size ||
@@ -237,7 +240,10 @@ class UploadHandler
         return $count;
     }
 
-    protected function up_count_name_callback($matches): string
+    /**
+     * @param array<int, string> $matches
+     */
+    protected function up_count_name_callback(array $matches): string
     {
         $index = isset($matches[1]) ? intval($matches[1]) + 1 : 1;
         $ext = $matches[2] ?? '';
@@ -247,7 +253,7 @@ class UploadHandler
 
     protected function up_count_name(string $name): string
     {
-        return preg_replace_callback(
+        return (string)preg_replace_callback(
             '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/',
             [$this, 'up_count_name_callback'],
             $name,
@@ -257,15 +263,20 @@ class UploadHandler
 
     private function my_basename(string $param, ?string $suffix = null): string
     {
+        $lastPos = strrpos($param, self::DIRSEP);
+        if ($lastPos === false) {
+            $lastPos = 0;
+        }
+
         if ($suffix) {
-            $tmp_str = ltrim(substr($param, strrpos($param, self::DIRSEP)), self::DIRSEP);
+            $tmp_str = ltrim(substr($param, $lastPos), self::DIRSEP);
             if ((strpos($param, $suffix) + strlen($suffix)) == strlen($param)) {
                 return str_ireplace($suffix, '', $tmp_str);
             } else {
-                return ltrim(substr($param, strrpos($param, self::DIRSEP)), self::DIRSEP);
+                return ltrim(substr($param, $lastPos), self::DIRSEP);
             }
         } else {
-            return ltrim(substr($param, strrpos($param, self::DIRSEP)), self::DIRSEP);
+            return ltrim(substr($param, $lastPos), self::DIRSEP);
         }
     }
 
@@ -384,16 +395,19 @@ class UploadHandler
      *
      * @param string $filename
      *
-     * @return string|bool
+     * @return string|false
      */
-    private function getMimeContentType(string $filename): bool|string
+    private function getMimeContentType(string $filename): string|false
     {
         if (function_exists('mime_content_type')) {
-            return (new MimeTypes())->guessMimeType($filename);
+            return (new MimeTypes())->guessMimeType($filename) ?? false;
         }
 
         if (function_exists('finfo_open')) {
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo === false) {
+                return false;
+            }
             $finfoFile = finfo_file($finfo, $filename);
             finfo_close($finfo);
 
@@ -418,6 +432,8 @@ class UploadHandler
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function post(): void
     {
@@ -433,12 +449,12 @@ class UploadHandler
             $this->flush($info);
         }
 
-        $upload = $_FILES[$this->options['param_name']] ?? null;
+        $upload = $this->files[$this->options['param_name']] ?? null;
 
         $info = [];
         if ($upload && is_array($upload['tmp_name'])) {
             // param_name is an array identifier like "files[]",
-            // $_FILES is a multi-dimensional array:
+            // $this->files is a multi-dimensional array:
             foreach ($upload['tmp_name'] as $index => $value) {
                 $info[] = $this->handle_file_upload(
                     $upload['tmp_name'][$index],
@@ -449,7 +465,7 @@ class UploadHandler
             }
         } elseif ($upload || isset($_SERVER['HTTP_X_FILE_NAME'])) {
             // param_name is a single object identifier like "file",
-            // $_FILES is a one-dimensional array:
+            // $this->files is a one-dimensional array:
             $info[] = $this->handle_file_upload(
                 $upload['tmp_name'] ?? null,
                 $upload['name'] ?? null,
@@ -468,16 +484,21 @@ class UploadHandler
 
             $regexp = '/' . $boundary . '.*?filename="(.*)".*?Content-Type:(.*)\x{0D}\x{0A}\x{0D}\x{0A}/sm';
 
-            $readBuff = fread($fp, 1024);
-            while (!preg_match($regexp, $readBuff, $matches)) {
-                $readBuff .= fread($fp, 1024);
+            if ($fp !== false) {
+                $readBuff = fread($fp, 1024);
+                $maxRead = 16 * 1024; // 16KB cap — multipart headers are always <1KB
+                while ($readBuff !== false && strlen($readBuff) < $maxRead && !preg_match($regexp, $readBuff, $matches)) {
+                    $readBuff .= fread($fp, 1024);
+                }
+                fclose($fp);
+            } else {
+                $matches = [];
             }
-            fclose($fp);
 
             $file = new stdClass();
-            $file->name = $this->trim_file_name($matches[1]);
+            $file->name = $this->trim_file_name($matches[1] ?? '');
             $file->size = null;
-            $file->type = trim($matches[2]);
+            $file->type = trim($matches[2] ?? '');
             $file->error = "The file is too large. " .
                 "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
@@ -498,16 +519,9 @@ class UploadHandler
     public function flush(mixed $info): void
     {
         $json = json_encode($info);
-        $redirect = isset($_REQUEST['redirect']) ? stripslashes($_REQUEST['redirect']) : null;
 
         header('Vary: Accept');
         header('Content-type: application/json');
-
-        if ($redirect) {
-            header('Location: ' . sprintf($redirect, rawurlencode($json)));
-
-            return;
-        }
 
         echo $json;
 
@@ -516,6 +530,8 @@ class UploadHandler
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function delete(): void
     {
@@ -533,7 +549,7 @@ class UploadHandler
         }
 
         try {
-            self::_validateFileName($file_name);
+            self::_validateFileName((string)$file_name);
             self::_validateToken($this->options['upload_token']);
         } catch (Exception $e) {
             header('Content-type: application/json');
@@ -542,21 +558,22 @@ class UploadHandler
             return;
         }
 
-        $file_info = AbstractFilesStorage::pathinfo_fix($file_name);
+        $file_info = AbstractFilesStorage::pathinfo_fix((string)$file_name);
         $source = $_REQUEST['source'];
         $segmentationRule = $_REQUEST['segmentationRule'];
         $filtersTemplate = $_REQUEST['filtersTemplate'];
 
         //if it's a zip file, delete it and all its contained files.
-        if ($file_info['extension'] == 'zip') {
-            $success = $this->zipFileDelete($file_name, $source, $segmentationRule, $filtersTemplate);
+        $extension = is_array($file_info) ? ($file_info['extension'] ?? '') : '';
+        if ($extension === 'zip') {
+            $success = $this->zipFileDelete((string)$file_name, $source, $segmentationRule, (int)$filtersTemplate);
         } //if it's a file in a zipped folder, delete it.
         elseif (preg_match('#^[^\.]*\.zip/#', $_REQUEST['file'])) {
             $file_name = ZipArchiveHandler::getInternalFileName($_REQUEST['file']);
 
-            $success = $this->zipInternalFileDelete($file_name, $source, $segmentationRule, $filtersTemplate);
+            $success = $this->zipInternalFileDelete($file_name, $source, $segmentationRule, (int)$filtersTemplate);
         } else {
-            $success = $this->normalFileDelete($file_name, $source, $segmentationRule, $filtersTemplate);
+            $success = $this->normalFileDelete((string)$file_name, $source, $segmentationRule, (int)$filtersTemplate);
         }
 
         header('Content-type: application/json');
@@ -564,9 +581,13 @@ class UploadHandler
     }
 
     /**
+     * @return array<string, bool>
+     *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    private function normalFileDelete($file_name, $source, $segmentationRule = null, ?int $filtersTemplate = 0): array
+    private function normalFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
         $file_path = $this->options['upload_dir'] . $file_name;
 
@@ -578,15 +599,13 @@ class UploadHandler
     }
 
     /**
-     * @param     $file_name
-     * @param     $source
-     * @param     $segmentationRule
-     * @param int $filtersTemplate
+     * @return array<string, bool>
      *
-     * @return array
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    private function zipFileDelete($file_name, $source, $segmentationRule = null, int $filtersTemplate = 0): array
+    private function zipFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
         $file_path = $this->options['upload_dir'] . $file_name;
 
@@ -595,6 +614,9 @@ class UploadHandler
         $success[$out_file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
         if ($success[$out_file_name]) {
             $containedFiles = glob($this->options['upload_dir'] . $file_name . "*");
+            if ($containedFiles === false) {
+                $containedFiles = [];
+            }
             $k = 0;
 
             while ($k < count($containedFiles)) {
@@ -608,9 +630,13 @@ class UploadHandler
     }
 
     /**
+     * @return array<string, bool>
+     *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    private function zipInternalFileDelete($file_name, $source, $segmentationRule = null, ?int $filtersTemplate = 0): array
+    private function zipInternalFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
         $file_path = $this->options['upload_dir'] . $file_name;
         CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
@@ -622,8 +648,12 @@ class UploadHandler
         return $success;
     }
 
-    protected function _isRightMime($fileUp): bool
+    protected function _isRightMime(stdClass $fileUp): bool
     {
+        if (!is_string($fileUp->type) || $fileUp->type === '') {
+            return false;
+        }
+
         //Mime Allowlist, take them from ProjectManager.php
         foreach (AppConfig::$MIME_TYPES as $key => $value) {
             if (str_contains($key, $fileUp->type)) {
@@ -634,7 +664,7 @@ class UploadHandler
         return false;
     }
 
-    protected function _isRightExtension($fileUp): bool
+    protected function _isRightExtension(stdClass $fileUp): bool
     {
         $acceptedExtensions = [];
         foreach (AppConfig::$SUPPORTED_FILE_TYPES as $value2) {

@@ -10,6 +10,7 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
+use LogicException;
 use Model\Jobs\JobStruct;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
@@ -24,27 +25,31 @@ class SetContributionMTWorker extends SetContributionWorker
     /**
      * @param JobStruct $jobStruct
      *
+     * @return AbstractEngine
      * @throws EndQueueException
      * @see SetContributionWorker::_loadEngine
-     *
      */
     protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
         try {
-            return EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
+            //Load MT Adaptive EnginesFactory
+
+            return EnginesFactory::getInstance($jobStruct->id_mt_engine, AbstractEngine::class);
         } catch (Exception $e) {
             throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
     }
 
     /**
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param SetContributionRequest $contributionStruct
      *
      * @throws Exception
+     * @throws LogicException
      */
     protected function _set(array $config, SetContributionRequest $contributionStruct): void
     {
+        $engine = $this->requireEngine();
         $jobStruct = $contributionStruct->getJobStruct();
 
         $config['segment'] = $contributionStruct->segment;
@@ -54,7 +59,7 @@ class SetContributionMTWorker extends SetContributionWorker
         $config['set_mt'] = $jobStruct->id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_engine->set($config);
+        $res = $engine->set($config);
 
         if (!$res) {
             $this->_raiseReQueueException('set', $config);
@@ -62,14 +67,16 @@ class SetContributionMTWorker extends SetContributionWorker
     }
 
     /**
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param SetContributionRequest $contributionStruct
      * @param int $id_mt_engine
      *
      * @throws ReQueueException
+     * @throws LogicException
      */
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 0): void
     {
+        $engine = $this->requireEngine();
         $config['segment'] = $contributionStruct->segment;
         $config['translation'] = $contributionStruct->translation;
         $config['tuid'] = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
@@ -80,13 +87,17 @@ class SetContributionMTWorker extends SetContributionWorker
         $config['translation_origin'] = $contributionStruct->translation_origin;
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_engine->update($config);
+        $res = $engine->update($config);
 
         if (!$res) {
             $this->_raiseReQueueException('update', $config);
         }
     }
 
+    /**
+     * @return array<string, array<?string>>
+     * @throws Exception
+     */
     protected function _extractAvailableKeysForUser(SetContributionRequest $contributionStruct, JobStruct $jobStruct): array
     {
         //find all the job's TMs with write grants and make a contribution to them

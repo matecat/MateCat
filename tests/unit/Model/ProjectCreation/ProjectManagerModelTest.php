@@ -7,10 +7,10 @@ use Model\DataAccess\IDatabase;
 use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
 use PDOStatement;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
-class ProjectManagerModelTest extends TestCase
+class ProjectManagerModelTest extends AbstractTest
 {
     /** @var list<string> Queries passed to PDO::prepare() */
     private array $preparedQueries = [];

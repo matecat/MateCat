@@ -10,6 +10,7 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use Model\FeaturesBase\Hook\Event\Run\ChunkReviewUpdatedEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -133,13 +134,12 @@ class ChunkReviewModel implements IChunkReviewModel
         $chunkReviewDao = new ChunkReviewDao();
         $chunkReviewDao->passFailCountsAtomicUpdate($this->chunk_review->id, $data);
 
-        $project->getFeaturesSet()->run(
-            'chunkReviewUpdated',
+        $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             1,
             $this,
             $project
-        );
+        ));
     }
 
     /**
@@ -181,7 +181,7 @@ class ChunkReviewModel implements IChunkReviewModel
             $this->chunk_review->is_pass = true;
         }
 
-        $update_result = ChunkReviewDao::updateStruct($this->chunk_review, [
+        $update_result = (new ChunkReviewDao())->updateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',
@@ -192,13 +192,12 @@ class ChunkReviewModel implements IChunkReviewModel
         );
 
         // External call by Plugins
-        $project->getFeaturesSet()->run(
-            'chunkReviewUpdated',
+        $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             $update_result,
             $this,
             $project
-        );
+        ));
     }
 
 

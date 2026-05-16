@@ -5,6 +5,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -17,6 +18,7 @@ use Utils\Registry\AppConfig;
  * Date: 19/04/16
  * Time: 16.06
  */
+#[Group('PersistenceNeeded')]
 class SanitizeInputArrayTest extends AbstractTest
 {
     protected ReflectionClass $reflector;

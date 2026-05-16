@@ -2,6 +2,7 @@
 
 namespace Utils\LQA\QA;
 
+use DOMNode;
 use DOMNodeList;
 use Throwable;
 
@@ -66,8 +67,8 @@ class WhitespaceChecker
      * Iterates through all DOM elements and validates that whitespace
      * patterns in text content match between source and target.
      *
-     * @param DOMNodeList $srcNodeList Source segment DOM nodes
-     * @param DOMNodeList $trgNodeList Target segment DOM nodes
+     * @param DOMNodeList<DOMNode> $srcNodeList Source segment DOM nodes
+     * @param DOMNodeList<DOMNode> $trgNodeList Target segment DOM nodes
      * @return void
      */
     public function checkContentConsistency(DOMNodeList $srcNodeList, DOMNodeList $trgNodeList): void
@@ -83,7 +84,11 @@ class WhitespaceChecker
 
             try {
                 if (!is_null($srcTagReference['parent_id'])) {
-                    $srcNode = $this->domHandler->queryDOMElement($this->domHandler->getSrcDom(), $srcTagReference);
+                    $srcDom = $this->domHandler->getSrcDom();
+                    if ($srcDom === null) {
+                        continue;
+                    }
+                    $srcNode = $this->domHandler->queryDOMElement($srcDom, $srcTagReference);
                     $srcNodeContent = $srcNode->textContent;
 
                     foreach ($trgDomMap['DOMElement'] as $k => $elements) {
@@ -92,7 +97,11 @@ class WhitespaceChecker
                         }
                     }
 
-                    $trgNode = $this->domHandler->queryDOMElement($this->domHandler->getTrgDom(), $trgTagReference);
+                    $trgDom = $this->domHandler->getTrgDom();
+                    if ($trgDom === null) {
+                        continue;
+                    }
+                    $trgNode = $this->domHandler->queryDOMElement($trgDom, $trgTagReference);
                     $trgNodeContent = $trgNode->textContent;
                 } else {
                     $srcNode = $srcNodeList->item($srcTagReference['node_idx']);
@@ -113,7 +122,12 @@ class WhitespaceChecker
                     }
                 }
 
-                $domSrcNodeString = $srcNode->ownerDocument->saveXML($srcNode);
+                /** @var DOMNode|null $srcNode */
+                if ($srcNode === null) {
+                    continue;
+                }
+
+                $domSrcNodeString = $srcNode->ownerDocument?->saveXML($srcNode) ?? '';
 
                 if (isset($trgNodeContent) && isset($srcNodeContent)) {
                     if (!preg_match('/^<g[^>]+></', $domSrcNodeString)) {
@@ -200,6 +214,11 @@ class WhitespaceChecker
     {
         $headSrcCRNL = mb_split('^[\r\n]+', $srcNodeContent);
         $headTrgCRNL = mb_split('^[\r\n]+', $trgNodeContent);
+
+        if ($headSrcCRNL === false || $headTrgCRNL === false) {
+            return;
+        }
+
         if ((count($headSrcCRNL) > 1 || count($headTrgCRNL) > 1) && $headSrcCRNL[0] !== $headTrgCRNL[0]) {
             $this->errorManager->addError(ErrorManager::ERR_CR_HEAD);
         }
@@ -212,6 +231,11 @@ class WhitespaceChecker
     {
         $headSrcCRNL = mb_split('[\r\n]+$', $srcNodeContent);
         $headTrgCRNL = mb_split('[\r\n]+$', $trgNodeContent);
+
+        if ($headSrcCRNL === false || $headTrgCRNL === false) {
+            return;
+        }
+
         if ((count($headSrcCRNL) > 1 || count($headTrgCRNL) > 1) && end($headSrcCRNL) !== end($headTrgCRNL)) {
             $this->errorManager->addError(ErrorManager::ERR_CR_TAIL);
         }
@@ -236,7 +260,7 @@ class WhitespaceChecker
      */
     protected function nbspToSpace(string $s): string
     {
-        return preg_replace("/\x{a0}/u", chr(0x20), $s);
+        return preg_replace("/\x{a0}/u", chr(0x20), $s) ?? $s;
     }
 
 }

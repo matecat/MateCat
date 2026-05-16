@@ -32,17 +32,17 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
     public int $is_default = 1;
 
     /**
-     * Returns the decoded access token.
-     *
      * @return string|null
      * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
     public function getDecryptedOauthAccessToken(): ?string
     {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        if ($this->oauth_access_token === null) {
+            return null;
+        }
 
-        return $oauthTokenEncryption->decrypt($this->oauth_access_token);
+        return OauthTokenEncryption::getInstance()->decrypt($this->oauth_access_token);
     }
 
     /**
@@ -53,19 +53,23 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      */
     public function setEncryptedAccessToken(string $token): void
     {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-        $this->oauth_access_token = $oauthTokenEncryption->encrypt($token);
+        $this->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt($token);
     }
 
     /**
      * @param string|null $field
      *
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws Exception
      */
     public function getDecodedOauthAccessToken(?string $field = null): ?array
     {
-        $decoded = json_decode($this->getDecryptedOauthAccessToken(), true);
+        $decrypted = $this->getDecryptedOauthAccessToken();
+        if ($decrypted === null) {
+            return null;
+        }
+
+        $decoded = json_decode($decrypted, true);
 
         if ($field) {
             if (array_key_exists($field, $decoded)) {

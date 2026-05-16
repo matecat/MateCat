@@ -8,6 +8,7 @@ use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -56,7 +57,7 @@ class ProjectManagerModel
 
         try {
             $projectId = $this->dbHandler->insert('projects', $data);
-            $project = ProjectDao::findById($projectId);
+            $project = ProjectDao::staticFindById((int)$projectId);
             $this->dbHandler->commit();
         } catch (Exception $e) {
             $this->dbHandler->rollback();
@@ -256,15 +257,7 @@ class ProjectManagerModel
      */
     private static function isAMetadata(string $metaKey): bool
     {
-        $metaDataKeys = [
-            'id_request',
-            'id_content',
-            'id_order',
-            'id_order_group',
-            'screenshot'
-        ];
-
-        return in_array($metaKey, $metaDataKeys);
+        return SegmentMetadataMarshaller::isAllowed($metaKey);
     }
 
     /**

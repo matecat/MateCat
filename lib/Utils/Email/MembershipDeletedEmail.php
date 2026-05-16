@@ -50,6 +50,9 @@ class MembershipDeletedEmail extends AbstractEmail
         $this->_setTemplate('Team/membership_deleted_content.html');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
         return [
@@ -59,6 +62,9 @@ class MembershipDeletedEmail extends AbstractEmail
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();
@@ -76,7 +82,7 @@ class MembershipDeletedEmail extends AbstractEmail
 
         $this->doSend(
             $recipient,
-            $this->title,
+            $this->title ?? '',
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage($this->_buildMessageContent())
         );

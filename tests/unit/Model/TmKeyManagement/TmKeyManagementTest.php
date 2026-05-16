@@ -7,6 +7,7 @@ use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use TestHelpers\AbstractTest;
@@ -21,6 +22,7 @@ use Utils\TmKeyManagement\TmKeyStruct;
  * Date: 14/10/14
  * Time: 19.17
  */
+#[Group('PersistenceNeeded')]
 class TmKeyManagementTest extends AbstractTest
 {
 

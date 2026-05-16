@@ -8,6 +8,7 @@
 
 namespace View\API\V3\Json;
 
+use DomainException;
 use Exception;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
@@ -29,15 +30,29 @@ use View\API\V2\Json\JobTranslator;
 class Chunk extends \View\API\V2\Json\Chunk
 {
 
+    /**
+     * @var ChunkReviewStruct[]
+     */
     protected array $chunk_reviews = [];
     protected JobStruct $chunk;
+
+    private JobDao $jobDao;
+    private ChunkReviewDao $chunkReviewDao;
+
+    public function __construct(?JobDao $jobDao = null, ?ChunkReviewDao $chunkReviewDao = null)
+    {
+        $this->jobDao = $jobDao ?? new JobDao();
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+    }
 
     /**
      * @param JobStruct $chunk
      *
-     * @return array
+     * @return array<string, mixed>
+     *
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function renderOne(JobStruct $chunk): array
     {
@@ -53,13 +68,14 @@ class Chunk extends \View\API\V2\Json\Chunk
     }
 
     /**
-     * @param                         $chunk JobStruct
+     * @param JobStruct      $chunk
+     * @param ProjectStruct  $project
+     * @param FeatureSet     $featureSet
      *
-     * @param ProjectStruct $project
-     * @param FeatureSet $featureSet
+     * @return array<string, mixed>
      *
-     * @return array
      * @throws Exception
+     * @throws \TypeError
      */
     public function renderItem(JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
@@ -113,7 +129,7 @@ class Chunk extends \View\API\V2\Json\Chunk
 
         $chunkReviewsList = $this->getChunkReviews();
 
-        $result = array_merge($result, (new QualitySummary($chunk, $project))->render($chunkReviewsList));
+        $result = array_merge($result, $this->renderQualitySummary($chunk, $project, $chunkReviewsList));
 
         foreach ($chunkReviewsList as $chunkReview) {
             $result = static::populateRevisePasswords($chunkReview, $result);
@@ -123,13 +139,15 @@ class Chunk extends \View\API\V2\Json\Chunk
     }
 
     /**
-     * @return array
+     * @return ChunkReviewStruct[]
+     *
+     * @throws Exception
      * @throws ReflectionException
      */
     protected function getChunkReviews(): array
     {
         if (empty($this->chunk_reviews)) {
-            $this->chunk_reviews = (new ChunkReviewDao())->findChunkReviews($this->chunk);
+            $this->chunk_reviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
         }
 
         return $this->chunk_reviews;
@@ -148,17 +166,33 @@ class Chunk extends \View\API\V2\Json\Chunk
     }
 
     /**
-     * @param $chunk_id
+     * @param JobStruct           $chunk
+     * @param ProjectStruct       $project
+     * @param ChunkReviewStruct[] $chunkReviewsList
      *
-     * @return array
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    protected function renderQualitySummary(JobStruct $chunk, ProjectStruct $project, array $chunkReviewsList): array
+    {
+        return (new QualitySummary($chunk, $project))->render($chunkReviewsList);
+    }
+
+    /**
+     * @param int $chunk_id
+     *
+     * @return array{total: int, t: int, r1: int, r2: int}
+     *
+     * @throws DomainException
+     * @throws Exception
      * @throws ReflectionException
      */
-    protected function getTimeToEditArray($chunk_id): array
+    protected function getTimeToEditArray(int $chunk_id): array
     {
-        $jobDao = new JobDao();
-        $tteT = (int)$jobDao->getTimeToEdit($chunk_id, 1)['tte'];
-        $tteR1 = (int)$jobDao->getTimeToEdit($chunk_id, 2)['tte'];
-        $tteR2 = (int)$jobDao->getTimeToEdit($chunk_id, 3)['tte'];
+        $tteT = (int)$this->jobDao->getTimeToEdit($chunk_id, 1)['tte'];
+        $tteR1 = (int)$this->jobDao->getTimeToEdit($chunk_id, 2)['tte'];
+        $tteR2 = (int)$this->jobDao->getTimeToEdit($chunk_id, 3)['tte'];
         $tteTotal = $tteT + $tteR1 + $tteR2;
 
         return [
@@ -170,10 +204,10 @@ class Chunk extends \View\API\V2\Json\Chunk
     }
 
     /**
-     * @param ChunkReviewStruct $chunk_review
-     * @param array $result
+     * @param ChunkReviewStruct    $chunk_review
+     * @param array<string, mixed> $result
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected static function populateRevisePasswords(ChunkReviewStruct $chunk_review, array $result): array
     {

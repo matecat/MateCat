@@ -20,6 +20,7 @@ use Utils\Registry\AppConfig;
  * Date: 21/05/16
  * Time: 12.26
  */
+#[Group('PersistenceNeeded')]
 class FastAnalysisTest extends AbstractTest
 {
 

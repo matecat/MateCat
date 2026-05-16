@@ -8,10 +8,12 @@
 
 namespace Model\ActivityLog;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class ActivityLogDao extends AbstractDao
@@ -20,7 +22,11 @@ class ActivityLogDao extends AbstractDao
     public string $epilogueString = "";
     public string $whereConditions = " id_project = :id_project ";
 
-    public function getAllForProject($id_project): array
+    /**
+     * @return ActivityLogStruct[]
+     * @throws PDOException
+     */
+    public function getAllForProject(int $id_project): array
     {
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
@@ -34,7 +40,11 @@ class ActivityLogDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
-    public function getLastActionInProject($id_project): array
+    /**
+     * @return ActivityLogStruct[]
+     * @throws PDOException
+     */
+    public function getLastActionInProject(int $id_project): array
     {
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
@@ -50,6 +60,9 @@ class ActivityLogDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function create(ActivityLogStruct $activityStruct): int
     {
         $conn = Database::obtain()->getConnection();
@@ -75,7 +88,7 @@ class ActivityLogDao extends AbstractDao
 
         $stmt->execute();
 
-        return $conn->lastInsertId();
+        return (int)$conn->lastInsertId();
     }
 
     /**
@@ -84,9 +97,10 @@ class ActivityLogDao extends AbstractDao
      * Use when counters of the job value are not important but only the metadata are needed
      *
      * @param IDaoStruct $activityQuery
-     * @param array $whereKeys
+     * @param array<string, int|string> $whereKeys
      *
      * @return IDaoStruct[]
+     * @throws Exception
      * @throws ReflectionException
      * @see      \Utils\AsyncTasks\Workers\ActivityLogWorker
      * @see      ActivityLogStruct
@@ -109,20 +123,12 @@ class ActivityLogDao extends AbstractDao
     }
 
     /**
-     * @param array $array_result
-     *
-     * @return void
-     */
-    protected function _buildResult(array $array_result)
-    {
-    }
-
-    /**
-     * @param $activity_id
+     * @param int $activity_id
      *
      * @return ActivityLogStruct|null
+     * @throws PDOException
      */
-    public static function getByID($activity_id)
+    public static function getByID(int $activity_id): ?ActivityLogStruct
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM activity_log WHERE id = ?");

@@ -35,6 +35,9 @@ class SessionTokenStoreHandler
     public function __construct()
     {
         $this->cacheTTL = 60 * 60 * 24 * 7; // 7 days
+        // Session tokens are written explicitly (not computed from queries),
+        // so probabilistic early expiration has no semantic meaning here.
+        $this->xFetchEnabled = false;
     }
 
     /**
@@ -71,6 +74,7 @@ class SessionTokenStoreHandler
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
      */
     public function setCookieLoginTokenActive(int $userId, string $loginCookieValue): void
     {
@@ -93,6 +97,7 @@ class SessionTokenStoreHandler
      *
      * @return bool Returns true if the token is active, false otherwise.
      * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
      */
     public function isLoginCookieStillActive(int $userId, string $loginCookieValue): bool
     {
@@ -111,6 +116,7 @@ class SessionTokenStoreHandler
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
+     * @throws Exception
      */
     public function removeLoginCookieFromStore(int $userId, string $loginCookieValue): void
     {

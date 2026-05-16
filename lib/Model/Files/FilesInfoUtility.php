@@ -5,6 +5,7 @@ namespace Model\Files;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use PDOException;
 use ReflectionException;
 use View\API\V3\Json\FilesInfo;
 
@@ -42,7 +43,7 @@ class FilesInfoUtility
      */
     public function getInfo(bool $showMetadata = true): array
     {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
+        $fileInfo = (new JobDao())->getFilesInfoInJob($this->chunk, 60 * 5);
         $fileMetadataDao = new MetadataDao();
         $filePartsDao = new FilesPartsDao();
 
@@ -133,6 +134,7 @@ class FilesInfoUtility
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function setInstructions(int $id_file, string $instructions): bool
     {

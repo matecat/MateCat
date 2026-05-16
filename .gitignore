@@ -9,7 +9,10 @@ nbproject/
 webgrind/
 _dic_cache
 .phpunit.result.cache
-/docs
+/docs/*
+!/docs/*.md
+!/docs/*.png
+!/docs/reviews/
 
 # Configuration files
 .num_processes
@@ -44,7 +47,6 @@ package-lock.json
 
 # Development env config files
 .agignore
-.vagrant
 
 # More stuffs
 Test_Local/*
@@ -67,9 +69,6 @@ vendor
 .env
 
 phinx.yml
-
-.lastjobprocessed_jpeer
-.maxJobToProcess_jpeer
 
 mmt_fallback_key.ini
 

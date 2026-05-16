@@ -15,9 +15,8 @@ use Model\DataAccess\IDaoStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use PDO;
+use PDOException;
 use ReflectionException;
-use Utils\Tools\Utils;
 
 class MembershipDao extends AbstractDao
 {
@@ -25,7 +24,9 @@ class MembershipDao extends AbstractDao
     const string TABLE = "teams_users";
     const string STRUCT_TYPE = MembershipStruct::class;
 
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
+    /** @var list<string> */
     protected static array $primary_keys = ['id'];
 
     protected static string $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
@@ -54,16 +55,6 @@ class MembershipDao extends AbstractDao
         DELETE FROM teams_users WHERE uid = :uid AND id_team = :id_team
     ";
 
-    public function findById($id)
-    {
-        $sql = " SELECT * FROM " . self::TABLE . " WHERE id = ? ";
-        $stmt = $this->getDatabaseHandler()->getConnection()->prepare($sql);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, self::STRUCT_TYPE);
-        $stmt->execute([$id]);
-
-        return $stmt->fetch();
-    }
-
     /**
      * Find ONE team for the given user. This is to enforce the temporary requirement to
      * have just one team per user.
@@ -72,6 +63,7 @@ class MembershipDao extends AbstractDao
      *
      * @return null|TeamStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findUserTeams(UserStruct $user): ?array
     {
@@ -83,7 +75,7 @@ class MembershipDao extends AbstractDao
             [
                 'uid' => $user->uid,
             ]
-        ) ?? null;
+        );
     }
 
     /**
@@ -91,6 +83,7 @@ class MembershipDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      * @see MembershipDao::findUserTeams
      *
      */
@@ -115,6 +108,7 @@ class MembershipDao extends AbstractDao
      *
      * @return null|TeamStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findTeamByIdAndUser(int $id, UserStruct $user): ?TeamStruct
     {
@@ -129,6 +123,7 @@ class MembershipDao extends AbstractDao
      *
      * @return TeamStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function findTeamByIdAndName(int $id, string $name): ?TeamStruct
     {
@@ -144,6 +139,7 @@ class MembershipDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      * @see MembershipDao::findTeamByIdAndUser
      *
      */
@@ -158,16 +154,15 @@ class MembershipDao extends AbstractDao
      * @param int $id_team
      * @param bool $traverse
      *
-     * @return IDaoStruct[]|MembershipStruct[]
+     * @return MembershipStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getMemberListByTeamId(int $id_team, bool $traverse = true): array
     {
         $stmt = $this->_getStatementForQuery(self::$_query_member_list);
 
-        /**
-         * @var $members MembershipStruct[]
-         */
+        /** @var MembershipStruct[] $members */
         $members = $this->_fetchObjectMap(
             $stmt,
             MembershipStruct::class,
@@ -182,13 +177,17 @@ class MembershipDao extends AbstractDao
                 $membersUIDs[] = $member->uid;
             }
 
-            $users = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUids($membersUIDs);
-            $metadata = (new MetadataDao())->setCacheTTL(60 * 60 * 24)->getAllByUidList($membersUIDs);
+            $memberUIDs = array_values(array_filter($membersUIDs, fn($v) => $v !== null));
+
+            $users = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUids($memberUIDs);
+            $metadata = (new MetadataDao())->setCacheTTL(60 * 60 * 24)->getAllByUidList($memberUIDs);
 
             foreach ($members as $member) {
-                $member->setUser($users[$member->uid]);
+                if ($member->uid !== null && isset($users[$member->uid])) {
+                    $member->setUser($users[$member->uid]);
+                }
 
-                if (isset($metadata[$member->uid]) and is_array($metadata[$member->uid])) {
+                if ($member->uid !== null && isset($metadata[$member->uid]) and is_array($metadata[$member->uid])) {
                     $member->setUserMetadata($metadata[$member->uid]);
                 }
             }
@@ -204,6 +203,7 @@ class MembershipDao extends AbstractDao
      * @param int $id_team
      *
      * @return bool
+     * @throws PDOException
      * @throws ReflectionException  @see MembershipDao::getMemberListByTeamId()
      */
     public function destroyCacheForListByTeamId(int $id_team): bool
@@ -225,6 +225,8 @@ class MembershipDao extends AbstractDao
      *
      * @return UserStruct|null
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
      */
     public function deleteUserFromTeam(int $uid, int $teamId): ?UserStruct
     {
@@ -238,8 +240,10 @@ class MembershipDao extends AbstractDao
         ]);
 
         $this->destroyCacheForListByTeamId($teamId);
-        $this->destroyCacheUserTeams($user);
-        $this->destroyCacheTeamByIdAndUser($teamId, $user);
+        if ($user !== null) {
+            $this->destroyCacheUserTeams($user);
+            $this->destroyCacheTeamByIdAndUser($teamId, $user);
+        }
         if ($stmt->rowCount()) {
             return $user;
         } else {
@@ -252,7 +256,7 @@ class MembershipDao extends AbstractDao
      * This method takes a list of email addresses as an argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
-     * @param $obj_arr array{team: TeamStruct, members: array}
+     * @param array<int, IDaoStruct>|array{team: TeamStruct, members: list<string>} $obj_arr
      *
      *
      * @return MembershipStruct[]
@@ -264,15 +268,27 @@ class MembershipDao extends AbstractDao
             throw new Exception('this method requires to be wrapped in a transaction');
         }
 
-        $obj_arr = Utils::ensure_keys($obj_arr, ['members', 'team']);
+        if (!isset($obj_arr['members'], $obj_arr['team'])) {
+            throw new Exception('Missing required keys: members, team');
+        }
 
-        $users = (new UserDao)->getByEmails($obj_arr['members']);
+        if (!is_array($obj_arr['members'])) {
+            throw new Exception('members must be an array of email strings');
+        }
+
+        if (!$obj_arr['team'] instanceof TeamStruct) {
+            throw new Exception('team must be a TeamStruct instance');
+        }
+
+        /** @var list<string> $members */
+        $members = $obj_arr['members'];
+        $teamStruct = $obj_arr['team'];
+
+        $users = (new UserDao)->getByEmails($members);
 
         if (empty($users)) {
             return [];
         }
-
-        $teamStruct = $obj_arr['team'];
 
         $membersList = [];
 
@@ -284,7 +300,7 @@ class MembershipDao extends AbstractDao
                 'is_admin' => $teamStruct->created_by == $user->uid
             ]));
 
-            $lastId = self::insertStruct($membershipStruct, ['ignore' => true]);
+            $lastId = $this->insertStruct($membershipStruct, ['ignore' => true]);
 
             if ($lastId) {
                 $membershipStruct->id = $lastId;
@@ -292,11 +308,13 @@ class MembershipDao extends AbstractDao
                 $membersList[] = $membershipStruct;
 
                 $this->destroyCacheUserTeams($user);
-                $this->destroyCacheTeamByIdAndUser($teamStruct->id, $user);
+                if ($teamStruct->id !== null) {
+                    $this->destroyCacheTeamByIdAndUser($teamStruct->id, $user);
+                }
             }
         }
 
-        if (count($membersList)) {
+        if (count($membersList) && $teamStruct->id !== null) {
             $this->destroyCacheForListByTeamId($teamStruct->id);
         }
 

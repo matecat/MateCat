@@ -12,6 +12,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
+use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Projects\ProjectDao;
 use View\API\V2\Json\ProjectUrls;
 
@@ -52,7 +53,9 @@ class UrlsController extends KleinController
 
         $formatted = new ProjectUrls($projectData);
 
-        $formatted = $this->featureSet->filter('projectUrls', $formatted);
+        $projectUrlsEvent = new ProjectUrlsEvent($formatted);
+        $this->featureSet->dispatch($projectUrlsEvent);
+        $formatted = $projectUrlsEvent->getFormatted();
 
         $this->response->json(['urls' => $formatted->render()]);
     }

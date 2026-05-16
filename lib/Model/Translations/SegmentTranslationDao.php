@@ -9,7 +9,6 @@ use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
@@ -30,7 +29,7 @@ class SegmentTranslationDao extends AbstractDao
     const string TABLE = "segment_translations";
 
     /**
-     * @var array
+     * @var list<string>
      */
     public static array $primary_keys = [
         'id_job',
@@ -38,11 +37,13 @@ class SegmentTranslationDao extends AbstractDao
     ];
 
     /**
-     * @param array $id_list
+     * @param array<int, int> $id_list
      * @param int $jobId
      * @param int $ttl
      *
-     * @return array
+     * @return array<int, SegmentTranslationStruct>
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function getAllSegmentsByIdListAndJobId(array $id_list, int $jobId, int $ttl = 0): array
@@ -59,7 +60,7 @@ class SegmentTranslationDao extends AbstractDao
             $thisDao = new self();
 
             /**
-             * @var $result SegmentTranslationStruct[]
+             * @var SegmentTranslationStruct[] $result
              */
             $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
                 $stmt,
@@ -98,7 +99,7 @@ class SegmentTranslationDao extends AbstractDao
             $values = [];
 
             foreach ($list as $row) {
-                if (strlen($row->translation) > SegmentSize::LIMIT) {
+                if (strlen($row->translation ?? '') > SegmentSize::LIMIT) {
                     throw new PDOException("Translation size limit reached. Translation is larger than 65kb.", -2);
                 }
                 $values[] = $row->id_segment;
@@ -124,6 +125,8 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $ttl
      *
      * @return SegmentTranslationStruct|null
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public static function findBySegmentAndJob(int $id_segment, int $id_job, int $ttl = 0): ?SegmentTranslationStruct
@@ -139,7 +142,7 @@ class SegmentTranslationDao extends AbstractDao
         $thisDao = new self();
 
         /**
-         * @var $result SegmentTranslationStruct[]
+         * @var SegmentTranslationStruct[] $result
          */
         $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, SegmentTranslationStruct::class, [
             'id_job' => $id_job,
@@ -150,8 +153,10 @@ class SegmentTranslationDao extends AbstractDao
     }
 
     /**
-     * @param array $segmentIdList
+     * @param array<int, int> $segmentIdList
      * @param string $date
+     *
+     * @throws PDOException
      */
     public static function updateLastTranslationDateByIdList(array $segmentIdList, string $date): void
     {
@@ -170,6 +175,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $id_job
      *
      * @return SegmentTranslationStruct[]
+     * @throws PDOException
      */
     public function getByJobId(int $id_job): array
     {
@@ -186,6 +192,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param FileStruct $file
      *
      * @return SegmentTranslationStruct[]
+     * @throws PDOException
      */
     public function getByFile(FileStruct $file): array
     {
@@ -202,19 +209,16 @@ class SegmentTranslationDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
     /**
-     * @param array $data
+     * @param array<string, scalar|null> $data
      *
      * @return int
+     * @throws PDOException
      */
     public static function setAnalysisValue(array $data): int
     {
         $query = "UPDATE `segment_translations` SET ";
-        foreach ($data as $key => $value) {
+        foreach ($data as $key => $_value) {
             $query .= "$key = :$key ,";
         }
 
@@ -222,7 +226,7 @@ class SegmentTranslationDao extends AbstractDao
         $query .= "
                 WHERE id_segment = :id_segment 
                   AND id_job = :id_job
-                  AND tm_analysis_status != 'SKIPPED';";
+                  AND tm_analysis_status NOT IN ('SKIPPED', 'DONE');";
 
         $db = Database::obtain();
         $stmt = $db->getConnection()->prepare($query);
@@ -235,11 +239,11 @@ class SegmentTranslationDao extends AbstractDao
 
     /**
      * @param JobStruct $chunk
-     * @param array $segments_ids
+     * @param array<int, int> $segments_ids
      * @param string $status
      * @param int|null $source_page
      *
-     * @return array
+     * @return array<int, int>
      * @throws Exception
      */
     public static function getUnchangeableStatus(JobStruct $chunk, array $segments_ids, string $status, ?int $source_page): array
@@ -324,6 +328,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param bool $is_revision
      *
      * @return int
+     * @throws PDOException
      */
     public static function addTranslation(SegmentTranslationStruct $translation_struct, bool $is_revision): int
     {
@@ -438,7 +443,7 @@ class SegmentTranslationDao extends AbstractDao
             $values['fields'][] = 'version_number';
         }
 
-        return SegmentTranslationDao::updateStruct($translation_struct, $values);
+        return (new SegmentTranslationDao())->updateStruct($translation_struct, $values);
     }
 
     /**
@@ -447,6 +452,7 @@ class SegmentTranslationDao extends AbstractDao
      * @param int $source_page
      *
      * @return ShapelessConcreteStruct[]
+     * @throws Exception
      * @throws ReflectionException
      */
     public
@@ -506,7 +512,8 @@ class SegmentTranslationDao extends AbstractDao
     /**
      * @param JobStruct $jStruct
      *
-     * @return array
+     * @return array<int, int>
+     * @throws PDOException
      */
     public
     static function getMaxSegmentIdsFromJob(
@@ -538,15 +545,17 @@ class SegmentTranslationDao extends AbstractDao
     }
 
     /**
-     * @param $data
-     * @param $where
+     * @param array<string, scalar|null> $data
+     * @param array<string, scalar|null> $where
+     *
+     * @throws PDOException
      */
     public
     static function updateFirstTimeOpenedContribution(
-        $data,
-        $where
+        array $data,
+        array $where
     ): void {
-        self::updateFields($data, $where);
+        self::staticUpdate($data, $where);
     }
 
     /**
@@ -571,7 +580,7 @@ class SegmentTranslationDao extends AbstractDao
      *      ];
      *  </code>
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public
@@ -671,7 +680,7 @@ class SegmentTranslationDao extends AbstractDao
 
             array_pop($arrayOfSegmentTranslationToPropagate);
 
-            if ($lastRow !== null and is_array($lastRow)) {
+            if ($lastRow !== null) {
                 $propagationAnalyser = new PropagationAnalyser();
                 $propagationTotal = $propagationAnalyser->analyse($segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate);
 
@@ -717,7 +726,7 @@ class SegmentTranslationDao extends AbstractDao
      *
      * @param int $id_job
      *
-     * @return array|null
+     * @return array<int, int|string>|null
      */
     public
     static function getLast10TranslatedSegmentIDsInLastHour(
@@ -762,14 +771,15 @@ class SegmentTranslationDao extends AbstractDao
 
     /**
      * @param int $id_job
-     * @param array|null $estimation_seg_ids
+     * @param list<int> $estimation_seg_ids
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws PDOException
      */
     public
     static function getWordsPerSecond(
         int $id_job,
-        ?array $estimation_seg_ids = []
+        array $estimation_seg_ids = []
     ): array {
         /**
          * If the translator translated the last ten segments in less than 1 hour
@@ -798,9 +808,10 @@ class SegmentTranslationDao extends AbstractDao
     }
 
     /**
-     * @param array $events
+     * @param array<int, ReplaceEventStruct> $events
      *
      * @return int
+     * @throws PDOException
      */
     public
     static function rebuildFromReplaceEvents(
@@ -838,13 +849,15 @@ class SegmentTranslationDao extends AbstractDao
     }
 
     /**
-     * @param $id_segment
-     * @param $suggestions
+     * @param int $id_segment
+     * @param array<int|string, mixed> $suggestions
+     *
+     * @throws PDOException
      */
     public
     static function updateSuggestionsArray(
-        $id_segment,
-        $suggestions
+        int $id_segment,
+        array $suggestions
     ): void {
         if (empty($suggestions)) {
             return;

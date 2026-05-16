@@ -87,14 +87,14 @@ class EntryValidator
     public function validate(): void
     {
         $dao = new SegmentDao(Database::obtain());
-        $this->segment = $dao->getById($this->struct->id_segment);
+        $this->segment = $dao->fetchById($this->struct->id_segment, SegmentStruct::class);
 
         if (!$this->segment) {
             throw new NotFoundException('segment not found');
         }
 
-        $job = JobDao::getById($this->struct->id_job)[0];
-        $this->project = ProjectDao::findById($job->id_project);
+        $job = (new JobDao())->getNotDeletedById($this->struct->id_job)[0];
+        $this->project = ProjectDao::staticFindById($job->id_project);
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();

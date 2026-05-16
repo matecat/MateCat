@@ -5,11 +5,15 @@ namespace unit\Model\ProjectCreation;
 use Exception;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\AppendFieldToAnalysisObjectEvent;
+use Model\FeaturesBase\Hook\Event\Filter\CorrectTagErrorsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\SanitizeOriginalDataMapEvent;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
@@ -123,9 +127,9 @@ class SegmentStorageServiceTest extends AbstractTest
      */
     private function stubFeaturesPassThrough(): void
     {
-        $this->features->method('filter')
-            ->willReturnCallback(function (string $name, mixed $arg1) {
-                return $arg1;
+        $this->features->method('dispatch')
+            ->willReturnCallback(function ($event) {
+                return $event;
             });
     }
 
@@ -258,15 +262,16 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubSequence(1, 300);
 
         // sanitizeOriginalDataMap returns the map, correctTagErrors returns modified segment
-        $this->features->method('filter')
-            ->willReturnCallback(function (string $name, mixed $arg1) {
-                if ($name === 'sanitizeOriginalDataMap') {
-                    return $arg1; // pass-through
+        $this->features->method('dispatch')
+            ->willReturnCallback(function ($event) {
+                if ($event instanceof SanitizeOriginalDataMapEvent) {
+                    return $event; // pass-through
                 }
-                if ($name === 'correctTagErrors') {
-                    return 'corrected-segment'; // simulate correction
+                if ($event instanceof CorrectTagErrorsEvent) {
+                    $event->setSegment('corrected-segment');
+                    return $event;
                 }
-                return $arg1;
+                return $event;
             });
 
         $ps = $this->makeProjectStructure($fid, [$seg], [$fid => [0 => $origData]]);
@@ -313,7 +318,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubSequence(1, 500);
         $this->stubFeaturesPassThrough();
 
-        $ps = $this->makeProjectStructure($fid, [$seg], [], [$fid => [0 => $meta]]);
+        $ps = $this->makeProjectStructure($fid, [$seg], [], [$fid => [0 => new SegmentMetadataCollection([$meta])]]);
         $this->service->storeSegments($fid, $ps);
 
         $persisted = $this->service->getPersistedSegmentMetadata();
@@ -395,13 +400,14 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubSequence(1, 900);
 
         // Simulate a plugin adding a field
-        $this->features->method('filter')
-            ->willReturnCallback(function (string $name, mixed $arg1) {
-                if ($name === 'appendFieldToAnalysisObject') {
-                    $arg1['custom_field'] = 'custom_value';
-                    return $arg1;
+        $this->features->method('dispatch')
+            ->willReturnCallback(function ($event) {
+                if ($event instanceof AppendFieldToAnalysisObjectEvent) {
+                    $metadata = $event->getMetadata();
+                    $metadata['custom_field'] = 'custom_value';
+                    $event->setMetadata($metadata);
                 }
-                return $arg1;
+                return $event;
             });
 
         $ps = $this->makeProjectStructure($fid, [$seg]);

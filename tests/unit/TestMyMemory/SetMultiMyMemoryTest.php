@@ -3,11 +3,13 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
 
+#[Group('PersistenceNeeded')]
 class SetMultiMyMemoryTest extends AbstractTest
 {
     private EngineStruct $engineStruct;

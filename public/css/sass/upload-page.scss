@@ -605,8 +605,6 @@ a {
     from(rgb(245, 245, 245)),
     to(rgb(211, 212, 213))
   );
-  background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-  background: linear-gradient(top, colors.$translatedBlue, #119ec4);
 }
 
 .translate-box h2 span.extra {

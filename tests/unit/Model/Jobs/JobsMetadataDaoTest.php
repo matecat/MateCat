@@ -4,10 +4,12 @@ namespace unit\Model\Jobs;
 
 use Model\DataAccess\Database;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use TestHelpers\AbstractTest;
 
+#[Group('PersistenceNeeded')]
 class JobsMetadataDaoTest extends AbstractTest
 {
     private const int TEST_JOB_ID   = 999999;

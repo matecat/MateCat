@@ -4,6 +4,7 @@ namespace unit\Utils\Tools;
 
 use Exception;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\Utils;
@@ -1815,6 +1816,334 @@ class UtilsTest extends AbstractTest
 
         unlink($testFile1);
         unlink($testFile2);
+    }
+
+    // =========================================================================
+    // Tests for changeMemorySuggestionSource()
+    // =========================================================================
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testChangeMemorySuggestionSourceReturnsPublicTmForMatecatSourceCaseInsensitive(): void
+    {
+        $match = [
+            'created_by' => 'MaTeCaT',
+            'memory_key' => 'irrelevant'
+        ];
+
+        $result = Utils::changeMemorySuggestionSource($match, '[]');
+
+        $this->assertSame(\Utils\Constants\Constants::PUBLIC_TM, $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testChangeMemorySuggestionSourceReturnsNonMyMemorySourceName(): void
+    {
+        $match = [
+            'created_by' => 'AcmeTM',
+            'memory_key' => 'irrelevant'
+        ];
+
+        $result = Utils::changeMemorySuggestionSource($match, '[]');
+
+        $this->assertSame('AcmeTM', $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testChangeMemorySuggestionSourceFallsBackToDefaultKeyDescriptionWhenUidIsNull(): void
+    {
+        $key = md5('default-key-description-null-uid');
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true,
+                'glos' => false,
+                'owner' => true,
+                'uid_transl' => null,
+                'uid_rev' => null,
+                'name' => 'Default Key Name',
+                'key' => $key,
+                'r' => true,
+                'w' => true,
+                'r_transl' => null,
+                'w_transl' => null,
+                'r_rev' => null,
+                'w_rev' => null,
+                'source' => null,
+                'target' => null,
+            ]
+        ], JSON_THROW_ON_ERROR);
+
+        $match = [
+            'created_by' => '',
+            'memory_key' => $key,
+        ];
+
+        $result = Utils::changeMemorySuggestionSource($match, $jobTmKeys, null);
+
+        $this->assertSame('Default Key Name', $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function testChangeMemorySuggestionSourceUsesUserKeyringFirstWhenUidProvided(): void
+    {
+        $uid = 910001;
+        $key = md5('user-keyring-priority');
+        $this->deleteMemoryKeyRow($uid, $key);
+        $this->insertMemoryKeyRow($uid, $key, 'User Key Name');
+
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true,
+                'glos' => false,
+                'owner' => true,
+                'uid_transl' => null,
+                'uid_rev' => null,
+                'name' => 'Owner Key Name',
+                'key' => $key,
+                'r' => true,
+                'w' => true,
+                'r_transl' => null,
+                'w_transl' => null,
+                'r_rev' => null,
+                'w_rev' => null,
+                'source' => null,
+                'target' => null,
+            ]
+        ], JSON_THROW_ON_ERROR);
+
+        $match = [
+            'created_by' => 'MyMemory',
+            'memory_key' => $key,
+        ];
+
+        $result = Utils::changeMemorySuggestionSource($match, $jobTmKeys, $uid);
+
+        $this->assertSame('User Key Name', $result);
+        $this->deleteMemoryKeyRow($uid, $key);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testChangeMemorySuggestionSourceReturnsPublicTmWhenNoBranchMatches(): void
+    {
+        $match = [
+            'created_by' => '',
+            'memory_key' => 'not-a-md5',
+        ];
+
+        $result = Utils::changeMemorySuggestionSource($match, '[]');
+
+        $this->assertSame(\Utils\Constants\Constants::PUBLIC_TM, $result);
+    }
+
+    // =========================================================================
+    // Tests for keyNameFromUserKeyring()
+    // =========================================================================
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testKeyNameFromUserKeyringReturnsNullWhenUidIsNull(): void
+    {
+        $result = Utils::keyNameFromUserKeyring(md5('key-with-null-uid'), null);
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function testKeyNameFromUserKeyringReturnsNameWhenMatchingKeyExists(): void
+    {
+        $uid = 910002;
+        $key = md5('existing-key-name');
+        $this->deleteMemoryKeyRow($uid, $key);
+        $this->insertMemoryKeyRow($uid, $key, 'Existing Key Name');
+
+        $result = Utils::keyNameFromUserKeyring($key, $uid);
+
+        $this->assertSame('Existing Key Name', $result);
+        $this->deleteMemoryKeyRow($uid, $key);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function testKeyNameFromUserKeyringReturnsNullWhenNoMatchingKeyExists(): void
+    {
+        $uid = 910003;
+        $key = md5('missing-key-name');
+        $this->deleteMemoryKeyRow($uid, $key);
+
+        $result = Utils::keyNameFromUserKeyring($key, $uid);
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function testKeyNameFromUserKeyringReturnsNoDescriptionWhenKeyNameIsEmpty(): void
+    {
+        $uid = 910004;
+        $key = md5('empty-key-name');
+        $this->deleteMemoryKeyRow($uid, $key);
+        $this->insertMemoryKeyRow($uid, $key, '   ');
+
+        $result = Utils::keyNameFromUserKeyring($key, $uid);
+
+        $this->assertSame(\Utils\Constants\Constants::NO_DESCRIPTION_TM, $result);
+        $this->deleteMemoryKeyRow($uid, $key);
+    }
+
+    // =========================================================================
+    // Tests for getDefaultKeyDescription()
+    // =========================================================================
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testGetDefaultKeyDescriptionReturnsNameWhenOwnerKeyExists(): void
+    {
+        $key = md5('owner-key-found');
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true,
+                'glos' => false,
+                'owner' => true,
+                'uid_transl' => null,
+                'uid_rev' => null,
+                'name' => 'Owner Key Visible Name',
+                'key' => $key,
+                'r' => true,
+                'w' => true,
+                'r_transl' => null,
+                'w_transl' => null,
+                'r_rev' => null,
+                'w_rev' => null,
+                'source' => null,
+                'target' => null,
+            ]
+        ], JSON_THROW_ON_ERROR);
+
+        $result = Utils::getDefaultKeyDescription($key, $jobTmKeys);
+
+        $this->assertSame('Owner Key Visible Name', $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testGetDefaultKeyDescriptionReturnsNoDescriptionWhenKeyNotFound(): void
+    {
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true,
+                'glos' => false,
+                'owner' => true,
+                'uid_transl' => null,
+                'uid_rev' => null,
+                'name' => 'Different Key Name',
+                'key' => md5('different-key'),
+                'r' => true,
+                'w' => true,
+                'r_transl' => null,
+                'w_transl' => null,
+                'r_rev' => null,
+                'w_rev' => null,
+                'source' => null,
+                'target' => null,
+            ]
+        ], JSON_THROW_ON_ERROR);
+
+        $result = Utils::getDefaultKeyDescription(md5('target-missing-key'), $jobTmKeys);
+
+        $this->assertSame(\Utils\Constants\Constants::NO_DESCRIPTION_TM, $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testGetDefaultKeyDescriptionReturnsNoDescriptionWhenOwnerKeyNameIsEmpty(): void
+    {
+        $key = md5('owner-key-empty-name');
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true,
+                'glos' => false,
+                'owner' => true,
+                'uid_transl' => null,
+                'uid_rev' => null,
+                'name' => '   ',
+                'key' => $key,
+                'r' => true,
+                'w' => true,
+                'r_transl' => null,
+                'w_transl' => null,
+                'r_rev' => null,
+                'w_rev' => null,
+                'source' => null,
+                'target' => null,
+            ]
+        ], JSON_THROW_ON_ERROR);
+
+        $result = Utils::getDefaultKeyDescription($key, $jobTmKeys);
+
+        $this->assertSame(\Utils\Constants\Constants::NO_DESCRIPTION_TM, $result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function insertMemoryKeyRow(int $uid, string $key, string $keyName): void
+    {
+        $connection = \Model\DataAccess\Database::obtain()->getConnection();
+        $stmt = $connection->prepare(
+            'INSERT INTO memory_keys (uid, key_value, key_name, key_tm, key_glos, creation_date, deleted) VALUES (:uid, :key_value, :key_name, 1, 1, NOW(), 0)'
+        );
+
+        $stmt->execute([
+            'uid' => $uid,
+            'key_value' => $key,
+            'key_name' => $keyName,
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function deleteMemoryKeyRow(int $uid, string $key): void
+    {
+        $connection = \Model\DataAccess\Database::obtain()->getConnection();
+        $stmt = $connection->prepare('DELETE FROM memory_keys WHERE uid = :uid AND key_value = :key_value');
+        $stmt->execute([
+            'uid' => $uid,
+            'key_value' => $key,
+        ]);
     }
 
     // =========================================================================

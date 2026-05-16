@@ -8,6 +8,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\SegmentExtractor;
+use Model\Segments\SegmentMetadataMapper;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -22,8 +23,9 @@ class TestableSegmentExtractor extends SegmentExtractor
         FeatureSet $features,
         MetadataDao $filesMetadataDao,
         MatecatLogger $logger,
+        ?SegmentMetadataMapper $segmentMetadataMapper = null,
     ) {
-        parent::__construct($config, $filter, $features, $filesMetadataDao, $logger);
+        parent::__construct($config, $filter, $features, $filesMetadataDao, $segmentMetadataMapper ?? new SegmentMetadataMapper(), $logger);
     }
 
     /**

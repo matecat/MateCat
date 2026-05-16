@@ -13,6 +13,7 @@ use Model\Analysis\XTRFStatus;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use ReflectionException;
+use TypeError;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
@@ -28,15 +29,17 @@ class DownloadAnalysisReportController extends AbstractDownloadController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function download(): void
     {
         $this->featureSet = new FeatureSet();
         $request = $this->validateTheRequest();
-        $_project_data = ProjectDao::getProjectAndJobData($request['id_project']);
+        $projectId = (int)$request['id_project'];
+        $_project_data = ProjectDao::getProjectAndJobData($projectId);
         $this->id_job = (int)$_project_data[0]['jid'];
 
-        $this->featureSet->loadForProject(ProjectDao::findById($request['id_project'], 60 * 60 * 24));
+        $this->featureSet->loadForProject(ProjectDao::staticFindById($projectId, 60 * 60 * 24) ?? throw new Exception("Project not found"));
 
         $analysisStatus = new XTRFStatus($_project_data, $this->featureSet);
         $outputContent = $analysisStatus->fetchData()->getResultArray();
@@ -54,8 +57,8 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         $this->_filename = $_project_data[0]['pname'] . ".zip";
 
         $activity = new ActivityLogStruct();
-        $activity->id_job = $_project_data[0]['jid'];
-        $activity->id_project = $request['id_project']; //assume that all rows have the same project id
+        $activity->id_job = (int)$_project_data[0]['jid'];
+        $activity->id_project = $projectId; //assume that all rows have the same project id
         $activity->action = ActivityLogStruct::DOWNLOAD_ANALYSIS_REPORT;
         $activity->ip = Utils::getRealIpAddr();
         $activity->uid = $this->user->uid;
@@ -66,12 +69,14 @@ class DownloadAnalysisReportController extends AbstractDownloadController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws Exception
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
-        $id_project = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT);
+        $id_project = (string)filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT);
         $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $download_type = filter_var($this->request->param('download_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
@@ -79,10 +84,10 @@ class DownloadAnalysisReportController extends AbstractDownloadController
             throw new InvalidArgumentException("Id project not provided");
         }
 
-        $project = ProjectDao::findById($id_project);
+        $project = ProjectDao::staticFindById((int)$id_project);
 
         if (empty($project)) {
-            throw new InvalidArgumentException(-10, "Wrong Id project provided");
+            throw new InvalidArgumentException("Wrong Id project provided", -10);
         }
 
         $this->project = $project;

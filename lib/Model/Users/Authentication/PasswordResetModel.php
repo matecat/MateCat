@@ -12,6 +12,7 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use RuntimeException;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -54,15 +55,15 @@ class PasswordResetModel
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
-    protected function getUserFromResetToken(): ?UserStruct
-    {
-        if (!isset($this->user)) {
-            $dao = new UserDao();
-            $this->user = $dao->getByConfirmationToken($this->token);
-        }
+     protected function getUserFromResetToken(): ?UserStruct
+     {
+         if (!isset($this->user)) {
+             $dao = new UserDao();
+             $this->user = $dao->getByConfirmationToken($this->token ?? throw new RuntimeException('Missing reset token'));
+         }
 
-        return $this->user;
-    }
+         return $this->user;
+     }
 
     /**
      * Validates the user based on the reset token
@@ -80,7 +81,7 @@ class PasswordResetModel
 
         if (strtotime($this->user->confirmation_token_created_at) < strtotime('30 minutes ago')) {
             $this->user->clearAuthToken();
-            UserDao::updateStruct($this->user, ['fields' => ['confirmation_token']]);
+            (new UserDao())->updateStruct($this->user, ['fields' => ['confirmation_token']]);
 
             throw new ValidationError('Auth token expired, repeat the operation.');
         }
@@ -124,9 +125,9 @@ class PasswordResetModel
             $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        UserDao::updateStruct($this->user, $fieldsToUpdate);
-        (new UserDao)->destroyCacheByEmail($this->user->email);
-        (new UserDao)->destroyCacheByUid($this->user->uid);
+        (new UserDao())->updateStruct($this->user, $fieldsToUpdate);
+        (new UserDao)->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        (new UserDao)->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
     }
 
     /**
