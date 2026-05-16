@@ -144,8 +144,8 @@ abstract class AbstractDao
         $sql = sprintf(
             self::UPDATE_STRUCT_SQL,
             static::TABLE,
-            static::buildUpdateSet($attrs, $fields),
-            static::buildPkeyCondition($attrs)
+            $this->buildUpdateSet($attrs, $fields),
+            $this->buildPkeyCondition($attrs)
         );
 
         $conn = $this->database->getConnection();
@@ -157,7 +157,7 @@ abstract class AbstractDao
 
         $data = array_merge(
             $struct->toArray($fields),
-            static::structKeys($struct)
+            $this->structKeys($struct)
         );
 
         LoggerFactory::getLogger('dao')->debug([
@@ -258,22 +258,6 @@ abstract class AbstractDao
      * @throws Exception This function throws exception input is not a \DataAccess\IDaoStruct object
      */
     public function sanitize(IDaoStruct $input): IDaoStruct
-    {
-        throw new Exception("Abstract method " . __METHOD__ . " must be overridden ");
-    }
-
-    /**
-     * @param array<int, IDaoStruct> $input An array of \DataAccess\IDaoStruct objects
-     *
-     * @return array<int, IDaoStruct> The input array, sanitized.
-     * @throws Exception This function throws exception if input is not:<br/>
-     *                  <ul>
-     *                      <li>An array of $type objects</li>
-     *                      or
-     *                      <li>A \DataAccess\IDaoStruct object</li>
-     *                  </ul>
-     */
-    public static function sanitizeArray(array $input): array
     {
         throw new Exception("Abstract method " . __METHOD__ . " must be overridden ");
     }
@@ -474,7 +458,7 @@ abstract class AbstractDao
      * @return string
      */
 
-    protected static function buildUpdateSet(array $attrs, ?array $mask = []): string
+    protected function buildUpdateSet(array $attrs, ?array $mask = []): string
     {
         $map = [];
         $pks = static::$primary_keys;
@@ -504,7 +488,7 @@ abstract class AbstractDao
      *
      */
 
-    protected static function buildPkeyCondition(array $attrs): string
+    protected function buildPkeyCondition(array $attrs): string
     {
         $map = [];
 
@@ -526,22 +510,11 @@ abstract class AbstractDao
      * @return array<string, scalar|null> the struct's primary keys
      */
 
-    protected static function structKeys(AbstractDaoObjectStruct $struct): array
+    protected function structKeys(AbstractDaoObjectStruct $struct): array
     {
         $keys = static::$primary_keys;
 
         return $struct->toArray($keys);
-    }
-
-    /**
-     * @param array<string, scalar|null> $data
-     * @param array<string, scalar|null> $where
-     *
-     * @throws PDOException
-     */
-    public static function staticUpdate(array $data = [], array $where = []): int
-    {
-        return Database::obtain()->update(static::TABLE, $data, $where);
     }
 
 }

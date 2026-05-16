@@ -135,7 +135,7 @@ class ProjectTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function createFromJSON(object $decodedObject, UserStruct $user): ProjectTemplateStruct
+    public static function staticCreateFromJSON(object $decodedObject, UserStruct $user): ProjectTemplateStruct
     {
         $uid = $user->uid ?? throw new Exception("UserStruct::uid must not be null when creating a project template");
 
@@ -144,7 +144,7 @@ class ProjectTemplateDao extends AbstractDao
 
         self::checkValues($projectTemplateStruct, $user);
 
-        return self::save($projectTemplateStruct);
+        return self::staticSave($projectTemplateStruct);
     }
 
     /**
@@ -154,11 +154,10 @@ class ProjectTemplateDao extends AbstractDao
      * @param UserStruct $user
      *
      * @return ProjectTemplateStruct
-     * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
-    public static function editFromJSON(ProjectTemplateStruct $projectTemplateStruct, object $json, int $id, UserStruct $user): ProjectTemplateStruct
+    public static function staticEditFromJSON(ProjectTemplateStruct $projectTemplateStruct, object $json, int $id, UserStruct $user): ProjectTemplateStruct
     {
         $uid = $user->uid ?? throw new Exception("UserStruct::uid must not be null when editing a project template");
 
@@ -373,7 +372,7 @@ class ProjectTemplateDao extends AbstractDao
      * @throws Exception
      * @throws ReflectionException
      */
-    public static function getById(int $id, int $ttl = 60): ?ProjectTemplateStruct
+    public static function staticGetById(int $id, int $ttl = 60): ?ProjectTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         /**
@@ -395,7 +394,7 @@ class ProjectTemplateDao extends AbstractDao
      * @throws Exception
      * @throws ReflectionException
      */
-    public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?ProjectTemplateStruct
+    public static function staticGetByIdAndUser(int $id, int $uid, int $ttl = 60): ?ProjectTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
         /**
@@ -416,7 +415,7 @@ class ProjectTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function save(ProjectTemplateStruct $projectTemplateStruct): ProjectTemplateStruct
+    public static function staticSave(ProjectTemplateStruct $projectTemplateStruct): ProjectTemplateStruct
     {
         $sql = "INSERT INTO " . self::TABLE . " (
                     `name`,
@@ -635,7 +634,7 @@ class ProjectTemplateDao extends AbstractDao
         ]);
 
         foreach ($stmt->fetchAll() as $project) {
-            self::destroyDefaultTemplateCache($conn, $uid);
+            self::staticDestroyDefaultTemplateCache($conn, $uid);
             self::destroyQueryByIdCache($conn, $project['id']);
             self::destroyQueryByIdAndUserCache($conn, $project['id'], $uid);
             self::destroyQueryPaginated($uid);
@@ -743,7 +742,7 @@ class ProjectTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws \Psr\Log\InvalidArgumentException
      */
-    public static function destroyDefaultTemplateCache(PDO $conn, int $uid): void
+    public static function staticDestroyDefaultTemplateCache(PDO $conn, int $uid): void
     {
         $stmt = $conn->prepare(self::query_default);
         self::getInstance()->_destroyObjectCache($stmt, ProjectTemplateStruct::class, ['uid' => $uid, 'is_default' => 1]);

@@ -89,7 +89,7 @@ class ProjectDao extends AbstractDao
         $data[$field] = $value;
         $where = ["id" => $project->id];
 
-        $success = self::staticUpdate($data, $where);
+        $success = $this->updateFields($data, $where);
 
         if ($success) {
             $project->$field = $value;
@@ -570,7 +570,7 @@ class ProjectDao extends AbstractDao
         $data['status_analysis'] = $status;
         $where = ["id" => $pid];
 
-        return self::staticUpdate($data, $where);
+        return (new static())->updateFields($data, $where);
     }
 
     /**

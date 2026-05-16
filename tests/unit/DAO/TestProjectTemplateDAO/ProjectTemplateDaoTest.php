@@ -20,7 +20,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('uid');
 
-        ProjectTemplateDao::createFromJSON((object)['name' => 'test'], $user);
+        ProjectTemplateDao::staticCreateFromJSON((object)['name' => 'test'], $user);
     }
 
     #[Test]
@@ -34,7 +34,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('uid');
 
-        ProjectTemplateDao::editFromJSON($struct, (object)['name' => 'test'], 1, $user);
+        ProjectTemplateDao::staticEditFromJSON($struct, (object)['name' => 'test'], 1, $user);
     }
 
     #[Test]

@@ -119,17 +119,17 @@ class ProjectTemplateDaoTest extends AbstractTest
     {
         $struct = $this->makeStruct('lifecycle-template');
 
-        $saved = ProjectTemplateDao::save($struct);
+        $saved = ProjectTemplateDao::staticSave($struct);
         $this->assertGreaterThan(0, $saved->id);
 
-        $byId = ProjectTemplateDao::getById($saved->id);
+        $byId = ProjectTemplateDao::staticGetById($saved->id);
         $this->assertNotNull($byId);
         $this->assertStringStartsWith('lifecycle-template-', $byId->name);
 
-        $byIdAndUser = ProjectTemplateDao::getByIdAndUser($saved->id, self::TEST_UID);
+        $byIdAndUser = ProjectTemplateDao::staticGetByIdAndUser($saved->id, self::TEST_UID);
         $this->assertNotNull($byIdAndUser);
         $this->assertSame($saved->id, $byIdAndUser->id);
-        $this->assertNull(ProjectTemplateDao::getByIdAndUser($saved->id, self::TEST_UID + 1));
+        $this->assertNull(ProjectTemplateDao::staticGetByIdAndUser($saved->id, self::TEST_UID + 1));
 
         $saved->name = 'lifecycle-template-updated-' . uniqid('', true);
         $saved->pretranslate_100 = true;
@@ -138,7 +138,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $saved->is_default = true;
         ProjectTemplateDao::update($saved);
 
-        $updated = ProjectTemplateDao::getById($saved->id);
+        $updated = ProjectTemplateDao::staticGetById($saved->id);
         $this->assertNotNull($updated);
         $this->assertStringStartsWith('lifecycle-template-updated-', $updated->name);
         $this->assertTrue($updated->pretranslate_100);
@@ -147,7 +147,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $removed = ProjectTemplateDao::remove($saved->id, self::TEST_UID);
         $this->assertSame(1, $removed);
-        $this->assertNull(ProjectTemplateDao::getById($saved->id));
+        $this->assertNull(ProjectTemplateDao::staticGetById($saved->id));
     }
 
     #[Test]
@@ -155,11 +155,11 @@ class ProjectTemplateDaoTest extends AbstractTest
     {
         $first = $this->makeStruct('default-1');
         $first->is_default = true;
-        $first = ProjectTemplateDao::save($first);
+        $first = ProjectTemplateDao::staticSave($first);
 
         $second = $this->makeStruct('default-2');
         $second->is_default = false;
-        $second = ProjectTemplateDao::save($second);
+        $second = ProjectTemplateDao::staticSave($second);
 
         $default = ProjectTemplateDao::getTheDefaultProject(self::TEST_UID);
         $this->assertNotNull($default);
@@ -167,7 +167,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         ProjectTemplateDao::markAsNotDefault(self::TEST_UID, $second->id);
 
-        $reloadedFirst = ProjectTemplateDao::getById($first->id);
+        $reloadedFirst = ProjectTemplateDao::staticGetById($first->id);
         $this->assertNotNull($reloadedFirst);
         $this->assertFalse($reloadedFirst->is_default);
     }
@@ -175,8 +175,8 @@ class ProjectTemplateDaoTest extends AbstractTest
     #[Test]
     public function getAllPaginatedReturnsExpectedShape(): void
     {
-        ProjectTemplateDao::save($this->makeStruct('page-1'));
-        ProjectTemplateDao::save($this->makeStruct('page-2'));
+        ProjectTemplateDao::staticSave($this->makeStruct('page-1'));
+        ProjectTemplateDao::staticSave($this->makeStruct('page-2'));
 
         $result = ProjectTemplateDao::getAllPaginated(self::TEST_UID, '/api/templates?page=', 1, 1, 1);
 
@@ -194,17 +194,17 @@ class ProjectTemplateDaoTest extends AbstractTest
     {
         $first = $this->makeStruct('sub-template-1');
         $first->payable_rate_template_id = 42;
-        $first = ProjectTemplateDao::save($first);
+        $first = ProjectTemplateDao::staticSave($first);
 
         $second = $this->makeStruct('sub-template-2');
         $second->payable_rate_template_id = 42;
-        $second = ProjectTemplateDao::save($second);
+        $second = ProjectTemplateDao::staticSave($second);
 
         $affected = ProjectTemplateDao::removeSubTemplateByIdAndUser(42, self::TEST_UID, 'payable_rate_template_id');
         $this->assertSame(2, $affected);
 
-        $firstReloaded = ProjectTemplateDao::getById($first->id);
-        $secondReloaded = ProjectTemplateDao::getById($second->id);
+        $firstReloaded = ProjectTemplateDao::staticGetById($first->id);
+        $secondReloaded = ProjectTemplateDao::staticGetById($second->id);
 
         $this->assertNotNull($firstReloaded);
         $this->assertNotNull($secondReloaded);
@@ -218,16 +218,16 @@ class ProjectTemplateDaoTest extends AbstractTest
         $user = $this->makeUser();
         $createPayload = $this->makePayload('create-json-template');
 
-        $created = ProjectTemplateDao::createFromJSON($createPayload, $user);
+        $created = ProjectTemplateDao::staticCreateFromJSON($createPayload, $user);
         $this->assertGreaterThan(0, $created->id);
 
         $editPayload = $this->makePayload('edited-json-template');
         $editPayload->pretranslate_100 = true;
         $editPayload->target_language = ['fr-FR', 'it-IT'];
 
-        ProjectTemplateDao::editFromJSON($created, $editPayload, $created->id, $user);
+        ProjectTemplateDao::staticEditFromJSON($created, $editPayload, $created->id, $user);
 
-        $reloaded = ProjectTemplateDao::getById($created->id);
+        $reloaded = ProjectTemplateDao::staticGetById($created->id);
         $this->assertNotNull($reloaded);
         $this->assertStringStartsWith('edited-json-template-', $reloaded->name);
         $this->assertTrue($reloaded->pretranslate_100);
@@ -244,7 +244,7 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('does not belong to this group');
 
-        ProjectTemplateDao::createFromJSON($payload, $user);
+        ProjectTemplateDao::staticCreateFromJSON($payload, $user);
     }
 
     #[Test]
@@ -256,7 +256,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $this->expectException(Exception::class);
 
-        ProjectTemplateDao::createFromJSON($payload, $user);
+        ProjectTemplateDao::staticCreateFromJSON($payload, $user);
     }
 
     #[Test]
@@ -268,7 +268,7 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $this->expectException(Exception::class);
 
-        ProjectTemplateDao::createFromJSON($payload, $user);
+        ProjectTemplateDao::staticCreateFromJSON($payload, $user);
     }
 
     #[Test]
@@ -276,7 +276,7 @@ class ProjectTemplateDaoTest extends AbstractTest
     {
         $conn = Database::obtain()->getConnection();
 
-        ProjectTemplateDao::destroyDefaultTemplateCache($conn, self::TEST_UID);
+        ProjectTemplateDao::staticDestroyDefaultTemplateCache($conn, self::TEST_UID);
 
         $this->assertTrue(true);
     }

@@ -75,7 +75,7 @@ class ProjectTemplateController extends KleinController
     {
         $id = (int)$this->request->param('id');
 
-        $model = ProjectTemplateDao::getByIdAndUser($id, $this->getUser()->uid);
+        $model = ProjectTemplateDao::staticGetByIdAndUser($id, $this->getUser()->uid);
 
         if (empty($model)) {
             throw new Exception('Model not found', 404);
@@ -106,7 +106,7 @@ class ProjectTemplateController extends KleinController
             $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
-            $struct = ProjectTemplateDao::createFromJSON($decodedObject, $this->getUser());
+            $struct = ProjectTemplateDao::staticCreateFromJSON($decodedObject, $this->getUser());
 
             $this->response->code(201);
 
@@ -149,13 +149,13 @@ class ProjectTemplateController extends KleinController
                 return $this->response->json(ProjectTemplateDao::getDefaultTemplate($uid));
             }
 
-            $model = ProjectTemplateDao::getByIdAndUser($id, $uid);
+            $model = ProjectTemplateDao::staticGetByIdAndUser($id, $uid);
 
             if (empty($model)) {
                 throw new NotFoundException('Model not found');
             }
 
-            $struct = ProjectTemplateDao::editFromJSON($model, $decodedObject, $id, $this->getUser());
+            $struct = ProjectTemplateDao::staticEditFromJSON($model, $decodedObject, $id, $this->getUser());
 
             return $this->response->json($struct);
         } catch (JSONValidatorException $exception) {
