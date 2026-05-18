@@ -28,6 +28,7 @@ use ReflectionException;
 use RuntimeException;
 use Stomp\Transport\Message;
 use Throwable;
+use TypeError;
 use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
@@ -304,10 +305,7 @@ class FastAnalysis extends AbstractDaemon
                         ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
                         : null;
                     $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
-                    $subfiltering_handlers_raw = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null;
-                    $subfiltering_handlers = $subfiltering_handlers_raw !== null
-                        ? array_values(array_map(static fn (mixed $h): string => (string)$h, (array)json_decode($subfiltering_handlers_raw, true)))
-                        : null;
+                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null;
                     $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
 
                     $insertReportRes = $this->_insertFastAnalysis(
@@ -356,7 +354,7 @@ class FastAnalysis extends AbstractDaemon
      *
      * @return AnalyzeResponse
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {
