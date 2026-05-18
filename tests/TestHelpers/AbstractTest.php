@@ -21,6 +21,11 @@ abstract class AbstractTest extends TestCase
     protected IDatabase $databaseInstance;
     protected ReflectionMethod $reflectedMethod;
 
+    protected static function projectRoot(): string
+    {
+        return dirname(__DIR__, 2);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
