@@ -60,8 +60,6 @@ class GetMemoryResponse extends TMSAbstractResponse
         $match['match'] = $match['match'] * 100;
         $match['match'] = $match['match'] . "%";
 
-        $match['prop'] = isset($match['prop']) ? json_decode($match['prop']) : [];
-
         return new Matches([
             'id' => $match['id'] ?? '0',
             'raw_segment' => $match['segment'] ?? '',

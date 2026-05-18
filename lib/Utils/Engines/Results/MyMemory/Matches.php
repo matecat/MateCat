@@ -108,12 +108,17 @@ class Matches
         $this->match = array_key_exists('match', $data) ? $data['match'] : 0;
         $this->memory_key = array_key_exists('key', $data) ? $data['key'] : '';
         $this->ICE = array_key_exists('ICE', $data) && $data['ICE'];
-        $this->tm_properties = array_key_exists('tm_properties', $data) ? json_decode($data['tm_properties'] ?? '[]', true) : [];
+
+        $raw = $data['tm_properties'] ?? null;
+        $this->tm_properties = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
+
         $this->target = array_key_exists('target', $data) ? $data['target'] : null;
         $this->source = array_key_exists('source', $data) ? $data['source'] : null;
         $this->penalty = array_key_exists('penalty', $data) ? $data['penalty'] : null;
         $this->score = array_key_exists('score', $data) ? $data['score'] : null;
-        $this->prop = array_key_exists('prop', $data) ? $data['prop'] : [];
+
+        $raw = $data['prop'] ?? null;
+        $this->prop = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
     }
 
     public function featureSet(?FeatureSet $featureSet = null): void

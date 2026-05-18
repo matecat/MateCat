@@ -10457,12 +10457,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
-			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
-			identifier: argument.type
-			count: 9
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
 			message: '#^Variable \$new_inverse_order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -10663,12 +10657,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoHideSingle\(\) has parameter \$match with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoHideSingle\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
@@ -10880,12 +10868,6 @@ parameters:
 			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\CatUtils\:\:segment_raw_word_count\(\) expects string\|null, array\<string, mixed\>\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
-
-		-
-			message: '#^Parameter \#2 \$where of static method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) expects array\<string, bool\|float\|int\|string\|null\>, array\<int, mixed\> given\.$#'
-			identifier: argument.type
-			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -16097,12 +16079,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 
 		-
-			message: '#^Parameter \#1 \$featureSet of static method Matecat\\SubFiltering\\AbstractFilter\:\:getInstance\(\) expects Matecat\\SubFiltering\\Contracts\\FeatureSetInterface, Model\\FeaturesBase\\FeatureSet\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
-
-		-
 			message: '#^Property Features\\Aligner\\Utils\\TMSService\:\:\$tmxFilePath has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -16355,3 +16331,32 @@ parameters:
 			path: plugins/uber/lib/Features/Uber/Utils/NoteExtractor.php
 
 	
+		-
+			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) has parameter \$where with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) has parameter \$where with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 5
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php

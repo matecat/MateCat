@@ -305,7 +305,8 @@ class FastAnalysis extends AbstractDaemon
                         ? new MTQEWorkflowParams($mt_qe_workflow_parameters_decoded)
                         : null;
                     $mt_quality_value_in_editor = (int)($allMetadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] ?? 85);
-                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null;
+                    $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
+                    $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
                     $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
 
                     $insertReportRes = $this->_insertFastAnalysis(
