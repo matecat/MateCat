@@ -74,6 +74,8 @@ $klein->with('/api/app/projects/[:id_project]/[:password]', function () {
 route('/api/app/projects/[:id_project]/token/[:project_access_token]', 'GET', ['Controller\API\V2\ProjectsController', 'get']);
 
 // LARA
+route('/api/app/lara/auth', 'GET', ['\Controller\API\App\Authentication\LaraAuthStandaloneController', 'auth']);
+
 $klein->with('/api/v3/lara/[i:engineId]', function () {
     route('/glossaries', 'GET', ['Controller\API\V3\LaraController', 'glossaries']);
 });
