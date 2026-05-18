@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 body section.muted {
   background: #f2f4f7;
   cursor: not-allowed;
@@ -23,8 +23,6 @@ body section.muted {
         }
       }
     }
-  }
-  .segment-side-buttons {
   }
 }
 
@@ -275,7 +273,9 @@ section.muted .segment-side-buttons {
               &.filtered {
                 .ui.basic.button {
                   background-color: #ffffff !important;
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                   color: #000000 !important;
                   padding: 9px 20px 9px 15px;
@@ -362,7 +362,6 @@ section.muted .segment-side-buttons {
                 margin-left: 2px;
               }
             }
-
           }
           .clear-filter-element {
             margin-left: 13px;
@@ -526,10 +525,7 @@ section.muted .segment-side-buttons {
   font-weight: bold;
 }
 
-.sample-size-container input[type="number"] {
+.sample-size-container input[type='number'] {
   width: 70px;
   padding: 8px;
 }
-
-
-

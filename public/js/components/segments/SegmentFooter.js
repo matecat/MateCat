@@ -108,16 +108,17 @@ const isMac = isMacOS()
 
 class SegmentFooterHeight {
   constructor() {
-    this.map = new Map()
+    this.sid
+    this.height = 0
   }
 
-  getHeight(sid) {
-    return this.map.get(sid) || 0
+  getHeight(sidValue) {
+    return sidValue === this.sid ? this.height : 0
   }
 
   setHeight(sid, value) {
-    this.map.clear()
-    this.map.set(sid, value)
+    this.sid = sid
+    this.height = value
   }
 }
 
