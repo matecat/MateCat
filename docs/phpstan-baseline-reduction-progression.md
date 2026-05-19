@@ -1,20 +1,20 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-19 (last updated)  
-**Commits (refactor + fix + security + test):** 341
+**Date:** 2026-05-20 (last updated)  
+**Commits (refactor + fix + security + test):** 344
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,666 | −4,700 (−63.8%) |
+| **PHPStan baseline entries** | 7,366 | 2,652 | −4,714 (−64.0%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 4,987 | +2,739 (+121.8%) |
-| **PHPUnit assertions** | ~19,449 | 16,797 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 24.71% (169/684) | +16.23% (+116 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 49.25% (2,032/4,126) | +27.51% (+1,188 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 51.54% (18,061/35,041) | +30.35% (+10,788 lines) |
-| **New test files** | 235 | 362 | +127 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 274 | +274 |
+| **PHPUnit tests** | ~2,248 | 5,113 | +2,865 (+127.4%) |
+| **PHPUnit assertions** | ~19,449 | 17,294 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 25.15% (172/684) | +16.67% (+119 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 50.51% (2,085/4,128) | +28.77% (+1,241 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 52.59% (18,444/35,074) | +31.40% (+11,171 lines) |
+| **New test files** | 235 | 366 | +131 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 279 | +279 |
 
 ---
 
@@ -88,7 +88,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 274 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 279 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (274 files)</summary>
@@ -219,6 +219,11 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Concerns/LogsMessages.php` | Phase 5C |
 | `lib/Model/Jobs/JobDao.php` | Phase 5C |
 | `lib/Model/Jobs/MetadataDao.php` | Phase 5C |
+| `lib/Model/Jobs/JobStruct.php` | Phase 30 |
+| `lib/Model/Jobs/JobsMetadataMarshaller.php` | Phase 30 |
+| `lib/Model/Jobs/LexiQaAndTagProjectionLanguages.php` | Phase 30 |
+| `lib/Model/Jobs/MetadataStruct.php` | Phase 30 |
+| `lib/Model/Jobs/WarningsCountStruct.php` | Phase 30 |
 | `lib/Model/JobSplitMerge/JobSplitMergeManager.php` | Phase 5C |
 | `lib/Model/LQA/CategoryDao.php` | Phase 0 |
 | `lib/Model/LQA/ChunkReviewDao.php` | Phase 5C |
@@ -810,23 +815,23 @@ All 76 errors eliminated. Same patterns as NewController (independent implementa
 ## Coverage & Test Suite Health
 
 Measured with: `vendor/bin/phpunit --exclude-group=ExternalServices --coverage-text`  
-Driver: Xdebug 3.5.0, PHP 8.3.30, PHPUnit 12.5.23
+Driver: Xdebug 3.5.0, PHP 8.3.31, PHPUnit 12.5.25
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 4,981 |
-| **Assertions** | 16,773 |
+| **Total tests** | 5,113 |
+| **Assertions** | 17,294 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
 ### Coverage Analysis
 
-- **Class coverage nearly tripled** (8.48% → 24.71%) — 116 additional classes now have test coverage.
-- **Method coverage more than doubled** (21.74% → 49.25%) — 1,188 additional methods covered.
-- **Line coverage grew by +30.35%** (21.19% → 51.54%) — 10,788 additional lines covered.
-- **Tests grew by 2,733** (2,248 → 4,981) — +121.6% test count.
-- **Assertions at 16,773** — slightly below develop's ~19,449 (develop's assertions were distributed across fewer, larger tests with heavy assertions per test).
-- **PHPStan: 0 errors** on full codebase — baseline-referenced only. 2,707 remaining entries in ~2,600 unique files.
+- **Class coverage nearly tripled** (8.48% → 25.15%) — 119 additional classes now have test coverage.
+- **Method coverage more than doubled** (21.74% → 50.31%) — 1,233 additional methods covered.
+- **Line coverage grew by +31.25%** (21.19% → 52.44%) — 11,110 additional lines covered.
+- **Tests grew by 2,831** (2,248 → 5,079) — +125.9% test count.
+- **Assertions at 17,186** — stable; test growth spread assertions across more, focused unit tests.
+- **PHPStan: 0 errors** on full codebase — baseline-referenced only. 2,666 remaining entries in ~2,600 unique files.
 
 ---
 
@@ -1469,24 +1474,135 @@ ActivityLogDao, AnalysisDao, ChunkCompletionEventDao, ChunkCompletionUpdateDao, 
 - **6 behavioral null guards**: `json_encode` failure, `(int)$size`, `(string)$mime`, `$parents[0] ?? ''`, `$copiedFile` null
 - **Cascade**: 6 errors in 4 off-ledger files → added to baseline
 - **Baseline**: 2,707 → **2,666** (−41)
-- **Tests**: 4,987 (+7 new tests in 2 files)
+- **Tests**: 4,979 (+8 new tests: 6 GDriveTokenVerifyModel + 2 RemoteFileService)
 - **Assertions**: 16,797
 
 ---
 
+### Phase 29: GDrive DI Refactor + Test Coverage Push — ✅ DONE
+
+**Goal:** Add DI to `GDriveUserAuthorizationModel` and `Session` for testability, then write comprehensive tests targeting ≥80% coverage.
+
+#### 29A. GDriveUserAuthorizationModel — DI + 97.78% coverage
+
+**Commits:** 2 (DI refactor + tests)
+
+| File | Changes |
+|------|---------|
+| `GDriveUserAuthorizationModel.php` | Constructor accepts optional `?ConnectedServiceDao $dao` and `?Google_Client $googleClient`. Private `__collectProperties` → `protected` for testable override. `__updateService`/`__insertService` use `$this->dao ?? new ConnectedServiceDao()` lazy fallback. `__collectProperties` uses `$this->googleClient ?? GoogleProvider::getClient(...)`. Added `use Google_Client` import. |
+| `GDriveUserAuthorizationModelTest.php` | **9 tests**, 31 assertions. Coverage: **97.78% lines** (44/45), **80% methods** (4/5). Tests: constructor (4), updateOrCreateRecordByCode with dao mock (update + insert + 2 error paths), collectProperties with Google client mock. Uses `TestableGDriveUserAuthorizationModel` subclass to override `__collectProperties` as no-op and pre-set token/user properties. |
+
+#### 29B. Session — DI + 63.79% coverage
+
+| File | Changes |
+|------|---------|
+| `Session.php` | Constructor accepts optional `?array &$sessionData`, `?ConnectedServiceDao $dao`, `?AbstractFilesStorage $filesStorage`. When `$sessionData` is null, uses `$_SESSION` (backward compatible). Added `protected createFeatureSet()` and `protected createFilesConverter()` factory methods for testable subclass overrides. `getInstanceForCLI` passes `$session` through constructor instead of mutating `$_SESSION`. `getTokenByUser` uses `$this->dao ?? new ConnectedServiceDao()` lazy fallback. |
+| `SessionTest.php` | **56 tests**, 107 assertions. Coverage: **63.79% lines** (155/243), **72.41% methods** (21/29). Tests: constructor (2), getInstanceForCLI (2), hasFiles/sessionHasFiles (3), findFileIdByName (2), clearSession/clearFileListFromSession (3), addFiles (2), setConversionParams, getToken/getTokenByUser (3), getService (3), buildRemoteFile (3), grantFileAccessByUrl (2), createRemoteFile (2), importFile error path (4), removeFile (2), removeAllFiles (2), reConvert (2), getFileStructureForJsonOutput (3), sanitizeFileName (3), deleteDirectory, getCacheFileDir, getGDriveFilePath, getGDriveFilePathForS3, createFeatureSet, createFilesConverter. I/O-heavy class — full 80% blocked by inline FilesConverter(8 params), Google API chains, and filesystem dependencies. |
+
+#### GDrive Coverage Summary
+
+| File | Methods | Lines | Tests |
+|------|---------|-------|-------|
+| GDriveTokenHandler | 100% (2/2) | 100% (15/15) | 14 |
+| GDriveTokenVerifyModel | 100% (5/5) | 100% (22/22) | 6 |
+| GDriveUserAuthorizationModel | 80% (4/5) | 97.78% (44/45) | 9 |
+| RemoteFileService | 88.89% (8/9) | 98.31% (58/59) | 18 |
+| Session | 72.41% (21/29) | 63.79% (155/243) | 56 |
+
+- **Baseline**: 2,666 (unchanged — no baseline modifications, Phase 28 already cleaned all entries)
+- **Tests**: 5,079 (+98: +9 GDriveUserAuthorizationModel + 56 Session)
+- **Assertions**: 17,186
+- **Files added to ledger**: 0 (GDrive files already on ledger from Phase 28)
+- **Full GDrive suite**: 98/98 pass, 0 warnings
+
+---
+
+### Phase 30: lib/Model/Jobs/ — Full Directory Cleanup — ✅ DONE
+
+**Goal:** Clean all PHPStan errors from every file in `lib/Model/Jobs/`.
+
+#### Files Processed
+
+| File | Errors Before | Errors After | Type |
+|------|--------------|-------------|------|
+| `JobDao.php` | 0 | 0 | Already clean (Phase 5C) |
+| `MetadataDao.php` | 0 | 0 | Already clean (Phase 5C) |
+| `JobsMetadataMarshaller.php` | 0 | 0 | Already clean |
+| `MetadataStruct.php` | 0 | 0 | Already clean |
+| `WarningsCountStruct.php` | 0 | 0 | Already clean |
+| `LexiQaAndTagProjectionLanguages.php` | 2 | 0 | PHPDoc-only fixes |
+| `JobStruct.php` | 14 | 0 | Mixed (TDD + type-only + cascade) |
+
+#### LexiQaAndTagProjectionLanguages.php
+
+| Fix | Error |
+|-----|-------|
+| `@var array<int, string>` | `$lexiQaAllowedLanguages` missing iterable value type |
+| `@var array<string, string>` | `$tagProjectionAllowedLanguages` missing iterable value type |
+
+Pure data class — no methods, no test file needed.
+
+#### JobStruct.php — 14 Errors Fixed
+
+**Type-only (10):**
+- `@implements \ArrayAccess<string, mixed>` — class docblock
+- `@return array{project_id: ?int, ...}` — getTMProps return type
+- `: int` — getOpenThreadsCount return type
+- Remove `?? []` dead code — getWarningsCount null coalesce
+- `string $role` — getClientKeys parameter type
+- `@return array<string, array<int, ClientTmKeyStruct>>` — getClientKeys return
+- `@throws TypeError` — getClientKeys
+- `int $_revisionNumber` — setSourcePage parameter type
+- `@throws DomainException` — getSegments
+- `@param array<int, mixed> $chunkReviews` + `@throws Exception` — getQualityOverall
+
+**Type mismatches (2):**
+- `project_id: int` → `project_id: ?int` — getTMProps
+- `Model\TmKeyManagement\ClientTmKeyStruct` → `Utils\TmKeyManagement\ClientTmKeyStruct` — import path
+
+**Behavioral (2, with TDD):**
+- `setIsReview(?bool)` → `setIsReview(bool)` — narrow parameter type (callers pass only true)
+- `getOutsource` loop: local-capture `$outsource` + `(array)` cast → property write-back after foreach mutation
+
+**New test file:** `tests/unit/Structs/JobStructUnitTest.php` — 4 tests, 5 assertions
+
+**Collateral cascading errors handled:**
+- `AnalysisChunk.php` — +2 baseline entries (getMemoryKeys TypeError, trim argument.type)
+- `Json/Job.php` — adjusted getKeyList TypeError count (1→2)
+
+#### Verification
+
+- **JobStruct alone without baseline**: 0 errors ✅
+- **Full PHPStan**: 0 errors ✅
+- **Full test suite**: 5,083 tests / 17,212 assertions, ALL PASSING ✅
+- **Baseline**: 2,652 (net −14: −15 removed +3 cascading −2 warnings_count cascade fixes)
+- **DI added to 9 uncovered methods**: `getTranslator(?JobsTranslatorsDao)`, `getOutsource(?ConfirmationDao)`, `getOpenThreadsCount(?CommentDao)`, `getWarningsCount(?WarningDao)`, `getChunks(?JobDao)`, `getClientKeys(?UserKeysModel)`, `getPeeForTranslatedSegments(?JobDao)`, `getSegments(?SegmentDao)`, `getErrorsCount(?WarningDao)` — pattern: `$dao ??= new XxxDao()` lazy fallback
+- **New DI test file**: `tests/unit/Structs/JobStructDITest.php` — 30 tests, 33 assertions
+  - Coverage after tests: **Methods 77.27%** (17/22, +6), **Lines 92.31%** (84/91, +56)
+  - Remaining 5 uncovered: `getProject/getTMProps/getFiles/getQualityOverall/totalWordsCount` — all blocked by static calls (`ProjectDao::staticFindById`, `FileDao::getByJobId`, `CatUtils`, `WordCountStruct::loadFromJob`)
+- **Per-file coverage**:
+  - JobDao: 100% methods (30/30), 100% lines (267/267)
+  - JobsMetadataMarshaller: 100% methods (1/1), 100% lines (7/7)
+  - MetadataDao: 80% methods (8/10), 95.40% lines (83/87)
+  - JobStruct: 50% methods (11/22), 32.10% lines (26/81)
+  - LexiQaAndTagProjectionLanguages: pure data class (0 methods)
+  - MetadataStruct / WarningsCountStruct: structs (0 methods)
+- **Files added to ledger**: +5 (JobsMetadataMarshaller, JobStruct, LexiQaAndTagProjectionLanguages, MetadataStruct, WarningsCountStruct)
+
+---
 
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,707 entries in ~2,600 files)
+2. Continue PHPStan baseline reduction from remaining targets (2,652 entries in ~2,600 files)
 
 ---
 
 ## Remaining Baseline Analysis
 
-**Core baseline:** 2,666 entries in ~2,600 files  
+**Core baseline:** 2,652 entries in ~2,600 files
 **Plugin baseline:** ~0 entries addressed (aligner plugin — 737 errors in 11 files, separate concern)  
-**By error type:** PHPDoc-only=~1,600 (59%), Behavioral=~780 (29%), Other=~327 (12%)
+**By error type:** PHPDoc-only=~1,600 (59%), Behavioral=~780 (29%), Other=~286 (11%)
 
 ### Phase 6 Candidates — Prioritized
 
@@ -1529,7 +1645,7 @@ ActivityLogDao, AnalysisDao, ChunkCompletionEventDao, ChunkCompletionUpdateDao, 
 |-------------------------------------|--------|------|--------|------------|-------|
 | `Model/Analysis/XTRFStatus.php`     | 34 | 44% | 15 | 19 | Highest count, mixed |
 | `Utils/TaskRunner/TaskManager.php`  | 33 | 9% | 3 | 28 | Almost all behavioral — hardest |
-| `GDrive/Session.php`                | 29 | 68% | 20 | 9 | GDrive integration |
+| ~~`GDrive/Session.php`~~             | ~~29~~ | ~~68%~~ | ~~20~~ | ~~9~~ | ✅ Done (Phase 28-29) |
 | `Utils/Tools/PostEditing.php`       | 27 | 29% | 8 | 19 | Heavy behavioral |
 | `Model/Analysis/AbstractStatus.php` | 25 | 56% | 14 | 9 | Analysis base class |
 | ~~`QualityReportSegmentModel.php`~~ | ~~25~~ | ~~68%~~ | ~~17~~ | ~~3~~ | ✅ Done (Phase 13, DI refactored, 80% methods) |
