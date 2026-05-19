@@ -1497,7 +1497,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\GetContributionController\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 12
+			count: 14
 			path: lib/Controller/API/App/GetContributionController.php
 
 		-
@@ -4148,6 +4148,12 @@ parameters:
 
 		-
 			message: '#^Variable \$lara_style on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: lib/Controller/API/V1/NewController.php
+
+		-
+			message: '#^Variable \$lara_style_guide_id on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
 			path: lib/Controller/API/V1/NewController.php
@@ -18612,11 +18618,6 @@ parameters:
 			count: 2
 			path: lib/Plugins/Features/RevisionFactory.php
 
-		-
-			message: '#^Parameter \#1 \$revisionFeature of class Plugins\\Features\\RevisionFactory constructor expects Plugins\\Features\\AbstractRevisionFeature, Plugins\\Features\\AbstractRevisionFeature\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Plugins/Features/RevisionFactory.php
 
 		-
 			message: '#^Property Plugins\\Features\\SecondPassReview\:\:\$dependencies type has no value type specified in iterable type array\.$#'
@@ -27692,7 +27693,7 @@ parameters:
 		-
 			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisMatch\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/View/API/App/Json/Analysis/AnalysisMatch.php
 
 		-

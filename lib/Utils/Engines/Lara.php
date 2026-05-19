@@ -234,6 +234,8 @@ class Lara extends AbstractEngine
 
         $metadataDao = new MetadataDao();
         $laraStyle = $_config['lara_style'] ?? null;
+        $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
+        $laraModel = $_config['lara_model'] ?? 'prosa';
 
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
@@ -273,6 +275,10 @@ class Lara extends AbstractEngine
 
                 if ($laraStyle !== null) {
                     $translateOptions->setStyle($laraStyle);
+                }
+
+                if($laraStyleGuidelineId !== null){
+                    $translateOptions->setStyleguideId($laraStyleGuidelineId);
                 }
 
                 $request_translation = [];
@@ -326,6 +332,8 @@ class Lara extends AbstractEngine
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
                     'style' => $laraStyle,
+                    'style_guideline_id' => $laraStyleGuidelineId,
+                    'model' => $laraModel,
                     'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
                     'multiline' => false,
                     'translation' => $translation,
@@ -393,6 +401,8 @@ class Lara extends AbstractEngine
                 'score' => $score ?? null,
                 'reasoning' => $reasoning,
                 'style' => $laraStyle ?? null,
+                'style_guideline_id' => $laraStyleGuidelineId,
+                'model' => $laraModel,
             ]);
         }
 
@@ -403,7 +413,7 @@ class Lara extends AbstractEngine
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning ? ' Think' : '')),
+            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning || $laraModel === 'think' ? ' Think' : '')),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
         ]))->getMatches(
@@ -711,6 +721,7 @@ class Lara extends AbstractEngine
         return [
             'enable_mt_analysis',
             'lara_style',
+            'lara_style_guide_id',
             'lara_glossaries',
         ];
     }

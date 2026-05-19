@@ -372,6 +372,7 @@ class GetContributionWorker extends AbstractWorker
         $_config['num_result'] = $contributionStruct->resultNum;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
         $_config['lara_style'] = $contributionStruct->lara_style;
+        $_config['lara_style_guide_id'] = $contributionStruct->lara_style_guide_id;
         $_config['reasoning'] = $contributionStruct->reasoning;
 
         $_config['dialect_strict'] = $contributionStruct->dialect_strict;
@@ -491,6 +492,7 @@ class GetContributionWorker extends AbstractWorker
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
                 $config['translation'] = $contributionStruct->translation;
                 $config['lara_style'] = $contributionStruct->lara_style;
+                $config['lara_style_guide_id'] = $contributionStruct->lara_style_guide_id;
                 $config['reasoning'] = $contributionStruct->reasoning;
                 $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 

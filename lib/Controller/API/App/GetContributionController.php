@@ -175,6 +175,14 @@ class GetContributionController extends KleinController
             $contributionRequest->resultNum = 10;
         }
 
+        if (!empty($request['lara_style_guide_id'])) {
+            $contributionRequest->lara_style_guide_id = $request['lara_style_guide_id'];
+        }
+
+        if (!empty($request['lara_model'])) {
+            $contributionRequest->lara_model = $request['lara_model'];
+        }
+
         Get::contribution($contributionRequest);
 
         $this->response->json([
@@ -198,6 +206,8 @@ class GetContributionController extends KleinController
                     'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
                     'resultNum' => (int)$contributionRequest->resultNum,
                     'lara_style' => $contributionRequest->lara_style,
+                    'lara_style_guide_id' => $contributionRequest->lara_style_guide_id,
+                    'lara_model' => $contributionRequest->lara_model,
                     'reasoning' => $contributionRequest->reasoning,
                     'concordanceSearch' => $contributionRequest->concordanceSearch,
                 ]
@@ -242,6 +252,8 @@ class GetContributionController extends KleinController
         $text = trim($text);
         $translation = trim($translation);
         $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style_guideline_id = filter_var($this->request->param('lara_style_guideline_id'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_model = filter_var($this->request->param('lara_model'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         if (!$concordance_search) {
             //execute these lines only in segment contribution search,
@@ -294,6 +306,8 @@ class GetContributionController extends KleinController
             'id_after' => $id_after,
             'cross_language' => $cross_language,
             'lara_style' => $lara_style,
+            'lara_style_guideline_id' => $lara_style_guideline_id,
+            'lara_model' => $lara_model,
             'reasoning' => $reasoning,
             'context_list_after' => json_decode($context_list_after, true),
             'context_list_before' => json_decode($context_list_before, true),

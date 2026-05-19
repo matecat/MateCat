@@ -372,7 +372,7 @@ class TaskManager extends AbstractDaemon
                     break;
                 }
             }
-        } elseif (empty($pid)) {
+        } else {
             $this->logger->debug("Killing ALL processes.");
             foreach ($this->_queueContextList->list as $queue) {
                 $pNameList = $this->queueHandler->getRedisClient()->smembers($queue->pid_set_name);
@@ -387,8 +387,6 @@ class TaskManager extends AbstractDaemon
                 }
                 $queue->pid_list_len = 0;
             }
-        } else {
-            $this->logger->debug("Parameters not valid. Killing *** NONE ***");
         }
 
         $this->_runningPids -= $numDeleted;
