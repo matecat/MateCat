@@ -3,16 +3,16 @@
 namespace unit\Controllers\Abstracts;
 
 use Controller\Abstracts\KleinController;
+use TestHelpers\AbstractTest;
 use Klein\Request;
 use Klein\Response;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
 #[CoversClass(KleinController::class)]
-class KleinControllerTest extends TestCase
+class KleinControllerTest extends AbstractTest
 {
     #[Test]
     public function parseIdSegmentReturnsIdAndSplitNum(): void

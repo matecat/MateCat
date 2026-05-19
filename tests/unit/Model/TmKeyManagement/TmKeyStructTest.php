@@ -3,11 +3,11 @@
 namespace unit\Model\TmKeyManagement;
 
 use DomainException;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Utils\TmKeyManagement\TmKeyStruct;
 
-class TmKeyStructTest extends TestCase
+class TmKeyStructTest extends AbstractTest
 {
     #[Test]
     public function getCryptReturnsEmptyStringWhenKeyIsNull(): void

@@ -16,6 +16,7 @@ use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -25,7 +26,7 @@ class GDriveUserAuthorizationModel
     protected UserStruct $user;
 
     protected Userinfo $userInfo;
-    protected array|string $token;
+    protected string $token;
 
     protected string $user_email;
     protected string $user_remote_id;
@@ -50,6 +51,7 @@ class GDriveUserAuthorizationModel
      * @throws ValidationError
      * @throws \Google\Service\Exception
      * @throws Exception
+     * @throws TypeError
      */
     public function updateOrCreateRecordByCode(string $code): void
     {
@@ -119,18 +121,16 @@ class GDriveUserAuthorizationModel
      *
      * @throws \Google\Service\Exception
      * @throws Exception
+     * @throws TypeError
      */
     private function __collectProperties(string $code): void
     {
         $gdriveClient = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
         $gdriveClient->fetchAccessTokenWithAuthCode($code);
-        $this->token = $gdriveClient->getAccessToken();
-
-        if (is_array($this->token)) {
-            // Enforce token to be passed passed around as json_string, to favour encryption and storage.
-            // Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
-            $this->token = GDriveTokenHandler::accessTokenToJsonString($this->token);
-        }
+        $accessToken = $gdriveClient->getAccessToken();
+        $this->token = is_array($accessToken)
+            ? GDriveTokenHandler::accessTokenToJsonString($accessToken)
+            : $accessToken;
 
         $infoService = new Google_Service_Oauth2($gdriveClient);
         $this->userInfo = $infoService->userinfo->get();

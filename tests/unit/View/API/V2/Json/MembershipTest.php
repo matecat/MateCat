@@ -3,13 +3,13 @@
 namespace Tests\unit\View\API\V2\Json;
 
 use Model\Teams\MembershipStruct;
+use TestHelpers\AbstractTest;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 use View\API\V2\Json\Membership;
 
 #[CoversClass(Membership::class)]
-class MembershipTest extends TestCase
+class MembershipTest extends AbstractTest
 {
     private function makeMembership(int $id = 1, int $idTeam = 10, int $uid = 100): MembershipStruct
     {

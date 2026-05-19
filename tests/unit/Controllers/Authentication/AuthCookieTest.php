@@ -3,19 +3,19 @@
 namespace unit\Controllers\Authentication;
 
 use Controller\Abstracts\Authentication\AuthCookie;
+use TestHelpers\AbstractTest;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(AuthCookie::class)]
 #[CoversClass(CookieManager::class)]
-class AuthCookieTest extends TestCase
+class AuthCookieTest extends AbstractTest
 {
     protected function setUp(): void
     {

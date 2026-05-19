@@ -3,12 +3,12 @@
 namespace unit\Controllers\Abstracts;
 
 use Controller\Abstracts\FlashMessage;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
 #[CoversClass(FlashMessage::class)]
-class FlashMessageTest extends TestCase
+class FlashMessageTest extends AbstractTest
 {
     protected function setUp(): void
     {

@@ -8,18 +8,19 @@ use Monolog\Level;
 use Monolog\Logger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(MatecatLogger::class)]
-class MatecatLoggerTest extends TestCase
+class MatecatLoggerTest extends AbstractTest
 {
     private TestHandler $handler;
     private MatecatLogger $logger;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->handler = new TestHandler();
         $monolog       = new Logger('test');
         $monolog->pushHandler($this->handler);

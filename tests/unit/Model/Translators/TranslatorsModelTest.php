@@ -3,16 +3,16 @@
 namespace unit\Model\Translators;
 
 use Model\FeaturesBase\FeatureSet;
+use TestHelpers\AbstractTest;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use TypeError;
 
-class TranslatorsModelTest extends TestCase
+class TranslatorsModelTest extends AbstractTest
 {
     private function makeJobStructWithProject(
         ?int $id = 1,

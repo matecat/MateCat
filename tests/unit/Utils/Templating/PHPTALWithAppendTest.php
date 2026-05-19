@@ -3,13 +3,13 @@
 namespace unit\Utils\Templating;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Utils\Templating\PHPTALWithAppend;
 
 #[CoversClass(PHPTALWithAppend::class)]
-class PHPTALWithAppendTest extends TestCase
+class PHPTALWithAppendTest extends AbstractTest
 {
     private PHPTALWithAppend $tal;
 

@@ -3,6 +3,7 @@
 namespace unit\Controllers;
 
 use Controller\API\App\DownloadAnalysisReportController;
+use TestHelpers\AbstractTest;
 use Controller\API\V2\DownloadController;
 use Controller\API\V2\DownloadJobTMXController;
 use Controller\API\V2\DownloadOriginalController;
@@ -11,7 +12,6 @@ use Klein\Request;
 use Klein\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -19,7 +19,7 @@ use ReflectionProperty;
 #[CoversClass(DownloadOriginalController::class)]
 #[CoversClass(DownloadJobTMXController::class)]
 #[CoversClass(DownloadAnalysisReportController::class)]
-class DownloadControllersTest extends TestCase
+class DownloadControllersTest extends AbstractTest
 {
     // --- DownloadController::pathinfoString ---
 

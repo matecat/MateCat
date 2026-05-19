@@ -3,10 +3,10 @@
 namespace TestCases\Filters\DTO;
 
 use Model\Filters\DTO\MSPowerpoint;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class MSPowerpointTest extends TestCase
+class MSPowerpointTest extends AbstractTest
 {
     #[Test]
     public function jsonSerializeReturnsDefaultValues(): void

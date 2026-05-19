@@ -3,10 +3,10 @@
 namespace TestCases\Filters\DTO;
 
 use Model\Filters\DTO\MSExcel;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class MSExcelTest extends TestCase
+class MSExcelTest extends AbstractTest
 {
     #[Test]
     public function jsonSerializeReturnsDefaultValues(): void

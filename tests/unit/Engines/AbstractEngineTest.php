@@ -54,6 +54,7 @@ class AbstractEngineTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $struct            = EngineStruct::getStruct();
         $struct->class_load = 'NONE';
         $struct->name       = 'TestEngine';

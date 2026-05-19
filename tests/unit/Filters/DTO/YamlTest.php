@@ -3,11 +3,11 @@
 namespace TestCases\Filters\DTO;
 
 use DomainException;
+use TestHelpers\AbstractTest;
 use Model\Filters\DTO\Yaml;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class YamlTest extends TestCase
+class YamlTest extends AbstractTest
 {
     #[Test]
     public function jsonSerializeReturnsDefaultValues(): void

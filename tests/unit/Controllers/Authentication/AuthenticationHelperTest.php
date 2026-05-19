@@ -3,17 +3,17 @@
 namespace unit\Controllers\Authentication;
 
 use Controller\Abstracts\Authentication\AuthenticationHelper;
+use TestHelpers\AbstractTest;
 use Controller\Abstracts\Authentication\CookieManager;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 
 #[CoversClass(AuthenticationHelper::class)]
 #[CoversClass(CookieManager::class)]
-class AuthenticationHelperTest extends TestCase
+class AuthenticationHelperTest extends AbstractTest
 {
     #[Test]
     public function loggedPropertyIsBoolNotTrue(): void

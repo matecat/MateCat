@@ -3,6 +3,7 @@
 namespace unit\Conversion;
 
 use CURLFile;
+use TestHelpers\AbstractTest;
 use Exception;
 use Model\Conversion\Filters;
 use Model\Filters\DTO\IDto;
@@ -10,7 +11,6 @@ use Model\Jobs\JobStruct;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Utils\Registry\AppConfig;
 
 /**
@@ -74,7 +74,7 @@ class TestableFilters extends Filters
     }
 }
 
-class FiltersTest extends TestCase
+class FiltersTest extends AbstractTest
 {
     private TestableFilters $filters;
 

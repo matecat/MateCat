@@ -3229,283 +3229,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Comments/CommentStruct.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveTokenHandler\:\:accessTokenToJsonString\(\) has parameter \$token with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenHandler.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveTokenHandler\:\:accessTokenToJsonString\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenHandler.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveTokenHandler\:\:getNewToken\(\) has parameter \$client with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenHandler.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveTokenHandler\:\:getNewToken\(\) has parameter \$raw_token with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenHandler.php
-
-		-
-			message: '#^Parameter \#2 \$flags of function json_encode expects int, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenHandler.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\GDrive\\GDriveTokenVerifyModel\:\:\$refreshed has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenVerifyModel.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between false and string\|null will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveTokenVerifyModel.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\GDriveUserAuthorizationModel\:\:__collectProperties\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php
-
-		-
-			message: '#^Parameter \#1 \$token of method Model\\ConnectedServices\\ConnectedServiceDao\:\:updateOauthToken\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php
-
-		-
-			message: '#^Parameter \#1 \$token of method Model\\ConnectedServices\\ConnectedServiceStruct\:\:setEncryptedAccessToken\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\GDrive\\GDriveUserAuthorizationModel\:\:\$token type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:__construct\(\) has parameter \$raw_token with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:copyFile\(\) has parameter \$copyTitle with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:copyFile\(\) has parameter \$originFileId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:getFileLink\(\) has parameter \$remote_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:getService\(\) has parameter \$token with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:getService\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:updateFileOnGDrive\(\) has parameter \$parents with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Parameter \#1 \$mimeType of method Google\\Service\\Drive\\DriveFile\:\:setMimeType\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Parameter \#1 \$token of method Google\\Client\:\:setAccessToken\(\) expects array\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:\$raw_token type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/RemoteFileService.php
-
-		-
-			message: '#^Cannot access property \$id on Google\\Service\\Drive\\DriveFile\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\ConnectedServices\\ConnectedServiceStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:addFiles\(\) has parameter \$fileHash with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:deleteDirectory\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:doConversion\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getCacheFileDir\(\) has parameter \$file with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getFileStructureForJsonOutput\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getGDriveFilePath\(\) has parameter \$file with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getGDriveFilePathForS3\(\) has parameter \$file with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getInstanceForCLI\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getInstanceForCLI\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getInstanceForCLI\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getToken\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:getTokenByUser\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:removeFile\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:removeFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:removeFile\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\GDrive\\Session\:\:sanitizeFileName\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Parameter \#1 \$googleMime of static method Model\\ConnectedServices\\GDrive\\RemoteFileService\:\:officeExtensionFromMime\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Parameter \#1 \$length of method Psr\\Http\\Message\\StreamInterface\:\:read\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Parameter \#4 \$connected_service_id of static method Model\\RemoteFiles\\RemoteFileDao\:\:insert\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\GDrive\\Session\:\:\$gDriveSession type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\GDrive\\Session\:\:\$session type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\GDrive\\Session\:\:\$token type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/GDrive/Session.php
-
 		-
 			message: '#^Method Model\\ConnectedServices\\Oauth\\DefuseEncryption\:\:decrypt\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
@@ -16264,3 +15987,33 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
+
+		-
+			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:deleteImportedFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/GDrive/GDriveController.php
+
+		-
+			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleCode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/GDrive/OAuthController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\DownloadController\:\:startRemoteFileService\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Parameter \#1 \$raw_token of class Model\\ConnectedServices\\GDrive\\RemoteFileService constructor expects array\<string, mixed\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/DownloadController.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:linkFilesToJob\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ProjectCreation/JobCreationService.php

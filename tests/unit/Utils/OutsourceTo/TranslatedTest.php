@@ -3,7 +3,7 @@
 namespace unit\Utils\OutsourceTo;
 
 use LogicException;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -12,7 +12,7 @@ use Utils\OutsourceTo\Translated;
 use Utils\Shop\Cart;
 use Utils\Shop\ItemHTSQuoteJob;
 
-class TranslatedTest extends TestCase
+class TranslatedTest extends AbstractTest
 {
     /**
      * @param object             $object

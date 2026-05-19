@@ -3,14 +3,14 @@
 namespace unit\Controllers\Authentication;
 
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use ReflectionProperty;
 
 #[CoversClass(SessionTokenStoreHandler::class)]
-class SessionTokenStoreHandlerTest extends TestCase
+class SessionTokenStoreHandlerTest extends AbstractTest
 {
     #[Test]
     public function constructorSetsCacheTtlTo7Days(): void

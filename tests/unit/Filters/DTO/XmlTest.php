@@ -3,10 +3,10 @@
 namespace TestCases\Filters\DTO;
 
 use Model\Filters\DTO\Xml;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class XmlTest extends TestCase
+class XmlTest extends AbstractTest
 {
     #[Test]
     public function jsonSerializeReturnsDefaultValues(): void

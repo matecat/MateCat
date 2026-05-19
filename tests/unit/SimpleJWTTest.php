@@ -20,6 +20,7 @@ class SimpleJWTTest extends AbstractTest
 
     public function setUp(): void
     {
+        parent::setUp();
         $this->secretKey = 'test_secret_key';
     }
 

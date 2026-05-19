@@ -14,6 +14,7 @@ class SignupTest extends AbstractTest
 
     public function setUp(): void
     {
+        parent::setUp();
         Database::obtain()->getConnection()->exec('DELETE FROM users');
     }
 

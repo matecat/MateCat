@@ -3,10 +3,10 @@
 namespace Tests\unit\Utils\Email;
 
 use Model\Teams\MembershipStruct;
+use TestHelpers\AbstractTest;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Email\MembershipCreatedEmail;
@@ -14,7 +14,7 @@ use Utils\Email\MembershipDeletedEmail;
 
 #[CoversClass(MembershipCreatedEmail::class)]
 #[CoversClass(MembershipDeletedEmail::class)]
-class MembershipEmailTest extends TestCase
+class MembershipEmailTest extends AbstractTest
 {
     private function makeUser(int $uid = 1): UserStruct
     {

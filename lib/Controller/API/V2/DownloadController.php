@@ -697,7 +697,7 @@ class DownloadController extends AbstractDownloadController
             throw new Exception('Connected service missing or disabled');
         }
 
-        $verifier = new GDriveTokenVerifyModel($connectedService);
+        $verifier = new GDriveTokenVerifyModel($connectedService, $dao);
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
         $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");

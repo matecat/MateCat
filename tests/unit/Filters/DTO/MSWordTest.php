@@ -3,10 +3,10 @@
 namespace TestCases\Filters\DTO;
 
 use Model\Filters\DTO\MSWord;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class MSWordTest extends TestCase
+class MSWordTest extends AbstractTest
 {
     #[Test]
     public function jsonSerializeReturnsDefaultValues(): void

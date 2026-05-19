@@ -27,6 +27,7 @@ class ValidatesDialectStrictTraitTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->validator = new DialectStrictValidator();
         $this->langHandler = Languages::getInstance();
     }

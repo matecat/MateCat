@@ -31,6 +31,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
+use UnexpectedValueException;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
@@ -53,10 +55,13 @@ class Session
     protected string $source_lang;
     protected string $target_lang;
     protected ?string $seg_rule = null;
+    /** @var array<string, mixed> */
     protected array $session = [];
+    /** @var array<string, mixed> */
     protected array $gDriveSession = [];
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
     protected ?Google_Service_Drive $service = null;
+    /** @var array<string, mixed>|null */
     protected ?array $token = null;
 
     /**
@@ -98,9 +103,11 @@ class Session
     /**
      * Creates a new instance of the Session class for CLI usage.
      *
-     * @param array $session
+     * @param array<string, mixed> $session
      *
      * @return Session
+     * @throws RuntimeException
+     * @throws Exception
      */
     public static function getInstanceForCLI(array $session): Session
     {
@@ -143,7 +150,7 @@ class Session
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function getFileStructureForJsonOutput(): array
@@ -211,7 +218,7 @@ class Session
     }
 
     /**
-     * @return ?array
+     * @return array<string, mixed>|null
      * @throws Exception
      */
     public function getToken(): ?array
@@ -228,7 +235,7 @@ class Session
     /**
      * @param UserStruct $user
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      * @throws Exception
      */
     public function getTokenByUser(UserStruct $user): ?array
@@ -244,7 +251,8 @@ class Session
      *
      * @param string $fileId
      * @param string $fileName
-     * @param array $fileHash
+     * @param array<string, mixed> $fileHash
+     * @throws Exception
      */
     public function addFiles(string $fileId, string $fileName, array $fileHash): void
     {
@@ -256,7 +264,7 @@ class Session
         $this->gDriveSession[self::FILE_LIST][$fileId] = [
             self::FILE_NAME => $fileName,
             self::FILE_HASH => $fileHash,
-            self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
+            self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id ?? throw new Exception('Service struct not set'),
         ];
     }
 
@@ -332,14 +340,16 @@ class Session
      *
      * @return RemoteFileService
      * @throws Exception
+     * @throws TypeError
      */
     public function buildRemoteFile(Google_Client $gClient): RemoteFileService
     {
-        if (!$this->getToken()) {
-            throw  new Exception('Cannot build RemoteFile without a token');
+        $token = $this->getToken();
+        if (!$token) {
+            throw new Exception('Cannot build RemoteFile without a token');
         }
 
-        return new RemoteFileService($this->token, $gClient);
+        return new RemoteFileService($token, $gClient);
     }
 
     public function clearFileListFromSession(): void
@@ -355,6 +365,9 @@ class Session
      *
      * @return bool
      * @throws ReflectionException
+     * @throws Exception
+     * @throws UnexpectedValueException
+     * @throws TypeError
      */
     public function removeFile(string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): bool
     {
@@ -407,6 +420,9 @@ class Session
      * @param int $filtersTemplate
      *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     * @throws UnexpectedValueException
      */
     public function removeAllFiles(string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
     {
@@ -419,6 +435,7 @@ class Session
 
     /**
      * @param string $dir
+     * @throws UnexpectedValueException
      */
     private function deleteDirectory(string $dir): void
     {
@@ -437,7 +454,7 @@ class Session
     }
 
     /**
-     * @param array $file
+     * @param array<string, mixed> $file
      *
      * @return string
      */
@@ -456,7 +473,7 @@ class Session
     }
 
     /**
-     * @param array $file
+     * @param array<string, mixed> $file
      *
      * @return string
      */
@@ -469,7 +486,7 @@ class Session
     }
 
     /**
-     * @param array $file
+     * @param array<string, mixed> $file
      *
      * @return string
      */
@@ -507,7 +524,7 @@ class Session
     public function createRemoteFile(int $fileId, string $remoteFileId, Google_Client $gClient): void
     {
         $this->getService($gClient);
-        RemoteFileDao::insert($fileId, 0, $remoteFileId, $this->serviceStruct->id, 1);
+        RemoteFileDao::insert($fileId, 0, $remoteFileId, (int)$this->serviceStruct?->id, 1);
     }
 
     /**
@@ -519,6 +536,7 @@ class Session
      * @param Google_Client $gClient
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function createRemoteCopiesWhereToSaveTranslation(int $id_file, int $id_job, Google_Client $gClient): void
     {
@@ -540,7 +558,11 @@ class Session
         $remoteFileService = $this->buildRemoteFile($gClient);
         $copiedFile = $remoteFileService->copyFile($remoteFile->remote_id, $translatedFileTitle);
 
-        RemoteFileDao::insert($id_file, $id_job, $copiedFile->id, $this->serviceStruct->id);
+        if (!$copiedFile) {
+            throw new Exception('Failed to copy remote file');
+        }
+
+        RemoteFileDao::insert($id_file, $id_job, $copiedFile->id, (int)$this->serviceStruct?->id);
 
         $this->grantFileAccessByUrl($copiedFile->id, $gClient);
     }
@@ -595,7 +617,7 @@ class Session
 
         // get filename
         $fileName = $this->sanitizeFileName($meta->getName());
-        $file_extension = RemoteFileService::officeExtensionFromMime($mime);
+        $file_extension = RemoteFileService::officeExtensionFromMime((string)$mime);
 
         // add the extension to filename
         if (substr($fileName, -5) !== $file_extension) {
@@ -619,7 +641,7 @@ class Session
             $filePath = Utils::uploadDirFromSessionCookie($this->guid, $fileName);
 
             $size = $file->getBody()->getSize();
-            $content = $file->getBody()->read($size);
+            $content = $file->getBody()->read((int)$size);
             $saved = file_put_contents($filePath, $content);
 
             if ($saved !== false) {
@@ -640,6 +662,7 @@ class Session
      * @param string $fileName
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     private function sanitizeFileName(string $fileName): string
     {
@@ -653,7 +676,7 @@ class Session
     /**
      * @param string $file_name
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function doConversion(string $file_name): array

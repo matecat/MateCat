@@ -10,18 +10,19 @@ use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
+use TestHelpers\AbstractTest;
 use View\API\Commons\ZipContentObject;
 
 #[CoversClass(AbstractDownloadController::class)]
-class AbstractDownloadControllerTest extends TestCase
+class AbstractDownloadControllerTest extends AbstractTest
 {
     private AbstractDownloadController $controller;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->controller = $this->createController();
     }
 

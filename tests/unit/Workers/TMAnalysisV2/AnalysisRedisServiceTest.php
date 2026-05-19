@@ -3,8 +3,8 @@
 namespace unit\Workers\TMAnalysisV2;
 
 use PHPUnit\Framework\Attributes\Test;
+use TestHelpers\AbstractTest;
 use PHPUnit\Framework\MockObject\Generator\Generator;
-use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
@@ -81,13 +81,14 @@ class RedisClientSpy extends Client
     }
 }
 
-class AnalysisRedisServiceTest extends TestCase
+class AnalysisRedisServiceTest extends AbstractTest
 {
     private RedisClientSpy $redisSpy;
     private AnalysisRedisService $service;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->redisSpy = new RedisClientSpy();
 
         $amqHandlerMock = (new Generator())->testDouble(AMQHandler::class, true);

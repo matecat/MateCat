@@ -3,21 +3,22 @@
 namespace unit\Workers\TMAnalysisV2;
 
 use Model\Analysis\Constants\InternalMatchesConstants;
+use TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
 
 
-class MatchProcessorServiceTest extends TestCase
+class MatchProcessorServiceTest extends AbstractTest
 {
     private MatchProcessorService $service;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->service = new MatchProcessorService(new MatchSorter());
     }
 

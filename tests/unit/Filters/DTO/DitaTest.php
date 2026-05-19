@@ -3,6 +3,7 @@
 namespace TestCases\Filters\DTO;
 
 use DomainException;
+use TestHelpers\AbstractTest;
 use Model\Filters\DTO\Dita;
 use Model\Filters\DTO\Json;
 use Model\Filters\DTO\MSExcel;
@@ -11,9 +12,8 @@ use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class DitaTest extends TestCase
+class DitaTest extends AbstractTest
 {
     #[Test]
     public function jsonSerializeReturnsDefaultValues(): void

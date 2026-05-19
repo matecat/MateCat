@@ -3,6 +3,7 @@
 namespace Tests\unit\View\API\V3\Json;
 
 use Model\DataAccess\ShapelessConcreteStruct;
+use TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -11,12 +12,11 @@ use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use View\API\V3\Json\Chunk;
 
 #[CoversClass(Chunk::class)]
-class ChunkTest extends TestCase
+class ChunkTest extends AbstractTest
 {
     private function invokePopulateRevisePasswords(ChunkReviewStruct $review, array $result): array
     {

@@ -19,11 +19,13 @@ class GDriveTokenVerifyModel
 
     protected ConnectedServiceStruct $service;
     protected bool $expired;
-    protected $refreshed;
+    protected bool $refreshed;
+    protected ?ConnectedServiceDao $dao = null;
 
-    public function __construct(ConnectedServiceStruct $service)
+    public function __construct(ConnectedServiceStruct $service, ?ConnectedServiceDao $dao = null)
     {
         $this->service = $service;
+        $this->dao = $dao;
     }
 
     /**
@@ -36,7 +38,7 @@ class GDriveTokenVerifyModel
         $this->expired = false;
         $decryptedOauthAccessToken = $this->service->getDecryptedOauthAccessToken();
 
-        if (false === $decryptedOauthAccessToken) {
+        if (null === $decryptedOauthAccessToken) {
             $this->__expireService();
 
             return false;
@@ -67,8 +69,8 @@ class GDriveTokenVerifyModel
      */
     private function __expireService(): void
     {
-        $dao = new ConnectedServiceDao();
-        $dao->setServiceExpired(time(), $this->service);
+        $this->dao ??= new ConnectedServiceDao();
+        $this->dao->setServiceExpired(time(), $this->service);
 
         $this->expired = true;
     }
@@ -78,8 +80,8 @@ class GDriveTokenVerifyModel
      */
     private function __updateToken(string $newToken): void
     {
-        $dao = new ConnectedServiceDao();
-        $this->service = $dao->updateOauthToken($newToken, $this->service);
+        $this->dao ??= new ConnectedServiceDao();
+        $this->service = $this->dao->updateOauthToken($newToken, $this->service);
 
         $this->refreshed = true;
     }

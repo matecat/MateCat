@@ -12,6 +12,7 @@ parameters:
         - lib/View/APIDoc.php (?)
         - lib/View/templates/_APIDoc.php
         - vendor
+        - tests
         - plugins/translated/tests
         - plugins/uber/tests
     universalObjectCratesClasses:

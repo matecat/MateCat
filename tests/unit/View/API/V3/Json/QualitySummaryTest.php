@@ -12,10 +12,10 @@ use Model\QualityReport\QualityReportDao;
 use Model\ReviseFeedback\FeedbackDAO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Plugins\Features\ReviewExtended\IChunkReviewModel;
 use Plugins\Features\RevisionFactory;
 use RuntimeException;
+use TestHelpers\AbstractTest;
 use View\API\V3\Json\QualitySummary;
 
 /**
@@ -84,7 +84,7 @@ class TestableQualitySummary extends QualitySummary
 }
 
 #[CoversClass(QualitySummary::class)]
-class QualitySummaryTest extends TestCase
+class QualitySummaryTest extends AbstractTest
 {
     private JobStruct $chunk;
     private ProjectStruct $project;
@@ -92,6 +92,7 @@ class QualitySummaryTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->chunk   = new JobStruct();
         $this->chunk->id       = 100;
         $this->chunk->password = 'abc123';

@@ -3,10 +3,10 @@
 namespace unit\Conversion;
 
 use Exception;
+use TestHelpers\AbstractTest;
 use Model\Conversion\Filters;
 use PDO;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 
@@ -39,7 +39,7 @@ class FiltersWithMockedCurl extends Filters
     }
 }
 
-class FiltersSendToFiltersTest extends TestCase
+class FiltersSendToFiltersTest extends AbstractTest
 {
     private FiltersWithMockedCurl $filters;
 

@@ -3,15 +3,16 @@
 namespace unit\Workers\TMAnalysisV2;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\AsyncTasks\Workers\Service\MatchSorter;
 
-class MatchSorterTest extends TestCase
+class MatchSorterTest extends AbstractTest
 {
     private MatchSorter $sorter;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->sorter = new MatchSorter();
     }
 
