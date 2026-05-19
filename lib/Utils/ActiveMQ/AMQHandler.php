@@ -61,7 +61,7 @@ class AMQHandler
      *
      * @throws ConnectionException
      */
-    public function __construct($brokerUri = null, $usePersistentConnection = true)
+    public function __construct(?string $brokerUri = null, bool $usePersistentConnection = true, bool $sync = true)
     {
         if ($usePersistentConnection) {
             if (!isset(self::$staticStompConnection)) {
@@ -81,12 +81,14 @@ class AMQHandler
 
         $connection->setReadTimeout(2, 500000);
 
-        $this->statefulStomp = new StatefulStomp(new Client($connection));
+        $client = new Client($connection);
+        $client->setSync($sync);
+        $this->statefulStomp = new StatefulStomp($client);
     }
 
     public static function getNewInstanceForDaemons(): AMQHandler
     {
-        return new self(null, false);
+        return new self(null, false, false);
     }
 
     /**
