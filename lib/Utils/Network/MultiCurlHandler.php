@@ -120,6 +120,7 @@ class MultiCurlHandler
      * to a container
      *
      * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function multiExec(): void
     {
@@ -169,7 +170,7 @@ class MultiCurlHandler
             $this->multi_curl_info[$tokenHash]['errno'] = @$_info[spl_object_id($curl_resource)]['result'];
 
             //HEADERS
-            if (isset($this->curl_headers_requests[$tokenHash])) {
+            if (isset($this->curl_headers_requests[$tokenHash]) && is_string($this->multi_curl_results[$tokenHash])) {
                 $header = substr($this->multi_curl_results[$tokenHash], 0, $this->multi_curl_info[$tokenHash]['curlinfo_header_size']);
                 $header = explode("\r\n", $header);
                 $this->multi_curl_results[$tokenHash] = substr(
@@ -218,6 +219,9 @@ class MultiCurlHandler
         }
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     protected function log(mixed $logging): void
     {
         if (!empty($this->logger)) {
@@ -272,13 +276,13 @@ class MultiCurlHandler
      * Create a curl resource and add it to the pool indexing it with a unique identifier
      *
      * @param string $url string
-     * @param array|null $options array
+     * @param array<int, mixed>|null $options array
      * @param string|null $tokenHash string
      *
-     * @return string|null Curl identifier
+     * @return string Curl identifier
      * @throws RuntimeException
      */
-    public function createResource(string $url, ?array $options = [], ?string $tokenHash = null): ?string
+    public function createResource(string $url, ?array $options = [], ?string $tokenHash = null): string
     {
         if ($tokenHash === null) {
             $tokenHash = md5(uniqid("", true));
@@ -286,8 +290,13 @@ class MultiCurlHandler
 
         $curl_resource = curl_init();
 
+        if ($url === '') {
+            throw new RuntimeException('URL cannot be empty');
+        }
         curl_setopt($curl_resource, CURLOPT_URL, $url);
-        @curl_setopt_array($curl_resource, $options);
+        if (is_array($options)) {
+            @curl_setopt_array($curl_resource, $options);
+        }
 
         $this->curl_options_requests[$tokenHash] = $options;
 
@@ -300,10 +309,10 @@ class MultiCurlHandler
      * @param CurlHandle $curl_resource
      * @param null|string $tokenHash
      *
-     * @return string|null
+     * @return string
      * @throws RuntimeException
      */
-    public function addResource(CurlHandle $curl_resource, ?string $tokenHash = null): ?string
+    public function addResource(CurlHandle $curl_resource, ?string $tokenHash = null): string
     {
         if ($tokenHash === null) {
             $tokenHash = md5(uniqid('', true));
@@ -334,7 +343,7 @@ class MultiCurlHandler
     /**
      * Return all curl info
      *
-     * @return array[]
+     * @return array<string, array<string, mixed>>
      */
     public function getAllInfo(): array
     {

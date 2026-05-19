@@ -243,12 +243,6 @@ abstract class AbstractEngine implements EngineInterface
             $uniq_uid
         );
 
-        if ($resourceHash === null) {
-            $mh->multiCurlCloseAll();
-
-            return null;
-        }
-
         $mh->multiExec();
 
         if ($mh->hasError($resourceHash)) {

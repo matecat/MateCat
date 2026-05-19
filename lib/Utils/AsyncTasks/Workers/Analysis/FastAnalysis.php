@@ -429,6 +429,7 @@ class FastAnalysis extends AbstractDaemon
      * @throws ReflectionException
      * @throws RuntimeException
      * @throws LogInvalidArgumentException
+     * @throws Exception
      */
     public function cleanShutDown(): void
     {

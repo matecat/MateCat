@@ -384,6 +384,7 @@ class Executor implements SplObserver
      *
      * @return int
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _myProcessExists(string $pid): int
     {
@@ -412,6 +413,7 @@ class Executor implements SplObserver
      * @param QueueElement $queueElement The element to re-publish
      *
      * @throws Exception
+     * @throws \Stomp\Exception\ConnectionException
      */
     private function _ackAndRequeue(Frame $msgFrame, QueueElement $queueElement): void
     {
@@ -426,6 +428,9 @@ class Executor implements SplObserver
         $this->logger->debug("--- (Executor " . $this->_executor_instance_id . ") - QueueElement re-queued and acknowledged.");
     }
 
+    /**
+     * @throws \Stomp\Exception\ConnectionException
+     */
     protected function _createPublisher(): AMQHandler
     {
         return $this->_testPublisherOverride ?? AMQHandler::getNewInstanceForDaemons();

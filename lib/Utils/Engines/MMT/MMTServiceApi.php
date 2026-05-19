@@ -647,9 +647,6 @@ class MMTServiceApi
         }
 
         $resourceHashId = $handler->createResource($url, $options);
-        if ($resourceHashId === null) {
-            throw new MMTServiceApiException("ConnectionException", 500, "Unable to create connection resource");
-        }
 
         $handler->multiExec();
         $handler->multiCurlCloseAll();

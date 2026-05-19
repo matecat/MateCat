@@ -87,13 +87,13 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 267 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 269 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <!-- Baseline: commit 7d529165b726b3b721de43805133d02c3f8f5a1b ("fix PHPStan level-8 type errors and remove dead _buildResult overrides") -->
 <!-- To verify: php vendor/bin/phpstan analyse <file> --configuration=phpstan-no-baseline.neon --no-progress --error-format=table -->
 
 <details>
-<summary>Click to expand full ledger (266 files)</summary>
+<summary>Click to expand full ledger (268 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -422,7 +422,9 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Utils (other)
 | File | Cleaned In |
 |------|-----------|
+| `lib/Utils/ActiveMQ/AMQHandler.php` | Phase 27 |
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
+| `lib/Utils/Network/MultiCurlHandler.php` | Phase 27 |
 | `lib/Utils/TaskRunner/Commons/SignalHandlerTrait.php` | Phase 26 |
 | `lib/Utils/TaskRunner/Executor.php` | Phase 26 |
 | `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
