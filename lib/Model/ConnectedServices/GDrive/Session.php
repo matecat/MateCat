@@ -79,25 +79,41 @@ class Session
      */
     protected FeatureSet $featureSet;
 
+    protected ?ConnectedServiceDao $dao = null;
+
     /**
      * MUST NOT TO BE CALLED FROM THE cli
      *
      * Session constructor.
+     *
+     * @param array<string, mixed>|null $sessionData Optional session data (for testing).
+     *                                               If null, uses $_SESSION superglobal.
+     * @param ConnectedServiceDao|null $dao
+     * @param AbstractFilesStorage|null $filesStorage
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
     {
-        if (!isset($_SESSION['uid'])) {
+        // Use the provided session data or fall back to the $_SESSION superglobal
+        if ($sessionData !== null) {
+            $source = &$sessionData;
+        } else {
+            $source = &$_SESSION;
+        }
+
+        if (!isset($source['uid'])) {
             return;
         }
 
-        $this->session = &$_SESSION;
-        if (!isset($_SESSION[self::SESSION_KEY]) || !is_array($_SESSION[self::SESSION_KEY])) {
-            $_SESSION[self::SESSION_KEY] = [];
-        }
-        $this->gDriveSession = &$_SESSION[self::SESSION_KEY];
+        $this->session = &$source;
 
-        $this->files_storage = FilesStorageFactory::create();
+        if (!isset($source[self::SESSION_KEY]) || !is_array($source[self::SESSION_KEY])) {
+            $source[self::SESSION_KEY] = [];
+        }
+
+        $this->gDriveSession = &$source[self::SESSION_KEY];
+        $this->files_storage = $filesStorage ?? FilesStorageFactory::create();
+        $this->dao = $dao;
     }
 
     /**
@@ -114,9 +130,8 @@ class Session
         if (PHP_SAPI != 'cli') {
             throw new RuntimeException("This method MUST be called by CLI.");
         }
-        $_SESSION =& $session;
 
-        return new self();
+        return new self($session);
     }
 
     /**
@@ -240,7 +255,7 @@ class Session
      */
     public function getTokenByUser(UserStruct $user): ?array
     {
-        $serviceDao = new ConnectedServiceDao();
+        $serviceDao = $this->dao ?? new ConnectedServiceDao();
         $this->serviceStruct = $serviceDao->findDefaultServiceByUserAndName($user, 'gdrive');
 
         return $this->serviceStruct?->getDecodedOauthAccessToken();
@@ -691,20 +706,14 @@ class Session
             'conversion_errors' .
             DIRECTORY_SEPARATOR . $uploadTokenValue;
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = $this->createFeatureSet();
         $this->featureSet->loadFromUserEmail($this->session['user']->email);
 
-        $converter = new FilesConverter(
+        $converter = $this->createFilesConverter(
             [$file_name],
-            $this->source_lang,
-            $this->target_lang,
             $uploadDir,
             $errDir,
             $uploadTokenValue,
-            false,
-            $this->seg_rule,
-            $this->featureSet,
-            $this->filters_extraction_parameters,
         );
 
         $converter->convertFiles();
@@ -721,6 +730,38 @@ class Session
         }
 
         return $data;
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createFeatureSet(): FeatureSet
+    {
+        return new FeatureSet();
+    }
+
+    /**
+     * @param array<string> $fileNames
+     * @throws Exception
+     */
+    protected function createFilesConverter(
+        array $fileNames,
+        string $uploadDir,
+        string $errDir,
+        string $uploadTokenValue,
+    ): FilesConverter {
+        return new FilesConverter(
+            $fileNames,
+            $this->source_lang,
+            $this->target_lang,
+            $uploadDir,
+            $errDir,
+            $uploadTokenValue,
+            false,
+            $this->seg_rule,
+            $this->featureSet,
+            $this->filters_extraction_parameters,
+        );
     }
 
 }

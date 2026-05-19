@@ -10,6 +10,7 @@ namespace Model\ConnectedServices\GDrive;
 
 use Exception;
 use Google\Service\Oauth2\Userinfo;
+use Google_Client;
 use Google_Service_Oauth2;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
@@ -32,9 +33,14 @@ class GDriveUserAuthorizationModel
     protected string $user_remote_id;
     protected string $user_name;
 
-    public function __construct(UserStruct $user)
+    protected ?ConnectedServiceDao $dao = null;
+    protected ?Google_Client $googleClient = null;
+
+    public function __construct(UserStruct $user, ?ConnectedServiceDao $dao = null, ?Google_Client $googleClient = null)
     {
         $this->user = $user;
+        $this->dao = $dao;
+        $this->googleClient = $googleClient;
     }
 
     /**
@@ -58,7 +64,7 @@ class GDriveUserAuthorizationModel
         $this->__collectProperties($code);
 
         // We have the user info email and name, we can save it along with the gdrive token to identify it.
-        $dao = new ConnectedServiceDao();
+        $dao = $this->dao ?? new ConnectedServiceDao();
         $service = $dao->findUserServicesByNameAndEmail(
             $this->user,
             ConnectedServiceDao::GDRIVE_SERVICE,
@@ -81,7 +87,7 @@ class GDriveUserAuthorizationModel
      */
     private function __updateService(ConnectedServiceStruct $service): void
     {
-        $dao = new ConnectedServiceDao();
+        $dao = $this->dao ?? new ConnectedServiceDao();
         $dao->updateOauthToken($this->token, $service);
 
         $service->expired_at = null;
@@ -104,7 +110,7 @@ class GDriveUserAuthorizationModel
             'created_at' => Utils::mysqlTimestamp(time())
         ]);
         $service->setEncryptedAccessToken($this->token);
-        $dao = new ConnectedServiceDao();
+        $dao = $this->dao ?? new ConnectedServiceDao();
 
         $lastId = $dao->insertStruct($service);
 
@@ -123,9 +129,9 @@ class GDriveUserAuthorizationModel
      * @throws Exception
      * @throws TypeError
      */
-    private function __collectProperties(string $code): void
+    protected function __collectProperties(string $code): void
     {
-        $gdriveClient = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+        $gdriveClient = $this->googleClient ?? GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
         $gdriveClient->fetchAccessTokenWithAuthCode($code);
         $accessToken = $gdriveClient->getAccessToken();
         $this->token = is_array($accessToken)
