@@ -15,6 +15,9 @@ final class PostAddSegmentTranslationEvent extends RunEvent
     {
         return 'postAddSegmentTranslation';
     }
+    /**
+     * @param array<string, mixed> $context
+     */
     public function __construct(
         public readonly array $context,
     ) {

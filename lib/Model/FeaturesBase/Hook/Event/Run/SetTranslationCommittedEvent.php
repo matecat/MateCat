@@ -16,6 +16,9 @@ final class SetTranslationCommittedEvent extends RunEvent
     {
         return 'setTranslationCommitted';
     }
+    /**
+     * @param array<string, mixed> $context
+     */
     public function __construct(
         public readonly array $context,
     ) {

@@ -16,15 +16,26 @@ final class FilterGetSegmentsResultEvent extends FilterEvent
     {
         return 'filterGetSegmentsResult';
     }
+    /**
+     * @param array<string, mixed> $data
+     */
     public function __construct(
         private array $data,
         private readonly JobStruct $chunk,
     ) {
     }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         return $this->data;
     }
+
+    /**
+     * @param array<string, mixed> $data
+     */
     public function setData(array $data): void
     {
         $this->data = $data;

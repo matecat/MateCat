@@ -15,14 +15,23 @@ final class InjectExcludedTagsInQaEvent extends FilterEvent
     {
         return 'injectExcludedTagsInQa';
     }
+    /**
+     * @param array<string, mixed> $excludedTags
+     */
     public function __construct(
         private array $excludedTags,
     ) {
     }
+    /**
+     * @return array<string, mixed>
+     */
     public function getExcludedTags(): array
     {
         return $this->excludedTags;
     }
+    /**
+     * @param array<string, mixed> $excludedTags
+     */
     public function setExcludedTags(array $excludedTags): void
     {
         $this->excludedTags = $excludedTags;

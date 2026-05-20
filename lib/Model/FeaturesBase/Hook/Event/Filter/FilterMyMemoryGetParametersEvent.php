@@ -15,19 +15,35 @@ final class FilterMyMemoryGetParametersEvent extends FilterEvent
     {
         return 'filterMyMemoryGetParameters';
     }
+    /**
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $config
+     */
     public function __construct(
         private array $parameters,
         private readonly array $config,
     ) {
     }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function getParameters(): array
     {
         return $this->parameters;
     }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
     public function setParameters(array $parameters): void
     {
         $this->parameters = $parameters;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function getConfig(): array
     {
         return $this->config;

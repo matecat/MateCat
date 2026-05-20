@@ -5,8 +5,10 @@ namespace Model\FeaturesBase;
 use DirectoryIterator;
 use Klein\Klein;
 use Klein\Request;
+use Psr\Log\InvalidArgumentException;
 use Plugins\Features\BaseFeature;
 use Plugins\Features\UnknownFeature;
+use RuntimeException;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -32,6 +34,7 @@ class PluginsLoader
      */
     protected static PluginsLoader $_INSTANCE;
 
+    /** @var array<int, mixed> */
     protected array $VALID_CODES = [
         FeatureCodes::PROJECT_COMPLETION,
         FeatureCodes::TRANSLATION_VERSIONS,
@@ -39,19 +42,27 @@ class PluginsLoader
         FeatureCodes::SECOND_PASS_REVIEW
     ];
 
+    /** @var array<string, mixed> */
     protected array $PLUGIN_CLASSES = [];
 
+    /** @var array<string, mixed> */
     protected array $PLUGIN_PATHS = [];
 
+    /**
+     * @return array<int, mixed>
+     * @throws RuntimeException
+     */
     public static function getValidCodes(): array
     {
         return static::getInstance()->VALID_CODES;
     }
 
+    /** @throws RuntimeException */
     protected static function getInstance(): PluginsLoader
     {
         if (empty(self::$_INSTANCE)) {
             //singleton
+            // @phpstan-ignore-next-line new.static: late static binding is intentional for singleton initialization.
             static::$_INSTANCE = new static();
 
             //autoload feature codes
@@ -76,6 +87,7 @@ class PluginsLoader
         return static::$_INSTANCE;
     }
 
+    /** @param array<string, mixed> $manifest */
     public static function populateVars(array $manifest, string $pathName): void
     {
         static::$_INSTANCE->PLUGIN_PATHS[$manifest['FEATURE_CODE']] = $pathName . DIRECTORY_SEPARATOR . "lib";
@@ -88,6 +100,7 @@ class PluginsLoader
      * @param $code string
      *
      * @return string
+     * @throws RuntimeException
      */
     public static function getPluginDirectoryName(string $code): string
     {
@@ -103,6 +116,7 @@ class PluginsLoader
      * @param $code string
      *
      * @return string|null
+     * @throws RuntimeException
      */
     public static function getPluginClass(string $code): ?string
     {
@@ -121,6 +135,8 @@ class PluginsLoader
      * @param string $decoratorName
      *
      * @return bool|string
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public static function getFeatureClassDecorator(BasicFeatureStruct $feature, string $decoratorName): bool|string
     {
@@ -151,6 +167,7 @@ class PluginsLoader
 
     /**
      *
+     * @throws RuntimeException
      */
     public static function setIncludePath(): void
     {
@@ -162,6 +179,7 @@ class PluginsLoader
      * Give your plugins the possibility to install routes
      *
      * @param Klein $klein
+     * @throws RuntimeException
      */
     public static function loadRoutes(Klein $klein): void
     {

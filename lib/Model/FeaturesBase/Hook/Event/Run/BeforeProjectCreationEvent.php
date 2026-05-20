@@ -16,6 +16,10 @@ final class BeforeProjectCreationEvent extends RunEvent
     {
         return 'beforeProjectCreation';
     }
+    /**
+     * @param ProjectStructure $projectStructure
+     * @param array<string, mixed> $context
+     */
     public function __construct(
         public readonly ProjectStructure $projectStructure,
         public readonly array $context,

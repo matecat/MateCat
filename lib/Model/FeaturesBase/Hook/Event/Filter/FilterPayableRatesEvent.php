@@ -15,16 +15,25 @@ final class FilterPayableRatesEvent extends FilterEvent
     {
         return 'filterPayableRates';
     }
+    /**
+     * @param array<string, mixed> $rates
+     */
     public function __construct(
         private array $rates,
         private readonly string $sourceLanguage,
         private readonly string $targetLanguage,
     ) {
     }
+    /**
+     * @return array<string, mixed>
+     */
     public function getRates(): array
     {
         return $this->rates;
     }
+    /**
+     * @param array<string, mixed> $rates
+     */
     public function setRates(array $rates): void
     {
         $this->rates = $rates;

@@ -3956,258 +3956,6 @@ parameters:
 			path: lib/Model/EditLog/EditLogSegmentStruct.php
 
 		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendFieldToAnalysisObjectEvent\:\:__construct\(\) has parameter \$metadata with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/AppendFieldToAnalysisObjectEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendFieldToAnalysisObjectEvent\:\:getMetadata\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/AppendFieldToAnalysisObjectEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendFieldToAnalysisObjectEvent\:\:setMetadata\(\) has parameter \$metadata with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/AppendFieldToAnalysisObjectEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendInitialTemplateVarsEvent\:\:__construct\(\) has parameter \$codes with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/AppendInitialTemplateVarsEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendInitialTemplateVarsEvent\:\:getCodes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/AppendInitialTemplateVarsEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendInitialTemplateVarsEvent\:\:setCodes\(\) has parameter \$codes with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/AppendInitialTemplateVarsEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\CorrectTagErrorsEvent\:\:__construct\(\) has parameter \$originalDataMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/CorrectTagErrorsEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\CorrectTagErrorsEvent\:\:getOriginalDataMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/CorrectTagErrorsEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterCreateProjectFeaturesEvent\:\:__construct\(\) has parameter \$projectFeatures with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterCreateProjectFeaturesEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterCreateProjectFeaturesEvent\:\:getProjectFeatures\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterCreateProjectFeaturesEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterCreateProjectFeaturesEvent\:\:setProjectFeatures\(\) has parameter \$projectFeatures with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterCreateProjectFeaturesEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterGetSegmentsResultEvent\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterGetSegmentsResultEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterGetSegmentsResultEvent\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterGetSegmentsResultEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterGetSegmentsResultEvent\:\:setData\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterGetSegmentsResultEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterMyMemoryGetParametersEvent\:\:__construct\(\) has parameter \$config with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterMyMemoryGetParametersEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterMyMemoryGetParametersEvent\:\:__construct\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterMyMemoryGetParametersEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterMyMemoryGetParametersEvent\:\:getConfig\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterMyMemoryGetParametersEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterMyMemoryGetParametersEvent\:\:getParameters\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterMyMemoryGetParametersEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterMyMemoryGetParametersEvent\:\:setParameters\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterMyMemoryGetParametersEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterPayableRatesEvent\:\:__construct\(\) has parameter \$rates with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterPayableRatesEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterPayableRatesEvent\:\:getRates\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterPayableRatesEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterPayableRatesEvent\:\:setRates\(\) has parameter \$rates with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/FilterPayableRatesEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\InjectExcludedTagsInQaEvent\:\:__construct\(\) has parameter \$excludedTags with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/InjectExcludedTagsInQaEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\InjectExcludedTagsInQaEvent\:\:getExcludedTags\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/InjectExcludedTagsInQaEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\InjectExcludedTagsInQaEvent\:\:setExcludedTags\(\) has parameter \$excludedTags with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/InjectExcludedTagsInQaEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\PrepareNotesForRenderingEvent\:\:__construct\(\) has parameter \$notes with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/PrepareNotesForRenderingEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\PrepareNotesForRenderingEvent\:\:getNotes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/PrepareNotesForRenderingEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\PrepareNotesForRenderingEvent\:\:setNotes\(\) has parameter \$notes with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/PrepareNotesForRenderingEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\SanitizeOriginalDataMapEvent\:\:__construct\(\) has parameter \$originalDataMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/SanitizeOriginalDataMapEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\SanitizeOriginalDataMapEvent\:\:getOriginalDataMap\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/SanitizeOriginalDataMapEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Filter\\SanitizeOriginalDataMapEvent\:\:setOriginalDataMap\(\) has parameter \$originalDataMap with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Filter/SanitizeOriginalDataMapEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Run\\BeforeProjectCreationEvent\:\:__construct\(\) has parameter \$context with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Run/BeforeProjectCreationEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Run\\PostAddSegmentTranslationEvent\:\:__construct\(\) has parameter \$context with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Run/PostAddSegmentTranslationEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\Hook\\Event\\Run\\SetTranslationCommittedEvent\:\:__construct\(\) has parameter \$context with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/Hook/Event/Run/SetTranslationCommittedEvent.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\PluginsLoader\:\:getFeatureClassDecorator\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\PluginsLoader\:\:getInstance\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\PluginsLoader\:\:getValidCodes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\PluginsLoader\:\:populateVars\(\) has parameter \$manifest with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Property Model\\FeaturesBase\\PluginsLoader\:\:\$PLUGIN_CLASSES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Property Model\\FeaturesBase\\PluginsLoader\:\:\$PLUGIN_PATHS type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Property Model\\FeaturesBase\\PluginsLoader\:\:\$VALID_CODES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Model/FeaturesBase/PluginsLoader.php
-
-		-
 			message: '#^Argument of an invalid type array\<Model\\Files\\MetadataStruct\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -4672,6 +4420,18 @@ parameters:
 			identifier: property.phpDocType
 			count: 1
 			path: lib/Model/OwnerFeatures/OwnerFeatureStruct.php
+
+		-
+			message: '#^Method Model\\FeaturesBase\\BasicFeatureStruct\:\:getFullyQualifiedClassName\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/FeaturesBase/BasicFeatureStruct.php
+
+		-
+			message: '#^Method Model\\FeaturesBase\\BasicFeatureStruct\:\:toNewObject\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/FeaturesBase/BasicFeatureStruct.php
 
 		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, array\|string\|null given\.$#'
@@ -15709,6 +15469,24 @@ parameters:
 		-
 			message: '#^Method Features\\Translated\:\:tmAnalysisDisabled\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
+			count: 1
+			path: plugins/translated/lib/Features/Translated.php
+
+		-
+			message: '#^Parameter \#1 \$codes of method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendInitialTemplateVarsEvent\:\:setCodes\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/translated/lib/Features/Translated.php
+
+		-
+			message: '#^Parameter \#1 \$notes of method Model\\FeaturesBase\\Hook\\Event\\Filter\\PrepareNotesForRenderingEvent\:\:setNotes\(\) expects array\<string, mixed\>, list\<mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/translated/lib/Features/Translated.php
+
+		-
+			message: '#^Parameter \#1 \$projectFeatures of method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterCreateProjectFeaturesEvent\:\:setProjectFeatures\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
 			count: 1
 			path: plugins/translated/lib/Features/Translated.php
 

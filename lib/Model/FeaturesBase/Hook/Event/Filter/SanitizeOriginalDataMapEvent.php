@@ -15,14 +15,23 @@ final class SanitizeOriginalDataMapEvent extends FilterEvent
     {
         return 'sanitizeOriginalDataMap';
     }
+    /**
+     * @param array<string, mixed> $originalDataMap
+     */
     public function __construct(
         private array $originalDataMap,
     ) {
     }
+    /**
+     * @return array<string, mixed>
+     */
     public function getOriginalDataMap(): array
     {
         return $this->originalDataMap;
     }
+    /**
+     * @param array<string, mixed> $originalDataMap
+     */
     public function setOriginalDataMap(array $originalDataMap): void
     {
         $this->originalDataMap = $originalDataMap;

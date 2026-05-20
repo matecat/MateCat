@@ -280,6 +280,7 @@ class GetSegmentsController extends KleinController
         $notes = $segment_notes[(int)$segment['sid']] ?? null;
 
         if (is_array($notes)) {
+            /** @var array<string, mixed> $notes */
             $prepareNotesForRenderingEvent = new PrepareNotesForRenderingEvent($notes);
             $this->featureSet->dispatch($prepareNotesForRenderingEvent);
             $notes = $prepareNotesForRenderingEvent->getNotes();

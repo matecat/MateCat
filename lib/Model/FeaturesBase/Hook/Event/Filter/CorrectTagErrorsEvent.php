@@ -17,6 +17,7 @@ final class CorrectTagErrorsEvent extends FilterEvent
     }
     public function __construct(
         private string $segment,
+        /** @var array<string, mixed> */
         private readonly array $originalDataMap,
     ) {
     }
@@ -30,6 +31,9 @@ final class CorrectTagErrorsEvent extends FilterEvent
     {
         $this->segment = $segment;
     }
+    /**
+     * @return array<string, mixed>
+     */
     public function getOriginalDataMap(): array
     {
         return $this->originalDataMap;

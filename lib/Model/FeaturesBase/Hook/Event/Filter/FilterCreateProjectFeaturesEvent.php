@@ -16,15 +16,24 @@ final class FilterCreateProjectFeaturesEvent extends FilterEvent
     {
         return 'filterCreateProjectFeatures';
     }
+    /**
+     * @param array<string, mixed> $projectFeatures
+     */
     public function __construct(
         private array $projectFeatures,
         private readonly mixed $controller = null,
     ) {
     }
+    /**
+     * @return array<string, mixed>
+     */
     public function getProjectFeatures(): array
     {
         return $this->projectFeatures;
     }
+    /**
+     * @param array<string, mixed> $projectFeatures
+     */
     public function setProjectFeatures(array $projectFeatures): void
     {
         $this->projectFeatures = $projectFeatures;
