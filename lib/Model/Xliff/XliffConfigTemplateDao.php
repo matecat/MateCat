@@ -102,6 +102,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @param int $uid
      *
      * @return XliffConfigTemplateStruct
+     * @deprecated use the non-static method getDefaultTemplate()
      */
     public static function staticGetDefaultTemplate(int $uid): XliffConfigTemplateStruct
     {
@@ -131,6 +132,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method createFromJSON()
      */
     public static function staticCreateFromJSON(string $json, int $uid): XliffConfigTemplateStruct
     {
@@ -161,6 +163,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method editFromJSON()
      */
     public static function staticEditFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
     {
@@ -178,6 +181,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method getAllPaginated()
      */
     public static function staticGetAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -219,6 +223,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method getById()
      */
     public static function staticGetById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
     {
@@ -257,6 +262,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct|null
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method getByIdAndUser()
      */
     public static function staticGetByIdAndUser(int $id, int $uid, int $ttl = 60): ?XliffConfigTemplateStruct
     {
@@ -298,6 +304,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct[]
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method getByUid()
      */
     public static function staticGetByUid(int $uid, int $ttl = 60): array
     {
@@ -342,6 +349,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      * @throws Exception
+     * @deprecated use the non-static method remove()
      */
     public static function staticRemove(int $id, int $uid): int
     {
@@ -505,6 +513,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct
      * @throws Exception
      * @throws TypeError
+     * @deprecated use the non-static method save()
      */
     public static function staticSave(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
@@ -516,6 +525,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      *
      * @return XliffConfigTemplateStruct
      * @throws Exception
+     * @deprecated use the non-static method update()
      */
     public static function staticUpdate(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
