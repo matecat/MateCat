@@ -342,6 +342,7 @@ class FeatureSet implements EventDispatcherInterface
      * @param BasicFeatureStruct[] $featureStructsList
      *
      * @return BasicFeatureStruct[]
+     * @throws \RuntimeException
      */
     private function quickSort(array $featureStructsList): array
     {

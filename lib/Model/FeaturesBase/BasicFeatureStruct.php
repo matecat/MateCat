@@ -25,6 +25,10 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public string|array|null $options;
 
+    /**
+     * @return string|null
+     * @throws \RuntimeException
+     */
     public function getFullyQualifiedClassName(): ?string
     {
         return PluginsLoader::getPluginClass($this->feature_code);
@@ -32,6 +36,7 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     /**
      * @return BaseFeature
+     * @throws \RuntimeException
      */
     public function toNewObject(): BaseFeature
     {

@@ -4422,18 +4422,6 @@ parameters:
 			path: lib/Model/OwnerFeatures/OwnerFeatureStruct.php
 
 		-
-			message: '#^Method Model\\FeaturesBase\\BasicFeatureStruct\:\:getFullyQualifiedClassName\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FeaturesBase/BasicFeatureStruct.php
-
-		-
-			message: '#^Method Model\\FeaturesBase\\BasicFeatureStruct\:\:toNewObject\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FeaturesBase/BasicFeatureStruct.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
