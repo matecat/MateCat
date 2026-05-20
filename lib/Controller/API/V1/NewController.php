@@ -1301,7 +1301,7 @@ class NewController extends KleinController
 
         if (!empty($xliff_parameters_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser(
+            $xliffConfigTemplate = XliffConfigTemplateDao::staticGetByIdAndUser(
                 (int)$xliff_parameters_template_id,
                 $uid
             );

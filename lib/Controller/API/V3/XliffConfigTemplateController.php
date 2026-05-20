@@ -52,7 +52,7 @@ class XliffConfigTemplateController extends KleinController
 
             $this->response->status()->setCode(200);
 
-            return $this->response->json(XliffConfigTemplateDao::getAllPaginated($uid, "/api/v3/xliff-config-template?page=", (int)$currentPage, (int)$pagination));
+            return $this->response->json(XliffConfigTemplateDao::staticGetAllPaginated($uid, "/api/v3/xliff-config-template?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
@@ -71,7 +71,7 @@ class XliffConfigTemplateController extends KleinController
         try {
             $id = (int)$this->request->param('id');
 
-            $model = XliffConfigTemplateDao::getByIdAndUser($id, $this->getUser()->uid);
+            $model = XliffConfigTemplateDao::staticGetByIdAndUser($id, $this->getUser()->uid);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -107,7 +107,7 @@ class XliffConfigTemplateController extends KleinController
             $json = $this->request->body();
             $this->validateJSON($json);
 
-            $struct = XliffConfigTemplateDao::createFromJSON($json, $this->getUser()->uid);
+            $struct = XliffConfigTemplateDao::staticCreateFromJSON($json, $this->getUser()->uid);
             $this->response->code(201);
 
             return $this->response->json($struct);
@@ -164,13 +164,13 @@ class XliffConfigTemplateController extends KleinController
             $json = $this->request->body();
             $this->validateJSON($json);
 
-            $model = XliffConfigTemplateDao::getByIdAndUser($id, $uid);
+            $model = XliffConfigTemplateDao::staticGetByIdAndUser($id, $uid);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
             }
 
-            $struct = XliffConfigTemplateDao::editFromJSON($model, $json, $uid);
+            $struct = XliffConfigTemplateDao::staticEditFromJSON($model, $json, $uid);
 
             $this->response->code(200);
 
@@ -203,7 +203,7 @@ class XliffConfigTemplateController extends KleinController
             $id = (int)$this->request->paramsNamed()->get('id');
             $uid = $this->getUser()->uid;
 
-            $count = XliffConfigTemplateDao::remove($id, $uid);
+            $count = XliffConfigTemplateDao::staticRemove($id, $uid);
 
             if ($count == 0) {
                 throw new Exception('Model not found', 404);

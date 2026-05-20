@@ -737,7 +737,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $xliffConfigTemplate->hydrateFromJSON($json);
             $xliff_parameters = $xliffConfigTemplate->rules?->getArrayCopy() ?? [];
         } elseif (!empty($xliff_parameters_template_id)) {
-            $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser(
+            $xliffConfigTemplate = XliffConfigTemplateDao::staticGetByIdAndUser(
                 $xliff_parameters_template_id,
                 $this->getUser()->uid ?? throw new TypeError('User not authenticated')
             );

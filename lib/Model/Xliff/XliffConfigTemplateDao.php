@@ -49,7 +49,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      *
      * @return XliffConfigTemplateStruct
      */
-    public static function getDefaultTemplate(int $uid): XliffConfigTemplateStruct
+    public function getDefaultTemplate(int $uid): XliffConfigTemplateStruct
     {
         $default = new XliffConfigTemplateStruct();
         $default->id = 0;
@@ -62,6 +62,16 @@ final class XliffConfigTemplateDao extends AbstractDao
     }
 
     /**
+     * @param int $uid
+     *
+     * @return XliffConfigTemplateStruct
+     */
+    public static function staticGetDefaultTemplate(int $uid): XliffConfigTemplateStruct
+    {
+        return (new self())->getDefaultTemplate($uid);
+    }
+
+    /**
      * @param string $json
      * @param int $uid
      *
@@ -69,12 +79,12 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function createFromJSON(string $json, int $uid): XliffConfigTemplateStruct
+    public static function staticCreateFromJSON(string $json, int $uid): XliffConfigTemplateStruct
     {
         $templateStruct = new XliffConfigTemplateStruct();
         $templateStruct->hydrateFromJSON($json, $uid);
 
-        return self::save($templateStruct);
+        return self::staticSave($templateStruct);
     }
 
      /**
@@ -86,11 +96,11 @@ final class XliffConfigTemplateDao extends AbstractDao
       * @throws Exception
       * @throws TypeError
       */
-     public static function editFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
+     public static function staticEditFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
     {
         $templateStruct->hydrateFromJSON($json, $uid);
 
-        return self::update($templateStruct);
+        return self::staticUpdate($templateStruct);
     }
 
     /**
@@ -105,7 +115,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
+    public static function staticGetAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
         $pdo = Database::obtain()->getConnection();
 
@@ -124,7 +134,7 @@ final class XliffConfigTemplateDao extends AbstractDao
         $models = [];
 
         foreach ($result['items'] as $item) {
-            $models[] = self::hydrateTemplateStruct($item->getArrayCopy());
+            $models[] = self::staticHydrateTemplateStruct($item->getArrayCopy());
         }
 
         $result['items'] = $models;
@@ -143,7 +153,7 @@ final class XliffConfigTemplateDao extends AbstractDao
       * @throws Exception
       * @throws TypeError
       */
-     public static function getById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
+     public static function staticGetById(int $id, int $ttl = 60): ?XliffConfigTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
@@ -154,7 +164,7 @@ final class XliffConfigTemplateDao extends AbstractDao
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[0]);
+        return self::staticHydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -166,7 +176,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?XliffConfigTemplateStruct
+    public static function staticGetByIdAndUser(int $id, int $uid, int $ttl = 60): ?XliffConfigTemplateStruct
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
@@ -178,7 +188,7 @@ final class XliffConfigTemplateDao extends AbstractDao
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[0]);
+        return self::staticHydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -189,7 +199,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getByUid(int $uid, int $ttl = 60): array
+    public static function staticGetByUid(int $uid, int $ttl = 60): array
     {
         $stmt = self::getInstance()->_getStatementForQuery(self::query_by_uid);
         $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
@@ -203,7 +213,7 @@ final class XliffConfigTemplateDao extends AbstractDao
         $res = [];
 
         foreach ($result as $r) {
-            $res[] = self::hydrateTemplateStruct((array)$r);
+            $res[] = self::staticHydrateTemplateStruct((array)$r);
         }
 
         return array_values(array_filter($res, fn($item) => $item !== null));
@@ -218,7 +228,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function remove(int $id, int $uid): int
+    public static function staticRemove(int $id, int $uid): int
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
@@ -229,10 +239,10 @@ final class XliffConfigTemplateDao extends AbstractDao
             'name' => 'deleted_' . Utils::randomString()
         ]);
 
-        self::destroyQueryByIdCache($conn, $id);
-        self::destroyQueryByIdAndUidCache($conn, $id, $uid);
-        self::destroyQueryByUidCache($conn, $uid);
-        self::destroyQueryPaginated($uid);
+        self::staticDestroyQueryByIdCache($conn, $id);
+        self::staticDestroyQueryByIdAndUidCache($conn, $id, $uid);
+        self::staticDestroyQueryByUidCache($conn, $uid);
+        self::staticDestroyQueryPaginated($uid);
 
         (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'xliff_config_template_id');
 
@@ -246,10 +256,22 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    private static function destroyQueryByIdCache(PDO $conn, int $id): void
+    private function destroyQueryByIdCache(PDO $conn, int $id): void
     {
         $stmt = $conn->prepare(self::query_by_id);
-        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id,]);
+        $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id,]);
+    }
+
+    /**
+     * @param PDO $conn
+     * @param int $id
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private static function staticDestroyQueryByIdCache(PDO $conn, int $id): void
+    {
+        (new self())->destroyQueryByIdCache($conn, $id);
     }
 
     /**
@@ -259,10 +281,22 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    private static function destroyQueryByUidCache(PDO $conn, int $uid): void
+    private function destroyQueryByUidCache(PDO $conn, int $uid): void
     {
         $stmt = $conn->prepare(self::query_by_uid);
-        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['uid' => $uid]);
+        $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['uid' => $uid]);
+    }
+
+    /**
+     * @param PDO $conn
+     * @param int $uid
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private static function staticDestroyQueryByUidCache(PDO $conn, int $uid): void
+    {
+        (new self())->destroyQueryByUidCache($conn, $uid);
     }
 
     /**
@@ -273,10 +307,23 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    private static function destroyQueryByIdAndUidCache(PDO $conn, int $id, int $uid): void
+    private function destroyQueryByIdAndUidCache(PDO $conn, int $id, int $uid): void
     {
         $stmt = $conn->prepare(self::query_by_id_and_uid);
-        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id, 'uid' => $uid]);
+        $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id, 'uid' => $uid]);
+    }
+
+    /**
+     * @param PDO $conn
+     * @param int $id
+     * @param int $uid
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private static function staticDestroyQueryByIdAndUidCache(PDO $conn, int $id, int $uid): void
+    {
+        (new self())->destroyQueryByIdAndUidCache($conn, $id, $uid);
     }
 
     /**
@@ -285,7 +332,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    private static function destroyQueryPaginated(int $uid): void
+    private static function staticDestroyQueryPaginated(int $uid): void
     {
         self::getInstance()->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
     }
@@ -298,7 +345,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    private static function hydrateTemplateStruct(array $data): ?XliffConfigTemplateStruct
+    private function hydrateTemplateStruct(array $data): ?XliffConfigTemplateStruct
     {
         if (
             !isset($data['id']) or
@@ -323,13 +370,25 @@ final class XliffConfigTemplateDao extends AbstractDao
     }
 
     /**
+     * @param array<string, int|string|null> $data
+     *
+     * @return XliffConfigTemplateStruct|null
+     * @throws Exception
+     * @throws TypeError
+     */
+    private static function staticHydrateTemplateStruct(array $data): ?XliffConfigTemplateStruct
+    {
+        return (new self())->hydrateTemplateStruct($data);
+    }
+
+    /**
      * @param XliffConfigTemplateStruct $templateStruct
      *
      * @return XliffConfigTemplateStruct
      * @throws Exception
      * @throws TypeError
      */
-    public static function save(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
+    public static function staticSave(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
         $sql = "INSERT INTO " . self::TABLE .
             " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
@@ -351,10 +410,10 @@ final class XliffConfigTemplateDao extends AbstractDao
         $templateStruct->created_at = $now;
         $templateStruct->modified_at = $now;
 
-        self::destroyQueryByIdCache($conn, $templateStruct->id);
-        self::destroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
-        self::destroyQueryByUidCache($conn, $templateStruct->uid);
-        self::destroyQueryPaginated($templateStruct->uid);
+        self::staticDestroyQueryByIdCache($conn, $templateStruct->id);
+        self::staticDestroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
+        self::staticDestroyQueryByUidCache($conn, $templateStruct->uid);
+        self::staticDestroyQueryPaginated($templateStruct->uid);
 
         return $templateStruct;
     }
@@ -365,7 +424,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function update(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
+    public static function staticUpdate(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
         $sql = "UPDATE " . self::TABLE . " SET 
             `name` = :name,
@@ -382,10 +441,10 @@ final class XliffConfigTemplateDao extends AbstractDao
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        self::destroyQueryByIdCache($conn, $templateStruct->id);
-        self::destroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
-        self::destroyQueryByUidCache($conn, $templateStruct->uid);
-        self::destroyQueryPaginated($templateStruct->uid);
+        self::staticDestroyQueryByIdCache($conn, $templateStruct->id);
+        self::staticDestroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
+        self::staticDestroyQueryByUidCache($conn, $templateStruct->uid);
+        self::staticDestroyQueryPaginated($templateStruct->uid);
 
         return $templateStruct;
     }
