@@ -375,9 +375,20 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
+    private function destroyQueryPaginated(int $uid): void
+    {
+        $this->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
+    }
+
+    /**
+     * @param int $uid
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
     private static function staticDestroyQueryPaginated(int $uid): void
     {
-        self::getInstance()->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
+        (new self())->destroyQueryPaginated($uid);
     }
 
 
@@ -431,7 +442,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function staticSave(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
+    public function save(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
         $sql = "INSERT INTO " . self::TABLE .
             " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
@@ -440,7 +451,7 @@ final class XliffConfigTemplateDao extends AbstractDao
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             "uid" => $templateStruct->uid,
@@ -453,10 +464,10 @@ final class XliffConfigTemplateDao extends AbstractDao
         $templateStruct->created_at = $now;
         $templateStruct->modified_at = $now;
 
-        self::staticDestroyQueryByIdCache($conn, $templateStruct->id);
-        self::staticDestroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
-        self::staticDestroyQueryByUidCache($conn, $templateStruct->uid);
-        self::staticDestroyQueryPaginated($templateStruct->uid);
+        $this->destroyQueryByIdCache($conn, $templateStruct->id);
+        $this->destroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
+        $this->destroyQueryByUidCache($conn, $templateStruct->uid);
+        $this->destroyQueryPaginated($templateStruct->uid);
 
         return $templateStruct;
     }
@@ -467,7 +478,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function staticUpdate(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
+    public function update(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
     {
         $sql = "UPDATE " . self::TABLE . " SET 
             `name` = :name,
@@ -475,7 +486,7 @@ final class XliffConfigTemplateDao extends AbstractDao
             `modified_at` = :now 
          WHERE id = :id;";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             "id" => $templateStruct->id,
@@ -484,11 +495,34 @@ final class XliffConfigTemplateDao extends AbstractDao
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        self::staticDestroyQueryByIdCache($conn, $templateStruct->id);
-        self::staticDestroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
-        self::staticDestroyQueryByUidCache($conn, $templateStruct->uid);
-        self::staticDestroyQueryPaginated($templateStruct->uid);
+        $this->destroyQueryByIdCache($conn, $templateStruct->id);
+        $this->destroyQueryByIdAndUidCache($conn, $templateStruct->id, $templateStruct->uid);
+        $this->destroyQueryByUidCache($conn, $templateStruct->uid);
+        $this->destroyQueryPaginated($templateStruct->uid);
 
         return $templateStruct;
+    }
+
+    /**
+     * @param XliffConfigTemplateStruct $templateStruct
+     *
+     * @return XliffConfigTemplateStruct
+     * @throws Exception
+     * @throws TypeError
+     */
+    public static function staticSave(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
+    {
+        return (new self())->save($templateStruct);
+    }
+
+    /**
+     * @param XliffConfigTemplateStruct $templateStruct
+     *
+     * @return XliffConfigTemplateStruct
+     * @throws Exception
+     */
+    public static function staticUpdate(XliffConfigTemplateStruct $templateStruct): XliffConfigTemplateStruct
+    {
+        return (new self())->update($templateStruct);
     }
 }
