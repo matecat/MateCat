@@ -34,8 +34,8 @@ class SignupModelUnitTest extends TestCase
     #[Test]
     public function testConstructWithDiInitializesDaos()
     {
-        $userDao = $this->createMock(UserDao::class);
-        $teamDao = $this->createMock(TeamDao::class);
+        $userDao = $this->createStub(UserDao::class);
+        $teamDao = $this->createStub(TeamDao::class);
         $session = [];
         $model = new SignupModel(['email' => 'test@example.com'], $session, $userDao, $teamDao);
 
@@ -110,26 +110,24 @@ class SignupModelUnitTest extends TestCase
         $user->initAuthToken();
 
         $dao = $this->createMock(UserDao::class);
-        $dao->method('getByEmail')
+        $dao->expects($this->once())
+            ->method('getByEmail')
             ->with('test@example.com')
             ->willReturn($user);
 
         SignupModel::resendConfirmationEmail('test@example.com', $dao);
-
-        $this->expectNotToPerformAssertions();
     }
 
     #[Test]
     public function testResendConfirmationEmailReturnsEarlyWhenUserNotFound()
     {
         $dao = $this->createMock(UserDao::class);
-        $dao->method('getByEmail')
+        $dao->expects($this->once())
+            ->method('getByEmail')
             ->with('valid@example.com')
             ->willReturn(null);
 
         SignupModel::resendConfirmationEmail('valid@example.com', $dao);
-
-        $this->expectNotToPerformAssertions();
     }
 
     #[Test]

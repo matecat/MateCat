@@ -14,6 +14,7 @@ use Utils\Registry\AppConfig;
 class PluginsLoaderTest extends TestCase
 {
     private string $originalIncludePath;
+    private string $originalAppConfigRoot;
 
     /** @var array<int, string> */
     private array $tempDirs = [];
@@ -23,10 +24,13 @@ class PluginsLoaderTest extends TestCase
         parent::setUp();
 
         $this->originalIncludePath = get_include_path();
+        $this->originalAppConfigRoot = AppConfig::$ROOT;
     }
 
     protected function tearDown(): void
     {
+        AppConfig::$ROOT = $this->originalAppConfigRoot;
+
         set_include_path($this->originalIncludePath);
 
         foreach ($this->tempDirs as $tempDir) {
