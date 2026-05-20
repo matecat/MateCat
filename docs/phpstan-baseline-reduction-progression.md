@@ -6,15 +6,15 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,605 | −4,761 (−64.6%) |
+| **PHPStan baseline entries** | 7,366 | 2,590 | −4,776 (−64.8%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,140 | +2,892 (+128.6%) |
+| **PHPUnit tests** | ~2,248 | 5,166 | +2,918 (+129.8%) |
 | **PHPUnit assertions** | ~19,449 | 17,383 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 25.15% (172/684) | +16.67% (+119 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 50.51% (2,085/4,128) | +28.77% (+1,241 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 52.59% (18,444/35,074) | +31.40% (+11,171 lines) |
 | **New test files** | 235 | 366 | +131 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 294 | +294 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 296 | +296 |
 
 ---
 
@@ -325,7 +325,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/FeaturesBase/Hook/Event/Run/SetTranslationCommittedEvent.php` | Phase 27 |
 | `lib/Model/FeaturesBase/Hook/FilterEvent.php` | Phase 27 |
 | `lib/Model/FeaturesBase/Hook/RunEvent.php` | Phase 27 |
-| `lib/Model/FeaturesBase/PluginsLoader.php` | Phase 27 |
+| `lib/Model/FeaturesBase/PluginsLoader.php` | Phase 28 |
+| `lib/Plugins/Features/BaseFeature.php` | Phase 28 |
 | `lib/Model/WordCount/WordCounterDao.php` | Phase 25 |
 | `lib/Model/Xliff/DTO/AbstractXliffRule.php` | Phase 0 |
 | `lib/Model/Xliff/DTO/XliffRuleInterface.php` | Phase 0 |
@@ -1699,7 +1700,32 @@ Pure data class — no methods, no test file needed.
 
 ---
 
-## Phase 27 — FeaturesBase directory (lib/Model/FeaturesBase/)
+## Phase 28 — BaseFeature + PluginsLoader + coverage
+
+**Date:** 2026-05-20
+**Subagents:** 2 (BaseFeature fix+coverage, PluginsLoader coverage)
+**Commit:** pending
+
+### BaseFeature (lib/Plugins/Features/BaseFeature.php)
+- **13 PHPStan errors fixed**: 7 type-only PHPDoc + 6 behavioral (null/false guards for `realpath()`, `parse_ini_file()`, `getFileName()`, `scandir()`)
+- **12 new tests** via concrete `TestFeature` subclass
+- **Coverage**: 94.44% lines, 85.71% methods
+- **Cascade fixes**: AbstractRevisionFeature + SecondPassReview `$dependencies` type alignment
+
+### PluginsLoader (lib/Model/FeaturesBase/PluginsLoader.php)
+- **14 new unit tests** with reflection-based singleton reset
+- **Coverage**: 93.33% lines (isolated)
+- File already PHPStan-clean from Phase 27
+
+### Cascade
+- `AbstractRevisionFeature.php` (ON ledger): `$dependencies` type changed from `list<string>` to `array<int, string>`
+- `SecondPassReview.php` (NOT on ledger): added `@var array<int, string>` annotation
+- `plugins/airbnb/lib/Features/Airbnb.php` (NOT on ledger): resolved by BaseFeature type alignment
+- Baseline entries also added for `plugins/aligner/.../SendTMXEmail.php` (LogicException cascade)
+
+### Baseline
+- 2,605 → 2,590 (−15: −13 BaseFeature removed + various cascades)
+- Files clean: 294 → 296 (+2)
 
 **Date:** 2026-05-20
 **Subagents:** 14 (1 per file)

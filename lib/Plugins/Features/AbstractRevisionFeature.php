@@ -46,7 +46,7 @@ use Utils\Tools\Utils;
 abstract class AbstractRevisionFeature extends BaseFeature
 {
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected static array $dependencies = [
         FeatureCodes::TRANSLATION_VERSIONS
     ];

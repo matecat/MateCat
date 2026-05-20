@@ -41,12 +41,18 @@ abstract class BaseFeature implements IBaseFeature
      */
     protected bool $forceOnProject = false;
 
+    /**
+     * @var array<int, string>
+     */
     protected static array $dependencies = [];
 
+    /**
+     * @var array<int, string>
+     */
     protected static array $conflictingDependencies = [];
 
     /**
-     * @return array
+     * @return array<int, string>
      */
     public static function getConflictingDependencies(): array
     {
@@ -54,16 +60,22 @@ abstract class BaseFeature implements IBaseFeature
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     public static function getConfig(): array
     {
         $config_file_path = realpath(self::getPluginBasePath() . '/../config.ini');
-        if (!file_exists($config_file_path)) {
+        if ($config_file_path === false || !file_exists($config_file_path)) {
             throw new Exception('Config file not found', 500);
         }
 
-        return parse_ini_file($config_file_path, true);
+        $config = @parse_ini_file($config_file_path, true);
+        if ($config === false) {
+            throw new Exception('Unable to parse config file', 500);
+        }
+
+        return $config;
     }
 
     /**
@@ -94,6 +106,9 @@ abstract class BaseFeature implements IBaseFeature
         return $this->forceOnProject;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function getDependencies(): array
     {
         return static::$dependencies;
@@ -120,18 +135,31 @@ abstract class BaseFeature implements IBaseFeature
     }
 
 
+    /**
+     * @throws LogicException
+     */
     public static function getClassPath(): string
     {
         $rc = new ReflectionClass(get_called_class());
+        $fileName = $rc->getFileName();
+        if ($fileName === false) {
+            throw new LogicException('Class file path not available');
+        }
 
-        return dirname($rc->getFileName()) . '/' . pathinfo($rc->getFileName(), PATHINFO_FILENAME);
+        return dirname($fileName) . '/' . pathinfo($fileName, PATHINFO_FILENAME);
     }
 
+    /**
+     * @throws LogicException
+     */
     public static function getPluginBasePath(): false|string
     {
-        return realpath(static::getClassPath() . '/../..');
+        return realpath(dirname(static::getClassPath(), 2));
     }
 
+    /**
+     * @throws LogicException
+     */
     public static function getTemplatesPath(): string
     {
         return static::getClassPath() . '/View';
@@ -145,6 +173,7 @@ abstract class BaseFeature implements IBaseFeature
     /**
      * @param Klein $klein
      *
+     * @return void
      * @see \Model\FeaturesBase\PluginsLoader::loadRoutes
      */
     public static function loadRoutes(Klein $klein)
@@ -154,16 +183,23 @@ abstract class BaseFeature implements IBaseFeature
     /**
      *
      * Return a list of files in build path of a plugin
-     * @return array|false
+     *
+     * @return list<string>|null
+     * @throws LogicException
      */
     public function getBuildFiles(): ?array
     {
         $path = realpath(self::getPluginBasePath() . '/../static/build');
-        if (empty($path)) {
+        if ($path === false) {
             return null;
         }
 
-        return scandir($path);
+        $files = scandir($path);
+        if ($files === false) {
+            return null;
+        }
+
+        return $files;
     }
 
 }
