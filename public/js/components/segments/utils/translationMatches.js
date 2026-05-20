@@ -260,7 +260,7 @@ let TranslationMatches = {
 
     const isLaraEngine = config.active_engine?.engine_type === 'Lara'
 
-    const getContributionRequest = (translation = null) => {
+    const getContributionRequest = ({translation = null, laraModel}) => {
       if (!translation) {
         console.log(
           'Call classic matches for segment:',
@@ -278,6 +278,7 @@ let TranslationMatches = {
           : [],
         contextListBefore,
         contextListAfter,
+        laraModel,
       })
         .then(() => {
           // Remove from waiting list
@@ -301,8 +302,11 @@ let TranslationMatches = {
     }
 
     const jobLanguages = [config.source_code, config.target_code]
+
+    const jobMetadata = CatToolStore.getJobMetadata()
+
     // Keep only languages whose base code is 'en' or 'it'.
-    let allowed =
+    const allowedLaraThink =
       jobLanguages
         .map((x) => x.split('-')[0])
         .filter((x) => ['en', 'it'].includes(x))
@@ -311,16 +315,27 @@ let TranslationMatches = {
           (value, index, array) => array.indexOf(value) === index,
         ).length === 2
 
+    const laraStyleGuide = jobMetadata?.project?.mt_extra?.lara_style_guide_id
+    const allowedLaraProsa =
+      typeof laraStyleGuide === 'string' && laraStyleGuide !== ''
+
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
     ) {
       return Promise.resolve()
     }
-    if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
+    if (
+      isLaraEngine &&
+      (allowedLaraThink || allowedLaraProsa) &&
+      !fastFetch &&
+      !callNewContributions
+    ) {
       this.segmentsWaitingForContributions.push(id_segment_original)
+
+      const laraModel = allowedLaraProsa ? 'prosa' : 'think'
+
       laraAuthJob({idJob: config.id_job, password: config.password})
         .then((response) => {
-          const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
           const decodedSource = decodeTagsToUnicodeChar(currentSegment.segment)
@@ -336,25 +351,30 @@ let TranslationMatches = {
             sid: id_segment_original,
             jobId: config.id_job,
             glossaries,
+            ...(allowedLaraProsa && {styleguideId: laraStyleGuide}),
           })
             .then((response) => {
+              console.log(response)
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
-              return getContributionRequest(
-                encodeTagsFromUnicodeChar(translation),
-              )
+              return getContributionRequest({
+                translation: encodeTagsFromUnicodeChar(translation),
+                laraModel,
+              })
             })
             .catch((e) => {
-              return getContributionRequest()
+              return getContributionRequest({laraModel})
             })
         })
         .catch(() => {
-          return getContributionRequest()
+          return getContributionRequest({laraModel})
         })
     } else {
       this.segmentsWaitingForContributions.push(id_segment_original)
-      return getContributionRequest()
+      return getContributionRequest({
+        laraModel: allowedLaraProsa ? 'prosa' : 'think',
+      })
     }
   },
 

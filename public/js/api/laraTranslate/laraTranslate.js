@@ -9,10 +9,10 @@ export const laraTranslate = async ({
   jobId,
   glossaries,
   style,
+  styleguideId,
   reasoning = true,
 }) => {
   const credentials = new AuthToken(token, null)
-
   const lara = new Translator(credentials, {
     connectionTimeoutMs: 30000,
   })
@@ -36,6 +36,7 @@ export const laraTranslate = async ({
       glossaries: glossaries,
       reasoning,
       style,
+      styleguideId,
     },
   )
 }

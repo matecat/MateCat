@@ -6,6 +6,7 @@ import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import NewProjectConstants from '../constants/NewProjectConstants'
 import assign from 'object-assign'
+import {get} from 'lodash'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -15,6 +16,7 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
     targetLang: undefined,
     selectedTeam: undefined,
     filtersTemplate: undefined,
+    laraStyleGuide: undefined,
   },
   updateProject: function (data) {
     this.projectData = {
@@ -47,6 +49,9 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
   },
   getFiltersTemplate: function () {
     return this.projectData.filtersTemplate
+  },
+  getLaraStyleGuide: function () {
+    return this.projectData.laraStyleGuide
   },
 })
 
