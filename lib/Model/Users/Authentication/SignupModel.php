@@ -24,20 +24,35 @@ class SignupModel
      */
     protected UserStruct $user;
 
+    /** @var array<string, mixed> */
     protected array $params;
 
     protected ?string $error = null;
+
+    /** @var array<string, mixed> */
     private array $session;
 
-    public function __construct(array $params, array &$session)
+    protected UserDao $userDao;
+
+    protected TeamDao $teamDao;
+
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $session
+     * @param ?UserDao $userDao
+     * @param ?TeamDao $teamDao
+     */
+    public function __construct(array $params, array &$session, ?UserDao $userDao = null, ?TeamDao $teamDao = null)
     {
         $this->params = $params;
         $this->session =& $session;
         $this->user = new UserStruct($this->params);
+        $this->userDao = $userDao ?? new UserDao();
+        $this->teamDao = $teamDao ?? new TeamDao();
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getParams(): array
     {
@@ -55,12 +70,13 @@ class SignupModel
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function processSignup(): void
     {
         if ($this->__userAlreadyExists()) {
             $this->__updatePersistedUser();
-            (new UserDao())->updateStruct($this->user, [
+            $this->userDao->updateStruct($this->user, [
                 'fields' => [
                     'salt',
                     'pass',
@@ -70,10 +86,10 @@ class SignupModel
             ]);
         } else {
             $this->__prepareNewUser();
-            $this->user->uid = (new UserDao())->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
+            $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
 
             Database::obtain()->begin();
-            (new TeamDao())->createPersonalTeam($this->user);
+            $this->teamDao->createPersonalTeam($this->user);
             Database::obtain()->commit();
         }
 
@@ -156,11 +172,15 @@ class SignupModel
      *
      * @return bool
      * @throws ReflectionException
+     * @throws Exception
      */
     private function __userAlreadyExists(): bool
     {
-        $dao = new UserDao();
-        $persisted = $dao->getByEmail($this->user->email);
+        if ($this->user->email === null) {
+            return false;
+        }
+
+        $persisted = $this->userDao->getByEmail($this->user->email);
 
         if ($persisted) {
             $this->user = $persisted;
@@ -186,14 +206,18 @@ class SignupModel
     /**
      * @throws ValidationError
      * @throws Exception
+     * @throws \TypeError
      */
     public function confirm(): UserStruct
     {
-        $dao = new UserDao();
-        $user = $dao->getByConfirmationToken($this->params['token']);
+        $user = $this->userDao->getByConfirmationToken($this->params['token']);
 
         if (!$user) {
             throw new ValidationError('Confirmation token not found');
+        }
+
+        if ($user->confirmation_token_created_at === null) {
+            throw new ValidationError('Confirmation token is invalid, please contact support.');
         }
 
         if (strtotime($user->confirmation_token_created_at) < strtotime('3 days ago')) {
@@ -202,7 +226,7 @@ class SignupModel
 
         $ever_signed_in = $user->everSignedIn();
 
-        $user = self::__updateUserFields($user);
+        $user = $this->__updateUserFields($user);
 
         if (!$ever_signed_in) {
             $email = new WelcomeEmail($user);
@@ -220,13 +244,12 @@ class SignupModel
     {
         $this->__saveWantedUrl();
 
-        $dao = new UserDao();
-        $user = $dao->getByEmail($this->params['email']);
+        $user = $this->userDao->getByEmail($this->params['email']);
 
         if ($user) {
             $user->initAuthToken();
 
-            (new UserDao())->updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
+            $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
 
             $delivery = new ForgotPasswordEmail($user);
             $delivery->send();
@@ -239,15 +262,20 @@ class SignupModel
 
     /**
      * @param string $email
+     * @param ?UserDao $dao
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function resendConfirmationEmail(string $email): void
+    public static function resendConfirmationEmail(string $email, ?UserDao $dao = null): void
     {
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-        $dao = new UserDao();
+        if ($email === false || $email === '') {
+            return;
+        }
+
+        $dao ??= new UserDao();
         $user = $dao->getByEmail($email);
 
         if ($user) {
@@ -261,15 +289,16 @@ class SignupModel
      *
      * @return UserStruct
      * @throws Exception
+     * @throws \TypeError
      */
-    private static function __updateUserFields(UserStruct $user): UserStruct
+    private function __updateUserFields(UserStruct $user): UserStruct
     {
         $user->email_confirmed_at = Utils::mysqlTimestamp(time());
         $user->clearAuthToken();
 
-         (new UserDao())->updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
-         (new UserDao)->destroyCacheByEmail($user->email ?? throw new RuntimeException('Missing user email'));
-         (new UserDao)->destroyCacheByUid($user->uid ?? throw new RuntimeException('Missing user uid'));
+         $this->userDao->updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
+         $this->userDao->destroyCacheByEmail($user->email ?? throw new RuntimeException('Missing user email'));
+         $this->userDao->destroyCacheByUid($user->uid ?? throw new RuntimeException('Missing user uid'));
 
         return $user;
     }

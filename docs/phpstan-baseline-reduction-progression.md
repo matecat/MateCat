@@ -6,15 +6,15 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,652 | −4,714 (−64.0%) |
+| **PHPStan baseline entries** | 7,366 | 2,642 | −4,724 (−64.1%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,113 | +2,865 (+127.4%) |
-| **PHPUnit assertions** | ~19,449 | 17,294 | — |
+| **PHPUnit tests** | ~2,248 | 5,140 | +2,892 (+128.6%) |
+| **PHPUnit assertions** | ~19,449 | 17,376 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 25.15% (172/684) | +16.67% (+119 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 50.51% (2,085/4,128) | +28.77% (+1,241 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 52.59% (18,444/35,074) | +31.40% (+11,171 lines) |
 | **New test files** | 235 | 366 | +131 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 279 | +279 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 280 | +280 |
 
 ---
 
@@ -304,6 +304,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
 | `lib/Model/Translators/TranslatorsModel.php` | Phase 6D |
 | `lib/Model/Translators/TranslatorsProfilesDao.php` | Phase 25 |
+| `lib/Model/Users/Authentication/SignupModel.php` | Phase 26 |
 | `lib/Model/Users/MetadataDao.php` | Phase 25 |
 | `lib/Model/Users/UserDao.php` | Phase 5C |
 | `lib/Model/WordCount/WordCounterDao.php` | Phase 25 |
@@ -1676,3 +1677,23 @@ Pure data class — no methods, no test file needed.
 3. ~~**GlossaryWorker** — familiar worker pattern from contribution stack~~ ✅ Done (Phase 17)
 4. **GetSegmentsController** — high business value, moderate difficulty
 5. **Remaining Tier 1** — ManageModel (19), ProjectModel (18)
+
+---
+
+## Phase 26 — SignupModel (lib/Model/Users/Authentication/SignupModel.php)
+
+**Date:** 2026-05-20
+**Commit:** 7bfc054020
+
+### Summary
+- **12 PHPStan errors fixed** (5 `missingType.iterableValue`, 3 `missingType.checkedException`, 3 `argument.type`, 1 extra `missingType.checkedException`)
+- **3 behavioral changes**: null guards in `__userAlreadyExists()`, `confirm()`, and `resendConfirmationEmail()`
+- **DI added**: `?UserDao $userDao = null` + `?TeamDao $teamDao = null` in constructor; `?UserDao $dao = null` in static `resendConfirmationEmail()`
+- **27 new unit tests** (19 were added in this phase; 8 net-new vs previous run)
+- **Coverage**: 87.50% methods (14/16), 88.24% lines (75/85)
+- **Baseline**: 2,652 → 2,642 (−10: −11 removed SignupModel, +1 cascading SignupController::create)
+
+### Cascade
+- `SignupController::create()` gained `missingType.checkedException` (TypeError from SignupModel::processSignup)
+- `SignupController::confirm()` count updated from 1 to 2 (TypeError from SignupModel::confirm)
+

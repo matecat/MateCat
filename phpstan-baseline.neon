@@ -213,9 +213,15 @@ parameters:
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:confirm\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
+			path: lib/Controller/API/App/Authentication/SignupController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:confirm\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
@@ -5327,73 +5333,8 @@ parameters:
 			message: '#^Property Model\\Users\\Authentication\\PasswordResetModel\:\:\$session type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
+
 			path: lib/Model/Users/Authentication/PasswordResetModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:__construct\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:__construct\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:__updateUserFields\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:__userAlreadyExists\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:getParams\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\SignupModel\:\:processSignup\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of function strtotime expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Property Model\\Users\\Authentication\\SignupModel\:\:\$params type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
-
-		-
-			message: '#^Property Model\\Users\\Authentication\\SignupModel\:\:\$session type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/Authentication/SignupModel.php
 
 		-
 			message: '#^Argument of an invalid type Model\\Users\\UserStruct supplied for foreach, only iterables are supported\.$#'

@@ -312,8 +312,11 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     /**
      * @param ?JobDao $dao
-     * @throws Exception
+     * @return float|null
      * @throws ReflectionException
+     * @throws DomainException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getPeeForTranslatedSegments(?JobDao $dao = null): ?float
     {
