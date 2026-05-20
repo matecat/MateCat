@@ -5,7 +5,7 @@ namespace Model\Xliff;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
@@ -27,21 +27,58 @@ final class XliffConfigTemplateDao extends AbstractDao
     const string query_paginated = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
     const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
-    /**
-     * @var XliffConfigTemplateDao|null
-     */
-    protected static ?XliffConfigTemplateDao $instance = null;
+    private ?ProjectTemplateDao $projectTemplateDao = null;
+
+    public function __construct(
+        ?IDatabase $con = null,
+        ?ProjectTemplateDao $projectTemplateDao = null,
+    ) {
+        parent::__construct($con);
+        $this->projectTemplateDao = $projectTemplateDao;
+    }
+
+    private function getProjectTemplateDao(): ProjectTemplateDao
+    {
+        return $this->projectTemplateDao ?? new ProjectTemplateDao();
+    }
 
     /**
-     * @return XliffConfigTemplateDao
+     * @param int $uid
+     * @param string $baseRoute
+     * @param int $current
+     * @param int $pagination
+     * @param int $ttl
+     *
+     * @return array<string, mixed>
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    protected static function getInstance(): XliffConfigTemplateDao
+    public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
-        if (!isset(XliffConfigTemplateDao::$instance)) {
-            XliffConfigTemplateDao::$instance = new XliffConfigTemplateDao();
+        $pdo = $this->database->getConnection();
+
+        $pager = new Pager($pdo);
+
+        $totals = $pager->count(
+            "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
+            ['uid' => $uid]
+        );
+
+        $paginationParameters = new PaginationParameters(XliffConfigTemplateDao::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
+        $paginationParameters->setCache(self::paginated_map_key . ":" . $uid, $ttl);
+
+        $result = $pager->getPagination($totals, $paginationParameters);
+
+        $models = [];
+
+        foreach ($result['items'] as $item) {
+            $models[] = $this->hydrateTemplateStruct($item->getArrayCopy());
         }
 
-        return XliffConfigTemplateDao::$instance;
+        $result['items'] = $models;
+
+        return $result;
     }
 
     /**
@@ -79,12 +116,41 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function staticCreateFromJSON(string $json, int $uid): XliffConfigTemplateStruct
+    public function createFromJSON(string $json, int $uid): XliffConfigTemplateStruct
     {
         $templateStruct = new XliffConfigTemplateStruct();
         $templateStruct->hydrateFromJSON($json, $uid);
 
-        return self::staticSave($templateStruct);
+        return $this->save($templateStruct);
+    }
+
+    /**
+     * @param string $json
+     * @param int $uid
+     *
+     * @return XliffConfigTemplateStruct
+     * @throws Exception
+     * @throws TypeError
+     */
+    public static function staticCreateFromJSON(string $json, int $uid): XliffConfigTemplateStruct
+    {
+        return (new self())->createFromJSON($json, $uid);
+    }
+
+    /**
+     * @param XliffConfigTemplateStruct $templateStruct
+     * @param string $json
+     * @param int $uid
+     *
+     * @return XliffConfigTemplateStruct
+     * @throws Exception
+     * @throws TypeError
+     */
+    public function editFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
+    {
+        $templateStruct->hydrateFromJSON($json, $uid);
+
+        return $this->update($templateStruct);
     }
 
     /**
@@ -98,9 +164,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      */
     public static function staticEditFromJSON(XliffConfigTemplateStruct $templateStruct, string $json, int $uid): XliffConfigTemplateStruct
     {
-        $templateStruct->hydrateFromJSON($json, $uid);
-
-        return self::staticUpdate($templateStruct);
+        return (new self())->editFromJSON($templateStruct, $json, $uid);
     }
 
     /**
@@ -117,29 +181,7 @@ final class XliffConfigTemplateDao extends AbstractDao
      */
     public static function staticGetAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
-        $pdo = Database::obtain()->getConnection();
-
-        $pager = new Pager($pdo);
-
-        $totals = $pager->count(
-            "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
-            ['uid' => $uid]
-        );
-
-        $paginationParameters = new PaginationParameters(XliffConfigTemplateDao::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
-        $paginationParameters->setCache(self::paginated_map_key . ":" . $uid, $ttl);
-
-        $result = $pager->getPagination($totals, $paginationParameters);
-
-        $models = [];
-
-        foreach ($result['items'] as $item) {
-            $models[] = self::staticHydrateTemplateStruct($item->getArrayCopy());
-        }
-
-        $result['items'] = $models;
-
-        return $result;
+        return (new self())->getAllPaginated($uid, $baseRoute, $current, $pagination, $ttl);
     }
 
     /**
@@ -271,9 +313,9 @@ final class XliffConfigTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function staticRemove(int $id, int $uid): int
+    public function remove(int $id, int $uid): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
         $stmt->execute([
             'id' => $id,
@@ -282,14 +324,28 @@ final class XliffConfigTemplateDao extends AbstractDao
             'name' => 'deleted_' . Utils::randomString()
         ]);
 
-        self::staticDestroyQueryByIdCache($conn, $id);
-        self::staticDestroyQueryByIdAndUidCache($conn, $id, $uid);
-        self::staticDestroyQueryByUidCache($conn, $uid);
-        self::staticDestroyQueryPaginated($uid);
+        $this->destroyQueryByIdCache($conn, $id);
+        $this->destroyQueryByIdAndUidCache($conn, $id, $uid);
+        $this->destroyQueryByUidCache($conn, $uid);
+        $this->destroyQueryPaginated($uid);
 
-        (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'xliff_config_template_id');
+        $this->getProjectTemplateDao()->removeSubTemplateByIdAndUser($id, $uid, 'xliff_config_template_id');
 
         return $stmt->rowCount();
+    }
+
+    /**
+     * @param int $id
+     * @param int $uid
+     *
+     * @return int
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public static function staticRemove(int $id, int $uid): int
+    {
+        return (new self())->remove($id, $uid);
     }
 
     /**
@@ -307,18 +363,6 @@ final class XliffConfigTemplateDao extends AbstractDao
 
     /**
      * @param PDO $conn
-     * @param int $id
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private static function staticDestroyQueryByIdCache(PDO $conn, int $id): void
-    {
-        (new self())->destroyQueryByIdCache($conn, $id);
-    }
-
-    /**
-     * @param PDO $conn
      * @param int $uid
      *
      * @throws PDOException
@@ -328,18 +372,6 @@ final class XliffConfigTemplateDao extends AbstractDao
     {
         $stmt = $conn->prepare(self::query_by_uid);
         $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['uid' => $uid]);
-    }
-
-    /**
-     * @param PDO $conn
-     * @param int $uid
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private static function staticDestroyQueryByUidCache(PDO $conn, int $uid): void
-    {
-        (new self())->destroyQueryByUidCache($conn, $uid);
     }
 
     /**
@@ -357,19 +389,6 @@ final class XliffConfigTemplateDao extends AbstractDao
     }
 
     /**
-     * @param PDO $conn
-     * @param int $id
-     * @param int $uid
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private static function staticDestroyQueryByIdAndUidCache(PDO $conn, int $id, int $uid): void
-    {
-        (new self())->destroyQueryByIdAndUidCache($conn, $id, $uid);
-    }
-
-    /**
      * @param int $uid
      *
      * @throws ReflectionException
@@ -378,17 +397,6 @@ final class XliffConfigTemplateDao extends AbstractDao
     private function destroyQueryPaginated(int $uid): void
     {
         $this->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
-    }
-
-    /**
-     * @param int $uid
-     *
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    private static function staticDestroyQueryPaginated(int $uid): void
-    {
-        (new self())->destroyQueryPaginated($uid);
     }
 
 
@@ -421,18 +429,6 @@ final class XliffConfigTemplateDao extends AbstractDao
         $struct->hydrateRulesFromJson((string)$data['rules']);
 
         return $struct;
-    }
-
-    /**
-     * @param array<string, int|string|null> $data
-     *
-     * @return XliffConfigTemplateStruct|null
-     * @throws Exception
-     * @throws TypeError
-     */
-    private static function staticHydrateTemplateStruct(array $data): ?XliffConfigTemplateStruct
-    {
-        return (new self())->hydrateTemplateStruct($data);
     }
 
     /**
