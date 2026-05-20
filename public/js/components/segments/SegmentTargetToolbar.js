@@ -18,6 +18,7 @@ import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
+import {TagsCompressButton} from './TagsCompressButton'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -143,6 +144,9 @@ export const SegmentTargetToolbar = ({
           },
         ]
       : []),
+    {
+      component: <TagsCompressButton key="tagscompress" />,
+    },
     ...(showFormatMenu
       ? [
           {

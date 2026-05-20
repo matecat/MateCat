@@ -1,5 +1,7 @@
-import React, {useRef} from 'react'
+import React, {useRef, useState, useEffect} from 'react'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
+import CatToolStore from '../../../stores/CatToolStore'
+import CatToolConstants from '../../../constants/CatToolConstants'
 
 export const TagEntityLite = ({
   entityKey,
@@ -9,13 +11,28 @@ export const TagEntityLite = ({
   children,
 }) => {
   const tagRef = useRef()
+  const [phTagsCompressed, setPhTagsCompressed] = useState(
+    CatToolStore.isPhTagsCompressed(),
+  )
+
+  useEffect(() => {
+    const handler = () => setPhTagsCompressed(CatToolStore.isPhTagsCompressed())
+    CatToolStore.addListener(
+      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+      handler,
+    )
+    return () =>
+      CatToolStore.removeListener(
+        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+        handler,
+      )
+  }, [])
 
   const getStyle = () => {
     const {
       data: {name: entityName},
     } = contentState.getEntity(entityKey)
 
-    // Basic style accordin to language direction
     const baseStyle =
       tagSignatures[entityName] &&
       (isRTL && tagSignatures[entityName].styleRTL
@@ -28,20 +45,34 @@ export const TagEntityLite = ({
   const style = getStyle()
 
   const {
-    data: {index},
+    data: {index, name: entityName},
   } = contentState.getEntity(entityKey)
+
+  const isPhTag = entityName === 'ph'
+  const isCompressedPh = isPhTag && phTagsCompressed && index >= 0
+
+  const getChildrenContent = () => {
+    if (isPhTag && index >= 0) {
+      return (
+        <>
+          <span className="index-counter">{index + 1}</span>
+          {!phTagsCompressed && children}
+        </>
+      )
+    }
+    return children
+  }
 
   return (
     <div className="tag-container tag-container-lite">
       <span
         ref={tagRef}
-        className={`tag ${style}`}
+        className={`tag ${style}${isCompressedPh ? ' tag-compressed' : ''}`}
         data-offset-key={offsetkey}
         unselectable="on"
         suppressContentEditableWarning={true}
       >
-        {children}
-        {index >= 0 && <span className="index-counter">{index + 1}</span>}
+        {getChildrenContent()}
       </span>
     </div>
   )

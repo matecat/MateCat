@@ -60,6 +60,11 @@ let CatToolActions = {
       container: 'search',
     })
   },
+  togglePhTagsCompressed: function () {
+    AppDispatcher.dispatch({
+      actionType: CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+    })
+  },
   storeSearchResults: function (data) {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.STORE_SEARCH_RESULT,

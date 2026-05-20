@@ -31,18 +31,25 @@ const createNewEntitiesFromMap = (
   const shouldCompareWithSourceTagMap = sourceTagMap?.length && tagRange.length
 
   const tagRangeWithIndexes = shouldCompareWithSourceTagMap
-    ? tagRange.map((tag) => {
-        const tagSource = sourceTagMap.find(({data}) => data.id === tag.data.id)
-        return {
-          ...tag,
-          data: {
-            ...tag.data,
-            ...(tagSource?.data?.index !== undefined && {
-              index: tagSource.data.index,
-            }),
-          },
-        }
-      })
+    ? addIncrementalIndex(
+        tagRange.map((tag) => {
+          // Only match by id when the tag has a non-empty id
+          // (XLIFF2 ph tags have empty ids — matching on "" would
+          // incorrectly pair all of them with the first source tag)
+          const tagSource = tag.data.id
+            ? sourceTagMap.find(({data}) => data.id === tag.data.id)
+            : undefined
+          return {
+            ...tag,
+            data: {
+              ...tag.data,
+              ...(tagSource?.data?.index !== undefined && {
+                index: tagSource.data.index,
+              }),
+            },
+          }
+        }),
+      )
     : addIncrementalIndex(tagRange)
 
   // Executre replace with placeholder and adapt offsets
@@ -151,30 +158,25 @@ const createNewEntitiesFromMap = (
   }
 }
 
-const addIncrementalIndex = (tagRange) =>
-  tagRange.reduce((acc, cur) => {
-    const {decodedText, encodedText} = cur.data
-    const reversed = [...acc].reverse()
-    const lastIndex =
-      reversed.find(({data}) => data.decodedText === decodedText)?.data
-        ?.index ?? -1
+const addIncrementalIndex = (tagRange) => {
+  let phIndex = 0
+  return tagRange.map((cur) => {
+    if (cur.data.name !== 'ph') return cur
 
-    const haveMultipleMatches =
-      tagRange.filter(({data}) => data.decodedText === cur.data.decodedText)
-        .length > 1
+    if (cur.data.index !== undefined) {
+      phIndex = Math.max(phIndex, cur.data.index + 1)
+      return cur
+    }
 
-    return [
-      ...acc,
-      {
-        ...cur,
-        data: {
-          ...cur.data,
-          ...(isXliff2(encodedText) &&
-            haveMultipleMatches && {index: lastIndex + 1}),
-        },
+    return {
+      ...cur,
+      data: {
+        ...cur.data,
+        index: phIndex++,
       },
-    ]
-  }, [])
+    }
+  })
+}
 
 const isXliff2 = (encodedText) =>
   /\bph\b/.test(encodedText) && !/id=\"mtc_/.test(encodedText) //eslint-disable-line

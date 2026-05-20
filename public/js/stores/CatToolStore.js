@@ -13,6 +13,8 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   qr: null,
   firstLoad: true,
   languages: [],
+  phTagsCompressed:
+    localStorage.getItem('phTagsCompressed-' + config.userMail) === 'true',
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],
@@ -134,10 +136,17 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   getJobMetadata: function () {
     return this.jobMetadata
   },
+  isPhTagsCompressed: function () {
+    return this.phTagsCompressed
+  },
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
+
+if (CatToolStore.phTagsCompressed) {
+  document.body.classList.add('ph-tags-compressed')
+}
 
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
@@ -289,6 +298,21 @@ AppDispatcher.register(function (action) {
       CatToolStore.emitChange(CatToolConstants.SEGMENT_FILTER_ERROR, {
         ...action,
       })
+      break
+    case CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED:
+      CatToolStore.phTagsCompressed = !CatToolStore.phTagsCompressed
+      localStorage.setItem(
+        'phTagsCompressed-' + config.userMail,
+        CatToolStore.phTagsCompressed,
+      )
+      document.body.classList.toggle(
+        'ph-tags-compressed',
+        CatToolStore.phTagsCompressed,
+      )
+      CatToolStore.emitChange(
+        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+        CatToolStore.phTagsCompressed,
+      )
       break
   }
 })

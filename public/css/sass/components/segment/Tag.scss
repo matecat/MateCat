@@ -441,6 +441,36 @@
     padding-right: 5px;
     box-shadow: inset 0px 0px 0px 1px #788190;
   }
+  &.tag-compressed {
+    .index-counter {
+      margin-left: 0;
+      margin-right: 0;
+    }
+    span[data-text='true'] {
+      display: none;
+    }
+  }
+}
+
+// Body-level toggle for HTML-rendered (closed) segments
+body.ph-tags-compressed {
+  .tag.tag-ph {
+    .index-counter {
+      margin-left: 0;
+      margin-right: 0;
+    }
+    span[data-text='true'] {
+      display: none;
+    }
+  }
+}
+
+// Ensure inline layout for index + text inside HTML-rendered ph tags
+.tag.tag-ph {
+  .index-counter,
+  span[data-text='true'] {
+    display: inline;
+  }
 }
 
 .tag-tooltip {
