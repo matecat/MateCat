@@ -24,7 +24,7 @@ import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
-import {laraAuth} from '../../../api/laraAuth'
+import {laraAuthJob} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
 import {
@@ -54,10 +54,7 @@ let TranslationMatches = {
         segment: segment,
       })
 
-      modifiedTranslation(
-        segment.sid,
-        segment.translation !== '',
-      )
+      modifiedTranslation(segment.sid, segment.translation !== '')
     }
   },
 
@@ -66,11 +63,7 @@ let TranslationMatches = {
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
     if (isUndefined(segmentObj)) return
 
-    setSegmentContributions(
-      segmentObj.sid,
-      data.matches,
-      data.errors,
-    )
+    setSegmentContributions(segmentObj.sid, data.matches, data.errors)
 
     this.useSuggestionInEditArea(sid)
 
@@ -325,7 +318,7 @@ let TranslationMatches = {
     }
     if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
       this.segmentsWaitingForContributions.push(id_segment_original)
-      laraAuth({idJob: config.id_job, password: config.password})
+      laraAuthJob({idJob: config.id_job, password: config.password})
         .then((response) => {
           const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =

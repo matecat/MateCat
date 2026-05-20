@@ -8,7 +8,7 @@ import {
 } from './utils/DraftMatecatUtils/tagUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {laraTranslate} from '../../api/laraTranslate'
-import {laraAuth} from '../../api/laraAuth'
+import {laraAuthJob} from '../../api/laraAuth'
 import SegmentUtils from '../../utils/segmentUtils'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentActions from '../../actions/SegmentActions'
@@ -85,7 +85,7 @@ export const SegmentFooterTabLaraStyles = ({
       if (cached) {
         setStyles(cached)
       } else {
-        laraAuth({
+        laraAuthJob({
           idJob: config.id_job,
           password: config.password,
           reasoning: false,
