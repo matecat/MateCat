@@ -34,7 +34,7 @@
     "immutable": "^5.0.0",
     "jquery": "^3.7.1",
     "js-base64": "^3.6.1",
-    "js-cookie": "^3.0.0",
+    "js-cookie": "^3.0.7",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.21",
     "make-plural": "^8.1.0",
