@@ -357,6 +357,7 @@ let TranslationMatches = {
               styleguideId: laraStyleGuide,
             }),
             reasoning: laraModel === 'think',
+            multiline: laraModel === 'prosa',
           })
             .then((response) => {
               const translation =
