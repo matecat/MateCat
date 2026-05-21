@@ -156,7 +156,7 @@ describe('translationMatches', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
       project: {
         mt_extra: {
-          lara_style_guide_id: 'style-1',
+          lara_style_guideline_id: 'style-1',
           lara_glossaries: ['gl-1'],
         },
       },
@@ -198,7 +198,7 @@ describe('translationMatches', () => {
     CatToolStore.getJobMetadata.mockReturnValue({
       project: {
         mt_extra: {
-          lara_style_guide_id: 'style-2',
+          lara_style_guideline_id: 'style-2',
         },
       },
     })
@@ -263,26 +263,30 @@ describe('translationMatches', () => {
   })
 
   test('returns expected percentage classes and percent text', () => {
-    expect(TranslationMatches.getPercentageClass({match: '100%', ICE: false})).toBe(
-      'per-green',
-    )
-    expect(TranslationMatches.getPercentageClass({match: '100%', ICE: true})).toBe(
-      'per-blue',
-    )
+    expect(
+      TranslationMatches.getPercentageClass({match: '100%', ICE: false}),
+    ).toBe('per-green')
+    expect(
+      TranslationMatches.getPercentageClass({match: '100%', ICE: true}),
+    ).toBe('per-blue')
     expect(TranslationMatches.getPercentageClass({match: '75%-84%'})).toBe(
       'per-orange',
     )
-    expect(TranslationMatches.getPercentageClass({match: 'MT'})).toBe('per-yellow')
-    expect(TranslationMatches.getPercentageClass({match: 'ICE_MT'})).toBe('per-green')
+    expect(TranslationMatches.getPercentageClass({match: 'MT'})).toBe(
+      'per-yellow',
+    )
+    expect(TranslationMatches.getPercentageClass({match: 'ICE_MT'})).toBe(
+      'per-green',
+    )
 
     expect(TranslationMatches.getNumericMatchBaseOrMTString('75%-84%')).toBe(75)
     expect(TranslationMatches.getNumericMatchBaseOrMTString('MT')).toBe('MT')
 
-    expect(TranslationMatches.getPercentTextForMatch({match: '100%', ICE: true})).toBe(
-      '101%',
-    )
-    expect(TranslationMatches.getPercentTextForMatch({match: 'ICE_MT', ICE: false})).toBe(
-      'TQMT',
-    )
+    expect(
+      TranslationMatches.getPercentTextForMatch({match: '100%', ICE: true}),
+    ).toBe('101%')
+    expect(
+      TranslationMatches.getPercentTextForMatch({match: 'ICE_MT', ICE: false}),
+    ).toBe('TQMT')
   })
 })

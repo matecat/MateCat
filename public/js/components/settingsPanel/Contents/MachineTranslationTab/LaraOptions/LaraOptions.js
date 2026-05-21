@@ -184,7 +184,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                     id ===
                     (isCattoolPage
                       ? CatToolStore.getJobMetadata().project.mt_extra
-                          .lara_style_guide_id
+                          .lara_style_guideline_id
                       : value),
                 )}
                 checkSpaceToReverse={true}

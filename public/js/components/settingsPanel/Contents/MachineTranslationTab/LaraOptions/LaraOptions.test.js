@@ -40,7 +40,14 @@ jest.mock('../../../../common/Switch', () => ({
 }))
 
 jest.mock('../../../../common/Select', () => ({
-  Select: ({name, options, activeOption, onSelect, isDisabled, placeholder}) => (
+  Select: ({
+    name,
+    options,
+    activeOption,
+    onSelect,
+    isDisabled,
+    placeholder,
+  }) => (
     <div data-testid={`select-${name}`}>
       <span data-testid={`select-${name}-active`}>
         {activeOption?.id ?? placeholder ?? ''}
@@ -77,7 +84,7 @@ jest.mock('../../../../../stores/CreateProjectStore', () => ({
 
 jest.mock('../../../../../stores/CatToolStore', () => ({
   getJobMetadata: jest.fn(() => ({
-    project: {mt_extra: {lara_style_guide_id: null}},
+    project: {mt_extra: {lara_style_guideline_id: null}},
   })),
 }))
 
@@ -143,7 +150,9 @@ describe('LaraOptions', () => {
 
   test('fetches style guides on mount and populates options', async () => {
     const {laraAuth} = require('../../../../../api/laraAuth')
-    const {laraStyleguides} = require('../../../../../api/laraStyleguides/laraStyleguides')
+    const {
+      laraStyleguides,
+    } = require('../../../../../api/laraStyleguides/laraStyleguides')
 
     laraAuth.mockResolvedValue({token: 'abc'})
     laraStyleguides.mockResolvedValue([
@@ -158,7 +167,9 @@ describe('LaraOptions', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByTestId('option-lara_style_guide-sg1')).toBeInTheDocument()
+      expect(
+        screen.getByTestId('option-lara_style_guide-sg1'),
+      ).toBeInTheDocument()
     })
   })
 
@@ -177,13 +188,15 @@ describe('LaraOptions', () => {
     expect(switchEl).toBeDisabled()
   })
 
-  test('style guide select shows lara_style_guide_id from CatToolStore when isCattoolPage', async () => {
+  test('style guide select shows lara_style_guideline_id from CatToolStore when isCattoolPage', async () => {
     const CatToolStore = require('../../../../../stores/CatToolStore')
     CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mt_extra: {lara_style_guide_id: 'sg-from-job'}},
+      project: {mt_extra: {lara_style_guideline_id: 'sg-from-job'}},
     })
 
-    const {laraStyleguides} = require('../../../../../api/laraStyleguides/laraStyleguides')
+    const {
+      laraStyleguides,
+    } = require('../../../../../api/laraStyleguides/laraStyleguides')
     laraStyleguides.mockResolvedValue([
       {id: 'sg-from-job', name: 'Job Guide', description: ''},
     ])
@@ -203,7 +216,9 @@ describe('LaraOptions', () => {
 
     const mockSetValue = jest.fn()
     useOptions.mockReturnValue({
-      watch: jest.fn((field) => (field === 'lara_style_guide' ? 'sg1' : undefined)),
+      watch: jest.fn((field) =>
+        field === 'lara_style_guide' ? 'sg1' : undefined,
+      ),
       control: {},
       setValue: mockSetValue,
     })
@@ -224,7 +239,9 @@ describe('LaraOptions', () => {
 
   test('handles laraStyleguides fetch failure gracefully', async () => {
     const {laraAuth} = require('../../../../../api/laraAuth')
-    const {laraStyleguides} = require('../../../../../api/laraStyleguides/laraStyleguides')
+    const {
+      laraStyleguides,
+    } = require('../../../../../api/laraStyleguides/laraStyleguides')
 
     laraAuth.mockResolvedValue({token: 'abc'})
     laraStyleguides.mockRejectedValue(new Error('network error'))

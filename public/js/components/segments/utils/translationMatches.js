@@ -317,7 +317,8 @@ let TranslationMatches = {
     //     ).length === 2
     const allowedLaraThink = false //Temp disable Lara Think
 
-    const laraStyleGuide = jobMetadata?.project?.mt_extra?.lara_style_guide_id
+    const laraStyleGuide =
+      jobMetadata?.project?.mt_extra?.lara_style_guideline_id
     const allowedLaraProsa =
       typeof laraStyleGuide === 'string' && laraStyleGuide !== ''
 
