@@ -354,7 +354,6 @@ let TranslationMatches = {
             ...(allowedLaraProsa && {styleguideId: laraStyleGuide}),
           })
             .then((response) => {
-              console.log(response)
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
