@@ -86,13 +86,13 @@ describe('getContributions', () => {
       contextListBefore: [],
       contextListAfter: [],
       laraStyle: 'formal',
-      laraModel: 'prose',
+      laraModel: 'prosa',
       reasoning: false,
     })
 
     const body = fetch.mock.calls[0][1].body
     expect(body.get('lara_style')).toBe('formal')
-    expect(body.get('lara_model')).toBe('prose')
+    expect(body.get('lara_model')).toBe('prosa')
     expect(body.get('reasoning')).toBe('false')
   })
 

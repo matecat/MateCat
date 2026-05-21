@@ -279,6 +279,7 @@ let TranslationMatches = {
         contextListBefore,
         contextListAfter,
         laraModel,
+        reasoning: laraModel === 'think',
       })
         .then(() => {
           // Remove from waiting list
@@ -351,7 +352,10 @@ let TranslationMatches = {
             sid: id_segment_original,
             jobId: config.id_job,
             glossaries,
-            ...(allowedLaraProsa && {styleguideId: laraStyleGuide}),
+            ...(allowedLaraProsa && {
+              styleguideId: laraStyleGuide,
+            }),
+            reasoning: laraModel === 'think',
           })
             .then((response) => {
               const translation =
