@@ -206,7 +206,7 @@ class GetContributionController extends KleinController
                     'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
                     'resultNum' => (int)$contributionRequest->resultNum,
                     'lara_style' => $contributionRequest->lara_style,
-                    'lara_style_guide_id' => $contributionRequest->lara_style_guideline_id,
+                    'lara_style_guideline_id' => $contributionRequest->lara_style_guideline_id,
                     'lara_model' => $contributionRequest->lara_model,
                     'reasoning' => $contributionRequest->reasoning,
                     'concordanceSearch' => $contributionRequest->concordanceSearch,

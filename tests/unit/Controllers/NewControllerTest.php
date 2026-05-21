@@ -304,7 +304,7 @@ class NewControllerTest extends AbstractTest
                 'mt_engine' => 1,
                 'tms_engine' => 1,
                 'segmentation_rule' => 'patent',
-                'lara_style_guide_id' => 'guide-abc-123',
+                'lara_style_guideline_id' => 'guide-abc-123',
             ],
             [],
             [],
@@ -324,8 +324,8 @@ class NewControllerTest extends AbstractTest
         $validateParameters = $this->method->invoke($this->controller);
 
         $this->assertIsArray($validateParameters);
-        $this->assertArrayHasKey('lara_style_guide_id', $validateParameters);
-        $this->assertEquals('guide-abc-123', $validateParameters['lara_style_guide_id']);
+        $this->assertArrayHasKey('lara_style_guideline_id', $validateParameters);
+        $this->assertEquals('guide-abc-123', $validateParameters['lara_style_guideline_id']);
     }
 
 }

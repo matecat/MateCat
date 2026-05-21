@@ -4153,12 +4153,6 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
-			message: '#^Variable \$lara_style_guide_id on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: lib/Controller/API/V1/NewController.php
-
-		-
 			message: '#^Variable \$mmt_activate_context_analyzer on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1

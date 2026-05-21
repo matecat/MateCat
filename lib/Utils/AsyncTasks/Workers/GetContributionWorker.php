@@ -500,7 +500,7 @@ class GetContributionWorker extends AbstractWorker
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
                 $config['translation'] = $contributionStruct->translation;
                 $config['lara_style'] = $contributionStruct->lara_style;
-                $config['lara_style_guide_id'] = $contributionStruct->lara_style_guideline_id;
+                $config['lara_style_guideline_id'] = $contributionStruct->lara_style_guideline_id;
                 $config['reasoning'] = $contributionStruct->reasoning;
                 $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 

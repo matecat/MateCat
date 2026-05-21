@@ -720,7 +720,7 @@ class Lara extends AbstractEngine
         return [
             'enable_mt_analysis',
             'lara_style',
-            'lara_style_guide_id',
+            'lara_style_guideline_id',
             'lara_glossaries',
         ];
     }
