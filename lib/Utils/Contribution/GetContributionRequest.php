@@ -99,7 +99,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
 
     public ?array $subfiltering_handlers = [];
     public ?string $lara_style = null;
-    public ?string $lara_style_guide_id = null;
+    public ?string $lara_style_guideline_id = null;
     public ?string $lara_model = null;
 
     public ?bool $reasoning = false;

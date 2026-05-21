@@ -759,7 +759,7 @@ class TMAnalysisWorker extends AbstractWorker
             // is not set to true
             $metadataDao = new ProjectsMetadataDao();
             $lara_style = $metadataDao->get($queueElement->params->pid, 'lara_style') ?? null;
-            $lara_style_guide_id = $metadataDao->get($queueElement->params->pid, 'lara_style_guide_id') ?? null;
+            $lara_style_guideline_id = $metadataDao->get($queueElement->params->pid, 'lara_style_guideline_id') ?? null;
             $enable_mt_analysis = $metadataDao->get($queueElement->params->pid, 'enable_mt_analysis');
             $mtEngine->setSkipAnalysis(!($enable_mt_analysis->value ?? false)); //double negation to have the default as true
 
@@ -781,7 +781,7 @@ class TMAnalysisWorker extends AbstractWorker
             $config['include_score'] = $queueElement->params->mt_evaluation ?? false;
             $config['tuid'] = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
             $config['lara_style'] = (!empty($lara_style)) ? $lara_style->value : null;
-            $config['lara_style_guide_id'] = (!empty($lara_style_guide_id)) ? $lara_style_guide_id->value : null;
+            $config['lara_style_guideline_id'] = (!empty($lara_style_guideline_id)) ? $lara_style_guideline_id->value : null;
 
             if (!isset($config['job_id'])) {
                 $config['job_id'] = $queueElement->params->id_job;

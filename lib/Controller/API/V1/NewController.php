@@ -386,7 +386,7 @@ class NewController extends KleinController
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $lara_style_guide_id = filter_var($this->request->param('lara_style_guide_id'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style_guideline_id = filter_var($this->request->param('lara_style_guideline_id'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -548,7 +548,7 @@ class NewController extends KleinController
             'intento_provider' => $intento_provider ?? null,
             'lara_glossaries' => $lara_glossaries ?? null,
             'lara_style' => $lara_style ?? null,
-            'lara_style_guide_id' => $lara_style_guide_id ?? null,
+            'lara_style_guideline_id' => $lara_style_guideline_id,
             'deepl_id_glossary' => $deepl_id_glossary ?? null,
             'deepl_formality' => $deepl_formality ?? null,
             'deepl_engine_type' => $deepl_engine_type ?? null,
