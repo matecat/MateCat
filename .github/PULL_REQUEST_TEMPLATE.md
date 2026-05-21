@@ -55,7 +55,7 @@
      Unreviewed AI output will not be merged. -->
 
 - [ ] No AI tools were used in this PR
-- [ ] AI tools were used — details below
+- [ ] AI tools were used — name the agent/tool below
 
 <!-- If AI was used, just name the agent/tool.
      Example: "Claude Code (claude-opus-4-6)" -->

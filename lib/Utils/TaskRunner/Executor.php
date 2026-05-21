@@ -181,11 +181,15 @@ class Executor implements SplObserver
                 // PROCESS CONTROL FUNCTIONS
 
                 //read Message frame from the queue
-                /**
-                 * @var $msgFrame     Frame
-                 * @var $queueElement QueueElement
-                 */
-                [$msgFrame, $queueElement] = $this->_readAMQFrame();
+                $frameReadResult = $this->_readAMQFrame();
+                /** @var Frame $msgFrame */
+                $msgFrame = $frameReadResult[0];
+                /** @var QueueElement $queueElement */
+                $queueElement = $frameReadResult[1];
+
+                if (!($msgFrame instanceof Frame) || !($queueElement instanceof QueueElement)) {
+                    continue;
+                }
             } catch (Exception) {
 //                $this->logger->debug( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in the next cycle." );
 //                $this->logger->debug( $e->getMessage() );
@@ -231,6 +235,16 @@ class Executor implements SplObserver
                 $amqHandlerPublisher->reQueue($queueElement, $this->_executionContext, $this->logger);
                 $amqHandlerPublisher->getClient()->disconnect();
                 sleep(2);
+            } catch (\Predis\Connection\ConnectionException|\Predis\Response\ServerException $e) {
+                $this->logger->debug(
+                    "************* (Executor " . $this->_executor_instance_id . ") Redis connection error. Re-Queue - " . $e->getMessage()
+                );
+
+                $queueElement->reQueueNum = ++$queueElement->reQueueNum;
+                $amqHandlerPublisher = AMQHandler::getNewInstanceForDaemons();
+                $amqHandlerPublisher->reQueue($queueElement, $this->_executionContext, $this->logger);
+                $amqHandlerPublisher->getClient()->disconnect();
+                sleep(2);
             } catch (Throwable $e) {
                 $this->logger->debug("************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************");
                 $this->logger->debug("Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() . " " . $e->getTraceAsString());
@@ -249,7 +263,7 @@ class Executor implements SplObserver
     /**
      * Read frame msg from the queue
      *
-     * @return array [ Frame , QueueElement ]
+     * @return array{0: Frame, 1: QueueElement}
      * @throws FrameException
      */
     protected function _readAMQFrame(): array
@@ -340,10 +354,9 @@ class Executor implements SplObserver
      */
     public function update(SplSubject $subject): void
     {
-        /**
-         * @var $subject AbstractWorker
-         */
-        $this->logger->debug($subject->getLogMsg());
+        if ($subject instanceof AbstractWorker && method_exists($subject, 'getLogMsg')) {
+            $this->logger->debug($subject->getLogMsg());
+        }
     }
 
 }

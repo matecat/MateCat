@@ -120,7 +120,7 @@ class FastAnalysis extends AbstractDaemon
         LoggerFactory::setAliases(['engines'], $this->logger);
 
         try {
-            $this->queueHandler = new AMQHandler();
+            $this->queueHandler = AMQHandler::getNewInstanceForDaemons();
             $this->queueHandler->getRedisClient()->sadd(RedisKeys::FAST_PID_SET, [$this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID]);
 
             $this->_updateConfiguration();
@@ -649,6 +649,9 @@ class FastAnalysis extends AbstractDaemon
              */
             $this->segments = array_values($this->segments);
 
+            // Pre-fetch metadata cache — values are per (id_job, password) pair,
+            // identical across all segments of the same job/language
+            $metadataCache = [];
             foreach ($this->segments as $k => $queue_element) {
                 $queue_element['pid'] = $pid;
                 $queue_element['id_segment'] = $queue_element['id'];
@@ -686,10 +689,18 @@ class FastAnalysis extends AbstractDaemon
                         $queue_element['id_job'] = $id_job;
                         $queue_element['payable_rates'] = $jobs_payable_rates[$id_job]; // assign the right payable rate for the current job
 
-                        $jobsMetadataDao = new MetadataDao();
-                        $tm_prioritization = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
-                        $dialect_strict = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
-                        $public_tm_penalty = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
+                        $cacheKey = "$id_job:$password";
+                        if (!isset($metadataCache[$cacheKey])) {
+                            $jobsMetadataDao = new MetadataDao();
+                            $metadataCache[$cacheKey] = [
+                                'tm_prioritization' => $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60),
+                                'dialect_strict' => $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60),
+                                'public_tm_penalty' => $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60),
+                            ];
+                        }
+                        $tm_prioritization = $metadataCache[$cacheKey]['tm_prioritization'];
+                        $dialect_strict = $metadataCache[$cacheKey]['dialect_strict'];
+                        $public_tm_penalty = $metadataCache[$cacheKey]['public_tm_penalty'];
 
                         if (!empty($public_tm_penalty)) {
                             $queue_element['public_tm_penalty'] = (int)$public_tm_penalty->value;

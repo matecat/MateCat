@@ -307,14 +307,15 @@ let TranslationMatches = {
     const jobMetadata = CatToolStore.getJobMetadata()
 
     // Keep only languages whose base code is 'en' or 'it'.
-    const allowedLaraThink =
-      jobLanguages
-        .map((x) => x.split('-')[0])
-        .filter((x) => ['en', 'it'].includes(x))
-        .filter(
-          // Remove duplicates, then check we have exactly two distinct matches.
-          (value, index, array) => array.indexOf(value) === index,
-        ).length === 2
+    // const allowedLaraThink =
+    //   jobLanguages
+    //     .map((x) => x.split('-')[0])
+    //     .filter((x) => ['en', 'it'].includes(x))
+    //     .filter(
+    //       // Remove duplicates, then check we have exactly two distinct matches.
+    //       (value, index, array) => array.indexOf(value) === index,
+    //     ).length === 2
+    const allowedLaraThink = false //Temp disable Lara Think
 
     const laraStyleGuide = jobMetadata?.project?.mt_extra?.lara_style_guide_id
     const allowedLaraProsa =
