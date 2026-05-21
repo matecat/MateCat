@@ -4384,13 +4384,6 @@ var spec = {
             type: 'string',
           },
           {
-            name: 'name',
-            in: 'formData',
-            description: 'The name for the TM key.',
-            required: false,
-            type: 'string',
-          },
-          {
             name: 'disable_upload_limit',
             in: 'formData',
             description: 'Whether to disable the upload size limit.',
