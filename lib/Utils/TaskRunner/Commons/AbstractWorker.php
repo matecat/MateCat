@@ -42,7 +42,7 @@ abstract class AbstractWorker implements SplSubject
     /**
      * The last log message
      *
-     * @var string|array
+     * @var string|array<mixed>
      */
     protected string|array $_logMsg;
 
@@ -179,7 +179,7 @@ abstract class AbstractWorker implements SplSubject
 
     /**
      * Method used by the Observer to get the logging message
-     * @return string|array
+     * @return string|array<mixed>
      */
     public function getLogMsg(): array|string
     {
@@ -189,7 +189,7 @@ abstract class AbstractWorker implements SplSubject
     /**
      * Method to be called when a concrete worker must log
      *
-     * @param $msg array|string
+     * @param array<mixed>|string $msg
      */
     protected function _doLog(array|string $msg): void
     {
@@ -207,10 +207,10 @@ abstract class AbstractWorker implements SplSubject
      */
     protected function _checkForReQueueEnd(QueueElement $queueElement): void
     {
-        if (isset($queueElement->reQueueNum) && $queueElement->reQueueNum >= $this->maxRequeueNum) {
+        if ($queueElement->reQueueNum >= $this->maxRequeueNum) {
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip.");
             $this->_endQueueCallback($queueElement);
-        } elseif (isset($queueElement->reQueueNum)) {
+        } else {
 //            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
@@ -220,7 +220,7 @@ abstract class AbstractWorker implements SplSubject
      *
      * @throws EndQueueException
      */
-    protected function _endQueueCallback(QueueElement $queueElement)
+    protected function _endQueueCallback(QueueElement $queueElement): void
     {
         throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END);
     }
@@ -235,9 +235,11 @@ abstract class AbstractWorker implements SplSubject
      * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
      * </code>
      *
+     * @throws PDOException
      */
     protected function _checkDatabaseConnection(): void
     {
+        /** @var Database $db */
         $db = Database::obtain();
         try {
             $db->ping();
@@ -251,15 +253,29 @@ abstract class AbstractWorker implements SplSubject
     }
 
     /**
-     * @param $_object
+     * @param mixed $_object
      *
      * @throws Exception
      */
-    protected function publishToNodeJsClients($_object): void
+    protected function publishToNodeJsClients(mixed $_object): void
     {
         $message = json_encode($_object);
-        AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message, ['persistent' => 'false']));
+        if ($message === false) {
+            $message = '';
+        }
+        $this->_getAmqHandlerForPublish()->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message, ['persistent' => 'false']));
         $this->_doLog($message);
+    }
+
+    /**
+     * Returns an AMQHandler instance for publishing to NodeJs clients.
+     * Override in tests to inject a stub.
+     *
+     * @throws Exception
+     */
+    protected function _getAmqHandlerForPublish(): AMQHandler
+    {
+        return AMQHandler::getNewInstanceForDaemons();
     }
 
 }

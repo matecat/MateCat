@@ -72,10 +72,7 @@ class TaskManager extends AbstractDaemon
      */
     protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
-        $this->_configFile   = $configFile ?? '';
-        $this->_contextIndex = $contextIndex;
-
-        parent::__construct();
+        parent::__construct($configFile, $contextIndex);
 
         $this->processControl = new NativeProcessControl();
 
@@ -105,6 +102,7 @@ class TaskManager extends AbstractDaemon
      * @return void
      * @throws Exception
      * @throws LogInvalidArgumentException
+     * @throws TypeError
      *
      */
     public function main(array $args = null): void
@@ -427,6 +425,7 @@ class TaskManager extends AbstractDaemon
      *
      * @throws Exception
      * @throws LogInvalidArgumentException
+     * @throws \TypeError
      */
     protected function _updateConfiguration(): void
     {

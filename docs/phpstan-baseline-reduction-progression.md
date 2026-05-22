@@ -88,10 +88,10 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 336 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 351 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
-<summary>Click to expand full ledger (336 files)</summary>
+<summary>Click to expand full ledger (351 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -485,9 +485,24 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
 | `lib/Utils/Network/MultiCurlHandler.php` | Phase 27 |
 | `lib/Utils/TaskRunner/Commons/SignalHandlerTrait.php` | Phase 26 |
+| `lib/Utils/TaskRunner/Commons/AbstractDaemon.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/AbstractElement.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/AbstractWorker.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/Configuration.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/Context.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/ContextList.php` | Phase 31 |
 | `lib/Utils/TaskRunner/Commons/NativeProcessControl.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/Params.php` | Phase 31 |
 | `lib/Utils/TaskRunner/Commons/ProcessControlInterface.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/QueueElement.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Exceptions/EmptyElementException.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Exceptions/EndQueueException.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Exceptions/FrameException.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Exceptions/NotSupportedMTException.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Exceptions/ReQueueException.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Exceptions/WorkerClassException.php` | Phase 31 |
 | `lib/Utils/TaskRunner/Executor.php` | Phase 26 |
+| `lib/Utils/TaskRunner/executor_worker.php` | Phase 31 |
 | `lib/Utils/TaskRunner/TaskManager.php` | Phase 31 |
 | `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/ShareKeyEmail.php` | Phase 6C |

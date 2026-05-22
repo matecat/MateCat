@@ -20,6 +20,7 @@ use Stringable;
  * Generic class for an element queue
  *
  * @package TaskRunner\Commons
+ * @implements ArrayAccess<string, mixed>
  */
 abstract class AbstractElement extends stdClass implements ArrayAccess, Stringable
 {
@@ -27,7 +28,9 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
     /**
      * AbstractElement constructor.
      *
-     * @param array $array_params
+     * @param array<string, mixed> $array_params
+     *
+     * @throws DomainException
      */
     public function __construct(array $array_params = [])
     {
@@ -46,6 +49,8 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
      *
      * @param string $name
      * @param mixed $value
+     *
+     * @throws DomainException
      */
     public function __set(string $name, mixed $value): void
     {
@@ -85,6 +90,8 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
      *
      * @param mixed $offset
      * @param mixed $value
+     *
+     * @throws DomainException
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -97,6 +104,8 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
      * ArrayAccess interface implementation
      *
      * @param mixed $offset
+     *
+     * @throws DomainException
      */
     public function offsetUnset(mixed $offset): void
     {
@@ -107,11 +116,13 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
 
     /**
      * Recursive Object to Array conversion method
+     *
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {
         $nestedParamsObject = [];
-        foreach ($this as $key => $item) {
+        foreach (get_object_vars($this) as $key => $item) {
             if ($item instanceof AbstractElement) {
                 $nestedParamsObject[$key] = $item->toArray();
             } else {
@@ -129,7 +140,7 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
      */
     public function __toString(): string
     {
-        return json_encode($this);
+        return json_encode($this) ?: '{}';
     }
 
 }

@@ -101,6 +101,7 @@ class FastAnalysis extends AbstractDaemon
      * Reload Configuration every cycle
      *
      * @throws Exception
+     * @throws \TypeError
      */
     protected function _updateConfiguration(): void
     {
@@ -131,12 +132,15 @@ class FastAnalysis extends AbstractDaemon
         }
     }
 
-    protected function __construct(string $configFile, ?string $contextIndex = null)
+    /**
+     * @throws \TypeError
+     * @throws Exception
+     * @throws \InvalidArgumentException
+     * @throws LogInvalidArgumentException
+     */
+    protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
-        parent::__construct();
-
-        $this->_configFile = $configFile;
-        $this->_contextIndex = $contextIndex;
+        parent::__construct($configFile, $contextIndex);
 
         $this->logger = LoggerFactory::getLogger('fast_analysis', 'fastAnalysis.log');
         if (AppConfig::$DEBUG) {

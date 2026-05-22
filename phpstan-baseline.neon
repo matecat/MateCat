@@ -4724,6 +4724,18 @@ parameters:
 			path: lib/Utils/ActiveMQ/WorkerClient.php
 
 		-
+			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueueWithClient\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Utils/ActiveMQ/WorkerClient.php
+
+		-
+			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:init\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/ActiveMQ/WorkerClient.php
+
+		-
 			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueueWithClient\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -4750,6 +4762,12 @@ parameters:
 		-
 			message: '#^Binary operation "/" between string and 2 results in an error\.$#'
 			identifier: binaryOp.invalid
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
 
@@ -4826,7 +4844,7 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
 
 		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\ActivityLogWorker\:\:_checkDatabaseConnection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Utils\\AsyncTasks\\Workers\\ActivityLogWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
@@ -4893,6 +4911,12 @@ parameters:
 
 		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:_recountAvgPee\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
@@ -6072,192 +6096,6 @@ parameters:
 			identifier: argument.templateType
 			count: 2
 			path: lib/Utils/TMS/TMSService.php
-
-		-
-			message: '#^Constructor of class Utils\\TaskRunner\\Commons\\AbstractDaemon has an unused parameter \$configFile\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractDaemon.php
-
-		-
-			message: '#^Constructor of class Utils\\TaskRunner\\Commons\\AbstractDaemon has an unused parameter \$contextIndex\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractDaemon.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractDaemon\:\:main\(\) has parameter \$args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractDaemon.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractDaemon.php
-
-		-
-			message: '#^Argument of an invalid type \$this\(Utils\\TaskRunner\\Commons\\AbstractElement\) supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractElement.php
-
-		-
-			message: '#^Class Utils\\TaskRunner\\Commons\\AbstractElement implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractElement.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractElement\:\:__construct\(\) has parameter \$array_params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractElement.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractElement\:\:__set\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractElement.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractElement\:\:__toString\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractElement.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractElement\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractElement.php
-
-		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkDatabaseConnection\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_doLog\(\) has parameter \$msg with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_endQueueCallback\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:getLogMsg\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:publishToNodeJsClients\(\) has parameter \$_object with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Parameter \#1 \$body of class Stomp\\Transport\\Message constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Parameter \#1 \$msg of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_doLog\(\) expects array\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Property Utils\\TaskRunner\\Commons\\AbstractWorker\:\:\$_logMsg type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Property Utils\\TaskRunner\\Commons\\QueueElement\:\:\$reQueueNum \(int\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 2
-			path: lib/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\Configuration\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Configuration.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\Configuration\:\:getRaw\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Configuration.php
-
-		-
-			message: '#^Property Utils\\TaskRunner\\Commons\\Configuration\:\:\$__raw type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Configuration.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\Context\:\:__construct\(\) has parameter \$queueElement with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Context.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\Context\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/TaskRunner/Commons/Context.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\Context\:\:__toString\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Context.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\Context\:\:buildFromArray\(\) has parameter \$context with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Context.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/Context.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\ContextList\:\:__construct\(\) has parameter \$queue_info with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/ContextList.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\Commons\\ContextList\:\:get\(\) has parameter \$queue_info with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/ContextList.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/Utils/TaskRunner/Commons/ContextList.php
 
 		-
 			message: '#^Call to an undefined method Utils\\Templating\\PHPTalMap\:\:__get\(\)\.$#'
@@ -14079,10 +13917,22 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
+
+		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'

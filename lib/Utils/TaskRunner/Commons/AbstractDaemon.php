@@ -22,6 +22,7 @@ use Utils\Registry\AppConfig;
  * - Install signal handlers for the concrete class
  * - Provide log method for the concrete classes
  *
+ * @phpstan-consistent-constructor
  */
 abstract class AbstractDaemon
 {
@@ -88,7 +89,9 @@ abstract class AbstractDaemon
     protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
         AppConfig::$PRINT_ERRORS = true;
-        $this->myProcessPid = posix_getpid();
+        $this->myProcessPid     = posix_getpid();
+        $this->_configFile      = $configFile ?? '';
+        $this->_contextIndex    = $contextIndex;
     }
 
     /**
@@ -111,7 +114,7 @@ abstract class AbstractDaemon
     /**
      * The starting method
      *
-     * @param array|null $args
+     * @param array<mixed>|null $args
      *
      * @return void
      */
@@ -132,6 +135,7 @@ abstract class AbstractDaemon
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function getConfiguration(): Configuration
     {
