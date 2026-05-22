@@ -29,6 +29,34 @@ use Utils\Tools\Utils;
 trait LaraAuthTrait
 {
     /**
+     * Checks and enforces rate limits based on email and IP address.
+     *
+     * This method utilizes pre-defined rate limit rules to track and
+     * restrict the number of requests that can be made by a specific email
+     * or IP address within a set time period. If rate limits are exceeded,
+     * appropriate responses are set to prevent further action.
+     *
+     * @return void
+     */
+    protected function checkRateLimits(): void
+    {
+        $email = $this->getUser()->email ?? 'BLANK_EMAIL';
+        $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
+        $rateLimitKey = '/api/app/lara/token';
+
+        $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $email, $rateLimitKey, 30);
+        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $rateLimitKey, 30);
+
+        if ($rateLimitEmailResponse instanceof Response) {
+            $this->response = $rateLimitEmailResponse;
+        }
+
+        if ($rateLimitIpResponse instanceof Response) {
+            $this->response = $rateLimitIpResponse;
+        }
+    }
+
+    /**
      * Performs Lara authentication: rate-limiting, engine lookup, TM key header injection, and token generation.
      *
      * @param int    $engineId The Lara engine ID to authenticate against.

@@ -86,6 +86,8 @@ class LaraAuthController extends AbstractStatefulKleinController
      */
     public function auth(): void
     {
+        $this->checkRateLimits();
+
         try {
             EnginesFactory::getInstance($this->chunk->id_mt_engine, Lara::class);
         } catch (Exception $e) {

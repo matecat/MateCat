@@ -65,9 +65,10 @@ class GetContributionController extends KleinController
         $switch_languages = $request['switch_languages'];
         $cross_language = $request['cross_language'];
         $reasoning = $request['reasoning'];
+        $lara_style = $request['lara_style'];
 
         // try to get from metadata if Lara style is empty of fallback to the default
-        if (empty($request['lara_style'])) {
+        if (empty($lara_style)) {
             $lara_style = $projectStruct->getMetadataValue('lara_style') ?? Lara::DEFAULT_STYLE;
         }
 
@@ -279,6 +280,11 @@ class GetContributionController extends KleinController
 
         if (empty($id_client)) {
             throw new InvalidArgumentException("missing id_client", -5);
+        }
+
+        // validate Lara model
+        if (!empty($lara_model)) {
+            $lara_model = Lara::validateLaraModel($lara_model);
         }
 
         // validate Lara style

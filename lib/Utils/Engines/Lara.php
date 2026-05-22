@@ -54,6 +54,11 @@ class Lara extends AbstractEngine
         'creative',
     ];
 
+    private const array ALLOWED_MODELS = [
+        'prosa',
+        'think',
+    ];
+
     /**
      * @inheritdoc
      * @see AbstractEngine::$_isAdaptiveMT
@@ -732,9 +737,26 @@ class Lara extends AbstractEngine
     public static function validateLaraStyle(string $lara_style): string
     {
         if (!in_array($lara_style, self::ALLOWED_STYLES)) {
-            throw new InvalidArgumentException("Invalid lara style.", -1);
+            throw new InvalidArgumentException("Invalid Lara style.", -1);
         }
 
         return $lara_style;
+    }
+
+    /**
+     * Validates the given Lara model against a predefined list of allowed models.
+     * If the model is not within the allowed list, an exception is thrown.
+     *
+     * @param string $model The Lara model to validate.
+     * @return string The validated model.
+     * @throws InvalidArgumentException If the provided model is not allowed.
+     */
+    public static function validateLaraModel(string $model): string
+    {
+        if (!in_array($model, self::ALLOWED_MODELS)) {
+            throw new InvalidArgumentException("Invalid Lara model.", -1);
+        }
+
+        return $model;
     }
 }

@@ -57,6 +57,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      */
     public function auth(): void
     {
+        $this->checkRateLimits();
         $engineId = $this->resolveActiveLaraEngineId();
         $this->performLaraAuth($engineId, '');
     }
