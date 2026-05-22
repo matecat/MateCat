@@ -6260,84 +6260,6 @@ parameters:
 			path: lib/Utils/TaskRunner/Commons/ContextList.php
 
 		-
-			message: '#^Call to Utils\\TaskRunner\\TaskManager\:\:_balanceQueues\(\) on a separate line has no effect\.$#'
-			identifier: staticMethod.resultUnused
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Cannot access property \$pid_set_name on Utils\\TaskRunner\\Commons\\Context\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Cannot call method getRedisClient\(\) on Utils\\ActiveMQ\\AMQHandler\|null\.$#'
-			identifier: method.nonObject
-			count: 22
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:_balanceQueues\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:_cleanContexts\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:_killPids\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 13
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:_waitPid\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:cleanShutDown\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:main\(\) has parameter \$args with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Parameter \#1 \$process_id of function posix_kill expects int, string given\.$#'
-			identifier: argument.type
-			count: 4
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Property Utils\\TaskRunner\\Commons\\AbstractDaemon\:\:\$_configFile \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
 			message: '#^Call to an undefined method Utils\\Templating\\PHPTalMap\:\:__get\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -14155,24 +14077,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:_killPids\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 16
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:_waitPid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/TaskRunner/TaskManager.php
-
-		-
-			message: '#^Method Utils\\TaskRunner\\TaskManager\:\:cleanShutDown\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/TaskRunner/TaskManager.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
