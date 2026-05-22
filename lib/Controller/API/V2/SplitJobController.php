@@ -27,6 +27,7 @@ class SplitJobController extends KleinController
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function merge(): void
     {

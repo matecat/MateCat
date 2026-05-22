@@ -1695,6 +1695,12 @@ parameters:
 			path: lib/Controller/API/V2/JobMergeController.php
 
 		-
+			message: '#^Method Controller\\API\\V2\\JobMergeController\:\:merge\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V2/JobMergeController.php
+
+		-
 			message: '#^Method Controller\\API\\V2\\JobsTranslatorsController\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -3985,65 +3991,6 @@ parameters:
 			count: 1
 			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
 
-		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:beginTransaction\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:deleteOnMerge\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:destroyAnalysisCacheByProjectId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:getJobByIdAndPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Method Model\\JobSplitMerge\\JobSplitMergeService\:\:mergeALL\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:get\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:set\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Parameter \#1 \$jsonTmKeys_array of static method Utils\\TmKeyManagement\\TmKeyManager\:\:getOwnerKeys\(\) expects list\<string\>, array\<int, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:get\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:set\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/JobSplitMerge/JobSplitMergeService.php
 
 		-
 			message: '#^Method Model\\LQA\\CategoryStruct\:\:toArrayWithJsonDecoded\(\) return type has no value type specified in iterable type array\.$#'

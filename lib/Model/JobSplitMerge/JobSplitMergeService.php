@@ -79,6 +79,7 @@ class JobSplitMergeService
 
     /**
      * Wrapper around the static JobDao::getByIdAndPassword() — overridable in tests.
+     * @throws Exception
      * @throws ReflectionException
      */
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
@@ -88,6 +89,7 @@ class JobSplitMergeService
 
     /**
      * Begin a database transaction using the injected handler.
+     * @throws \PDOException
      */
     protected function beginTransaction(): void
     {
@@ -104,6 +106,7 @@ class JobSplitMergeService
 
     /**
      * Wrapper around static AnalysisDao call — overridable in tests.
+     * @throws \PDOException
      * @throws ReflectionException
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
@@ -119,7 +122,7 @@ class JobSplitMergeService
      */
     protected function getOwnerKeys(array $tmKeys): array
     {
-        return TmKeyManager::getOwnerKeys($tmKeys);
+        return TmKeyManager::getOwnerKeys(array_values($tmKeys));
     }
 
     /**
@@ -133,6 +136,7 @@ class JobSplitMergeService
 
     /**
      * Wrapper around static JobDao::deleteOnMerge() — overridable in tests.
+     * @throws \PDOException
      */
     protected function deleteOnMerge(JobStruct $job): void
     {
@@ -467,10 +471,19 @@ class JobSplitMergeService
             ];
 
              foreach ($metadata as $key) {
-                 $_data = $jobsMetadataDao->get($jobToSplit->id, $jobToSplit->password, $key);
+                 $_data = $jobsMetadataDao->get(
+                     $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
+                     $jobToSplit->password ?? throw new RuntimeException('Missing job password'),
+                     $key
+                 );
 
                  if (!empty($_data)) {
-                     $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $_data->value);
+                     $jobsMetadataDao->set(
+                         $newJob->id ?? throw new RuntimeException('Missing new job id'),
+                         $newJob->password ?? throw new RuntimeException('Missing new job password'),
+                         $key,
+                         $_data->value
+                     );
                      $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id ?? throw new RuntimeException('Missing job id'), $jobToSplit->password ?? throw new RuntimeException('Missing job password'), $key);
                  }
              }
@@ -521,6 +534,7 @@ class JobSplitMergeService
      * @param JobStruct[] $jobStructs
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {

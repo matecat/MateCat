@@ -106,6 +106,7 @@ class JobSplitMergeManager
      * @param JobStruct[] $jobStructs
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
