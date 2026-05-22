@@ -88,10 +88,10 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 282 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 336 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
-<summary>Click to expand full ledger (277 files)</summary>
+<summary>Click to expand full ledger (336 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -172,7 +172,20 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Model/Conversion & Filters/DTO
 | File | Cleaned In |
 |------|-----------|
+| `lib/Model/Conversion/ConversionHandler.php` | Phase 31 |
+| `lib/Model/Conversion/ConvertedFileList.php` | Phase 31 |
+| `lib/Model/Conversion/ConvertedFileModel.php` | Phase 31 |
+| `lib/Model/Conversion/FilesConverter.php` | Phase 31 |
 | `lib/Model/Conversion/Filters.php` | Phase 18 |
+| `lib/Model/Conversion/InternalHashPaths.php` | Phase 31 |
+| `lib/Model/Conversion/MimeTypes/Guesser/FileBinaryMimeTypeGuesser.php` | Phase 31 |
+| `lib/Model/Conversion/MimeTypes/Guesser/FileinfoMimeTypeGuesser.php` | Phase 31 |
+| `lib/Model/Conversion/MimeTypes/Guesser/SimpleMarkupMimeTypeGuesser.php` | Phase 31 |
+| `lib/Model/Conversion/MimeTypes/MimeTypes.php` | Phase 31 |
+| `lib/Model/Conversion/OCRCheck.php` | Phase 31 |
+| `lib/Model/Conversion/Upload.php` | Phase 31 |
+| `lib/Model/Conversion/UploadElement.php` | Phase 31 |
+| `lib/Model/Conversion/ZipArchiveHandler.php` | Phase 31 |
 | `lib/Model/Filters/DTO/IDto.php` | Phase 18 |
 | `lib/Model/Filters/DTO/Dita.php` | Phase 18 |
 | `lib/Model/Filters/DTO/Json.php` | Phase 18 |
@@ -228,6 +241,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Jobs/MetadataStruct.php` | Phase 30 |
 | `lib/Model/Jobs/WarningsCountStruct.php` | Phase 30 |
 | `lib/Model/JobSplitMerge/JobSplitMergeManager.php` | Phase 5C |
+| `lib/Model/JobSplitMerge/JobSplitMergeService.php` | Phase 31 |
 | `lib/Model/LQA/CategoryDao.php` | Phase 0 |
 | `lib/Model/LQA/ChunkReviewDao.php` | Phase 5C |
 | `lib/Model/LQA/EntryCommentDao.php` | Phase 16 |
@@ -256,7 +270,12 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `lib/Model/ActivityLog/ActivityLogDao.php` | Phase 25 |
+| `lib/Model/Analysis/AbstractStatus.php` | Phase 31 |
 | `lib/Model/Analysis/AnalysisDao.php` | Phase 25 |
+| `lib/Model/Analysis/Constants/AbstractConstants.php` | Phase 31 |
+| `lib/Model/Analysis/Constants/ConstantsInterface.php` | Phase 31 |
+| `lib/Model/Analysis/PayableRates.php` | Phase 31 |
+| `lib/Model/Analysis/XTRFStatus.php` | Phase 31 |
 | `lib/Model/ChunksCompletion/ChunkCompletionEventDao.php` | Phase 25 |
 | `lib/Model/ChunksCompletion/ChunkCompletionUpdateDao.php` | Phase 25 |
 | `lib/Model/ConnectedServices/ConnectedServiceDao.php` | Phase 25 |
@@ -267,6 +286,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php` | Phase 28 |
 | `lib/Model/ConnectedServices/GDrive/RemoteFileService.php` | Phase 28 |
 | `lib/Model/ConnectedServices/GDrive/Session.php` | Phase 28 |
+| `lib/Model/ProjectCreation/ProjectManager.php` | Phase 31 |
 | `lib/Model/Files/FileDao.php` | Phase 25 |
 | `lib/Model/Files/MetadataDao.php` | Phase 25 |
 | `lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php` | Phase 25 |
@@ -339,6 +359,13 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | File | Cleaned In |
 |------|-----------|
 | `lib/Plugins/Features/RevisionFactory.php` | Phase 13A |
+| `lib/Plugins/Features/ReviewExtended/BatchReviewProcessor.php` | Phase 31 |
+| `lib/Plugins/Features/ReviewExtended/ChunkReviewModel.php` | Phase 31 |
+| `lib/Plugins/Features/ReviewExtended/Email/BatchReviewProcessorAlertEmail.php` | Phase 31 |
+| `lib/Plugins/Features/ReviewExtended/Email/RevisionChangedNotificationEmail.php` | Phase 31 |
+| `lib/Plugins/Features/ReviewExtended/IChunkReviewModel.php` | Phase 31 |
+| `lib/Plugins/Features/ReviewExtended/ReviewUtils.php` | Phase 31 |
+| `lib/Plugins/Features/ReviewExtended/TranslationIssueModel.php` | Phase 31 |
 | `lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php` | Phase 0 |
 | `lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php` | Phase 12A |
 | `lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php` | Phase 0 |
@@ -458,12 +485,16 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
 | `lib/Utils/Network/MultiCurlHandler.php` | Phase 27 |
 | `lib/Utils/TaskRunner/Commons/SignalHandlerTrait.php` | Phase 26 |
+| `lib/Utils/TaskRunner/Commons/NativeProcessControl.php` | Phase 31 |
+| `lib/Utils/TaskRunner/Commons/ProcessControlInterface.php` | Phase 31 |
 | `lib/Utils/TaskRunner/Executor.php` | Phase 26 |
+| `lib/Utils/TaskRunner/TaskManager.php` | Phase 31 |
 | `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/ShareKeyEmail.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/TmKeyManager.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/TmKeyStruct.php` | Phase 6C |
 | `lib/Utils/Tools/CatUtils.php` | Phase 3A |
+| `lib/Utils/Tools/PostEditing.php` | Phase 31 |
 | `lib/Utils/Tools/SimpleJWT.php` | Phase 0 |
 | `lib/Utils/Tools/Utils.php` | Phase 3B |
 | `lib/Utils/Validator/IsJobRevisionValidator.php` | Phase 13A |
@@ -476,6 +507,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
 | `lib/View/API/V2/Json/Membership.php` | Phase 12A |
 | `lib/View/API/V3/Json/QualitySummary.php` | Phase 16 |
+| `lib/View/fileupload/UploadHandler.php` | Phase 31 |
 
 </details>
 
