@@ -53,6 +53,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws ValidationError
      * @throws RuntimeException
      * @throws Exception
+     * @throws \TypeError
      */
     public function create(): void {
         $data = [
@@ -194,6 +195,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function delete(): void {
         $issue = $this->validator->issue ?? throw new RuntimeException('Missing issue');
@@ -273,6 +275,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @param EntryStruct $issue
      *
      * @return TranslationIssueModel
+     * @throws Exception
+     * @throws \TypeError
      */
     protected function _getSegmentTranslationIssueModel( int $id_job, string $password, EntryStruct $issue ): TranslationIssueModel {
         return new TranslationIssueModel( $id_job, $password, $issue );

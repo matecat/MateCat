@@ -52,13 +52,13 @@ class ChunkReviewModel implements IChunkReviewModel
     /**
      * adds penalty_points and updates pass fail result
      *
-     * @param                         $penalty_points
+     * @param float $penalty_points
      *
      * @param ProjectStruct $projectStruct
      *
      * @throws Exception
      */
-    public function addPenaltyPoints($penalty_points, ProjectStruct $projectStruct): void
+    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void
     {
         $this->updateChunkReviewCountersAndPassFail($penalty_points, 0, 0, $projectStruct);
     }
@@ -88,7 +88,7 @@ class ChunkReviewModel implements IChunkReviewModel
     {
         $data = [
             'chunkReview' => $this->chunk_review,
-            'penalty_points' => $penalty_points,
+            'penalty_points' => (int)$penalty_points,
             'reviewed_words_count' => $reviewed_word_count,
             'total_tte' => $tte,
         ];
@@ -125,14 +125,14 @@ class ChunkReviewModel implements IChunkReviewModel
      * Used only by ChunkReviewModel::[subtractPenaltyPoints, addPenaltyPoints]
      *
      * @param ProjectStruct $project
-     * @param array $data
+     * @param array{chunkReview: ChunkReviewStruct, penalty_points?: int, reviewed_words_count: int, total_tte: int} $data
      *
      * @throws Exception
      */
     protected function _updatePassFailResult(ProjectStruct $project, array $data): void
     {
         $chunkReviewDao = new ChunkReviewDao();
-        $chunkReviewDao->passFailCountsAtomicUpdate($this->chunk_review->id, $data);
+        $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
 
         $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,

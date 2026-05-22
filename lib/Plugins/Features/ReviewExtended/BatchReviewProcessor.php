@@ -11,13 +11,16 @@ namespace Plugins\Features\ReviewExtended;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Plugins\Features\RevisionFactory;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 
 class BatchReviewProcessor
@@ -28,7 +31,7 @@ class BatchReviewProcessor
      */
     private CounterModel $jobWordCounter;
     /**
-     * @var mixed
+     * @var JobStruct
      */
     private JobStruct $chunk;
 
@@ -45,6 +48,7 @@ class BatchReviewProcessor
      * @param JobStruct $chunk
      *
      * @return $this
+     * @throws TypeError
      */
     public function setChunk(JobStruct $chunk): BatchReviewProcessor
     {
@@ -56,7 +60,7 @@ class BatchReviewProcessor
     }
 
     /**
-     * @param array $prepared_events
+     * @param TranslationEvent[] $prepared_events
      *
      * @return $this
      */
@@ -68,7 +72,11 @@ class BatchReviewProcessor
     }
 
     /**
+     * @return ChunkReviewStruct[]
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
      */
     private function getOrCreateChunkReviews(ProjectStruct $project): array
     {
@@ -106,6 +114,7 @@ class BatchReviewProcessor
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function process(): void
     {
@@ -128,7 +137,7 @@ class BatchReviewProcessor
                 // send chunkReviewUpdated notifications through FeaturesSet hook
                 $project = $chunkReview->getChunk()->getProject();
                 $chunkReviewModel = new ChunkReviewModel($chunkReview);
-                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
+                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }
         }
 
@@ -137,6 +146,7 @@ class BatchReviewProcessor
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function updateJobWordCounter(): void
     {
@@ -150,12 +160,12 @@ class BatchReviewProcessor
             $this->chunk->approved2_words = $newCount->getApproved2Words();
             $this->chunk->rejected_words = $newCount->getRejectedWords();
 
-            $this->chunk->draft_raw_words = $newCount->getDraftRawWords();
-            $this->chunk->new_raw_words = $newCount->getNewRawWords();
-            $this->chunk->translated_raw_words = $newCount->getTranslatedRawWords();
-            $this->chunk->approved_raw_words = $newCount->getApprovedRawWords();
-            $this->chunk->approved2_raw_words = $newCount->getApproved2RawWords();
-            $this->chunk->rejected_raw_words = $newCount->getRejectedRawWords();
+            $this->chunk->draft_raw_words = (int)$newCount->getDraftRawWords();
+            $this->chunk->new_raw_words = (int)$newCount->getNewRawWords();
+            $this->chunk->translated_raw_words = (int)$newCount->getTranslatedRawWords();
+            $this->chunk->approved_raw_words = (int)$newCount->getApprovedRawWords();
+            $this->chunk->approved2_raw_words = (int)$newCount->getApproved2RawWords();
+            $this->chunk->rejected_raw_words = (int)$newCount->getRejectedRawWords();
             // updateTodoValues for the JOB
         }
     }

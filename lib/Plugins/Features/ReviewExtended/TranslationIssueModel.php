@@ -18,6 +18,7 @@ use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use TypeError;
 use Utils\Tools\Utils;
 
 class TranslationIssueModel
@@ -28,6 +29,7 @@ class TranslationIssueModel
      */
     protected ProjectStruct $project;
 
+    /** @var array<mixed>|null */
     private ?array $diff = null;
 
     /**
@@ -36,9 +38,9 @@ class TranslationIssueModel
     protected EntryStruct $issue;
 
     /**
-     * @var ChunkReviewStruct|null
+     * @var ChunkReviewStruct
      */
-    protected ?ChunkReviewStruct $chunk_review;
+    protected ChunkReviewStruct $chunk_review;
 
     /**
      * @var JobStruct
@@ -46,16 +48,22 @@ class TranslationIssueModel
     protected JobStruct $chunk;
 
     /**
-     * @param             $id_job
-     * @param             $password
+     * @param int         $id_job
+     * @param string      $password
      * @param EntryStruct $issue
+     *
+     * @throws Exception
+     * @throws \TypeError
      */
-    public function __construct($id_job, $password, EntryStruct $issue)
+    public function __construct(int $id_job, string $password, EntryStruct $issue)
     {
         $this->issue = $issue;
 
         $review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
 
+        if ($review === null) {
+            throw new Exception('ChunkReview not found for job ' . $id_job);
+        }
         $this->chunk_review = $review;
         $this->chunk = $this->chunk_review->getChunk();
         $this->project = $this->chunk->getProject();
@@ -65,6 +73,8 @@ class TranslationIssueModel
      * This method optionally saves the diff between versions if this is being received from the post params.
      * This change was introduced for the new revision, in which issues have to come with a diff object because
      * selection is referred to the difference between segments.
+     *
+     * @param array<mixed>|null $diff
      */
     public function setDiff(?array $diff = null): void
     {
@@ -76,6 +86,7 @@ class TranslationIssueModel
      *
      * @return EntryStruct
      * @throws Exception
+     * @throws TypeError
      */
     public function editFrom(EntryStruct $oldStruct): EntryStruct
     {
@@ -108,6 +119,7 @@ class TranslationIssueModel
      * @return EntryStruct
      * @throws ValidationError
      * @throws Exception
+     * @throws TypeError
      */
     public function save(): EntryStruct
     {
@@ -120,7 +132,7 @@ class TranslationIssueModel
         EntryDao::createEntry($this->issue);
 
         $chunk_review_model = new ChunkReviewModel($this->chunk_review);
-        $chunk_review_model->addPenaltyPoints($this->issue->penalty_points, $this->project);
+        $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
 
         return $this->issue;
     }
@@ -141,10 +153,11 @@ class TranslationIssueModel
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function saveDiff(): void
     {
-        $string_to_save = json_encode($this->diff);
+        $string_to_save = json_encode($this->diff) ?: null;
 
         /**
          * in order to save diff we need to lookup for current version in segment_translations.
@@ -186,8 +199,13 @@ class TranslationIssueModel
         //
         // $this->chunkReview may not refer to the chunk review associated to issue source page
         //
-        $chunkReview = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($this->chunk->id, $this->chunk->password, $this->issue->source_page);
+        $chunkJobId = $this->chunk->id ?? throw new Exception('Missing chunk job id');
+        $chunkPassword = $this->chunk->password ?? throw new Exception('Missing chunk password');
+        $chunkReview = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($chunkJobId, $chunkPassword, $this->issue->source_page);
 
+        if ($chunkReview === null) {
+            throw new Exception('ChunkReview not found for delete operation');
+        }
         $chunk_review_model = new ChunkReviewModel($chunkReview);
         $this->subtractPenaltyPoints($chunk_review_model);
     }
@@ -202,8 +220,9 @@ class TranslationIssueModel
      */
     protected function subtractPenaltyPoints(ChunkReviewModel $chunk_review_model): void
     {
-        if (($chunk_review_model->getPenaltyPoints() - $this->issue->penalty_points) >= 0) {
-            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points, $this->project);
+        $penaltyPoints = $this->issue->penalty_points ?? 0.0;
+        if (($chunk_review_model->getPenaltyPoints() - $penaltyPoints) >= 0) {
+            $chunk_review_model->subtractPenaltyPoints($penaltyPoints, $this->project);
         }
     }
 }

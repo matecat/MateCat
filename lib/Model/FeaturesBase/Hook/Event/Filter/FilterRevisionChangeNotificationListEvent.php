@@ -15,19 +15,21 @@ final class FilterRevisionChangeNotificationListEvent extends FilterEvent
     {
         return 'filterRevisionChangeNotificationList';
     }
-    /** @param list<string> $emails */
+    /**
+     * @param list<array{isPreviousChangeAuthor: bool, recipient: \Model\Users\UserStruct}> $emails
+     */
     public function __construct(
         private array $emails,
     ) {
     }
 
-    /** @return list<string> */
+    /** @return list<array{isPreviousChangeAuthor: bool, recipient: \Model\Users\UserStruct}> */
     public function getEmails(): array
     {
         return $this->emails;
     }
 
-    /** @param list<string> $emails */
+    /** @param list<array{isPreviousChangeAuthor: bool, recipient: \Model\Users\UserStruct}> $emails */
     public function setEmails(array $emails): void
     {
         $this->emails = $emails;

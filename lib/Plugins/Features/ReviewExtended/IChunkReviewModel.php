@@ -28,7 +28,7 @@ interface IChunkReviewModel
      *
      * @return void
      */
-    public function addPenaltyPoints($penalty_points, ProjectStruct $projectStruct): void;
+    public function addPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void;
 
     /**
      * subtract penalty_points and updates pass fail result
