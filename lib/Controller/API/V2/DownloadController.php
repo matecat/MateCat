@@ -678,6 +678,7 @@ class DownloadController extends AbstractDownloadController
      * @param array<int|string, array<string, mixed>> $output_content
      *
      * @throws Exception
+     * @throws \TypeError
      */
     private function startRemoteFileService(array $output_content): void
     {
@@ -703,7 +704,7 @@ class DownloadController extends AbstractDownloadController
         $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
 
         if ($verifier->validOrRefreshed($client)) {
-            $this->remoteFileService = new RemoteFileService($raw_token, $client);
+            $this->remoteFileService = new RemoteFileService($raw_token ?? throw new Exception('Token not available'), $client);
         } else {
             throw new Exception('Unable to refresh token for service');
         }
@@ -772,6 +773,7 @@ class DownloadController extends AbstractDownloadController
      *
      * @return array<int|string, ZipContentObject>
      * @throws Exception
+     * @throws \TypeError
      */
     private function getOutputContentsWithZipFiles(array $output_content): array
     {
@@ -853,6 +855,7 @@ class DownloadController extends AbstractDownloadController
      * @return string
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {

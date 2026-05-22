@@ -25,6 +25,40 @@ class ZipArchiveHandlerTest extends AbstractTest
         $this->assertStringContainsString('unknown error', $za->message(999));
     }
 
+    #[Test]
+    public function messageCoversAllKnownCodes(): void
+    {
+        $za = new ZipArchiveHandler();
+
+        $expected = [
+            1  => 'Multi-disk zip archives not supported',
+            2  => 'Renaming temporary file failed',
+            3  => 'Closing zip archive failed',
+            4  => 'Seek error',
+            5  => 'Read error',
+            6  => 'Write error',
+            7  => 'CRC error',
+            8  => 'Containing zip archive was closed',
+            10 => 'File already exists',
+            11 => "Can't open file",
+            12 => 'Failure to create temporary file',
+            13 => 'Zlib error',
+            14 => 'Malloc failure',
+            15 => 'Entry has been changed',
+            16 => 'Compression method not supported',
+            17 => 'Premature EOF',
+            18 => 'Invalid argument',
+            20 => 'Internal error',
+            21 => 'Zip archive inconsistent',
+            22 => "Can't remove file",
+            23 => 'Entry has been deleted',
+        ];
+
+        foreach ($expected as $code => $message) {
+            $this->assertEquals($message, $za->message($code), "Code $code");
+        }
+    }
+
     // ================================================
     // isDir()
     // ================================================
