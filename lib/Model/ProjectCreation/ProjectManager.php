@@ -272,6 +272,7 @@ class ProjectManager
     /**
      * Save features in project metadata
      * @throws ReflectionException
+     * @throws \PDOException
      */
     protected function saveFeaturesInMetadata(): void
     {
@@ -334,6 +335,7 @@ class ProjectManager
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
+     * @throws \PDOException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -428,6 +430,8 @@ class ProjectManager
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
+     * @throws \PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -500,6 +504,7 @@ class ProjectManager
      * Resolve the upload directory from config + upload token, and retrieve file hashes from storage.
      *
      * @return array<string, mixed> The link files structure with conversion hashes and zip hashes.
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function resolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
@@ -516,6 +521,7 @@ class ProjectManager
      * Push TMX files to MyMemory via TmKeyService.
      *
      * @throws EndQueueException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function pushTmxToMemory(): void
     {
@@ -533,6 +539,7 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function handleZipFiles(array $linkFiles): void
     {
@@ -554,6 +561,8 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
+     * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function resolveFilesExtractSegmentsAndStoreData(
         AbstractFilesStorage $fs,
@@ -665,6 +674,9 @@ class ProjectManager
 
     /**
      * Map segment-extraction/project-creation error codes to user-friendly project errors.
+     *
+     * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function mapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
     {
@@ -692,6 +704,8 @@ class ProjectManager
 
     /**
      * Determine project status and populate the result structure with success data.
+     *
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function determineStatusAndPopulateResult(): void
     {
@@ -779,6 +793,8 @@ class ProjectManager
 
     /**
      * Delete the upload directory via the storage abstraction.
+     *
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function cleanupUploadDirectory(AbstractFilesStorage $fs): void
     {
@@ -821,6 +837,9 @@ class ProjectManager
         $client->downloadItem($params);
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     private function clearFailedProject(Throwable $e): void
     {
         $this->log($e->getMessage(), $e);
@@ -885,6 +904,9 @@ class ProjectManager
         $this->projectStructure->segments_metadata = [];
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     private function pushActivityLog(): void
     {
         $activity = new ActivityLogStruct();
@@ -1015,6 +1037,7 @@ class ProjectManager
      *
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws ReQueueException
      * @throws ReflectionException
@@ -1051,6 +1074,9 @@ class ProjectManager
         $this->getProjectManagerModel()->bulkInsertSegmentNotesAndMetadata($this->projectStructure->notes);
     }
 
+    /**
+     * @throws \PDOException
+     */
     private function insertContextsForFile(): void
     {
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
