@@ -537,6 +537,12 @@ parameters:
 			path: lib/Controller/API/App/GetVolumeAnalysisController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\GetVolumeAnalysisController\:\:analysis\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/App/GetVolumeAnalysisController.php
+
+		-
 			message: '#^Cannot call method getValue\(\) on Utils\\Validator\\JSONSchema\\JSONValidatorObject\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -2571,6 +2577,12 @@ parameters:
 			path: lib/Controller/API/V3/QAModelTemplateController.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\StatusController\:\:index\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/API/V3/StatusController.php
+
+		-
 			message: '#^Cannot access offset ''path'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
@@ -2721,6 +2733,12 @@ parameters:
 			path: lib/Controller/Views/AnalyzeController.php
 
 		-
+			message: '#^Method Controller\\Views\\AnalyzeController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: lib/Controller/Views/AnalyzeController.php
+
+		-
 			message: '#^Cannot access offset ''id_project'' on array\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -2827,276 +2845,6 @@ parameters:
 			identifier: property.phpDocType
 			count: 1
 			path: lib/Model/ActivityLog/ActivityLogStruct.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:__construct\(\) has parameter \$_project_data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:_fetchProjectData\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:_fetchProjectData\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:fetchData\(\) should return \$this\(Model\\Analysis\\AbstractStatus\) but returns Model\\Analysis\\AbstractStatus\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:getResult\(\) should return View\\API\\App\\Json\\Analysis\\AnalysisProject but returns View\\API\\App\\Json\\Analysis\\AnalysisProject\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:isOutsourceEnabled\(\) has parameter \$idJob with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:isOutsourceEnabled\(\) has parameter \$id_customer with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:isOutsourceEnabled\(\) has parameter \$targetLang with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\AbstractStatus\:\:loadObjects\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Parameter \#1 \$mt_we_workflow_enabled of static method Model\\Analysis\\Constants\\MatchConstantsFactory\:\:getInstance\(\) expects bool\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Parameter \#1 \$pid of static method Model\\Analysis\\AnalysisDao\:\:getProjectStatsVolumeAnalysis\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Parameter \#1 \$raw of method View\\API\\App\\Json\\Analysis\\AnalysisJob\:\:incrementRaw\(\) expects int, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Parameter \#2 \$id_file_part of class View\\API\\App\\Json\\Analysis\\AnalysisFile constructor expects string\|null, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Parameter \#3 \$user of class View\\API\\App\\Json\\Analysis\\AnalysisChunk constructor expects Model\\Users\\UserStruct, Model\\Users\\UserStruct\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Parameter \#6 \$metadata of class View\\API\\App\\Json\\Analysis\\AnalysisFile constructor expects array\<object\>, array\<Model\\Files\\MetadataStruct\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Property Model\\Analysis\\AbstractStatus\:\:\$_others_in_queue \(int\) does not accept int\|string\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Property Model\\Analysis\\AbstractStatus\:\:\$_project_data type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Property Model\\Analysis\\AbstractStatus\:\:\$_resultSet type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Property Model\\Analysis\\AbstractStatus\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Analysis/AbstractStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\Constants\\AbstractConstants\:\:forValue\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/Constants/AbstractConstants.php
-
-		-
-			message: '#^Property Model\\Analysis\\Constants\\AbstractConstants\:\:\$forValue type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/Constants/AbstractConstants.php
-
-		-
-			message: '#^Method Model\\Analysis\\Constants\\ConstantsInterface\:\:forValue\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/Constants/ConstantsInterface.php
-
-		-
-			message: '#^Property Model\\Analysis\\Constants\\MTQEMatchTypeNamesConstants\:\:\$forValue type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/Constants/MTQEMatchTypeNamesConstants.php
-
-		-
-			message: '#^Property Model\\Analysis\\Constants\\StandardMatchTypeNamesConstants\:\:\$forValue type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/Constants/StandardMatchTypeNamesConstants.php
-
-		-
-			message: '#^Method Model\\Analysis\\PayableRates\:\:getBreakDown\(\) has parameter \$breakdowns with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Method Model\\Analysis\\PayableRates\:\:getBreakDown\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Method Model\\Analysis\\PayableRates\:\:getPayableRates\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Method Model\\Analysis\\PayableRates\:\:resolveBreakdowns\(\) has parameter \$breakdowns with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Method Model\\Analysis\\PayableRates\:\:resolveBreakdowns\(\) has parameter \$default with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Method Model\\Analysis\\PayableRates\:\:resolveBreakdowns\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Parameter \#4 \$isoSource of static method Model\\Analysis\\PayableRates\:\:getBreakDown\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Parameter \#5 \$isoTarget of static method Model\\Analysis\\PayableRates\:\:getBreakDown\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Property Model\\Analysis\\PayableRates\:\:\$DEFAULT_PAYABLE_RATES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Property Model\\Analysis\\PayableRates\:\:\$langPair2MTpayableRates type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/PayableRates.php
-
-		-
-			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Cannot call method getCreateDate\(\) on View\\API\\App\\Json\\Analysis\\AnalysisProject\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Cannot call method getJobs\(\) on View\\API\\App\\Json\\Analysis\\AnalysisProject\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Cannot call method getName\(\) on View\\API\\App\\Json\\Analysis\\AnalysisProject\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\XTRFStatus\:\:formatFile\(\) has parameter \$vector with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\XTRFStatus\:\:formatFile\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 13
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Method Model\\Analysis\\XTRFStatus\:\:getResultArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Parameter \#1 \$string of function str_pad expects string, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
-			identifier: argument.type
-			count: 13
-			path: lib/Model/Analysis/XTRFStatus.php
 
 		-
 			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -7793,6 +7541,12 @@ parameters:
 			message: '#^Parameter \#1 \$pid of static method Model\\Projects\\ProjectDao\:\:getProjectAndJobData\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
+			path: lib/View/API/V2/Json/Project.php
+
+		-
+			message: '#^Method View\\API\\V2\\Json\\Project\:\:renderItem\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/View/API/V2/Json/Project.php
 
 		-
@@ -14748,6 +14502,18 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/uber/lib/Features/Uber.php
+
+		-
+			message: '#^PHPDoc type array<string, float> of property Features\\Uber\\Model\\Analysis\\CustomPayableRates::\$DEFAULT_PAYABLE_RATES is not covariant with PHPDoc type array<string, int> of overridden property Model\\Analysis\\PayableRates::\$DEFAULT_PAYABLE_RATES\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: plugins/uber/lib/Features/Uber/Model/Analysis/CustomPayableRates.php
+
+		-
+			message: '#^PHPDoc type array<string, array<string, array<string, float\|int>>> of property Features\\Uber\\Model\\Analysis\\CustomPayableRates::\$langPair2MTpayableRates is not covariant with PHPDoc type array<string, array<string, array<string, int>>> of overridden property Model\\Analysis\\PayableRates::\$langPair2MTpayableRates\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: plugins/uber/lib/Features/Uber/Model/Analysis/CustomPayableRates.php
 
 		-
 			message: '#^Offset ''Additional Info''\|''AdditionalInfo''\|''Component''\|''Content Type''\|''Description''\|''DynamicValueExample''\|''KeyName''\|''MobileUsages''\|''Preview Link''\|''ReferenceLinks''\|''Repo''\|''Target Audience'' might not exist on array\{\}\|array\{Repo\?\: non\-falsy\-string, KeyName\?\: non\-falsy\-string, Description\?\: non\-falsy\-string, ''Content Type''\?\: non\-falsy\-string, ''Preview Link''\?\: non\-falsy\-string, ''Additional Info''\?\: non\-falsy\-string, DynamicValueExample\?\: non\-falsy\-string, Component\?\: non\-falsy\-string, \.\.\.\}\.$#'

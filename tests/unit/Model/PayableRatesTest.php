@@ -36,4 +36,40 @@ class PayableRatesTest extends AbstractTest
             $this->assertEquals($languageCombo[2], $payableRate['MT'], $errorMessage);
         }
     }
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function getPayableRates_unknownPairReturnsDefault()
+    {
+        // An unknown language pair should return $DEFAULT_PAYABLE_RATES
+        $payableRate = PayableRates::getPayableRates('xx', 'yy');
+        $this->assertEquals(PayableRates::$DEFAULT_PAYABLE_RATES, $payableRate);
+    }
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function resolveBreakdowns_usesExplicitDefaultWhenNoPairFound()
+    {
+        $customDefault = [
+            'NO_MATCH'    => 50,
+            '50%-74%'     => 50,
+            '75%-84%'     => 30,
+            '85%-94%'     => 30,
+            '95%-99%'     => 30,
+            '100%'        => 10,
+            '100%_PUBLIC' => 10,
+            'REPETITIONS' => 10,
+            'INTERNAL'    => 30,
+            'MT'          => 40,
+            'ICE'         => 0,
+            'ICE_MT'      => 40,
+        ];
+
+        $result = PayableRates::resolveBreakdowns([], 'xx', 'yy', $customDefault);
+        $this->assertEquals($customDefault, $result);
+    }
 }

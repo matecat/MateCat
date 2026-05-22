@@ -27,6 +27,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
     }
 
     /**
+     * @throws \DivisionByZeroError
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError

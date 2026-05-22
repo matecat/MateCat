@@ -28,6 +28,9 @@ interface ConstantsInterface
 
     public static function getWorkflowType(): string;
 
+    /**
+     * @return array<string, string>
+     */
     public static function forValue(): array;
 
 }
