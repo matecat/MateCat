@@ -506,6 +506,11 @@ class Lara extends AbstractEngine
         $laraClient = $client->getHttpClient();
         $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_keys));
 
+        // Send the translation origin to Lara via a custom request header.
+        if(!empty($_config['draft_translation'])){
+            $laraClient->setExtraHeader(Headers::LARA_DRAFT_TRANSLATION_HEADER, $_config['draft_translation']);
+        }
+
         try {
             $time_start = microtime(true);
             $headers = new Headers($_config['tuid'], $_config['translation_origin']);

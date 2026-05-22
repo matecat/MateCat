@@ -955,6 +955,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $contributionStruct->oldSegment = $this->filter->fromLayer0ToLayer1($this->data['segment']['segment']); //
         $contributionStruct->oldTranslation = ($old_translation['translation'] !== null) ? $this->filter->fromLayer0ToLayer1($old_translation['translation']) : "";
         $contributionStruct->translation_origin = $this->getOriginalSuggestionProvider($_Translation, $old_translation);
+        $contributionStruct->draftTranslation = $this->getDraftTranslation($old_translation);
 
         /*
          * This parameter is not used by the application, but we use it to for information integrity
@@ -1043,6 +1044,26 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         // Extract and return the provider information from the `created_by` field.
         return $created_by == EngineConstants::TM ? $created_by : explode('-', $created_by)[1] ?? EngineConstants::MT;
+    }
+
+    /**
+     * Returns the original suggestion (draft translation) that was presented to the user.
+     *
+     * The suggestion is stored in Layer 0 in the database. This method converts it
+     * to Layer 1 for use as the draft translation header sent to Lara.
+     *
+     * @param SegmentTranslationStruct $old_translation The old translation containing the suggestion.
+     *
+     * @return string The draft translation in Layer 1, or an empty string if unavailable.
+     * @throws Exception
+     */
+    protected function getDraftTranslation(SegmentTranslationStruct $old_translation): string
+    {
+        if (empty($old_translation->suggestion)) {
+            return '';
+        }
+
+        return $this->filter->fromLayer0ToLayer1($old_translation->suggestion);
     }
 
 }
