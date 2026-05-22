@@ -7,6 +7,9 @@ use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -401,5 +404,224 @@ class NewControllerValidationMethodsTest extends AbstractTest
     {
         $result = $this->invokeMethod('validateMMTGlossaries', ['']);
         $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateMMTGlossaries_valid_int_array_returns_string(): void
+    {
+        $result = $this->invokeMethod('validateMMTGlossaries', ['[1,2,3]']);
+        $this->assertSame('[1,2,3]', $result);
+    }
+
+    #[Test]
+    public function validateMMTGlossaries_non_array_json_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->invokeMethod('validateMMTGlossaries', ['"hello"']);
+    }
+
+    #[Test]
+    public function validateMMTGlossaries_array_with_non_int_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->invokeMethod('validateMMTGlossaries', ['["abc"]']);
+    }
+
+    // ──────────────── validateEngines() ────────────────
+
+    #[Test]
+    public function validateEngines_tms_engine_gt_1_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid TM Engine.');
+        $this->invokeMethod('validateEngines', [2, 0]);
+    }
+
+    #[Test]
+    public function validateEngines_mt_engine_gt_1_not_logged_throws(): void
+    {
+        $userIsLoggedProp = $this->reflector->getProperty('userIsLogged');
+        $userIsLoggedProp->setValue($this->controller, false);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid MT Engine.');
+        $this->invokeMethod('validateEngines', [0, 2]);
+    }
+
+    #[Test]
+    public function validateEngines_both_le_1_returns_array(): void
+    {
+        $result = $this->invokeMethod('validateEngines', [0, 0]);
+        $this->assertSame([0, null], $result);
+
+        $result = $this->invokeMethod('validateEngines', [1, 1]);
+        $this->assertSame([1, null], $result);
+    }
+
+    // ──────────────── validateLaraGlossaries() ────────────────
+
+    #[Test]
+    public function validateLaraGlossaries_null_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateLaraGlossaries', [null]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateLaraGlossaries_empty_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateLaraGlossaries', ['']);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateLaraGlossaries_valid_string_array_returns_string(): void
+    {
+        $result = $this->invokeMethod('validateLaraGlossaries', ['["abc","def"]']);
+        $this->assertSame('["abc","def"]', $result);
+    }
+
+    #[Test]
+    public function validateLaraGlossaries_non_array_json_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->invokeMethod('validateLaraGlossaries', ['"not_an_array"']);
+    }
+
+    #[Test]
+    public function validateLaraGlossaries_array_with_non_string_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->invokeMethod('validateLaraGlossaries', ['[1,2,3]']);
+    }
+
+    // ──────────────── validatePayableRateTemplate() ────────────────
+
+    #[Test]
+    public function validatePayableRateTemplate_both_null_returns_null(): void
+    {
+        $result = $this->invokeMethod('validatePayableRateTemplate', [null, null]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validatePayableRateTemplate_name_without_id_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('`payable_rate_template_id` param is missing');
+        $this->invokeMethod('validatePayableRateTemplate', ['My Rate', null]);
+    }
+
+    #[Test]
+    public function validatePayableRateTemplate_id_without_name_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('`payable_rate_template_name` param is missing');
+        $this->invokeMethod('validatePayableRateTemplate', [null, '42']);
+    }
+
+    // ──────────────── validateQaModelTemplate() ────────────────
+
+    #[Test]
+    public function validateQaModelTemplate_null_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateQaModelTemplate', [null]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateQaModelTemplate_empty_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateQaModelTemplate', ['']);
+        $this->assertNull($result);
+    }
+
+    // ──────────────── validateQaModel() ────────────────
+
+    #[Test]
+    public function validateQaModel_null_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateQaModel', [null]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateQaModel_empty_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateQaModel', ['']);
+        $this->assertNull($result);
+    }
+
+    // ──────────────── validateFiltersExtractionParameters() ────────────────
+
+    #[Test]
+    public function validateFiltersExtractionParameters_both_null_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateFiltersExtractionParameters', [null, null]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateFiltersExtractionParameters_valid_json_returns_struct(): void
+    {
+        $result = $this->invokeMethod('validateFiltersExtractionParameters', ['{"name":"test","json":{"extract_arrays":true}}', null]);
+        $this->assertInstanceOf(FiltersConfigTemplateStruct::class, $result);
+    }
+
+    // ──────────────── validateMTQEParametersOrDefault() ────────────────
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_both_null_returns_default(): void
+    {
+        $result = $this->invokeMethod('validateMTQEParametersOrDefault', [null, null]);
+        $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
+    }
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_invalid_json_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('mt_qe_workflow_template_raw_parameters is not a valid JSON');
+        $this->invokeMethod('validateMTQEParametersOrDefault', [null, 'not-json']);
+    }
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_valid_json_returns_params(): void
+    {
+        $result = $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"analysis_ignore_100":true,"confirm_best_quality_mt":false}']);
+        $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
+    }
+
+    // ──────────────── validateMTQEPayableRateBreakdownsOrDefault() ────────────────
+
+    #[Test]
+    public function validateMTQEPayableRateBreakdownsOrDefault_null_returns_default(): void
+    {
+        $result = $this->invokeMethod('validateMTQEPayableRateBreakdownsOrDefault', [null]);
+        $this->assertInstanceOf(MTQEPayableRateBreakdowns::class, $result);
+    }
+
+    // ──────────────── validateXliffParameters() ────────────────
+
+    #[Test]
+    public function validateXliffParameters_both_null_returns_null(): void
+    {
+        $result = $this->invokeMethod('validateXliffParameters', [null, null]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function validateXliffParameters_invalid_json_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('xliff_parameters is not a valid JSON');
+        $this->invokeMethod('validateXliffParameters', ['not-json', null]);
+    }
+
+    #[Test]
+    public function validateXliffParameters_valid_json_returns_array(): void
+    {
+        $result = $this->invokeMethod('validateXliffParameters', ['{}', null]);
+        $this->assertIsArray($result);
     }
 }
