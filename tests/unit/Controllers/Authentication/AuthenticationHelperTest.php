@@ -3,58 +3,55 @@
 namespace unit\Controllers\Authentication;
 
 use Controller\Abstracts\Authentication\AuthenticationHelper;
-use TestHelpers\AbstractTest;
-use Controller\Abstracts\Authentication\CookieManager;
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionMethod;
-use ReflectionProperty;
+use TestHelpers\AbstractTest;
 
+#[AllowMockObjectsWithoutExpectations]
 #[CoversClass(AuthenticationHelper::class)]
-#[CoversClass(CookieManager::class)]
 class AuthenticationHelperTest extends AbstractTest
 {
-    #[Test]
-    public function loggedPropertyIsBoolNotTrue(): void
-    {
-        $session = [];
-        $helper = $this->createHelper($session);
-        $prop = new ReflectionProperty(AuthenticationHelper::class, 'logged');
+    /** @var ApiKeyDao&MockObject */
+    private ApiKeyDao&MockObject $apiKeyDaoMock;
 
-        $this->assertIsBool($prop->getValue($helper));
+    /** @var UserDao&MockObject */
+    private UserDao&MockObject $userDaoMock;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->apiKeyDaoMock = $this->createMock(ApiKeyDao::class);
+        $this->userDaoMock = $this->createMock(UserDao::class);
+        TestableAuthenticationHelper::resetInstance();
     }
 
-    #[Test]
-    public function userPropertyIsAlwaysUserStruct(): void
+    protected function tearDown(): void
     {
-        $session = [];
-        $helper = $this->createHelper($session);
-        $prop = new ReflectionProperty(AuthenticationHelper::class, 'user');
-
-        $this->assertInstanceOf(UserStruct::class, $prop->getValue($helper));
+        TestableAuthenticationHelper::resetInstance();
+        parent::tearDown();
     }
 
-    #[Test]
-    public function validKeysReturnsFalseWhenBothNull(): void
+    private function createHelper(array &$session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
     {
-        $session = [];
-        $helper = $this->createHelper($session);
-        $method = new ReflectionMethod($helper, 'validKeys');
-
-        // Both null: early return false without DB access
-        $this->assertFalse($method->invoke($helper, null, null));
+        return TestableAuthenticationHelper::create($session, $this->apiKeyDaoMock, $apiKey, $apiSecret, $this->userDaoMock);
     }
 
+    // ─── Basic getters (no auth) ─────────────────────────────────────────
+
     #[Test]
-    public function validKeysReturnsFalseWhenKeyIsEmptyString(): void
+    public function loggedIsFalseByDefault(): void
     {
         $session = [];
         $helper = $this->createHelper($session);
-        $method = new ReflectionMethod($helper, 'validKeys');
 
-        // Empty strings are falsy: early return false without DB access
-        $this->assertFalse($method->invoke($helper, '', ''));
+        $this->assertFalse($helper->isLogged());
     }
 
     #[Test]
@@ -67,15 +64,6 @@ class AuthenticationHelperTest extends AbstractTest
     }
 
     #[Test]
-    public function isLoggedReturnsBoolWhenNoAuth(): void
-    {
-        $session = [];
-        $helper = $this->createHelper($session);
-
-        $this->assertFalse($helper->isLogged());
-    }
-
-    #[Test]
     public function getApiRecordReturnsNullByDefault(): void
     {
         $session = [];
@@ -84,17 +72,87 @@ class AuthenticationHelperTest extends AbstractTest
         $this->assertNull($helper->getApiRecord());
     }
 
-    #[Test]
-    public function sessionPropertyIsArrayReference(): void
-    {
-        $session = ['test_key' => 'test_value'];
-        $helper = $this->createHelper($session);
-        $prop = new ReflectionProperty(AuthenticationHelper::class, 'session');
-        $value = $prop->getValue($helper);
+    // ─── validKeys ───────────────────────────────────────────────────────
 
-        $this->assertIsArray($value);
-        $this->assertSame('test_value', $value['test_key']);
+    #[Test]
+    public function validKeysReturnsFalseWhenBothNull(): void
+    {
+        $session = [];
+        $helper = $this->createHelper($session);
+
+        $this->assertFalse($helper->validKeys(null, null));
     }
+
+    #[Test]
+    public function validKeysReturnsFalseWhenKeyIsEmptyString(): void
+    {
+        $session = [];
+        $helper = $this->createHelper($session);
+
+        $this->assertFalse($helper->validKeys('', ''));
+    }
+
+    #[Test]
+    public function validKeysSetsApiRecordWhenKeyFound(): void
+    {
+        $session = [];
+        $helper = $this->createHelper($session);
+
+        $apiRecord = new ApiKeyStruct(['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 1, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']);
+        $this->apiKeyDaoMock->method('findByKey')
+            ->with('key123')
+            ->willReturn($apiRecord);
+
+        $result = $helper->validKeys('key123', 's1');
+
+        $this->assertTrue($result);
+        $this->assertSame($apiRecord, $helper->getApiRecord());
+    }
+
+    #[Test]
+    public function validKeysReturnsFalseWhenSecretMismatch(): void
+    {
+        $session = [];
+        $helper = $this->createHelper($session);
+
+        $apiRecord = new ApiKeyStruct(['api_key' => 'k1', 'api_secret' => 'correct', 'uid' => 1, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']);
+        $this->apiKeyDaoMock->method('findByKey')
+            ->with('key123')
+            ->willReturn($apiRecord);
+
+        $result = $helper->validKeys('key123', 'wrong');
+
+        $this->assertFalse($result);
+        $this->assertSame($apiRecord, $helper->getApiRecord());
+    }
+
+    #[Test]
+    public function validKeysReturnsFalseWhenKeyNotFound(): void
+    {
+        $session = [];
+        $helper = $this->createHelper($session);
+
+        $this->apiKeyDaoMock->method('findByKey')->willReturn(null);
+
+        $this->assertFalse($helper->validKeys('unknown', 'secret'));
+        $this->assertNull($helper->getApiRecord());
+    }
+
+    #[Test]
+    public function validKeysUsesEmptyStringWhenApiKeyIsNull(): void
+    {
+        $session = [];
+        $helper = $this->createHelper($session);
+
+        $this->apiKeyDaoMock->expects($this->once())
+            ->method('findByKey')
+            ->with('')
+            ->willReturn(null);
+
+        $helper->validKeys(null, 'some_secret');
+    }
+
+    // ─── getUserProfile ──────────────────────────────────────────────────
 
     #[Test]
     public function getUserProfileReturnsArray(): void
@@ -112,18 +170,171 @@ class AuthenticationHelperTest extends AbstractTest
         $this->assertIsArray($result);
     }
 
-    private function createHelper(array &$session): AuthenticationHelper
+    // ─── Constructor: API key auth path ──────────────────────────────────
+
+    #[Test]
+    public function constructorWithValidApiKeySetsUserAndLogged(): void
     {
-        return TestableAuthenticationHelper::create($session);
+        $user = new UserStruct();
+        $user->uid = 42;
+        $user->email = 'api@example.com';
+        $user->first_name = 'Test';
+        $user->last_name = 'User';
+
+        $this->userDaoMock->method('getByUid')->with(42)->willReturn($user);
+
+        $apiRecord = new ApiKeyStruct(
+            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
+            $this->userDaoMock
+        );
+        $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
+
+        $session = [];
+        $helper = $this->createHelper($session, 'k1', 's1');
+
+        $this->assertTrue($helper->isLogged());
+        $this->assertSame(42, $helper->getUser()->uid);
+        $this->assertSame('api@example.com', $helper->getUser()->email);
+        $this->assertNotNull($helper->getApiRecord());
+    }
+
+    #[Test]
+    public function constructorWithValidApiKeyButNullUserKeepsDefaultUser(): void
+    {
+        $this->userDaoMock->method('getByUid')->willReturn(null);
+
+        $apiRecord = new ApiKeyStruct(
+            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
+            $this->userDaoMock
+        );
+        $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
+
+        $session = [];
+        $helper = $this->createHelper($session, 'k1', 's1');
+
+        $this->assertFalse($helper->isLogged());
+        $this->assertNull($helper->getUser()->uid);
+    }
+
+    #[Test]
+    public function constructorWithInvalidSecretDoesNotSetUser(): void
+    {
+        $apiRecord = new ApiKeyStruct(
+            ['api_key' => 'k1', 'api_secret' => 'real_secret', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
+            $this->userDaoMock
+        );
+        $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
+
+        $session = [];
+        $helper = $this->createHelper($session, 'k1', 'wrong_secret');
+
+        $this->assertFalse($helper->isLogged());
+        $this->assertNull($helper->getUser()->uid);
+    }
+
+    // ─── Constructor: session auth path ──────────────────────────────────
+
+    #[Test]
+    public function constructorWithSessionDataSetsUser(): void
+    {
+        $user = new UserStruct();
+        $user->uid = 99;
+        $user->email = 'session@example.com';
+
+        $session = [
+            'user'         => $user,
+            'user_profile' => ['uid' => 99, 'email' => 'session@example.com'],
+        ];
+
+        $helper = $this->createHelper($session);
+
+        $this->assertSame(99, $helper->getUser()->uid);
+    }
+
+    // ─── Constructor: exception handling ─────────────────────────────────
+
+    #[Test]
+    public function constructorCatchesExceptionAndSetsLoggedFalse(): void
+    {
+        $this->apiKeyDaoMock->method('findByKey')
+            ->willThrowException(new \RuntimeException('DB down'));
+
+        $session = [];
+        $helper = $this->createHelper($session, 'some_key', 'some_secret');
+
+        $this->assertFalse($helper->isLogged());
+        $this->assertNull($helper->getApiRecord());
+    }
+
+    // ─── getInstance singleton ───────────────────────────────────────────
+
+    #[Test]
+    public function getInstanceReturnsSameInstance(): void
+    {
+        $session = [];
+        $instance1 = TestableAuthenticationHelper::getInstance($session);
+        $instance2 = TestableAuthenticationHelper::getInstance($session);
+
+        $this->assertSame($instance1, $instance2);
+    }
+
+    // ─── refreshSession ──────────────────────────────────────────────────
+
+    #[Test]
+    public function refreshSessionClearsSessionVars(): void
+    {
+        $session = [
+            'user'         => new UserStruct(),
+            'user_profile' => ['some' => 'data'],
+        ];
+
+        TestableAuthenticationHelper::refreshSession($session);
+
+        $this->assertArrayNotHasKey('user', $session);
+        $this->assertArrayNotHasKey('user_profile', $session);
+    }
+
+    // ─── destroyAuthentication ───────────────────────────────────────────
+
+    #[Test]
+    public function destroyAuthenticationClearsSessionVars(): void
+    {
+        $session = [
+            'user'         => new UserStruct(),
+            'user_profile' => ['some' => 'data'],
+        ];
+
+        try {
+            AuthenticationHelper::destroyAuthentication($session);
+        } catch (\Throwable) {
+            // AuthCookie may throw in test environment without session — ignore
+        }
+
+        $this->assertArrayNotHasKey('user', $session);
+        $this->assertArrayNotHasKey('user_profile', $session);
     }
 }
 
 class TestableAuthenticationHelper extends AuthenticationHelper
 {
-    public static function create(array &$session): self
-    {
-        $instance = new self($session);
+    public static function create(
+        array &$session,
+        ?ApiKeyDao $apiKeyDao = null,
+        ?string $api_key = null,
+        ?string $api_secret = null,
+        ?UserDao $userDao = null,
+    ): self {
+        return new self($session, $api_key, $api_secret, $userDao, $apiKeyDao);
+    }
 
-        return $instance;
+    public static function resetInstance(): void
+    {
+        $ref = new \ReflectionClass(AuthenticationHelper::class);
+        $ref->getProperty('instance')->setValue(null, null);
+    }
+
+    public function validKeys(?string $api_key = null, ?string $api_secret = null): bool
+    {
+        return parent::validKeys($api_key, $api_secret);
     }
 }

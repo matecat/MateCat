@@ -210,7 +210,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check xliff_config_template_id
         if ($projectTemplateStruct->xliff_config_template_id > 0) {
-            $xliffConfigModel = XliffConfigTemplateDao::staticGetByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
+            $xliffConfigModel = (new XliffConfigTemplateDao())->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
 
             if (empty($xliffConfigModel)) {
                 throw new Exception("Not existing Xliff template.", 404);

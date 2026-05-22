@@ -454,6 +454,8 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * @param array<string, mixed> $elem
      * @return array<string, mixed>
+     * @throws \DomainException
+     * @throws \TypeError
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {
@@ -737,7 +739,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $xliffConfigTemplate->hydrateFromJSON($json);
             $xliff_parameters = $xliffConfigTemplate->rules?->getArrayCopy() ?? [];
         } elseif (!empty($xliff_parameters_template_id)) {
-            $xliffConfigTemplate = XliffConfigTemplateDao::staticGetByIdAndUser(
+            $xliffConfigTemplate = (new XliffConfigTemplateDao())->getByIdAndUser(
                 $xliff_parameters_template_id,
                 $this->getUser()->uid ?? throw new TypeError('User not authenticated')
             );

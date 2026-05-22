@@ -381,18 +381,6 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:sanitizeTmKeyArr\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/CreateProjectController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:sanitizeTmKeyArr\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/CreateProjectController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:validateDialectStrictParam\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1487,18 +1475,6 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V1\\NewController\:\:getFilesList\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V1/NewController.php
-
-		-
-			message: '#^Method Controller\\API\\V1\\NewController\:\:sanitizeTmKeyArr\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V1/NewController.php
-
-		-
-			message: '#^Method Controller\\API\\V1\\NewController\:\:sanitizeTmKeyArr\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V1/NewController.php
 
@@ -2625,96 +2601,6 @@ parameters:
 			path: lib/Controller/API/V3/TeamsProjectsController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:all\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:get\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:update\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:validateJSON\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\XliffConfigTemplateController\:\:validateJSON\(\) throws checked exception Swaggest\\JsonSchema\\Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$json of static method Model\\Xliff\\XliffConfigTemplateDao\:\:createFromJSON\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$jsonSchema of static method Utils\\Validator\\JSONSchema\\JSONValidator\:\:getValidJSONSchema\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$uid of static method Model\\Xliff\\XliffConfigTemplateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$json of static method Model\\Xliff\\XliffConfigTemplateDao\:\:editFromJSON\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Xliff\\XliffConfigTemplateDao\:\:createFromJSON\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Xliff\\XliffConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Xliff\\XliffConfigTemplateDao\:\:remove\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Parameter \#3 \$uid of static method Model\\Xliff\\XliffConfigTemplateDao\:\:editFromJSON\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/XliffConfigTemplateController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\Authentication\\AuthenticationHelper\:\:\$user \(Model\\Users\\UserStruct\) does not accept Model\\Users\\UserStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/Abstracts/Authentication/AuthenticationHelper.php
-
-		-
 			message: '#^Method Controller\\Abstracts\\BaseKleinViewController\:\:render\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3199,18 +3085,6 @@ parameters:
 			identifier: argument.type
 			count: 13
 			path: lib/Model/Analysis/XTRFStatus.php
-
-		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyStruct\:\:getUser\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyStruct.php
-
-		-
-			message: '#^Method Model\\ApiKeys\\ApiKeyStruct\:\:validSecret\(\) has parameter \$secret with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/ApiKeys/ApiKeyStruct.php
 
 		-
 			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'

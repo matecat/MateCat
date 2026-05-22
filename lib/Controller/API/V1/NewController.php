@@ -832,6 +832,7 @@ class NewController extends KleinController
      *
      * @return array<int, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
     protected function validateTmAndKeys(string $private_tm_key = "", string $private_tm_key_json = ""): array
     {
@@ -976,6 +977,8 @@ class NewController extends KleinController
      * @param array<string, mixed> $elem
      *
      * @return array<string, mixed>
+     * @throws \DomainException
+     * @throws \TypeError
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {
@@ -1301,7 +1304,7 @@ class NewController extends KleinController
 
         if (!empty($xliff_parameters_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $xliffConfigTemplate = XliffConfigTemplateDao::staticGetByIdAndUser(
+            $xliffConfigTemplate = (new XliffConfigTemplateDao())->getByIdAndUser(
                 (int)$xliff_parameters_template_id,
                 $uid
             );

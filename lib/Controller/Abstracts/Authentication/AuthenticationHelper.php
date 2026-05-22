@@ -35,6 +35,8 @@ class AuthenticationHelper
     /** @var array<string, mixed> */
     private array $session;
     private static ?AuthenticationHelper $instance = null;
+    private ?UserDao $userDao = null;
+    private ?ApiKeyDao $apiKeyDao = null;
 
     /**
      * @param array<string, mixed> $session
@@ -55,23 +57,27 @@ class AuthenticationHelper
      *
      * @throws Exception
      */
-    protected function __construct(array &$session, ?string $api_key = null, ?string $api_secret = null)
+    protected function __construct(array &$session, ?string $api_key = null, ?string $api_secret = null, ?UserDao $userDao = null, ?ApiKeyDao $apiKeyDao = null)
     {
         $this->session =& $session;
         $this->user = new UserStruct();
+        $this->userDao = $userDao;
+        $this->apiKeyDao = $apiKeyDao;
 
         try {
             if ($this->validKeys($api_key, $api_secret) && $this->api_record !== null) {
-                $this->user = $this->api_record->getUser();
+                $user = $this->api_record->getUser();
+                if ($user !== null) {
+                    $this->user = $user;
+                }
             } elseif (!empty($this->session['user']) && !empty($this->session['user_profile'])) {
                 $this->user = $this->session['user'];
                 AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler(), true);
             } else {
                 $user_cookie_credentials = AuthCookie::getCredentials(new SessionTokenStoreHandler());
                 if (!empty($user_cookie_credentials) && !empty($user_cookie_credentials['user'])) {
-                    $userDao = new UserDao();
-                    $userDao->setCacheTTL(60 * 60 * 24);
-                    $user = $userDao->getByUid($user_cookie_credentials['user']['uid']);
+                    $this->getUserDao()->setCacheTTL(60 * 60 * 24);
+                    $user = $this->getUserDao()->getByUid($user_cookie_credentials['user']['uid']);
                     if ($user !== null) {
                         $this->user = $user;
                         $this->setUserSession();
@@ -183,9 +189,9 @@ class AuthenticationHelper
     {
         if ($api_key || $api_secret) {
             $apiKey = $api_key ?? '';
-            $this->api_record = ApiKeyDao::findByKey($apiKey);
+            $this->api_record = $this->getApiKeyDao()->findByKey($apiKey);
             if ($this->api_record) {
-                return $this->api_record->validSecret($api_secret);
+                return $this->api_record->validSecret($api_secret ?? '');
             }
         }
 
@@ -207,4 +213,13 @@ class AuthenticationHelper
         return $this->api_record;
     }
 
+    private function getUserDao(): UserDao
+    {
+        return $this->userDao ??= new UserDao();
+    }
+
+    private function getApiKeyDao(): ApiKeyDao
+    {
+        return $this->apiKeyDao ??= new ApiKeyDao();
+    }
 }

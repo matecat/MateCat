@@ -1,19 +1,17 @@
 <?php
 
-
+use Model\DataAccess\Database;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers ApiKeyStruct::validSecret
- * User: dinies
- * Date: 21/06/16
- * Time: 15.50
+ * @covers ApiKeyStruct::getUser
  */
 class GetUserApiKeyTest extends AbstractTest
 {
+    private const TEST_API_KEY = 'test_get_user_api_key';
 
     protected $uid;
     private $test_data;
@@ -21,17 +19,27 @@ class GetUserApiKeyTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-
-        /**
-         * environment initialization
-         */
+        $this->cleanup();
         $this->test_data = new StdClass();
         $this->test_data->user = Factory_User::create();
         $this->test_data->api_key = Factory_ApiKey::create([
             'uid' => $this->test_data->user->uid,
+            'api_key' => self::TEST_API_KEY,
         ]);
     }
 
+    public function tearDown(): void
+    {
+        $this->cleanup();
+        parent::tearDown();
+    }
+
+    private function cleanup(): void
+    {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("DELETE FROM api_keys WHERE api_key = :key");
+        $stmt->execute(['key' => self::TEST_API_KEY]);
+    }
 
     #[Test]
     public function test_getUser_success()

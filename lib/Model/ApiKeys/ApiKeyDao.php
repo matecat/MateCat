@@ -4,7 +4,6 @@ namespace Model\ApiKeys;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -21,15 +20,15 @@ class ApiKeyDao extends AbstractDao
      * @return ApiKeyStruct|null
      * @throws PDOException
      */
-    static function findByKey(string $key): ?ApiKeyStruct
+    public function findByKey(string $key): ?ApiKeyStruct
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND api_key = :key ");
         $stmt->execute(['key' => $key]);
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, ApiKeyStruct::class);
 
-        return $stmt->fetch() ?? null;
+        return $stmt->fetch() ?: null;
     }
 
     /**
