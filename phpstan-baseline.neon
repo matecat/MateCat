@@ -1017,6 +1017,12 @@ parameters:
 			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/XliffToTargetConverterController.php
+
+		-
 			message: '#^Parameter \#1 \$body of method Klein\\AbstractResponse\:\:body\(\) expects string\|null, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3372,318 +3378,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-		-
-			message: '#^Argument of an invalid type Model\\Conversion\\UploadElement supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConversionHandler\:\:extractZipFile\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConversionHandler\:\:getZipExtractionErrorFiles\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$filters_extraction_parameters with type mixed is not subtype of native type Model\\Filters\\FiltersConfigTemplateStruct\|null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type array\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^Parameter \#1 \$size of method Model\\Conversion\\ConvertedFileModel\:\:setSize\(\) expects int, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^Property Model\\Conversion\\ConversionHandler\:\:\$zipExtractionErrorFiles type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConversionHandler.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConvertedFileList\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileList.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConvertedFileList\:\:getErrors\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileList.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConvertedFileList\:\:getWarnings\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileList.php
-
-		-
-			message: '#^Property Model\\Conversion\\ConvertedFileList\:\:\$erroredFiles type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileList.php
-
-		-
-			message: '#^Property Model\\Conversion\\ConvertedFileList\:\:\$warnedFiles type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileList.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConvertedFileModel\:\:getPdfAnalysis\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileModel.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConvertedFileModel\:\:getResult\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileModel.php
-
-		-
-			message: '#^Method Model\\Conversion\\ConvertedFileModel\:\:setPdfAnalysis\(\) has parameter \$pdfAnalysis with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileModel.php
-
-		-
-			message: '#^Property Model\\Conversion\\ConvertedFileModel\:\:\$pdfAnalysis type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/ConvertedFileModel.php
-
-		-
-			message: '#^Cannot call method isError\(\) on Model\\Conversion\\ConvertedFileModel\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Cannot call method isWarning\(\) on Model\\Conversion\\ConvertedFileModel\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Method Model\\Conversion\\FilesConverter\:\:__construct\(\) has parameter \$files with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Method Model\\Conversion\\FilesConverter\:\:convertFile\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Method Model\\Conversion\\FilesConverter\:\:getExtractedFilesContentList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Parameter \#1 \$convertedFileModel of method Model\\Conversion\\ConvertedFileList\:\:add\(\) expects Model\\Conversion\\ConvertedFileModel, Model\\Conversion\\ConvertedFileModel\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Parameter \#1 \$erroredFile of method Model\\Conversion\\ConvertedFileList\:\:setErroredFile\(\) expects Model\\Conversion\\ConvertedFileModel, Model\\Conversion\\ConvertedFileModel\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Parameter \#1 \$message of class DomainException constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Parameter \#1 \$warnedFile of method Model\\Conversion\\ConvertedFileList\:\:setWarnedFile\(\) expects Model\\Conversion\\ConvertedFileModel, Model\\Conversion\\ConvertedFileModel\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Property Model\\Conversion\\FilesConverter\:\:\$files type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/FilesConverter.php
-
-		-
-			message: '#^Method Model\\Conversion\\InternalHashPaths\:\:__construct\(\) has parameter \$array_params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/InternalHashPaths.php
-
-		-
-			message: '#^Method Model\\Conversion\\InternalHashPaths\:\:__construct\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Conversion/InternalHashPaths.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Conversion/MimeTypes/Guesser/FileBinaryMimeTypeGuesser.php
-
-		-
-			message: '#^Method Model\\Conversion\\MimeTypes\\Guesser\\FileinfoMimeTypeGuesser\:\:guessMimeType\(\) should return string\|null but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Conversion/MimeTypes/Guesser/FileinfoMimeTypeGuesser.php
-
-		-
-			message: '#^Method Model\\Conversion\\MimeTypes\\Guesser\\SimpleMarkupMimeTypeGuesser\:\:guessMimeType\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Conversion/MimeTypes/Guesser/SimpleMarkupMimeTypeGuesser.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function stripos expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 4
-			path: lib/Model/Conversion/MimeTypes/Guesser/SimpleMarkupMimeTypeGuesser.php
-
-		-
-			message: '#^Method Model\\Conversion\\MimeTypes\\MimeTypes\:\:getExtensions\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/MimeTypes/MimeTypes.php
-
-		-
-			message: '#^Method Model\\Conversion\\MimeTypes\\MimeTypes\:\:getMimeTypes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/MimeTypes/MimeTypes.php
-
-		-
-			message: '#^Method Model\\Conversion\\MimeTypes\\MimeTypes\:\:guessMimeType\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Conversion/MimeTypes/MimeTypes.php
-
-		-
-			message: '#^Property Model\\Conversion\\MimeTypes\\MimeTypes\:\:\$extensions type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/MimeTypes/MimeTypes.php
-
-		-
-			message: '#^Property Model\\Conversion\\MimeTypes\\MimeTypes\:\:\$mimeTypes type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/MimeTypes/MimeTypes.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function stripos expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Conversion/OCRCheck.php
-
-		-
-			message: '#^Property Model\\Conversion\\OCRCheck\:\:\$mimeTypes type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/OCRCheck.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$error\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Argument of an invalid type Model\\Conversion\\UploadElement supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Method Model\\Conversion\\Upload\:\:_filesAreTooMuch\(\) has parameter \$filesToUpload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Method Model\\Conversion\\Upload\:\:fixFileName\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Method Model\\Conversion\\Upload\:\:getUniformGlobalFilesStructure\(\) has parameter \$filesToUpload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Method Model\\Conversion\\Upload\:\:getUniformGlobalFilesStructure\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 6
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Method Model\\Conversion\\Upload\:\:uploadFiles\(\) has parameter \$filesToUpload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Model/Conversion/Upload.php
-
-		-
-			message: '#^Class Model\\Conversion\\UploadElement implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Conversion/UploadElement.php
-
-		-
-			message: '#^Method Model\\Conversion\\UploadElement\:\:__construct\(\) has parameter \$array_params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/UploadElement.php
-
-		-
-			message: '#^Method Model\\Conversion\\UploadElement\:\:getArrayCopy\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Conversion/UploadElement.php
 
 
 		-
@@ -8504,12 +8198,6 @@ parameters:
 			path: lib/View/API/V3/Json/FilesInfo.php
 
 		-
-			message: '#^Method UploadHandler\:\:handle_file_upload\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/View/fileupload/UploadHandler.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$segment\.$#'
 			identifier: property.notFound
 			count: 2
@@ -10042,6 +9730,12 @@ parameters:
 		-
 			message: '#^Argument of an invalid type Model\\Conversion\\UploadElement supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
+
+		-
+			message: '#^Parameter \#1 \$message of class RuntimeException constructor expects string, array\<string, int\|string\|null\> given\.$#'
+			identifier: argument.type
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 

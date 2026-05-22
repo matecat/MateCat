@@ -300,6 +300,10 @@ class UploadHandler
         return $file_name;
     }
 
+    /**
+     * @throws \LogicException
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     protected function handle_file_upload(string $uploaded_file, string $name, int $size, string $error): stdClass
     {
         $this->logger->debug($uploaded_file);
@@ -396,6 +400,7 @@ class UploadHandler
      * @param string $filename
      *
      * @return string|false
+     * @throws \LogicException
      */
     private function getMimeContentType(string $filename): string|false
     {

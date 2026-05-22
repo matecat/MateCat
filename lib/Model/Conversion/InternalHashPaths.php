@@ -18,7 +18,9 @@ class InternalHashPaths
     protected string $diskHash;
 
     /**
-     * @param array $array_params Associative array with keys 'cacheHash' and 'diskHash'.
+     * @param array<string, string> $array_params Associative array with keys 'cacheHash' and 'diskHash'.
+     *
+     * @throws DomainException
      */
     public function __construct(array $array_params)
     {

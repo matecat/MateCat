@@ -176,5 +176,83 @@ class FilesConverterTest extends AbstractTest
         $result = $converter->getResult();
         $this->assertTrue($result->hasErrors());
     }
+
+    // ================================================
+    // convertFiles() — zip with a non-zip file inside
+    // ================================================
+
+    /**
+     * A zip containing a missing (non-zip) file exercises the inner-zip
+     * convertFile() path (lines 147-154): the file conversion fails with an
+     * error, which is added to the result stack and recorded as an errored file.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function convertFilesZipWithInternalFileRecordsError(): void
+    {
+        // Create a zip containing one text file (not a zip).
+        $zipPath = $this->tmpDir . DIRECTORY_SEPARATOR . 'test_inner.zip';
+        $za = new \ZipArchive();
+        $za->open($zipPath, \ZipArchive::CREATE);
+        $za->addFromString('document.docx', 'fake docx content');
+        $za->close();
+
+        // Copy zip to the upload dir so the ConversionHandler can find it.
+        copy($zipPath, $this->tmpDir . DIRECTORY_SEPARATOR . 'test_inner.zip');
+
+        $converter = new \Model\Conversion\FilesConverter(
+            files: ['test_inner.zip'],
+            source_lang: 'en-US',
+            target_lang: 'it-IT',
+            intDir: $this->tmpDir,
+            errDir: $this->tmpDir,
+            uploadTokenValue: 'test-token-' . uniqid(),
+            icu_enabled: false,
+            segmentation_rule: null,
+            featureSet: new \Model\FeaturesBase\FeatureSet(),
+        );
+
+        $result = $converter->convertFiles();
+
+        // The internal file conversion failed (missing from storage) → error recorded.
+        $this->assertTrue($result->hasErrors());
+    }
+
+    // ================================================
+    // convertFiles() — empty zip triggers DomainException
+    // ================================================
+
+    /**
+     * An empty (but valid) zip causes extractZipFile() to return [] with no
+     * zipExtractionErrorFlag set, so convertFiles() throws a DomainException
+     * via the `empty($internalZipFileNames)` guard (lines 234-238).
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function convertFilesEmptyZipThrowsDomainException(): void
+    {
+        // Create a valid zip archive that contains no files.
+        $zipPath = $this->tmpDir . DIRECTORY_SEPARATOR . 'empty.zip';
+        $za = new \ZipArchive();
+        $za->open($zipPath, \ZipArchive::CREATE);
+        $za->close();
+
+        $converter = new \Model\Conversion\FilesConverter(
+            files: ['empty.zip'],
+            source_lang: 'en-US',
+            target_lang: 'it-IT',
+            intDir: $this->tmpDir,
+            errDir: $this->tmpDir,
+            uploadTokenValue: 'test-token-' . uniqid(),
+            icu_enabled: false,
+            segmentation_rule: null,
+            featureSet: new \Model\FeaturesBase\FeatureSet(),
+        );
+
+        $this->expectException(\DomainException::class);
+        $converter->convertFiles();
+    }
 }
 

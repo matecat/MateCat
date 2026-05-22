@@ -218,6 +218,7 @@ class ZipArchiveHandler extends ZipArchive
      * @param string $tmp_folder Absolute path to the temporary extraction directory (with trailing slash).
      *
      * @return array<string, array{size: int, name: string, tmp_name: string, error: string|null, type: string|null}>
+     * @throws \LogicException
      * @throws RuntimeException
      */
     public function extractFilesInTmp(string $tmp_folder): array

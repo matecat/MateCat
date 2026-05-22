@@ -38,6 +38,7 @@ class FilesConverter
     private string $errDir;
     private string $uploadTokenValue;
     private ?string $segmentation_rule;
+    /** @var string[] */
     private array $files;
 
     /**
@@ -64,7 +65,7 @@ class FilesConverter
     /**
      * FilesConverter constructor.
      *
-     * @param array $files
+     * @param string[] $files
      * @param string $source_lang
      * @param string $target_lang
      * @param string $intDir
@@ -194,11 +195,11 @@ class FilesConverter
     /**
      * @param string $fileName
      *
-     * @return ConvertedFileModel|null
+     * @return ConvertedFileModel
      * @throws ReflectionException
      * @throws Exception
      */
-    private function convertFile(string $fileName): ?ConvertedFileModel
+    private function convertFile(string $fileName): ConvertedFileModel
     {
         $conversionHandler = $this->getConversionHandlerInstance($fileName);
         $conversionHandler->processConversion();
@@ -208,6 +209,7 @@ class FilesConverter
 
     /**
      * @throws Exception
+     * @return string[]
      */
     private function getExtractedFilesContentList(string $zipName): array
     {
@@ -233,7 +235,7 @@ class FilesConverter
 
         if (empty($internalZipFileNames)) {
             $errors = $conversionHandler->getResult();
-            throw new DomainException($errors->getMessage(), $errors->getCode());
+            throw new DomainException($errors->getMessage() ?? '', $errors->getCode());
         }
 
         return $internalZipFileNames;

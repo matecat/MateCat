@@ -721,7 +721,7 @@ class Session
         $result = $converter->getResult();
 
         if ($result->hasErrors()) {
-            throw new RuntimeException($result->getErrors()[0]);
+            throw new RuntimeException((string)($result->getErrors()[0]['message'] ?? 'Conversion error'));
         }
 
         $data = [];

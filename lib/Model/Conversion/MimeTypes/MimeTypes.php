@@ -42,7 +42,10 @@ use Model\Conversion\MimeTypes\Guesser\SimpleMarkupMimeTypeGuesser;
  */
 class MimeTypes
 {
+    /** @var array<string, string[]> */
     private array $extensions = [];
+
+    /** @var array<string, string[]> */
     private array $mimeTypes = [];
 
     /**
@@ -107,7 +110,7 @@ class MimeTypes
     /**
      * @param string $mimeType
      *
-     * @return array
+     * @return string[]
      */
     public function getExtensions(string $mimeType): array
     {
@@ -121,7 +124,7 @@ class MimeTypes
     /**
      * @param string $ext
      *
-     * @return array
+     * @return string[]
      */
     public function getMimeTypes(string $ext): array
     {
@@ -155,6 +158,8 @@ class MimeTypes
      * @param string $path
      *
      * @return string|null
+     *
+     * @throws LogicException
      */
     public function guessMimeType(string $path): ?string
     {

@@ -31,6 +31,7 @@ class ConvertedFileModel
 
     private bool $isZipContent = false;
 
+    /** @var array<string, mixed> */
     private array $pdfAnalysis = [];
 
     /**
@@ -166,7 +167,7 @@ class ConvertedFileModel
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getPdfAnalysis(): array
     {
@@ -174,7 +175,7 @@ class ConvertedFileModel
     }
 
     /**
-     * @param array $pdfAnalysis
+     * @param array<string, mixed> $pdfAnalysis
      */
     public function setPdfAnalysis(array $pdfAnalysis): void
     {
@@ -193,6 +194,7 @@ class ConvertedFileModel
 
     /**
      * @return InternalHashPaths
+     * @throws \DomainException
      */
     public function getConversionHashes(): InternalHashPaths
     {
@@ -224,7 +226,7 @@ class ConvertedFileModel
     /**
      * Returns the result data of this file as an array, suitable for the API response.
      *
-     * @return array{name: string, size: int, pdfAnalysis: array}
+     * @return array{name: string, size: int, pdfAnalysis: array<string, mixed>}
      */
     public function getResult(): array
     {

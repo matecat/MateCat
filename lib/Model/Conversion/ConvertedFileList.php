@@ -16,7 +16,15 @@ class ConvertedFileList
      * @var ConvertedFileModel[]
      */
     private array $convertedFiles = [];
+
+    /**
+     * @var array<int, array{code: int, message: string|null, name: string}>
+     */
     private array $erroredFiles = [];
+
+    /**
+     * @var array<int, array{code: int, message: string|null, name: string}>
+     */
     private array $warnedFiles = [];
 
     /**
@@ -64,7 +72,7 @@ class ConvertedFileList
 
     /**
      * Check on executed conversion results and filter the stack to get errors only.
-     * @return array
+     * @return array<int, array{code: int, message: string|null, name: string}>
      */
     public function getErrors(): array
     {
@@ -73,7 +81,7 @@ class ConvertedFileList
 
     /**
      * Returns OCR warnings
-     * @return array
+     * @return array<int, array{code: int, message: string|null, name: string}>
      */
     public function getWarnings(): array
     {
@@ -82,6 +90,7 @@ class ConvertedFileList
 
     /**
      * @return InternalHashPaths[]
+     * @throws \DomainException
      */
     public function getHashes(): array
     {
@@ -96,7 +105,7 @@ class ConvertedFileList
     }
 
     /**
-     * @return array
+     * @return array{zipFiles?: array<int, array{name: string, size: int, pdfAnalysis: array<string, mixed>}>, simpleFileName?: array<int, array{name: string, size: int, pdfAnalysis: array<string, mixed>}>}
      */
     public function getData(): array
     {

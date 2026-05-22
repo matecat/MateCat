@@ -67,7 +67,11 @@ class FileinfoMimeTypeGuesser implements MimeTypeGuesserInterface
         $finfo = new finfo(FILEINFO_MIME_TYPE, $this->magicFile);
         $mimeType = $finfo->file($path);
 
-        if ($mimeType && 0 === (strlen($mimeType) % 2)) {
+        if ($mimeType === false) {
+            return null;
+        }
+
+        if (0 === (strlen($mimeType) % 2)) {
             $mimeStart = substr($mimeType, 0, strlen($mimeType) >> 1);
             $mimeType = $mimeStart . $mimeStart === $mimeType ? $mimeStart : $mimeType;
         }
