@@ -1,6 +1,7 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\Database;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -74,6 +75,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
     public function setUp(): void
     {
         parent::setUp();
+        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");

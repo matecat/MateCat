@@ -31,6 +31,7 @@ class SetContributionTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
+        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $insertJobQuery = "INSERT INTO `jobs` 
             (`id`, 
@@ -103,10 +104,11 @@ class SetContributionTest extends AbstractTest
 
     public function tearDown(): void
     {
+        $conn = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
         $redisHandler = (new RedisHandler())->getConnection();
         $redisHandler->flushdb();
-        Database::obtain()->getConnection()->exec("DELETE FROM jobs WHERE id = 1999999");
-        Database::obtain()->getConnection()->exec("DELETE FROM projects WHERE id = 22222222");
+        $conn->exec("DELETE FROM jobs WHERE id = 1999999");
+        $conn->exec("DELETE FROM projects WHERE id = 22222222");
         parent::tearDown();
     }
 

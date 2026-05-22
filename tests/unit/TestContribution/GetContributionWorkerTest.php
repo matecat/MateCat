@@ -19,6 +19,7 @@ use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class GetContributionWorkerTest extends AbstractTest
@@ -783,7 +784,7 @@ class GetContributionWorkerTest extends AbstractTest
 
     private function cleanupDbFixtures(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
         $conn->exec('DELETE FROM segment_translations WHERE id_job = ' . self::TEST_JOB_ID);
         $conn->exec('DELETE FROM segments WHERE id = ' . self::TEST_SEGMENT_ID);
         $conn->exec('DELETE FROM jobs WHERE id = ' . self::TEST_JOB_ID);
