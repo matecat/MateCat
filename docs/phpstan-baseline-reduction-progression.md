@@ -6,14 +6,14 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,317 | −5,049 (−68.5%) |
+| **PHPStan baseline entries** | 7,366 | 2,305 | −5,061 (−68.7%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,231 | +2,983 (+132.7%) |
-| **PHPUnit assertions** | ~19,449 | 18,034 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 25.15% (172/684) | +16.67% (+119 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 50.51% (2,085/4,128) | +28.77% (+1,241 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 52.59% (18,444/35,074) | +31.40% (+11,171 lines) |
-| **New test files** | 235 | 366 | +131 |
+| **PHPUnit tests** | ~2,248 | 5,471 | +3,223 (+143.4%) |
+| **PHPUnit assertions** | ~19,449 | 18,647 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 26.53% (182/686) | +18.05% (+129 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 53.09% (2,198/4,140) | +31.35% (+1,354 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 55.12% (19,380/35,159) | +33.93% (+12,107 lines) |
+| **New test files** | 235 | 367 | +132 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 298 | +298 |
 
 ---

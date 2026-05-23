@@ -11,6 +11,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
@@ -56,10 +57,11 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      *
      * @return $this
      * @throws Exception
+     * @throws TypeError
      */
     public function setOutputContent(ZipContentObject $content): AbstractDownloadController
     {
-        $this->outputContent = $content->getContent();
+        $this->outputContent = $content->getContent() ?? '';
 
         return $this;
     }
@@ -230,6 +232,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      *
      * @return string
      * @throws Exception
+     * @throws TypeError
      */
     protected static function composeZip(array $output_content, ?string $outputFile = null, ?bool $isOriginalFile = false): string
     {

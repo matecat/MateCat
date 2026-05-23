@@ -756,6 +756,7 @@ class DownloadController extends AbstractDownloadController
      * @param ZipContentObject[] $output_content
      *
      * @throws Exception
+     * @throws TypeError
      */
     private function updateRemoteFiles(array $output_content): void
     {
@@ -764,7 +765,7 @@ class DownloadController extends AbstractDownloadController
             if ($remoteFile === null) {
                 throw new Exception('Remote file not found');
             }
-            $this->remoteFiles[$remoteFile->id] = $this->remoteFileService->updateFile($remoteFile, $output_file->getContent());
+            $this->remoteFiles[$remoteFile->id] = $this->remoteFileService->updateFile($remoteFile, $output_file->getContent() ?? '');
         }
     }
 
@@ -941,7 +942,7 @@ class DownloadController extends AbstractDownloadController
                             $newRealZipFilePath = $newInternalZipFile->output_filename; //xlf
                         }
 
-                        $zip->addFromString($newRealZipFilePath, $newInternalZipFile->getContent());
+                        $zip->addFromString($newRealZipFilePath, $newInternalZipFile->getContent() ?? '');
                     }
                 }
             }
