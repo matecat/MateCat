@@ -15,6 +15,7 @@ parameters:
         - tests
         - plugins/translated/tests
         - plugins/uber/tests
+        - plugins/vite/tests
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
     # Flag @throws \Exception on public/protected methods when only

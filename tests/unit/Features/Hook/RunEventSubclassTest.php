@@ -9,6 +9,7 @@ use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\FeaturesBase\Hook\Event\Run\BeforeProjectCreationEvent;
 use Model\FeaturesBase\Hook\Event\Run\ChunkReviewUpdatedEvent;
+use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use Model\FeaturesBase\Hook\Event\Run\FilterProjectNameModifiedEvent;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
@@ -69,6 +70,7 @@ class RunEventSubclassTest extends AbstractTest
             'ValidateProjectCreation' => [ValidateProjectCreationEvent::class, 'validateProjectCreation'],
             'PostJobMerged' => [PostJobMergedEvent::class, 'postJobMerged'],
             'SetTranslationCommitted' => [SetTranslationCommittedEvent::class, 'setTranslationCommitted'],
+            'DecorateView' => [DecorateViewEvent::class, 'decorateView'],
         ];
     }
 
@@ -250,5 +252,16 @@ class RunEventSubclassTest extends AbstractTest
         $event = new SetTranslationCommittedEvent($context);
 
         self::assertSame($context, $event->context);
+    }
+
+    #[Test]
+    public function decorateViewEventExposesAllProperties(): void
+    {
+        $view = $this->createStub(\PHPTAL::class);
+        $event = new DecorateViewEvent($view, 'main_page', 'nonce-abc');
+
+        self::assertSame($view, $event->view);
+        self::assertSame('main_page', $event->templateName);
+        self::assertSame('nonce-abc', $event->nonce);
     }
 }

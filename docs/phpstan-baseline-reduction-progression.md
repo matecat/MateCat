@@ -6,9 +6,9 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,291 | −5,075 (−68.9%) |
+| **PHPStan baseline entries** | 7,366 | 2,293 | −5,073 (−68.9%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,471 | +3,223 (+143.4%) |
+| **PHPUnit tests** | ~2,248 | 5,498 | +3,250 (+144.6%) |
 | **PHPUnit assertions** | ~19,449 | 18,647 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 26.53% (182/686) | +18.05% (+129 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 53.09% (2,198/4,140) | +31.35% (+1,354 methods) |

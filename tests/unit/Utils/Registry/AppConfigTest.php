@@ -105,45 +105,6 @@ class AppConfigTest extends TestCase
     }
 
     #[Test]
-    public function registerViewDecoratorAndDecorateViewInvokesCallback(): void
-    {
-        $called = false;
-        $capturedTemplate = '';
-        $capturedNonce = '';
-
-        AppConfig::registerViewDecorator(function ($view, string $template, string $nonce) use (&$called, &$capturedTemplate, &$capturedNonce) {
-            $called = true;
-            $capturedTemplate = $template;
-            $capturedNonce = $nonce;
-        });
-
-        $mockView = $this->createStub(\PHPTAL::class);
-        AppConfig::decorateView($mockView, 'test_template', 'abc123');
-
-        $this->assertTrue($called);
-        $this->assertSame('test_template', $capturedTemplate);
-        $this->assertSame('abc123', $capturedNonce);
-
-        AppConfig::registerViewDecorator(function () {});
-    }
-
-    #[Test]
-    public function decorateViewIsNoOpWhenNoDecoratorRegistered(): void
-    {
-        $ref = new \ReflectionProperty(AppConfig::class, 'viewDecorator');
-        $original = $ref->getValue();
-
-        $ref->setValue(null, null);
-
-        $mockView = $this->createStub(\PHPTAL::class);
-        AppConfig::decorateView($mockView, 'template', 'nonce');
-
-        $this->assertTrue(true);
-
-        $ref->setValue(null, $original);
-    }
-
-    #[Test]
     public function resetSingletonAllowsReinitialization(): void
     {
         AppConfig::resetSingleton();

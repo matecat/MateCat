@@ -17,6 +17,7 @@ use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
+use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
@@ -103,9 +104,6 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $nonce = Utils::uuid4();
         $this->view->{'x_nonce_unique_id'} = $nonce;
 
-        $this->view->{'vite_html'} = '';
-        AppConfig::decorateView( $this->view, $template_name, $nonce );
-
         // init oauth clients
         $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
         $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
@@ -119,20 +117,15 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
             AppConfig::$HTTPHOST . "/gdrive/oauth/response"
         )->getAuthorizationUrl($_SESSION, 'drive') : "";
 
-        /**
-         * This is a unique ID generated at runtime.
-         * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
-         */
-        $this->view->{'x_nonce_unique_id'} = Utils::uuid4();
-
         $parsedHost = parse_url(AppConfig::$HTTPHOST);
         $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])
             ? " *.ajax." . $parsedHost['host']
             : null;
 
         $this->addParamsToView($params);
-
         $this->view->setOutputMode(PHPTAL::HTML5);
+
+        $this->getFeatureSet()->dispatch(new DecorateViewEvent($this->view, $template_name, $nonce));
     }
 
     /**
@@ -166,6 +159,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function render(?int $code = null): never
     {
