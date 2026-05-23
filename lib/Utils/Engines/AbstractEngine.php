@@ -3,8 +3,8 @@
 namespace Utils\Engines;
 
 use CURLFile;
-use DomainException;
 use Exception;
+use Model\DataAccess\UnknownPropertyException;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -188,7 +188,7 @@ abstract class AbstractEngine implements EngineInterface
      * @param string $key
      * @param mixed  $value
      *
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __set(string $key, mixed $value)
     {
@@ -199,7 +199,7 @@ abstract class AbstractEngine implements EngineInterface
         } elseif (is_array($this->engineRecord->extra_parameters) && array_key_exists($key, $this->engineRecord->extra_parameters)) {
             $this->engineRecord->extra_parameters[$key] = $value;
         } else {
-            throw new DomainException("Property $key does not exists in " . get_class($this));
+            throw new UnknownPropertyException($key, get_class($this));
         }
     }
 

@@ -10,7 +10,6 @@
 namespace Model\DataAccess;
 
 use Countable;
-use DomainException;
 use ReflectionObject;
 use ReflectionProperty;
 use stdClass;
@@ -45,12 +44,12 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @param string $name
      * @param mixed $value
      *
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __set($name, $value)
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
         $this->$name = $value;
     }
@@ -100,12 +99,12 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @param string $name
      *
      * @return mixed
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __get($name)
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Trying to get an undefined property ' . $name);
+            throw new UnknownPropertyException($name);
         }
 
         return $this->$name;
@@ -116,7 +115,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @param int    $timestamp
      *
      * @return void
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function setTimestamp(string $attribute, int $timestamp): void
     {

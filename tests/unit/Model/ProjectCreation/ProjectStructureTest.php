@@ -104,7 +104,7 @@ class ProjectStructureTest extends AbstractTest
         $ps = new ProjectStructure();
 
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessageMatches('/Trying to get an undefined property/');
+        $this->expectExceptionMessageMatches('/Unknown property/');
 
         $_ = $ps->nonexistent_property;
     }

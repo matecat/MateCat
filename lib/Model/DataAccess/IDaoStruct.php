@@ -22,6 +22,11 @@ interface IDaoStruct
 
     public function count(): int;
 
+    /**
+     * @param list<string>|null $mask
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(array $mask = null): array;
 
 }

@@ -6,8 +6,8 @@
 namespace Utils\Shop;
 
 use ArrayObject;
-use DomainException;
 use LogicException;
+use Model\DataAccess\UnknownPropertyException;
 
 /**
  * Abstract parent for Items to use with Cart class
@@ -108,7 +108,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      *
      * @return void
      *
-     * @throws LogicException/DomainException
+     * @throws UnknownPropertyException
      * @see  $__storage
      *
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
@@ -121,7 +121,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
         }
 
         if (!array_key_exists($key, $this->__storage)) {
-            throw new DomainException("Field $key does not exists in " . __CLASS__ . " structure.");
+            throw new UnknownPropertyException($key, __CLASS__);
         }
 
         $value = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES);
@@ -139,7 +139,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      *
      * @return void
      *
-     * @throws DomainException
+     * @throws UnknownPropertyException
      * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      *
      * @see  $__storage
@@ -150,7 +150,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
         if (array_key_exists($key, $this->__storage)) {
             parent::offsetUnset($key);
         } else {
-            throw new DomainException("Field $key does not exists in " . __CLASS__ . " structure.");
+            throw new UnknownPropertyException($key, __CLASS__);
         }
     }
 

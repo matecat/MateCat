@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,569 | −4,797 (−65.1%) |
+| **PHPStan baseline entries** | 7,366 | 2,317 | −5,049 (−68.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 5,231 | +2,983 (+132.7%) |
 | **PHPUnit assertions** | ~19,449 | 18,034 | — |
@@ -14,7 +14,7 @@
 | **Coverage — Methods** | 21.74% (844/3,883) | 50.51% (2,085/4,128) | +28.77% (+1,241 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 52.59% (18,444/35,074) | +31.40% (+11,171 lines) |
 | **New test files** | 235 | 366 | +131 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 296 | +296 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 298 | +298 |
 
 ---
 
@@ -157,6 +157,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/DataAccess/DaoCacheTrait.php` | Phase 2A |
 | `lib/Model/DataAccess/Database.php` | Phase 0 |
 | `lib/Model/DataAccess/IDatabase.php` | Phase 0 |
+| `lib/Model/DataAccess/IDaoStruct.php` | Phase 32 |
+| `lib/Model/DataAccess/UnknownPropertyException.php` | Phase 32 |
 | `lib/Model/DataAccess/RecursiveArrayCopy.php` | Phase 0 |
 | `lib/Model/DataAccess/ShapelessConcreteStruct.php` | Phase 2B |
 | `lib/Model/DataAccess/TransactionalTrait.php` | Phase 7B |

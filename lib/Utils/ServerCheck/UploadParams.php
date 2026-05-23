@@ -2,7 +2,7 @@
 
 namespace Utils\ServerCheck;
 
-use DomainException;
+use Model\DataAccess\UnknownPropertyException;
 
 /**
  * Created by PhpStorm.
@@ -36,7 +36,7 @@ class UploadParams
     public function __set($name, $value)
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
     }
 

@@ -17,6 +17,8 @@ parameters:
     # a narrower exception (e.g. \InvalidArgumentException) is thrown
     checkTooWideThrowTypesInProtectedAndPublicMethods: true
     exceptions:
+        uncheckedExceptionClasses:
+            - 'Model\DataAccess\UnknownPropertyException'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

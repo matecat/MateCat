@@ -11,6 +11,7 @@ namespace Utils\TaskRunner\Commons;
 
 use ArrayAccess;
 use DomainException;
+use Model\DataAccess\UnknownPropertyException;
 use stdClass;
 use Stringable;
 
@@ -50,11 +51,11 @@ abstract class AbstractElement extends stdClass implements ArrayAccess, Stringab
      * @param string $name
      * @param mixed $value
      *
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __set(string $name, mixed $value): void
     {
-        throw new DomainException('Unknown property ' . $name);
+        throw new UnknownPropertyException($name);
     }
 
     /**

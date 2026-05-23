@@ -200,14 +200,13 @@ abstract class AbstractDao
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys($struct->toArray());
-        /** @var list<string> $mask */
         $mask = array_values(array_diff($mask, static::$auto_increment_field));
 
         [$sql, $dupBindValues] = static::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_update);
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
-        $data = array_merge($struct->toArray($mask), $dupBindValues);
+        $data = array_merge($struct->toArray(array_values($mask)), $dupBindValues);
 
         LoggerFactory::getLogger('dao')->debug(["SQL" => $sql, "values" => $data]);
 

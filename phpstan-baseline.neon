@@ -3128,23 +3128,7 @@ parameters:
 			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
 
 
-		-
-			message: '#^Method Model\\DataAccess\\AbstractDaoObjectStruct\:\:__construct\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/DataAccess/AbstractDaoObjectStruct.php
 
-		-
-			message: '#^Method Model\\DataAccess\\IDaoStruct\:\:toArray\(\) has parameter \$mask with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/IDaoStruct.php
-
-		-
-			message: '#^Method Model\\DataAccess\\IDaoStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/DataAccess/IDaoStruct.php
 
 		-
 			message: '#^Method Model\\EditLog\\EditLogSegmentStruct\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -5989,11 +5973,6 @@ parameters:
 			count: 1
 			path: lib/Utils/ServerCheck/UploadParams.php
 
-		-
-			message: '#^Method Utils\\ServerCheck\\UploadParams\:\:__set\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/ServerCheck/UploadParams.php
 
 		-
 			message: '#^Call to an undefined method object\:\:offsetSet\(\)\.$#'
@@ -6025,11 +6004,6 @@ parameters:
 			count: 1
 			path: lib/Utils/Shop/AbstractItem.php
 
-		-
-			message: '#^Method Utils\\Shop\\AbstractItem\:\:offsetSet\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Shop/AbstractItem.php
 
 		-
 			message: '#^Method Utils\\Shop\\AbstractItem\:\:offsetSet\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -6037,11 +6011,6 @@ parameters:
 			count: 1
 			path: lib/Utils/Shop/AbstractItem.php
 
-		-
-			message: '#^PHPDoc tag @throws has invalid value \(LogicException/DomainException\)\: Unexpected token "/DomainException", expected TOKEN_HORIZONTAL_WS at offset 438 on line 15$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/Shop/AbstractItem.php
 
 		-
 			message: '#^Property Utils\\Shop\\AbstractItem\:\:\$__storage type has no value type specified in iterable type array\.$#'
@@ -6673,11 +6642,6 @@ parameters:
 			count: 1
 			path: lib/View/API/Commons/ZipContentObject.php
 
-		-
-			message: '#^Method View\\API\\Commons\\ZipContentObject\:\:__set\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/View/API/Commons/ZipContentObject.php
 
 		-
 			message: '#^Method View\\API\\Commons\\ZipContentObject\:\:build\(\) has parameter \$_array_params with no value type specified in iterable type array\.$#'

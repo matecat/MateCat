@@ -265,7 +265,7 @@ class QualityReportViewControllerTest extends AbstractTest
         ]);
 
         $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('Trying to get an undefined property job_owner');
+        $this->expectExceptionMessage('Unknown property job_owner');
 
         $this->controller->renderView();
     }

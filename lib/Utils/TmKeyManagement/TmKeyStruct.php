@@ -4,6 +4,7 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use JsonSerializable;
+use Model\DataAccess\UnknownPropertyException;
 use stdClass;
 
 /**
@@ -182,12 +183,12 @@ class TmKeyStruct extends stdClass implements JsonSerializable
     }
 
     /**
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __set(string $name, mixed $_value): void
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
     }
 

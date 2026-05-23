@@ -2,8 +2,8 @@
 
 namespace View\API\Commons;
 
-use DomainException;
 use Exception;
+use Model\DataAccess\UnknownPropertyException;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\S3FilesStorage;
 use Predis\Connection\ConnectionException;
@@ -114,7 +114,7 @@ class ZipContentObject extends stdClass
     public function __set($name, $value)
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
     }
 

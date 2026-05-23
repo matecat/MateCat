@@ -116,7 +116,7 @@ class AbstractDaoObjectStructTest extends AbstractTest
     public function getUnknownPropertyThrowsDomainException(): void
     {
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessageMatches('/Trying to get an undefined property/');
+        $this->expectExceptionMessageMatches('/Unknown property/');
 
         $this->struct->undeclared;
     }
