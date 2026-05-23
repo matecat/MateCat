@@ -10,6 +10,7 @@ use Utils\Constants\Mime2Extension;
 class AppConfig
 {
 
+    /** @var list<string> */
     public static array $MANDATORY_KEYS = [
         'ENV',
         'DB_SERVER',
@@ -269,6 +270,7 @@ class AppConfig
      *
      * Done.
      */
+    /** @var array<string, array<string, string|null>> */
     public static array $OAUTH_CONFIG = [];
 
     /**
@@ -329,6 +331,7 @@ class AppConfig
     /**
      * Logging configuration
      */
+    /** @var array<string, array<string, mixed>> */
     public static array $MONOLOG_HANDLERS = [];
 
     public static string $REPLACE_HISTORY_DRIVER = '';
@@ -336,6 +339,12 @@ class AppConfig
 
     private static ?AppConfig $MYSELF = null;
 
+    /**
+     * @param array<string, mixed> $configuration
+     * @param array<string, mixed> $taskManagerConfiguration
+     *
+     * @throws RuntimeException
+     */
     protected function __construct(
         string $rootPath,
         string $envName,
@@ -399,9 +408,9 @@ class AppConfig
         self::$UTILS_ROOT = self::$ROOT . '/lib/Utils';
 
         // Load external view decorator (e.g. Vite asset injection) if configured
-        if ( self::$VITE_ASSETS_PATH ) {
-            $viteAssetsFullPath = realpath( self::$ROOT . '/' . self::$VITE_ASSETS_PATH );
-            if ( $viteAssetsFullPath && str_starts_with( $viteAssetsFullPath, self::$ROOT ) && file_exists( $viteAssetsFullPath ) ) {
+        if (self::$VITE_ASSETS_PATH) {
+            $viteAssetsFullPath = realpath(self::$ROOT . '/' . self::$VITE_ASSETS_PATH);
+            if ($viteAssetsFullPath && str_starts_with($viteAssetsFullPath, self::$ROOT) && file_exists($viteAssetsFullPath)) {
                 require_once $viteAssetsFullPath;
             }
         }
@@ -409,7 +418,8 @@ class AppConfig
         $oauth_config_file = self::$ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini';
 
         if (file_exists($oauth_config_file)) {
-            self::$OAUTH_CONFIG = parse_ini_file($oauth_config_file, true) ?? [];
+            $parsed = parse_ini_file($oauth_config_file, true);
+            self::$OAUTH_CONFIG = $parsed !== false ? $parsed : [];
         }
 
         //auth sections
@@ -418,7 +428,7 @@ class AppConfig
         //if a secret is set in file
         if (file_exists(self::$AUTHSECRET_PATH)) {
             //fetch it
-            self::$AUTHSECRET = file_get_contents(self::$AUTHSECRET_PATH);
+            self::$AUTHSECRET = file_get_contents(self::$AUTHSECRET_PATH) ?: '';
         } else {
             //generates pass
             try {
@@ -467,6 +477,7 @@ class AppConfig
         self::$MIME_TYPES = Mime2Extension::getMimeTypes();
     }
 
+    /** @var array<string, array<string, array<int, string>>> */
     public static array $SUPPORTED_FILE_TYPES = [
         'Office' => [
             'pages' => ['', '', 'extdoc'],
@@ -566,6 +577,7 @@ class AppConfig
         ]
     ];
 
+    /** @var array<string, list<string>> */
     public static array $MIME_TYPES = [];
 
     /*
@@ -576,11 +588,12 @@ class AppConfig
      */
     public static int $MAX_FILENAME_LENGTH = 210;
 
+    /** @var list<string> */
     public static array $AUTOLOAD_PLUGINS = ["second_pass_review"];
 
     /**
      * Definitions for the asynchronous task runner
-     * @var array
+     * @var array<string, mixed>
      */
     public static array $TASK_RUNNER_CONFIG = [];
 
@@ -592,8 +605,10 @@ class AppConfig
      * @param string $rootPath
      * @param string $envName
      * @param string $matecatVersion
-     * @param array $configuration
-     * @param array $taskManagerConfiguration
+     * @param array<string, mixed> $configuration
+     * @param array<string, mixed> $taskManagerConfiguration
+     *
+     * @throws RuntimeException
      */
     public static function init(
         string $rootPath,
@@ -605,6 +620,24 @@ class AppConfig
         if (empty(self::$MYSELF)) {
             self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration);
         }
+    }
+
+    /**
+     * @throws RuntimeException
+     * @internal TESTING ONLY — never call in production code.
+     *
+     * Resets the singleton so that {@see init()} can be called again with
+     * different parameters. Using this outside of tests will corrupt
+     * global application state.
+     *
+     */
+    public static function resetSingleton(): void
+    {
+        if (PHP_SAPI !== 'cli' || !defined('PHPUNIT_COMPOSER_INSTALL')) {
+            throw new RuntimeException('AppConfig::resetSingleton() must only be called from PHPUnit tests.');
+        }
+
+        self::$MYSELF = null;
     }
 
     /**
@@ -648,7 +681,8 @@ class AppConfig
      *
      * @param callable $decorator fn(PHPTAL $view, string $templateName, string $nonce): void
      */
-    public static function registerViewDecorator( callable $decorator ): void {
+    public static function registerViewDecorator(callable $decorator): void
+    {
         self::$viewDecorator = $decorator;
     }
 
@@ -656,13 +690,14 @@ class AppConfig
      * Invoke the registered view decorator, if any.
      * No-op when no decorator has been registered.
      *
-     * @param \PHPTAL  $view
-     * @param string   $templateName
-     * @param string   $nonce
+     * @param \PHPTAL $view
+     * @param string $templateName
+     * @param string $nonce
      */
-    public static function decorateView( \PHPTAL $view, string $templateName, string $nonce ): void {
-        if ( self::$viewDecorator ) {
-            ( self::$viewDecorator )( $view, $templateName, $nonce );
+    public static function decorateView(\PHPTAL $view, string $templateName, string $nonce): void
+    {
+        if (self::$viewDecorator) {
+            (self::$viewDecorator)($view, $templateName, $nonce);
         }
     }
 

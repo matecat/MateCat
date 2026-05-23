@@ -85,6 +85,12 @@ parameters:
 			path: lib/Bootstrap.php
 
 		-
+			message: '#^Method Bootstrap\:\:initRegistryClass\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Bootstrap.php
+
+		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 3
@@ -5805,95 +5811,6 @@ parameters:
 			count: 1
 			path: lib/Utils/Redis/RedisHandler.php
 
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Method Utils\\Registry\\AppConfig\:\:__construct\(\) has parameter \$configuration with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Method Utils\\Registry\\AppConfig\:\:__construct\(\) has parameter \$taskManagerConfiguration with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Method Utils\\Registry\\AppConfig\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Method Utils\\Registry\\AppConfig\:\:init\(\) has parameter \$configuration with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Method Utils\\Registry\\AppConfig\:\:init\(\) has parameter \$taskManagerConfiguration with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$AUTOLOAD_PLUGINS type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$MANDATORY_KEYS type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$MIME_TYPES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$MONOLOG_HANDLERS type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$OAUTH_CONFIG type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$SUPPORTED_FILE_TYPES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Property Utils\\Registry\\AppConfig\:\:\$TASK_RUNNER_CONFIG type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Static property Utils\\Registry\\AppConfig\:\:\$AUTHSECRET \(string\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
-
-		-
-			message: '#^Static property Utils\\Registry\\AppConfig\:\:\$OAUTH_CONFIG \(array\) does not accept array\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/Registry/AppConfig.php
 
 		-
 			message: '#^Method Utils\\Search\\ReplaceHistory\:\:_moveToVersion\(\) has parameter \$versionToMove with no type specified\.$#'

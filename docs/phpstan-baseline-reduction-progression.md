@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,305 | −5,061 (−68.7%) |
+| **PHPStan baseline entries** | 7,366 | 2,291 | −5,075 (−68.9%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 5,471 | +3,223 (+143.4%) |
 | **PHPUnit assertions** | ~19,449 | 18,647 | — |
@@ -14,7 +14,7 @@
 | **Coverage — Methods** | 21.74% (844/3,883) | 53.09% (2,198/4,140) | +31.35% (+1,354 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 55.12% (19,380/35,159) | +33.93% (+12,107 lines) |
 | **New test files** | 235 | 367 | +132 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 298 | +298 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 299 | +299 |
 
 ---
 
@@ -514,6 +514,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Tools/PostEditing.php` | Phase 31 |
 | `lib/Utils/Tools/SimpleJWT.php` | Phase 0 |
 | `lib/Utils/Tools/Utils.php` | Phase 3B |
+| `lib/Utils/Registry/AppConfig.php` | Phase 32 |
 | `lib/Utils/Validator/IsJobRevisionValidator.php` | Phase 13A |
 
 #### View
