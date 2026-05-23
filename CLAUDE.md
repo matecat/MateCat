@@ -48,3 +48,7 @@ This keeps the user aware of memory gaps so they can be filled over time.
 ---
 <!-- Do not edit above this line -- managed by signet-first plugin -->
 <!-- Add your project-specific rules below -->
+
+## Git
+
+Do not add Co-Authored-By trailers to commit messages.
