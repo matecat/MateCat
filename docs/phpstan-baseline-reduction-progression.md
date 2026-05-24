@@ -88,10 +88,10 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 351 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 393 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
-<summary>Click to expand full ledger (351 files)</summary>
+<summary>Click to expand full ledger (393 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -102,6 +102,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/Abstracts/Authentication/AuthenticationTrait.php` | Phase 1G |
 | `lib/Controller/Abstracts/Authentication/CookieManager.php` | Phase 1F |
 | `lib/Controller/Abstracts/Authentication/SessionTokenStoreHandler.php` | Phase 1D |
+| `lib/Controller/Abstracts/BaseKleinViewController.php` | Phase 31 |
 | `lib/Controller/Abstracts/FlashMessage.php` | Phase 0 |
 | `lib/Controller/Exceptions/RenderTerminatedException.php` | Phase 13D |
 
@@ -110,6 +111,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 |------|-----------|
 | `lib/Controller/API/App/Authentication/LaraAuthController.php` | Phase 0 |
 | `lib/Controller/API/App/CommentController.php` | Phase 5D |
+| `lib/Controller/API/App/CompletionEventController.php` | Phase 31 |
+| `lib/Controller/API/App/ContextUrlController.php` | Phase 31 |
 | `lib/Controller/API/App/DeleteContributionController.php` | Phase 5C |
 | `lib/Controller/API/App/DownloadAnalysisReportController.php` | Phase 1B |
 | `lib/Controller/API/App/EngineController.php` | Phase 0 |
@@ -127,9 +130,12 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/QualityReportControllerAPI.php` | Phase 5C |
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
+| `lib/Controller/API/V2/JobsController.php` | Phase 31 |
 | `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
-| `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
+| `lib/Controller/API/V2/ReviseTranslationIssuesController.php` | Phase 31 |
 | `lib/Controller/API/V2/SegmentTranslationIssueController.php` | Phase 5C |
+| `lib/Controller/API/V2/SegmentVersionController.php` | Phase 31 |
+| `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
 | `lib/Controller/API/V2/ChunkTranslationIssueController.php` | Phase 5C |
 | `lib/Controller/API/V2/KeyCheckController.php` | Phase 5C |
 | `lib/Controller/API/V3/LaraController.php` | Phase 0 |
@@ -219,8 +225,36 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 |------|-----------|
 | `lib/Model/FeaturesBase/FeatureSet.php` | Phase 24 |
 | `lib/Model/FeaturesBase/Hook/Event/Filter/AnalysisBeforeMTGetContributionEvent.php` | Phase 5B |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/CharacterLengthCountEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/CheckTagMismatchEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/CheckTagPositionsEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/DecodeInstructionsEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/EncodeInstructionsEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/FilterActivityLogEntryEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/FilterContributionStructOnMTSetEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/FilterContributionStructOnSetTranslationEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/FilterJobPasswordToReviewPasswordEvent.php` | Phase 31 |
 | `lib/Model/FeaturesBase/Hook/Event/Filter/FilterRevisionChangeNotificationListEvent.php` | Phase 0 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/HandleJsonNotesBeforeInsertEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/IsAnInternalUserEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/OutsourceAvailableInfoEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/PopulatePreTranslationsEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/ProjectUrlsEvent.php` | Phase 31 |
 | `lib/Model/FeaturesBase/Hook/Event/Filter/RewriteContributionContextsEvent.php` | Phase 0 |
+| `lib/Model/FeaturesBase/Hook/Event/Filter/WordCountEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/AlterChunkReviewStructEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/ChunkReviewUpdatedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/DecorateViewEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/FilterProjectNameModifiedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/JobPasswordChangedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/PostJobMergedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/PostJobSplittedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/PostProjectCreateEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/ProjectCompletionEventSavedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/ReviewPasswordChangedEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/TmAnalysisDisabledEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/ValidateJobCreationEvent.php` | Phase 31 |
+| `lib/Model/FeaturesBase/Hook/Event/Run/ValidateProjectCreationEvent.php` | Phase 31 |
 
 #### Model/Files & FilesStorage
 | File | Cleaned In |
@@ -264,6 +298,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Projects/MetadataDao.php` | Phase 15 |
 | `lib/Model/Projects/ProjectDao.php` | Phase 15 |
 | `lib/Model/Projects/ProjectModel.php` | Phase 5C |
+| `lib/Model/Projects/ProjectsMetadataMarshaller.php` | Phase 31 |
 | `lib/Model/Projects/ProjectStruct.php` | Phase 14 |
 | `lib/Model/Projects/ProjectTemplateDao.php` | Phase 5C |
 | `lib/Model/Projects/ProjectTemplateStruct.php` | Phase 0 |
@@ -308,6 +343,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Search/RedisReplaceEventDAO.php` | Phase 25 |
 | `lib/Model/Search/RedisReplaceEventIndexDAO.php` | Phase 0 |
 | `lib/Model/Segments/ContextGroupDao.php` | Phase 25 |
+| `lib/Model/Segments/ContextResType.php` | Phase 31 |
+| `lib/Model/Segments/ContextUrlResolver.php` | Phase 31 |
 | `lib/Model/Segments/SegmentDao.php` | Phase 25 |
 | `lib/Model/Segments/SegmentDisabledService.php` | Phase 5C |
 | `lib/Model/Segments/SegmentMetadataDao.php` | Phase 5C |
@@ -352,6 +389,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/FeaturesBase/Hook/RunEvent.php` | Phase 27 |
 | `lib/Model/FeaturesBase/PluginsLoader.php` | Phase 28 |
 | `lib/Plugins/Features/BaseFeature.php` | Phase 28 |
+| `lib/Model/WordCount/CounterModel.php` | Phase 31 |
 | `lib/Model/WordCount/WordCounterDao.php` | Phase 25 |
 | `lib/Model/Xliff/DTO/AbstractXliffRule.php` | Phase 0 |
 | `lib/Model/Xliff/DTO/XliffRuleInterface.php` | Phase 0 |
@@ -371,6 +409,12 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php` | Phase 0 |
 | `lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php` | Phase 12A |
 | `lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php` | Phase 0 |
+
+#### Routes
+| File | Cleaned In |
+|------|-----------|
+| `lib/Routes/api_v3_routes.php` | Phase 31 |
+| `lib/Routes/view_routes.php` | Phase 31 |
 
 #### Utils/Workers & Contribution
 | File | Cleaned In |
@@ -476,6 +520,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/LQA/ICUSourceSegmentChecker.php` | Phase 14 |
 | `lib/Utils/LQA/ICUSourceSegmentDetector.php` | Phase 14 |
 | `lib/Utils/LQA/QA/ErrObject.php` | Phase 9A |
+| `lib/Utils/LQA/QA/SizeRestrictionChecker.php` | Phase 31 |
 | `lib/Utils/LQA/QA/SymbolChecker.php` | Phase 9A |
 | `lib/Utils/LQA/SizeRestriction/CJKLangUtils.php` | Phase 9A |
 | `lib/Utils/LQA/SizeRestriction/EmojiUtils.php` | Phase 9A |
@@ -525,7 +570,24 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
 | `lib/View/API/V2/Json/Membership.php` | Phase 12A |
 | `lib/View/API/V3/Json/QualitySummary.php` | Phase 16 |
+| `lib/View/fileupload/index.php` | Phase 31 |
 | `lib/View/fileupload/UploadHandler.php` | Phase 31 |
+
+#### TODO COVERAGE
+Files that are PHPStan-clean but not yet covered by the test suite (controllers/routes/views not instrumented during unit tests).
+
+| File | Cleaned In | Notes |
+|------|-----------|-------|
+| `lib/Controller/Abstracts/BaseKleinViewController.php` | Phase 31 | Base controller class |
+| `lib/Controller/API/App/CompletionEventController.php` | Phase 31 | API controller |
+| `lib/Controller/API/App/ContextUrlController.php` | Phase 31 | API controller |
+| `lib/Controller/API/V2/JobsController.php` | Phase 31 | API controller |
+| `lib/Controller/API/V2/ReviseTranslationIssuesController.php` | Phase 31 | API controller |
+| `lib/Controller/API/V2/SegmentVersionController.php` | Phase 31 | API controller |
+| `lib/Model/Segments/ContextResType.php` | Phase 31 | Enum — no executable lines |
+| `lib/Routes/api_v3_routes.php` | Phase 31 | Route definitions |
+| `lib/Routes/view_routes.php` | Phase 31 | Route definitions |
+| `lib/View/fileupload/index.php` | Phase 31 | View template |
 
 </details>
 

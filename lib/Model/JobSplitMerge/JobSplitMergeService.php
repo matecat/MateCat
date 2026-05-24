@@ -105,13 +105,12 @@ class JobSplitMergeService
     }
 
     /**
-     * Wrapper around static AnalysisDao call — overridable in tests.
      * @throws \PDOException
      * @throws ReflectionException
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
-        AnalysisDao::destroyCacheByProjectId($projectId);
+        (new AnalysisDao())->destroyCacheByProjectId($projectId);
     }
 
     /**

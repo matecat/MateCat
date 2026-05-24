@@ -347,7 +347,7 @@ class FastAnalysis extends AbstractDaemon
                 (new JobDao())->destroyCacheByProjectId($pid);
                 (new ProjectDao())->destroyFetchByIdCache($pid, ProjectStruct::class);
                 ProjectDao::destroyCacheByIdAndPassword($pid, $projectStruct->password);
-                AnalysisDao::destroyCacheByProjectId($pid);
+                (new AnalysisDao())->destroyCacheByProjectId($pid);
             }
         } while ($this->RUNNING);
 

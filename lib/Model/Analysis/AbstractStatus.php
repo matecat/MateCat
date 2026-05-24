@@ -19,6 +19,7 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\ProjectStatus;
 use Utils\OutsourceTo\OutsourceAvailable;
@@ -71,18 +72,31 @@ abstract class AbstractStatus
      */
     protected mixed $subject;
 
+    protected AnalysisDao $analysisDao;
+    protected JobDao $jobDao;
+    protected FileMetadataDao $fileMetadataDao;
+
     /**
      * @param array<mixed> $_project_data
      * @param FeatureSet $features
      * @param UserStruct|null $user
+     * @param AnalysisDao|null $analysisDao
+     * @param JobDao|null $jobDao
+     * @param FileMetadataDao|null $fileMetadataDao
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
-    public function __construct(array $_project_data, FeatureSet $features, ?UserStruct $user = null)
-    {
-        if (is_null($user)) { // avoid null pointer exception when calling methods on class property user
+    public function __construct(
+        array $_project_data,
+        FeatureSet $features,
+        ?UserStruct $user = null,
+        ?AnalysisDao $analysisDao = null,
+        ?JobDao $jobDao = null,
+        ?FileMetadataDao $fileMetadataDao = null
+    ) {
+        if (is_null($user)) {
             $user = new UserStruct();
             $user->uid = -1;
         }
@@ -94,6 +108,9 @@ abstract class AbstractStatus
         $this->project = $project;
         $this->_project_data = $_project_data;
         $this->featureSet = $features;
+        $this->analysisDao = $analysisDao ?? new AnalysisDao();
+        $this->jobDao = $jobDao ?? new JobDao();
+        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao();
     }
 
     /**
@@ -113,11 +130,11 @@ abstract class AbstractStatus
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function _fetchProjectData(): AbstractStatus
     {
-        $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis((int)$this->project->id);
+        $this->_resultSet = $this->analysisDao->getProjectStatsVolumeAnalysis((int)$this->project->id);
 
         try {
             $amqHandler = new AMQHandler();
@@ -145,7 +162,7 @@ abstract class AbstractStatus
      *
      * @return static
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function fetchData(): AbstractStatus
     {
@@ -154,20 +171,20 @@ abstract class AbstractStatus
     }
 
     /**
-     * @param $targetLang
-     * @param $id_customer
-     * @param $idJob
+     * @param string $targetLang
+     * @param string $id_customer
+     * @param int $idJob
      *
      * @return bool
      * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ValidationError
      */
     protected function isOutsourceEnabled(string $targetLang, string $id_customer, int $idJob): bool
     {
-        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($targetLang, (string)$id_customer, (int)$idJob);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($targetLang, $id_customer, $idJob);
         $this->featureSet->dispatch($outsourceAvailableInfoEvent);
         $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
@@ -185,7 +202,7 @@ abstract class AbstractStatus
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function loadObjects(): AbstractStatus
     {
@@ -222,7 +239,7 @@ abstract class AbstractStatus
             }
 
             if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
-                $chunkStruct = (new JobDao())->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
+                $chunkStruct = $this->jobDao->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
                 $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
@@ -239,7 +256,7 @@ abstract class AbstractStatus
             if (!isset($file) || $file->getId() != $segInfo['id_file'] || !$chunk->hasFile($segInfo['id_file'])) {
                 $originalFile = (!empty($segInfo['tag_key']) and $segInfo['tag_key'] === 'original') ? $segInfo['tag_value'] : $segInfo['filename'];
                 $id_file_part = (!empty($segInfo['id_file_part'])) ? (string)$segInfo['id_file_part'] : null;
-                $metadata = (new FileMetadataDao())->getByJobIdProjectAndIdFile((int)$this->_project_data[0]['pid'], $segInfo['id_file'], 60 * 5);
+                $metadata = $this->fileMetadataDao->getByJobIdProjectAndIdFile((int)$this->_project_data[0]['pid'], $segInfo['id_file'], 60 * 5);
                 $file = new AnalysisFile($segInfo['id_file'], $id_file_part, ZipArchiveHandler::getFileName($segInfo['filename']), $originalFile, $matchConstantsClass, $metadata ?? []);
                 $chunk->setFile($file);
             }
