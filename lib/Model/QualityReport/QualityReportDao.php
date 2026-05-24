@@ -74,7 +74,7 @@ SQL;
      * @return array<int, array<string, mixed>>
      * @throws PDOException
      */
-    public static function getSegmentsForQualityReport(JobStruct $chunk): array
+    public function getSegmentsForQualityReport(JobStruct $chunk): array
     {
         $sql = <<<SQL
 
@@ -163,7 +163,7 @@ ORDER BY f.id, s.id, issues.id, comments.id
 
 SQL;
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -184,7 +184,7 @@ SQL;
      * @return array<int, ShapelessConcreteStruct>
      * @throws PDOException
      */
-    public static function getIssuesBySegments(array $segments_id, int $job_id): array
+    public function getIssuesBySegments(array $segments_id, int $job_id): array
     {
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
 
@@ -223,7 +223,7 @@ JOIN (
 
   ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ShapelessConcreteStruct::class);
 

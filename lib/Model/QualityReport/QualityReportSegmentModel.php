@@ -42,11 +42,25 @@ class QualityReportSegmentModel
     protected ?array $_chunkReviews = null;
 
     private ChunkReviewDao $chunkReviewDao;
+    private SegmentDao $segmentDao;
+    private QualityReportDao $qualityReportDao;
+    private EntryCommentDao $entryCommentDao;
+    private CommentDao $commentDao;
 
-    public function __construct(JobStruct $chunk, ?ChunkReviewDao $chunkReviewDao = null)
-    {
+    public function __construct(
+        JobStruct $chunk,
+        ?ChunkReviewDao $chunkReviewDao = null,
+        ?SegmentDao $segmentDao = null,
+        ?QualityReportDao $qualityReportDao = null,
+        ?EntryCommentDao $entryCommentDao = null,
+        ?CommentDao $commentDao = null
+    ) {
         $this->chunk = $chunk;
         $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+        $this->segmentDao = $segmentDao ?? new SegmentDao();
+        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao();
+        $this->entryCommentDao = $entryCommentDao ?? new EntryCommentDao();
+        $this->commentDao = $commentDao ?? new CommentDao();
     }
 
     /**
@@ -91,8 +105,7 @@ class QualityReportSegmentModel
             }
         }
 
-        $segmentsDao = new SegmentDao();
-        $segments_id = $segmentsDao->getSegmentsIdForQR(
+        $segments_id = $this->segmentDao->getSegmentsIdForQR(
             $this->chunk,
             $step,
             $ref_segment,
@@ -179,25 +192,23 @@ class QualityReportSegmentModel
         $chunkId = $this->chunk->id;
         $chunkPassword = $this->chunk->password;
 
-        $segmentsDao = new SegmentDao;
-        $data = $segmentsDao->getSegmentsForQr($segmentIds, $chunkId, $chunkPassword);
+        $data = $this->segmentDao->getSegmentsForQr($segmentIds, $chunkId, $chunkPassword);
 
         $featureSet = new FeatureSet();
 
         $featureSet->loadForProject($this->chunk->getProject());
         $issue_comments = [];
 
-         $issues = QualityReportDao::getIssuesBySegments($segmentIds, $chunkId);
+         $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);
          if (!empty($issues)) {
-             $issue_comments = (new EntryCommentDao())->fetchCommentsGroupedByIssueIds(
+             $issue_comments = $this->entryCommentDao->fetchCommentsGroupedByIssueIds(
                  array_values(array_map(function ($issue): int {
                      return (int)$issue->issue_id;
                  }, $issues))
              );
          }
 
-        $commentsDao = new CommentDao;
-        $comments = $commentsDao->getThreadsBySegments($segmentIds, $chunkId);
+        $comments = $this->commentDao->getThreadsBySegments($segmentIds, $chunkId);
 
         $translationVersionDao = new TranslationVersionDao;
         $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $chunkId);

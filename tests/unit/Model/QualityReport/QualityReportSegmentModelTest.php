@@ -6,14 +6,20 @@ namespace unit\Model\QualityReport;
 
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\BaseCommentStruct;
+use Model\Comments\CommentDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
+use Model\LQA\EntryCommentDao;
+use Model\Projects\ProjectStruct;
+use Model\QualityReport\QualityReportDao;
 use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
 use Model\QualityReport\SegmentEventsStruct;
+use Model\Segments\SegmentDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use ReflectionMethod;
@@ -410,6 +416,231 @@ class QualityReportSegmentModelTest extends AbstractTest
 
         $this->assertSame($match, $model->invokeProtected('filterEvent', [10, SourcePages::SOURCE_PAGE_REVISION, $events]));
         $this->assertNull($model->invokeProtected('filterEvent', [10, SourcePages::SOURCE_PAGE_REVISION_2, $events]));
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRDelegatesToSegmentDao(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([1, 2, 3]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            null,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(10, 100);
+
+        $this->assertSame([1, 2, 3], $result);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRWithAfterDirection(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([50, 51]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            null,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(5, 50, 'after');
+
+        $this->assertSame([50, 51], $result);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRWithBeforeDirection(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([8, 9]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            null,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(5, 10, 'before');
+
+        $this->assertSame([8, 9], $result);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRWithRevisionStatusFilter(): void
+    {
+        $chunkReview = new \stdClass();
+        $chunkReview->source_page = 2;
+
+        $mockChunkReviewDao = $this->createStub(ChunkReviewDao::class);
+        $mockChunkReviewDao->method('findChunkReviews')->willReturn([$chunkReview]);
+
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([10, 11]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            $mockChunkReviewDao,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(10, 100, 'after', [
+            'filter' => [
+                'status' => TranslationStatus::STATUS_APPROVED,
+                'revision_number' => 1,
+            ],
+        ]);
+
+        $this->assertSame([10, 11], $result);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRWithInvalidRevisionNumberDefaultsToOne(): void
+    {
+        $chunkReview = new \stdClass();
+        $chunkReview->source_page = 2;
+
+        $mockChunkReviewDao = $this->createStub(ChunkReviewDao::class);
+        $mockChunkReviewDao->method('findChunkReviews')->willReturn([$chunkReview]);
+
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([10]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            $mockChunkReviewDao,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(10, 100, 'after', [
+            'filter' => [
+                'status' => TranslationStatus::STATUS_APPROVED,
+                'revision_number' => 999,
+            ],
+        ]);
+
+        $this->assertSame([10], $result);
+    }
+
+    private function createChunkWithProject(): JobStruct
+    {
+        $project = new ProjectStruct();
+        $project->id = 1;
+        $project->id_qa_model = null;
+
+        $chunk = $this->createStub(JobStruct::class);
+        $chunk->id = 10;
+        $chunk->password = 'secret';
+        $chunk->source = 'en-US';
+        $chunk->target = 'it-IT';
+        $chunk->method('getProject')->willReturn($project);
+
+        return $chunk;
+    }
+
+    #[Test]
+    public function getSegmentsForQRWithEmptyDataReturnsEmptyArray(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsForQr')->willReturn([]);
+
+        $qualityReportDao = $this->createStub(QualityReportDao::class);
+        $qualityReportDao->method('getIssuesBySegments')->willReturn([]);
+
+        $entryCommentDao = $this->createStub(EntryCommentDao::class);
+
+        $commentDao = $this->createStub(CommentDao::class);
+        $commentDao->method('getThreadsBySegments')->willReturn([]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunkWithProject(),
+            null,
+            $segmentDao,
+            $qualityReportDao,
+            $entryCommentDao,
+            $commentDao
+        );
+
+        $result = $model->getSegmentsForQR([1, 2, 3]);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    #[Test]
+    public function getSegmentsForQRWithIssuesLoadsComments(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsForQr')->willReturn([]);
+
+        $issue = new ShapelessConcreteStruct();
+        $issue->issue_id = 5;
+        $issue->segment_id = 1;
+        $issue->source_page = 2;
+
+        $qualityReportDao = $this->createStub(QualityReportDao::class);
+        $qualityReportDao->method('getIssuesBySegments')->willReturn([$issue]);
+
+        $entryCommentDao = $this->createStub(EntryCommentDao::class);
+        $entryCommentDao->method('fetchCommentsGroupedByIssueIds')->willReturn([]);
+
+        $commentDao = $this->createStub(CommentDao::class);
+        $commentDao->method('getThreadsBySegments')->willReturn([]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunkWithProject(),
+            null,
+            $segmentDao,
+            $qualityReportDao,
+            $entryCommentDao,
+            $commentDao
+        );
+
+        $result = $model->getSegmentsForQR([1]);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRWithIssueCategoryAllSkipsSubCategoryLookup(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([10, 11]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            null,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(10, 100, 'after', [
+            'filter' => [
+                'issue_category' => 'all',
+            ],
+        ]);
+
+        $this->assertSame([10, 11], $result);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRWithNoFilterPassesOptionsThrough(): void
+    {
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturn([5]);
+
+        $model = new QualityReportSegmentModel(
+            $this->createChunk(),
+            null,
+            $segmentDao
+        );
+
+        $result = $model->getSegmentsIdForQR(5, 50, 'after', []);
+
+        $this->assertSame([5], $result);
     }
 }
 

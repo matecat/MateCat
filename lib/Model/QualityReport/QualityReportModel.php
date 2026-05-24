@@ -173,7 +173,7 @@ class QualityReportModel
      */
     protected function getSegmentsForQualityReport(): array
     {
-        return QualityReportDao::getSegmentsForQualityReport($this->chunk);
+        return (new QualityReportDao())->getSegmentsForQualityReport($this->chunk);
     }
 
     /**
