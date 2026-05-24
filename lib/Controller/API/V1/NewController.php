@@ -1197,7 +1197,7 @@ class NewController extends KleinController
 
         if (!empty($filters_extraction_parameters_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser(
+            $filtersTemplate = (new FiltersConfigTemplateDao())->getByIdAndUser(
                 (int)$filters_extraction_parameters_template_id,
                 $uid
             );

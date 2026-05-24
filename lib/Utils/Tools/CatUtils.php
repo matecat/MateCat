@@ -922,7 +922,7 @@ class CatUtils
         $extraction_parameters = null;
 
         if ($filtersTemplateId > 0) {
-            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
+            $filtersTemplateStruct = (new FiltersConfigTemplateDao())->getById($filtersTemplateId);
 
             if ($filtersTemplateStruct !== null) {
                 $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);

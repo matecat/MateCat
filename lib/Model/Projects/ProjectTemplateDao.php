@@ -219,7 +219,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check filters_template_id
         if ($projectTemplateStruct->filters_template_id > 0) {
-            $filtersConfigModel = FiltersConfigTemplateDao::getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
+            $filtersConfigModel = (new FiltersConfigTemplateDao())->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
 
             if (empty($filtersConfigModel)) {
                 throw new Exception("Not existing Filters config template.", 404);

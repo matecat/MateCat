@@ -321,7 +321,7 @@ parameters:
 			path: lib/Controller/API/App/ConvertFileController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/ConvertFileController.php
@@ -1425,7 +1425,7 @@ parameters:
 			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
 			path: lib/Controller/API/GDrive/GDriveController.php
@@ -2325,43 +2325,43 @@ parameters:
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#1 \$json of static method Model\\Filters\\FiltersConfigTemplateDao\:\:createFromJSON\(\) expects string, string\|null given\.$#'
+			message: '#^Parameter \#1 \$json of method Model\\Filters\\FiltersConfigTemplateDao\:\:createFromJSON\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#1 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#1 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#2 \$json of static method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) expects string, string\|null given\.$#'
+			message: '#^Parameter \#2 \$json of method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:createFromJSON\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:createFromJSON\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:remove\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:remove\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
 
 		-
-			message: '#^Parameter \#3 \$uid of static method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#3 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:editFromJSON\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
