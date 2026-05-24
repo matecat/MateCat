@@ -56,6 +56,12 @@ class TMSService
     private string $output_type;
     protected MatecatLogger $logger;
     protected IDatabase $database;
+    private ?TMSServiceDao $tmsServiceDao = null;
+
+    private function getTmsServiceDao(): TMSServiceDao
+    {
+        return $this->tmsServiceDao ??= new TMSServiceDao($this->database);
+    }
 
     /**
      *
@@ -481,15 +487,15 @@ class TMSService
         switch ($this->output_type) {
             case 'mt' :
                 $hideUnconfirmedRows = false;
-                $result = TMSServiceDao::getMTForTMXExport($jid, $jPassword);
+                $result = $this->getTmsServiceDao()->getMTForTMXExport($jid, $jPassword);
                 break;
             case 'tm' :
                 $hideUnconfirmedRows = false;
-                $result = TMSServiceDao::getTMForTMXExport($jid, $jPassword);
+                $result = $this->getTmsServiceDao()->getTMForTMXExport($jid, $jPassword);
                 break;
             case 'translation':
             default:
-                $result = TMSServiceDao::getTranslationsForTMXExport($jid, $jPassword);
+                $result = $this->getTmsServiceDao()->getTranslationsForTMXExport($jid, $jPassword);
                 break;
         }
 
@@ -600,7 +606,7 @@ class TMSService
 
         $tmpFile->fputcsv($csv_fields);
 
-        $result = TMSServiceDao::getTranslationsForTMXExport($jid, $jPassword);
+        $result = $this->getTmsServiceDao()->getTranslationsForTMXExport($jid, $jPassword);
 
         foreach ($result as $row) {
             $row_array = [
