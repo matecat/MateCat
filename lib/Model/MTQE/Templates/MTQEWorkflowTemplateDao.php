@@ -12,12 +12,10 @@ namespace Model\MTQE\Templates;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
-use PDO;
 use PDOException;
 use ReflectionException;
 use TypeError;
@@ -35,23 +33,6 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
     const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
-     * @var MTQEWorkflowTemplateDao|null
-     */
-    protected static ?MTQEWorkflowTemplateDao $instance = null;
-
-    /**
-     * @return MTQEWorkflowTemplateDao
-     */
-    protected static function getInstance(): MTQEWorkflowTemplateDao
-    {
-        if (!isset(static::$instance)) {
-            static::$instance = new static();
-        }
-
-        return static::$instance;
-    }
-
-    /**
      * @param int $uid
      * @param string $baseRoute
      * @param int $current
@@ -64,9 +45,9 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @throws PDOException
      * @throws Exception
      */
-    public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
+    public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
-        $pdo = Database::obtain()->getConnection();
+        $pdo = $this->database->getConnection();
 
         $pager = new Pager($pdo);
 
@@ -83,23 +64,12 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
         $models = [];
 
         foreach ($result['items'] as $item) {
-            $models[] = self::hydrateTemplateStruct($item->getArrayCopy());
+            $models[] = $this->hydrateTemplateStruct($item->getArrayCopy());
         }
 
         $result['items'] = $models;
 
         return $result;
-    }
-
-    /**
-     * @param int $uid
-     *
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    private static function destroyQueryPaginated(int $uid): void
-    {
-        self::getInstance()->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
     }
 
     /**
@@ -112,10 +82,10 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @throws TypeError
      * @throws ReflectionException
      */
-    public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?MTQEWorkflowTemplateStruct
+    public function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?MTQEWorkflowTemplateStruct
     {
-        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
-        $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+        $stmt = $this->_getStatementForQuery(self::query_by_id_and_uid);
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'id' => $id,
             'uid' => $uid,
         ]);
@@ -124,21 +94,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[0]);
-    }
-
-    /**
-     * @param PDO $conn
-     * @param int $id
-     * @param int $uid
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private static function destroyQueryByIdAndUserCache(PDO $conn, int $id, int $uid): void
-    {
-        $stmt = $conn->prepare(self::query_by_id_and_uid);
-        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id, 'uid' => $uid]);
+        return $this->hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -149,10 +105,10 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getByUid(int $uid, int $ttl = 60): array
+    public function getByUid(int $uid, int $ttl = 60): array
     {
-        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_uid);
-        $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+        $stmt = $this->_getStatementForQuery(self::query_by_uid);
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'uid' => $uid,
         ]);
 
@@ -163,28 +119,13 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
         $res = [];
 
         foreach ($result as $r) {
-            $res[] = self::hydrateTemplateStruct((array)$r);
+            $res[] = $this->hydrateTemplateStruct((array)$r);
         }
 
         return array_values(array_filter($res, fn($item) => $item !== null));
     }
 
     /**
-     * @param PDO $conn
-     * @param int $uid
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private static function destroyQueryByUidCache(PDO $conn, int $uid): void
-    {
-        $stmt = $conn->prepare(self::query_by_uid);
-        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['uid' => $uid]);
-    }
-
-    /**
-     * WARNING: Use this method only when no user authentication is needed or when it is already performed
-     *
      * @param int $id
      * @param int $ttl
      *
@@ -192,10 +133,10 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getById(int $id, int $ttl = 60): ?MTQEWorkflowTemplateStruct
+    public function getById(int $id, int $ttl = 60): ?MTQEWorkflowTemplateStruct
     {
-        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
-        $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+        $stmt = $this->_getStatementForQuery(self::query_by_id);
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'id' => $id,
         ]);
 
@@ -203,20 +144,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
             return null;
         }
 
-        return self::hydrateTemplateStruct((array)$result[0]);
-    }
-
-    /**
-     * @param PDO $conn
-     * @param int $id
-     *
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private static function destroyQueryByIdCache(PDO $conn, int $id): void
-    {
-        $stmt = $conn->prepare(self::query_by_id);
-        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id,]);
+        return $this->hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
@@ -228,9 +156,9 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function remove(int $id, int $uid): int
+    public function remove(int $id, int $uid): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
         $stmt->execute([
             'id' => $id,
@@ -239,14 +167,76 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
             'name' => 'deleted_' . Utils::randomString()
         ]);
 
-        self::destroyQueryByIdCache($conn, $id);
-        self::destroyQueryByIdAndUserCache($conn, $id, $uid);
-        self::destroyQueryByUidCache($conn, $uid);
-        self::destroyQueryPaginated($uid);
-
-//        ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'xliff_config_template_id' );
+        $this->destroyQueryByIdCache($id);
+        $this->destroyQueryByIdAndUserCache($id, $uid);
+        $this->destroyQueryByUidCache($uid);
+        $this->destroyQueryPaginated($uid);
 
         return $stmt->rowCount();
+    }
+
+    /**
+     * @param int $uid
+     *
+     * @return MTQEWorkflowTemplateStruct
+     */
+    public function getDefaultTemplate(int $uid): MTQEWorkflowTemplateStruct
+    {
+        return new MTQEWorkflowTemplateStruct([
+            'params' => new MTQEWorkflowParams(),
+            'name' => "Matecat default settings",
+            'uid' => $uid,
+            'id' => 0,
+            'created_at' => date("Y-m-d H:i:s")
+        ]);
+    }
+
+    /**
+     * @param int $id
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private function destroyQueryByIdCache(int $id): void
+    {
+        $stmt = $this->database->getConnection()->prepare(self::query_by_id);
+        $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id]);
+    }
+
+    /**
+     * @param int $id
+     * @param int $uid
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private function destroyQueryByIdAndUserCache(int $id, int $uid): void
+    {
+        $stmt = $this->database->getConnection()->prepare(self::query_by_id_and_uid);
+        $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id, 'uid' => $uid]);
+    }
+
+    /**
+     * @param int $uid
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    private function destroyQueryByUidCache(int $uid): void
+    {
+        $stmt = $this->database->getConnection()->prepare(self::query_by_uid);
+        $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['uid' => $uid]);
+    }
+
+    /**
+     * @param int $uid
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function destroyQueryPaginated(int $uid): void
+    {
+        $this->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
     }
 
     /**
@@ -255,7 +245,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @return MTQEWorkflowTemplateStruct|null
      * @throws TypeError
      */
-    private static function hydrateTemplateStruct(array $data): ?MTQEWorkflowTemplateStruct
+    private function hydrateTemplateStruct(array $data): ?MTQEWorkflowTemplateStruct
     {
         if (
             !isset($data['id']) or
@@ -277,22 +267,6 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
         $struct->hydrateParamsFromJson($data['params']);
 
         return $struct;
-    }
-
-    /**
-     * @param int $uid
-     *
-     * @return MTQEWorkflowTemplateStruct
-     */
-    public static function getDefaultTemplate(int $uid): MTQEWorkflowTemplateStruct
-    {
-        return new MTQEWorkflowTemplateStruct([
-            'params' => new MTQEWorkflowParams(),
-            'name' => "Matecat default settings",
-            'uid' => $uid,
-            'id' => 0,
-            'created_at' => date("Y-m-d H:i:s")
-        ]);
     }
 
 }

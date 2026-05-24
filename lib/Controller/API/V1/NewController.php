@@ -1238,7 +1238,7 @@ class NewController extends KleinController
             return new MTQEWorkflowParams((array)($jsonObject->decode()));
         } elseif (!empty($mt_qe_workflow_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $mtQeWorkflowTemplate = MTQEWorkflowTemplateDao::getByIdAndUser(
+            $mtQeWorkflowTemplate = (new MTQEWorkflowTemplateDao())->getByIdAndUser(
                 $mt_qe_workflow_template_id,
                 $uid
             );
