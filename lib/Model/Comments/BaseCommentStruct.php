@@ -35,7 +35,7 @@ class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, J
      */
     public function templateMessage(): void
     {
-        $this->message = CommentDao::placeholdContent($this->message ?? throw new RuntimeException('Comment message must be set before templating'));
+        $this->message = (new CommentDao())->placeholdContent($this->message ?? throw new RuntimeException('Comment message must be set before templating'));
     }
 
     /**

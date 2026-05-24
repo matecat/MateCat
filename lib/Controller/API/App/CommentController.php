@@ -346,7 +346,7 @@ class CommentController extends KleinController
      */
     private function resolveUserMentions(string $message): array
     {
-        return array_values(array_map('intval', CommentDao::getUsersIdFromContent($message)));
+        return array_values(array_map('intval', (new CommentDao())->getUsersIdFromContent($message)));
     }
 
     /**

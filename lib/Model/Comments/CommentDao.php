@@ -258,33 +258,31 @@ class CommentDao extends AbstractDao
     }
 
     /**
-     *
      * @param JobStruct $chunk
      * @param array{from_id?: int|null} $options
      *
      * @return list<BaseCommentStruct>
      * @throws PDOException
      */
-
-    public static function getCommentsForChunk(JobStruct $chunk, array $options = []): array
+    public function getCommentsForChunk(JobStruct $chunk, array $options = []): array
     {
-        $sql = "SELECT 
-                  id, 
-                  uid, 
-                  resolve_date, 
-                  id_job, 
-                  id_segment, 
-                  create_date, 
-                  IF( is_anonymous = 0, full_name, 'Anonymous' ) as full_name, 
-                  source_page, 
+        $sql = "SELECT
+                  id,
+                  uid,
+                  resolve_date,
+                  id_job,
+                  id_segment,
+                  create_date,
+                  IF( is_anonymous = 0, full_name, 'Anonymous' ) as full_name,
+                  source_page,
                   is_anonymous,
-                  message_type, 
-                  message, 
-                  email, 
-                  IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
-                ) AS thread_id 
+                  message_type,
+                  message,
+                  email,
+                  IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) )
+                ) AS thread_id
                 FROM " . self::TABLE . "
-                WHERE id_job = :id_job 
+                WHERE id_job = :id_job
                 AND message_type IN(1,2)
                 ORDER BY id_segment, create_date";
 
@@ -295,7 +293,7 @@ class CommentDao extends AbstractDao
             $params['from_id'] = $options['from_id'];
         }
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
 
@@ -326,10 +324,10 @@ class CommentDao extends AbstractDao
      * @throws Exception
      * @throws ReflectionException
      */
-    public static function placeholdContent(string $content): string
+    public function placeholdContent(string $content): string
     {
-        $users_ids = self::getUsersIdFromContent($content);
-        $userDao = new UserDao(Database::obtain());
+        $users_ids = $this->getUsersIdFromContent($content);
+        $userDao = new UserDao($this->database);
         $users = $userDao->getByUids($users_ids);
         foreach ($users as $user) {
             $content = str_replace("{@" . $user->uid . "@}", "@" . $user->first_name, $content);
@@ -342,14 +340,11 @@ class CommentDao extends AbstractDao
      * @param string $content
      * @return list<numeric-string>
      */
-    public static function getUsersIdFromContent(string $content): array
+    public function getUsersIdFromContent(string $content): array
     {
-        $users = [];
-
         preg_match_all("/\{@(\d+)@}/", $content, $find_users);
-        $users = $find_users[1];
 
-        return $users;
+        return $find_users[1];
     }
 
 }

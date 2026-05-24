@@ -88,7 +88,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 393 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 397 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (393 files)</summary>
@@ -454,6 +454,10 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Utils/Email
 | File | Cleaned In |
 |------|-----------|
+| `lib/Utils/Email/BaseCommentEmail.php` | Phase 31 |
+| `lib/Utils/Email/CommentEmail.php` | Phase 31 |
+| `lib/Utils/Email/CommentMentionEmail.php` | Phase 31 |
+| `lib/Utils/Email/CommentResolveEmail.php` | Phase 31 |
 | `lib/Utils/Email/MembershipCreatedEmail.php` | Phase 12A |
 | `lib/Utils/Email/MembershipDeletedEmail.php` | Phase 12A |
 

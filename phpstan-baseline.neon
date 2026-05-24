@@ -5237,42 +5237,6 @@ parameters:
 			path: lib/Utils/Email/AbstractEmail.php
 
 		-
-			message: '#^Method Utils\\Email\\BaseCommentEmail\:\:_getTemplateVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Email/BaseCommentEmail.php
-
-		-
-			message: '#^Method Utils\\Email\\BaseCommentEmail\:\:_getTemplateVariables\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Email/BaseCommentEmail.php
-
-		-
-			message: '#^Parameter \#2 \$subject of method Utils\\Email\\AbstractEmail\:\:doSend\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Email/BaseCommentEmail.php
-
-		-
-			message: '#^Method Utils\\Email\\CommentEmail\:\:_getTemplateVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Email/CommentEmail.php
-
-		-
-			message: '#^Method Utils\\Email\\CommentMentionEmail\:\:_getTemplateVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Email/CommentMentionEmail.php
-
-		-
-			message: '#^Method Utils\\Email\\CommentResolveEmail\:\:_getTemplateVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/Email/CommentResolveEmail.php
-
-		-
 			message: '#^Method Utils\\Email\\ForgotPasswordEmail\:\:_getDefaultMailConf\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

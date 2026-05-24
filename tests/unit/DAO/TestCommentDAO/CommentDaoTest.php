@@ -7,10 +7,12 @@ use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
 use Model\DataAccess\IDatabase;
+use Model\Jobs\JobStruct;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 class TestCommentDao extends CommentDao
 {
@@ -155,27 +157,6 @@ class CommentDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function getUsersIdFromContentReturnsEmptyArrayWhenNoMentions(): void
-    {
-        $result = CommentDao::getUsersIdFromContent('Hello world, no mentions here.');
-        $this->assertSame([], $result);
-    }
-
-    #[Test]
-    public function getUsersIdFromContentReturnsSingleId(): void
-    {
-        $result = CommentDao::getUsersIdFromContent('Hey {@999@}');
-        $this->assertSame(['999'], $result);
-    }
-
-    #[Test]
-    public function getUsersIdFromContentReturnsMultipleIds(): void
-    {
-        $result = CommentDao::getUsersIdFromContent('Hello {@123@} and {@456@}');
-        $this->assertSame(['123', '456'], $result);
-    }
-
-    #[Test]
     public function getThreadContributorUidsReturnsEmptyArrayWhenNoResults(): void
     {
         $dbMock   = $this->createMock(IDatabase::class);
@@ -230,5 +211,115 @@ class CommentDaoTest extends AbstractTest
         $result = $dao->getThreadContributorUids($struct);
 
         $this->assertSame([['uid' => 7]], $result);
+    }
+
+    // ── Instance method tests (specular) ──
+
+    private function makeChunk(int $id = 10, string $password = 'pass1'): JobStruct
+    {
+        $chunk = new JobStruct();
+        $chunk->id = $id;
+        $chunk->password = $password;
+
+        return $chunk;
+    }
+
+    #[Test]
+    public function instanceGetCommentsForChunkReturnsArray(): void
+    {
+        [,, $stmtStub] = $this->createDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        $comment = new BaseCommentStruct();
+        $comment->id = 1;
+        $stmtStub->method('fetchAll')->willReturn([$comment]);
+
+        $dao = new CommentDao();
+        $results = $dao->getCommentsForChunk($this->makeChunk());
+
+        $this->assertIsArray($results);
+        $this->assertCount(1, $results);
+
+        $this->resetDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = false;
+    }
+
+    #[Test]
+    public function instanceGetCommentsForChunkReturnsEmptyArray(): void
+    {
+        [,, $stmtStub] = $this->createDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        $stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new CommentDao();
+        $results = $dao->getCommentsForChunk($this->makeChunk());
+
+        $this->assertIsArray($results);
+        $this->assertEmpty($results);
+
+        $this->resetDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = false;
+    }
+
+    #[Test]
+    public function instanceGetCommentsForChunkWithFromIdOption(): void
+    {
+        [,, $stmtStub] = $this->createDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        $stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new CommentDao();
+        $results = $dao->getCommentsForChunk($this->makeChunk(), ['from_id' => 5]);
+
+        $this->assertIsArray($results);
+
+        $this->resetDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = false;
+    }
+
+    #[Test]
+    public function instanceGetUsersIdFromContentReturnsEmptyArray(): void
+    {
+        $dao = new CommentDao();
+        $result = $dao->getUsersIdFromContent('Hello world, no mentions here.');
+
+        $this->assertSame([], $result);
+    }
+
+    #[Test]
+    public function instanceGetUsersIdFromContentReturnsSingleId(): void
+    {
+        $dao = new CommentDao();
+        $result = $dao->getUsersIdFromContent('Hey {@999@}');
+
+        $this->assertSame(['999'], $result);
+    }
+
+    #[Test]
+    public function instanceGetUsersIdFromContentReturnsMultipleIds(): void
+    {
+        $dao = new CommentDao();
+        $result = $dao->getUsersIdFromContent('Hello {@123@} and {@456@}');
+
+        $this->assertSame(['123', '456'], $result);
+    }
+
+    #[Test]
+    public function instancePlaceholdContentReplacesTeamMention(): void
+    {
+        [,, $stmtStub] = $this->createDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        $stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new CommentDao();
+        $result = $dao->placeholdContent('Hello {@team@}');
+
+        $this->assertSame('Hello @team', $result);
+
+        $this->resetDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = false;
     }
 }
