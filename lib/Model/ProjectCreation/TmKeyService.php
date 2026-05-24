@@ -297,7 +297,7 @@ class TmKeyService
      */
     protected function getKeyringOwnerKeys(int $uid): array
     {
-        return MemoryKeyDao::getKeyringOwnerKeysByUid($uid);
+        return (new MemoryKeyDao())->getKeyringOwnerKeysByUid($uid);
     }
 
     /**

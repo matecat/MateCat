@@ -8,6 +8,7 @@
 
 namespace Model\TmKeyManagement;
 
+use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
@@ -15,6 +16,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Users\UserDao;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -71,24 +73,21 @@ class MemoryKeyDao extends AbstractDao
      * @param int $uid
      *
      * @return MemoryKeyStruct[]
-     * @throws \Exception
      */
-    public static function getKeyringOwnerKeysByUid(int $uid): array
+    public function getKeyringOwnerKeysByUid(int $uid): array
     {
-        /*
-         * Take the keys of the user
-         */
-        $keyList = [];
-
         try {
-            $_keyDao = new MemoryKeyDao(Database::obtain());
             $dh = new MemoryKeyStruct(['uid' => $uid]);
-            $keyList = $_keyDao->read($dh);
-        } catch (Exception $e) {
-            LoggerFactory::getLogger('dao')->error($e->getMessage());
+
+            return $this->read($dh);
+        } catch (Throwable $e) {
+            try {
+                LoggerFactory::getLogger('dao')->error($e->getMessage());
+            } catch (Throwable) {
+            }
         }
 
-        return $keyList;
+        return [];
     }
 
     /**
@@ -320,7 +319,7 @@ class MemoryKeyDao extends AbstractDao
      */
     public function createList(array $obj_arr): void
     {
-        $obj_arr = self::sanitizeArray($obj_arr);
+        $obj_arr = $this->sanitizeArray($obj_arr);
 
         $query = "INSERT INTO " . self::TABLE .
             " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
@@ -372,7 +371,7 @@ class MemoryKeyDao extends AbstractDao
      * @return MemoryKeyStruct[]
      * @throws Exception
      */
-    public static function sanitizeArray(array $input): array
+    public function sanitizeArray(array $input): array
     {
         $result = [];
         foreach ($input as $elem) {
@@ -428,7 +427,7 @@ class MemoryKeyDao extends AbstractDao
      *
      * @return list<MemoryKeyStruct>
      *
-     * @throws \DomainException
+     * @throws DomainException
      */
     protected function _buildResult(array $array_result): array
     {

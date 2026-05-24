@@ -3796,12 +3796,6 @@ parameters:
 			path: lib/Model/ProjectCreation/SegmentStorageService.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:getKeyringOwnerKeys\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/TmKeyService.php
-
-		-
 			message: '#^Method Model\\ProjectCreation\\TmKeyService\:\:getUserByUid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
