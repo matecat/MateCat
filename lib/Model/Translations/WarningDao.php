@@ -97,26 +97,24 @@ class WarningDao extends AbstractDao
      * @throws PDOException
      * @throws Exception
      */
-    public static function getWarningsByJobIdAndPassword(int $jid, string $jpassword): array
+    public function getWarningsByJobIdAndPassword(int $jid, string $jpassword): array
     {
-        $thisDao = new self();
-        $db = $thisDao->getDatabaseHandler();
-
         $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
 		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		WHERE jobs.id = :id_job
 		  AND jobs.password = :password
-		  AND segment_translations.status != :segment_status 
+		  AND segment_translations.status != :segment_status
 		-- following is a condition on bitmask to filter by severity ERROR
 		  AND warning & 1 = 1 ";
 
-        $stmt = $db->getConnection()->prepare($query);
+        $stmt = $this->database->getConnection()->prepare($query);
 
-        return $thisDao->_fetchObjectMap($stmt, GlobalWarningStruct::class, [
-            'id_job' => $jid,
-            'password' => $jpassword,
-            'segment_status' => TranslationStatus::STATUS_NEW
+        return $this->_fetchObjectMap($stmt, GlobalWarningStruct::class, [
+            'id_job'         => $jid,
+            'password'       => $jpassword,
+            'segment_status' => TranslationStatus::STATUS_NEW,
         ]);
     }
+
 }
