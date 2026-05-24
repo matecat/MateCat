@@ -52,7 +52,7 @@ class ProjectCompletion extends BaseFeature
             ($current_phase == ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review) ||
             ($current_phase == ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review)
         ) {
-            ChunkCompletionUpdateDao::createOrUpdateFromStruct($chunk_completion_update_struct);
+            (new ChunkCompletionUpdateDao())->createOrUpdateFromStruct($chunk_completion_update_struct);
         }
     }
 

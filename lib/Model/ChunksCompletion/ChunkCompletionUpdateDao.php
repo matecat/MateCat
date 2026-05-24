@@ -29,19 +29,10 @@ class ChunkCompletionUpdateDao extends AbstractDao
         return $stmt->rowCount();
     }
 
-    /** @return array<string, string> */
-    public static function validSources(): array
-    {
-        return [
-            'user' => ChunkCompletionEventStruct::SOURCE_USER,
-            'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
-        ];
-    }
-
     /**
      * @throws PDOException
      */
-    public static function createOrUpdateFromStruct(ChunkCompletionUpdateStruct $struct): bool
+    public function createOrUpdateFromStruct(ChunkCompletionUpdateStruct $struct): bool
     {
         $sql_update = "  " .
             " last_update = CURRENT_TIMESTAMP, source = :source, uid = :uid, " .
@@ -59,7 +50,7 @@ class ChunkCompletionUpdateDao extends AbstractDao
             " ) " .
             " ON DUPLICATE KEY UPDATE $sql_update ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkCompletionUpdateStruct::class);
 
