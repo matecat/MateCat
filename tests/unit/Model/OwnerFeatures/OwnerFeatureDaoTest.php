@@ -100,16 +100,19 @@ class OwnerFeatureDaoTest extends AbstractTest
         $this->assertNotEmpty($result->last_update);
     }
 
+    // ─── Instance method tests ───
+
     /**
      * @covers OwnerFeatureDao::getByIdCustomer
      */
     #[Test]
-    public function test_get_by_id_customer_returns_enabled_features_only(): void
+    public function test_instance_get_by_id_customer_returns_enabled_features_only(): void
     {
         $this->insertFixtureFeature('enabled_feature', true);
         $this->insertFixtureFeature('disabled_feature', false);
 
-        $results = OwnerFeatureDao::getByIdCustomer($this->userEmail, 0); // ttl=0 bypasses cache
+        $dao = new OwnerFeatureDao($this->database);
+        $results = $dao->getByIdCustomer($this->userEmail, 0);
 
         $this->assertIsArray($results);
         $this->assertCount(1, $results);
@@ -122,9 +125,10 @@ class OwnerFeatureDaoTest extends AbstractTest
      * @covers OwnerFeatureDao::getByIdCustomer
      */
     #[Test]
-    public function test_get_by_id_customer_with_unknown_email_returns_empty_array(): void
+    public function test_instance_get_by_id_customer_with_unknown_email_returns_empty_array(): void
     {
-        $results = OwnerFeatureDao::getByIdCustomer('no-such-user@matecat-phpunit.test', 0);
+        $dao = new OwnerFeatureDao($this->database);
+        $results = $dao->getByIdCustomer('no-such-user@matecat-phpunit.test', 0);
         $this->assertSame([], $results);
     }
 
@@ -132,12 +136,13 @@ class OwnerFeatureDaoTest extends AbstractTest
      * @covers OwnerFeatureDao::destroyCacheByIdCustomer
      */
     #[Test]
-    public function test_destroy_cache_by_id_customer_returns_bool(): void
+    public function test_instance_destroy_cache_by_id_customer_returns_bool(): void
     {
         $this->insertFixtureFeature('cache_feature_email', true);
-        OwnerFeatureDao::getByIdCustomer($this->userEmail, 3600); // prime cache
+        $dao = new OwnerFeatureDao($this->database);
+        $dao->getByIdCustomer($this->userEmail, 3600); // prime cache
 
-        $result = OwnerFeatureDao::destroyCacheByIdCustomer($this->userEmail);
+        $result = $dao->destroyCacheByIdCustomer($this->userEmail);
 
         $this->assertIsBool($result);
     }
@@ -146,12 +151,13 @@ class OwnerFeatureDaoTest extends AbstractTest
      * @covers OwnerFeatureDao::getByUserId
      */
     #[Test]
-    public function test_get_by_user_id_returns_all_features_for_user(): void
+    public function test_instance_get_by_user_id_returns_all_features_for_user(): void
     {
         $this->insertFixtureFeature('feature_alpha', true);
         $this->insertFixtureFeature('feature_beta', false);
 
-        $results = OwnerFeatureDao::getByUserId($this->userId, 0); // ttl=0 bypasses cache
+        $dao = new OwnerFeatureDao($this->database);
+        $results = $dao->getByUserId($this->userId, 0);
 
         $this->assertIsArray($results);
         $this->assertCount(2, $results);
@@ -165,9 +171,10 @@ class OwnerFeatureDaoTest extends AbstractTest
      * @covers OwnerFeatureDao::getByUserId
      */
     #[Test]
-    public function test_get_by_user_id_with_null_uid_returns_empty_array(): void
+    public function test_instance_get_by_user_id_with_null_uid_returns_empty_array(): void
     {
-        $results = OwnerFeatureDao::getByUserId(null);
+        $dao = new OwnerFeatureDao($this->database);
+        $results = $dao->getByUserId(null);
         $this->assertSame([], $results);
     }
 
@@ -175,15 +182,18 @@ class OwnerFeatureDaoTest extends AbstractTest
      * @covers OwnerFeatureDao::destroyCacheByUserId
      */
     #[Test]
-    public function test_destroy_cache_by_user_id_returns_bool(): void
+    public function test_instance_destroy_cache_by_user_id_returns_bool(): void
     {
         $this->insertFixtureFeature('uid_cache_feature', true);
-        OwnerFeatureDao::getByUserId($this->userId, 3600); // prime cache
+        $dao = new OwnerFeatureDao($this->database);
+        $dao->getByUserId($this->userId, 3600); // prime cache
 
-        $result = OwnerFeatureDao::destroyCacheByUserId($this->userId);
+        $result = $dao->destroyCacheByUserId($this->userId);
 
         $this->assertIsBool($result);
     }
+
+    // ─── Inherited / fetchById tests ───
 
     /**
      * @covers OwnerFeatureDao::getById

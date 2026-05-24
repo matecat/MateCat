@@ -182,7 +182,7 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadFromUserEmail(string $id_customer): void
     {
-        $features = OwnerFeatureDao::getByIdCustomer($id_customer);
+        $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
         $this->clear();
         $this->_setIgnoreDependencies(false);
         $this->loadFromMandatory();
@@ -227,7 +227,7 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadAutoActivableOwnerFeatures(string $id_customer): void
     {
-        $features = OwnerFeatureDao::getByIdCustomer($id_customer);
+        $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
 
         $objs = array_map(function (BasicFeatureStruct $feature): BaseFeature {
             return $feature->toNewObject();
