@@ -1069,7 +1069,7 @@ class NewController extends KleinController
 
         if (!empty($payable_rate_template_name) and !empty($payable_rate_template_id)) {
             $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser((int)$payable_rate_template_id, $userId);
+            $payableRateModelTemplate = (new CustomPayableRateDao())->getByIdAndUser((int)$payable_rate_template_id, $userId);
 
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');

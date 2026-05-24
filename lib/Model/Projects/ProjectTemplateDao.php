@@ -240,7 +240,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check pr_id
         if ($projectTemplateStruct->payable_rate_template_id > 0) {
-            $payableRateModel = CustomPayableRateDao::getByIdAndUser($projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid);
+            $payableRateModel = (new CustomPayableRateDao())->getByIdAndUser($projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid);
 
             if (empty($payableRateModel)) {
                 throw new Exception("Not existing payable rate template.", 404);

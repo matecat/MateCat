@@ -2511,37 +2511,37 @@ parameters:
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#1 \$json of static method Model\\PayableRates\\CustomPayableRateDao\:\:createFromJSON\(\) expects string, string\|null given\.$#'
+			message: '#^Parameter \#1 \$json of method Model\\PayableRates\\CustomPayableRateDao\:\:createFromJSON\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#1 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#1 \$uid of method Model\\PayableRates\\CustomPayableRateDao\:\:getAllPaginated\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#1 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:getDefaultTemplate\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#1 \$uid of method Model\\PayableRates\\CustomPayableRateDao\:\:getDefaultTemplate\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#2 \$json of static method Model\\PayableRates\\CustomPayableRateDao\:\:editFromJSON\(\) expects string, string\|null given\.$#'
+			message: '#^Parameter \#2 \$json of method Model\\PayableRates\\CustomPayableRateDao\:\:editFromJSON\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\PayableRates\\CustomPayableRateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Model\\PayableRates\\CustomPayableRateDao\:\:remove\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$uid of method Model\\PayableRates\\CustomPayableRateDao\:\:remove\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/PayableRateController.php

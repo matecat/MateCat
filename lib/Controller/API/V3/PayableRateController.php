@@ -17,6 +17,13 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class PayableRateController extends KleinController
 {
+    private ?CustomPayableRateDao $customPayableRateDao = null;
+
+    private function getCustomPayableRateDao(): CustomPayableRateDao
+    {
+        return $this->customPayableRateDao ??= new CustomPayableRateDao();
+    }
+
     protected function afterConstruct(): void
     {
         parent::afterConstruct();
@@ -38,7 +45,7 @@ class PayableRateController extends KleinController
 
             $uid = $this->getUser()->uid;
 
-            return $this->response->json(CustomPayableRateDao::getAllPaginated($uid, "/api/v3/payable_rate?page=", (int)$currentPage, (int)$pagination));
+            return $this->response->json($this->getCustomPayableRateDao()->getAllPaginated($uid, "/api/v3/payable_rate?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
@@ -64,7 +71,7 @@ class PayableRateController extends KleinController
             $json = $this->request->body();
             $this->validateJSON($json);
 
-            $struct = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
+            $struct = $this->getCustomPayableRateDao()->createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
 
@@ -96,7 +103,7 @@ class PayableRateController extends KleinController
         $id = $this->request->param('id');
 
         try {
-            $count = CustomPayableRateDao::remove($id, $this->getUser()->uid);
+            $count = $this->getCustomPayableRateDao()->remove($id, $this->getUser()->uid);
 
             if ($count == 0) {
                 throw new Exception('Model not found', 404);
@@ -128,7 +135,7 @@ class PayableRateController extends KleinController
 
             $id = $this->request->param('id');
 
-            $model = CustomPayableRateDao::getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getCustomPayableRateDao()->getByIdAndUser($id, $this->getUser()->uid);
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
             }
@@ -136,7 +143,7 @@ class PayableRateController extends KleinController
             $json = $this->request->body();
             $this->validateJSON($json);
 
-            $struct = CustomPayableRateDao::editFromJSON($model, $json);
+            $struct = $this->getCustomPayableRateDao()->editFromJSON($model, $json);
 
             $this->response->code(200);
 
@@ -167,7 +174,7 @@ class PayableRateController extends KleinController
     {
         try {
             $id = $this->request->param('id');
-            $model = CustomPayableRateDao::getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getCustomPayableRateDao()->getByIdAndUser($id, $this->getUser()->uid);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -253,7 +260,7 @@ class PayableRateController extends KleinController
     {
         $this->response->status()->setCode(200);
         $this->response->json(
-            CustomPayableRateDao::getDefaultTemplate($this->getUser()->uid)
+            $this->getCustomPayableRateDao()->getDefaultTemplate($this->getUser()->uid)
         );
     }
 

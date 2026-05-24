@@ -25,10 +25,14 @@ use View\API\Commons\Error;
 
 class JobCreationService
 {
+    private readonly CustomPayableRateDao $customPayableRateDao;
+
     public function __construct(
         private readonly FeatureSet $features,
         private readonly MatecatLogger $logger,
+        ?CustomPayableRateDao $customPayableRateDao = null,
     ) {
+        $this->customPayableRateDao = $customPayableRateDao ?? new CustomPayableRateDao();
     }
 
     /**
@@ -60,7 +64,7 @@ class JobCreationService
 
         // Branch 3: payable_rate_model_id — look up from DB
         if (!empty($projectStructure->payable_rate_model_id)) {
-            $template = CustomPayableRateDao::getById($projectStructure->payable_rate_model_id);
+            $template = $this->customPayableRateDao->findById($projectStructure->payable_rate_model_id);
             if ($template === null) {
                 throw new Exception("Payable rate model not found: $projectStructure->payable_rate_model_id");
             }
@@ -227,7 +231,7 @@ class JobCreationService
         }
 
         try {
-            CustomPayableRateDao::assocModelToJob(
+            $this->customPayableRateDao->assocModelToJob(
                 $projectStructure->payable_rate_model_id,
                 (int)$job->id,
                 $template->version,

@@ -687,7 +687,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $payableRateModelTemplate->hydrateFromJSON($json);
             $payableRateModelTemplate->uid = $userId;
         } elseif (!empty($payable_rate_template_id)) {
-            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser($payable_rate_template_id, $userId);
+            $payableRateModelTemplate = (new CustomPayableRateDao())->getByIdAndUser($payable_rate_template_id, $userId);
             $payableRateModelTemplate?->getBreakdownsArray();
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');
