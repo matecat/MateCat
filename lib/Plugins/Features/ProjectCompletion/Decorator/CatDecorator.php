@@ -2,6 +2,7 @@
 
 namespace Plugins\Features\ProjectCompletion\Decorator;
 
+use Controller\Abstracts\IController;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
@@ -11,6 +12,7 @@ use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use RuntimeException;
+use Utils\Templating\PHPTALWithAppend;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Tools\CatUtils;
 
@@ -23,6 +25,17 @@ class CatDecorator extends AbstractDecorator
     private string $current_phase;
 
     private CatDecoratorArguments $arguments;
+
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+
+    public function __construct(
+        IController $controller,
+        PHPTALWithAppend $template,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null
+    ) {
+        parent::__construct($controller, $template);
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+    }
 
     /**
      * @throws Exception
@@ -39,10 +52,9 @@ class CatDecorator extends AbstractDecorator
 
         $this->stats = CatUtils::getFastStatsForJob($this->arguments->getWordCountStruct());
 
-        $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord($job, ['is_review' => $this->arguments->isRevision()]);
+        $lastCompletionEvent = $this->chunkCompletionEventDao->lastCompletionRecord($job, ['is_review' => $this->arguments->isRevision()]);
 
-        $dao = new ChunkCompletionEventDao();
-        $this->current_phase = $dao->currentPhase($this->arguments->getJob());
+        $this->current_phase = $this->chunkCompletionEventDao->currentPhase($this->arguments->getJob());
 
         $this->template->project_completion_feature_enabled = new PHPTalBoolean(true);
         $this->template->job_completion_current_phase = $this->current_phase;

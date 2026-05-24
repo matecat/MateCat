@@ -288,7 +288,7 @@ class QualityReportModel
      */
     protected function getReviewerName(): string
     {
-        $completion_event = ChunkCompletionEventDao::lastCompletionRecord(
+        $completion_event = (new ChunkCompletionEventDao())->lastCompletionRecord(
             $this->chunk,
             ['is_review' => true]
         );

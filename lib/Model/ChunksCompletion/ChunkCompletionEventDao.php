@@ -21,7 +21,7 @@ class ChunkCompletionEventDao extends AbstractDao
     /**
      * @return array<string, string>
      */
-    public static function validSources(): array
+    public function validSources(): array
     {
         return [
             'user' => ChunkCompletionEventStruct::SOURCE_USER,
@@ -89,9 +89,16 @@ class ChunkCompletionEventDao extends AbstractDao
      * @return string
      * @throws PDOException
      */
-    public static function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
+    /**
+     * @param JobStruct $chunk
+     * @param CompletionEventStruct $params
+     *
+     * @return string
+     * @throws PDOException
+     */
+    public function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
             "INSERT INTO chunk_completion_events " .
@@ -104,7 +111,7 @@ class ChunkCompletionEventDao extends AbstractDao
             " ); "
         );
 
-        $validSources = self::validSources();
+        $validSources = $this->validSources();
         $stmt->execute([
             'id_project' => $chunk->getProject()->id,
             'id_job' => $chunk->id,
@@ -161,31 +168,33 @@ class ChunkCompletionEventDao extends AbstractDao
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord(JobStruct $chunk, array $params = []): array
+    /**
+     * @param JobStruct $chunk
+     * @param array{is_review?: bool} $params
+     *
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    public function lastCompletionRecord(JobStruct $chunk, array $params = []): array
     {
         $params = Utils::ensure_keys($params, ['is_review']);
         $is_review = $params['is_review'];
 
-        /**
-         * This query takes into account the fact that completion records are never deleted.
-         * We order by event.create_date DESC and then group by id_job, password, is_review
-         * so to only get the most recent event record that matches the condition.
-         *
-         */
         $sql = "
             SELECT events.id AS id_event, events.id_job, events.password, events.is_review, events.create_date
-            FROM chunk_completion_events events 
-            LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job 
-            AND  events.password = updates.password and events.is_review = updates.is_review 
-            WHERE events.create_date IS NOT NULL  
-            AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL ) 
-            AND events.is_review = :is_review 
-            AND events.id_job = :id_job AND events.password = :password 
-            ORDER BY events.create_date DESC 
+            FROM chunk_completion_events events
+            LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job
+            AND  events.password = updates.password and events.is_review = updates.is_review
+            WHERE events.create_date IS NOT NULL
+            AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL )
+            AND events.is_review = :is_review
+            AND events.id_job = :id_job AND events.password = :password
+            ORDER BY events.create_date DESC
             LIMIT 1
             ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
                 'id_job' => $chunk->id,

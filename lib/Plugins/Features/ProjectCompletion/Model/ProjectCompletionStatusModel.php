@@ -102,7 +102,7 @@ class ProjectCompletionStatusModel
      */
     private function dataForChunkStatus(JobStruct $chunk, bool $is_review): array
     {
-        $record = ChunkCompletionEventDao::lastCompletionRecord($chunk, [
+        $record = (new ChunkCompletionEventDao())->lastCompletionRecord($chunk, [
             'is_review' => $is_review
         ]);
 

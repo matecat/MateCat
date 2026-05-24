@@ -46,7 +46,7 @@ class EventModel
     {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = ChunkCompletionEventDao::createFromChunk(
+        $this->chunkCompletionEventId = (new ChunkCompletionEventDao())->createFromChunk(
             $this->chunk,
             $this->eventStruct
         );
