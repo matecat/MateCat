@@ -1023,7 +1023,7 @@ class NewController extends KleinController
     {
         if (!empty($id_qa_model_template)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $qaModelTemplate = QAModelTemplateDao::get([
+            $qaModelTemplate = (new QAModelTemplateDao())->get([
                 'id' => (int)$id_qa_model_template,
                 'uid' => $uid
             ]);

@@ -69,7 +69,7 @@ class QualityFrameworkController extends KleinController
 
         if ($qaModel->qa_model_template_id) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id, 'uid' => $uid]);
+            $parentTemplate = (new QAModelTemplateDao())->get(['id' => $qaModel->qa_model_template_id, 'uid' => $uid]);
 
             if ($parentTemplate === null) {
                 return $json;

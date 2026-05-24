@@ -593,6 +593,7 @@ Files that are PHPStan-clean but not yet covered by the test suite (controllers/
 | `lib/Routes/view_routes.php` | Phase 31 | Route definitions |
 | `lib/View/fileupload/index.php` | Phase 31 | View template |
 | `lib/Model/ProjectCreation/JobCreationService.php` | Phase 32 | DAO migration — CustomPayableRateDao DI |
+| `lib/Controller/API/V1/NewController.php` | Phase 32 | PHPStan-clean, DAO migration caller |
 
 </details>
 

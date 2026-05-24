@@ -5,7 +5,6 @@ namespace Model\LQA\QAModelTemplate;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
@@ -18,16 +17,13 @@ use TypeError;
 use Utils\Date\DateTimeUtil;
 use Utils\Registry\AppConfig;
 
-final class QAModelTemplateDao extends AbstractDao
+class QAModelTemplateDao extends AbstractDao
 {
 
     const string query_paginated = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
     const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
-     * validate a json against schema and then
-     * create a QA model template from it
-     *
      * @param string $json
      * @param int|null $uid
      *
@@ -36,7 +32,7 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function createFromJSON(string $json, ?int $uid = null): QAModelTemplateStruct
+    public function createFromJSON(string $json, ?int $uid = null): QAModelTemplateStruct
     {
         $QAModelTemplateStruct = new QAModelTemplateStruct();
         $QAModelTemplateStruct->hydrateFromJSON($json);
@@ -45,7 +41,7 @@ final class QAModelTemplateDao extends AbstractDao
             $QAModelTemplateStruct->uid = $uid;
         }
 
-        return self::save($QAModelTemplateStruct);
+        return $this->save($QAModelTemplateStruct);
     }
 
     /**
@@ -57,11 +53,11 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function editFromJSON(QAModelTemplateStruct $QAModelTemplateStruct, string $json): QAModelTemplateStruct
+    public function editFromJSON(QAModelTemplateStruct $QAModelTemplateStruct, string $json): QAModelTemplateStruct
     {
         $QAModelTemplateStruct->hydrateFromJSON($json);
 
-        return self::update($QAModelTemplateStruct);
+        return $this->update($QAModelTemplateStruct);
     }
 
     /**
@@ -73,9 +69,9 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws ReflectionException
      */
-    public static function remove(int $id, int $uid): int
+    public function remove(int $id, int $uid): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $conn->beginTransaction();
 
         try {
@@ -88,6 +84,8 @@ final class QAModelTemplateDao extends AbstractDao
             $deleted = $stmt->rowCount();
 
             if (!$deleted) {
+                $conn->commit();
+
                 return 0;
             }
 
@@ -139,7 +137,7 @@ final class QAModelTemplateDao extends AbstractDao
 
             throw $exception;
         } finally {
-            static::destroyQueryPaginated($uid);
+            $this->destroyQueryPaginated($uid);
         }
     }
 
@@ -149,7 +147,7 @@ final class QAModelTemplateDao extends AbstractDao
      * @return array<string, mixed>
      * @throws Exception
      */
-    public static function getDefaultTemplate(int $uid): array
+    public function getDefaultTemplate(int $uid): array
     {
         $defaultTemplate = file_get_contents(AppConfig::$ROOT . '/inc/qa_model.json');
         if ($defaultTemplate === false) {
@@ -231,9 +229,9 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
+    public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $pager = new Pager($conn);
         $totals = $pager->count(
@@ -248,7 +246,7 @@ final class QAModelTemplateDao extends AbstractDao
 
         $models = [];
         foreach ($result['items'] as $model) {
-            $models[] = self::get([
+            $models[] = $this->get([
                 'id' => $model['id'],
                 'uid' => $uid
             ]);
@@ -260,14 +258,11 @@ final class QAModelTemplateDao extends AbstractDao
     }
 
     /**
-     * @throws Exception
-     */
-    /**
      * @param array{id?: int, uid?: int} $meta
      * @throws Exception
      * @throws PDOException
      */
-    public static function getQaModelTemplateByIdAndUid(PDO $conn, array $meta = []): ?QAModelTemplateStruct
+    public function getQaModelTemplateByIdAndUid(array $meta = []): ?QAModelTemplateStruct
     {
         $query = "SELECT * FROM qa_model_templates WHERE deleted_at IS NULL ";
         $params = [];
@@ -282,11 +277,12 @@ final class QAModelTemplateDao extends AbstractDao
         $query .= " AND uid=:uid ";
         $params['uid'] = $meta['uid'];
 
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, QAModelTemplateStruct::class);
         $stmt->execute($params);
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**
@@ -296,11 +292,11 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function get(array $meta = []): ?QAModelTemplateStruct
+    public function get(array $meta = []): ?QAModelTemplateStruct
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
-        $QAModelTemplateStruct = self::getQaModelTemplateByIdAndUid($conn, $meta);
+        $QAModelTemplateStruct = $this->getQaModelTemplateByIdAndUid($meta);
 
         if (!$QAModelTemplateStruct) {
             return null;
@@ -355,11 +351,11 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function save(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
+    public function save(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
         $passfail = $modelTemplateStruct->passfail ?? throw new Exception("QAModelTemplateStruct::passfail must not be null when saving");
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $conn->beginTransaction();
 
         try {
@@ -397,7 +393,7 @@ final class QAModelTemplateDao extends AbstractDao
             foreach ($modelTemplateStruct->categories as $csort => $categoryStruct) {
                 $categoryStruct->id_template = $QAModelTemplateId;
                 $stmt = $conn->prepare(
-                    "INSERT INTO qa_model_template_categories (id_template, id_parent, category_label, code, sort) 
+                    "INSERT INTO qa_model_template_categories (id_template, id_parent, category_label, code, sort)
                     VALUES (:id_template, :id_parent, :category_label, :code, :sort) "
                 );
                 $stmt->execute([
@@ -414,7 +410,7 @@ final class QAModelTemplateDao extends AbstractDao
                 foreach ($categoryStruct->severities as $ssort => $severityStruct) {
                     $severityStruct->id_category = $QAModelTemplateCategoryId;
                     $stmt = $conn->prepare(
-                        "INSERT INTO qa_model_template_severities (id_category, severity_label, severity_code, penalty, sort) 
+                        "INSERT INTO qa_model_template_severities (id_category, severity_label, severity_code, penalty, sort)
                     VALUES (:id_category, :severity_label, :severity_code, :penalty, :sort) "
                     );
                     $stmt->execute([
@@ -439,7 +435,7 @@ final class QAModelTemplateDao extends AbstractDao
 
             throw $exception;
         } finally {
-            static::destroyQueryPaginated($modelTemplateStruct->uid);
+            $this->destroyQueryPaginated($modelTemplateStruct->uid);
         }
     }
 
@@ -450,11 +446,11 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws Exception
      * @throws TypeError
      */
-    public static function update(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
+    public function update(QAModelTemplateStruct $modelTemplateStruct): QAModelTemplateStruct
     {
         $passfail = $modelTemplateStruct->passfail ?? throw new Exception("QAModelTemplateStruct::passfail must not be null when updating");
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $conn->beginTransaction();
 
         try {
@@ -489,7 +485,7 @@ final class QAModelTemplateDao extends AbstractDao
 
             foreach ($passfail->thresholds as $thresholdStruct) {
                 $stmt = $conn->prepare(
-                    "INSERT INTO qa_model_template_passfail_options (id_passfail,passfail_label,passfail_value) 
+                    "INSERT INTO qa_model_template_passfail_options (id_passfail,passfail_label,passfail_value)
                     VALUES (:id_passfail,:passfail_label,:passfail_value) "
                 );
                 $stmt->execute([
@@ -504,7 +500,7 @@ final class QAModelTemplateDao extends AbstractDao
 
             foreach ($modelTemplateStruct->categories as $csort => $categoryStruct) {
                 $stmt = $conn->prepare(
-                    "INSERT INTO qa_model_template_categories (id_template,id_parent,category_label, code, sort) 
+                    "INSERT INTO qa_model_template_categories (id_template,id_parent,category_label, code, sort)
                     VALUES (:id_template,:id_parent,:category_label,:code,:sort) "
                 );
                 $stmt->execute([
@@ -544,7 +540,7 @@ final class QAModelTemplateDao extends AbstractDao
 
             throw $exception;
         } finally {
-            static::destroyQueryPaginated($modelTemplateStruct->uid);
+            $this->destroyQueryPaginated($modelTemplateStruct->uid);
         }
     }
 
@@ -554,10 +550,9 @@ final class QAModelTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    protected static function destroyQueryPaginated(
-        int $uid
-    ): void {
-        (new static())->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
+    private function destroyQueryPaginated(int $uid): void
+    {
+        $this->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
     }
 
 }

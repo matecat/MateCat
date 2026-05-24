@@ -228,7 +228,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check qa_id
         if ($projectTemplateStruct->qa_model_template_id > 0) {
-            $qaModel = QAModelTemplateDao::getQaModelTemplateByIdAndUid($this->database->getConnection(), [
+            $qaModel = (new QAModelTemplateDao())->getQaModelTemplateByIdAndUid([
                 'id' => $projectTemplateStruct->qa_model_template_id,
                 'uid' => $projectTemplateStruct->uid
             ]);

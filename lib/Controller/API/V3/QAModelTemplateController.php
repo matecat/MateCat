@@ -19,6 +19,12 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class QAModelTemplateController extends KleinController
 {
+    private ?QAModelTemplateDao $qaModelTemplateDao = null;
+
+    private function getQaModelTemplateDao(): QAModelTemplateDao
+    {
+        return $this->qaModelTemplateDao ??= new QAModelTemplateDao();
+    }
 
     protected function afterConstruct(): void
     {
@@ -58,7 +64,7 @@ class QAModelTemplateController extends KleinController
 
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
-            return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, "/api/v3/qa_model_template?page=", (int)$currentPage, (int)$pagination));
+            return $this->response->json($this->getQaModelTemplateDao()->getAllPaginated($uid, "/api/v3/qa_model_template?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
@@ -89,7 +95,7 @@ class QAModelTemplateController extends KleinController
              $this->validateJSON($json);
 
              $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-             $model = QAModelTemplateDao::createFromJSON($json ?? throw new RuntimeException('Missing request body'), $uid);
+             $model = $this->getQaModelTemplateDao()->createFromJSON($json ?? throw new RuntimeException('Missing request body'), $uid);
 
             $this->response->code(201);
 
@@ -122,7 +128,7 @@ class QAModelTemplateController extends KleinController
             $id = (int)$this->request->param('id');
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
-            $deleted = QAModelTemplateDao::remove($id, $uid);
+            $deleted = $this->getQaModelTemplateDao()->remove($id, $uid);
 
             if (empty($deleted)) {
                 throw new Exception('Model not found', 404);
@@ -153,7 +159,7 @@ class QAModelTemplateController extends KleinController
             $id = (int)$this->request->param('id');
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
-            $model = QAModelTemplateDao::get([
+            $model = $this->getQaModelTemplateDao()->get([
                 'id' => $id,
                 'uid' => $uid
             ]);
@@ -166,7 +172,7 @@ class QAModelTemplateController extends KleinController
 
              $this->validateJSON($json);
 
-             $model = QAModelTemplateDao::editFromJSON($model, $json ?? throw new RuntimeException('Missing request body'));
+             $model = $this->getQaModelTemplateDao()->editFromJSON($model, $json ?? throw new RuntimeException('Missing request body'));
 
             $this->response->code(200);
 
@@ -203,7 +209,7 @@ class QAModelTemplateController extends KleinController
             $id = (int)$this->request->param('id');
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
-            $model = QAModelTemplateDao::get([
+            $model = $this->getQaModelTemplateDao()->get([
                 'id' => $id,
                 'uid' => $uid
             ]);
@@ -291,7 +297,7 @@ class QAModelTemplateController extends KleinController
         $this->response->status()->setCode(200);
 
         return $this->response->json(
-            QAModelTemplateDao::getDefaultTemplate($uid)
+            $this->getQaModelTemplateDao()->getDefaultTemplate($uid)
         );
     }
 

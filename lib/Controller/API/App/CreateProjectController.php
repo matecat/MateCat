@@ -644,7 +644,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             return $QAModelTemplateStruct;
         } elseif (!empty($qa_model_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $qaModelTemplate = QAModelTemplateDao::get([
+            $qaModelTemplate = (new QAModelTemplateDao())->get([
                 'id' => $qa_model_template_id,
                 'uid' => $uid
             ]);

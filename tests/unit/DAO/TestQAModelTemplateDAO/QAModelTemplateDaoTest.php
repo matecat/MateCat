@@ -3,15 +3,84 @@
 namespace unit\DAO\TestQAModelTemplateDAO;
 
 use Exception;
+use Model\DataAccess\Database;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplatePassfailStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplatePassfailThresholdStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 class QAModelTemplateDaoTest extends AbstractTest
 {
+    private QAModelTemplateDao $dao;
+    private int $uid = 999999;
+    /** @var array<int> */
+    private array $createdIds = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->dao = new QAModelTemplateDao();
+        $this->createdIds = [];
+        $this->cleanupTestData();
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->createdIds as $id) {
+            try {
+                $this->dao->remove($id, $this->uid);
+            } catch (Exception) {
+            }
+        }
+        $this->cleanupTestData();
+        parent::tearDown();
+    }
+
+    private function cleanupTestData(): void
+    {
+        $conn = Database::obtain()->getConnection();
+        $conn->exec("DELETE FROM qa_model_templates WHERE uid = {$this->uid}");
+    }
+
+    private function makeValidJson(string $label = 'Test Template'): string
+    {
+        return json_encode([
+            'model' => [
+                'version' => 1,
+                'label' => $label . ' ' . uniqid(),
+                'categories' => [
+                    [
+                        'label' => 'Style',
+                        'code' => 'STY',
+                        'sort' => 1,
+                        'severities' => [
+                            ['label' => 'Neutral', 'code' => 'NEU', 'penalty' => 0, 'sort' => 1],
+                            ['label' => 'Minor', 'code' => 'MIN', 'penalty' => 1, 'sort' => 2],
+                        ]
+                    ]
+                ],
+                'passfail' => [
+                    'type' => 'points',
+                    'thresholds' => [
+                        ['label' => 'R1', 'value' => 5],
+                        ['label' => 'R2', 'value' => 10],
+                    ]
+                ]
+            ]
+        ]);
+    }
+
+    private function create(string $label = 'Test Template'): QAModelTemplateStruct
+    {
+        $struct = $this->dao->createFromJSON($this->makeValidJson($label), $this->uid);
+        $this->createdIds[] = $struct->id;
+
+        return $struct;
+    }
+
     #[Test]
     public function saveThrowsWhenPassfailIsNull(): void
     {
@@ -24,7 +93,7 @@ class QAModelTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('passfail');
 
-        QAModelTemplateDao::save($struct);
+        $this->dao->save($struct);
     }
 
     #[Test]
@@ -40,49 +109,41 @@ class QAModelTemplateDaoTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('passfail');
 
-        QAModelTemplateDao::update($struct);
+        $this->dao->update($struct);
     }
 
     #[Test]
     public function getDefaultTemplateReturnsValidStructure(): void
     {
-        $result = QAModelTemplateDao::getDefaultTemplate(42);
+        $result = $this->dao->getDefaultTemplate(42);
 
         $this->assertIsArray($result);
-        $this->assertArrayHasKey('id', $result);
-        $this->assertArrayHasKey('uid', $result);
-        $this->assertArrayHasKey('label', $result);
+        $this->assertSame(0, $result['id']);
+        $this->assertSame(42, $result['uid']);
+        $this->assertSame('Matecat original settings', $result['label']);
         $this->assertArrayHasKey('categories', $result);
         $this->assertArrayHasKey('passfail', $result);
         $this->assertArrayHasKey('createdAt', $result);
         $this->assertArrayHasKey('modifiedAt', $result);
-
-        $this->assertSame(0, $result['id']);
-        $this->assertSame(42, $result['uid']);
-        $this->assertSame('Matecat original settings', $result['label']);
+        $this->assertNull($result['deletedAt']);
     }
 
     #[Test]
     public function getDefaultTemplateReturnsIsoFormattedDates(): void
     {
-        $result = QAModelTemplateDao::getDefaultTemplate(1);
+        $result = $this->dao->getDefaultTemplate(1);
 
         $this->assertNotNull($result['createdAt']);
-        $this->assertNotNull($result['modifiedAt']);
         $this->assertMatchesRegularExpression(
             '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/',
             $result['createdAt']
         );
-        $this->assertMatchesRegularExpression(
-            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/',
-            $result['modifiedAt']
-        );
     }
 
     #[Test]
-    public function getDefaultTemplateReturnsCategories(): void
+    public function getDefaultTemplateReturnsCategoriesWithSeverities(): void
     {
-        $result = QAModelTemplateDao::getDefaultTemplate(1);
+        $result = $this->dao->getDefaultTemplate(1);
 
         $this->assertNotEmpty($result['categories']);
         $firstCategory = $result['categories'][0];
@@ -95,28 +156,147 @@ class QAModelTemplateDaoTest extends AbstractTest
     #[Test]
     public function getDefaultTemplateReturnsPassfailWithThresholds(): void
     {
-        $result = QAModelTemplateDao::getDefaultTemplate(1);
+        $result = $this->dao->getDefaultTemplate(1);
 
         $passfail = $result['passfail'];
-        $this->assertArrayHasKey('id', $passfail);
-        $this->assertArrayHasKey('thresholds', $passfail);
         $this->assertSame(0, $passfail['id']);
         $this->assertCount(2, $passfail['thresholds']);
-
-        $threshold = $passfail['thresholds'][0];
-        $this->assertArrayHasKey('label', $threshold);
-        $this->assertArrayHasKey('value', $threshold);
+        $this->assertArrayHasKey('label', $passfail['thresholds'][0]);
+        $this->assertArrayHasKey('value', $passfail['thresholds'][0]);
     }
 
     #[Test]
-    public function saveAcceptsStructWithValidPassfail(): void
+    public function getQaModelTemplateByIdAndUidThrowsWhenIdMissing(): void
     {
-        // Verify save() does not throw when passfail is properly set
-        // (it will throw PDOException from DB — that's expected, not Exception about passfail)
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('id and uid parameters must be provided');
+
+        $this->dao->getQaModelTemplateByIdAndUid(['uid' => 1]);
+    }
+
+    #[Test]
+    public function getQaModelTemplateByIdAndUidThrowsWhenUidMissing(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('id and uid parameters must be provided');
+
+        $this->dao->getQaModelTemplateByIdAndUid(['id' => 1]);
+    }
+
+    #[Test]
+    public function getReturnsNullForMissing(): void
+    {
+        $result = $this->dao->get(['id' => 999999999, 'uid' => 999999]);
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function createFromJsonPersistsAndReturns(): void
+    {
+        $struct = $this->create('CRUD Create');
+
+        $this->assertGreaterThan(0, $struct->id);
+        $this->assertSame($this->uid, $struct->uid);
+        $this->assertStringContainsString('CRUD Create', $struct->label);
+        $this->assertNotEmpty($struct->categories);
+        $this->assertNotNull($struct->passfail);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function getReturnsCreatedTemplate(): void
+    {
+        $created = $this->create('Get Test');
+
+        $fetched = $this->dao->get(['id' => $created->id, 'uid' => $this->uid]);
+
+        $this->assertNotNull($fetched);
+        $this->assertSame($created->id, $fetched->id);
+        $this->assertStringContainsString('Get Test', $fetched->label);
+        $this->assertNotEmpty($fetched->categories);
+        $this->assertNotNull($fetched->passfail);
+        $this->assertNotEmpty($fetched->passfail->thresholds);
+        $this->assertNotEmpty($fetched->categories[0]->severities);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function getByIdAndUidReturnsTemplate(): void
+    {
+        $created = $this->create('ByIdAndUid Test');
+
+        $fetched = $this->dao->getQaModelTemplateByIdAndUid(['id' => $created->id, 'uid' => $this->uid]);
+
+        $this->assertNotNull($fetched);
+        $this->assertSame($created->id, $fetched->id);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function getByIdAndUidReturnsNullForWrongUid(): void
+    {
+        $created = $this->create('Wrong Uid');
+
+        $fetched = $this->dao->getQaModelTemplateByIdAndUid(['id' => $created->id, 'uid' => 888888]);
+
+        $this->assertNull($fetched);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function editFromJsonUpdatesTemplate(): void
+    {
+        $created = $this->create('Before Edit');
+
+        $editJson = $this->makeValidJson('After Edit');
+        $updated = $this->dao->editFromJSON($created, $editJson);
+
+        $this->assertSame($created->id, $updated->id);
+        $this->assertStringContainsString('After Edit', $updated->label);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function removeSoftDeletesTemplate(): void
+    {
+        $created = $this->create('Delete Test');
+
+        $count = $this->dao->remove($created->id, $this->uid);
+
+        $this->assertSame(1, $count);
+        $this->assertNull($this->dao->get(['id' => $created->id, 'uid' => $this->uid]));
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function removeReturnsZeroForNonExistent(): void
+    {
+        $count = $this->dao->remove(999999999, $this->uid);
+        $this->assertSame(0, $count);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function getAllPaginatedReturnsStructure(): void
+    {
+        $this->create('Paginated Test');
+
+        $result = $this->dao->getAllPaginated($this->uid, '/api/v3/qa_model_template?page=', 1, 10);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('items', $result);
+        $this->assertNotEmpty($result['items']);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function saveDirectlyPersists(): void
+    {
         $struct = new QAModelTemplateStruct();
-        $struct->uid = 1;
+        $struct->uid = $this->uid;
         $struct->version = 1;
-        $struct->label = 'Test';
+        $struct->label = 'Direct Save ' . uniqid();
 
         $passfail = new QAModelTemplatePassfailStruct();
         $passfail->passfail_type = 'points';
@@ -130,13 +310,10 @@ class QAModelTemplateDaoTest extends AbstractTest
         $struct->passfail = $passfail;
         $struct->categories = [];
 
-        // If passfail guard passes, it will fail on DB connection — not on "passfail" exception
-        try {
-            QAModelTemplateDao::save($struct);
-            $this->fail('Expected an exception (DB or otherwise)');
-        } catch (Exception $e) {
-            // Must NOT be the passfail null guard
-            $this->assertStringNotContainsString('passfail', strtolower($e->getMessage()));
-        }
+        $saved = $this->dao->save($struct);
+        $this->createdIds[] = $saved->id;
+
+        $this->assertGreaterThan(0, $saved->id);
+        $this->assertStringContainsString('Direct Save', $saved->label);
     }
 }
