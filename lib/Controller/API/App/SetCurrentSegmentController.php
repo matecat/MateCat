@@ -74,7 +74,7 @@ class SetCurrentSegmentController extends KleinController
          * End Split check control
          */
         if (!$isASplittedSegment or $isLastSegmentChunk) {
-            $segmentList = SegmentDao::getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
+            $segmentList = (new SegmentDao())->getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
 
             if (!$revision_number) {
                 $nextSegmentId = CatUtils::fetchStatus($id_segment, $segmentList);

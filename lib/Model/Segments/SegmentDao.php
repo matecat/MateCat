@@ -4,7 +4,6 @@ namespace Model\Segments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobDao;
@@ -87,14 +86,13 @@ class SegmentDao extends AbstractDao
             " AND segments.id_file = f.id " .
             " AND segments.id = :id_segment ";
 
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($query);
 
         /**
          * @var SegmentStruct[] $fetched
          */
-        $fetched = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, SegmentStruct::class, [
+        $fetched = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, SegmentStruct::class, [
             'id_job' => $id_job,
             'password' => $password,
             'id_segment' => $id_segment
@@ -185,7 +183,7 @@ class SegmentDao extends AbstractDao
      */
     public function getSegmentsIdForQR(JobStruct $chunk, int $step, int $ref_segment, string $where = "after", array $options = []): array
     {
-        $db = Database::obtain()->getConnection();
+        $db = $this->database->getConnection();
 
         $options_conditions_query = "";
         $options_join_query = "";
@@ -379,7 +377,7 @@ class SegmentDao extends AbstractDao
 
     public function getSegmentsForQr(array $segments_id, int $job_id, string $job_password): array
     {
-        $db = Database::obtain()->getConnection();
+        $db = $this->database->getConnection();
 
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
 
@@ -859,8 +857,6 @@ class SegmentDao extends AbstractDao
     }
 
     /**
-     * Used to get a resultset of segments id and statuses
-     *
      * @param int $sid
      * @param int $jid
      * @param string $password
@@ -869,7 +865,7 @@ class SegmentDao extends AbstractDao
      * @return list<array{id: int, status: string|null}>
      * @throws PDOException
      */
-    public static function getNextSegment(int $sid, int $jid, string $password = '', bool $getTranslatedInstead = false): array
+    public function getNextSegment(int $sid, int $jid, string $password = '', bool $getTranslatedInstead = false): array
     {
         if (!$getTranslatedInstead) {
             $translationStatus = " ( st.status IN (
@@ -894,7 +890,7 @@ class SegmentDao extends AbstractDao
 		FROM segments AS s
 		JOIN segment_translations st ON st.id_segment = s.id
 		JOIN jobs ON jobs.id = st.id_job
-		WHERE jobs.id = :jid 
+		WHERE jobs.id = :jid
 		AND jobs.password = :password
 		AND $translationStatus
 		AND s.show_in_cattool = 1
@@ -902,7 +898,7 @@ class SegmentDao extends AbstractDao
 		AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		";
 
-        $stmt = Database::obtain()->getConnection()->prepare($query);
+        $stmt = $this->database->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute($bind_values);
 
@@ -921,12 +917,11 @@ class SegmentDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function getSegmentsForAnalysisFromIdJobAndPassword(int $idJob, string $password, int $limit, int $offset, int $ttl = 0): array
+    public function getSegmentsForAnalysisFromIdJobAndPassword(int $idJob, string $password, int $limit, int $offset, int $ttl = 0): array
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $query = "
-            SELECT 
+            SELECT
                 p.name as project_name,
                 s.id,
                 j.id as id_job,
@@ -935,7 +930,7 @@ class SegmentDao extends AbstractDao
                 j.target,
                 s.segment,
                 st.translation,
-                st.status,  
+                st.status,
                 s.raw_word_count,
                 st.eq_word_count,
                 st.match_type,
@@ -949,43 +944,43 @@ class SegmentDao extends AbstractDao
                 IF( LOCATE( '3', _page ) > 0, 3, null ) AS has_r2
             FROM
                 jobs j
-            JOIN 
+            JOIN
                 projects p ON p.id = j.id_project
             JOIN
                 segment_translations st ON j.id = st.id_job AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
-            JOIN 
-                segments s on s.id = st.id_segment 
+            JOIN
+                segments s on s.id = st.id_segment
             LEFT JOIN
                 files f ON s.id_file = f.id
             LEFT JOIN
-                files_parts fp ON fp.id = s.id_file_part     
+                files_parts fp ON fp.id = s.id_file_part
             LEFT JOIN (
                 SELECT id_job, id_segment, group_concat( distinct source_page )  as _page
                 FROM segment_translation_events stex
                 JOIN
                     jobs j ON stex.id_job = j.id
                 WHERE stex.id_job = j.id
-                    AND j.id = :id_job 
+                    AND j.id = :id_job
                     AND j.password = :password
                 GROUP BY stex.id_segment
             ) AS XX ON XX.id_segment = st.id_segment
             LEFT JOIN
                 (
-                    SELECT 
+                    SELECT
                        id_segment AS ste_id_segment, source_page, create_date
                     FROM
                         segment_translation_events
                     JOIN (
-                        SELECT 
+                        SELECT
                             MAX(ste.id) AS _m_id
                                 FROM
                             segment_translation_events ste
-                        JOIN 
+                        JOIN
                             jobs j ON ste.id_job = j.id
-                        JOIN 
+                        JOIN
                             projects p ON p.id = j.id_project
                         WHERE
-                            j.id = :id_job 
+                            j.id = :id_job
                         AND
                             j.password = :password
                         AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ($limit + $offset) . " )
@@ -995,13 +990,13 @@ class SegmentDao extends AbstractDao
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE
                 j.id = :id_job
-            AND 
+            AND
                 j.password = :password
             LIMIT " . $limit . " offset " . $offset;
 
         $stmt = $conn->prepare($query);
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'id_job' => $idJob,
             'password' => $password,
         ]);
@@ -1019,12 +1014,11 @@ class SegmentDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function getSegmentsForAnalysisFromIdProjectAndPassword(int $idProject, string $password, int $limit, int $offset, int $ttl = 0): array
+    public function getSegmentsForAnalysisFromIdProjectAndPassword(int $idProject, string $password, int $limit, int $offset, int $ttl = 0): array
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $query = "
-            SELECT 
+            SELECT
                 p.name as project_name,
                 s.id,
                 j.id as id_job,
@@ -1033,7 +1027,7 @@ class SegmentDao extends AbstractDao
                 j.target,
                 s.segment,
                 st.translation,
-                st.status,  
+                st.status,
                 s.raw_word_count,
                 st.eq_word_count,
                 st.match_type,
@@ -1047,16 +1041,16 @@ class SegmentDao extends AbstractDao
                 IF( LOCATE( '3', _page ) > 0, 3, null ) AS has_r2
             FROM
                 jobs j
-            JOIN 
+            JOIN
                 projects p ON p.id = j.id_project
             JOIN
                 segment_translations st ON j.id = st.id_job AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
-            JOIN 
-                segments s on s.id = st.id_segment 
+            JOIN
+                segments s on s.id = st.id_segment
             LEFT JOIN
                 files f ON s.id_file = f.id
             LEFT JOIN
-                files_parts fp ON fp.id = s.id_file_part     
+                files_parts fp ON fp.id = s.id_file_part
             LEFT JOIN (
                 SELECT id_job, id_segment, group_concat( distinct source_page )  as _page
                 FROM segment_translation_events stex
@@ -1068,18 +1062,18 @@ class SegmentDao extends AbstractDao
             ) AS XX ON XX.id_segment = st.id_segment
             LEFT JOIN
                 (
-                    SELECT 
+                    SELECT
                        id_segment AS ste_id_segment, source_page, create_date
                     FROM
                         segment_translation_events
                     JOIN (
-                        SELECT 
+                        SELECT
                             MAX(ste.id) AS _m_id
                                 FROM
                             segment_translation_events ste
-                        JOIN 
+                        JOIN
                             jobs j ON ste.id_job = j.id
-                        JOIN 
+                        JOIN
                             projects p ON p.id = j.id_project
                         WHERE
                             p.id = :id_project
@@ -1090,13 +1084,13 @@ class SegmentDao extends AbstractDao
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE
                 p.id = :id_project
-            AND 
+            AND
                 p.password = :password
             LIMIT " . $limit . " offset " . $offset;
 
         $stmt = $conn->prepare($query);
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
             'id_project' => $idProject,
             'password' => $password,
         ]);

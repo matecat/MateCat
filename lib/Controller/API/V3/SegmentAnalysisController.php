@@ -131,7 +131,7 @@ class SegmentAnalysisController extends KleinController
         $idJob = $jobStruct->id ?? throw new RuntimeException('Job ID must not be null');
         $password = $jobStruct->password ?? throw new RuntimeException('Job password must not be null');
 
-        $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset);
+        $segmentsForAnalysis = (new SegmentDao())->getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset);
         $projectPasswordsMap = $this->projectDao->getPasswordsMap($jobStruct->id_project);
         $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
 
@@ -216,7 +216,7 @@ class SegmentAnalysisController extends KleinController
         $offset = ($page - 1) * $perPage;
         $this->segmentDisabledService = new SegmentDisabledService();
 
-        $segmentsForAnalysis = SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
+        $segmentsForAnalysis = (new SegmentDao())->getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
         $projectIdFromProject = $this->project->id ?? throw new Exception('Project not found');
         $projectPasswordsMap = $this->projectDao->getPasswordsMap((int)$projectIdFromProject);
         $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);

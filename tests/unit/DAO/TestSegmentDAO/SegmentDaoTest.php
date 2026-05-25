@@ -674,95 +674,6 @@ class SegmentDaoTest extends AbstractTest
     }
 
 
-    public function testGetNextSegmentReturnsArray(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            ['id' => 101, 'status' => 'NEW'],
-        ]);
-
-        $result = SegmentDao::getNextSegment(100, 1, 'abc123');
-
-        $this->assertCount(1, $result);
-        $this->assertSame(101, $result[0]['id']);
-        $this->assertSame('NEW', $result[0]['status']);
-    }
-
-    public function testGetNextSegmentWithTranslatedFilter(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            ['id' => 102, 'status' => 'TRANSLATED'],
-        ]);
-
-        $result = SegmentDao::getNextSegment(100, 1, 'abc123', true);
-
-        $this->assertCount(1, $result);
-        $this->assertSame('TRANSLATED', $result[0]['status']);
-    }
-
-    public function testGetNextSegmentReturnsEmptyWhenNone(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = SegmentDao::getNextSegment(100, 1, 'abc123');
-
-        $this->assertSame([], $result);
-    }
-
-
-    public function testGetSegmentsForAnalysisFromIdJobAndPasswordReturnsArray(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-        $this->stmtStub->method('fetch')->willReturn(false);
-
-        $result = SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword(1, 'abc123', 50, 0);
-
-        $this->assertIsArray($result);
-        $this->assertSame([], $result);
-    }
-
-    public function testGetSegmentsForAnalysisFromIdJobAndPasswordWithTtl(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-        $this->stmtStub->method('fetch')->willReturn(false);
-
-        $result = SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword(1, 'abc123', 50, 10, 3600);
-
-        $this->assertSame([], $result);
-    }
-
-
-    public function testGetSegmentsForAnalysisFromIdProjectAndPasswordReturnsArray(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-        $this->stmtStub->method('fetch')->willReturn(false);
-
-        $result = SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword(10, 'proj123', 50, 0);
-
-        $this->assertIsArray($result);
-        $this->assertSame([], $result);
-    }
-
-    public function testGetSegmentsForAnalysisFromIdProjectAndPasswordWithOffset(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-        $this->stmtStub->method('fetch')->willReturn(false);
-
-        $result = SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword(10, 'proj123', 25, 50, 7200);
-
-        $this->assertSame([], $result);
-    }
-
-
     public function testGetSegmentsIdForQRWithIssuesInR2(): void
     {
         $job = $this->makeJobStruct();
@@ -824,5 +735,101 @@ class SegmentDaoTest extends AbstractTest
         ]);
 
         $this->assertSame([100, 99], $result);
+    }
+
+
+    // ── Instance method tests (specular of static tests) ──
+
+    public function testInstanceGetNextSegmentReturnsArray(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([
+            ['id' => 101, 'status' => 'NEW'],
+        ]);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getNextSegment(100, 1, 'abc123');
+
+        $this->assertCount(1, $result);
+        $this->assertSame(101, $result[0]['id']);
+        $this->assertSame('NEW', $result[0]['status']);
+    }
+
+    public function testInstanceGetNextSegmentWithTranslatedFilter(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([
+            ['id' => 102, 'status' => 'TRANSLATED'],
+        ]);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getNextSegment(100, 1, 'abc123', true);
+
+        $this->assertCount(1, $result);
+        $this->assertSame('TRANSLATED', $result[0]['status']);
+    }
+
+    public function testInstanceGetNextSegmentReturnsEmptyWhenNone(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getNextSegment(100, 1, 'abc123');
+
+        $this->assertSame([], $result);
+    }
+
+    public function testInstanceGetSegmentsForAnalysisFromIdJobAndPasswordReturnsArray(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn(false);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getSegmentsForAnalysisFromIdJobAndPassword(1, 'abc123', 50, 0);
+
+        $this->assertIsArray($result);
+        $this->assertSame([], $result);
+    }
+
+    public function testInstanceGetSegmentsForAnalysisFromIdJobAndPasswordWithTtl(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn(false);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getSegmentsForAnalysisFromIdJobAndPassword(1, 'abc123', 50, 10, 3600);
+
+        $this->assertSame([], $result);
+    }
+
+    public function testInstanceGetSegmentsForAnalysisFromIdProjectAndPasswordReturnsArray(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn(false);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getSegmentsForAnalysisFromIdProjectAndPassword(10, 'proj123', 50, 0);
+
+        $this->assertIsArray($result);
+        $this->assertSame([], $result);
+    }
+
+    public function testInstanceGetSegmentsForAnalysisFromIdProjectAndPasswordWithOffset(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn(false);
+
+        $dao = new SegmentDao($this->dbStub);
+        $result = $dao->getSegmentsForAnalysisFromIdProjectAndPassword(10, 'proj123', 25, 50, 7200);
+
+        $this->assertSame([], $result);
     }
 }
