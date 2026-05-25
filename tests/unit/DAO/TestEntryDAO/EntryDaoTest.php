@@ -190,17 +190,36 @@ class EntryDaoTest extends AbstractTest
         $this->assertInstanceOf(EntryStruct::class, $result[0]);
     }
 
-    private function invokeEnsureOrdered(EntryDao $dao, EntryStruct $entry): EntryStruct
+    #[Test]
+    public function modifyEntryExecutesUpdate(): void
     {
-        $ref = new \ReflectionMethod($dao, 'ensureStartAndStopPositionAreOrdered');
+        $this->stmtStub->method('execute')->willReturn(true);
 
-        return $ref->invoke($dao, $entry);
+        $dao = new EntryDao($this->dbStub);
+        $entry = $this->makeEntryStruct();
+        $result = $dao->modifyEntry($entry);
+
+        $this->assertInstanceOf(EntryStruct::class, $result);
+        $this->assertSame(1, $result->id);
     }
 
     #[Test]
-    public function ensureOrderedSwapsOffsetsOnSameNodeWhenBackward(): void
+    public function createEntryReturnsStructWithId(): void
     {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->pdoStub->method('lastInsertId')->willReturn('99');
+
         $dao = new EntryDao($this->dbStub);
+        $entry = $this->makeEntryStruct(['id' => null]);
+        $result = $dao->createEntry($entry);
+
+        $this->assertInstanceOf(EntryStruct::class, $result);
+        $this->assertSame(99, $result->id);
+    }
+
+    #[Test]
+    public function structEnsureOrderedSwapsOffsetsOnSameNodeWhenBackward(): void
+    {
         $entry = $this->makeEntryStruct([
             'start_node' => 0,
             'start_offset' => 20,
@@ -208,16 +227,15 @@ class EntryDaoTest extends AbstractTest
             'end_offset' => 5,
         ]);
 
-        $result = $this->invokeEnsureOrdered($dao, $entry);
+        $entry->ensureStartAndStopPositionAreOrdered();
 
-        $this->assertSame(5, $result->start_offset);
-        $this->assertSame(20, $result->end_offset);
+        $this->assertSame(5, $entry->start_offset);
+        $this->assertSame(20, $entry->end_offset);
     }
 
     #[Test]
-    public function ensureOrderedLeavesCorrectOrderUntouched(): void
+    public function structEnsureOrderedLeavesCorrectOrderUntouched(): void
     {
-        $dao = new EntryDao($this->dbStub);
         $entry = $this->makeEntryStruct([
             'start_node' => 0,
             'start_offset' => 3,
@@ -225,16 +243,15 @@ class EntryDaoTest extends AbstractTest
             'end_offset' => 10,
         ]);
 
-        $result = $this->invokeEnsureOrdered($dao, $entry);
+        $entry->ensureStartAndStopPositionAreOrdered();
 
-        $this->assertSame(3, $result->start_offset);
-        $this->assertSame(10, $result->end_offset);
+        $this->assertSame(3, $entry->start_offset);
+        $this->assertSame(10, $entry->end_offset);
     }
 
     #[Test]
-    public function ensureOrderedSwapsNodesWhenBackward(): void
+    public function structEnsureOrderedSwapsNodesWhenBackward(): void
     {
-        $dao = new EntryDao($this->dbStub);
         $entry = $this->makeEntryStruct([
             'start_node' => 5,
             'start_offset' => 10,
@@ -242,18 +259,17 @@ class EntryDaoTest extends AbstractTest
             'end_offset' => 3,
         ]);
 
-        $result = $this->invokeEnsureOrdered($dao, $entry);
+        $entry->ensureStartAndStopPositionAreOrdered();
 
-        $this->assertSame(2, $result->start_node);
-        $this->assertSame(5, $result->end_node);
-        $this->assertSame(3, $result->start_offset);
-        $this->assertSame(10, $result->end_offset);
+        $this->assertSame(2, $entry->start_node);
+        $this->assertSame(5, $entry->end_node);
+        $this->assertSame(3, $entry->start_offset);
+        $this->assertSame(10, $entry->end_offset);
     }
 
     #[Test]
-    public function ensureOrderedLeavesForwardDifferentNodesUntouched(): void
+    public function structEnsureOrderedLeavesForwardDifferentNodesUntouched(): void
     {
-        $dao = new EntryDao($this->dbStub);
         $entry = $this->makeEntryStruct([
             'start_node' => 1,
             'start_offset' => 5,
@@ -261,11 +277,11 @@ class EntryDaoTest extends AbstractTest
             'end_offset' => 8,
         ]);
 
-        $result = $this->invokeEnsureOrdered($dao, $entry);
+        $entry->ensureStartAndStopPositionAreOrdered();
 
-        $this->assertSame(1, $result->start_node);
-        $this->assertSame(3, $result->end_node);
-        $this->assertSame(5, $result->start_offset);
-        $this->assertSame(8, $result->end_offset);
+        $this->assertSame(1, $entry->start_node);
+        $this->assertSame(3, $entry->end_node);
+        $this->assertSame(5, $entry->start_offset);
+        $this->assertSame(8, $entry->end_offset);
     }
 }

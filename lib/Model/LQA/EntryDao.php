@@ -5,13 +5,10 @@ namespace Model\LQA;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Exceptions\NotFoundException;
-use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
-use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
@@ -256,17 +253,10 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
-     * @throws Exception
-     * @throws NotFoundException
      * @throws PDOException
-     * @throws ReflectionException
-     * @throws TypeError
-     * @throws ValidationError
      */
     public function modifyEntry(EntryStruct $entryStruct): EntryStruct
     {
-        $entryStruct = $this->ensureStartAndStopPositionAreOrdered($entryStruct);
-        $entryStruct->setDefaults();
 
         $sql  = "UPDATE qa_entries SET
                 id_segment=:id_segment,
@@ -319,18 +309,10 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
-     * @throws Exception
-     * @throws NotFoundException
      * @throws PDOException
-     * @throws ReflectionException
-     * @throws TypeError
-     * @throws ValidationError
      */
     public function createEntry(EntryStruct $entryStruct): EntryStruct
     {
-        $entryStruct = $this->ensureStartAndStopPositionAreOrdered($entryStruct);
-        $entryStruct->setDefaults();
-
         $sql = "INSERT INTO qa_entries
              (
              id_segment, id_job, id_category, severity,
@@ -387,32 +369,4 @@ class EntryDao extends AbstractDao
         return $entryStruct;
     }
 
-    /**
-     * Right-to-left selections may provide nodes/offsets in reverse order; silently reorder so clients don't have to.
-     */
-    private function ensureStartAndStopPositionAreOrdered(EntryStruct $entryStruct): EntryStruct
-    {
-        LoggerFactory::doJsonLog($entryStruct);
-
-        if ($entryStruct->start_node == $entryStruct->end_node) {
-            if (intval($entryStruct->start_offset) > intval($entryStruct->end_offset)) {
-                $tmp = $entryStruct->start_offset;
-                $entryStruct->start_offset = $entryStruct->end_offset;
-                $entryStruct->end_offset = $tmp;
-                unset($tmp);
-            }
-        } elseif (intval($entryStruct->start_node > intval($entryStruct->end_node))) {
-            $tmp = $entryStruct->start_offset;
-            $entryStruct->start_offset = $entryStruct->end_offset;
-            $entryStruct->end_offset = $tmp;
-
-            $tmp = $entryStruct->start_node;
-            $entryStruct->start_node = $entryStruct->end_node;
-            $entryStruct->end_node = $tmp;
-        } else {
-            // in any other case leave everything as is
-        }
-
-        return $entryStruct;
-    }
 }

@@ -96,7 +96,10 @@ class TranslationIssueModel
             $this->saveDiff();
         }
 
-        (new EntryDao())->modifyEntry($this->issue);
+        $this->issue->ensureStartAndStopPositionAreOrdered();
+        $this->issue->setDefaults();
+        $entryDao = new EntryDao();
+        $entryDao->modifyEntry($this->issue);
 
         // update score
         $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
@@ -129,7 +132,10 @@ class TranslationIssueModel
             $this->saveDiff();
         }
 
-        (new EntryDao())->createEntry($this->issue);
+        $this->issue->ensureStartAndStopPositionAreOrdered();
+        $this->issue->setDefaults();
+        $entryDao = new EntryDao();
+        $entryDao->createEntry($this->issue);
 
         $chunk_review_model = new ChunkReviewModel($this->chunk_review);
         $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);

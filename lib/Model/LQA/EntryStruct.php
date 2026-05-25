@@ -10,6 +10,7 @@ use Model\Exceptions\ValidationError;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TypeError;
+use Utils\Logger\LoggerFactory;
 
 class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
@@ -106,6 +107,33 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
         $this->penalty_points = $this->getPenaltyPoints();
         $this->id_category = $this->validator->category->id;
+    }
+
+    /**
+     * Right-to-left selections may provide nodes/offsets in reverse order; silently reorder so clients don't have to.
+     */
+    public function ensureStartAndStopPositionAreOrdered(): void
+    {
+
+        if ($this->start_node == $this->end_node) {
+            if (intval($this->start_offset) > intval($this->end_offset)) {
+                $tmp = $this->start_offset;
+                $this->start_offset = $this->end_offset;
+                $this->end_offset = $tmp;
+                unset($tmp);
+            }
+        } elseif (intval($this->start_node > intval($this->end_node))) {
+            $tmp = $this->start_offset;
+            $this->start_offset = $this->end_offset;
+            $this->end_offset = $tmp;
+
+            $tmp = $this->start_node;
+            $this->start_node = $this->end_node;
+            $this->end_node = $tmp;
+        } else {
+            // in any other case leave everything as is
+        }
+
     }
 
     /**
