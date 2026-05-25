@@ -14,7 +14,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Tools\Utils;
 
-class FiltersConfigTemplateDao extends AbstractDao
+final class FiltersConfigTemplateDao extends AbstractDao
 {
     const string TABLE = 'filters_config_templates';
 

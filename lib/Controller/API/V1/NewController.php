@@ -1264,7 +1264,7 @@ class NewController extends KleinController
     ): MTQEPayableRateBreakdowns {
         if (!empty($mt_qe_workflow_payable_rate_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $mtQeWorkflowTemplate = MTQEPayableRateTemplateDao::getByIdAndUser(
+            $mtQeWorkflowTemplate = (new MTQEPayableRateTemplateDao())->getByIdAndUser(
                 $mt_qe_workflow_payable_rate_template_id,
                 $uid
             );
