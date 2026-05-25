@@ -2,6 +2,7 @@
 
 namespace Controller\API\App\Authentication\Traits;
 
+use Controller\Services\RateLimiterService;
 use Exception;
 use Klein\Response;
 use Lara\LaraException;
@@ -15,19 +16,32 @@ use Utils\Tools\Utils;
  * Shared Lara authentication logic.
  *
  * Classes using this trait MUST provide:
- *  - RateLimiterTrait (checkAndIncrementRateLimit)
  *  - $this->response (Klein\Response)
  *  - $this->logger (Psr\Log or compatible)
  *  - $this->getUser() returning a user object with ->email
+ *  - $this->getRateLimiter() returning a RateLimiterService instance
  *
  * @method object getUser()
- * @method Response|null checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10)
  *
  * @property Response $response
  * @property object $logger
  */
 trait LaraAuthTrait
 {
+    /**
+     * Provides an instance of the RateLimiterService.
+     *
+     * This method is responsible for providing access to the rate limiter service,
+     * which is used to enforce and manage rate-limiting rules across the application.
+     * The returned service instance can be utilized to check and increment request
+     * limits based on predefined keys, ensuring that API or system usage adheres to
+     * the configured restrictions.
+     *
+     * @return RateLimiterService The rate limiter service instance.
+     * @throws Exception
+     */
+    abstract protected function getRateLimiter(): RateLimiterService;
+
     /**
      * Checks and enforces rate limits based on email and IP address.
      *
@@ -38,14 +52,16 @@ trait LaraAuthTrait
      * to halt execution.
      *
      * @return bool True if rate-limited (caller must stop), false otherwise.
+     * @throws Exception
      */
     protected function checkRateLimits(): bool
     {
         $email = $this->getUser()->email ?? 'BLANK_EMAIL';
         $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
         $rateLimitKey = '/api/app/lara/token';
+        $rateLimiter = $this->getRateLimiter();
 
-        $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $email, $rateLimitKey, 30);
+        $rateLimitEmailResponse = $rateLimiter->checkAndIncrement($this->response, $email, $rateLimitKey, 30);
 
         if ($rateLimitEmailResponse instanceof Response) {
             $this->response = $rateLimitEmailResponse;
@@ -53,7 +69,7 @@ trait LaraAuthTrait
             return true;
         }
 
-        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $rateLimitKey, 30);
+        $rateLimitIpResponse = $rateLimiter->checkAndIncrement($this->response, $ip, $rateLimitKey, 30);
 
         if ($rateLimitIpResponse instanceof Response) {
             $this->response = $rateLimitIpResponse;

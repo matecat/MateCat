@@ -14,8 +14,7 @@ use Controller\API\App\Authentication\Traits\LaraAuthTrait;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\IsOwnerInternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\RateLimiterTrait;
-use DomainException;
+use Controller\Services\RateLimiterService;
 use Exception;
 use Klein\App;
 use Klein\Request;
@@ -24,8 +23,6 @@ use Klein\ServiceProvider;
 use Lara\LaraException;
 use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
-use Utils\Engines\EnginesFactory;
-use Utils\Engines\Lara;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
@@ -34,25 +31,37 @@ use Utils\TmKeyManagement\TmKeyManager;
 class LaraAuthController extends AbstractStatefulKleinController
 {
 
-    use RateLimiterTrait;
     use LaraAuthTrait;
 
     private JobStruct $chunk;
+    private readonly RateLimiterService $rateLimiter;
 
     /**
      * @param Request $request
      * @param Response $response
      * @param ServiceProvider|null $service
      * @param App|null $app
+     * @param RateLimiterService|null $rateLimiter
      *
      * @throws Exception
      */
-    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
-    {
+    public function __construct(
+        Request $request,
+        Response $response,
+        ?ServiceProvider $service = null,
+        ?App $app = null,
+        ?RateLimiterService $rateLimiter = null,
+    ) {
         parent::__construct($request, $response, $service, $app);
         $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
         $loggerName = $contextList->list['CONTRIBUTION_GET']->loggerName;
-        $this->logger = LoggerFactory::getLogger($loggerName,$loggerName);
+        $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
+        $this->rateLimiter = $rateLimiter ?? new RateLimiterService();
+    }
+
+    protected function getRateLimiter(): RateLimiterService
+    {
+        return $this->rateLimiter;
     }
 
     protected function afterConstruct(): void
@@ -90,11 +99,6 @@ class LaraAuthController extends AbstractStatefulKleinController
             return;
         }
 
-        try {
-            EnginesFactory::getInstance($this->chunk->id_mt_engine, Lara::class);
-        } catch (Exception $e) {
-            throw new DomainException("Job MT engine is not a Lara engine", $e->getCode(), $e);
-        }
 
         // Parse + filter the chunk TM keys, keeping only "owner" keys with read ("r") permission.
         $tm_keys = TmKeyManager::getOwnerKeys([$this->chunk->tm_keys ?? '[]'], 'r');
