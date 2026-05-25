@@ -10,6 +10,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Email\ForgotPasswordEmail;
 use Utils\Email\SignupEmail;
 use Utils\Email\WelcomeEmail;
@@ -70,11 +71,11 @@ class SignupModel
     /**
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function processSignup(): void
     {
-        if ($this->__userAlreadyExists()) {
+        if ($this->__userAlreadyExists() && !$this->__userAlreadyExistsAndIsActive()) {
             $this->__updatePersistedUser();
             $this->userDao->updateStruct($this->user, [
                 'fields' => [
@@ -206,7 +207,7 @@ class SignupModel
     /**
      * @throws ValidationError
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function confirm(): UserStruct
     {
@@ -289,7 +290,7 @@ class SignupModel
      *
      * @return UserStruct
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function __updateUserFields(UserStruct $user): UserStruct
     {
