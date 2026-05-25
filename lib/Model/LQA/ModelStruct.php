@@ -22,33 +22,33 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     public ?int $qa_model_template_id = null;
     public ?int $uid = null; // nullable for backward compatibility
 
-      /**
-       * Returns the serialized representation of categories and subcategories.
-       *
-       * @return array{categories: list<array<string, mixed>>}
-       * @throws RuntimeException
-       */
-      public function getSerializedCategories(): array
-     {
-         return ['categories' => CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'))];
-     }
-
-      /**
-       * @return list<array<string, mixed>>
-       * @throws RuntimeException
-       */
-      public function getCategoriesAndSeverities(): array
-     {
-         return CategoryDao::getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
-     }
-
-     /**
-      * @return CategoryStruct[]
-      * @throws PDOException
-      */
-     public function getCategories(): array
+    /**
+     * Returns the serialized representation of categories and subcategories.
+     *
+     * @return array{categories: list<array<string, mixed>>}
+     * @throws RuntimeException
+     */
+    public function getSerializedCategories(): array
     {
-        return CategoryDao::getCategoriesByModel($this);
+        return ['categories' => (new CategoryDao())->getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'))];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     * @throws RuntimeException
+     */
+    public function getCategoriesAndSeverities(): array
+    {
+        return (new CategoryDao())->getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
+    }
+
+    /**
+     * @return CategoryStruct[]
+     * @throws PDOException
+     */
+    public function getCategories(): array
+    {
+        return (new CategoryDao())->getCategoriesByModel($this);
     }
 
     /**
@@ -94,11 +94,11 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
         return $normalized;
     }
 
-     /**
-      * @return array{model: array<string, mixed>}
-      * @throws PDOException
-      */
-     public function getDecodedModel(): array
+    /**
+     * @return array{model: array<string, mixed>}
+     * @throws PDOException
+     */
+    public function getDecodedModel(): array
     {
         $categoriesArray = [];
         foreach ($this->getCategories() as $categoryStruct) {

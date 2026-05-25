@@ -194,7 +194,7 @@ class ModelDao extends AbstractDao
             }
         }
 
-        $category_record = CategoryDao::createRecord([
+        $category_record = (new CategoryDao())->createRecord([
             'id_model' => $model_id,
             'label' => $category['label'],
             'options' => (empty($options) ? null : json_encode($options)),

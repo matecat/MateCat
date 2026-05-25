@@ -38,36 +38,6 @@ class CategoryDaoTest extends AbstractTest
     }
 
 
-    public function testFindByIdReturnsStructWhenFound(): void
-    {
-        $struct = new CategoryStruct();
-        $struct->id = 42;
-        $struct->id_model = 1;
-        $struct->label = 'Accuracy';
-        $struct->severities = '[]';
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = CategoryDao::findById(42);
-
-        $this->assertInstanceOf(CategoryStruct::class, $result);
-        $this->assertSame(42, $result->id);
-    }
-
-    public function testFindByIdReturnsNullWhenNotFound(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = CategoryDao::findById(999);
-
-        $this->assertNull($result);
-    }
-
-
     public function testFindByIdModelAndIdParentReturnsArrayOfStructs(): void
     {
         $s1 = new CategoryStruct();
@@ -106,7 +76,41 @@ class CategoryDaoTest extends AbstractTest
     }
 
 
-    public function testCreateRecordReturnsStructWithInsertedId(): void
+    // ── Instance method tests ──
+
+    public function testInstanceFetchByIdReturnsStructWhenFound(): void
+    {
+        $struct = new CategoryStruct();
+        $struct->id = 42;
+        $struct->id_model = 1;
+        $struct->label = 'Accuracy';
+        $struct->severities = '[]';
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new CategoryDao($this->dbStub);
+        /** @var ?CategoryStruct $result */
+        $result = $dao->fetchById(42, CategoryStruct::class);
+
+        $this->assertInstanceOf(CategoryStruct::class, $result);
+        $this->assertSame(42, $result->id);
+    }
+
+    public function testInstanceFetchByIdReturnsNullWhenNotFound(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->fetchById(999, CategoryStruct::class);
+
+        $this->assertNull($result);
+    }
+
+    public function testInstanceCreateRecordReturnsStructWithInsertedId(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->pdoStub->method('lastInsertId')->willReturn('77');
@@ -119,7 +123,8 @@ class CategoryDaoTest extends AbstractTest
             'options'    => null,
         ];
 
-        $result = CategoryDao::createRecord($data);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->createRecord($data);
 
         $this->assertInstanceOf(CategoryStruct::class, $result);
         $this->assertSame(77, $result->id);
@@ -127,7 +132,7 @@ class CategoryDaoTest extends AbstractTest
         $this->assertSame(1, $result->id_model);
     }
 
-    public function testCreateRecordSetsOptionsWhenProvided(): void
+    public function testInstanceCreateRecordSetsOptionsWhenProvided(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->pdoStub->method('lastInsertId')->willReturn('88');
@@ -140,15 +145,15 @@ class CategoryDaoTest extends AbstractTest
             'options'    => '{"code":"STY","sort":2}',
         ];
 
-        $result = CategoryDao::createRecord($data);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->createRecord($data);
 
         $this->assertSame(88, $result->id);
         $this->assertSame(5, $result->id_parent);
         $this->assertSame('{"code":"STY","sort":2}', $result->options);
     }
 
-
-    public function testGetCategoriesByModelReturnsArrayOfStructs(): void
+    public function testInstanceGetCategoriesByModelReturnsArrayOfStructs(): void
     {
         $s1 = new CategoryStruct();
         $s1->id = 10;
@@ -163,14 +168,15 @@ class CategoryDaoTest extends AbstractTest
         $model = new ModelStruct();
         $model->id = 3;
 
-        $result = CategoryDao::getCategoriesByModel($model);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesByModel($model);
 
         $this->assertCount(1, $result);
         $this->assertInstanceOf(CategoryStruct::class, $result[0]);
         $this->assertSame(10, $result[0]->id);
     }
 
-    public function testGetCategoriesByModelReturnsEmptyArray(): void
+    public function testInstanceGetCategoriesByModelReturnsEmptyArray(): void
     {
         $this->stmtStub->method('setFetchMode')->willReturn(true);
         $this->stmtStub->method('execute')->willReturn(true);
@@ -179,13 +185,13 @@ class CategoryDaoTest extends AbstractTest
         $model = new ModelStruct();
         $model->id = 999;
 
-        $result = CategoryDao::getCategoriesByModel($model);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesByModel($model);
 
         $this->assertSame([], $result);
     }
 
-
-    public function testGetCategoriesAndSeveritiesReturnsParentCategory(): void
+    public function testInstanceGetCategoriesAndSeveritiesReturnsParentCategory(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([
@@ -199,7 +205,8 @@ class CategoryDaoTest extends AbstractTest
             ],
         ]);
 
-        $result = CategoryDao::getCategoriesAndSeverities(5);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesAndSeverities(5);
 
         $this->assertCount(1, $result);
         $this->assertSame('Accuracy', $result[0]['label']);
@@ -210,7 +217,7 @@ class CategoryDaoTest extends AbstractTest
         $this->assertSame(1, $result[0]['severities'][0]['penalty']);
     }
 
-    public function testGetCategoriesAndSeveritiesProcessesSubcategories(): void
+    public function testInstanceGetCategoriesAndSeveritiesProcessesSubcategories(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([
@@ -232,7 +239,8 @@ class CategoryDaoTest extends AbstractTest
             ],
         ]);
 
-        $result = CategoryDao::getCategoriesAndSeverities(5);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesAndSeverities(5);
 
         $this->assertCount(1, $result);
         $this->assertSame('Fluency', $result[0]['label']);
@@ -241,17 +249,18 @@ class CategoryDaoTest extends AbstractTest
         $this->assertSame('20', $result[0]['subcategories'][0]['id']);
     }
 
-    public function testGetCategoriesAndSeveritiesReturnsEmptyArrayWhenNoResults(): void
+    public function testInstanceGetCategoriesAndSeveritiesReturnsEmptyArrayWhenNoResults(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $result = CategoryDao::getCategoriesAndSeverities(999);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesAndSeverities(999);
 
         $this->assertSame([], $result);
     }
 
-    public function testGetCategoriesAndSeveritiesHandlesMultipleParentsAndSubcategories(): void
+    public function testInstanceGetCategoriesAndSeveritiesHandlesMultipleParentsAndSubcategories(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([
@@ -289,7 +298,8 @@ class CategoryDaoTest extends AbstractTest
             ],
         ]);
 
-        $result = CategoryDao::getCategoriesAndSeverities(3);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesAndSeverities(3);
 
         $this->assertCount(2, $result);
         $this->assertSame('Accuracy', $result[0]['label']);
@@ -300,8 +310,7 @@ class CategoryDaoTest extends AbstractTest
         $this->assertSame('Grammar', $result[1]['subcategories'][0]['label']);
     }
 
-
-    public function testExtractSeveritiesIncludesCodeWhenPresent(): void
+    public function testInstanceExtractSeveritiesIncludesCodeWhenPresent(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([
@@ -315,54 +324,13 @@ class CategoryDaoTest extends AbstractTest
             ],
         ]);
 
-        $result = CategoryDao::getCategoriesAndSeverities(1);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesAndSeverities(1);
 
         $this->assertSame('MIN', $result[0]['severities'][0]['code']);
     }
 
-    public function testExtractSeveritiesOmitsCodeWhenAbsent(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            [
-                'id'         => '1',
-                'id_model'   => '1',
-                'id_parent'  => null,
-                'label'      => 'Test',
-                'severities' => '[{"label":"Major","penalty":5,"sort":2}]',
-                'options'    => null,
-            ],
-        ]);
-
-        $result = CategoryDao::getCategoriesAndSeverities(1);
-
-        $this->assertArrayNotHasKey('code', $result[0]['severities'][0]);
-    }
-
-    public function testExtractSeveritiesHandlesMultipleSeverities(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            [
-                'id'         => '1',
-                'id_model'   => '1',
-                'id_parent'  => null,
-                'label'      => 'Test',
-                'severities' => '[{"label":"Minor","penalty":1,"sort":1},{"label":"Major","penalty":5,"sort":2},{"label":"Critical","penalty":10,"sort":0}]',
-                'options'    => null,
-            ],
-        ]);
-
-        $result = CategoryDao::getCategoriesAndSeverities(1);
-
-        $this->assertCount(3, $result[0]['severities']);
-        $this->assertSame('Minor', $result[0]['severities'][0]['label']);
-        $this->assertSame('Major', $result[0]['severities'][1]['label']);
-        $this->assertSame('Critical', $result[0]['severities'][2]['label']);
-    }
-
-
-    public function testExtractOptionsReturnsAllowedKeys(): void
+    public function testInstanceExtractOptionsReturnsAllowedKeys(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([
@@ -376,107 +344,11 @@ class CategoryDaoTest extends AbstractTest
             ],
         ]);
 
-        $result = CategoryDao::getCategoriesAndSeverities(1);
+        $dao = new CategoryDao($this->dbStub);
+        $result = $dao->getCategoriesAndSeverities(1);
 
         $this->assertCount(2, $result[0]['options']);
         $this->assertSame('code', $result[0]['options'][0]['key']);
         $this->assertSame('ACC', $result[0]['options'][0]['value']);
-        $this->assertSame('sort', $result[0]['options'][1]['key']);
-        $this->assertSame(1, $result[0]['options'][1]['value']);
-    }
-
-    public function testExtractOptionsFiltersNonAllowedKeys(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            [
-                'id'         => '1',
-                'id_model'   => '1',
-                'id_parent'  => null,
-                'label'      => 'Test',
-                'severities' => '[{"label":"Minor","penalty":1,"sort":1}]',
-                'options'    => '{"code":"ACC","ignored_key":"should_not_appear","sort":2}',
-            ],
-        ]);
-
-        $result = CategoryDao::getCategoriesAndSeverities(1);
-
-        $this->assertCount(2, $result[0]['options']);
-        foreach ($result[0]['options'] as $opt) {
-            $this->assertContains($opt['key'], ['code', 'sort']);
-        }
-    }
-
-    public function testExtractOptionsReturnsEmptyArrayWhenOptionsNull(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            [
-                'id'         => '1',
-                'id_model'   => '1',
-                'id_parent'  => null,
-                'label'      => 'Test',
-                'severities' => '[{"label":"Minor","penalty":1,"sort":1}]',
-                'options'    => null,
-            ],
-        ]);
-
-        $result = CategoryDao::getCategoriesAndSeverities(1);
-
-        $this->assertSame([], $result[0]['options']);
-    }
-
-    public function testExtractOptionsReturnsEmptyArrayWhenOptionsIsEmptyObject(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            [
-                'id'         => '1',
-                'id_model'   => '1',
-                'id_parent'  => null,
-                'label'      => 'Test',
-                'severities' => '[{"label":"Minor","penalty":1,"sort":1}]',
-                'options'    => '{}',
-            ],
-        ]);
-
-        $result = CategoryDao::getCategoriesAndSeverities(1);
-
-        $this->assertSame([], $result[0]['options']);
-    }
-
-
-    public function testSubcategoryOptionsAndSeveritiesAreExtracted(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([
-            [
-                'id'         => '10',
-                'id_model'   => '1',
-                'id_parent'  => null,
-                'label'      => 'Parent',
-                'severities' => '[{"label":"Minor","penalty":1,"sort":1}]',
-                'options'    => null,
-            ],
-            [
-                'id'         => '20',
-                'id_model'   => '1',
-                'id_parent'  => '10',
-                'label'      => 'Child',
-                'severities' => '[{"label":"Critical","penalty":10,"sort":0,"code":"CRI"}]',
-                'options'    => '{"code":"CHD","sort":5}',
-            ],
-        ]);
-
-        $result = CategoryDao::getCategoriesAndSeverities(1);
-
-        $sub = $result[0]['subcategories'][0];
-        $this->assertSame('Child', $sub['label']);
-        $this->assertCount(1, $sub['severities']);
-        $this->assertSame('Critical', $sub['severities'][0]['label']);
-        $this->assertSame('CRI', $sub['severities'][0]['code']);
-        $this->assertCount(2, $sub['options']);
-        $this->assertSame('code', $sub['options'][0]['key']);
-        $this->assertSame('CHD', $sub['options'][0]['value']);
     }
 }

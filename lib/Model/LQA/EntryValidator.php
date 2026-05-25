@@ -4,6 +4,7 @@ namespace Model\LQA;
 
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
+use Model\LQA\CategoryStruct;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
@@ -121,7 +122,7 @@ class EntryValidator
         }
 
         $this->qa_model = ModelDao::findById($this->project->id_qa_model);
-        $this->category = CategoryDao::findById($this->struct->id_category);
+        $this->category = (new CategoryDao())->fetchById($this->struct->id_category, CategoryStruct::class);
 
         if ($this->category->id_model != $this->qa_model->id) {
             $this->errors[] = [null, 'QA model id mismatch'];
