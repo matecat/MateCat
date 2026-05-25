@@ -208,7 +208,7 @@ class CattoolController extends BaseKleinViewController
             'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
             'secondRevisionsCount' => count(
                 array_filter(
-                    ChunkReviewDao::findByProjectId($projectId),
+                    (new ChunkReviewDao())->findByProjectId($projectId),
                     function (ChunkReviewStruct $chunkReviewStruct) use ($chunkStruct) {
                         return $chunkReviewStruct->id_job == $chunkStruct->id && $chunkReviewStruct->source_page > SourcePages::SOURCE_PAGE_REVISION;
                     }

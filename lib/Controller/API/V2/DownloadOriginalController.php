@@ -55,7 +55,7 @@ class DownloadOriginalController extends AbstractDownloadController
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
-            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
+            $chunkReviewStruct = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
             if (empty($chunkReviewStruct)) {
                 $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);

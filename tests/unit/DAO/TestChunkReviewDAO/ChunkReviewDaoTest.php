@@ -85,89 +85,6 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function findByIdJobReturnsArrayOfStructs(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 1;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = ChunkReviewDao::findByIdJob(42);
-
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result[0]);
-    }
-
-    #[Test]
-    public function findByIdJobReturnsEmptyArrayWhenNoResults(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = ChunkReviewDao::findByIdJob(999);
-
-        $this->assertSame([], $result);
-    }
-
-    #[Test]
-    public function findByIdJobAndPasswordAndSourcePageReturnsFirstStruct(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 7;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage(1, 'pwd', 2);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-        $this->assertSame(7, $result->id);
-    }
-
-    #[Test]
-    public function findByIdJobAndPasswordAndSourcePageReturnsNullWhenEmpty(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage(1, 'pwd', 2);
-
-        $this->assertNull($result);
-    }
-
-    #[Test]
-    public function findByIdReturnsStructWhenFound(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 55;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = ChunkReviewDao::findById(55);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-    }
-
-    #[Test]
-    public function findByIdReturnsNullWhenNotFound(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = ChunkReviewDao::findById(999);
-
-        $this->assertNull($result);
-    }
-
-    #[Test]
     public function getPenaltyPointsForChunkDefaultsToRevisionSourcePage(): void
     {
         $chunk = new JobStruct();
@@ -380,49 +297,6 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function findByProjectIdReturnsArrayOfStructs(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 200;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = ChunkReviewDao::findByProjectId(77);
-
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result[0]);
-    }
-
-    #[Test]
-    public function findByReviewPasswordAndJobIdReturnsStructWhenFound(): void
-    {
-        $struct = new ChunkReviewStruct();
-        $struct->id = 300;
-
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
-
-        $result = ChunkReviewDao::findByReviewPasswordAndJobId('rev_pw', 50);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-    }
-
-    #[Test]
-    public function findByReviewPasswordAndJobIdReturnsNullWhenEmpty(): void
-    {
-        $this->stmtStub->method('setFetchMode')->willReturn(true);
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = ChunkReviewDao::findByReviewPasswordAndJobId('rev_pw', 50);
-
-        $this->assertNull($result);
-    }
-
-    #[Test]
     public function findLastReviewReturnsStructWhenFound(): void
     {
         $struct = new ChunkReviewStruct();
@@ -552,70 +426,6 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function createRecordReturnsStructWithInsertedId(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->pdoStub->method('lastInsertId')->willReturn('42');
-
-        $data = [
-            'id_project'      => 1,
-            'id_job'          => 2,
-            'password'        => 'test_pw',
-            'review_password' => 'rev_pw',
-            'source_page'     => 2,
-        ];
-
-        $result = ChunkReviewDao::createRecord($data);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-        $this->assertSame(42, $result->id);
-        $this->assertSame(1, $result->id_project);
-        $this->assertSame(2, $result->id_job);
-        $this->assertSame('test_pw', $result->password);
-        $this->assertSame('rev_pw', $result->review_password);
-    }
-
-    #[Test]
-    public function createRecordSetsDefaultReviewPasswordWhenNull(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->pdoStub->method('lastInsertId')->willReturn('43');
-
-        $data = [
-            'id_project'  => 1,
-            'id_job'      => 2,
-            'password'    => 'test_pw',
-            'source_page' => 2,
-        ];
-
-        $result = ChunkReviewDao::createRecord($data);
-
-        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
-        $this->assertNotNull($result->review_password);
-        $this->assertNotEmpty($result->review_password);
-    }
-
-    #[Test]
-    public function deleteByJobIdReturnsTrueOnSuccess(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-
-        $result = ChunkReviewDao::deleteByJobId(77);
-
-        $this->assertTrue($result);
-    }
-
-    #[Test]
-    public function deleteByJobIdReturnsFalseOnFailure(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(false);
-
-        $result = ChunkReviewDao::deleteByJobId(88);
-
-        $this->assertFalse($result);
-    }
-
-    #[Test]
     public function passFailCountsAtomicUpdateReturnsEarlyWhenLqaModelIsNull(): void
     {
         $projectStub = $this->createStub(ProjectStruct::class);
@@ -728,17 +538,238 @@ class ChunkReviewDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function destroyCacheByProjectIdDoesNotThrow(): void
-    {
-        $result = ChunkReviewDao::destroyCacheByProjectId(88);
-        $this->assertIsBool($result);
-    }
-
-    #[Test]
     public function destroyCacheForJobIdReviewPasswordAndSourcePageDoesNotThrow(): void
     {
         $dao = new ChunkReviewDao($this->dbStub);
         $result = $dao->destroyCacheForJobIdReviewPasswordAndSourcePage(10, 'rev', 2);
         $this->assertIsBool($result);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Instance-method specular tests (Step 1 — mirror of static tests)
+    // ──────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function instanceFindByIdJobReturnsArrayOfStructs(): void
+    {
+        $struct = new ChunkReviewStruct();
+        $struct->id = 1;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByIdJob(42);
+
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result[0]);
+    }
+
+    #[Test]
+    public function instanceFindByIdJobReturnsEmptyArrayWhenNoResults(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByIdJob(999);
+
+        $this->assertSame([], $result);
+    }
+
+    #[Test]
+    public function instanceFindByIdJobAndPasswordAndSourcePageReturnsFirstStruct(): void
+    {
+        $struct = new ChunkReviewStruct();
+        $struct->id = 7;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByIdJobAndPasswordAndSourcePage(1, 'pwd', 2);
+
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
+        $this->assertSame(7, $result->id);
+    }
+
+    #[Test]
+    public function instanceFindByIdJobAndPasswordAndSourcePageReturnsNullWhenEmpty(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByIdJobAndPasswordAndSourcePage(1, 'pwd', 2);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function instanceFindByIdReturnsStructWhenFound(): void
+    {
+        $struct = new ChunkReviewStruct();
+        $struct->id = 55;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findById(55);
+
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
+    }
+
+    #[Test]
+    public function instanceFindByIdReturnsNullWhenNotFound(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findById(999);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function instanceFindByProjectIdReturnsArrayOfStructs(): void
+    {
+        $struct = new ChunkReviewStruct();
+        $struct->id = 200;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByProjectId(77);
+
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result[0]);
+    }
+
+    #[Test]
+    public function instanceFindByProjectIdReturnsEmptyArrayWhenNoResults(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByProjectId(999);
+
+        $this->assertSame([], $result);
+    }
+
+    #[Test]
+    public function instanceDestroyCacheByProjectIdDoesNotThrow(): void
+    {
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->destroyCacheByProjectId(88);
+        $this->assertIsBool($result);
+    }
+
+    #[Test]
+    public function instanceFindByReviewPasswordAndJobIdReturnsStructWhenFound(): void
+    {
+        $struct = new ChunkReviewStruct();
+        $struct->id = 300;
+
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$struct]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByReviewPasswordAndJobId('rev_pw', 50);
+
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
+    }
+
+    #[Test]
+    public function instanceFindByReviewPasswordAndJobIdReturnsNullWhenEmpty(): void
+    {
+        $this->stmtStub->method('setFetchMode')->willReturn(true);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->findByReviewPasswordAndJobId('rev_pw', 50);
+
+        $this->assertNull($result);
+    }
+
+    #[Test]
+    public function instanceCreateRecordReturnsStructWithInsertedId(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->pdoStub->method('lastInsertId')->willReturn('42');
+
+        $data = [
+            'id_project'      => 1,
+            'id_job'          => 2,
+            'password'        => 'test_pw',
+            'review_password' => 'rev_pw',
+            'source_page'     => 2,
+        ];
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->createRecord($data);
+
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
+        $this->assertSame(42, $result->id);
+        $this->assertSame(1, $result->id_project);
+        $this->assertSame(2, $result->id_job);
+        $this->assertSame('test_pw', $result->password);
+        $this->assertSame('rev_pw', $result->review_password);
+    }
+
+    #[Test]
+    public function instanceCreateRecordSetsDefaultReviewPasswordWhenNull(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->pdoStub->method('lastInsertId')->willReturn('43');
+
+        $data = [
+            'id_project'  => 1,
+            'id_job'      => 2,
+            'password'    => 'test_pw',
+            'source_page' => 2,
+        ];
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->createRecord($data);
+
+        $this->assertInstanceOf(ChunkReviewStruct::class, $result);
+        $this->assertNotNull($result->review_password);
+        $this->assertNotEmpty($result->review_password);
+    }
+
+    #[Test]
+    public function instanceDeleteByJobIdReturnsTrueOnSuccess(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->deleteByJobId(77);
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function instanceDeleteByJobIdReturnsFalseOnFailure(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(false);
+
+        $dao = new ChunkReviewDao($this->dbStub);
+        $result = $dao->deleteByJobId(88);
+
+        $this->assertFalse($result);
     }
 }

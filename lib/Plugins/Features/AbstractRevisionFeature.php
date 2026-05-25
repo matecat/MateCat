@@ -130,10 +130,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $password = $event->getPassword();
         $id_job = $event->getIdJob();
 
-        $chunk_review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $id_job, 'password' => $password]))[0] ?? null;
+        $chunkReviewDao = new ChunkReviewDao();
+        $chunk_review = $chunkReviewDao->findChunkReviews(new JobStruct(['id' => $id_job, 'password' => $password]))[0] ?? null;
 
         if (!$chunk_review) {
-            $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
+            $chunk_review = $chunkReviewDao->findByReviewPasswordAndJobId($password, $id_job);
         }
 
         if (!$chunk_review) {
@@ -196,7 +197,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 $data['review_password'] = $options['first_record_password'];
             }
 
-            $chunkReview = ChunkReviewDao::createRecord($data);
+            $chunkReview = (new ChunkReviewDao())->createRecord($data);
             $createdRecords[] = $chunkReview;
         }
 
@@ -243,11 +244,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
          */
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
-        $previousRevisionRecords = ChunkReviewDao::findByIdJob($id_job);
+        $chunkReviewDao = new ChunkReviewDao();
+        $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
         $project = ProjectDao::staticFindById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
-        ChunkReviewDao::deleteByJobId($id_job);
+        $chunkReviewDao->deleteByJobId($id_job);
 
         $jobDao = new JobDao();
         $chunksStructArray = $jobDao->getNotDeletedById($id_job);
@@ -290,7 +292,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $projectStructure = $event->data;
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
-        $old_reviews = ChunkReviewDao::findByIdJob($id_job);
+        $chunkReviewDao = new ChunkReviewDao();
+        $old_reviews = $chunkReviewDao->findByIdJob($id_job);
         $project = ProjectDao::staticFindById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
@@ -304,7 +307,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             }
         }
 
-        ChunkReviewDao::deleteByJobId($id_job);
+        $chunkReviewDao->deleteByJobId($id_job);
 
         $chunksStructArray = (new JobDao())->getNotDeletedById($id_job);
 

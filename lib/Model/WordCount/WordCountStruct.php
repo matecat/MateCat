@@ -39,13 +39,13 @@ class WordCountStruct implements JsonSerializable
 
     protected float $total = 0;
 
-     /**
-      * @param JobStruct $jobOrChunk
-      *
-      * @return WordCountStruct
-      * @throws TypeError
-      */
-     public static function loadFromJob(JobStruct $jobOrChunk): WordCountStruct
+    /**
+     * @param JobStruct $jobOrChunk
+     *
+     * @return WordCountStruct
+     * @throws TypeError
+     */
+    public static function loadFromJob(JobStruct $jobOrChunk): WordCountStruct
     {
         $wordCountStruct = new WordCountStruct();
         $wordCountStruct->id_job = (int)$jobOrChunk->id;

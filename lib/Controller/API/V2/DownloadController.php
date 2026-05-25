@@ -195,7 +195,7 @@ class DownloadController extends AbstractDownloadController
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
-            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->password, $this->id_job);
+            $chunkReviewStruct = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->password, $this->id_job);
             if (empty($chunkReviewStruct)) {
                 throw new NotFoundException("Not found.");
             }

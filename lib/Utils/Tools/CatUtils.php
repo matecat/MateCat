@@ -817,7 +817,7 @@ class CatUtils
         $job = (new JobDao())->getByIdAndPassword($jobId, $jobPassword);
 
         if (!$job) {
-            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($jobPassword, $jobId);
+            $chunkReview = (new ChunkReviewDao())->findByReviewPasswordAndJobId($jobPassword, $jobId);
             $job = $chunkReview?->getChunk();
         }
 
@@ -848,7 +848,7 @@ class CatUtils
             return null;
         }
 
-        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
+        $qa = (new ChunkReviewDao())->findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
 
         return $qa?->review_password;
     }

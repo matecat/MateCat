@@ -55,8 +55,9 @@ class ReviewsController extends KleinController
 
         // destroy the 5 minutes chunk review cache
         $chunk = (new JobDao())->getByIdAndPasswordOrFail($records[0]->id_job, $records[0]->password);
-        (new ChunkReviewDao())->destroyCacheForFindChunkReviews($chunk);
-        ChunkReviewDao::destroyCacheByProjectId((int)$projectId);
+        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao->destroyCacheForFindChunkReviews($chunk);
+        $chunkReviewDao->destroyCacheByProjectId((int)$projectId);
 
         $this->response->json([
                 'chunk_review' => [

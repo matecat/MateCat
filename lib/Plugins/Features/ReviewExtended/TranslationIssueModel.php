@@ -59,7 +59,7 @@ class TranslationIssueModel
     {
         $this->issue = $issue;
 
-        $review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
+        $review = (new ChunkReviewDao())->findByReviewPasswordAndJobId($password, $id_job);
 
         if ($review === null) {
             throw new Exception('ChunkReview not found for job ' . $id_job);
@@ -207,7 +207,7 @@ class TranslationIssueModel
         //
         $chunkJobId = $this->chunk->id ?? throw new Exception('Missing chunk job id');
         $chunkPassword = $this->chunk->password ?? throw new Exception('Missing chunk password');
-        $chunkReview = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($chunkJobId, $chunkPassword, $this->issue->source_page);
+        $chunkReview = (new ChunkReviewDao())->findByIdJobAndPasswordAndSourcePage($chunkJobId, $chunkPassword, $this->issue->source_page);
 
         if ($chunkReview === null) {
             throw new Exception('ChunkReview not found for delete operation');

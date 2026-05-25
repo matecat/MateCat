@@ -87,7 +87,7 @@ class ChunkPasswordValidator extends Base
      */
     protected function getChunkFromRevisePassword(): void
     {
-        $this->chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param('password'), $this->request->param('id_job'), $this->ttl);
+        $this->chunkReview = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->request->param('password'), $this->request->param('id_job'), $this->ttl);
         if (empty($this->chunkReview)) {
             throw new NotFoundException('Not found.');
         }

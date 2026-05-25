@@ -126,7 +126,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $data['source_page'] = $oldStruct->source_page;
 
         $chunkReviewDao = new ChunkReviewDao();
-        $chunkReviewStruct = $chunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $chunkReviewStruct = $chunkReviewDao->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
         if ( $chunkReviewStruct === null ) {
             throw new NotFoundException( "Job not found", 404 );
@@ -207,7 +207,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $issue
         );
 
-        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $chunkReviewStruct = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
         if ( $chunkReviewStruct === null ) {
             throw new NotFoundException( "Job not found", 404 );

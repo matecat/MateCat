@@ -76,11 +76,11 @@ class ChunkReviewDao extends AbstractDao
      * @return ChunkReviewStruct[]
      * @throws PDOException
      */
-    public static function findByIdJob(int $id_job): array
+    public function findByIdJob(int $id_job): array
     {
         $sql = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id_job = :id_job ORDER BY id";
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
         $stmt->execute(['id_job' => $id_job]);
@@ -96,13 +96,13 @@ class ChunkReviewDao extends AbstractDao
      * @return ChunkReviewStruct|null
      * @throws PDOException
      */
-    public static function findByIdJobAndPasswordAndSourcePage(int $id_job, string $password, ?int $source_page): ?ChunkReviewStruct
+    public function findByIdJobAndPasswordAndSourcePage(int $id_job, string $password, ?int $source_page): ?ChunkReviewStruct
     {
         $sql = "SELECT * FROM qa_chunk_reviews " .
-            " WHERE id_job = :id_job 
+            " WHERE id_job = :id_job
                 AND password = :password
                 AND source_page = :source_page ORDER BY id";
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
         $stmt->execute([
@@ -124,10 +124,10 @@ class ChunkReviewDao extends AbstractDao
      * @throws ReflectionException
      * @throws \Exception
      */
-    public static function findById(int $id): ?ChunkReviewStruct
+    public function findById(int $id): ?ChunkReviewStruct
     {
         /** @var ?ChunkReviewStruct $res */
-        $res = (new self())->fetchById($id, ChunkReviewStruct::class);
+        $res = $this->fetchById($id, ChunkReviewStruct::class);
 
         return $res;
     }
@@ -381,25 +381,23 @@ class ChunkReviewDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function findByProjectId(int $id_project, int $ttl = 60 * 60): array
+    public function findByProjectId(int $id_project, int $ttl = 60 * 60): array
     {
-        $self = new self();
-        $self->setCacheTTL($ttl);
-        $stmt = $self->_getStatementForQuery(self::sql_for_get_by_project_id);
+        $this->setCacheTTL($ttl);
+        $stmt = $this->_getStatementForQuery(self::sql_for_get_by_project_id);
 
-        return $self->_fetchObjectMap($stmt, ChunkReviewStruct::class, ['id_project' => $id_project]);
+        return $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, ['id_project' => $id_project]);
     }
 
     /**
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function destroyCacheByProjectId(int $id_project): bool
+    public function destroyCacheByProjectId(int $id_project): bool
     {
-        $self = new self();
-        $stmt = $self->_getStatementForQuery(self::sql_for_get_by_project_id);
+        $stmt = $this->_getStatementForQuery(self::sql_for_get_by_project_id);
 
-        return $self->_destroyObjectCache($stmt, ChunkReviewStruct::class, ['id_project' => $id_project]);
+        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, ['id_project' => $id_project]);
     }
 
     /**
@@ -411,12 +409,11 @@ class ChunkReviewDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public static function findByReviewPasswordAndJobId(string $review_password, int $id_job, int $ttl = 0): ?ChunkReviewStruct
+    public function findByReviewPasswordAndJobId(string $review_password, int $id_job, int $ttl = 0): ?ChunkReviewStruct
     {
-        $self = new self();
-        $self->setCacheTTL($ttl);
-        $stmt = $self->_getStatementForQuery(self::sql_get_from_review_password_and_id_job);
-        return $self->_fetchObjectMap(
+        $this->setCacheTTL($ttl);
+        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job);
+        return $this->_fetchObjectMap(
             $stmt,
             ChunkReviewStruct::class,
             [
@@ -540,9 +537,8 @@ class ChunkReviewDao extends AbstractDao
      * @return ChunkReviewStruct
      * @throws PDOException
      * @throws TypeError
-     * @internal param bool $setDefaults
      */
-    public static function createRecord(array $data): ChunkReviewStruct
+    public function createRecord(array $data): ChunkReviewStruct
     {
         $struct = new ChunkReviewStruct($data);
 
@@ -561,7 +557,7 @@ class ChunkReviewDao extends AbstractDao
         $sql = "INSERT INTO " . self::TABLE .
             " ( id_project, id_job, password, review_password, source_page, total_tte, avg_pee ) " .
             " VALUES " .
-            " ( :id_project, :id_job, :password, :review_password, :source_page, :total_tte, :avg_pee ) 
+            " ( :id_project, :id_job, :password, :review_password, :source_page, :total_tte, :avg_pee )
                     ON DUPLICATE KEY UPDATE
                         id_project = :id_project,
                         id_job = :id_job,
@@ -570,10 +566,10 @@ class ChunkReviewDao extends AbstractDao
                         source_page = :source_page,
                         total_tte = :total_tte,
                         avg_pee = :avg_pee
-                
+
                 ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare($sql);
         $stmt->execute($attrs);
@@ -586,10 +582,10 @@ class ChunkReviewDao extends AbstractDao
     /**
      * @throws PDOException
      */
-    public static function deleteByJobId(int $id_job): bool
+    public function deleteByJobId(int $id_job): bool
     {
         $sql = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         return $stmt->execute(['id_job' => $id_job]);
