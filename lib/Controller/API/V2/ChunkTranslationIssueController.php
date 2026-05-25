@@ -28,7 +28,7 @@ class ChunkTranslationIssueController extends KleinController
         $this->return404IfTheJobWasDeleted();
 
         // find all issues by chunk and return the json representation.
-        $result = EntryDao::findAllByChunk($this->chunk);
+        $result = (new EntryDao())->findAllByChunk($this->chunk);
 
         $json = new JsonFormatter();
         $rendered = $json->render($result);

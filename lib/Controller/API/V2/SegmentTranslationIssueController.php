@@ -37,7 +37,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws RuntimeException
      */
     public function index(): void {
-        $result = EntryDao::findAllByTranslationVersion(
+        $result = (new EntryDao())->findAllByTranslationVersion(
             $this->validator->translation->id_segment,
             $this->validator->translation->id_job,
             $this->getVersionNumber()
@@ -117,7 +117,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         Database::obtain()->begin();
 
-        $oldStruct = EntryDao::findById( $data[ 'id_issue' ] );
+        $oldStruct = (new EntryDao())->findById( $data[ 'id_issue' ] );
 
         if ( $oldStruct === null ) {
             throw new NotFoundException( "Issue not found", 404 );
@@ -253,7 +253,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
          ];
 
          $dao = new EntryCommentDao();
-         $entry = EntryDao::findById( $this->validator->issue->id ?? throw new RuntimeException('Missing issue id') );
+         $entry = (new EntryDao())->findById( $this->validator->issue->id ?? throw new RuntimeException('Missing issue id') );
 
         if ( empty( $entry ) ) {
             throw new NotFoundException( "Issue not found", 404 );

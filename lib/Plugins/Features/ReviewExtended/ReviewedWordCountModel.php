@@ -261,7 +261,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             $issue->addComments((new EntryCommentStruct())->getEntriesById(
                 $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
             ));
-            EntryDao::deleteEntry($issue);
+            (new EntryDao())->deleteEntry($issue);
         }
     }
 
@@ -291,7 +291,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     private function flagIssuesToBeDeleted(int $source_page): void
     {
-        $issue = EntryDao::findByIdSegmentAndSourcePage(
+        $issue = (new EntryDao())->findByIdSegmentAndSourcePage(
             $this->_segment->id,
             $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
             $source_page

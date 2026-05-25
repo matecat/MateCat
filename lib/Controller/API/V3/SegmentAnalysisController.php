@@ -248,7 +248,7 @@ class SegmentAnalysisController extends KleinController
         }
 
         $notesRecords = SegmentNoteDao::getBySegmentIds($segmentIds);
-        $issuesRecords = EntryDao::getBySegmentIds($segmentIds);
+        $issuesRecords = (new EntryDao())->getBySegmentIds($segmentIds);
         $idRequestRecords = SegmentMetadataDao::getBySegmentIds($segmentIds, 'id_request');
 
         $notesAggregate = [];

@@ -96,7 +96,7 @@ class TranslationIssueModel
             $this->saveDiff();
         }
 
-        EntryDao::modifyEntry($this->issue);
+        (new EntryDao())->modifyEntry($this->issue);
 
         // update score
         $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
@@ -129,7 +129,7 @@ class TranslationIssueModel
             $this->saveDiff();
         }
 
-        EntryDao::createEntry($this->issue);
+        (new EntryDao())->createEntry($this->issue);
 
         $chunk_review_model = new ChunkReviewModel($this->chunk_review);
         $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
@@ -190,7 +190,7 @@ class TranslationIssueModel
      */
     public function delete(): void
     {
-        EntryDao::deleteEntry($this->issue);
+        (new EntryDao())->deleteEntry($this->issue);
 
         //
         // ---------------------------------------------------
