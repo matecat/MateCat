@@ -278,7 +278,7 @@ let TranslationMatches = {
           : [],
         contextListBefore,
         contextListAfter,
-        laraModel,
+        ...(laraModel && {laraModel}),
         reasoning: laraModel === 'think',
       })
         .then(() => {
@@ -370,17 +370,14 @@ let TranslationMatches = {
               })
             })
             .catch((e) => {
-              return getContributionRequest({laraModel})
+              return getContributionRequest()
             })
         })
         .catch(() => {
-          return getContributionRequest({laraModel})
+          return getContributionRequest()
         })
     } else {
-      this.segmentsWaitingForContributions.push(id_segment_original)
-      return getContributionRequest({
-        laraModel: allowedLaraProsa ? 'prosa' : 'think',
-      })
+      return getContributionRequest()
     }
   },
 

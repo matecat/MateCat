@@ -73,11 +73,13 @@ export const LaraOptions = ({isCattoolPage}) => {
   }, [currentProjectTemplate?.mt?.extra, setValue])
 
   useEffect(() => {
-    laraAuth().then((response) => {
-      laraStyleguides(response)
-        .then((data) => setStyleGuidesOptions(data))
-        .catch((error) => console.log(error))
-    })
+    if (config.isAnInternalUser) {
+      laraAuth().then((response) => {
+        laraStyleguides(response)
+          .then((data) => setStyleGuidesOptions(data))
+          .catch((error) => console.log(error))
+      })
+    }
   }, [])
 
   useEffect(() => {

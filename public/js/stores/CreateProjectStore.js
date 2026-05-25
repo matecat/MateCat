@@ -6,7 +6,6 @@ import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import NewProjectConstants from '../constants/NewProjectConstants'
 import assign from 'object-assign'
-import {get} from 'lodash'
 
 EventEmitter.prototype.setMaxListeners(0)
 
