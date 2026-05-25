@@ -2,7 +2,7 @@
 
 namespace Controller\API\App\Authentication\Traits;
 
-use Controller\Services\RateLimiterService;
+use Controller\Services\RateLimiterInterface;
 use Exception;
 use Klein\Response;
 use Lara\LaraException;
@@ -19,7 +19,7 @@ use Utils\Tools\Utils;
  *  - $this->response (Klein\Response)
  *  - $this->logger (Psr\Log or compatible)
  *  - $this->getUser() returning a user object with ->email
- *  - $this->getRateLimiter() returning a RateLimiterService instance
+ *  - $this->getRateLimiter() returning a RateLimiterInterface instance
  *
  * @method object getUser()
  *
@@ -37,10 +37,10 @@ trait LaraAuthTrait
      * limits based on predefined keys, ensuring that API or system usage adheres to
      * the configured restrictions.
      *
-     * @return RateLimiterService The rate limiter service instance.
+     * @return RateLimiterInterface The rate limiter service instance.
      * @throws Exception
      */
-    abstract protected function getRateLimiter(): RateLimiterService;
+    abstract protected function getRateLimiter(): RateLimiterInterface;
 
     /**
      * Checks and enforces rate limits based on email and IP address.

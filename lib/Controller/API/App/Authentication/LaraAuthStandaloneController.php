@@ -5,6 +5,7 @@ namespace Controller\API\App\Authentication;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\App\Authentication\Traits\LaraAuthTrait;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Services\RateLimiterInterface;
 use Controller\Services\RateLimiterService;
 use DomainException;
 use Exception;
@@ -25,14 +26,14 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
 {
     use LaraAuthTrait;
 
-    private readonly RateLimiterService $rateLimiter;
+    private readonly RateLimiterInterface $rateLimiter;
 
     /**
      * @param Request              $request
      * @param Response             $response
      * @param ServiceProvider|null $service
      * @param App|null             $app
-     * @param RateLimiterService|null $rateLimiter
+     * @param RateLimiterInterface|null $rateLimiter
      *
      * @throws Exception
      */
@@ -41,7 +42,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         Response $response,
         ?ServiceProvider $service = null,
         ?App $app = null,
-        ?RateLimiterService $rateLimiter = null,
+        ?RateLimiterInterface $rateLimiter = null,
     ) {
         parent::__construct($request, $response, $service, $app);
         $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
@@ -55,10 +56,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         $this->appendValidator(new LoginValidator($this));
     }
 
-    /**
-     * @return RateLimiterService
-     */
-    protected function getRateLimiter(): RateLimiterService
+    protected function getRateLimiter(): RateLimiterInterface
     {
         return $this->rateLimiter;
     }
@@ -87,7 +85,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      * @return int
      * @throws Exception
      */
-    private function resolveActiveLaraEngineId(): int
+    protected function resolveActiveLaraEngineId(): int
     {
         $engineDAO = new EngineDAO(Database::obtain());
         $engineStruct = EngineStruct::getStruct();
