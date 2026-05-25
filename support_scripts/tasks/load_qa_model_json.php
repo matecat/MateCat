@@ -33,7 +33,7 @@ $project = ProjectDao::staticFindById( $options['id_project']);
 $content = file_get_contents( $options['file']);
 $json = json_decode( $content, true );
 
-$model_record = Model\LQA\ModelDao::createModelFromJsonDefinition( $json );
+$model_record = (new Model\LQA\ModelDao())->createModelFromJsonDefinition( $json );
 
 $dao = new \Model\Projects\ProjectDao( \Model\DataAccess\Database::obtain() );
 $dao->updateField( $this->project, 'id_qa_model', $model_record->id );

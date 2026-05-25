@@ -1094,7 +1094,7 @@ class NewController extends KleinController
     private function validateQaModel(string|false|null $id_qa_model = null): ?ModelStruct
     {
         if (!empty($id_qa_model)) {
-            $qaModel = ModelDao::findById((int)$id_qa_model);
+            $qaModel = (new ModelDao())->fetchById((int)$id_qa_model, ModelStruct::class);
 
             // check if qa_model exists
             if (null === $qaModel) {

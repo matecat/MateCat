@@ -447,7 +447,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
          * }} $model_json
          */
 
-        $model_record = ModelDao::createModelFromJsonDefinition($model_json);
+        $model_record = (new ModelDao())->createModelFromJsonDefinition($model_json);
 
         $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to set QA model');
         $project = ProjectDao::staticFindById($idProject)

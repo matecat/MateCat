@@ -121,7 +121,7 @@ class EntryValidator
             return;
         }
 
-        $this->qa_model = ModelDao::findById($this->project->id_qa_model);
+        $this->qa_model = (new ModelDao())->fetchById($this->project->id_qa_model, ModelStruct::class);
         $this->category = (new CategoryDao())->fetchById($this->struct->id_category, CategoryStruct::class);
 
         if ($this->category->id_model != $this->qa_model->id) {

@@ -266,7 +266,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
                 return null;
             }
 
-            return ModelDao::findById($this->id_qa_model, $ttl);
+            return (new ModelDao())->fetchById($this->id_qa_model, ModelStruct::class, $ttl ?: null);
         });
     }
 

@@ -398,6 +398,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Plugins
 | File | Cleaned In |
 |------|-----------|
+| `lib/Plugins/Features/AbstractRevisionFeature.php` | Phase 33 |
 | `lib/Plugins/Features/RevisionFactory.php` | Phase 13A |
 | `lib/Plugins/Features/ReviewExtended/BatchReviewProcessor.php` | Phase 31 |
 | `lib/Plugins/Features/ReviewExtended/ChunkReviewModel.php` | Phase 31 |

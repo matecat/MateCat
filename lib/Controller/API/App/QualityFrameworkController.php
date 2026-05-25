@@ -7,6 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -58,7 +59,7 @@ class QualityFrameworkController extends KleinController
             throw new NotFoundException('QAModel not found');
         }
 
-        $qaModel = ModelDao::findById($idQaModel);
+        $qaModel = (new ModelDao())->fetchById($idQaModel, ModelStruct::class);
 
         if ($qaModel === null) {
             throw new NotFoundException('QAModel not found');

@@ -3,11 +3,8 @@
 namespace Model\LQA;
 
 use DomainException;
-use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDOException;
-use ReflectionException;
 use TypeError;
 
 class ModelDao extends AbstractDao
@@ -15,23 +12,6 @@ class ModelDao extends AbstractDao
     const string TABLE = "qa_models";
 
     protected static array $auto_increment_field = ['id'];
-
-    /**
-     * @param int $id
-     * @param int $ttl
-     *
-     * @return ModelStruct|null
-     * @throws Exception
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public static function findById(int $id, int $ttl = 0): ?ModelStruct
-    {
-        /** @var ?ModelStruct $res */
-        $res = (new self())->fetchById($id, ModelStruct::class, $ttl ?: null);
-
-        return $res;
-    }
 
     /**
      * @param array{
@@ -48,9 +28,9 @@ class ModelDao extends AbstractDao
      * @throws PDOException
      * @throws TypeError
      */
-    public static function createRecord(array $data): ModelStruct
+    public function createRecord(array $data): ModelStruct
     {
-        $model_hash = static::_getModelHash($data);
+        $model_hash = $this->getModelHash($data);
 
         $sql = "INSERT INTO qa_models ( uid, label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
             " VALUES ( :uid, :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
@@ -59,12 +39,12 @@ class ModelDao extends AbstractDao
             'uid' => $data['uid'],
             'label' => $data['label'] ?? null,
             'pass_type' => $data['passfail']['type'],
-            'pass_options' => self::decodePassOptions($data['passfail']['options']),
+            'pass_options' => $this->decodePassOptions($data['passfail']['options']),
             'hash' => $model_hash,
             'qa_model_template_id' => (isset($data['id_template'])) ? $data['id_template'] : null,
         ]);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(
@@ -85,7 +65,7 @@ class ModelDao extends AbstractDao
      *
      * @return false|string
      */
-    private static function decodePassOptions(array $options): false|string
+    private function decodePassOptions(array $options): false|string
     {
         if (!isset($options['limit'])) {
             return json_encode([]);
@@ -112,7 +92,7 @@ class ModelDao extends AbstractDao
      *     passfail: array{type: string, options: array{limit?: list<int|string>}}
      * } $model_root
      */
-    protected static function _getModelHash(array $model_root): int
+    protected function getModelHash(array $model_root): int
     {
         $h_string = '';
 
@@ -150,13 +130,12 @@ class ModelDao extends AbstractDao
      * @return ModelStruct
      * @throws DomainException
      * @throws PDOException
-     * @throws ReflectionException
      * @throws TypeError
      */
-    public static function createModelFromJsonDefinition(array $json): ModelStruct
+    public function createModelFromJsonDefinition(array $json): ModelStruct
     {
         $model_root = $json['model'];
-        $model = ModelDao::createRecord($model_root);
+        $model = $this->createRecord($model_root);
 
         $default_severities = $model_root['severities'] ?? [];
         $categories = $model_root['categories'];
@@ -164,7 +143,7 @@ class ModelDao extends AbstractDao
         $modelId = $model->id ?? throw new DomainException("Model ID must not be null after creation");
 
         foreach ($categories as $category) {
-            self::insertCategory($category, $modelId, $default_severities, null);
+            $this->insertCategory($category, $modelId, $default_severities, null);
         }
 
         return $model;
@@ -174,18 +153,14 @@ class ModelDao extends AbstractDao
      * @param array{label: string, severities?: list<mixed>, subcategories?: list<array<string, mixed>>}|array<string, mixed> $category
      * @param list<mixed> $default_severities
      * @throws PDOException
-     * @throws ReflectionException
      * @throws TypeError
      */
-    private static function insertCategory(array $category, int $model_id, array $default_severities, ?int $parent_id): void
+    private function insertCategory(array $category, int $model_id, array $default_severities, ?int $parent_id): void
     {
         if (!array_key_exists('severities', $category)) {
             $category['severities'] = $default_severities;
         }
 
-        /*
-         * Any other key found in the JSON array will populate the `options` field
-         */
         $options = [];
 
         foreach (array_keys($category) as $key) {
@@ -204,7 +179,7 @@ class ModelDao extends AbstractDao
 
         if (array_key_exists('subcategories', $category) && !empty($category['subcategories'])) {
             foreach ($category['subcategories'] as $sub) {
-                self::insertCategory($sub, $model_id, $default_severities, $category_record->id);
+                $this->insertCategory($sub, $model_id, $default_severities, $category_record->id);
             }
         }
     }
