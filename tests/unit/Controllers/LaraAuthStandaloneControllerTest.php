@@ -3,7 +3,6 @@
 namespace unit\Controllers;
 
 use Controller\API\App\Authentication\LaraAuthStandaloneController;
-use Controller\Services\RateLimiterInterface;
 use Controller\Services\RateLimiterService;
 use Klein\Request;
 use Klein\Response;
@@ -29,7 +28,7 @@ class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
     public function initWith(
         Request $request,
         Response $response,
-        RateLimiterInterface $rateLimiter,
+        RateLimiterService $rateLimiter,
         UserStruct $user,
         MatecatLogger $logger,
     ): void {
@@ -60,7 +59,7 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
     private TestableLaraAuthStandaloneController $controller;
     private Request|MockObject $request;
     private Response $response;
-    private RateLimiterInterface|MockObject $rateLimiter;
+    private RateLimiterService|MockObject $rateLimiter;
     private UserStruct $user;
     private MatecatLogger|MockObject $logger;
 
@@ -70,7 +69,7 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
-        $this->rateLimiter = $this->createMock(RateLimiterInterface::class);
+        $this->rateLimiter = $this->createMock(RateLimiterService::class);
         $this->logger = $this->createStub(MatecatLogger::class);
 
         $this->user = new UserStruct();
@@ -213,5 +212,57 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
         $controller->auth();
 
         $this->assertEquals(200, $controller->getResponse()->code());
+    }
+
+    #[Test]
+    public function auth_allows_30_requests_then_returns_429_on_31st(): void
+    {
+        // Clean Redis keys for this test to ensure isolation
+        $redis = (new \Utils\Redis\RedisHandler())->getConnection();
+        $emailKey = md5('standalone@example.com' . '/api/app/lara/token');
+        $ipKey = md5('127.0.0.1' . '/api/app/lara/token');
+        $redis->del([$emailKey, $ipKey]);
+
+        $realRateLimiter = new RateLimiterService();
+
+        // First 30 requests should pass rate-limiting
+        for ($i = 1; $i <= 30; $i++) {
+            $controller = $this->getMockBuilder(TestableLaraAuthStandaloneController::class)
+                ->onlyMethods(['performLaraAuth', 'resolveActiveLaraEngineId'])
+                ->getMock();
+
+            $controller->initWith(
+                $this->request,
+                new Response(),
+                $realRateLimiter,
+                $this->user,
+                $this->logger,
+            );
+
+            $controller->method('resolveActiveLaraEngineId')->willReturn(1);
+            $controller->expects($this->once())->method('performLaraAuth');
+
+            $controller->auth();
+        }
+
+        // 31st request should be rate-limited (429)
+        $controller = $this->getMockBuilder(TestableLaraAuthStandaloneController::class)
+            ->onlyMethods(['performLaraAuth', 'resolveActiveLaraEngineId'])
+            ->getMock();
+
+        $controller->initWith(
+            $this->request,
+            new Response(),
+            $realRateLimiter,
+            $this->user,
+            $this->logger,
+        );
+
+        $controller->expects($this->never())->method('performLaraAuth');
+
+        $controller->auth();
+
+        $this->assertEquals(429, $controller->getResponse()->code());
+        $this->assertNotEmpty($controller->getResponse()->headers()->get('Retry-After'));
     }
 }

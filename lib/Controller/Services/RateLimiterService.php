@@ -14,7 +14,7 @@ use Utils\Redis\RedisHandler;
  * Encapsulates Redis-based sliding-window rate limiting logic,
  * decoupled from any controller or trait dependency.
  */
-final class RateLimiterService implements RateLimiterInterface
+class RateLimiterService
 {
     private ?Client $redis = null;
 

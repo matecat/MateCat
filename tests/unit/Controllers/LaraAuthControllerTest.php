@@ -3,8 +3,6 @@
 namespace unit\Controllers;
 
 use Controller\API\App\Authentication\LaraAuthController;
-use Controller\Services\InMemoryRateLimiter;
-use Controller\Services\RateLimiterInterface;
 use Controller\Services\RateLimiterService;
 use Klein\Request;
 use Klein\Response;
@@ -31,7 +29,7 @@ class TestableLaraAuthController extends LaraAuthController
     public function initWith(
         Request $request,
         Response $response,
-        RateLimiterInterface $rateLimiter,
+        RateLimiterService $rateLimiter,
         UserStruct $user,
         MatecatLogger $logger,
     ): void {
@@ -68,7 +66,7 @@ class LaraAuthControllerTest extends AbstractTest
     private TestableLaraAuthController $controller;
     private Request|MockObject $request;
     private Response $response;
-    private RateLimiterInterface|MockObject $rateLimiter;
+    private RateLimiterService|MockObject $rateLimiter;
     private UserStruct $user;
     private MatecatLogger|MockObject $logger;
 
@@ -78,7 +76,7 @@ class LaraAuthControllerTest extends AbstractTest
 
         $this->request = $this->createStub(Request::class);
         $this->response = new Response();
-        $this->rateLimiter = $this->createMock(RateLimiterInterface::class);
+        $this->rateLimiter = $this->createMock(RateLimiterService::class);
         $this->logger = $this->createStub(MatecatLogger::class);
 
         $this->user = new UserStruct();
@@ -243,7 +241,13 @@ class LaraAuthControllerTest extends AbstractTest
     #[Test]
     public function auth_allows_30_requests_then_returns_429_on_31st(): void
     {
-        $inMemoryRateLimiter = new InMemoryRateLimiter();
+        // Clean Redis keys for this test to ensure isolation
+        $redis = (new \Utils\Redis\RedisHandler())->getConnection();
+        $emailKey = md5('test@example.com' . '/api/app/lara/token');
+        $ipKey = md5('127.0.0.1' . '/api/app/lara/token');
+        $redis->del([$emailKey, $ipKey]);
+
+        $realRateLimiter = new RateLimiterService();
 
         $chunk = new JobStruct();
         $chunk->id_mt_engine = 42;
@@ -258,7 +262,7 @@ class LaraAuthControllerTest extends AbstractTest
             $controller->initWith(
                 $this->request,
                 new Response(),
-                $inMemoryRateLimiter,
+                $realRateLimiter,
                 $this->user,
                 $this->logger,
             );
@@ -278,55 +282,7 @@ class LaraAuthControllerTest extends AbstractTest
         $controller->initWith(
             $this->request,
             new Response(),
-            $inMemoryRateLimiter,
-            $this->user,
-            $this->logger,
-        );
-        $controller->setChunk($chunk);
-
-        $controller->expects($this->never())
-            ->method('performLaraAuth');
-
-        $controller->auth();
-
-        $this->assertEquals(429, $controller->getResponse()->code());
-    }
-
-    #[Test]
-    public function auth_rate_limits_by_email_after_threshold(): void
-    {
-        $inMemoryRateLimiter = new InMemoryRateLimiter();
-
-        $chunk = new JobStruct();
-        $chunk->id_mt_engine = 42;
-        $chunk->tm_keys = '[]';
-
-        // Exhaust email-based limit with 30 requests
-        for ($i = 1; $i <= 30; $i++) {
-            $controller = $this->getMockBuilder(TestableLaraAuthController::class)
-                ->onlyMethods(['performLaraAuth'])
-                ->getMock();
-
-            $controller->initWith(
-                $this->request,
-                new Response(),
-                $inMemoryRateLimiter,
-                $this->user,
-                $this->logger,
-            );
-            $controller->setChunk($chunk);
-            $controller->auth();
-        }
-
-        // Request 31 — rate-limited, performLaraAuth must NOT be called
-        $controller = $this->getMockBuilder(TestableLaraAuthController::class)
-            ->onlyMethods(['performLaraAuth'])
-            ->getMock();
-
-        $controller->initWith(
-            $this->request,
-            new Response(),
-            $inMemoryRateLimiter,
+            $realRateLimiter,
             $this->user,
             $this->logger,
         );
