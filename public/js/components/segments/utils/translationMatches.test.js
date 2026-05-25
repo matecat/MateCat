@@ -219,9 +219,9 @@ describe('translationMatches', () => {
       expect.objectContaining({
         idSegment: 101,
         translation: null,
-        laraModel: 'prosa',
       }),
     )
+    expect(getContributions.mock.calls[0][0]).not.toHaveProperty('laraModel')
   })
 
   test('prefetch requests current and next segments with fastFetch only on first request', () => {

@@ -260,7 +260,7 @@ let TranslationMatches = {
 
     const isLaraEngine = config.active_engine?.engine_type === 'Lara'
 
-    const getContributionRequest = ({translation = null, laraModel}) => {
+    const getContributionRequest = ({translation = null, laraModel} = {}) => {
       if (!translation) {
         console.log(
           'Call classic matches for segment:',
