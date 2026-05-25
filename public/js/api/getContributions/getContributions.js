@@ -26,7 +26,7 @@ export const getContributions = async ({
   contextListBefore,
   contextListAfter,
   laraStyle,
-  laraModel = 'think',
+  laraModel,
   reasoning = true,
 }) => {
   const contextBefore = globalFunctions.getContextBefore(idSegment)
