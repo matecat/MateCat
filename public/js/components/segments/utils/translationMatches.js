@@ -260,7 +260,7 @@ let TranslationMatches = {
 
     const isLaraEngine = config.active_engine?.engine_type === 'Lara'
 
-    const getContributionRequest = ({translation = null, laraModel}) => {
+    const getContributionRequest = ({translation = null, laraModel} = {}) => {
       if (!translation) {
         console.log(
           'Call classic matches for segment:',
@@ -327,17 +327,22 @@ let TranslationMatches = {
     ) {
       return Promise.resolve()
     }
+
+    this.segmentsWaitingForContributions.push(id_segment_original)
+
     if (
       isLaraEngine &&
       (allowedLaraThink || allowedLaraProsa) &&
       !fastFetch &&
       !callNewContributions
     ) {
-      this.segmentsWaitingForContributions.push(id_segment_original)
-
       const laraModel = allowedLaraProsa ? 'prosa' : 'think'
 
-      laraAuthJob({idJob: config.id_job, password: config.password})
+      laraAuthJob({
+        idJob: config.id_job,
+        password: config.password,
+        reasoning: laraModel === 'think',
+      })
         .then((response) => {
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []

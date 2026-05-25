@@ -68,7 +68,7 @@ describe('getContributions', () => {
     expect(body.get('cross_language')).toBe('en-US,it-IT')
     expect(body.get('context_list_before')).toBe(JSON.stringify(['b1', 'b2']))
     expect(body.get('context_list_after')).toBe(JSON.stringify(['a1']))
-    expect(body.get('lara_model')).toBe('think')
+    expect(body.get('lara_model')).toBeNull()
     expect(body.get('reasoning')).toBe('true')
   })
 

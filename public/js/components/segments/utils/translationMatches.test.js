@@ -171,7 +171,11 @@ describe('translationMatches', () => {
 
     await flushPromises()
 
-    expect(laraAuthJob).toHaveBeenCalledWith({idJob: 12, password: 'pw'})
+    expect(laraAuthJob).toHaveBeenCalledWith({
+      idJob: 12,
+      password: 'pw',
+      reasoning: false,
+    })
     expect(laraTranslate).toHaveBeenCalledWith(
       expect.objectContaining({
         token: 'token-1',
@@ -219,9 +223,9 @@ describe('translationMatches', () => {
       expect.objectContaining({
         idSegment: 101,
         translation: null,
-        laraModel: 'prosa',
       }),
     )
+    expect(getContributions.mock.calls[0][0]).not.toHaveProperty('laraModel')
   })
 
   test('prefetch requests current and next segments with fastFetch only on first request', () => {

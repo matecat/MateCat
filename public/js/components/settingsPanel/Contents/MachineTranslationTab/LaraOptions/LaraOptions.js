@@ -184,7 +184,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                 activeOption={styleGuidesOptions.find(
                   ({id}) =>
                     id ===
-                    (isCattoolPage
+                    (isCattoolPage && CatToolStore.getJobMetadata()
                       ? CatToolStore.getJobMetadata().project.mt_extra
                           .lara_style_guideline_id
                       : value),

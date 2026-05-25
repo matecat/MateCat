@@ -37,7 +37,7 @@ export const laraTranslate = async ({
       glossaries: glossaries,
       reasoning,
       style,
-      styleguideId,
+      ...(styleguideId && {styleguideId}),
     },
   )
 }
