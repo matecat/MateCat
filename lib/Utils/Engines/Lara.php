@@ -741,7 +741,7 @@ class Lara extends AbstractEngine
      */
     public static function validateLaraStyle(string $lara_style): string
     {
-        if (!in_array($lara_style, self::ALLOWED_STYLES)) {
+        if (!in_array($lara_style, self::ALLOWED_STYLES, true)) {
             throw new InvalidArgumentException("Invalid Lara style.", -1);
         }
 
@@ -758,7 +758,7 @@ class Lara extends AbstractEngine
      */
     public static function validateLaraModel(string $model): string
     {
-        if (!in_array($model, self::ALLOWED_MODELS)) {
+        if (!in_array($model, self::ALLOWED_MODELS, true)) {
             throw new InvalidArgumentException("Invalid Lara model.", -1);
         }
 

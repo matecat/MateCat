@@ -34,30 +34,40 @@ trait LaraAuthTrait
      * This method utilizes pre-defined rate limit rules to track and
      * restrict the number of requests that can be made by a specific email
      * or IP address within a set time period. If rate limits are exceeded,
-     * appropriate responses are set to prevent further action.
+     * the response is set to 429 and true is returned to signal the caller
+     * to halt execution.
      *
-     * @return void
+     * @return bool True if rate-limited (caller must stop), false otherwise.
      */
-    protected function checkRateLimits(): void
+    protected function checkRateLimits(): bool
     {
         $email = $this->getUser()->email ?? 'BLANK_EMAIL';
         $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
         $rateLimitKey = '/api/app/lara/token';
 
         $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $email, $rateLimitKey, 30);
-        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $rateLimitKey, 30);
 
         if ($rateLimitEmailResponse instanceof Response) {
             $this->response = $rateLimitEmailResponse;
+
+            return true;
         }
+
+        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $rateLimitKey, 30);
 
         if ($rateLimitIpResponse instanceof Response) {
             $this->response = $rateLimitIpResponse;
+
+            return true;
         }
+
+        return false;
     }
 
     /**
-     * Performs Lara authentication: rate-limiting, engine lookup, TM key header injection, and token generation.
+     * Performs Lara authentication: engine lookup, TM key header injection, and token generation.
+     *
+     * Rate-limiting MUST be checked by the caller before invoking this method.
      *
      * @param int    $engineId The Lara engine ID to authenticate against.
      * @param string $tmKeys   Comma-separated TM key IDs (can be empty).
@@ -68,22 +78,6 @@ trait LaraAuthTrait
      */
     protected function performLaraAuth(int $engineId, string $tmKeys): void
     {
-        $email = $this->getUser()->email ?? 'BLANK_EMAIL';
-        $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
-        $rateLimitKey = '/api/app/lara/token';
-
-        $rateLimitEmailResponse = $this->checkAndIncrementRateLimit($this->response, $email, $rateLimitKey, 30);
-        $rateLimitIpResponse = $this->checkAndIncrementRateLimit($this->response, $ip, $rateLimitKey, 30);
-
-        if ($rateLimitEmailResponse instanceof Response) {
-            $this->response = $rateLimitEmailResponse;
-            return;
-        }
-
-        if ($rateLimitIpResponse instanceof Response) {
-            $this->response = $rateLimitIpResponse;
-            return;
-        }
 
         $laraEngine = EnginesFactory::getInstance($engineId, Lara::class);
         $laraClient = $laraEngine->getInternalClient();
