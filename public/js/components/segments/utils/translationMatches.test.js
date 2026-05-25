@@ -171,7 +171,11 @@ describe('translationMatches', () => {
 
     await flushPromises()
 
-    expect(laraAuthJob).toHaveBeenCalledWith({idJob: 12, password: 'pw'})
+    expect(laraAuthJob).toHaveBeenCalledWith({
+      idJob: 12,
+      password: 'pw',
+      reasoning: false,
+    })
     expect(laraTranslate).toHaveBeenCalledWith(
       expect.objectContaining({
         token: 'token-1',
