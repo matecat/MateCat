@@ -11,8 +11,13 @@ use Utils\Redis\RedisHandler;
 /**
  * Standalone rate-limiter service.
  *
- * Encapsulates Redis-based sliding-window rate limiting logic,
- * decoupled from any controller or trait dependency.
+ * Encapsulates Redis-based fixed-window rate limiting using an
+ * atomic counter (INCR) with TTL-based expiration, decoupled from
+ * any controller or trait dependency.
+ *
+ * The counter is bucketed by key and expires on a minute-aligned
+ * boundary plus one additional minute; this is not a true
+ * sliding-window algorithm.
  */
 class RateLimiterService
 {
