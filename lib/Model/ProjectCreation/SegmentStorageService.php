@@ -319,7 +319,7 @@ class SegmentStorageService
      */
     protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
-        SegmentMetadataDao::save($metadataStruct);
+        (new SegmentMetadataDao())->save($metadataStruct);
     }
 
     // ── Private helpers ─────────────────────────────────────────────

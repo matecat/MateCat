@@ -109,7 +109,7 @@ class ContextUrlController extends KleinController
             throw new InvalidArgumentException('Invalid context_url value', 400);
         }
 
-        SegmentMetadataDao::upsert(
+        (new SegmentMetadataDao())->upsert(
             $idSegment,
             SegmentMetadataMarshaller::CONTEXT_URL->value,
             $marshalled

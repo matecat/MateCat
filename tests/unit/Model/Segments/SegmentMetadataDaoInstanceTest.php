@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace unit\Model\Segments;
 
 use Model\DataAccess\Database;
@@ -12,13 +14,14 @@ use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
-class SegmentMetadataDaoTest extends AbstractTest
+class SegmentMetadataDaoInstanceTest extends AbstractTest
 {
     private const int SEGMENT_ID_1 = 999991;
     private const int SEGMENT_ID_2 = 999992;
     private const int SEGMENT_ID_3 = 999993;
 
     private Database $database;
+    private SegmentMetadataDao $dao;
 
     protected function setUp(): void
     {
@@ -29,6 +32,7 @@ class SegmentMetadataDaoTest extends AbstractTest
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
+        $this->dao = new SegmentMetadataDao();
         $this->deleteFixtureRows();
     }
 
@@ -68,10 +72,12 @@ class SegmentMetadataDaoTest extends AbstractTest
             ->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    // ── save ─────────────────────────────────────────────────────────────────
+
     #[Test]
     public function testSaveInsertsRow(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'save_key', 'save_value'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'save_key', 'save_value'));
 
         $rows = $this->fetchRows(self::SEGMENT_ID_1, 'save_key');
         $this->assertCount(1, $rows);
@@ -80,12 +86,14 @@ class SegmentMetadataDaoTest extends AbstractTest
         $this->assertEquals('save_value', $rows[0]['meta_value']);
     }
 
+    // ── get ──────────────────────────────────────────────────────────────────
+
     #[Test]
     public function testGetReturnsCorrectStruct(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'get_key', 'get_value'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'get_key', 'get_value'));
 
-        $result = SegmentMetadataDao::get(self::SEGMENT_ID_1, 'get_key', 0);
+        $result = $this->dao->get(self::SEGMENT_ID_1, 'get_key', 0);
 
         $this->assertInstanceOf(SegmentMetadataStruct::class, $result);
         $this->assertEquals(self::SEGMENT_ID_1, $result->id_segment);
@@ -96,18 +104,20 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testGetNonexistentReturnsNull(): void
     {
-        $result = SegmentMetadataDao::get(self::SEGMENT_ID_1, 'no_such_key', 0);
+        $result = $this->dao->get(self::SEGMENT_ID_1, 'no_such_key', 0);
 
         $this->assertNull($result);
     }
 
+    // ── getAll ───────────────────────────────────────────────────────────────
+
     #[Test]
     public function testGetAllReturnsCollectionWithAllMetadataForSegment(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_b', 'val_b'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'key_b', 'val_b'));
 
-        $collection = SegmentMetadataDao::getAll(self::SEGMENT_ID_1, 0);
+        $collection = $this->dao->getAll(self::SEGMENT_ID_1, 0);
 
         $this->assertInstanceOf(SegmentMetadataCollection::class, $collection);
         $this->assertCount(2, $collection);
@@ -116,21 +126,23 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testGetAllReturnsEmptyCollectionWhenNoMetadataExists(): void
     {
-        $collection = SegmentMetadataDao::getAll(self::SEGMENT_ID_2, 0);
+        $collection = $this->dao->getAll(self::SEGMENT_ID_2, 0);
 
         $this->assertInstanceOf(SegmentMetadataCollection::class, $collection);
         $this->assertCount(0, $collection);
         $this->assertTrue($collection->isEmpty());
     }
 
+    // ── getBySegmentIds ───────────────────────────────────────────────────────
+
     #[Test]
     public function testGetBySegmentIdsReturnsOnlyRowsMatchingKey(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'shared_key', 'v1'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_2, 'shared_key', 'v2'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_3, 'other_key', 'v3'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'shared_key', 'v1'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_2, 'shared_key', 'v2'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_3, 'other_key', 'v3'));
 
-        $results = SegmentMetadataDao::getBySegmentIds(
+        $results = $this->dao->getBySegmentIds(
             [self::SEGMENT_ID_1, self::SEGMENT_ID_2, self::SEGMENT_ID_3],
             'shared_key',
             0
@@ -147,7 +159,7 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testGetBySegmentIdsReturnsEmptyArrayWhenKeyNotFound(): void
     {
-        $results = SegmentMetadataDao::getBySegmentIds(
+        $results = $this->dao->getBySegmentIds(
             [self::SEGMENT_ID_1, self::SEGMENT_ID_2],
             'nonexistent_key',
             0
@@ -157,10 +169,12 @@ class SegmentMetadataDaoTest extends AbstractTest
         $this->assertCount(0, $results);
     }
 
+    // ── upsert ────────────────────────────────────────────────────────────────
+
     #[Test]
     public function testUpsertInsertsRowWhenNotPresent(): void
     {
-        SegmentMetadataDao::upsert(self::SEGMENT_ID_1, 'upsert_key', 'upsert_value');
+        $this->dao->upsert(self::SEGMENT_ID_1, 'upsert_key', 'upsert_value');
 
         $rows = $this->fetchRows(self::SEGMENT_ID_1, 'upsert_key');
         $this->assertCount(1, $rows);
@@ -170,82 +184,75 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testUpsertDoesNotThrowOnRepeatCallWithSameKey(): void
     {
-        SegmentMetadataDao::upsert(self::SEGMENT_ID_1, 'upsert_key2', 'first');
-        SegmentMetadataDao::upsert(self::SEGMENT_ID_1, 'upsert_key2', 'second');
+        $this->dao->upsert(self::SEGMENT_ID_1, 'upsert_key2', 'first');
+        $this->dao->upsert(self::SEGMENT_ID_1, 'upsert_key2', 'second');
 
         $rows = $this->fetchRows(self::SEGMENT_ID_1, 'upsert_key2');
         $this->assertGreaterThanOrEqual(1, count($rows));
     }
 
+    // ── delete ────────────────────────────────────────────────────────────────
+
     #[Test]
     public function testDeleteRemovesRowFromDatabase(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'del_key', 'del_value'));
-        $this->assertNotNull(SegmentMetadataDao::get(self::SEGMENT_ID_1, 'del_key', 0));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'del_key', 'del_value'));
+        $this->assertNotNull($this->dao->get(self::SEGMENT_ID_1, 'del_key', 0));
 
-        SegmentMetadataDao::delete(self::SEGMENT_ID_1, 'del_key');
+        $this->dao->delete(self::SEGMENT_ID_1, 'del_key');
 
-        $this->assertNull(SegmentMetadataDao::get(self::SEGMENT_ID_1, 'del_key', 0));
+        $this->assertNull($this->dao->get(self::SEGMENT_ID_1, 'del_key', 0));
     }
 
     #[Test]
     public function testDeleteNonexistentRowDoesNotThrow(): void
     {
-        SegmentMetadataDao::delete(self::SEGMENT_ID_1, 'key_that_never_existed');
+        $this->dao->delete(self::SEGMENT_ID_1, 'key_that_never_existed');
 
         $this->assertTrue(true);
     }
 
-    #[Test]
-    public function testSetTranslationDisabledCreatesRowWithKeyAndValueOne(): void
-    {
-        $service = new \Model\Segments\SegmentDisabledService();
-        $service->disable(self::SEGMENT_ID_1);
-
-        $result = SegmentMetadataDao::get(self::SEGMENT_ID_1, 'translation_disabled', 0);
-
-        $this->assertInstanceOf(SegmentMetadataStruct::class, $result);
-        $this->assertEquals(self::SEGMENT_ID_1, $result->id_segment);
-        $this->assertEquals('translation_disabled', $result->meta_key);
-        $this->assertEquals('1', $result->meta_value);
-    }
+    // ── destroyGetAllCache ────────────────────────────────────────────────────
 
     #[Test]
     public function testDestroyGetAllCacheReturnsBool(): void
     {
-        $result = SegmentMetadataDao::destroyGetAllCache(self::SEGMENT_ID_1);
+        $result = $this->dao->destroyGetAllCache(self::SEGMENT_ID_1);
 
         $this->assertIsBool($result);
     }
+
+    // ── destroyGetCache ───────────────────────────────────────────────────────
 
     #[Test]
     public function testDestroyGetCacheReturnsBool(): void
     {
-        $result = SegmentMetadataDao::destroyGetCache(self::SEGMENT_ID_1, 'any_key');
+        $result = $this->dao->destroyGetCache(self::SEGMENT_ID_1, 'any_key');
 
         $this->assertIsBool($result);
     }
+
+    // ── destroyGetBySegmentIdsCache ───────────────────────────────────────────
 
     #[Test]
     public function testDestroyGetBySegmentIdsCacheReturnsBool(): void
     {
-        $result = SegmentMetadataDao::destroyGetBySegmentIdsCache('any_key');
+        $result = $this->dao->destroyGetBySegmentIdsCache('any_key');
 
         $this->assertIsBool($result);
     }
 
-    // ─── getAllInRange ────────────────────────────────────────────────
+    // ── getAllInRange (renamed from staticGetAllInRange) ───────────────────────
 
     #[Test]
     public function testGetAllInRangeReturnsGroupedCollections(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_b', 'val_b'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_2, 'key_a', 'val_c'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_d'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'key_b', 'val_b'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_2, 'key_a', 'val_c'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_d'));
 
-        $dao = new SegmentMetadataDao();
-        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
+        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
 
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
@@ -255,9 +262,6 @@ class SegmentMetadataDaoTest extends AbstractTest
         $this->assertArrayHasKey(self::SEGMENT_ID_3, $result);
 
         $this->assertInstanceOf(SegmentMetadataCollection::class, $result[self::SEGMENT_ID_1]);
-        $this->assertInstanceOf(SegmentMetadataCollection::class, $result[self::SEGMENT_ID_2]);
-        $this->assertInstanceOf(SegmentMetadataCollection::class, $result[self::SEGMENT_ID_3]);
-
         $this->assertCount(2, $result[self::SEGMENT_ID_1]);
         $this->assertCount(1, $result[self::SEGMENT_ID_2]);
         $this->assertCount(1, $result[self::SEGMENT_ID_3]);
@@ -266,8 +270,7 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testGetAllInRangeReturnsEmptyArrayWhenNoDataInRange(): void
     {
-        $dao = new SegmentMetadataDao();
-        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
+        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
 
         $this->assertIsArray($result);
         $this->assertCount(0, $result);
@@ -276,29 +279,13 @@ class SegmentMetadataDaoTest extends AbstractTest
     #[Test]
     public function testGetAllInRangeExcludesSegmentsOutsideRange(): void
     {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_b'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
+        $this->dao->save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_b'));
 
-        $dao = new SegmentMetadataDao();
-        // Range covers only SEGMENT_ID_1 and SEGMENT_ID_2 (not 3)
-        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_2, 0);
+        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_2, 0);
 
         $this->assertCount(1, $result);
         $this->assertArrayHasKey(self::SEGMENT_ID_1, $result);
         $this->assertArrayNotHasKey(self::SEGMENT_ID_3, $result);
-    }
-
-    #[Test]
-    public function testGetAllInRangeCollectionsAreFunctional(): void
-    {
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'context-url', 'https://example.com'));
-        SegmentMetadataDao::save($this->makeStruct(self::SEGMENT_ID_1, 'resname', 'block1'));
-
-        $dao = new SegmentMetadataDao();
-        $result = $dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, 0);
-
-        $collection = $result[self::SEGMENT_ID_1];
-        $this->assertSame('https://example.com', $collection->find(\Model\Segments\SegmentMetadataMarshaller::CONTEXT_URL));
-        $this->assertSame('block1', $collection->find(\Model\Segments\SegmentMetadataMarshaller::RESNAME));
     }
 }

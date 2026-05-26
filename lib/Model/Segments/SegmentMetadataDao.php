@@ -2,11 +2,7 @@
 
 namespace Model\Segments;
 
-use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
-use PDOException;
-use ReflectionException;
 
 class SegmentMetadataDao extends AbstractDao
 {
@@ -15,23 +11,15 @@ class SegmentMetadataDao extends AbstractDao
     const string _query_get = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
     const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
 
-    /**
-     * Get all metadata for a segment.
-     *
-     * @param int $id_segment
-     * @param int $ttl Cache TTL in seconds (default: 1 week)
-     *
-     * @return SegmentMetadataCollection
-     * @throws ReflectionException
-     * @throws Exception
+/**
+     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public static function getAll(int $id_segment, int $ttl = 86400): SegmentMetadataCollection
+    public function getAll(int $id_segment, int $ttl = 86400): SegmentMetadataCollection
     {
-        $thisDao = new self();
-        $conn = $thisDao->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare(self::_query_get_all);
+        $stmt = $this->database->getConnection()->prepare(self::_query_get_all);
 
-        $results = $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        $results = $this->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
             [$id_segment]
@@ -42,20 +30,15 @@ class SegmentMetadataDao extends AbstractDao
 
     /**
      * @param int[] $ids
-     * @param string $key
-     * @param int $ttl
-     *
      * @return SegmentMetadataStruct[]
-     * @throws ReflectionException
-     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public static function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
+    public function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
     {
-        $thisDao = new self();
-        $conn = $thisDao->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN (" . implode(', ', $ids) . ") and meta_key = ? ");
+        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN (" . implode(', ', $ids) . ") and meta_key = ? ");
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        return $this->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
             [$key]
@@ -63,23 +46,14 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * Get a single metadata entry by segment ID and key.
-     *
-     * @param int $id_segment
-     * @param string $key
-     * @param int $ttl Cache TTL in seconds (default: 1 week)
-     *
-     * @return SegmentMetadataStruct|null
-     * @throws ReflectionException
-     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public static function get(int $id_segment, string $key, int $ttl = 604800): ?SegmentMetadataStruct
+    public function get(int $id_segment, string $key, int $ttl = 604800): ?SegmentMetadataStruct
     {
-        $thisDao = new self();
-        $conn = $thisDao->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare(self::_query_get);
+        $stmt = $this->database->getConnection()->prepare(self::_query_get);
 
-        $results = $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        $results = $this->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
             [$id_segment, $key]
@@ -89,25 +63,22 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws PDOException
+     * @throws \PDOException
      */
-    public static function delete(int $id_segment, string $key): void
+    public function delete(int $id_segment, string $key): void
     {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
+        $stmt = $this->database->getConnection()->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
         $stmt->execute([$id_segment, $key]);
     }
 
     /**
-     * @param SegmentMetadataStruct $metadataStruct
-     * @throws ReflectionException
-     * @throws PDOException
-     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \PDOException
+     * @throws \Exception
      */
-    public static function save(SegmentMetadataStruct $metadataStruct): void
+    public function save(SegmentMetadataStruct $metadataStruct): void
     {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
+        $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata " .
             " ( id_segment, meta_key, meta_value  ) VALUES " .
             " ( :id_segment, :key, :value ) "
@@ -119,20 +90,19 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $metadataStruct->meta_value,
         ]);
 
-        self::destroyGetAllCache($metadataStruct->id_segment);
-        self::destroyGetCache($metadataStruct->id_segment, $metadataStruct->meta_key);
-        self::destroyGetBySegmentIdsCache($metadataStruct->meta_key);
+        $this->destroyGetAllCache($metadataStruct->id_segment);
+        $this->destroyGetCache($metadataStruct->id_segment, $metadataStruct->meta_key);
+        $this->destroyGetBySegmentIdsCache($metadataStruct->meta_key);
     }
 
     /**
-     * @throws ReflectionException
-     * @throws PDOException
-     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \PDOException
+     * @throws \Exception
      */
-    public static function upsert(int $id_segment, string $key, string $value): void
+    public function upsert(int $id_segment, string $key, string $value): void
     {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
+        $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata " .
             " ( id_segment, meta_key, meta_value ) VALUES " .
             " ( :id_segment, :key, :value ) " .
@@ -145,25 +115,48 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $value,
         ]);
 
-        self::destroyGetAllCache($id_segment);
-        self::destroyGetCache($id_segment, $key);
-        self::destroyGetBySegmentIdsCache($key);
+        $this->destroyGetAllCache($id_segment);
+        $this->destroyGetCache($id_segment, $key);
+        $this->destroyGetBySegmentIdsCache($key);
     }
 
     /**
-     * Fetch all metadata for segments in a range, grouped by segment ID.
-     *
-     * Single query replaces N per-segment getAll() calls.
-     * Used by GetSegmentsController to pre-load before the rendering loop.
-     *
-     * @param int $startSid First segment ID (inclusive)
-     * @param int $stopSid  Last segment ID (inclusive)
-     * @param int $ttl      Cache TTL in seconds (default: 1 day)
-     *
-     * @return array<int, SegmentMetadataCollection> keyed by id_segment
-     *
-     * @throws ReflectionException
-     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \PDOException
+     */
+    public function destroyGetAllCache(int $id_segment): bool
+    {
+        $stmt = $this->database->getConnection()->prepare(self::_query_get_all);
+
+        return $this->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment]);
+    }
+
+    /**
+     * @throws \ReflectionException
+     * @throws \PDOException
+     */
+    public function destroyGetCache(int $id_segment, string $key): bool
+    {
+        $stmt = $this->database->getConnection()->prepare(self::_query_get);
+
+        return $this->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
+    }
+
+    /**
+     * @throws \ReflectionException
+     * @throws \Exception
+     */
+    public function destroyGetBySegmentIdsCache(string $key): bool
+    {
+        $keyMap = self::_keymap_get_by_segment_ids . $key;
+
+        return $this->_deleteCacheByKey($keyMap, false);
+    }
+
+    /**
+     * @return array<int, SegmentMetadataCollection>
+     * @throws \ReflectionException
+     * @throws \Exception
      */
     public function getAllInRange(int $startSid, int $stopSid, int $ttl = 86400): array
     {
@@ -188,51 +181,6 @@ class SegmentMetadataDao extends AbstractDao
             static fn(array $structs) => new SegmentMetadataCollection($structs),
             $grouped
         );
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws PDOException
-     */
-    public static function destroyGetAllCache(int $id_segment): bool
-    {
-        $thisDao = new self();
-        $conn = $thisDao->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare(self::_query_get_all);
-
-        return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment]);
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws PDOException
-     */
-    public static function destroyGetCache(int $id_segment, string $key): bool
-    {
-        $thisDao = new self();
-        $conn = $thisDao->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare(self::_query_get);
-
-        return $thisDao->_destroyObjectCache($stmt, SegmentMetadataStruct::class, [$id_segment, $key]);
-    }
-
-    /**
-     * Destroy cache for getBySegmentIds queries matching the given meta_key.
-     *
-     * Because getBySegmentIds bakes segment IDs into the SQL string (not bind params),
-     * we cannot reconstruct the exact cache key via _destroyObjectCache.
-     * Instead, we delete the keyMap directly using _deleteCacheByKey.
-     * @param string $key
-     * @return bool
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public static function destroyGetBySegmentIdsCache(string $key): bool
-    {
-        $thisDao  = new self();
-        $keyMap   = self::_keymap_get_by_segment_ids . $key;
-
-        return $thisDao->_deleteCacheByKey($keyMap, false);
     }
 
 }
