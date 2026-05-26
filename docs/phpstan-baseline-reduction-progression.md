@@ -8,8 +8,8 @@
 |--------|-------------------|--------------------------|-------|
 | **PHPStan baseline entries** | 7,366 | 2,245 | −5,121 (−69.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,779 | +3,531 (+157.1%) |
-| **PHPUnit assertions** | ~19,449 | 15,827 | — |
+| **PHPUnit tests** | ~2,248 | 5,782 | +3,534 (+157.2%) |
+| **PHPUnit assertions** | ~19,449 | 15,833 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -1829,7 +1829,7 @@ Key changes:
 - **`FilesInfo::render()`**: `@param null` → `@param int|null` for params 2 & 3; `@return array<string, mixed>`
 - **`@throws` + return types**: `getInfo()` → `array<string, mixed>`, `getInstructions()` → `array{instructions: mixed}|null`
 - **Cascade**: 9 new entries added to baseline for `FileInfoController.php` (not on ledger)
-- **10 new tests** in `FilesInfoUtilityTest.php` (24 assertions, 0 warnings)
+- **13 new tests** in `FilesInfoUtilityTest.php` (30 assertions, 0 warnings) — **100% lines, 100% methods**
 
 **Baseline reduction:** 2,253 → 2,245 (−8 net: −24 removed + 9 cascade added + 7 pre-existing stale)
 
