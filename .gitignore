@@ -84,3 +84,5 @@ certs
 /CallGraph
 /PHP-SQL-Parser
 /storage
+# Added by code-review-graph
+.code-review-graph/
