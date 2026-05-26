@@ -11,6 +11,7 @@ namespace Model\Search;
 
 use Exception;
 use Matecat\Finder\WholeTextFinder;
+use TypeError;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
@@ -28,7 +29,7 @@ class SearchModel
     protected SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var Database
+     * @var IDatabase
      */
     protected IDatabase $db;
 
@@ -42,6 +43,7 @@ class SearchModel
      *
      * @param SearchQueryParamsStruct $queryParams
      * @param MateCatFilter $filters
+     * @throws TypeError
      */
     public function __construct(SearchQueryParamsStruct $queryParams, MateCatFilter $filters)
     {
@@ -54,8 +56,9 @@ class SearchModel
     /**
      * @param bool $inCurrentChunkOnly
      *
-     * @return array
+     * @return array{sid_list: list<string>, count: int}
      * @throws Exception
+     * @throws TypeError
      */
     public function search(bool $inCurrentChunkOnly): array
     {
@@ -92,15 +95,15 @@ class SearchModel
 
         $vector = [
             'sid_list' => [],
-            'count' => '0'
+            'count' => 0
         ];
 
         if ($this->queryParams->key === 'source' || $this->queryParams->key === 'target') {
-            $searchTerm = (false === empty($this->queryParams->source)) ? $this->queryParams->source : $this->queryParams->target;
+            $searchTerm = ((false === empty($this->queryParams->source)) ? $this->queryParams->source : $this->queryParams->target) ?? '';
 
             foreach ($results as $occurrence) {
                 if($occurrence['text'] !== null){
-                    $matches = $this->find($occurrence['text'], $searchTerm);
+                    $matches = $this->find((string)$occurrence['text'], $searchTerm);
                     $matchesCount = count($matches);
 
                     if ($this->hasMatches($matches)) {
@@ -117,14 +120,14 @@ class SearchModel
         } elseif ($this->queryParams->key === 'coupled') {
             foreach ($results as $id => $occurrence) {
                 // check if exists match target
-                if (isset($occurrence[1]) && $occurrence[1] !== null && $occurrence[0] !== null) {
+                if (isset($occurrence[0], $occurrence[1])) {
                     // match source
-                    $searchTermSource = $this->queryParams->source;
-                    $matchesSource = $this->find($occurrence[0], $searchTermSource);
+                    $searchTermSource = $this->queryParams->source ?? '';
+                    $matchesSource = $this->find((string)$occurrence[0], $searchTermSource);
                     $matchesSourceCount = count($matchesSource);
 
-                    $searchTermTarget = $this->queryParams->target;
-                    $matchesTarget = $this->find($occurrence[1], $searchTermTarget);
+                    $searchTermTarget = $this->queryParams->target ?? '';
+                    $matchesTarget = $this->find((string)$occurrence[1], $searchTermTarget);
                     $matchesTargetCount = count($matchesTarget);
 
                     if ($this->hasMatches($matchesSource) and $this->hasMatches($matchesTarget)) {
@@ -148,7 +151,7 @@ class SearchModel
     }
 
     /**
-     * @param array $matches
+     * @param array<int, array<int, int|string>> $matches
      *
      * @return bool
      */
@@ -161,7 +164,7 @@ class SearchModel
      * @param string $haystack
      * @param string $needle
      *
-     * @return array
+     * @return array<int, array<int, int|string>>
      * @throws Exception
      */
     private function find(string $haystack, string $needle): array
@@ -180,9 +183,9 @@ class SearchModel
 
     /**
      * @param string $sql
-     * @param array $params
+     * @param array<string, mixed> $params
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws Exception
      */
     protected function _getQuery(string $sql, array $params = []): array
@@ -201,6 +204,8 @@ class SearchModel
 
     /**
      * Pay attention to possible SQL injection
+     *
+     * @throws TypeError
      */
     protected function _loadParams(): void
     {
@@ -239,7 +244,8 @@ class SearchModel
     /**
      * @param bool $inCurrentChunkOnly
      *
-     * @return array
+     * @return array{string, array<string, mixed>}
+     * @throws TypeError
      */
     protected function _loadSearchInTargetQuery(bool $inCurrentChunkOnly = false): array
     {
@@ -270,9 +276,10 @@ class SearchModel
     }
 
     /**
-     * @param bool $inCurrentChunkOnly
+     * @param bool|null $inCurrentChunkOnly
      *
-     * @return array
+     * @return array{string, array<string, mixed>}
+     * @throws TypeError
      */
     protected function _loadSearchInSourceQuery(?bool $inCurrentChunkOnly = false): array
     {
@@ -304,6 +311,10 @@ class SearchModel
         return [$sql, $params];
     }
 
+    /**
+     * @return array{string, array<string, mixed>}
+     * @throws TypeError
+     */
     protected function _loadSearchStatusOnlyQuery(): array
     {
         $this->_loadParams();

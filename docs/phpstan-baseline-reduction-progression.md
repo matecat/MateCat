@@ -6,10 +6,10 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,245 | −5,121 (−69.5%) |
+| **PHPStan baseline entries** | 7,366 | 2,233 | −5,133 (−69.7%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,782 | +3,534 (+157.2%) |
-| **PHPUnit assertions** | ~19,449 | 15,833 | — |
+| **PHPUnit tests** | ~2,248 | 5,785 | +3,537 (+157.3%) |
+| **PHPUnit assertions** | ~19,449 | 15,842 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -88,7 +88,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 437 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 438 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (435 files)</summary>
@@ -339,6 +339,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/QualityReport/QualityReportSegmentStruct.php` | Phase 13A |
 | `lib/Model/RemoteFiles/RemoteFileDao.php` | Phase 25 |
 | `lib/Model/ReviseFeedback/FeedbackDAO.php` | Phase 0 |
+| `lib/Model/Search/SearchModel.php` | Phase 35 |
 | `lib/Model/Search/MySQLReplaceEventDAO.php` | Phase 0 |
 | `lib/Model/Search/MySQLReplaceEventIndexDAO.php` | Phase 0 |
 | `lib/Model/Search/RedisReplaceEventDAO.php` | Phase 25 |
@@ -1808,6 +1809,31 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 - **Tests**: 5,231 (was 5,166), **Assertions**: 18,034 (was 17,383)
 - **PHPStan**: 0 errors (full codebase with baseline)
 - **Files added to ledger**: +3 (XliffConfigTemplateController, ApiKeyStruct, AuthenticationHelper)
+
+---
+
+### Phase 35: SearchModel — ✅ DONE (−12 net baseline entries, +3 tests)
+
+**Why:** `SearchModel` is the core search/replace engine — handles source, target, coupled, and status-only search across segments. 15 PHPStan errors.
+
+#### Changes
+
+| File | Errors Fixed | Coverage Before → After | Notes |
+|------|-------------|------------------------|-------|
+| `lib/Model/Search/SearchModel.php` | 15→0 | 66.92% → 95.38% lines | PHPDoc types, null guards, redundant check removal |
+| `lib/Controller/API/App/GetSearchController.php` | cascade | already clean | `@throws TypeError` added to 3 methods |
+
+Key changes:
+- **`@var Database` PHPDoc** was overriding native `IDatabase` type — removed (`assign.propertyType`)
+- **`$searchTerm ?? ''`** — nullable source/target made `?? ''` explicit (3× `argument.type` errors)
+- **Removed redundant `$occurrence[1] !== null`** — after `isset($occurrence[1])`, null already eliminated
+- **Array shape PHPDocs**: `@return array{sid_list: list<string>, count: int}`, `array{string, array<string, mixed>}` for query-builders, `array<int, array<string, mixed>>` for `_getQuery`
+- **`$vector['count'] = '0'`** → `0` (int) to match declared return type
+- **`@throws TypeError`** added to constructor, `search()`, `_loadParams()`, and all 3 query-builders
+- **Cascade**: `GetSearchController::search()`, `doSearch()`, `getSearchModel()` gained `@throws TypeError`
+- **3 new tests** (coupled search, status_only search, default key) → 8 total in `SearchModelTest.php`
+
+**Baseline reduction:** 2,245 → 2,233 (−12 net: −15 removed + 3 cascade in GetSearchController)
 
 ---
 

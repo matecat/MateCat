@@ -46,6 +46,7 @@ class GetSearchController extends AbstractStatefulKleinController
      * @throws InvalidArgumentException
      * @throws DomainException
      * @throws RuntimeException
+     * @throws TypeError
      */
     public function search(): void
     {
@@ -256,6 +257,7 @@ class GetSearchController extends AbstractStatefulKleinController
      * @param JobStruct $jobStruct
      * @return SearchModel
      * @throws RuntimeException
+     * @throws TypeError
      */
     private function getSearchModel(SearchQueryParamsStruct $queryParams, JobStruct $jobStruct): SearchModel
     {
@@ -342,6 +344,7 @@ class GetSearchController extends AbstractStatefulKleinController
      *
      * @throws DomainException
      * @throws RuntimeException
+     * @throws TypeError
      */
     private function doSearch(array $request): array
     {

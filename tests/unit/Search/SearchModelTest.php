@@ -169,6 +169,88 @@ class SearchModelTest extends AbstractTest
         $this->assertEquals($expected, $searchModel->search(true));
     }
 
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testSearchCoupled(): void
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job               = $this->jobId;
+        $queryParamsStruct->password          = $this->jobPwd;
+        $queryParamsStruct->status            = 'all';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested  = false;
+        $queryParamsStruct['key'] = 'coupled';
+        $queryParamsStruct['src'] = 'Hello';
+        $queryParamsStruct['trg'] = 'Ciao';
+
+        $jobData    = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
+        $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
+        $searchModel = new SearchModel($queryParamsStruct, $filters);
+
+        $result = $searchModel->search(true);
+
+        $this->assertArrayHasKey('sid_list', $result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertGreaterThanOrEqual(0, $result['count']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testSearchStatusOnly(): void
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job               = $this->jobId;
+        $queryParamsStruct->password          = $this->jobPwd;
+        $queryParamsStruct->status            = 'TRANSLATED';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested  = false;
+        $queryParamsStruct['key'] = 'status_only';
+
+        $jobData    = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
+        $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
+        $searchModel = new SearchModel($queryParamsStruct, $filters);
+
+        $result = $searchModel->search(false);
+
+        $this->assertArrayHasKey('sid_list', $result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertIsArray($result['sid_list']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function testSearchDefaultKeyReturnsEmpty(): void
+    {
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job               = $this->jobId;
+        $queryParamsStruct->password          = $this->jobPwd;
+        $queryParamsStruct->status            = 'all';
+        $queryParamsStruct->isExactMatchRequested = false;
+        $queryParamsStruct->isMatchCaseRequested  = false;
+        $queryParamsStruct['key'] = 'unknown_key';
+
+        $jobData    = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
+        $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
+        $searchModel = new SearchModel($queryParamsStruct, $filters);
+
+        $result = $searchModel->search(false);
+
+        $this->assertSame([], $result['sid_list']);
+        $this->assertSame(0, $result['count']);
+    }
+
     private function _searchWithStatus(string $status): array
     {
         $queryParamsStruct = new SearchQueryParamsStruct();
