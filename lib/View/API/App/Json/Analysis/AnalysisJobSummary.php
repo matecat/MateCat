@@ -20,6 +20,9 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable
      */
     protected array $matches = [];
 
+    /**
+     * @throws \RuntimeException
+     */
     public function __construct(ConstantsInterface $matchConstantsClass)
     {
         foreach ($matchConstantsClass::forValue() as $matchType) {
