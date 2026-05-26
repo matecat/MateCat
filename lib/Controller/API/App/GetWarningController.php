@@ -117,7 +117,7 @@ class GetWarningController extends KleinController
         $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
         $featureSet = $this->getFeatureSet();
         $metadata = new MetadataDao();
-        $dataRefMap = (!empty($id)) ? SegmentOriginalDataDao::getSegmentDataRefMap($id) : [];
+        $dataRefMap = (!empty($id)) ? (new SegmentOriginalDataDao())->getSegmentDataRefMap($id) : [];
 
         // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
         // Detect if the translation content contains ICU MessageFormat syntax

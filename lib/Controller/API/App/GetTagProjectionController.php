@@ -42,7 +42,7 @@ class GetTagProjectionController extends KleinController
         $engine = EnginesFactory::getInstance(1);
         $engine->setFeatureSet($this->featureSet);
 
-        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($request['id_segment']);
+        $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($request['id_segment']);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($this->getFeatureSet(), $request['source_lang'], $request['target_lang'], $dataRefMap);
 

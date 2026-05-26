@@ -56,7 +56,7 @@ class GetContributionController extends KleinController
         $password = $request['password'];
 
         $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
-        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($id_segment);
+        $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($id_segment);
 
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject($projectStruct);

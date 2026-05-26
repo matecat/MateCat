@@ -216,7 +216,7 @@ class QualityReportSegmentModel
         $segments = [];
 
         foreach ($data as $index => $seg) {
-            $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
+            $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($seg->sid);
             $metadataDao = new MetadataDao();
 
             /** @var MateCatFilter $Filter */

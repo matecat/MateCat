@@ -310,7 +310,7 @@ class SegmentStorageService
      */
     protected function insertOriginalDataRecord(int $id_segment, array $map): void
     {
-        SegmentOriginalDataDao::insertRecord($id_segment, $map);
+        (new SegmentOriginalDataDao())->insertRecord($id_segment, $map);
     }
 
     /**

@@ -792,7 +792,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $featureSet,
             $this->data['chunk']->source,
             $this->data['chunk']->target,
-            SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
+            (new SegmentOriginalDataDao())->getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password ?? ''),
             $this->sourceContainsIcu
         );

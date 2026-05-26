@@ -186,7 +186,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
         }
 
         $metadata = $this->metadataDao ?? new MetadataDao();
-        $dataRefMap = (!empty($this->sid)) ? SegmentOriginalDataDao::getSegmentDataRefMap($this->sid) : [];
+        $dataRefMap = (!empty($this->sid)) ? (new SegmentOriginalDataDao())->getSegmentDataRefMap($this->sid) : [];
 
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $chunk->password));
