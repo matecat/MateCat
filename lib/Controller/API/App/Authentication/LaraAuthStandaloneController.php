@@ -39,6 +39,20 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         ?App $app = null
     ) {
         parent::__construct($request, $response, $service, $app);
+        $this->initLogger();
+    }
+
+    /**
+     * Initializes the logger from the task-runner context definitions.
+     *
+     * Exposed as a protected seam so the wiring can be unit-tested without
+     * invoking the heavy parent constructor (session, validators, DB).
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function initLogger(): void
+    {
         $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
         $loggerName = $contextList->list['CONTRIBUTION_GET']->loggerName;
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
@@ -75,7 +89,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      */
     protected function resolveActiveLaraEngineId(): int
     {
-        $engineDAO = new EngineDAO(Database::obtain());
+        $engineDAO = $this->getEngineDAO();
         $engineStruct = EngineStruct::getStruct();
         $engineStruct->active = true;
         $engineStruct->class_load = Lara::class;
@@ -88,6 +102,20 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         }
 
         return (int)$engines[0]->id;
+    }
+
+    /**
+     * Returns the EngineDAO instance used by this controller.
+     *
+     * Exposed as a protected seam so tests can override the DAO without
+     * touching the global Database::obtain() static dependency.
+     *
+     * @return EngineDAO
+     * @throws Exception
+     */
+    protected function getEngineDAO(): EngineDAO
+    {
+        return new EngineDAO(Database::obtain());
     }
 }
 

@@ -16,11 +16,6 @@ use TestHelpers\AbstractTest;
 class RateLimiterTraitConsumer
 {
     use RateLimiterTrait;
-
-    public function setRateLimiterService(RateLimiterService $limiterService): void
-    {
-        $this->limiterService = $limiterService;
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]
@@ -34,13 +29,10 @@ class RateLimiterTraitTest extends AbstractTest
         parent::setUp();
         $this->mockService = $this->createMock(RateLimiterService::class);
         $this->consumer = new RateLimiterTraitConsumer();
-        $this->consumer->setRateLimiterService($this->mockService);
     }
 
-    // ─── Delegation tests ───────────────────────────────────────────
-
     #[Test]
-    public function checkAndIncrementRateLimitDelegatesToService(): void
+    public function checkAndIncrementRateLimitDelegatesToInjectedService(): void
     {
         $response = $this->createStub(Response::class);
 
@@ -50,7 +42,13 @@ class RateLimiterTraitTest extends AbstractTest
             ->with($response, 'user@test.com', '/api/route', 10)
             ->willReturn(null);
 
-        $result = $this->consumer->checkAndIncrementRateLimit($response, 'user@test.com', '/api/route', 10);
+        $result = $this->consumer->checkAndIncrementRateLimit(
+            $response,
+            'user@test.com',
+            '/api/route',
+            10,
+            $this->mockService
+        );
 
         $this->assertNull($result);
     }
@@ -65,7 +63,13 @@ class RateLimiterTraitTest extends AbstractTest
             ->method('checkAndIncrement')
             ->willReturn($response);
 
-        $result = $this->consumer->checkAndIncrementRateLimit($response, 'user@test.com', '/api/route', 5);
+        $result = $this->consumer->checkAndIncrementRateLimit(
+            $response,
+            'user@test.com',
+            '/api/route',
+            5,
+            $this->mockService
+        );
 
         $this->assertSame($response, $result);
     }
@@ -80,32 +84,12 @@ class RateLimiterTraitTest extends AbstractTest
             ->method('checkAndIncrement')
             ->with($response, 'id', '/route', 10);
 
-        $this->consumer->checkAndIncrementRateLimit($response, 'id', '/route');
-    }
-
-    // ─── getRateLimiterService tests ────────────────────────────────
-
-    #[Test]
-    public function getRateLimiterServiceReturnsInjectedService(): void
-    {
-        $service = new RateLimiterService();
-        $consumer = new RateLimiterTraitConsumer();
-        $consumer->setRateLimiterService($service);
-
-        $ref = new \ReflectionMethod($consumer, 'getRateLimiterService');
-        $result = $ref->invoke($consumer);
-
-        $this->assertSame($service, $result);
-    }
-
-    #[Test]
-    public function getRateLimiterServiceCreatesDefaultServiceWhenNotInjected(): void
-    {
-        $consumer = new RateLimiterTraitConsumer();
-
-        $ref = new \ReflectionMethod($consumer, 'getRateLimiterService');
-        $result = $ref->invoke($consumer);
-
-        $this->assertInstanceOf(RateLimiterService::class, $result);
+        $this->consumer->checkAndIncrementRateLimit(
+            $response,
+            'id',
+            '/route',
+            10,
+            $this->mockService
+        );
     }
 }

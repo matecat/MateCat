@@ -49,6 +49,20 @@ class LaraAuthController extends AbstractStatefulKleinController
         ?App $app = null
     ) {
         parent::__construct($request, $response, $service, $app);
+        $this->initLogger();
+    }
+
+    /**
+     * Initializes the logger from the task-runner context definitions.
+     *
+     * Exposed as a protected seam so the wiring can be unit-tested without
+     * invoking the heavy parent constructor (session, validators, DB).
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function initLogger(): void
+    {
         $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
         $loggerName = $contextList->list['CONTRIBUTION_GET']->loggerName;
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
@@ -60,19 +74,58 @@ class LaraAuthController extends AbstractStatefulKleinController
 
         $chunkValidator = new ChunkPasswordValidator($this, ttl: 3600);
         $this->appendValidator(
-            $chunkValidator->onSuccess(
-                function () use ($chunkValidator) {
-                    $this->chunk = $chunkValidator->getChunk();
-                }
-            )->onSuccess(
-                function () use ($chunkValidator) {
-                    $reasoning = (bool)filter_var($this->getParams()['reasoning'], FILTER_VALIDATE_BOOLEAN);
-                    if($reasoning){
-                        (new IsOwnerInternalUserValidator($this, $chunkValidator->getChunk()))->validate();
-                    }                
-                }
-            )
+            $chunkValidator
+                ->onSuccess(fn() => $this->onChunkValidated($chunkValidator))
+                ->onSuccess(fn() => $this->enforceReasoningOwner($chunkValidator))
         );
+    }
+
+    /**
+     * Stores the chunk resolved by the ChunkPasswordValidator on the controller.
+     *
+     * Exposed as a protected seam for unit testing the post-validation callback.
+     *
+     * @param ChunkPasswordValidator $chunkValidator
+     *
+     * @return void
+     */
+    protected function onChunkValidated(ChunkPasswordValidator $chunkValidator): void
+    {
+        $this->chunk = $chunkValidator->getChunk();
+    }
+
+    /**
+     * When the `reasoning` parameter is truthy, ensures the requesting user is the
+     * internal owner of the chunk by running IsOwnerInternalUserValidator.
+     *
+     * Exposed as a protected seam for unit testing the post-validation callback.
+     *
+     * @param ChunkPasswordValidator $chunkValidator
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function enforceReasoningOwner(ChunkPasswordValidator $chunkValidator): void
+    {
+        $reasoning = (bool)filter_var($this->getParams()['reasoning'] ?? null, FILTER_VALIDATE_BOOLEAN);
+        if ($reasoning) {
+            $this->buildOwnerValidator($chunkValidator->getChunk())->validate();
+        }
+    }
+
+    /**
+     * Builds the IsOwnerInternalUserValidator for the given chunk.
+     *
+     * Exposed as a protected seam so tests can substitute the validator without
+     * touching the DB-backed dependencies pulled in by IsOwnerInternalUserValidator.
+     *
+     * @param JobStruct $chunk
+     *
+     * @return IsOwnerInternalUserValidator
+     */
+    protected function buildOwnerValidator(JobStruct $chunk): IsOwnerInternalUserValidator
+    {
+        return new IsOwnerInternalUserValidator($this, $chunk);
     }
 
     /**

@@ -24,6 +24,15 @@ class RateLimiterService
     private ?Client $redis = null;
 
     /**
+     * @param Client|null $redis
+     * @throws Exception
+     */
+    public function __construct(?Client $redis = null)
+    {
+        $this->redis = $redis ?? (new RedisHandler())->getConnection();
+    }
+
+    /**
      * Atomically increment the rate limit counter and check whether the limit has been exceeded.
      * Uses Redis INCR (atomic) to avoid TOCTOU race conditions.
      *

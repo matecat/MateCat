@@ -19,7 +19,8 @@ use Utils\Tools\Utils;
  *  - $this->response (Klein\Response)
  *  - $this->logger (Psr\Log or compatible)
  *  - $this->getUser() returning a user object with ->email
- *  - $this->getRateLimiter() returning a RateLimiterService instance
+ *
+ * Tests may inject a RateLimiterService by passing it to checkRateLimits().
  *
  * @method object getUser()
  *
@@ -28,34 +29,6 @@ use Utils\Tools\Utils;
  */
 trait LaraAuthTrait
 {
-    private RateLimiterService $limiterService;
-
-    /**
-     * Provides an instance of the RateLimiterService.
-     *
-     * This method is responsible for providing access to the rate limiter service,
-     * which is used to enforce and manage rate-limiting rules across the application.
-     * The returned service instance can be utilized to check and increment request
-     * limits based on predefined keys, ensuring that API or system usage adheres to
-     * the configured restrictions.
-     *
-     * @return RateLimiterService The rate limiter service instance.
-     * @throws Exception
-     */
-    protected function getRateLimiterService(): RateLimiterService
-    {
-        if (!isset($this->limiterService)) {
-            $this->limiterService = new RateLimiterService();
-        }
-
-        return $this->limiterService;
-    }
-
-    protected function setRateLimiterService(RateLimiterService $limiterService): void
-    {
-        $this->limiterService = $limiterService;
-    }
-
     /**
      * Checks and enforces rate limits based on email and IP address.
      *
@@ -65,15 +38,17 @@ trait LaraAuthTrait
      * the response is set to 429 and true is returned to signal the caller
      * to halt execution.
      *
+     * @param ?RateLimiterService $limiterService Optional RateLimiterService instance to use.
+     *
      * @return bool True if rate-limited (caller must stop), false otherwise.
      * @throws Exception
      */
-    protected function checkRateLimits(): bool
+    protected function checkRateLimits(?RateLimiterService $limiterService = null): bool
     {
         $email = $this->getUser()->email ?? 'BLANK_EMAIL';
         $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
         $rateLimitKey = '/api/app/lara/token';
-        $rateLimiter = $this->getRateLimiterService();
+        $rateLimiter = $limiterService ?? new RateLimiterService();
 
         $rateLimitEmailResponse = $rateLimiter->checkAndIncrement($this->response, $email, $rateLimitKey, 30);
 
@@ -109,7 +84,7 @@ trait LaraAuthTrait
     protected function performLaraAuth(int $engineId, string $tmKeys): void
     {
 
-        $laraEngine = EnginesFactory::getInstance($engineId, Lara::class);
+        $laraEngine = $this->resolveLaraEngine($engineId);
         $laraClient = $laraEngine->getInternalClient();
 
         if ($tmKeys !== '') {
@@ -133,6 +108,25 @@ trait LaraAuthTrait
 
         $this->response->code(200);
         $this->response->json(['token' => $token]);
+    }
+
+    /**
+     * Resolves the Lara engine for a given engine id.
+     *
+     * Exposed as a protected seam so tests can override engine resolution
+     * without touching the global EnginesFactory static dependency.
+     *
+     * @param int $engineId
+     *
+     * @return Lara
+     * @throws Exception
+     */
+    protected function resolveLaraEngine(int $engineId): Lara
+    {
+        /** @var Lara $engine */
+        $engine = EnginesFactory::getInstance($engineId, Lara::class);
+
+        return $engine;
     }
 }
 

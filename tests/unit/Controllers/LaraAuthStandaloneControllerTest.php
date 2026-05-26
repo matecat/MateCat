@@ -3,16 +3,57 @@
 namespace unit\Controllers;
 
 use Controller\API\App\Authentication\LaraAuthStandaloneController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Services\RateLimiterService;
+use DomainException;
 use Klein\Request;
 use Klein\Response;
+use Lara\Internal\HttpClient as LaraSdkHttpClient;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 use TestHelpers\AbstractTest;
+use Utils\Engines\Lara;
+use Utils\Engines\Lara\Headers;
+use Utils\Engines\Lara\HttpClientInterface as LaraHttpClientInterface;
 use Utils\Logger\MatecatLogger;
+
+/**
+ * Fake Lara HTTP client used as a test double. Satisfies the intersection type
+ * (`HttpClient & HttpClientInterface`) required by Lara::getInternalClient().
+ */
+class FakeLaraHttpClient extends LaraSdkHttpClient implements LaraHttpClientInterface
+{
+    public array $extraHeaders = [];
+    public mixed $tokenToReturn = 'fake-token';
+
+    /** Skip parent constructor (which requires auth + opens curl). */
+    public function __construct()
+    {
+    }
+
+    public function __destruct()
+    {
+        // Skip parent destructor (would curl_close() an uninitialized handle).
+    }
+
+    public function setExtraHeader($name, $value): void
+    {
+        $this->extraHeaders[$name] = $value;
+    }
+
+    public function authenticate()
+    {
+        return $this->tokenToReturn;
+    }
+}
 
 /**
  * Testable subclass that bypasses the parent constructor (session, DB, validators)
@@ -20,6 +61,10 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
 {
+    private ?RateLimiterService $injectedRateLimiter = null;
+    public ?EngineDAO $mockEngineDAO = null;
+    public ?Lara $mockLaraEngine = null;
+
     public function __construct()
     {
         // Skip parent constructor entirely
@@ -41,7 +86,22 @@ class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
 
-        $this->setRateLimiterService($rateLimiter);
+        $this->injectedRateLimiter = $rateLimiter;
+    }
+
+    protected function checkRateLimits(?RateLimiterService $limiterService = null): bool
+    {
+        return parent::checkRateLimits($limiterService ?? $this->injectedRateLimiter);
+    }
+
+    protected function getEngineDAO(): EngineDAO
+    {
+        return $this->mockEngineDAO ?? parent::getEngineDAO();
+    }
+
+    protected function resolveLaraEngine(int $engineId): Lara
+    {
+        return $this->mockLaraEngine ?? parent::resolveLaraEngine($engineId);
     }
 
     public function getResponse(): Response
@@ -264,5 +324,138 @@ class LaraAuthStandaloneControllerTest extends AbstractTest
 
         $this->assertEquals(429, $controller->getResponse()->code());
         $this->assertNotEmpty($controller->getResponse()->headers()->get('Retry-After'));
+    }
+
+    // ─── resolveActiveLaraEngineId() ──────────────────────────────────
+
+    #[Test]
+    public function resolveActiveLaraEngineId_returns_first_engine_id_from_dao(): void
+    {
+        $struct1 = EngineStruct::getStruct();
+        $struct1->id = 42;
+        $struct2 = EngineStruct::getStruct();
+        $struct2->id = 99;
+
+        $dao = $this->createMock(EngineDAO::class);
+        $dao->method('setCacheTTL')->willReturnSelf();
+        $dao->expects($this->once())
+            ->method('read')
+            ->willReturn([$struct1, $struct2]);
+
+        $this->controller->mockEngineDAO = $dao;
+
+        $ref = new ReflectionMethod($this->controller, 'resolveActiveLaraEngineId');
+        $result = $ref->invoke($this->controller);
+
+        $this->assertSame(42, $result);
+    }
+
+    #[Test]
+    public function resolveActiveLaraEngineId_throws_DomainException_when_no_engines(): void
+    {
+        $dao = $this->createMock(EngineDAO::class);
+        $dao->method('setCacheTTL')->willReturnSelf();
+        $dao->method('read')->willReturn([]);
+
+        $this->controller->mockEngineDAO = $dao;
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('No active Lara engine found');
+
+        $ref = new ReflectionMethod($this->controller, 'resolveActiveLaraEngineId');
+        $ref->invoke($this->controller);
+    }
+
+    // ─── performLaraAuth() (LaraAuthTrait coverage) ───────────────────
+
+    #[Test]
+    public function performLaraAuth_with_empty_tm_keys_returns_200_and_does_not_set_memories_header(): void
+    {
+        $client = new FakeLaraHttpClient();
+        $client->tokenToReturn = 'token-empty-tm';
+
+        $engine = $this->createMock(Lara::class);
+        $engine->method('getInternalClient')->willReturn($client);
+        $engine->expects($this->never())->method('reMapKeyList');
+
+        $this->controller->mockLaraEngine = $engine;
+
+        $ref = new ReflectionMethod($this->controller, 'performLaraAuth');
+        $ref->invoke($this->controller, 7, '');
+
+        $this->assertSame(200, $this->controller->getResponse()->code());
+        $this->assertArrayNotHasKey(
+            Headers::LARA_MEMORIES_IDS,
+            $client->extraHeaders,
+            'Memories header must not be set when tmKeys is empty.'
+        );
+    }
+
+    #[Test]
+    public function performLaraAuth_with_tm_keys_remaps_and_sets_memories_header(): void
+    {
+        $client = new FakeLaraHttpClient();
+        $client->tokenToReturn = 'token-with-tm';
+
+        $engine = $this->createMock(Lara::class);
+        $engine->method('getInternalClient')->willReturn($client);
+        $engine->expects($this->once())
+            ->method('reMapKeyList')
+            ->with(['k1', 'k2'])
+            ->willReturn(['ext_my_k1', 'ext_my_k2']);
+
+        $this->controller->mockLaraEngine = $engine;
+
+        $ref = new ReflectionMethod($this->controller, 'performLaraAuth');
+        $ref->invoke($this->controller, 7, 'k1,k2');
+
+        $this->assertSame(200, $this->controller->getResponse()->code());
+        $this->assertArrayHasKey(Headers::LARA_MEMORIES_IDS, $client->extraHeaders);
+        $this->assertSame('ext_my_k1,ext_my_k2', $client->extraHeaders[Headers::LARA_MEMORIES_IDS]);
+    }
+
+    // ─── Constructor / wiring seams ───────────────────────────────────
+
+    #[Test]
+    public function initLogger_initializes_logger_property_from_context_list(): void
+    {
+        $controller = new TestableLaraAuthStandaloneController();
+
+        $ref = new ReflectionMethod($controller, 'initLogger');
+        $ref->invoke($controller);
+
+        $loggerProp = new ReflectionProperty(LaraAuthStandaloneController::class, 'logger');
+        $logger = $loggerProp->getValue($controller);
+
+        $this->assertNotNull($logger, 'Logger must be initialized after initLogger().');
+        $this->assertInstanceOf(LoggerInterface::class, $logger);
+    }
+
+    #[Test]
+    public function afterConstruct_appends_a_login_validator(): void
+    {
+        $ref = new ReflectionMethod($this->controller, 'afterConstruct');
+        $ref->invoke($this->controller);
+
+        $validatorsProp = new ReflectionProperty(
+            \Controller\Abstracts\KleinController::class,
+            'validators'
+        );
+        $validators = $validatorsProp->getValue($this->controller);
+
+        $this->assertNotEmpty($validators, 'afterConstruct must append at least one validator.');
+        $this->assertInstanceOf(LoginValidator::class, end($validators));
+    }
+
+    #[Test]
+    public function getEngineDAO_returns_a_real_engine_dao_instance(): void
+    {
+        // Ensure the override seam falls through to the real implementation.
+        $this->controller->mockEngineDAO = null;
+
+        $ref = new ReflectionMethod(LaraAuthStandaloneController::class, 'getEngineDAO');
+        $dao = $ref->invoke($this->controller);
+
+        $this->assertInstanceOf(EngineDAO::class, $dao);
     }
 }

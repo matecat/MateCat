@@ -3,6 +3,9 @@
 namespace unit\Controllers;
 
 use Controller\API\App\Authentication\LaraAuthController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\IsOwnerInternalUserValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Services\RateLimiterService;
 use Klein\Request;
 use Klein\Response;
@@ -11,7 +14,10 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
@@ -21,6 +27,9 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableLaraAuthController extends LaraAuthController
 {
+    private ?RateLimiterService $injectedRateLimiter = null;
+    public ?IsOwnerInternalUserValidator $mockOwnerValidator = null;
+
     public function __construct()
     {
         // Skip parent constructor entirely
@@ -42,7 +51,27 @@ class TestableLaraAuthController extends LaraAuthController
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
 
-        $this->setRateLimiterService($rateLimiter);
+        $this->injectedRateLimiter = $rateLimiter;
+    }
+
+    protected function checkRateLimits(?RateLimiterService $limiterService = null): bool
+    {
+        return parent::checkRateLimits($limiterService ?? $this->injectedRateLimiter);
+    }
+
+    protected function buildOwnerValidator(JobStruct $chunk): IsOwnerInternalUserValidator
+    {
+        return $this->mockOwnerValidator ?? parent::buildOwnerValidator($chunk);
+    }
+
+    /** Test helper: set the controller `params` (used by enforceReasoningOwner). */
+    public function setParams(array $params): void
+    {
+        $ref = new ReflectionProperty(
+            \Controller\Abstracts\KleinController::class,
+            'params'
+        );
+        $ref->setValue($this, $params);
     }
 
     public function setChunk(JobStruct $chunk): void
@@ -295,5 +324,127 @@ class LaraAuthControllerTest extends AbstractTest
 
         $this->assertEquals(429, $controller->getResponse()->code());
         $this->assertNotEmpty($controller->getResponse()->headers()->get('Retry-After'));
+    }
+
+    // ─── Constructor / wiring seams ───────────────────────────────────
+
+    #[Test]
+    public function initLogger_initializes_logger_property_from_context_list(): void
+    {
+        $controller = new TestableLaraAuthController();
+
+        $ref = new ReflectionMethod($controller, 'initLogger');
+        $ref->invoke($controller);
+
+        $loggerProp = new ReflectionProperty(LaraAuthController::class, 'logger');
+        $logger = $loggerProp->getValue($controller);
+
+        $this->assertNotNull($logger);
+        $this->assertInstanceOf(LoggerInterface::class, $logger);
+    }
+
+    #[Test]
+    public function afterConstruct_appends_login_and_chunk_password_validators(): void
+    {
+        // ChunkPasswordValidator reads id_job/password from controller params in its constructor.
+        $this->controller->setParams(['id_job' => '1', 'password' => 'pw']);
+
+        $ref = new ReflectionMethod($this->controller, 'afterConstruct');
+        $ref->invoke($this->controller);
+
+        $validatorsProp = new ReflectionProperty(
+            \Controller\Abstracts\KleinController::class,
+            'validators'
+        );
+        $validators = $validatorsProp->getValue($this->controller);
+
+        $this->assertCount(2, $validators);
+        $this->assertInstanceOf(LoginValidator::class, $validators[0]);
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $validators[1]);
+    }
+
+    // ─── onChunkValidated() ───────────────────────────────────────────
+
+    #[Test]
+    public function onChunkValidated_assigns_chunk_property_from_validator(): void
+    {
+        $this->controller->setParams(['id_job' => '1', 'password' => 'pw']);
+
+        $chunk = new JobStruct();
+        $chunk->id = 1234;
+
+        $validator = $this->getMockBuilder(ChunkPasswordValidator::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChunk'])
+            ->getMock();
+        $validator->expects($this->once())->method('getChunk')->willReturn($chunk);
+
+        $ref = new ReflectionMethod($this->controller, 'onChunkValidated');
+        $ref->invoke($this->controller, $validator);
+
+        $chunkProp = new ReflectionProperty(LaraAuthController::class, 'chunk');
+        $this->assertSame($chunk, $chunkProp->getValue($this->controller));
+    }
+
+    // ─── enforceReasoningOwner() ──────────────────────────────────────
+
+    #[Test]
+    public function enforceReasoningOwner_skips_owner_check_when_reasoning_param_is_falsy(): void
+    {
+        $this->controller->setParams(['reasoning' => 'false']);
+
+        $validator = $this->getMockBuilder(ChunkPasswordValidator::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChunk'])
+            ->getMock();
+        $validator->expects($this->never())->method('getChunk');
+
+        // Owner validator must NEVER be built when reasoning is falsy.
+        $this->controller->mockOwnerValidator = $this->createMock(IsOwnerInternalUserValidator::class);
+        $this->controller->mockOwnerValidator
+            ->expects($this->never())
+            ->method('validate');
+
+        $ref = new ReflectionMethod($this->controller, 'enforceReasoningOwner');
+        $ref->invoke($this->controller, $validator);
+    }
+
+    #[Test]
+    public function enforceReasoningOwner_skips_owner_check_when_reasoning_param_is_missing(): void
+    {
+        $this->controller->setParams([]);
+
+        $validator = $this->getMockBuilder(ChunkPasswordValidator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->controller->mockOwnerValidator = $this->createMock(IsOwnerInternalUserValidator::class);
+        $this->controller->mockOwnerValidator
+            ->expects($this->never())
+            ->method('validate');
+
+        $ref = new ReflectionMethod($this->controller, 'enforceReasoningOwner');
+        $ref->invoke($this->controller, $validator);
+    }
+
+    #[Test]
+    public function enforceReasoningOwner_runs_owner_validator_when_reasoning_is_truthy(): void
+    {
+        $this->controller->setParams(['reasoning' => 'true']);
+
+        $chunk = new JobStruct();
+        $chunk->id = 42;
+
+        $validator = $this->getMockBuilder(ChunkPasswordValidator::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getChunk'])
+            ->getMock();
+        $validator->expects($this->once())->method('getChunk')->willReturn($chunk);
+
+        $ownerValidator = $this->createMock(IsOwnerInternalUserValidator::class);
+        $ownerValidator->expects($this->once())->method('validate');
+        $this->controller->mockOwnerValidator = $ownerValidator;
+
+        $ref = new ReflectionMethod($this->controller, 'enforceReasoningOwner');
+        $ref->invoke($this->controller, $validator);
     }
 }
