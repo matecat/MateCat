@@ -56,6 +56,9 @@ class AnalysisChunk implements JsonSerializable
      */
     protected float $total_industry = 0;
 
+    /**
+     * @throws \RuntimeException
+     */
     public function __construct(JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
     {
         $this->chunkStruct = $chunkStruct;
