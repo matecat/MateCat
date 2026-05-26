@@ -29,13 +29,6 @@ class AuthenticationHelperTest extends AbstractTest
         parent::setUp();
         $this->apiKeyDaoMock = $this->createMock(ApiKeyDao::class);
         $this->userDaoMock = $this->createMock(UserDao::class);
-        TestableAuthenticationHelper::resetInstance();
-    }
-
-    protected function tearDown(): void
-    {
-        TestableAuthenticationHelper::resetInstance();
-        parent::tearDown();
     }
 
     private function createHelper(array &$session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
@@ -266,52 +259,58 @@ class AuthenticationHelperTest extends AbstractTest
         $this->assertNull($helper->getApiRecord());
     }
 
-    // ─── getInstance singleton ───────────────────────────────────────────
+    // ─── refreshSession (instance method) ───────────────────────────────
 
     #[Test]
-    public function getInstanceReturnsSameInstance(): void
+    public function refreshSessionClearsSessionVarsOnInstance(): void
     {
-        $session = [];
-        $instance1 = TestableAuthenticationHelper::getInstance($session);
-        $instance2 = TestableAuthenticationHelper::getInstance($session);
-
-        $this->assertSame($instance1, $instance2);
-    }
-
-    // ─── refreshSession ──────────────────────────────────────────────────
-
-    #[Test]
-    public function refreshSessionClearsSessionVars(): void
-    {
+        $user = new UserStruct();
+        $user->uid = 99;
         $session = [
-            'user'         => new UserStruct(),
+            'user'         => $user,
             'user_profile' => ['some' => 'data'],
         ];
+        $helper = $this->createHelper($session);
 
-        TestableAuthenticationHelper::refreshSession($session);
+        $helper->refreshSession();
 
         $this->assertArrayNotHasKey('user', $session);
         $this->assertArrayNotHasKey('user_profile', $session);
+        $this->assertFalse($helper->isLogged());
+        $this->assertNull($helper->getUser()->uid);
     }
 
-    // ─── destroyAuthentication ───────────────────────────────────────────
+    // ─── destroyAuthentication (instance method) ─────────────────────────
 
     #[Test]
-    public function destroyAuthenticationClearsSessionVars(): void
+    public function destroyAuthenticationClearsSessionVarsOnInstance(): void
     {
+        $user = new UserStruct();
         $session = [
-            'user'         => new UserStruct(),
+            'user'         => $user,
             'user_profile' => ['some' => 'data'],
         ];
+        $helper = $this->createHelper($session);
 
         try {
-            AuthenticationHelper::destroyAuthentication($session);
+            $helper->destroyAuthentication();
         } catch (\Throwable) {
-            // AuthCookie may throw in test environment without session — ignore
+            // AuthCookie may throw in test environment without active session
         }
 
         $this->assertArrayNotHasKey('user', $session);
         $this->assertArrayNotHasKey('user_profile', $session);
+    }
+
+    // ─── public constructor ───────────────────────────────────────────────
+
+    #[Test]
+    public function canInstantiateDirectlyWithPublicConstructor(): void
+    {
+        $session = [];
+        $helper = new AuthenticationHelper($session);
+        $this->assertInstanceOf(AuthenticationHelper::class, $helper);
+        $this->assertFalse($helper->isLogged());
     }
 }
 
@@ -325,12 +324,6 @@ class TestableAuthenticationHelper extends AuthenticationHelper
         ?UserDao $userDao = null,
     ): self {
         return new self($session, $api_key, $api_secret, $userDao, $apiKeyDao);
-    }
-
-    public static function resetInstance(): void
-    {
-        $ref = new \ReflectionClass(AuthenticationHelper::class);
-        $ref->getProperty('instance')->setValue(null, null);
     }
 
     public function validKeys(?string $api_key = null, ?string $api_secret = null): bool

@@ -132,7 +132,7 @@ abstract class KleinController implements IController
     {
         if (empty($this->api_key)) {
             static::sessionStart();
-            AuthenticationHelper::refreshSession($_SESSION);
+            (new AuthenticationHelper($_SESSION))->refreshSession();
         }
     }
 
@@ -204,6 +204,7 @@ abstract class KleinController implements IController
 
     /**
      * @throws \Psr\Log\InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     protected function _logWithTime(): void
     {

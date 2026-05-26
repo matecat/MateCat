@@ -168,7 +168,7 @@ class OAuthSignInModel
     protected function _authenticateUser(): void
     {
         AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler());
-        AuthenticationHelper::getInstance($_SESSION);
+        new AuthenticationHelper($_SESSION);
     }
 
     /**

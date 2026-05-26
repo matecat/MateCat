@@ -120,7 +120,7 @@ class SignupController extends AbstractStatefulKleinController
             $user = $signupModel->confirm();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelper::getInstance($_SESSION);
+            new AuthenticationHelper($_SESSION);
 
             if (InvitedUser::hasPendingInvitations()) {
                 InvitedUser::completeTeamSignUp($user, $_SESSION['invited_to_team']);

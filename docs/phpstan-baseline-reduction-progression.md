@@ -6,10 +6,10 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,233 | −5,133 (−69.7%) |
+| **PHPStan baseline entries** | 7,366 | 2,232 | −5,134 (−69.7%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,785 | +3,537 (+157.3%) |
-| **PHPUnit assertions** | ~19,449 | 15,842 | — |
+| **PHPUnit tests** | ~2,248 | 5,794 | +3,546 (+157.7%) |
+| **PHPUnit assertions** | ~19,449 | 15,856 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -1809,6 +1809,36 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 - **Tests**: 5,231 (was 5,166), **Assertions**: 18,034 (was 17,383)
 - **PHPStan**: 0 errors (full codebase with baseline)
 - **Files added to ledger**: +3 (XliffConfigTemplateController, ApiKeyStruct, AuthenticationHelper)
+
+---
+
+### Phase 36: AuthenticationHelper de-staticification + coverage — ✅ DONE (−1 baseline entry, +12 tests)
+
+**Why:** `AuthenticationHelper` used a Singleton pattern with 3 static methods (`getInstance`, `destroyAuthentication`, `refreshSession`). Per project rule "no technical debt, best architectural solution always." De-staticification enables full testability of `AuthenticationTrait` (was 42.42%) and `AuthenticationHelper` (stays 80%+).
+
+#### Changes
+
+| File | Type | Notes |
+|------|------|-------|
+| `AuthenticationHelper.php` | Refactor | Constructor `protected`→`public`; removed `$instance` singleton; `destroyAuthentication()` + `refreshSession()` converted to instance methods using `$this->session` |
+| `AuthenticationTrait.php` | Caller update | `getInstance()` → `new AuthenticationHelper(...)`, `destroyAuthentication()` → `(new AuthenticationHelper($_SESSION))->destroyAuthentication()` |
+| `KleinController.php` | Caller update + fix | `refreshSession()` → instance call; fixed `_logWithTime()` missing `@throws \InvalidArgumentException` (removed 1 stale baseline entry) |
+| `BaseKleinViewController.php` | Cascade fix | Added `@throws \InvalidArgumentException` to `render()` |
+| `LoginController.php` | Caller update | `getInstance()` → `new AuthenticationHelper($_SESSION)` |
+| `SignupController.php` | Caller update | Same |
+| `UserController.php` | Caller update | `refreshSession()` → instance call (2 sites) |
+| `OAuthSignInModel.php` | Caller update | `getInstance()` → `new AuthenticationHelper($_SESSION)` |
+
+Key decisions:
+- **Singleton removed entirely**: no `$instance` static property, no `getInstance()`. Callers use `new AuthenticationHelper(...)` directly.
+- **`refreshSession()` as instance method**: resets `$this->user`, `$this->logged`, `$this->api_record` + clears session vars (semantically equivalent to the old static behavior)
+- **TDD**: 3 tests written RED first (instance methods called with no args), GREEN after implementation
+- **Cascade**: baseline entries for `Bootstrap` and `OauthResponseHandlerController` updated from `Psr\Log\InvalidArgumentException` → `InvalidArgumentException` (same cascade, different exception class reported after `_logWithTime()` annotation fix)
+- **12 new tests** in `AuthenticationHelperTest.php` (39 assertions)
+
+**Coverage:** `AuthenticationHelper` 80.00% lines (maintained), `AuthenticationTrait` — measured via full suite
+
+**Baseline reduction:** 2,233 → 2,232 (−1 KleinController entry)
 
 ---
 

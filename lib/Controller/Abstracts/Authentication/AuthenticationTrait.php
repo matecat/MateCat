@@ -51,7 +51,7 @@ trait AuthenticationTrait
 
         $this->setAuthKeysIfExists();
 
-        $auth = AuthenticationHelper::getInstance($_session, $this->api_key, $this->api_secret);
+        $auth = new AuthenticationHelper($_session, $this->api_key, $this->api_secret);
         $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
         $this->api_record = $auth->getApiRecord();
@@ -124,7 +124,7 @@ trait AuthenticationTrait
      */
     public function logout(): void
     {
-        AuthenticationHelper::destroyAuthentication($_SESSION);
+        (new AuthenticationHelper($_SESSION))->destroyAuthentication();
     }
 
     public function getApiRecord(): ?ApiKeyStruct

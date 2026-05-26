@@ -34,7 +34,6 @@ class AuthenticationHelper
     private ?ApiKeyStruct $api_record = null;
     /** @var array<string, mixed> */
     private array $session;
-    private static ?AuthenticationHelper $instance = null;
     private ?UserDao $userDao = null;
     private ?ApiKeyDao $apiKeyDao = null;
 
@@ -43,21 +42,7 @@ class AuthenticationHelper
      *
      * @throws Exception
      */
-    public static function getInstance(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
-    {
-        if (!self::$instance) {
-            self::$instance = new AuthenticationHelper($session, $api_key, $api_secret);
-        }
-
-        return self::$instance;
-    }
-
-    /**
-     * @param array<string, mixed> $session
-     *
-     * @throws Exception
-     */
-    protected function __construct(array &$session, ?string $api_key = null, ?string $api_secret = null, ?UserDao $userDao = null, ?ApiKeyDao $apiKeyDao = null)
+    public function __construct(array &$session, ?string $api_key = null, ?string $api_secret = null, ?UserDao $userDao = null, ?ApiKeyDao $apiKeyDao = null)
     {
         $this->session =& $session;
         $this->user = new UserStruct();
@@ -106,28 +91,26 @@ class AuthenticationHelper
     }
 
     /**
-     * @param array<string, mixed> $session
-     *
      * @throws Exception
      */
-    public static function refreshSession(array &$session): void
+    public function refreshSession(): void
     {
-        unset($session['user']);
-        unset($session['user_profile']);
-        self::$instance = new AuthenticationHelper($session);
+        unset($this->session['user']);
+        unset($this->session['user_profile']);
+        $this->user = new UserStruct();
+        $this->logged = false;
+        $this->api_record = null;
     }
 
     /**
-     * @param array<string, mixed> $session
-     *
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
      */
-    public static function destroyAuthentication(array &$session): void
+    public function destroyAuthentication(): void
     {
-        unset($session['user']);
-        unset($session['user_profile']);
+        unset($this->session['user']);
+        unset($this->session['user_profile']);
         AuthCookie::destroyAuthentication(new SessionTokenStoreHandler());
     }
 

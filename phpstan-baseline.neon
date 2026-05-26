@@ -2674,12 +2674,6 @@ parameters:
 			path: lib/Controller/Abstracts/IController.php
 
 		-
-			message: '#^Method Controller\\Abstracts\\KleinController\:\:_logWithTime\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Abstracts/KleinController.php
-
-		-
 			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -13422,19 +13416,19 @@ parameters:
 			path: lib/Model/ProjectCreation/JobCreationService.php
 
 		-
-			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Bootstrap.php
 
 		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
 			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OauthResponseHandlerController.php

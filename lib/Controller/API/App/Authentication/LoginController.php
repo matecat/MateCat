@@ -97,7 +97,7 @@ class LoginController extends AbstractStatefulKleinController
             $project->tryToRedeem();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelper::getInstance($_SESSION);
+            new AuthenticationHelper($_SESSION);
 
             $this->response->code(200);
         } else {

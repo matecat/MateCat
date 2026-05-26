@@ -160,6 +160,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
      * @throws \Psr\Log\InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function render(?int $code = null): never
     {

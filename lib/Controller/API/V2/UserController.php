@@ -66,7 +66,7 @@ class UserController extends AbstractStatefulKleinController
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($uid);
 
-            AuthenticationHelper::refreshSession($_SESSION);
+            (new AuthenticationHelper($_SESSION))->refreshSession();
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -132,7 +132,7 @@ class UserController extends AbstractStatefulKleinController
                 $filtered['value']
             );
 
-            AuthenticationHelper::refreshSession($_SESSION);
+            (new AuthenticationHelper($_SESSION))->refreshSession();
 
             $this->response->json($metadata);
         } catch (Exception $exception) {
