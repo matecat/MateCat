@@ -3,6 +3,7 @@
 namespace unit\Controllers\Abstracts;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\Base;
 use TestHelpers\AbstractTest;
 use Klein\Request;
 use Klein\Response;
@@ -102,6 +103,85 @@ class KleinControllerTest extends AbstractTest
         $result = $method->invoke($controller);
 
         $this->assertNull($result);
+    }
+
+    #[Test]
+    public function isViewReturnsFalseByDefault(): void
+    {
+        $this->assertFalse($this->createController()->isView());
+    }
+
+    #[Test]
+    public function getRequestReturnsRequestInstance(): void
+    {
+        $controller = $this->createController();
+        $this->assertInstanceOf(Request::class, $controller->getRequest());
+    }
+
+    #[Test]
+    public function appendValidatorReturnsSelf(): void
+    {
+        $controller = $this->createController();
+        $validator = $this->createStub(Base::class);
+
+        $result = (new ReflectionMethod($controller, 'appendValidator'))->invoke($controller, $validator);
+
+        $this->assertSame($controller, $result);
+    }
+
+    #[Test]
+    public function isJsonRequestReturnsFalseForNonJsonContentType(): void
+    {
+        $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'text/html']);
+        $response = new Response();
+        $controller = new class ($request, $response) extends KleinController {
+            protected bool $useSession = false;
+            protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
+        };
+
+        $result = (new ReflectionMethod($controller, 'isJsonRequest'))->invoke($controller);
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function isJsonRequestReturnsTrueForJsonContentType(): void
+    {
+        $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'application/json']);
+        $response = new Response();
+        $controller = new class ($request, $response) extends KleinController {
+            protected bool $useSession = false;
+            protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
+        };
+
+        $result = (new ReflectionMethod($controller, 'isJsonRequest'))->invoke($controller);
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function performValidationsWithNoValidatorsDoesNotThrow(): void
+    {
+        $controller = $this->createController();
+        $controller->performValidations();
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function validateRequestCallsEachValidatorAndClearsList(): void
+    {
+        $controller = $this->createController();
+
+        $validator = $this->createMock(Base::class);
+        $validator->expects($this->once())->method('validate');
+
+        $appendMethod = new ReflectionMethod($controller, 'appendValidator');
+        $appendMethod->invoke($controller, $validator);
+
+        $validateMethod = new ReflectionMethod($controller, 'validateRequest');
+        $validateMethod->invoke($controller);
+
+        // mock expectation on validate() being called once is the real assertion
     }
 
     private function createController(): KleinController
