@@ -68,6 +68,7 @@ class Session
      * @var ?ConnectedServiceStruct
      */
     protected ?ConnectedServiceStruct $serviceStruct = null;
+    private ?RemoteFileDao $remoteFileDao = null;
 
     /**
      * @var AbstractFilesStorage
@@ -80,6 +81,11 @@ class Session
     protected FeatureSet $featureSet;
 
     protected ?ConnectedServiceDao $dao = null;
+
+    private function getRemoteFileDao(): RemoteFileDao
+    {
+        return $this->remoteFileDao ??= new RemoteFileDao();
+    }
 
     /**
      * MUST NOT TO BE CALLED FROM THE cli
@@ -539,7 +545,7 @@ class Session
     public function createRemoteFile(int $fileId, string $remoteFileId, Google_Client $gClient): void
     {
         $this->getService($gClient);
-        RemoteFileDao::insert($fileId, 0, $remoteFileId, (int)$this->serviceStruct?->id, 1);
+        $this->getRemoteFileDao()->insert($fileId, 0, $remoteFileId, (int)$this->serviceStruct?->id, 1);
     }
 
     /**
@@ -561,7 +567,7 @@ class Session
             throw new Exception('Cannot instantiate service');
         }
 
-        $listRemoteFiles = RemoteFileDao::getByFileId($id_file, 1);
+        $listRemoteFiles = $this->getRemoteFileDao()->getByFileId($id_file, 1);
         $remoteFile = $listRemoteFiles[0];
 
         $gdriveFile = $service->files->get($remoteFile->remote_id);
@@ -577,7 +583,7 @@ class Session
             throw new Exception('Failed to copy remote file');
         }
 
-        RemoteFileDao::insert($id_file, $id_job, $copiedFile->id, (int)$this->serviceStruct?->id);
+        $this->getRemoteFileDao()->insert($id_file, $id_job, $copiedFile->id, (int)$this->serviceStruct?->id);
 
         $this->grantFileAccessByUrl($copiedFile->id, $gClient);
     }

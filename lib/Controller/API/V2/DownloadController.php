@@ -76,6 +76,12 @@ class DownloadController extends AbstractDownloadController
     const int FILES_CHUNK_SIZE = 3;
 
     private ?bool $disableErrorCheck = null;
+    private ?RemoteFileDao $remoteFileDao = null;
+
+    private function getRemoteFileDao(): RemoteFileDao
+    {
+        return $this->remoteFileDao ??= new RemoteFileDao();
+    }
 
     /**
      * @throws AuthenticationError
@@ -606,7 +612,7 @@ class DownloadController extends AbstractDownloadController
     private function anyRemoteFile(): bool
     {
         if (is_null($this->thereIsARemoteFile)) {
-            $this->thereIsARemoteFile = RemoteFileDao::jobHasRemoteFiles($this->id_job);
+            $this->thereIsARemoteFile = $this->getRemoteFileDao()->jobHasRemoteFiles($this->id_job);
         }
 
         return $this->thereIsARemoteFile;
@@ -686,7 +692,7 @@ class DownloadController extends AbstractDownloadController
         $firstFileId = (int)$keys[0];
 
         // find the proper remote file by id_job and file_id
-        $remoteFile = RemoteFileDao::getByFileAndJob($firstFileId, (int)$this->job->id);
+        $remoteFile = $this->getRemoteFileDao()->getByFileAndJob($firstFileId, (int)$this->job->id);
         if ($remoteFile === null) {
             throw new Exception('Remote file not found');
         }
@@ -715,7 +721,7 @@ class DownloadController extends AbstractDownloadController
      */
     private function outputResultForOriginalFiles(): void
     {
-        $files = RemoteFileDao::getOriginalsByJobId($this->id_job);
+        $files = $this->getRemoteFileDao()->getOriginalsByJobId($this->id_job);
 
         $response = ['urls' => []];
 
@@ -761,7 +767,7 @@ class DownloadController extends AbstractDownloadController
     private function updateRemoteFiles(array $output_content): void
     {
         foreach ($output_content as $id_file => $output_file) {
-            $remoteFile = RemoteFileDao::getByFileAndJob((int)$id_file, (int)$this->job->id);
+            $remoteFile = $this->getRemoteFileDao()->getByFileAndJob((int)$id_file, (int)$this->job->id);
             if ($remoteFile === null) {
                 throw new Exception('Remote file not found');
             }

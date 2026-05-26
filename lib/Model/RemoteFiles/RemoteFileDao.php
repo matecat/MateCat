@@ -3,42 +3,30 @@
 namespace Model\RemoteFiles;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 
 class RemoteFileDao extends AbstractDao
 {
-    /**
-     * @param int $id_file
-     * @param int $id_job
-     * @param string $remote_id
-     * @param int $connected_service_id
-     * @param int $is_original
-     */
-    public static function insert(int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0): void
+    public function insert(int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0): void
     {
         $data = [];
         $data['id_file'] = $id_file;
         $data['id_job'] = $id_job;
         $data['remote_id'] = $remote_id;
         $data['is_original'] = $is_original;
-
         $data['connected_service_id'] = $connected_service_id;
 
-        $db = Database::obtain();
-        $db->insert('remote_files', $data);
+        $this->database->insert('remote_files', $data);
     }
 
     /**
-     * @param int $id_job
-     *
      * @return RemoteFileStruct[]
      * @throws PDOException
      */
-    public static function getByJobId(int $id_job): array
+    public function getByJobId(int $id_job): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "SELECT * FROM remote_files " .
             " WHERE id_job = :id_job " .
@@ -51,16 +39,13 @@ class RemoteFileDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
-
     /**
-     * @param int $id_job
-     *
      * @return RemoteFileStruct[]
      * @throws PDOException
      */
-    public static function getOriginalsByJobId(int $id_job): array
+    public function getOriginalsByJobId(int $id_job): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "SELECT r.* FROM remote_files r " .
             " INNER JOIN files_job fj " .
@@ -77,15 +62,12 @@ class RemoteFileDao extends AbstractDao
     }
 
     /**
-     * @param int $id_file
-     * @param int $is_original
-     *
      * @return RemoteFileStruct[]
      * @throws PDOException
      */
-    public static function getByFileId(int $id_file, int $is_original = 0): array
+    public function getByFileId(int $id_file, int $is_original = 0): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "SELECT * FROM remote_files " .
             " WHERE id_file = :id_file " .
@@ -99,15 +81,11 @@ class RemoteFileDao extends AbstractDao
     }
 
     /**
-     * @param int $id_file
-     * @param int $id_job
-     *
-     * @return RemoteFileStruct|null
      * @throws PDOException
      */
-    public static function getByFileAndJob(int $id_file, int $id_job): ?RemoteFileStruct
+    public function getByFileAndJob(int $id_file, int $id_job): ?RemoteFileStruct
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "SELECT * FROM remote_files " .
             " WHERE id_file = :id_file " .
@@ -122,14 +100,11 @@ class RemoteFileDao extends AbstractDao
     }
 
     /**
-     * @param int $id_job
-     *
-     * @return boolean
      * @throws PDOException
      */
-    public static function jobHasRemoteFiles(int $id_job): bool
+    public function jobHasRemoteFiles(int $id_job): bool
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "  SELECT count(id) "
             . "  FROM remote_files "
