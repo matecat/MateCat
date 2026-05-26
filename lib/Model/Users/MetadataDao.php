@@ -4,7 +4,6 @@ namespace Model\Users;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -59,7 +58,7 @@ class MetadataDao extends AbstractDao
      */
     public function getAllByUid(int $uid): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
             "SELECT * FROM user_metadata WHERE " .
             " uid = :uid "
@@ -122,7 +121,7 @@ class MetadataDao extends AbstractDao
             " ( :uid, :key, :value ) " .
             " ON DUPLICATE KEY UPDATE value = :value ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'uid' => $uid,
@@ -154,7 +153,7 @@ class MetadataDao extends AbstractDao
             " WHERE uid = :uid " .
             " AND `key` LIKE :key ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'uid' => $uid,
