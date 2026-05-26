@@ -5,7 +5,6 @@ namespace Controller\API\App\Authentication;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\App\Authentication\Traits\LaraAuthTrait;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Services\RateLimiterService;
 use DomainException;
 use Exception;
 use Klein\App;
@@ -25,14 +24,11 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
 {
     use LaraAuthTrait;
 
-    private readonly RateLimiterService $rateLimiter;
-
     /**
      * @param Request              $request
      * @param Response             $response
      * @param ServiceProvider|null $service
      * @param App|null             $app
-     * @param RateLimiterService|null $rateLimiter
      *
      * @throws Exception
      */
@@ -40,24 +36,17 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         Request $request,
         Response $response,
         ?ServiceProvider $service = null,
-        ?App $app = null,
-        ?RateLimiterService $rateLimiter = null,
+        ?App $app = null
     ) {
         parent::__construct($request, $response, $service, $app);
         $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
         $loggerName = $contextList->list['CONTRIBUTION_GET']->loggerName;
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
-        $this->rateLimiter = $rateLimiter ?? new RateLimiterService();
     }
 
     protected function afterConstruct(): void
     {
         $this->appendValidator(new LoginValidator($this));
-    }
-
-    protected function getRateLimiter(): RateLimiterService
-    {
-        return $this->rateLimiter;
     }
 
     /**

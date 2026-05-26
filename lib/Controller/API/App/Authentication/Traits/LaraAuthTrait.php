@@ -28,6 +28,8 @@ use Utils\Tools\Utils;
  */
 trait LaraAuthTrait
 {
+    private RateLimiterService $limiterService;
+
     /**
      * Provides an instance of the RateLimiterService.
      *
@@ -40,7 +42,19 @@ trait LaraAuthTrait
      * @return RateLimiterService The rate limiter service instance.
      * @throws Exception
      */
-    abstract protected function getRateLimiter(): RateLimiterService;
+    protected function getRateLimiterService(): RateLimiterService
+    {
+        if (!isset($this->limiterService)) {
+            $this->limiterService = new RateLimiterService();
+        }
+
+        return $this->limiterService;
+    }
+
+    protected function setRateLimiterService(RateLimiterService $limiterService): void
+    {
+        $this->limiterService = $limiterService;
+    }
 
     /**
      * Checks and enforces rate limits based on email and IP address.
@@ -59,7 +73,7 @@ trait LaraAuthTrait
         $email = $this->getUser()->email ?? 'BLANK_EMAIL';
         $ip = Utils::getRealIpAddr() ?? '127.0.0.1';
         $rateLimitKey = '/api/app/lara/token';
-        $rateLimiter = $this->getRateLimiter();
+        $rateLimiter = $this->getRateLimiterService();
 
         $rateLimitEmailResponse = $rateLimiter->checkAndIncrement($this->response, $email, $rateLimitKey, 30);
 

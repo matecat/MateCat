@@ -14,7 +14,6 @@ use Controller\API\App\Authentication\Traits\LaraAuthTrait;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\IsOwnerInternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Services\RateLimiterService;
 use Exception;
 use Klein\App;
 use Klein\Request;
@@ -34,14 +33,12 @@ class LaraAuthController extends AbstractStatefulKleinController
     use LaraAuthTrait;
 
     private JobStruct $chunk;
-    private readonly RateLimiterService $rateLimiter;
 
     /**
      * @param Request $request
      * @param Response $response
      * @param ServiceProvider|null $service
      * @param App|null $app
-     * @param RateLimiterService|null $rateLimiter
      *
      * @throws Exception
      */
@@ -49,19 +46,12 @@ class LaraAuthController extends AbstractStatefulKleinController
         Request $request,
         Response $response,
         ?ServiceProvider $service = null,
-        ?App $app = null,
-        ?RateLimiterService $rateLimiter = null,
+        ?App $app = null
     ) {
         parent::__construct($request, $response, $service, $app);
         $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
         $loggerName = $contextList->list['CONTRIBUTION_GET']->loggerName;
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
-        $this->rateLimiter = $rateLimiter ?? new RateLimiterService();
-    }
-
-    protected function getRateLimiter(): RateLimiterService
-    {
-        return $this->rateLimiter;
     }
 
     protected function afterConstruct(): void

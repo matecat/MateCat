@@ -2,14 +2,40 @@
 
 namespace Controller\Traits;
 
-use DateTime;
+use Controller\Services\RateLimiterService;
 use Exception;
 use Klein\Response;
-use Predis\Client;
-use Utils\Redis\RedisHandler;
 
 trait RateLimiterTrait
 {
+    private RateLimiterService $limiterService;
+
+    /**
+     * Provides an instance of the RateLimiterService.
+     *
+     * This method is responsible for providing access to the rate limiter service,
+     * which is used to enforce and manage rate-limiting rules across the application.
+     * The returned service instance can be utilized to check and increment request
+     * limits based on predefined keys, ensuring that API or system usage adheres to
+     * the configured restrictions.
+     *
+     * @return RateLimiterService The rate limiter service instance.
+     * @throws Exception
+     */
+    protected function getRateLimiterService(): RateLimiterService
+    {
+        if (!isset($this->limiterService)) {
+            $this->limiterService = new RateLimiterService();
+        }
+
+        return $this->limiterService;
+    }
+
+    protected function setRateLimiterService(RateLimiterService $limiterService): void
+    {
+        $this->limiterService = $limiterService;
+    }
+
     /**
      * Atomically increment the rate limit counter and check whether the limit has been exceeded.
      * Uses Redis INCR (atomic) to avoid TOCTOU race conditions.
@@ -23,63 +49,6 @@ trait RateLimiterTrait
      */
     public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
     {
-        $key   = $this->getKey($identifier, $route);
-        $redis = $this->getRedis();
-
-        $current = $redis->incr($key);
-
-        if ($current === 1) {
-            $redis->expire($key, $this->getTtl());
-        }
-
-        if ($current > $maxRetries) {
-            $response->code(429);
-            // PENALTY: reset ttl first, then report accurate Retry-After
-            $redis->expire($key, $this->getTtl());
-            $response->header("Retry-After", $redis->ttl($key));
-            return $response;
-        }
-
-        return null;
-    }
-
-    /**
-     * @return Client
-     *
-     * @throws Exception
-     */
-    private function getRedis(): Client
-    {
-        $redisHandler = new RedisHandler();
-
-        return $redisHandler->getConnection();
-    }
-
-    /**
-     * @param string $identifier
-     * @param string $route
-     *
-     * @return string
-     */
-    private function getKey(string $identifier, string $route): string
-    {
-        return md5($identifier . $route);
-    }
-
-    /**
-     * This function returns the end of the current minute + 1 minute (in seconds).
-     *
-     * Example:
-     *
-     * 12:30:46 ---> returns 14 + 60
-     *
-     * @return int
-     */
-    private function getTtl(): int
-    {
-        $date = new DateTime();
-        $ttl = 60 - $date->format("s");
-
-        return 60 + (int)$ttl;
+        return $this->getRateLimiterService()->checkAndIncrement($response, $identifier, $route, $maxRetries);
     }
 }

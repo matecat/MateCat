@@ -42,7 +42,7 @@ class TestableLaraAuthController extends LaraAuthController
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
 
-        $ref->getProperty('rateLimiter')->setValue($this, $rateLimiter);
+        $this->setRateLimiterService($rateLimiter);
     }
 
     public function setChunk(JobStruct $chunk): void
