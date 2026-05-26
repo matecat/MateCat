@@ -250,7 +250,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
        */
       public function getFiles(): array
      {
-         return FileDao::getByJobId($this->id ?? throw new RuntimeException('Missing job id'));
+         return (new FileDao())->getByJobId($this->id ?? throw new RuntimeException('Missing job id'));
      }
 
     /**

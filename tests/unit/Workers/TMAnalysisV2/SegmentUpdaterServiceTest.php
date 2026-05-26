@@ -94,7 +94,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $source = $this->readSource($this->segmentUpdaterServicePath());
 
         $this->assertStringContainsString(
-            'SegmentTranslationDao::setAnalysisValue(',
+            '->setAnalysisValue(',
             $source,
             'setAnalysisValue() must delegate to SegmentTranslationDao::setAnalysisValue().'
         );

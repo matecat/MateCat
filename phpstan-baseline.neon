@@ -3204,7 +3204,7 @@ parameters:
 			path: lib/Model/Files/FilesInfoUtility.php
 
 		-
-			message: '#^Parameter \#2 \$id_project of static method Model\\Files\\FileDao\:\:isFileInProject\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$id_project of method Model\\Files\\FileDao\:\:isFileInProject\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
 			path: lib/Model/Files/FilesInfoUtility.php

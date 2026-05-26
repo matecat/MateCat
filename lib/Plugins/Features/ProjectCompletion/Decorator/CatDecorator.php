@@ -95,21 +95,21 @@ class CatDecorator extends AbstractDecorator
         if ($this->arguments->getJob()->getProject()->getWordCountType() != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             if ($this->arguments->isRevision()) {
                 $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
-                    $this->stats['DRAFT'] == 0 &&
-                    ($this->stats['APPROVED'] + $this->stats['REJECTED']) > 0;
+                    ($this->stats['DRAFT'] ?? 0) == 0 &&
+                    (($this->stats['APPROVED'] ?? 0) + ($this->stats['REJECTED'] ?? 0)) > 0;
             } else {
                 $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
-                    $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0;
+                    ($this->stats['DRAFT'] ?? 0) == 0 && ($this->stats['REJECTED'] ?? 0) == 0;
             }
         } elseif ($this->arguments->isRevision()) {
             $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
-                $this->stats['raw']['draft'] == 0 && $this->stats['raw']['new'] == 0 &&
-                ($this->stats['raw']['approved'] + $this->stats['raw']['approved2'] + $this->stats['raw']['rejected']) > 0;
+                ($this->stats['raw']['draft'] ?? 0) == 0 && ($this->stats['raw']['new'] ?? 0) == 0 &&
+                (($this->stats['raw']['approved'] ?? 0) + ($this->stats['raw']['approved2'] ?? 0) + ($this->stats['raw']['rejected'] ?? 0)) > 0;
         } else {
             $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
-                $this->stats['raw']['draft'] == 0 &&
-                $this->stats['raw']['new'] == 0 &&
-                $this->stats['raw']['rejected'] == 0;
+                ($this->stats['raw']['draft'] ?? 0) == 0 &&
+                ($this->stats['raw']['new'] ?? 0) == 0 &&
+                ($this->stats['raw']['rejected'] ?? 0) == 0;
         }
 
         return $completable;

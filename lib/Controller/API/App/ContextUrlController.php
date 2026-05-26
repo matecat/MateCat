@@ -65,7 +65,7 @@ class ContextUrlController extends KleinController
         }
 
         if (empty($idProject)) {
-            $file = FileDao::getById($idFile);
+            $file = (new FileDao())->getById($idFile);
             if (!$file) {
                 throw new InvalidArgumentException('File not found for id_file: ' . $idFile, 404);
             }

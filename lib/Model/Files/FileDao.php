@@ -15,100 +15,6 @@ class FileDao extends AbstractDao
     protected static array $auto_increment_field = ['id'];
 
     /**
-     * @param int $id_job
-     *
-     * @param int $ttl
-     *
-     * @return FileStruct[]
-     * @throws PDOException
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    public static function getByJobId(int $id_job, int $ttl = 60): array
-    {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
-            "SELECT * FROM files " .
-            " INNER JOIN files_job ON files_job.id_file = files.id " .
-            " AND id_job = :id_job "
-        );
-
-        /** @var FileStruct[] */
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_job' => $id_job]);
-    }
-
-    /**
-     * @param int $id_project
-     *
-     * @param int $ttl
-     *
-     * @return FileStruct[]
-     * @throws PDOException
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    public static function getByProjectId(int $id_project, int $ttl = 600): array
-    {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project ");
-
-        /** @var FileStruct[] */
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_project' => $id_project]);
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public static function updateField(FileStruct $file, string $field, string|int|float|bool|null $value): bool
-    {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
-            "UPDATE files SET $field = :value " .
-            " WHERE id = :id "
-        );
-
-        return $stmt->execute([
-            'value' => $value,
-            'id' => $file->id
-        ]);
-    }
-
-    /**
-     * @param int $id_file
-     * @param int $id_project
-     *
-     * @return int
-     * @throws PDOException
-     */
-    public static function isFileInProject(int $id_file, int $id_project): int
-    {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project and id = :id_file ");
-        $stmt->execute(['id_project' => $id_project, 'id_file' => $id_file]);
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * @param int $id
-     * @param int|null $ttl
-     *
-     * @return FileStruct|null
-     * @throws PDOException
-     * @throws Exception
-     * @throws ReflectionException
-     */
-    public static function getById(int $id, ?int $ttl = 0): ?FileStruct
-    {
-        /** @var ?FileStruct $res */
-        $res = (new self())->fetchById($id, FileStruct::class, $ttl);
-
-        return $res;
-    }
-
-    /**
      * @param array<int, int> $idFiles
      *
      * @return int
@@ -129,16 +35,90 @@ class FileDao extends AbstractDao
     }
 
     /**
+     * @return FileStruct[]
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    public function getByJobId(int $id_job, int $ttl = 60): array
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare(
+            "SELECT * FROM files " .
+            " INNER JOIN files_job ON files_job.id_file = files.id " .
+            " AND id_job = :id_job "
+        );
+
+        /** @var FileStruct[] */
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_job' => $id_job]);
+    }
+
+    /**
+     * @return FileStruct[]
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    public function getByProjectId(int $id_project, int $ttl = 600): array
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project ");
+
+        /** @var FileStruct[] */
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_project' => $id_project]);
+    }
+
+    /**
+     * @throws PDOException
+     */
+    public function updateField(FileStruct $file, string $field, string|int|float|bool|null $value): bool
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare(
+            "UPDATE files SET $field = :value " .
+            " WHERE id = :id "
+        );
+
+        return $stmt->execute([
+            'value' => $value,
+            'id' => $file->id
+        ]);
+    }
+
+    /**
+     * @throws PDOException
+     */
+    public function isFileInProject(int $id_file, int $id_project): int
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project and id = :id_file ");
+        $stmt->execute(['id_project' => $id_project, 'id_file' => $id_file]);
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @throws PDOException
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    public function getById(int $id, ?int $ttl = 0): ?FileStruct
+    {
+        /** @var ?FileStruct $res */
+        $res = $this->fetchById($id, FileStruct::class, $ttl);
+
+        return $res;
+    }
+
+    /**
      * @throws Exception
      */
-    public static function insertFilesJob(int $id_job, int $id_file): void
+    public function insertFilesJob(int $id_job, int $id_file): void
     {
         $data = [];
         $data['id_job'] = (int)$id_job;
         $data['id_file'] = (int)$id_file;
 
-        $db = Database::obtain();
-        $db->insert('files_job', $data);
+        $this->database->insert('files_job', $data);
     }
-
 }

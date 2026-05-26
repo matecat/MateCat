@@ -216,7 +216,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      */
     public function getDefaultFileName(ProjectStruct $project): string
     {
-        $files = FileDao::getByProjectId((int)$project->id);
+        $files = (new FileDao())->getByProjectId((int)$project->id);
 
         if (count($files) > 1) {
             return $this->project->name . ".zip";

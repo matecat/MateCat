@@ -1,6 +1,6 @@
 <?php
 
-namespace unit\DAO\TestFileDAO;
+namespace unit\Model\Files;
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class FileDaoTest extends AbstractTest
+class FileDaoInstanceTest extends AbstractTest
 {
     private IDatabase $dbStub;
     private \PDO $pdoStub;
@@ -34,6 +34,8 @@ class FileDaoTest extends AbstractTest
         parent::tearDown();
     }
 
+    // ─── getByJobId() ───
+
     #[Test]
     public function getByJobIdReturnsFileStructs(): void
     {
@@ -44,7 +46,8 @@ class FileDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $results = FileDao::getByJobId(5);
+        $dao = new FileDao();
+        $results = $dao->getByJobId(5);
 
         $this->assertIsArray($results);
         $this->assertCount(1, $results);
@@ -56,7 +59,8 @@ class FileDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $results = FileDao::getByJobId(999);
+        $dao = new FileDao();
+        $results = $dao->getByJobId(999);
 
         $this->assertIsArray($results);
         $this->assertEmpty($results);
@@ -69,10 +73,13 @@ class FileDaoTest extends AbstractTest
         $struct->id = 2;
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $results = FileDao::getByJobId(5, 3600);
+        $dao = new FileDao();
+        $results = $dao->getByJobId(5, 3600);
 
         $this->assertCount(1, $results);
     }
+
+    // ─── getByProjectId() ───
 
     #[Test]
     public function getByProjectIdReturnsFileStructs(): void
@@ -84,7 +91,8 @@ class FileDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct1, $struct2]);
 
-        $results = FileDao::getByProjectId(10);
+        $dao = new FileDao();
+        $results = $dao->getByProjectId(10);
 
         $this->assertIsArray($results);
         $this->assertCount(2, $results);
@@ -95,7 +103,8 @@ class FileDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $results = FileDao::getByProjectId(999);
+        $dao = new FileDao();
+        $results = $dao->getByProjectId(999);
 
         $this->assertIsArray($results);
         $this->assertEmpty($results);
@@ -106,10 +115,13 @@ class FileDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $results = FileDao::getByProjectId(10, 1200);
+        $dao = new FileDao();
+        $results = $dao->getByProjectId(10, 1200);
 
         $this->assertIsArray($results);
     }
+
+    // ─── updateField() ───
 
     #[Test]
     public function updateFieldReturnsTrue(): void
@@ -121,7 +133,8 @@ class FileDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $result = FileDao::updateField($file, 'filename', 'renamed.xliff');
+        $dao = new FileDao();
+        $result = $dao->updateField($file, 'filename', 'renamed.xliff');
 
         $this->assertTrue($result);
     }
@@ -136,7 +149,8 @@ class FileDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $result = FileDao::updateField($file, 'sha1_original_file', null);
+        $dao = new FileDao();
+        $result = $dao->updateField($file, 'sha1_original_file', null);
 
         $this->assertTrue($result);
     }
@@ -151,10 +165,13 @@ class FileDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $result = FileDao::updateField($file, 'id_project', 20);
+        $dao = new FileDao();
+        $result = $dao->updateField($file, 'id_project', 20);
 
         $this->assertTrue($result);
     }
+
+    // ─── isFileInProject() ───
 
     #[Test]
     public function isFileInProjectReturnsRowCount(): void
@@ -162,7 +179,8 @@ class FileDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $result = FileDao::isFileInProject(5, 10);
+        $dao = new FileDao();
+        $result = $dao->isFileInProject(5, 10);
 
         $this->assertSame(1, $result);
     }
@@ -173,10 +191,13 @@ class FileDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(0);
 
-        $result = FileDao::isFileInProject(999, 10);
+        $dao = new FileDao();
+        $result = $dao->isFileInProject(999, 10);
 
         $this->assertSame(0, $result);
     }
+
+    // ─── getById() ───
 
     #[Test]
     public function getByIdReturnsFileStruct(): void
@@ -188,7 +209,8 @@ class FileDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = FileDao::getById(5);
+        $dao = new FileDao();
+        $result = $dao->getById(5);
 
         $this->assertInstanceOf(FileStruct::class, $result);
         $this->assertSame(5, $result->id);
@@ -199,7 +221,8 @@ class FileDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $result = FileDao::getById(999);
+        $dao = new FileDao();
+        $result = $dao->getById(999);
 
         $this->assertNull($result);
     }
@@ -211,43 +234,13 @@ class FileDaoTest extends AbstractTest
         $struct->id = 3;
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = FileDao::getById(3, 120);
+        $dao = new FileDao();
+        $result = $dao->getById(3, 120);
 
         $this->assertInstanceOf(FileStruct::class, $result);
     }
 
-    #[Test]
-    public function deleteFailedProjectFilesReturnsZeroForEmptyArray(): void
-    {
-        $dao = new FileDao();
-        $result = $dao->deleteFailedProjectFiles([]);
-
-        $this->assertSame(0, $result);
-    }
-
-    #[Test]
-    public function deleteFailedProjectFilesReturnsRowCount(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('rowCount')->willReturn(3);
-
-        $dao = new FileDao();
-        $result = $dao->deleteFailedProjectFiles([1, 2, 3]);
-
-        $this->assertSame(3, $result);
-    }
-
-    #[Test]
-    public function deleteFailedProjectFilesWithSingleId(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('rowCount')->willReturn(1);
-
-        $dao = new FileDao();
-        $result = $dao->deleteFailedProjectFiles([42]);
-
-        $this->assertSame(1, $result);
-    }
+    // ─── insertFilesJob() ───
 
     #[Test]
     public function insertFilesJobCallsInsert(): void
@@ -261,6 +254,7 @@ class FileDaoTest extends AbstractTest
 
         $this->setDatabaseInstance($dbMock);
 
-        FileDao::insertFilesJob(5, 10);
+        $dao = new FileDao();
+        $dao->insertFilesJob(5, 10);
     }
 }

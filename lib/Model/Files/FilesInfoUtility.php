@@ -110,7 +110,7 @@ class FilesInfoUtility
      */
     public function getInstructions(int $id_file, ?int $filePartsId = null): ?array
     {
-        if (FileDao::isFileInProject($id_file, $this->project->id)) {
+        if ((new FileDao())->isFileInProject($id_file, $this->project->id)) {
             $metadataDao = new MetadataDao;
             $instructions = $metadataDao->get($this->project->id, $id_file, 'instructions', $filePartsId, 60 * 5);
 
@@ -138,7 +138,7 @@ class FilesInfoUtility
      */
     public function setInstructions(int $id_file, string $instructions): bool
     {
-        if (FileDao::isFileInProject($id_file, $this->project->id)) {
+        if ((new FileDao())->isFileInProject($id_file, $this->project->id)) {
             $metadataDao = new MetadataDao;
             if ($metadataDao->get($this->project->id, $id_file, 'instructions')) {
                 $metadataDao->update($this->project->id, $id_file, 'instructions', $instructions);

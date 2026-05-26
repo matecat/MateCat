@@ -297,7 +297,7 @@ class JobCreationService
      */
     protected function insertFilesJob(int $jobId, int $fid): void
     {
-        FileDao::insertFilesJob($jobId, $fid);
+        (new FileDao())->insertFilesJob($jobId, $fid);
     }
 
     /**

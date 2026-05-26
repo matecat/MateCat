@@ -234,7 +234,7 @@ class ChunkReviewDao extends AbstractDao
 
         $result = $stmt->fetch();
 
-        return $result[0] == null ? 0 : (int)$result[0];
+        return (!$result || $result[0] === null) ? 0 : (int)$result[0];
     }
 
     /**
