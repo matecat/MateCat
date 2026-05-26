@@ -36,22 +36,23 @@ trait AuthenticationTrait
      */
     protected ?string $api_secret = null;
 
+
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function identifyUser(?bool $useSession = true): void
+    protected function identifyUser(?bool $useSession = true, ?AuthenticationHelper $authHelper = null): void
     {
         $_session = [];
         if ($useSession) {
-            //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disable
+            //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disabled
             static::sessionStart();
             $_session =& $_SESSION;
         }
 
         $this->setAuthKeysIfExists();
 
-        $auth = new AuthenticationHelper($_session, $this->api_key, $this->api_secret);
+        $auth = $authHelper ?? new AuthenticationHelper($_session, $this->api_key, $this->api_secret);
         $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
         $this->api_record = $auth->getApiRecord();
@@ -96,10 +97,10 @@ trait AuthenticationTrait
      * @throws Exception
      * @throws TypeError
      */
-    public function broadcastLogout(): void
+    public function broadcastLogout(?AMQHandler $amqHandler = null): void
     {
         $this->logout();
-        $queueHandler = new AMQHandler();
+        $queueHandler = $amqHandler ?? new AMQHandler();
         $message = json_encode([
             '_type' => 'logout',
             'data' => [
@@ -122,9 +123,9 @@ trait AuthenticationTrait
      * @throws Exception
      * @throws TypeError
      */
-    public function logout(): void
+    public function logout(?AuthenticationHelper $authHelper = null): void
     {
-        (new AuthenticationHelper($_SESSION))->destroyAuthentication();
+        ($authHelper ?? new AuthenticationHelper($_SESSION))->destroyAuthentication();
     }
 
     public function getApiRecord(): ?ApiKeyStruct

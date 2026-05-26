@@ -150,7 +150,7 @@ class DownloadControllersTest extends AbstractTest
         return new class ($request, $response) extends DownloadController {
             protected bool $useSession = false;
 
-            protected function identifyUser(?bool $useSession = true): void
+            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
             {
                 $this->userIsLogged = false;
             }
@@ -173,7 +173,7 @@ class DownloadControllersTest extends AbstractTest
                 // Skip validators for unit testing
             }
 
-            protected function identifyUser(?bool $useSession = true): void
+            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
             {
                 $this->userIsLogged = false;
             }
@@ -194,7 +194,7 @@ class DownloadControllersTest extends AbstractTest
         return new class ($request, $response) extends DownloadOriginalController {
             protected bool $useSession = false;
 
-            protected function identifyUser(?bool $useSession = true): void
+            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
             {
                 $this->userIsLogged = false;
             }
@@ -209,7 +209,7 @@ class DownloadControllersTest extends AbstractTest
         return new class ($request, $response) extends DownloadJobTMXController {
             protected bool $useSession = false;
 
-            protected function identifyUser(?bool $useSession = true): void
+            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
             {
                 $this->userIsLogged = false;
             }
