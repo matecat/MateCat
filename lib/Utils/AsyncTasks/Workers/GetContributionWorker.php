@@ -379,6 +379,8 @@ class GetContributionWorker extends AbstractWorker
         $_config['num_result'] = $contributionStruct->resultNum;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
         $_config['lara_style'] = $contributionStruct->lara_style;
+        $_config['lara_style_guideline_id'] = $contributionStruct->lara_style_guideline_id;
+        $_config['lara_model'] = $contributionStruct->lara_model;
         $_config['reasoning'] = $contributionStruct->reasoning;
 
         $_config['dialect_strict'] = $contributionStruct->dialect_strict;
@@ -498,7 +500,9 @@ class GetContributionWorker extends AbstractWorker
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
                 $config['translation'] = $contributionStruct->translation;
                 $config['lara_style'] = $contributionStruct->lara_style;
+                $config['lara_style_guideline_id'] = $contributionStruct->lara_style_guideline_id;
                 $config['reasoning'] = $contributionStruct->reasoning;
+                $config['lara_model'] = $contributionStruct->lara_model;
                 $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
@@ -515,7 +519,7 @@ class GetContributionWorker extends AbstractWorker
 
                 if ($contributionStruct->mt_qe_workflow_enabled) {
                     // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-                    $mt_qe_config = new MTQEWorkflowParams($queueElement->params->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
+                    $mt_qe_config = new MTQEWorkflowParams($contributionStruct->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
                     $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
                 }
 

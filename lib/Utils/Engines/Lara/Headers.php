@@ -48,6 +48,15 @@ class Headers implements Iterator
     const string LARA_TRANSLATION_ORIGIN_HEADER = 'X-Lara-Engine-Translation-Origin';
 
     /**
+     * Header name for the LARA draft translation.
+     * This constant is used to identify the HTTP header for the draft translation.
+     *
+     * @var string
+     *
+     */
+    const string LARA_DRAFT_TRANSLATION_HEADER = "X-Lara-Engine-Draft-Translation";
+
+    /**
      * Stores the headers as an associative array.
      *
      * @var HeaderField[]

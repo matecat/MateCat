@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import useOptions from '../useOptions'
@@ -6,6 +6,10 @@ import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {LaraGlossary} from '../LaraGlossary/LaraGlossary'
 import {Select} from '../../../../common/Select'
+import {laraStyleguides} from '../../../../../api/laraStyleguides/laraStyleguides'
+import {laraAuth} from '../../../../../api/laraAuth'
+import CreateProjectStore from '../../../../../stores/CreateProjectStore'
+import CatToolStore from '../../../../../stores/CatToolStore'
 
 export const LARA_STYLES = {
   FAITHFUL: 'faithful',
@@ -49,7 +53,11 @@ export const LARA_STYLES_OPTIONS = [
 export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
-  const {control, setValue} = useOptions()
+  const [styleGuidesOptions, setStyleGuidesOptions] = useState([])
+
+  const {watch, control, setValue} = useOptions(['lara_style_guide'])
+
+  const laraStyleGuide = watch('lara_style_guide')
 
   const setGlossaries = useCallback(
     (value) => setValue('lara_glossaries', value),
@@ -63,6 +71,22 @@ export const LaraOptions = ({isCattoolPage}) => {
     )
       setValue('lara_style', LARA_STYLES.FAITHFUL)
   }, [currentProjectTemplate?.mt?.extra, setValue])
+
+  useEffect(() => {
+    if (config.isAnInternalUser) {
+      laraAuth().then((response) => {
+        laraStyleguides(response)
+          .then((data) => setStyleGuidesOptions(data))
+          .catch((error) => console.log(error))
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    CreateProjectStore.updateProject({
+      laraStyleGuide,
+    })
+  }, [laraStyleGuide])
 
   return (
     <div className="options-container-content">
@@ -129,6 +153,51 @@ export const LaraOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
+      {config.isAnInternalUser && (
+        <div className="mt-params-option">
+          <div>
+            <h3>Style guide</h3>
+            <p>
+              Select a style guide to be applied to Lara's translations
+              (activates Lara Prose for the project).
+            </p>
+          </div>
+          <Controller
+            control={control}
+            name="lara_style_guide"
+            disabled={isCattoolPage}
+            render={({field: {onChange, value, name, disabled}}) => (
+              <Select
+                name={name}
+                placeholder="Select a style guide"
+                isPortalDropdown={true}
+                dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
+                options={styleGuidesOptions.map((option) => ({
+                  ...option,
+                  name: (
+                    <div className="option-dropdown-with-descrition-select-content">
+                      {option.name}
+                      <p>{option.description}</p>
+                    </div>
+                  ),
+                }))}
+                activeOption={styleGuidesOptions.find(
+                  ({id}) =>
+                    id ===
+                    (isCattoolPage && CatToolStore.getJobMetadata()
+                      ? CatToolStore.getJobMetadata().project.mt_extra
+                          .lara_style_guideline_id
+                      : value),
+                )}
+                checkSpaceToReverse={true}
+                onSelect={(option) => onChange(option.id)}
+                isDisabled={disabled}
+                maxHeightDroplist={300}
+              />
+            )}
+          />
+        </div>
+      )}
       <h2>Glossaries</h2>
       <LaraGlossary
         id={currentProjectTemplate.mt.id}

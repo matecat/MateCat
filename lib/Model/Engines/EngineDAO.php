@@ -69,6 +69,11 @@ class EngineDAO extends AbstractDao
             $where_conditions[] = "type = :type";
         }
 
+        if ($obj->class_load !== null) {
+            $bind_values['class_load'] = $obj->class_load;
+            $where_conditions[] = "class_load = :class_load";
+        }
+
         if (count($where_conditions)) {
             $where_string = implode(" AND ", $where_conditions);
         } else {
