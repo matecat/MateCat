@@ -6,10 +6,10 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,253 | −5,113 (−69.4%) |
+| **PHPStan baseline entries** | 7,366 | 2,245 | −5,121 (−69.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,769 | +3,521 (+156.6%) |
-| **PHPUnit assertions** | ~19,449 | 15,803 | — |
+| **PHPUnit tests** | ~2,248 | 5,779 | +3,531 (+157.1%) |
+| **PHPUnit assertions** | ~19,449 | 15,827 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -88,7 +88,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 435 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 437 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (435 files)</summary>
@@ -259,6 +259,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Model/Files & FilesStorage
 | File | Cleaned In |
 |------|-----------|
+| `lib/Model/Files/FilesInfoUtility.php` | Phase 34 |
 | `lib/Model/Files/FilesPartsDao.php` | Phase 16 |
 | `lib/Model/Files/FilesPartsStruct.php` | Phase 0 |
 | `lib/Model/FilesStorage/AbstractFilesStorage.php` | Phase 6B |
@@ -571,6 +572,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### View
 | File | Cleaned In |
 |------|-----------|
+| `lib/View/API/V3/Json/FilesInfo.php` | Phase 34 |
 | `lib/View/API/App/Json/Analysis/AnalysisFile.php` | Phase 12A |
 | `lib/View/API/App/Json/Analysis/AnalysisFileMetadata.php` | Phase 12A |
 | `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
@@ -1806,6 +1808,30 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 - **Tests**: 5,231 (was 5,166), **Assertions**: 18,034 (was 17,383)
 - **PHPStan**: 0 errors (full codebase with baseline)
 - **Files added to ledger**: +3 (XliffConfigTemplateController, ApiKeyStruct, AuthenticationHelper)
+
+---
+
+### Phase 34: FilesInfoUtility + FilesInfo — ✅ DONE (−8 net baseline entries, +10 tests)
+
+**Why:** `FilesInfoUtility` is the core utility for the `/api/v3/files` endpoint — file metadata, instructions read/write. 22 PHPStan errors, 0 tests.
+
+#### Changes
+
+| File | Errors Fixed | Coverage Before → After | Notes |
+|------|-------------|------------------------|-------|
+| `lib/Model/Files/FilesInfoUtility.php` | 22→0 | 0% → ~85% | Constructor DI, null guard, `?? []` on nullable foreach |
+| `lib/View/API/V3/Json/FilesInfo.php` | 2→0 | n/a | PHPDoc param/return type fixes |
+
+Key changes:
+- **Constructor DI**: 4 optional DAO params (`?JobDao`, `?MetadataDao`, `?FilesPartsDao`, `?FileDao`) with `?? new XxxDao()` fallbacks in constructor body — zero breaking change
+- **Null guard**: `$projectId = $chunkStruct->getProject()->id` extracted as local variable, guarded with `RuntimeException` if null, stored as `private int $projectId` — resolves all 8 `argument.type` errors from `?int` passed as `int`
+- **`foreach` null guard**: `getByJobIdProjectAndIdFile(...) ?? []` — fixes `foreach.nonIterable`
+- **`FilesInfo::render()`**: `@param null` → `@param int|null` for params 2 & 3; `@return array<string, mixed>`
+- **`@throws` + return types**: `getInfo()` → `array<string, mixed>`, `getInstructions()` → `array{instructions: mixed}|null`
+- **Cascade**: 9 new entries added to baseline for `FileInfoController.php` (not on ledger)
+- **10 new tests** in `FilesInfoUtilityTest.php` (24 assertions, 0 warnings)
+
+**Baseline reduction:** 2,253 → 2,245 (−8 net: −24 removed + 9 cascade added + 7 pre-existing stale)
 
 ---
 

@@ -2265,7 +2265,55 @@ parameters:
 			path: lib/Controller/API/V3/DownloadQRController.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getInfo\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getInfo\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getInstructions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getInstructions\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getInstructionsByFilePartsId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:getInstructionsByFilePartsId\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:setInstructions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:setInstructions\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FileInfoController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\FileInfoController\:\:setInstructions\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/FileInfoController.php
@@ -3124,90 +3172,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/EditLog/EditLogSegmentStruct.php
-
-		-
-			message: '#^Argument of an invalid type array\<Model\\Files\\MetadataStruct\>\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:getInfo\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:getInfo\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:getInstructions\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:getInstructions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:getInstructions\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Method Model\\Files\\FilesInfoUtility\:\:setInstructions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Files\\MetadataDao\:\:get\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Files\\MetadataDao\:\:getByJobIdProjectAndIdFile\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Files\\MetadataDao\:\:insert\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#1 \$id_project of method Model\\Files\\MetadataDao\:\:update\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#2 \$id_project of method Model\\Files\\FileDao\:\:isFileInProject\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#2 \$job_first_segment of method View\\API\\V3\\Json\\FilesInfo\:\:render\(\) expects null, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
-
-		-
-			message: '#^Parameter \#3 \$job_last_segment of method View\\API\\V3\\Json\\FilesInfo\:\:render\(\) expects null, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Files/FilesInfoUtility.php
 
 		-
 			message: '#^Method Model\\Files\\FilesMetadataMarshaller\:\:marshall\(\) never returns null so it can be removed from the return type\.$#'
@@ -6986,18 +6950,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/View/API/V3/Json/Chunk.php
-
-		-
-			message: '#^Method View\\API\\V3\\Json\\FilesInfo\:\:render\(\) has parameter \$filesStructList with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/View/API/V3/Json/FilesInfo.php
-
-		-
-			message: '#^Method View\\API\\V3\\Json\\FilesInfo\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V3/Json/FilesInfo.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$segment\.$#'
