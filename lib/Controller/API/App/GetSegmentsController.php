@@ -315,7 +315,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+            return (new SegmentNoteDao())->getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
         return [];
