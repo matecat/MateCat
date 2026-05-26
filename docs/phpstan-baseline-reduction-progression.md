@@ -1,19 +1,19 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-22 (last updated)  
-**Commits (refactor + fix + security + test):** 344+
+**Date:** 2026-05-26 (last updated)  
+**Commits (refactor + fix + security + test):** 356+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,293 | −5,073 (−68.9%) |
+| **PHPStan baseline entries** | 7,366 | 2,253 | −5,113 (−69.4%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,498 | +3,250 (+144.6%) |
-| **PHPUnit assertions** | ~19,449 | 18,647 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 26.53% (182/686) | +18.05% (+129 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 53.09% (2,198/4,140) | +31.35% (+1,354 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 55.12% (19,380/35,159) | +33.93% (+12,107 lines) |
-| **New test files** | 235 | 367 | +132 |
+| **PHPUnit tests** | ~2,248 | 5,769 | +3,521 (+156.6%) |
+| **PHPUnit assertions** | ~19,449 | 15,803 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
+| **New test files** | 235 | 403 | +168 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 299 | +299 |
 
 ---
@@ -88,10 +88,10 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 397 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 435 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
-<summary>Click to expand full ledger (393 files)</summary>
+<summary>Click to expand full ledger (435 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -536,6 +536,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/ActiveMQ/AMQHandler.php` | Phase 27 |
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
 | `lib/Utils/Network/MultiCurlHandler.php` | Phase 27 |
+| `lib/Utils/Redis/RedisHandler.php` | Phase N+ |
 | `lib/Utils/TaskRunner/Commons/SignalHandlerTrait.php` | Phase 26 |
 | `lib/Utils/TaskRunner/Commons/AbstractDaemon.php` | Phase 31 |
 | `lib/Utils/TaskRunner/Commons/AbstractElement.php` | Phase 31 |
@@ -962,19 +963,18 @@ Driver: Xdebug 3.5.0, PHP 8.3.31, PHPUnit 12.5.25
 
 | Metric | Value |
 |--------|-------|
-| **Total tests** | 5,231 |
-| **Assertions** | 18,034 |
+| **Total tests** | 5,754 |
+| **Assertions** | 15,784 |
 | **Warnings** | 0 |
 | **Status** | ALL PASSING |
 
 ### Coverage Analysis
 
-- **Class coverage nearly tripled** (8.48% → 25.15%) — 119 additional classes now have test coverage.
-- **Method coverage more than doubled** (21.74% → 50.31%) — 1,233 additional methods covered.
-- **Line coverage grew by +31.25%** (21.19% → 52.44%) — 11,110 additional lines covered.
-- **Tests grew by 2,831** (2,248 → 5,079) — +125.9% test count.
-- **Assertions at 17,186** — stable; test growth spread assertions across more, focused unit tests.
-- **PHPStan: 0 errors** on full codebase — baseline-referenced only. 2,569 remaining entries.
+- **Class coverage more than tripled** (8.48% → 28.38%) — 142 additional classes now have test coverage.
+- **Method coverage nearly tripled** (21.74% → 57.22%) — 1,529 additional methods covered.
+- **Line coverage grew by +38.09%** (21.19% → 59.28%) — 13,644 additional lines covered.
+- **Tests grew by 3,506** (2,248 → 5,754) — +155.9% test count.
+- **PHPStan: 0 errors** on full codebase — baseline-referenced only. 2,286 remaining entries.
 
 ---
 
@@ -1812,15 +1812,15 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,569 entries)
+2. Continue PHPStan baseline reduction from remaining targets (2,286 entries)
 
 ---
 
 ## Remaining Baseline Analysis
 
-**Core baseline:** 2,569 entries
+**Core baseline:** 2,286 entries
 **Plugin baseline:** ~0 entries addressed (aligner plugin — 737 errors in 11 files, separate concern)  
-**By error type:** PHPDoc-only=~1,600 (59%), Behavioral=~780 (29%), Other=~286 (11%)
+**By error type:** PHPDoc-only=~1,350 (59%), Behavioral=~663 (29%), Other=~273 (11%)
 
 ### Phase 6 Candidates — Prioritized
 

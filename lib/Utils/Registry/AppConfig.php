@@ -62,7 +62,25 @@ class AppConfig
     public static ?string $DB_USER = null;
     public static ?string $DB_PASS = null;
     public static int $INSTANCE_ID = 0;
-    public static string $REDIS_SERVERS = '';
+    /** @var string|list<string> */
+    public static string|array $REDIS_SERVERS = '';
+
+    /**
+     * Redis connection mode.
+     * Valid values: 'single', 'cluster', 'replication', 'sentinel'
+     */
+    public static string $REDIS_MODE = 'single';
+
+    /**
+     * Sentinel service name (used only when REDIS_MODE = 'sentinel').
+     */
+    public static string $REDIS_SENTINEL_SERVICE = 'mymaster';
+
+    /**
+     * Redis password applied to all connections (optional).
+     */
+    public static ?string $REDIS_PASSWORD = null;
+
     public static string $QUEUE_BROKER_ADDRESS;
     public static string $QUEUE_JMX_ADDRESS;
     public static string $QUEUE_CREDENTIALS;

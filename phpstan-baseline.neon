@@ -363,12 +363,6 @@ parameters:
 			path: lib/Controller/API/App/CreateProjectController.php
 
 		-
-			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:getFileMetadata\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/CreateProjectController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\CreateProjectController\:\:getFilesList\(\) has parameter \$arFiles with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1473,12 +1467,6 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
-			message: '#^Method Controller\\API\\V1\\NewController\:\:getFileMetadata\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V1/NewController.php
-
-		-
 			message: '#^Method Controller\\API\\V1\\NewController\:\:getFilesList\(\) has parameter \$arFiles with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1901,7 +1889,7 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V2\\TeamMembersController\:\:index\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 5
 			path: lib/Controller/API/V2/TeamMembersController.php
 
 		-
@@ -4681,13 +4669,13 @@ parameters:
 		-
 			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:getPublishedResults\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php
 
 		-
 			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:publishResults\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php
 
 		-
@@ -5703,66 +5691,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: lib/Utils/OutsourceTo/Translated.php
-
-		-
-			message: '#^Call to function is_null\(\) with int will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Cannot call method del\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Cannot call method expire\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Cannot call method get\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Cannot call method getProperty\(\) on ReflectionClass\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Cannot call method setnx\(\) on Predis\\Client\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Method Utils\\Redis\\RedisHandler\:\:formatDSN\(\) has parameter \$dsnString with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Method Utils\\Redis\\RedisHandler\:\:unlock\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(never\)\: mixed\)\|null, array\{''Utils\\\\Redis\\\\RedisHandler'', ''formatDSN''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Redis/RedisHandler.php
 
 
 		-
@@ -7272,7 +7200,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 9
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
 		-
@@ -7284,7 +7212,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
 		-
@@ -7336,12 +7264,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:getRedisClient\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:getSegmentsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7350,12 +7272,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:getSegmentsCount\(\) has parameter \$project_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:getSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
@@ -7370,6 +7286,7 @@ parameters:
 			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
+
 
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -7452,12 +7369,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:updateSegmentsCount\(\) has parameter \$segment_count with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:updateSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
@@ -8250,17 +8161,11 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:create\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
 
 		-
 			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:create\(\) throws checked exception Model\\Exceptions\\ValidationError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:create\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
@@ -8296,12 +8201,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:getRedisClient\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:getSegmentsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8313,11 +8212,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
 
-		-
-			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:getSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
 
 		-
 			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -8400,12 +8294,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:updateSegmentsCount\(\) has parameter \$segment_count with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:updateSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
 
@@ -11188,7 +11076,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:_Align\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:_Align\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
@@ -11247,6 +11135,7 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
+
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getProgress\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -11278,12 +11167,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getRedisClient\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getSegmentsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11292,12 +11175,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getSegmentsCount\(\) has parameter \$project_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
@@ -11386,12 +11263,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:updateSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
-
-		-
 			message: '#^PHPDoc tag @var has invalid value \(\$redisClient ClientContextInterface\)\: Unexpected token "\$redisClient", expected type at offset 16 on line 2$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -11472,13 +11343,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_createSegments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_createSegments\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
@@ -11602,12 +11467,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:getRedisClient\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:getSegmentsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11619,11 +11478,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:getSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -11724,12 +11578,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:updateSegmentsCount\(\) has parameter \$segment_count with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:updateSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
@@ -12424,12 +12272,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:getRedisClient\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:getSegmentsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12438,12 +12280,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:getSegmentsCount\(\) has parameter \$project_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:getSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
 
@@ -12478,10 +12314,11 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:mapNewAlignment\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:mapNewAlignment\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
+
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -12564,12 +12401,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:updateSegmentsCount\(\) has parameter \$segment_count with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:updateSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
 
@@ -12766,7 +12597,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:align\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:align\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
@@ -12982,12 +12813,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:getRedisClient\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:getSegmentsCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12999,11 +12824,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
-		-
-			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:getSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:mapAlignment\(\) has no return type specified\.$#'
@@ -13110,13 +12930,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:translateSegments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
-			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:translateSegments\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
+			count: 6
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
@@ -13158,12 +12972,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:updateSegmentsCount\(\) has parameter \$segment_count with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:updateSegmentsCount\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
@@ -13602,7 +13410,7 @@ parameters:
 		-
 			message: '#^Method Features\\Translated\\Utils\\SupportedLanguages\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: plugins/translated/lib/Features/Translated/Utils/SupportedLanguages.php
 
 		-
