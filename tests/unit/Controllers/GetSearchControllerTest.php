@@ -796,6 +796,54 @@ class GetSearchControllerTest extends AbstractTest
         $this->assertTrue(true);
     }
 
+    // ─── redoReplaceAll / undoReplaceAll ───
+
+    #[Test]
+    public function redoReplaceAll_with_empty_history_returns_success(): void
+    {
+        $this->setRequestParams([
+            'job' => (string)self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'source' => '',
+            'target' => 'Ciao',
+            'token' => 'tok',
+            'status' => 'all',
+            'replace' => 'replacement',
+            'matchcase' => '0',
+            'exactmatch' => '0',
+            'inCurrentChunkOnly' => '0',
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with(['success' => true]);
+
+        $this->controller->redoReplaceAll();
+    }
+
+    #[Test]
+    public function undoReplaceAll_with_empty_history_returns_success(): void
+    {
+        $this->setRequestParams([
+            'job' => (string)self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'source' => '',
+            'target' => 'Ciao',
+            'token' => 'tok',
+            'status' => 'all',
+            'replace' => 'replacement',
+            'matchcase' => '0',
+            'exactmatch' => '0',
+            'inCurrentChunkOnly' => '0',
+        ]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with(['success' => true]);
+
+        $this->controller->undoReplaceAll();
+    }
+
     // ─── replaceAll ───
 
     #[Test]
