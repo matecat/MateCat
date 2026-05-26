@@ -75,7 +75,7 @@ class ChangeProjectNameController extends KleinController
      */
     private function changeProjectName($id, $password, $name): void
     {
-        $pStruct = ProjectDao::findByIdAndPassword($id, $password);
+        $pStruct = (new ProjectDao())->findByIdAndPassword($id, $password);
 
         $this->checkUserPermissions($pStruct, $this->getUser());
 

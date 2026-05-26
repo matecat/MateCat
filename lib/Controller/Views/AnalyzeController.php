@@ -28,6 +28,13 @@ use Utils\Tools\Utils;
 class AnalyzeController extends BaseKleinViewController implements IController
 {
 
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao();
+    }
+
     protected function afterConstruct(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
@@ -75,7 +82,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
         $jid = $postInput['jid'];
         $pass = $postInput['password'];
 
-        $projectStruct = ProjectDao::staticFindById($pid, 60 * 60);
+        $projectStruct = $this->getProjectDao()->findById($pid, 60 * 60);
 
         if (empty($projectStruct)) {
             $this->setView("project_not_found.html", [], 404);
@@ -116,7 +123,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
             $this->featureSet->loadForProject($projectStruct);
         }
 
-        $projectData = ProjectDao::getProjectAndJobData($pid);
+        $projectData = $this->getProjectDao()->getProjectAndJobData($pid);
         $analysisStatus = new Status($projectData, $this->featureSet, $this->user);
 
         $model = $analysisStatus->fetchData()->getResult();

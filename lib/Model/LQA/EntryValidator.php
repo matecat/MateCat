@@ -95,7 +95,7 @@ class EntryValidator
         }
 
         $job = (new JobDao())->getNotDeletedById($this->struct->id_job)[0];
-        $this->project = ProjectDao::staticFindById($job->id_project);
+        $this->project = (new ProjectDao())->findById($job->id_project);
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();

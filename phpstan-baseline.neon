@@ -6658,7 +6658,7 @@ parameters:
 			path: lib/View/API/V2/Json/Project.php
 
 		-
-			message: '#^Parameter \#1 \$pid of static method Model\\Projects\\ProjectDao\:\:getProjectAndJobData\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#1 \$pid of method Model\\Projects\\ProjectDao\:\:getProjectAndJobData\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/View/API/V2/Json/Project.php

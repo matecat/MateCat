@@ -50,7 +50,7 @@ class RedeemableProject
     {
         if (!isset($this->project)) {
             if (isset($this->session['last_created_pid'])) {
-                $this->project = ProjectDao::staticFindById($this->session['last_created_pid']);
+                $this->project = (new ProjectDao())->findById($this->session['last_created_pid']);
             }
         }
 

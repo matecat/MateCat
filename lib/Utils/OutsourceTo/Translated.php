@@ -202,7 +202,7 @@ class Translated extends AbstractProvider
          ************************** GET VOLUME ANALYSIS FIRST *************************
          */
 
-        $_project_data = ProjectDao::getProjectAndJobData($this->pid);
+        $_project_data = (new ProjectDao())->getProjectAndJobData($this->pid);
 
         if ($this->features === null) {
             throw new RuntimeException('FeatureSet is required for volume analysis');

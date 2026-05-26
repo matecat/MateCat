@@ -32,7 +32,7 @@ class ChangeJobsStatusController extends KleinController
 
         if ($request['res_type'] == "prj") {
             try {
-                $project = ProjectDao::findByIdAndPassword($request['res_id'], $request['password']);
+                $project = (new ProjectDao())->findByIdAndPassword($request['res_id'], $request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);

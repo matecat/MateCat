@@ -101,7 +101,7 @@ abstract class AbstractStatus
             $user->uid = -1;
         }
         $this->user = $user;
-        $project = ProjectDao::staticFindById((int)$_project_data[0]['pid'], 60 * 60);
+        $project = (new ProjectDao())->findById((int)$_project_data[0]['pid'], 60 * 60);
         if ($project === null) {
             throw new Exception("Project not found for pid: " . $_project_data[0]['pid']);
         }

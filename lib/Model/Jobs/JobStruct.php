@@ -266,7 +266,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public function getProject(int $ttl = 86400): ProjectStruct
     {
         return $this->cachable(__METHOD__, function () use ($ttl) {
-            return ProjectDao::staticFindById($this->id_project, $ttl);
+            return (new ProjectDao())->findById($this->id_project, $ttl);
         });
     }
 

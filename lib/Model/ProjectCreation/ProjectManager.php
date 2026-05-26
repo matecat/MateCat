@@ -776,7 +776,7 @@ class ProjectManager
             $status = $this->projectStructure->status
                 ?? throw new RuntimeException('Project status must be available before updating analysis status');
 
-            ProjectDao::updateAnalysisStatus(
+            (new ProjectDao($this->dbHandler))->updateAnalysisStatus(
                 $projectId,
                 $status,
                 $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])

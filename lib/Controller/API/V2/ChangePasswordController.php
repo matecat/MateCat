@@ -91,7 +91,7 @@ class ChangePasswordController extends KleinController
     {
         // change project password
         if ($res == "prj") {
-            $pStruct = ProjectDao::findByIdAndPassword($id, $actual_pwd);
+            $pStruct = (new ProjectDao())->findByIdAndPassword($id, $actual_pwd);
 
             $this->checkUserPermissions($pStruct, $user);
 

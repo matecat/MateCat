@@ -57,7 +57,7 @@ class ProjectManagerModel
 
         try {
             $projectId = $this->dbHandler->insert('projects', $data);
-            $project = ProjectDao::staticFindById((int)$projectId);
+            $project = (new ProjectDao($this->dbHandler))->findById((int)$projectId);
             $this->dbHandler->commit();
         } catch (Exception $e) {
             $this->dbHandler->rollback();

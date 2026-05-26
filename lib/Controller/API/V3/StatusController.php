@@ -29,7 +29,7 @@ class StatusController extends KleinController
      */
     public function index(): void
     {
-        $_project_data = ProjectDao::getProjectAndJobData($this->request->param('id_project'));
+        $_project_data = (new ProjectDao())->getProjectAndJobData($this->request->param('id_project'));
         $analysisStatus = new Status($_project_data, $this->featureSet, $this->user);
         $result = $analysisStatus->fetchData()->getResult();
 

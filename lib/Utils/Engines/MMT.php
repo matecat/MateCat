@@ -420,7 +420,7 @@ class MMT extends AbstractEngine
             }
 
             // get jobs keys
-            $project = ProjectDao::staticFindById($pid);
+            $project = (new ProjectDao())->findById($pid);
             if ($project === null) {
                 return;
             }

@@ -179,7 +179,7 @@ class CattoolController extends BaseKleinViewController
             'id_project' => $projectId,
             'id_team' => $chunkStruct->getProject()->id_team,
             'isCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->source)),
-            'isGDriveProject' => new PHPTalBoolean(ProjectDao::isGDriveProject($chunkStruct->id_project)),
+            'isGDriveProject' => new PHPTalBoolean((new ProjectDao())->isGDriveProject($chunkStruct->id_project)),
             'isOpenAiEnabled' => new PHPTalBoolean(!empty(AppConfig::$OPENAI_API_KEY)),
             'isReview' => new PHPTalBoolean($isRevision),
             'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->source)),

@@ -20,6 +20,13 @@ use View\API\Commons\ZipContentObject;
 class DownloadAnalysisReportController extends AbstractDownloadController
 {
 
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao();
+    }
+
     protected function afterConstruct(): void
     {
         $this->appendValidator(new LoginValidator($this));
@@ -37,10 +44,10 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         $this->featureSet = new FeatureSet();
         $request = $this->validateTheRequest();
         $projectId = (int)$request['id_project'];
-        $_project_data = ProjectDao::getProjectAndJobData($projectId);
+        $_project_data = $this->getProjectDao()->getProjectAndJobData($projectId);
         $this->id_job = (int)$_project_data[0]['jid'];
 
-        $this->featureSet->loadForProject(ProjectDao::staticFindById($projectId, 60 * 60 * 24) ?? throw new Exception("Project not found"));
+        $this->featureSet->loadForProject($this->getProjectDao()->findById($projectId, 60 * 60 * 24) ?? throw new Exception("Project not found"));
 
         $analysisStatus = new XTRFStatus($_project_data, $this->featureSet);
         $outputContent = $analysisStatus->fetchData()->getResultArray();
@@ -85,7 +92,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
             throw new InvalidArgumentException("Id project not provided");
         }
 
-        $project = ProjectDao::staticFindById((int)$id_project);
+        $project = $this->getProjectDao()->findById((int)$id_project);
 
         if (empty($project)) {
             throw new InvalidArgumentException("Wrong Id project provided", -10);

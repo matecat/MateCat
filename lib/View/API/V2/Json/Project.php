@@ -142,7 +142,7 @@ class Project
         $projectInfo = $metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
         $fromApi = $metadataDao->setCacheTTL(60)->get((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
 
-        $_project_data = ProjectDao::getProjectAndJobData($project->id);
+        $_project_data = (new ProjectDao())->getProjectAndJobData($project->id);
         $analysisStatus = new Status($_project_data, $featureSet, $this->user);
 
         return [

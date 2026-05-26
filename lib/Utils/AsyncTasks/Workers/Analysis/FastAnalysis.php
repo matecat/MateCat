@@ -92,6 +92,13 @@ class FastAnalysis extends AbstractDaemon
      */
     protected AbstractFilesStorage $files_storage;
 
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao();
+    }
+
     const int ERR_NO_SEGMENTS = 127;
     const int ERR_TOO_LARGE = 128;
     const int ERR_500 = 129;
@@ -276,7 +283,7 @@ class FastAnalysis extends AbstractDaemon
                      * Ensure we have fresh data from the master node
                      */
                     $metadataResult = Database::obtain()->transaction(function () use ($pid) {
-                        $projectStruct = ProjectDao::staticFindById($pid);
+                        $projectStruct = $this->getProjectDao()->findById($pid);
                         if ($projectStruct === null) {
                             return null;
                         }
@@ -346,7 +353,7 @@ class FastAnalysis extends AbstractDaemon
 
                 (new JobDao())->destroyCacheByProjectId($pid);
                 (new ProjectDao())->destroyFetchByIdCache($pid, ProjectStruct::class);
-                ProjectDao::destroyCacheByIdAndPassword($pid, $projectStruct->password);
+                $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
                 (new AnalysisDao())->destroyCacheByProjectId($pid);
             }
         } while ($this->RUNNING);
@@ -458,7 +465,7 @@ class FastAnalysis extends AbstractDaemon
     protected function _updateProject(int $pid, string $status): void
     {
         Database::obtain()->transaction(function () use ($pid, $status) {
-            $project = ProjectDao::staticFindById($pid);
+            $project = $this->getProjectDao()->findById($pid);
             if ($project === null) {
                 $this->logger->debug("*** Project $pid: not found. Skip update.");
 
@@ -468,7 +475,7 @@ class FastAnalysis extends AbstractDaemon
             // avoid concurrency between fast and tm daemons ( they set DONE when complete )
             if ($project->status_analysis != ProjectStatus::STATUS_DONE) {
                 $this->logger->debug("*** Project $pid: Changing status...");
-                ProjectDao::changeProjectStatus($pid, $status);
+                $this->getProjectDao()->changeProjectStatus($pid, $status);
                 $this->logger->debug("*** Project $pid: $status");
             } else {
                 $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");

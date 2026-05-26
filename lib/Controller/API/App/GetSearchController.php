@@ -387,7 +387,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $db = Database::obtain();
 
         $chunk = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
-        $project = ProjectDao::findByJobId($id_job);
+        $project = (new ProjectDao())->findByJobId($id_job);
 
         if ($project === null) {
             throw new NotFoundException("Project not found for job $id_job");

@@ -36,6 +36,13 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     protected ProjectStruct $project;
 
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao();
+    }
+
     /**
      * @param int $ttl
      *
@@ -171,7 +178,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             $this->unlockToken();
 
             if (empty($this->project)) {
-                $this->project = ProjectDao::findByJobId($this->id_job)
+                $this->project = $this->getProjectDao()->findByJobId($this->id_job)
                     ?? throw new Exception('Project not found for job ' . $this->id_job);
             }
 
@@ -180,7 +187,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             }
 
             $projectId = $this->project->id ?? throw new Exception('Project not found');
-            $isGDriveProject = ProjectDao::isGDriveProject((int)$projectId);
+            $isGDriveProject = $this->getProjectDao()->isGDriveProject((int)$projectId);
 
             if (!$isGDriveProject || $forceXliff === true) {
                 ob_get_contents();

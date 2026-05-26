@@ -324,7 +324,7 @@ class TranslatorsModel
             throw new InvalidArgumentException("Who invites can not be empty. Try TranslatorsModel::setUser() ");
         }
 
-        $project = ProjectDao::findByJobId($this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'));
+        $project = (new ProjectDao())->findByJobId($this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'));
 
         if ($project === null) {
             throw new RuntimeException('Project not found for job id ' . $this->jStruct->id);
