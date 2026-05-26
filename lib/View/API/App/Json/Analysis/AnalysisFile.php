@@ -49,6 +49,9 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable
 
     protected array $metadata = [];
 
+    /**
+     * @throws \RuntimeException
+     */
     public function __construct($id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [])
     {
         $this->id = (int)$id;

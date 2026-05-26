@@ -193,6 +193,10 @@ class Bootstrap
                 $code = 403;
                 $logger->debug(["error" => 'Access not allowed error for URI: ' . $_SERVER['REQUEST_URI'] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace()]);
                 break;
+            case Controller\API\Commons\Exceptions\ConflictError::class:
+                $code = 409;
+                $logger->debug(["error" => 'Conflict error for URI: ' . $_SERVER['REQUEST_URI'] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace()]);
+                break;
             case PDOException::class:
                 $code = 503;
                 $logger->debug((new View\API\Commons\Error($exception))->render(true));

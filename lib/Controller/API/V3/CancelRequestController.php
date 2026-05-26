@@ -9,6 +9,7 @@
 namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Controller\Traits\RateLimiterTrait;
@@ -149,8 +150,9 @@ class CancelRequestController extends KleinController
         }
 
         // 5. check segment status
+        // return 409 http code if the segment is not in "new" status
         if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
-            throw new Exception('Segment is not in "new" status and cannot be disabled');
+            throw new ConflictError('Segment is not in "new" status and cannot be disabled');
         }
     }
 

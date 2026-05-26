@@ -2,6 +2,7 @@
 
 namespace unit\Controllers;
 
+use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\V3\CancelRequestController;
 use Exception;
 use Klein\Request;
@@ -505,7 +506,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         // When user is a team member but not the creator, the code falls through
         // to the segment status check (no "not owner" exception is thrown)
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $teamStruct = $this->createStub(TeamStruct::class);
@@ -543,7 +544,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsTranslated(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('TRANSLATED');
@@ -560,7 +561,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsApproved(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('APPROVED');
@@ -577,7 +578,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsDraft(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('DRAFT');
@@ -594,7 +595,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsRejected(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('REJECTED');
