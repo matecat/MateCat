@@ -16,6 +16,7 @@ use Model\Teams\InvitedUser;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\RedeemableProject;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -28,6 +29,7 @@ class SignupController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -58,6 +60,7 @@ class SignupController extends AbstractStatefulKleinController
 
     /**
      * @throws ValidationError
+     * @return array<string, mixed>
      */
     private function validateCreationRequest(): array
     {
@@ -83,8 +86,15 @@ class SignupController extends AbstractStatefulKleinController
                     'filter' => FILTER_CALLBACK,
                     'options' => function ($wanted_url) {
                         $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
-
-                        return parse_url($wanted_url)['host'] != parse_url(AppConfig::$HTTPHOST)['host'] ? AppConfig::$HTTPHOST : $wanted_url;
+                        if ($wanted_url === false) {
+                            return AppConfig::$HTTPHOST;
+                        }
+                        $parsed     = parse_url($wanted_url);
+                        $parsedHost = parse_url(AppConfig::$HTTPHOST);
+                        if ($parsed === false || $parsedHost === false) {
+                            return AppConfig::$HTTPHOST;
+                        }
+                        return ($parsed['host'] ?? '') !== ($parsedHost['host'] ?? '') ? AppConfig::$HTTPHOST : $wanted_url;
                     }
                 ]
             ]
@@ -102,13 +112,17 @@ class SignupController extends AbstractStatefulKleinController
             throw new ValidationError("Last name must contain at least one letter");
         }
 
-        $this->validatePasswordRequirements($user['password'], $user['password_confirmation']);
+        $this->validatePasswordRequirements(
+            is_string($user['password']) ? $user['password'] : '',
+            is_string($user['password_confirmation']) ? $user['password_confirmation'] : ''
+        );
 
         return $user;
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function confirm(): void
     {

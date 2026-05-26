@@ -18,6 +18,7 @@ use Klein\Response;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
@@ -29,6 +30,8 @@ class LoginController extends AbstractStatefulKleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function directLogout(): void
     {
@@ -38,6 +41,7 @@ class LoginController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function login(): void
     {
@@ -84,7 +88,7 @@ class LoginController extends AbstractStatefulKleinController
         }
 
         $dao = new UserDao();
-        $user = $dao->getByEmail($params['email']);
+        $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
 
         if ($user && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
             $user->clearAuthToken();
@@ -108,6 +112,7 @@ class LoginController extends AbstractStatefulKleinController
     /**
      * Signed Double-Submit Cookie
      * @throws Exception
+     * @throws TypeError
      */
     public function token(): void
     {
@@ -126,6 +131,7 @@ class LoginController extends AbstractStatefulKleinController
     /**
      * Signed Double-Submit Cookie
      * @throws Exception
+     * @throws TypeError
      */
     public function socketToken(): void
     {

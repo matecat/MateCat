@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,232 | −5,134 (−69.7%) |
+| **PHPStan baseline entries** | 7,366 | 2,212 | −5,154 (−70.0%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 5,801 | +3,553 (+158.1%) |
 | **PHPUnit assertions** | ~19,449 | 15,864 | — |
@@ -88,7 +88,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 438 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 442 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (435 files)</summary>
@@ -109,6 +109,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Controller API
 | File | Cleaned In |
 |------|-----------|
+| `lib/Controller/API/App/Authentication/LoginController.php` | Phase 37 |
+| `lib/Controller/API/App/Authentication/SignupController.php` | Phase 37 |
 | `lib/Controller/API/App/Authentication/LaraAuthController.php` | Phase 0 |
 | `lib/Controller/API/App/CommentController.php` | Phase 5D |
 | `lib/Controller/API/App/CompletionEventController.php` | Phase 31 |
@@ -129,6 +131,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/QualityFrameworkController.php` | Phase 13C |
 | `lib/Controller/API/App/QualityReportControllerAPI.php` | Phase 5C |
 | `lib/Controller/API/App/SetTranslationController.php` | Phase 5 |
+| `lib/Controller/API/V2/UserController.php` | Phase 37 |
 | `lib/Controller/API/V2/DownloadController.php` | Phase 14 |
 | `lib/Controller/API/V2/JobsController.php` | Phase 31 |
 | `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
@@ -368,6 +371,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
 | `lib/Model/Translators/TranslatorsModel.php` | Phase 6D |
 | `lib/Model/Translators/TranslatorsProfilesDao.php` | Phase 25 |
+| `lib/Model/Users/Authentication/OAuthSignInModel.php` | Phase 37 |
 | `lib/Model/Users/Authentication/SignupModel.php` | Phase 26 |
 | `lib/Model/Users/MetadataDao.php` | Phase 25 |
 | `lib/Model/Users/UserDao.php` | Phase 5C |
@@ -1809,6 +1813,33 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 - **Tests**: 5,231 (was 5,166), **Assertions**: 18,034 (was 17,383)
 - **PHPStan**: 0 errors (full codebase with baseline)
 - **Files added to ledger**: +3 (XliffConfigTemplateController, ApiKeyStruct, AuthenticationHelper)
+
+---
+
+### Phase 37: LoginController + SignupController + UserController (V2) + OAuthSignInModel — ✅ DONE (−20 baseline entries)
+
+**Why:** 4 files modified as call-site updates for AuthenticationHelper de-staticification. Per "no technical debt" rule, all touched files must be clean.
+
+#### Changes
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `LoginController.php` | 6→0 | `@throws` + `is_string()` guard on `getByEmail()` email param |
+| `SignupController.php` | 8→0 | `@throws`, `@return array<string, mixed>`, `parse_url` false guard, `is_string()` password guards |
+| `UserController.php` (V2) | 8→0 | `@throws`, `json_decode ?? ''`, `is_string()` type guards, `uid ?? throw` |
+| `OAuthSignInModel.php` | 3→0 | `@throws TypeError` + `$email !== null` guard on `getByEmail()` |
+
+Key behavioral fixes:
+- `LoginController::login()`: `$dao->getByEmail(string|false|null)` → `is_string($email) ? $dao->getByEmail($email) : null`
+- `SignupController`: `parse_url(string|false)` → explicit false check + safe host comparison
+- `SignupController`: `validatePasswordRequirements(string|false|null)` → `is_string()` narrowing
+- `UserController::setMetadata()`: `json_decode(string|null)` → `?? ''`, `foreach(null)` → `(array)$json`, uid null guard, `is_string()` key/value guards
+- `OAuthSignInModel::signIn()`: `getByEmail(?string)` → null guard
+
+**Cascade:** `OauthResponseHandlerController::_processSuccessfulOAuth()` gained `TypeError` cascade → added to baseline (not on ledger)
+
+**Baseline reduction:** 2,232 → 2,212 (−20)
+**Files added to ledger:** 4
 
 ---
 

@@ -16,6 +16,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Email\WelcomeEmail;
 use Utils\Tools\Utils;
 
@@ -69,11 +70,12 @@ class OAuthSignInModel
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function signIn(): bool
     {
         $userDao = new UserDao();
-        $existingUser = $userDao->getByEmail($this->user->email);
+        $existingUser = $this->user->email !== null ? $userDao->getByEmail($this->user->email) : null;
 
         if ($existingUser) {
             $welcome_new_user = !$existingUser->everSignedIn();
@@ -138,6 +140,7 @@ class OAuthSignInModel
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     protected function _createNewUser(): void
     {
@@ -164,6 +167,7 @@ class OAuthSignInModel
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     protected function _authenticateUser(): void
     {

@@ -174,85 +174,8 @@ parameters:
 			count: 1
 			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:directLogout\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:directLogout\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:login\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:socketToken\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\LoginController\:\:token\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
-
-		-
-			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/LoginController.php
 
 
-
-		-
-			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:confirm\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\SignupController\:\:validateCreationRequest\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Parameter \#1 \$password of method Controller\\API\\App\\Authentication\\SignupController\:\:validatePasswordRequirements\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Parameter \#1 \$url of function parse_url expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
-
-		-
-			message: '#^Parameter \#2 \$password_confirmation of method Controller\\API\\App\\Authentication\\SignupController\:\:validatePasswordRequirements\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/SignupController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\Authentication\\UserController\:\:changePasswordAsLoggedUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -2013,36 +1936,6 @@ parameters:
 			path: lib/Controller/API/V2/UrlsController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\UserController\:\:edit\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/UserController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\UserController\:\:setMetadata\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/V2/UserController.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V2/UserController.php
-
-		-
-			message: '#^Parameter \#1 \$uid of method Model\\Users\\MetadataDao\:\:set\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/UserController.php
-
-		-
-			message: '#^Parameter \#2 \$key of method Model\\Users\\MetadataDao\:\:set\(\) expects string, array\<string\|false\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/UserController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:findSegmentTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -2815,6 +2708,12 @@ parameters:
 			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
+			path: lib/Controller/Views/OauthResponseHandlerController.php
+
+		-
+			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 		-
@@ -3936,24 +3835,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Model/Users/Authentication/ChangePasswordModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_authenticateUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Method Model\\Users\\Authentication\\OAuthSignInModel\:\:_createNewUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
-
-		-
-			message: '#^Parameter \#1 \$email of method Model\\Users\\UserDao\:\:getByEmail\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Users/Authentication/OAuthSignInModel.php
 
 		-
 			message: '#^Method Model\\Users\\Authentication\\PasswordResetModel\:\:__construct\(\) has parameter \$session with no value type specified in iterable type array\.$#'
