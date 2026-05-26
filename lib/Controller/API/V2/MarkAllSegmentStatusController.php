@@ -64,7 +64,7 @@ class MarkAllSegmentStatusController extends KleinController
             TranslationStatus::STATUS_APPROVED,
             TranslationStatus::STATUS_APPROVED2
         ])) {
-            $unchangeable_segments = SegmentTranslationDao::getUnchangeableStatus(
+            $unchangeable_segments = (new SegmentTranslationDao())->getUnchangeableStatus(
                 $this->chunk,
                 $segments_id,
                 $status,

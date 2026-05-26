@@ -74,7 +74,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
         // and then hydrate the $search_results array
         foreach ($res['sid_list'] as $segmentId) {
-            $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($segmentId, $request['queryParams']['job']);
+            $segmentTranslation = (new SegmentTranslationDao())->findBySegmentAndJob($segmentId, $request['queryParams']['job']);
             if ($segmentTranslation === null) {
                 continue;
             }
@@ -400,7 +400,8 @@ class GetSearchController extends AbstractStatefulKleinController
             // start the transaction
             $db->begin();
 
-            $old_translation = SegmentTranslationDao::findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
+            $segmentTranslationDao = new SegmentTranslationDao();
+            $old_translation = $segmentTranslationDao->findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
             $segment = (new SegmentDao())->fetchById((int)$tRow['id_segment'], SegmentStruct::class);
 
             if ($old_translation === null || $segment === null) {
@@ -430,7 +431,7 @@ class GetSearchController extends AbstractStatefulKleinController
                 $TPropagation['segment_hash'] = $old_translation['segment_hash'];
 
                 try {
-                    $propagationTotal = SegmentTranslationDao::propagateTranslation(
+                    $propagationTotal = $segmentTranslationDao->propagateTranslation(
                         $TPropagation,
                         $chunk,
                         (int)($id_segment ?? $tRow['id_segment']),
@@ -487,7 +488,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
             // commit the transaction
             try {
-                SegmentTranslationDao::updateTranslationAndStatusAndDate($new_translation);
+                $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
                 $db->commit();
             } catch (Exception $e) {
                 $this->logger->debug("Lock: Transaction Aborted. " . $e->getMessage());

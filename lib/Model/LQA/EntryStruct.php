@@ -102,7 +102,7 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
         // set the translation reading the version number on the
         // segment translation
-        $translation = SegmentTranslationDao::findBySegmentAndJob($this->id_segment, $this->id_job);
+        $translation = (new SegmentTranslationDao())->findBySegmentAndJob($this->id_segment, $this->id_job);
         $this->translation_version = $translation->version_number;
 
         $this->penalty_points = $this->getPenaltyPoints();

@@ -45,9 +45,11 @@ class ChangeJobsStatusController extends KleinController
 
             (new JobDao())->updateAllJobsStatusesByProjectId((int)$projectId, $request['new_status']);
 
+            $segmentTranslationDao = new SegmentTranslationDao();
+
             foreach ($chunks as $chunk) {
-                $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);
-                SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
+                $lastSegmentsList = $segmentTranslationDao->getMaxSegmentIdsFromJob($chunk);
+                $segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
             }
         } else {
             try {
@@ -59,9 +61,10 @@ class ChangeJobsStatusController extends KleinController
                 throw new NotFoundException("Job not found");
             }
 
+            $segmentTranslationDao = new SegmentTranslationDao();
             (new JobDao())->updateJobStatus($firstChunk, $request['new_status']);
-            $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($firstChunk);
-            SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
+            $lastSegmentsList = $segmentTranslationDao->getMaxSegmentIdsFromJob($firstChunk);
+            $segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
         }
 
         $this->response->json([

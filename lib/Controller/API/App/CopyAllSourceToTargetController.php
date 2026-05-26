@@ -104,7 +104,8 @@ class CopyAllSourceToTargetController extends KleinController
             $segment_id = $segment->id;
             $chunk_id = (int)$chunk->id;
 
-            $old_translation = SegmentTranslationDao::findBySegmentAndJob($segment_id, $chunk_id);
+            $segmentTranslationDao = new SegmentTranslationDao();
+            $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
 
             if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {
                 //no segment found
@@ -117,7 +118,7 @@ class CopyAllSourceToTargetController extends KleinController
             $new_translation->translation_date = date("Y-m-d H:i:s");
 
             try {
-                $affected_rows += SegmentTranslationDao::updateTranslationAndStatusAndDate($new_translation);
+                $affected_rows += $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
             } catch (Exception $e) {
                 $database->rollback();
 

@@ -67,11 +67,13 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         $database = Database::obtain();
         $database->begin();
 
+        $segmentTranslationDao = new SegmentTranslationDao($database);
+
         $batchEventCreator = new TranslationEventsHandler($chunk);
         $batchEventCreator->setFeatureSet($chunk->getProject()->getFeaturesSet());
         $batchEventCreator->setProject($chunk->getProject());
 
-        $old_translations = SegmentTranslationDao::getAllSegmentsByIdListAndJobId($params['segment_ids'], $chunk->id);
+        $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], $chunk->id);
 
         $new_translations = [];
 
@@ -99,7 +101,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
             }
         }
 
-        SegmentTranslationDao::updateTranslationAndStatusAndDateByList($new_translations);
+        $segmentTranslationDao->updateTranslationAndStatusAndDateByList($new_translations);
 
         $batchEventCreator->save(new BatchReviewProcessor());
 

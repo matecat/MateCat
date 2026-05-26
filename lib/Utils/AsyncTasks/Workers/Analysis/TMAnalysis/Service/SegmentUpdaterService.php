@@ -23,7 +23,7 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
      */
     public function setAnalysisValue(array $tmData): int
     {
-        return SegmentTranslationDao::setAnalysisValue($tmData);
+        return (new SegmentTranslationDao($this->db))->setAnalysisValue($tmData);
     }
 
     public function forceSetSegmentAnalyzed(int $idSegment, int $idJob): bool

@@ -192,7 +192,8 @@ class DeleteContributionController extends KleinController
      */
     private function updateSuggestionsArray(mixed $id_segment, int $id_job, mixed $id_match): void
     {
-        $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
+        $segmentTranslationDao = new SegmentTranslationDao();
+        $segmentTranslation = $segmentTranslationDao->findBySegmentAndJob($id_segment, $id_job);
 
         if ($segmentTranslation === null) {
             return;
@@ -208,7 +209,7 @@ class DeleteContributionController extends KleinController
                 }
             }
 
-            SegmentTranslationDao::updateSuggestionsArray($id_segment, $newSuggestionsArray);
+            $segmentTranslationDao->updateSuggestionsArray($id_segment, $newSuggestionsArray);
         }
     }
 

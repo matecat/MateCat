@@ -4865,7 +4865,7 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php
 
 		-
-			message: '#^Parameter \#2 \$jobId of static method Model\\Translations\\SegmentTranslationDao\:\:getAllSegmentsByIdListAndJobId\(\) expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$jobId of method Model\\Translations\\SegmentTranslationDao\:\:getAllSegmentsByIdListAndJobId\(\) expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php

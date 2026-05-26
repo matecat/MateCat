@@ -103,7 +103,7 @@ class ReplaceHistory
         $events = $this->get($versionToMove);
 
         if (count($events) > 0) {
-            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents($events);
+            $replacedEvents = (new SegmentTranslationDao())->rebuildFromReplaceEvents($events);
 
             $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
 

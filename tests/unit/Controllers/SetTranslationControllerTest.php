@@ -1964,7 +1964,7 @@ class SetTranslationControllerTest extends AbstractTest
             'segments_for_propagation' => [],
         ], $result);
 
-        $stored = \Model\Translations\SegmentTranslationDao::findBySegmentAndJob($segmentId, $jobId);
+        $stored = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob($segmentId, $jobId);
         self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
         self::assertSame('nuova', $stored->translation);
     }

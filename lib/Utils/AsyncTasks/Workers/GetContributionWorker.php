@@ -557,7 +557,8 @@ class GetContributionWorker extends AbstractWorker
             $contributionStruct->segmentId !== null and
             !empty($contributionStruct->getJobStruct()->id)
         ) {
-            $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
+            $segmentTranslationDao = new SegmentTranslationDao();
+            $segmentTranslation = $segmentTranslationDao->findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
             if ($segmentTranslation === null) {
                 return;
@@ -614,7 +615,7 @@ class GetContributionWorker extends AbstractWorker
                 'status' => TranslationStatus::STATUS_NEW
             ];
 
-            SegmentTranslationDao::updateFirstTimeOpenedContribution($data, $where);
+            $segmentTranslationDao->updateFirstTimeOpenedContribution($data, $where);
         }
     }
 }

@@ -99,7 +99,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      */
     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
     {
-        return SegmentTranslationDao::propagateTranslation(
+        return (new SegmentTranslationDao())->propagateTranslation(
             $translationStruct,
             $this->chunkStruct,
             $this->id_segment,

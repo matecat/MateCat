@@ -163,6 +163,6 @@ class CancelRequestController extends KleinController
      */
     protected function findSegmentTranslation(int $id_segment, int $id_job): ?SegmentTranslationStruct
     {
-        return SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
+        return (new SegmentTranslationDao())->findBySegmentAndJob($id_segment, $id_job);
     }
 }

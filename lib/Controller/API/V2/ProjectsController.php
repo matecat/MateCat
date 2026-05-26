@@ -145,8 +145,9 @@ class ProjectsController extends KleinController
             if (!$chunk->isDeleted()) {
                 (new JobDao())->updateJobStatus($chunk, $status);
 
-                $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);
-                SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
+                $segmentTranslationDao = new SegmentTranslationDao();
+                $lastSegmentsList = $segmentTranslationDao->getMaxSegmentIdsFromJob($chunk);
+                $segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
             }
         }
 

@@ -909,7 +909,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected function getOldTranslation(): SegmentTranslationStruct
     {
-        $old_translation = SegmentTranslationDao::findBySegmentAndJob((int)$this->data['id_segment'], (int)$this->data['id_job']);
+        $old_translation = (new SegmentTranslationDao())->findBySegmentAndJob((int)$this->data['id_segment'], (int)$this->data['id_job']);
 
         if (empty($old_translation)) {
             $old_translation = new SegmentTranslationStruct();

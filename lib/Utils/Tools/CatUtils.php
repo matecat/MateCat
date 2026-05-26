@@ -225,7 +225,7 @@ class CatUtils
      */
     public static function addSegmentTranslation(SegmentTranslationStruct $translation, bool $is_revision): void
     {
-        SegmentTranslationDao::addTranslation($translation, $is_revision);
+        (new SegmentTranslationDao())->addTranslation($translation, $is_revision);
     }
 
     /**
@@ -240,12 +240,13 @@ class CatUtils
      */
     protected static function _performanceEstimationTime(array $job_stats, int $id_job): array
     {
-        $last_10_worked_ids = SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour($id_job);
+        $segmentTranslationDao = new SegmentTranslationDao();
+        $last_10_worked_ids = $segmentTranslationDao->getLast10TranslatedSegmentIDsInLastHour($id_job);
         if (!empty($last_10_worked_ids) and count($last_10_worked_ids) === 10) {
             // Calculating words per hour and estimated completion
             /** @var list<int> $last10WorkedIds */
             $last10WorkedIds = array_values(array_map('intval', $last_10_worked_ids));
-            $estimation_temp = SegmentTranslationDao::getWordsPerSecond($id_job, $last10WorkedIds);
+            $estimation_temp = $segmentTranslationDao->getWordsPerSecond($id_job, $last10WorkedIds);
             $words_per_second = (!empty($estimation_temp[0]['words_per_second']) ? $estimation_temp[0]['words_per_second'] : 1); // avoid division by zero
 
             $totalWordsToDo = $job_stats['raw']['new'] + $job_stats['raw']['draft'] + ($job_stats['raw']['rejected'] ?? 0);
