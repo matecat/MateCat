@@ -70,6 +70,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
         $this->_initRemoteUser($code, $provider);
 
         $model = new OAuthSignInModel(
+            $_SESSION,
             $this->remoteUser->email,
             $this->remoteUser->name,
             $this->remoteUser->lastName

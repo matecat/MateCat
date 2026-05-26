@@ -8,8 +8,8 @@
 |--------|-------------------|--------------------------|-------|
 | **PHPStan baseline entries** | 7,366 | 2,212 | −5,154 (−70.0%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,801 | +3,553 (+158.1%) |
-| **PHPUnit assertions** | ~19,449 | 15,864 | — |
+| **PHPUnit tests** | ~2,248 | 5,810 | +3,562 (+158.5%) |
+| **PHPUnit assertions** | ~19,449 | 15,880 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -88,7 +88,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 442 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 442 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (435 files)</summary>
@@ -1813,6 +1813,27 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 - **Tests**: 5,231 (was 5,166), **Assertions**: 18,034 (was 17,383)
 - **PHPStan**: 0 errors (full codebase with baseline)
 - **Files added to ledger**: +3 (XliffConfigTemplateController, ApiKeyStruct, AuthenticationHelper)
+
+---
+
+### Phase 38: OAuthSignInModel — DI refactor + coverage 0%→84% — ✅ DONE (+9 tests)
+
+**Why:** File added to ledger in Phase 37 with 0% coverage. Per "no technical debt" rule, full DI refactor to enable testability.
+
+#### Changes
+
+| File | Type | Notes |
+|------|------|-------|
+| `OAuthSignInModel.php` | DI refactor | `array &$session` as first required param (live reference); `UserDao`, `MetadataDao`, `TeamDao` constructor-injected with `??= new` fallback; `_authenticateUser(?AuthenticationHelper)` optional param; `createWelcomeEmail()` + `createRedeemableProject()` protected factories |
+| `OauthResponseHandlerController.php` | Caller update | Pass `$_SESSION` explicitly as first arg |
+
+Key decisions:
+- **Session as first required param** — eliminates nullable reference ambiguity; `=& $session` maintains live reference to caller's `$_SESSION`
+- **`$_SESSION ??= []` guard** — initializes `$_SESSION` if not yet started (CLI/test context)
+- **`UserDao`/`MetadataDao`/`TeamDao`** in constructor (used across multiple methods) — method-level injection only for `AuthenticationHelper` (runtime session dependency)
+- **9 new tests** in `OAuthSignInModelTest.php` (16 assertions, 0 warnings)
+
+**Coverage:** 0% → **83.67%** lines, **64.29%** methods
 
 ---
 

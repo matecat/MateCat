@@ -33,8 +33,25 @@ class OAuthSignInModel
     protected ?string $profilePictureUrl = null;
     protected string $provider;
 
-    public function __construct(string $email, ?string $firstName = null, ?string $lastName = null)
-    {
+    /** @var array<string, mixed> */
+    protected array $session;
+
+    private UserDao $userDao;
+    private MetadataDao $metadataDao;
+    private TeamDao $teamDao;
+
+    /**
+     * @param array<string, mixed> $session
+     */
+    public function __construct(
+        array &$session,
+        string $email,
+        ?string $firstName = null,
+        ?string $lastName = null,
+        ?UserDao $userDao = null,
+        ?MetadataDao $metadataDao = null,
+        ?TeamDao $teamDao = null
+    ) {
         if (empty($firstName)) {
             $firstName = "Anonymous";
         }
@@ -48,6 +65,11 @@ class OAuthSignInModel
             'last_name' => $lastName,
             'email' => $email
         ]);
+
+        $this->session     =& $session;
+        $this->userDao     = $userDao ?? new UserDao();
+        $this->metadataDao = $metadataDao ?? new MetadataDao();
+        $this->teamDao     = $teamDao ?? new TeamDao();
     }
 
     /**
@@ -74,8 +96,7 @@ class OAuthSignInModel
      */
     public function signIn(): bool
     {
-        $userDao = new UserDao();
-        $existingUser = $this->user->email !== null ? $userDao->getByEmail($this->user->email) : null;
+        $existingUser = $this->user->email !== null ? $this->userDao->getByEmail($this->user->email) : null;
 
         if ($existingUser) {
             $welcome_new_user = !$existingUser->everSignedIn();
@@ -96,8 +117,7 @@ class OAuthSignInModel
         $this->_updateProvider();
         $this->_authenticateUser();
 
-        $project = new RedeemableProject($this->user, $_SESSION);
-        $project->tryToRedeem();
+        $this->createRedeemableProject()->tryToRedeem();
 
         return true;
     }
@@ -111,8 +131,7 @@ class OAuthSignInModel
         $uid = $this->user->uid ?? throw new RuntimeException('User uid must be set before updating profile picture');
         $profilePictureUrl = $this->profilePictureUrl ?? throw new RuntimeException('Profile picture url must be set before updating profile picture');
 
-        $dao = new MetadataDao();
-        $dao->set($uid, $this->provider . '_picture', $profilePictureUrl);
+        $this->metadataDao->set($uid, $this->provider . '_picture', $profilePictureUrl);
     }
 
     public function setProfilePicture(?string $pictureUrl = null): void
@@ -128,8 +147,7 @@ class OAuthSignInModel
     {
         $uid = $this->user->uid ?? throw new RuntimeException('User uid must be set before updating provider metadata');
 
-        $dao = new MetadataDao();
-        $dao->set($uid, 'oauth_provider', $this->provider);
+        $this->metadataDao->set($uid, 'oauth_provider', $this->provider);
     }
 
     public function setProvider(string $provider): void
@@ -145,12 +163,11 @@ class OAuthSignInModel
     protected function _createNewUser(): void
     {
         $this->user->create_date = Utils::mysqlTimestamp(time());
-        $this->user->uid = (new UserDao())->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after OAuth insert');
+        $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after OAuth insert');
 
-        $dao = new TeamDao();
-        $dao->getDatabaseHandler()->begin();
-        $dao->createPersonalTeam($this->user);
-        $dao->getDatabaseHandler()->commit();
+        $this->teamDao->getDatabaseHandler()->begin();
+        $this->teamDao->createPersonalTeam($this->user);
+        $this->teamDao->getDatabaseHandler()->commit();
     }
 
     /**
@@ -159,9 +176,8 @@ class OAuthSignInModel
     protected function _updateExistingUser(UserStruct $existing_user): void
     {
         $this->user->uid = $existing_user->uid;
-        (new UserDao())->updateStruct($this->user, [
-            'fields' =>
-                ['oauth_access_token']
+        $this->userDao->updateStruct($this->user, [
+            'fields' => ['oauth_access_token']
         ]);
     }
 
@@ -169,10 +185,14 @@ class OAuthSignInModel
      * @throws Exception
      * @throws TypeError
      */
-    protected function _authenticateUser(): void
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function _authenticateUser(?AuthenticationHelper $authHelper = null): void
     {
         AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler());
-        new AuthenticationHelper($_SESSION);
+        $authHelper ?? new AuthenticationHelper($this->session);
     }
 
     /**
@@ -180,10 +200,18 @@ class OAuthSignInModel
      */
     protected function _welcomeNewUser(): void
     {
-        $email = new WelcomeEmail($this->user);
-        $email->send();
+        $this->createWelcomeEmail()->send();
         FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
     }
 
+    protected function createWelcomeEmail(): WelcomeEmail
+    {
+        return new WelcomeEmail($this->user);
+    }
+
+    protected function createRedeemableProject(): RedeemableProject
+    {
+        return new RedeemableProject($this->user, $this->session);
+    }
 
 }
