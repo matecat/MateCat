@@ -3,6 +3,7 @@
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\UnprocessableException;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -101,6 +102,12 @@ $klein->onError(function (Klein $klein, $err_msg, $err_type, Throwable $exceptio
                 $logger->debug('Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ]);
                 $logger->debug((new Error($exception))->render(true));
                 $klein->response()->code(404);
+                $klein->response()->json((new Error($exception))->render());
+                break;
+            case ConflictError::class:
+                $logger->debug('Conflict error for URI: ' . $_SERVER[ 'REQUEST_URI' ]);
+                $logger->debug((new Error($exception))->render(true));
+                $klein->response()->code(409);
                 $klein->response()->json((new Error($exception))->render());
                 break;
             case UnprocessableException::class:

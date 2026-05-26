@@ -29,6 +29,9 @@ class AnalysisMatch implements JsonSerializable
      */
     protected string $type;
 
+    /**
+     * @throws \RuntimeException
+     */
     public static function forName(string $name, ConstantsInterface $matchConstantsClass): AnalysisMatch
     {
         return new static($name, $matchConstantsClass);
@@ -37,6 +40,8 @@ class AnalysisMatch implements JsonSerializable
     /**
      * @param string $name
      * @param ConstantsInterface $matchConstantsClass
+     *
+     * @throws \RuntimeException
      */
     protected function __construct(string $name, ConstantsInterface $matchConstantsClass)
     {
