@@ -27690,12 +27690,6 @@ parameters:
 			path: lib/View/API/App/Json/Analysis/AnalysisJobSummary.php
 
 		-
-			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisMatch\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisMatch.php
-
-		-
 			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisMatch\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
