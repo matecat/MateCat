@@ -8,7 +8,7 @@
 |--------|-------------------|--------------------------|-------|
 | **PHPStan baseline entries** | 7,366 | 2,212 | −5,154 (−70.0%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 5,810 | +3,562 (+158.5%) |
+| **PHPUnit tests** | ~2,248 | 5,820 | +3,572 (+158.9%) |
 | **PHPUnit assertions** | ~19,449 | 15,880 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
@@ -88,10 +88,10 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 442 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 443 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
-<summary>Click to expand full ledger (435 files)</summary>
+<summary>Click to expand full ledger (436 files)</summary>
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -286,6 +286,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/LQA/ChunkReviewDao.php` | Phase 5C |
 | `lib/Model/LQA/EntryCommentDao.php` | Phase 16 |
 | `lib/Model/LQA/EntryDao.php` | Phase 25 |
+| `lib/Model/LQA/EntryValidator.php` | Phase 39 |
 | `lib/Model/LQA/ModelDao.php` | Phase 0 |
 | `lib/Model/LQA/ModelStruct.php` | Phase 0 |
 | `lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php` | Phase 25 |
@@ -1813,6 +1814,27 @@ Multi-file sweep applying baseline reduction algorithm + >80% coverage across al
 - **Tests**: 5,231 (was 5,166), **Assertions**: 18,034 (was 17,383)
 - **PHPStan**: 0 errors (full codebase with baseline)
 - **Files added to ledger**: +3 (XliffConfigTemplateController, ApiKeyStruct, AuthenticationHelper)
+
+---
+
+### Phase 39: EntryValidator — DI refactor + coverage 0%→92% — ✅ DONE (−13 baseline entries, +10 tests)
+
+**Why:** `lib/Model/LQA/EntryValidator.php` had 13 PHPStan errors and 0% coverage. All 5 internal DAO instantiations replaced with constructor injection (optional params, `??= new XxxDao()` fallback). Null guards added for all `property.nonObject` errors.
+
+#### Changes
+
+| File | Type | Notes |
+|------|------|-------|
+| `EntryValidator.php` | DI refactor | 5 DAOs injected in constructor: `SegmentDao`, `JobDao`, `ProjectDao`, `ModelDao`, `CategoryDao`; `??= new` lazy fallback; `$jobs[0] ?? throw NotFoundException` for job/project null guards; `$this->qa_model`/`$this->category` guarded with `?? throw NotFoundException`; typed array PHPDocs for `$errors`, `getErrors()`, `getErrorMessages()` |
+| `EntryValidatorTest.php` | New test file | 10 tests covering: `isValid()` true/false paths, `ensureValid()` throw/no-throw, `validate()` throws for missing segment/job/project, error helper methods |
+
+Key decisions:
+- **All 5 DAOs → constructor** (not method-level): all are used in every validation pass, no scenario where one is needed without the others
+- **`SegmentDao(Database::obtain())` stays in default path** — inject the DAO itself, isolate the static call to the fallback only
+- **`EntryStruct` call site unchanged** — `new EntryValidator($this)` still works via lazy defaults
+- **10 new tests**, 0 regressions
+
+**Coverage:** 0% → **92.31%** lines, **80.00%** methods
 
 ---
 
