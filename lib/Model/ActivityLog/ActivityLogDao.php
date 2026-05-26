@@ -122,20 +122,4 @@ class ActivityLogDao extends AbstractDao
         );
     }
 
-    /**
-     * @param int $activity_id
-     *
-     * @return ActivityLogStruct|null
-     * @throws PDOException
-     */
-    public static function getByID(int $activity_id): ?ActivityLogStruct
-    {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM activity_log WHERE id = ?");
-        $stmt->setFetchMode(PDO::FETCH_CLASS, ActivityLogStruct::class);
-        $stmt->execute([$activity_id]);
-
-        return $stmt->fetch();
-    }
-
 }
