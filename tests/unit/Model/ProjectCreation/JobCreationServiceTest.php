@@ -5,6 +5,8 @@ namespace unit\Model\ProjectCreation;
 use Exception;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectStructure;
@@ -401,5 +403,183 @@ class JobCreationServiceTest extends AbstractTest
             ['job_first_segment' => 1],
             100
         );
+    }
+
+    // =========================================================================
+    // resolvePayableRates — branch 3 (DB lookup)
+    // =========================================================================
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testResolvePayableRatesFromDbLookup(): void
+    {
+        $template = new CustomPayableRateStruct();
+        $template->version = 1;
+        $template->name = 'db_template';
+        $template->breakdowns = json_encode([
+            'default' => ['NO_MATCH' => 100, 'ICE' => 0, 'ICE_MT' => 0],
+        ]);
+
+        $dao = $this->createStub(CustomPayableRateDao::class);
+        $dao->method('findById')->willReturn($template);
+
+        $service = new JobCreationService($this->featureSet, $this->logger, $dao);
+
+        $ps = $this->makeProjectStructure([
+            'mt_qe_workflow_payable_rate' => null,
+            'payable_rate_model' => null,
+            'payable_rate_model_id' => 42,
+        ]);
+
+        $ref = new ReflectionClass(JobCreationService::class);
+        $method = $ref->getMethod('resolvePayableRates');
+        [$rates, $returnedTemplate] = $method->invoke($service, $ps, 'it-IT');
+
+        $this->assertIsString($rates);
+        $this->assertSame($template, $returnedTemplate);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testResolvePayableRatesFromDbLookupThrowsWhenNotFound(): void
+    {
+        $dao = $this->createStub(CustomPayableRateDao::class);
+        $dao->method('findById')->willReturn(null);
+
+        $service = new JobCreationService($this->featureSet, $this->logger, $dao);
+
+        $ps = $this->makeProjectStructure([
+            'mt_qe_workflow_payable_rate' => null,
+            'payable_rate_model' => null,
+            'payable_rate_model_id' => 999,
+        ]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Payable rate model not found');
+
+        $ref = new ReflectionClass(JobCreationService::class);
+        $method = $ref->getMethod('resolvePayableRates');
+        $method->invoke($service, $ps, 'it-IT');
+    }
+
+    // =========================================================================
+    // saveJobsMetadata
+    // =========================================================================
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testSaveJobsMetadataCallsBulkSet(): void
+    {
+        $metadataDao = $this->createMock(JobsMetadataDao::class);
+        $metadataDao->expects($this->once())->method('bulkSet')
+            ->with(42, 'pass123', $this->isArray());
+
+        $testable = new TestableJobCreationService($this->featureSet, $this->logger);
+        $testable->setJobsMetadataDao($metadataDao);
+
+        $job = new JobStruct();
+        $job->id = 42;
+        $job->password = 'pass123';
+        $job->target = 'it-IT';
+
+        $ps = $this->makeProjectStructure([
+            'public_tm_penalty' => 5,
+            'character_counter_count_tags' => true,
+            'character_counter_mode' => 'source',
+            'tm_prioritization' => true,
+            'dialect_strict' => ['it-IT' => true],
+            'subfiltering_handlers' => '{"key":"val"}',
+        ]);
+
+        $testable->callSaveJobsMetadata($job, $ps);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testSaveJobsMetadataSkipsEmptySubfiltering(): void
+    {
+        $metadataDao = $this->createMock(JobsMetadataDao::class);
+        $metadataDao->expects($this->once())->method('bulkSet')
+            ->with(42, 'pass123', $this->callback(function (array $metadata) {
+                return !array_key_exists('subfiltering_handlers', $metadata);
+            }));
+
+        $testable = new TestableJobCreationService($this->featureSet, $this->logger);
+        $testable->setJobsMetadataDao($metadataDao);
+
+        $job = new JobStruct();
+        $job->id = 42;
+        $job->password = 'pass123';
+        $job->target = 'it-IT';
+
+        $ps = $this->makeProjectStructure([
+            'subfiltering_handlers' => '[]',
+        ]);
+
+        $testable->callSaveJobsMetadata($job, $ps);
+    }
+
+    // =========================================================================
+    // associatePayableRateModel — success path
+    // =========================================================================
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testAssociatePayableRateModelCallsDao(): void
+    {
+        $template = new CustomPayableRateStruct();
+        $template->version = 2;
+        $template->name = 'test_model';
+
+        $dao = $this->createMock(CustomPayableRateDao::class);
+        $dao->expects($this->once())->method('assocModelToJob')
+            ->with(99, 42, 2, 'test_model');
+
+        $service = new JobCreationService($this->featureSet, $this->logger, $dao);
+
+        $ps = $this->makeProjectStructure(['payable_rate_model_id' => 99]);
+        $job = new JobStruct();
+        $job->id = 42;
+
+        $ref = new ReflectionClass(JobCreationService::class);
+        $method = $ref->getMethod('associatePayableRateModel');
+        $method->invoke($service, $job, $ps, $template);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testAssociatePayableRateModelCatchesException(): void
+    {
+        $template = new CustomPayableRateStruct();
+        $template->version = 1;
+        $template->name = 'fail_model';
+
+        $dao = $this->createStub(CustomPayableRateDao::class);
+        $dao->method('assocModelToJob')->willThrowException(new Exception('DB error'));
+
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects($this->once())->method('error');
+
+        $service = new JobCreationService($this->featureSet, $logger, $dao);
+
+        $ps = $this->makeProjectStructure(['payable_rate_model_id' => 99]);
+        $job = new JobStruct();
+        $job->id = 42;
+
+        $ref = new ReflectionClass(JobCreationService::class);
+        $method = $ref->getMethod('associatePayableRateModel');
+        $method->invoke($service, $job, $ps, $template);
     }
 }

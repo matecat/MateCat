@@ -2,6 +2,7 @@
 
 namespace Model\ProjectCreation;
 
+use DomainException;
 use Exception;
 use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
@@ -16,7 +17,10 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
+use PDOException;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -42,6 +46,7 @@ class JobCreationService
      *
      * @return array{0: string, 1: ?CustomPayableRateStruct} [$ratesJson, $template]
      * @throws Exception
+     * @throws TypeError
      */
     private function resolvePayableRates(ProjectStructure $projectStructure, string $target): array
     {
@@ -88,6 +93,10 @@ class JobCreationService
     /**
      * Build a JSON string of TM keys from the project's private_tm_key array.
      * Replaces the {{pid}} placeholder with the actual project ID.
+     *
+     * @throws DomainException
+     * @throws LogInvalidArgumentException
+     * @throws TypeError
      */
     private function buildTmKeysJson(ProjectStructure $projectStructure): string
     {
@@ -176,6 +185,7 @@ class JobCreationService
      * Moved from ProjectManager::saveJobsMetadata().
      *
      * @throws ReflectionException
+     * @throws PDOException
      */
     private function saveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
     {
@@ -220,6 +230,8 @@ class JobCreationService
     /**
      * Associate a payable rate model with a job if both model ID and template exist.
      * Wrapped in try-catch to preserve the original error handling behavior.
+     *
+     * @throws LogInvalidArgumentException
      */
     private function associatePayableRateModel(
         JobStruct $job,
@@ -249,6 +261,7 @@ class JobCreationService
      * @param array<string, int> $minMaxSegmentsId
      * @return list<JobStruct>
      * @throws Exception
+     * @throws TypeError
      */
     public function createJobsForTargetLanguages(
         ProjectStructure $projectStructure,
@@ -285,6 +298,7 @@ class JobCreationService
     /**
      * Insert a job into the database. Extracted for testability.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function insertJob(JobStruct $job): JobStruct
     {
@@ -305,6 +319,7 @@ class JobCreationService
      *
      * @param list<JobStruct> $jobs
      * @throws Exception
+     * @throws TypeError
      */
     public function linkFilesAndInsertPreTranslations(
         array $jobs,
@@ -322,6 +337,7 @@ class JobCreationService
     /**
      * Link all project files to a job and create GDrive remote copies if applicable.
      * @throws Exception
+     * @throws TypeError
      */
     private function linkFilesToJob(JobStruct $job, ProjectStructure $projectStructure, ?Session $gdriveSession): void
     {

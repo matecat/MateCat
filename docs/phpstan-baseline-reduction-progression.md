@@ -68,6 +68,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 ### Coverage Target
 
 - When fixing PHPStan errors in a file, the goal is also to **increase test coverage above 80%** for that file. Tests must cover the fixed code paths, not just satisfy PHPStan.
+-  MANDATORY  Before starting the coverage, analyze blockers, show me the report about the blockers and the current coverage status.
 
 ### Commit / Git Rules
 

@@ -981,6 +981,7 @@ class ProjectManager
     /**
      * @return list<JobStruct>
      * @throws Exception
+     * @throws \TypeError
      */
     protected function createJobs(): array
     {
@@ -996,6 +997,7 @@ class ProjectManager
      *
      * @param list<JobStruct> $jobs
      * @throws Exception
+     * @throws \TypeError
      */
     private function linkFilesAndInsertPreTranslations(array $jobs): void
     {

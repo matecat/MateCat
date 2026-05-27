@@ -3472,49 +3472,6 @@ parameters:
 			path: lib/Model/ProjectCreation/FileInsertionService.php
 
 		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:associatePayableRateModel\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:buildTmKeysJson\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:buildTmKeysJson\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:buildTmKeysJson\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:insertJob\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:resolvePayableRates\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:saveJobsMetadata\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/JobCreationService.php
-
-
-		-
 			message: '#^Method Model\\ProjectCreation\\ProjectManagerModel\:\:executeBulkInsert\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 7
@@ -13193,12 +13150,6 @@ parameters:
 			count: 1
 			path: lib/Controller/API/GDrive/OAuthController.php
 
-
-		-
-			message: '#^Method Model\\ProjectCreation\\JobCreationService\:\:linkFilesToJob\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/JobCreationService.php
 
 		-
 			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
