@@ -13,7 +13,7 @@ _dic_cache
 !/docs/*.md
 !/docs/*.png
 !/docs/reviews/
-
+/wiki/*
 # Configuration files
 .num_processes
 inc/*.dat
