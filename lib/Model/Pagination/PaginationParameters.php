@@ -16,26 +16,23 @@ class PaginationParameters
     protected int $current;
     protected int $pagination;
     protected string $baseRoute;
-    protected ?string $cacheKeyMap;
-    protected ?int $ttl;
+    protected ?string $cacheKeyMap = null;
+    protected ?int $ttl = null;
+    /** @var array<int|string, mixed> */
     protected array $bindParams;
     protected string $query;
 
     /**
-     * @param string $query
-     * @param array $bindParams
-     * @param string $fetchClass
-     * @param string $baseRoute
-     * @param int|null $current
-     * @param int|null $pagination
+     * @param array<int|string, mixed> $bindParams
+     * @throws \TypeError
      */
     public function __construct(string $query, array $bindParams, string $fetchClass, string $baseRoute, ?int $current = 1, ?int $pagination = 20)
     {
         $this->query = $query;
         $this->bindParams = $bindParams;
         $this->fetchClass = $fetchClass;
-        $this->current = $current;
-        $this->pagination = $pagination;
+        $this->current = $current ?? 1;
+        $this->pagination = $pagination ?? 20;
         $this->baseRoute = $baseRoute;
     }
 
@@ -50,6 +47,9 @@ class PaginationParameters
         return $this->query;
     }
 
+    /**
+     * @return array<int|string, mixed>
+     */
     public function getBindParams(): array
     {
         return $this->bindParams;

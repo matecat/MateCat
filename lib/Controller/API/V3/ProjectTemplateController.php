@@ -54,6 +54,8 @@ class ProjectTemplateController extends KleinController
     /**
      * Get all entries
      * @throws Exception
+     * @throws \DivisionByZeroError
+     * @throws \TypeError
      */
     public function all(): Response
     {

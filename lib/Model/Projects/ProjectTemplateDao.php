@@ -302,6 +302,8 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @return array<string, mixed>
      * @throws Exception
+     * @throws \DivisionByZeroError
+     * @throws \TypeError
      */
     public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {

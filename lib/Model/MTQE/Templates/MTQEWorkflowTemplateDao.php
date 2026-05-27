@@ -44,6 +44,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws PDOException
      * @throws Exception
+     * @throws \DivisionByZeroError
      */
     public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {

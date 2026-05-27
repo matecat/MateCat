@@ -2212,6 +2212,12 @@ parameters:
 			path: lib/Controller/API/V3/FileInfoController.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\FiltersConfigTemplateController\:\:all\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/FiltersConfigTemplateController.php
+
+		-
 			message: '#^Method Controller\\API\\V3\\FiltersConfigTemplateController\:\:all\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -2398,6 +2404,18 @@ parameters:
 			path: lib/Controller/API/V3/MyMemoryController.php
 
 		-
+			message: '#^Method Controller\\API\\V3\\PayableRateController\:\:index\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/PayableRateController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\PayableRateController\:\:index\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/PayableRateController.php
+
+		-
 			message: '#^Call to an undefined method Throwable\:\:getFormattedError\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2480,6 +2498,12 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V3/PayableRateController.php
+
+		-
+			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:index\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/V3/QAModelTemplateController.php
 
 		-
 			message: '#^Call to an undefined method Throwable\:\:getFormattedError\(\)\.$#'
@@ -3256,83 +3280,6 @@ parameters:
 			count: 1
 			path: lib/Model/OwnerFeatures/OwnerFeatureStruct.php
 
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:count\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:count\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:format\(\) has parameter \$items with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:format\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:getPagination\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\Pager\:\:getPagination\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Parameter \#3 \$pages of method Model\\Pagination\\Pager\:\:format\(\) expects int, float given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Pagination/Pager.php
-
-		-
-			message: '#^Method Model\\Pagination\\PaginationParameters\:\:__construct\(\) has parameter \$bindParams with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/PaginationParameters.php
-
-		-
-			message: '#^Method Model\\Pagination\\PaginationParameters\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/Pagination/PaginationParameters.php
-
-		-
-			message: '#^Method Model\\Pagination\\PaginationParameters\:\:getBindParams\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/PaginationParameters.php
-
-		-
-			message: '#^Property Model\\Pagination\\PaginationParameters\:\:\$bindParams type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Pagination/PaginationParameters.php
-
-		-
-			message: '#^Property Model\\Pagination\\PaginationParameters\:\:\$current \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Pagination/PaginationParameters.php
-
-		-
-			message: '#^Property Model\\Pagination\\PaginationParameters\:\:\$pagination \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/Pagination/PaginationParameters.php
 
 
 

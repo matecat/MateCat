@@ -47,6 +47,7 @@ class XliffConfigTemplateController extends KleinController
      * Get all entries
      *
      * @throws \TypeError
+     * @throws \DivisionByZeroError
      */
     public function all(): Response
     {
