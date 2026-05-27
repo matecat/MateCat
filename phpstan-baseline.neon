@@ -3091,55 +3091,6 @@ parameters:
 			path: lib/Model/FilesStorage/S3FilesStorage.php
 
 		-
-			message: '#^Call to an undefined method object\:\:fromArray\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$dita of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setDita\(\) expects Model\\Filters\\DTO\\Dita\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$json of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setJson\(\) expects Model\\Filters\\DTO\\Json\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$ms_excel of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setMsExcel\(\) expects Model\\Filters\\DTO\\MSExcel\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$ms_powerpoint of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setMsPowerpoint\(\) expects Model\\Filters\\DTO\\MSPowerpoint\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$ms_word of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setMsWord\(\) expects Model\\Filters\\DTO\\MSWord\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$xml of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setXml\(\) expects Model\\Filters\\DTO\\Xml\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$yaml of method Model\\Filters\\FiltersConfigTemplateStruct\:\:setYaml\(\) expects Model\\Filters\\DTO\\Yaml\|null, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/Filters/FiltersConfigTemplateStruct.php
-
-
-		-
 			message: '#^Method Model\\LQA\\CategoryStruct\:\:toArrayWithJsonDecoded\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

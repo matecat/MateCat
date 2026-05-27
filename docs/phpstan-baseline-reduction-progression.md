@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 451 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 452 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -212,6 +212,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Filters/DTO/Xml.php` | Phase 18 |
 | `lib/Model/Filters/DTO/Yaml.php` | Phase 18 |
 | `lib/Model/Filters/FiltersConfigTemplateDao.php` | Phase 25 |
+| `lib/Model/Filters/FiltersConfigTemplateStruct.php` | Phase N+ |
 
 #### Model/Engines (Structs)
 | File | Cleaned In |
