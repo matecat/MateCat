@@ -215,7 +215,7 @@ describe('validatePrChecklist', () => {
         });
 
         it('passes with AI tools used', () => {
-            const body = validBody({ai: 'AI tools were used — details below'});
+            const body = validBody({ai: 'AI tools were used — name the agent/tool below'});
             const errors = validatePrChecklist(body, {testFilesWithAdditions: TEST_FILES});
             assert.deepEqual(errors, []);
         });
@@ -302,7 +302,7 @@ describe('validatePrChecklist', () => {
         });
 
         it('fails when both AI options are selected', () => {
-            const body = '## Summary\n\n## Type\n\n- [x] `chore` — build, deps, config, docs\n\n## Testing\n\n- [x] Manual testing performed (describe below)\n\n## AI Disclosure\n\n- [x] No AI tools were used in this PR\n- [x] AI tools were used — details below\n## Notes\n\n';
+            const body = '## Summary\n\n## Type\n\n- [x] `chore` — build, deps, config, docs\n\n## Testing\n\n- [x] Manual testing performed (describe below)\n\n## AI Disclosure\n\n- [x] No AI tools were used in this PR\n- [x] AI tools were used — name the agent/tool below\n## Notes\n\n';
             const errors = validatePrChecklist(body, {});
             assert.ok(errors.some((e) => e.includes('Both AI disclosure options')));
         });

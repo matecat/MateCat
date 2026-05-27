@@ -54,6 +54,11 @@ class Lara extends AbstractEngine
         'creative',
     ];
 
+    private const array ALLOWED_MODELS = [
+        'prosa',
+        'think',
+    ];
+
     /**
      * @inheritdoc
      * @see AbstractEngine::$_isAdaptiveMT
@@ -234,6 +239,8 @@ class Lara extends AbstractEngine
 
         $metadataDao = new MetadataDao();
         $laraStyle = $_config['lara_style'] ?? null;
+        $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
+        $laraModel = $_config['lara_model'] ?: '';
 
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
@@ -261,18 +268,21 @@ class Lara extends AbstractEngine
                 }
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
-                $laraGlossariesArray = [];
 
                 if (!empty($_config['id_project'])) {
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
-                        $translateOptions->setGlossaries($laraGlossariesArray);
+                        $translateOptions->setGlossaries($laraGlossaries->value);
                     }
                 }
 
                 if ($laraStyle !== null) {
                     $translateOptions->setStyle($laraStyle);
+                }
+
+                if($laraStyleGuidelineId !== null){
+                    $translateOptions->setStyleguideId($laraStyleGuidelineId);
                 }
 
                 $request_translation = [];
@@ -326,7 +336,9 @@ class Lara extends AbstractEngine
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
                     'style' => $laraStyle,
-                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
+                    'style_guideline_id' => $laraStyleGuidelineId,
+                    'model' => $laraModel,
+                    'glossaries' => isset($laraGlossaries) ? implode(",", $laraGlossaries->value) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
@@ -393,6 +405,8 @@ class Lara extends AbstractEngine
                 'score' => $score ?? null,
                 'reasoning' => $reasoning,
                 'style' => $laraStyle ?? null,
+                'style_guideline_id' => $laraStyleGuidelineId,
+                'model' => $laraModel,
             ]);
         }
 
@@ -403,7 +417,7 @@ class Lara extends AbstractEngine
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning ? ' Think' : '')),
+            'created-by' => $this->getMTName($this->engineRecord->name . ($laraModel === 'think' ? ' Think' : ($laraModel === 'prosa' ? ' Prosa' : ''))),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
         ]))->getMatches(
@@ -491,6 +505,11 @@ class Lara extends AbstractEngine
         // Send the selected memory IDs to Lara via a custom request header.
         $laraClient = $client->getHttpClient();
         $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_keys));
+
+        // Send the translation origin to Lara via a custom request header.
+        if (!empty($_config['draft_translation'])) {
+            $laraClient->setExtraHeader(Headers::LARA_DRAFT_TRANSLATION_HEADER, $_config['draft_translation']);
+        }
 
         try {
             $time_start = microtime(true);
@@ -711,6 +730,7 @@ class Lara extends AbstractEngine
         return [
             'enable_mt_analysis',
             'lara_style',
+            'lara_style_guideline_id',
             'lara_glossaries',
         ];
     }
@@ -721,10 +741,27 @@ class Lara extends AbstractEngine
      */
     public static function validateLaraStyle(string $lara_style): string
     {
-        if (!in_array($lara_style, self::ALLOWED_STYLES)) {
-            throw new InvalidArgumentException("Invalid lara style.", -1);
+        if (!in_array($lara_style, self::ALLOWED_STYLES, true)) {
+            throw new InvalidArgumentException("Invalid Lara style.", -1);
         }
 
         return $lara_style;
+    }
+
+    /**
+     * Validates the given Lara model against a predefined list of allowed models.
+     * If the model is not within the allowed list, an exception is thrown.
+     *
+     * @param string $model The Lara model to validate.
+     * @return string The validated model.
+     * @throws InvalidArgumentException If the provided model is not allowed.
+     */
+    public static function validateLaraModel(string $model): string
+    {
+        if (!in_array($model, self::ALLOWED_MODELS, true)) {
+            throw new InvalidArgumentException("Invalid Lara model.", -1);
+        }
+
+        return $model;
     }
 }

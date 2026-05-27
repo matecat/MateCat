@@ -104,7 +104,7 @@ const REGRESSION_ITEM = 'Regression tests added for bug fixes';
 
 const AI_ITEMS = [
     'No AI tools were used in this PR',
-    'AI tools were used — details below',
+    'AI tools were used — name the agent/tool below',
 ];
 
 const MIGRATION_REQUIRED_ITEMS = [

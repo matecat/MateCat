@@ -222,7 +222,7 @@ class SegmentTranslationDao extends AbstractDao
         $query .= "
                 WHERE id_segment = :id_segment 
                   AND id_job = :id_job
-                  AND tm_analysis_status != 'SKIPPED';";
+                  AND tm_analysis_status NOT IN ('SKIPPED', 'DONE');";
 
         $db = Database::obtain();
         $stmt = $db->getConnection()->prepare($query);

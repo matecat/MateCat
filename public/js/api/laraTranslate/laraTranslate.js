@@ -9,10 +9,11 @@ export const laraTranslate = async ({
   jobId,
   glossaries,
   style,
+  styleguideId,
   reasoning = true,
+  multiline = false,
 }) => {
   const credentials = new AuthToken(token, null)
-
   const lara = new Translator(credentials, {
     connectionTimeoutMs: 30000,
   })
@@ -30,12 +31,13 @@ export const laraTranslate = async ({
     config.source_rfc,
     config.target_rfc,
     {
-      multiline: false,
+      multiline,
       contentType: 'application/xliff+xml',
       headers: {'X-Lara-Engine-Tuid': `${jobId}:${sid}`},
       glossaries: glossaries,
       reasoning,
       style,
+      ...(styleguideId && {styleguideId}),
     },
   )
 }

@@ -20,7 +20,9 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Utils\AsyncTasks\Workers\Traits\MatchesComparator;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
+use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
@@ -38,8 +40,13 @@ use Utils\Tools\Utils;
 
 class GetContributionWorker extends AbstractWorker
 {
+    private MatchSorterInterface $matchSorter;
 
-    use MatchesComparator;
+    public function __construct(AMQHandler $queueHandler, ?MatchSorterInterface $matchSorter = null)
+    {
+        parent::__construct($queueHandler);
+        $this->matchSorter = $matchSorter ?? new MatchSorter();
+    }
 
     /**
      * @param AbstractElement $queueElement
@@ -76,7 +83,7 @@ class GetContributionWorker extends AbstractWorker
 
         [$mt_result, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $jobStruct->target, $featureSet);
 
-        $matches = $this->_sortMatches($mt_result, $matches);
+        $matches = $this->matchSorter->sortMatches($mt_result, $matches);
 
         if (!$contributionStruct->concordanceSearch) {
             //execute these lines only in segment contribution search,
@@ -108,7 +115,7 @@ class GetContributionWorker extends AbstractWorker
             }
 
             if (!empty($crossLangMatches)) {
-                usort($crossLangMatches, self::__compareScoreDesc(...));
+                $crossLangMatches = $this->matchSorter->sortMatches([], $crossLangMatches);
             }
 
             if (false === $contributionStruct->concordanceSearch) {
@@ -207,7 +214,7 @@ class GetContributionWorker extends AbstractWorker
         $jobStruct = $contributionStruct->getJobStruct();
 
         foreach ($matches as &$match) {
-            if ($this->isMtMatch($match)) {
+            if ($this->matchSorter->isMtMatch($match)) {
                 $match['match'] = EngineConstants::MT;
 
                 $QA = new PostProcess($match['segment'], $match['translation']); // layer 1 here
@@ -372,6 +379,8 @@ class GetContributionWorker extends AbstractWorker
         $_config['num_result'] = $contributionStruct->resultNum;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
         $_config['lara_style'] = $contributionStruct->lara_style;
+        $_config['lara_style_guideline_id'] = $contributionStruct->lara_style_guideline_id;
+        $_config['lara_model'] = $contributionStruct->lara_model;
         $_config['reasoning'] = $contributionStruct->reasoning;
 
         $_config['dialect_strict'] = $contributionStruct->dialect_strict;
@@ -491,7 +500,9 @@ class GetContributionWorker extends AbstractWorker
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
                 $config['translation'] = $contributionStruct->translation;
                 $config['lara_style'] = $contributionStruct->lara_style;
+                $config['lara_style_guideline_id'] = $contributionStruct->lara_style_guideline_id;
                 $config['reasoning'] = $contributionStruct->reasoning;
+                $config['lara_model'] = $contributionStruct->lara_model;
                 $config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $contributionStruct->subfiltering_handlers;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
@@ -508,7 +519,7 @@ class GetContributionWorker extends AbstractWorker
 
                 if ($contributionStruct->mt_qe_workflow_enabled) {
                     // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-                    $mt_qe_config = new MTQEWorkflowParams($queueElement->params->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
+                    $mt_qe_config = new MTQEWorkflowParams($contributionStruct->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
                     $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
                 }
 
