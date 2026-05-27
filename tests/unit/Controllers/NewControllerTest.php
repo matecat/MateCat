@@ -284,4 +284,50 @@ class NewControllerTest extends AbstractTest
         $this->method->invoke($this->controller);
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestWithLaraStyleGuideId(): void
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'segmentation_rule' => 'patent',
+                'lara_style_guideline_id' => 'guide-abc-123',
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        $validateParameters = $this->method->invoke($this->controller);
+
+        $this->assertIsArray($validateParameters);
+        $this->assertArrayHasKey('lara_style_guideline_id', $validateParameters);
+        $this->assertEquals('guide-abc-123', $validateParameters['lara_style_guideline_id']);
+    }
+
 }

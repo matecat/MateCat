@@ -85,6 +85,7 @@ class SetContributionMTWorker extends SetContributionWorker
         $config['context_before'] = $contributionStruct->context_before;
         $config['context_after'] = $contributionStruct->context_after;
         $config['translation_origin'] = $contributionStruct->translation_origin;
+        $config['draft_translation'] = $contributionStruct->draftTranslation;
 
         // set the contribution for every key in the job belonging to the user
         $res = $engine->update($config);

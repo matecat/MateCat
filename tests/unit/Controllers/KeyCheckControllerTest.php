@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Klein\DataCollection\DataCollection;
 use Klein\Request;
+use Controller\Services\RateLimiterService;
 use Klein\Response;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
@@ -42,7 +43,7 @@ class TestableKeyCheckController extends KeyCheckController
         $this->rateLimitIpResponse = $response;
     }
 
-    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
+    public function checkAndIncrementRateLimit(Response $response, string $identifier, string $route, int $maxRetries = 10, ?RateLimiterService $limiterService = null): ?Response
     {
         $this->rateLimitCallCount++;
         if ($this->rateLimitCallCount % 2 === 1) {

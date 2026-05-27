@@ -39,7 +39,7 @@ Execution order:
 
 1. **TDD** — write good test coverage alongside every PHPStan improvement. Tests FIRST or alongside, never deferred.
 2. **Verify ALL callers** — when changing/updating method signatures (parameters, return types), MUST verify ALL callers, child classes, and sibling implementations before committing.
-3. **Types MUST be certain** — no speculative type changes. Confirm actual runtime behavior via tests/callers before narrowing or changing a type.
+3. **Types MUST be certain** — no speculative type changes. Confirm actual runtime behavior via tests/callers labefore narrowing or changing a type.
 4. **Minimize scope** — fix the PHPStan error, don't refactor surrounding code.
 5. **No `@phpstan-ignore`** or baseline suppression.
 
@@ -67,8 +67,8 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 ### Coverage Target
 
-- When fixing PHPStan errors in a file, the goal is also to **increase test coverage above 80%** for that file. Tests must cover the fixed code paths, not just satisfy PHPStan.
--  MANDATORY  Before starting the coverage, analyze blockers, show me the report about the blockers and the current coverage status.
+- Every file in the ledger must have **at least 80% test coverage**. When fixing PHPStan errors in a file, the goal is also to **increase test coverage above 80%** for that file. Tests must cover the fixed code paths, not just satisfy PHPStan.
+- MANDATORY – Before starting the coverage increase, analyze blockers, show me the report about the blockers and the current coverage status.
 
 ### Commit / Git Rules
 
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 443 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 450 files** (OAuthSignInModel already counted in Phase 37) (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -106,6 +106,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/Abstracts/BaseKleinViewController.php` | Phase 31 |
 | `lib/Controller/Abstracts/FlashMessage.php` | Phase 0 |
 | `lib/Controller/Exceptions/RenderTerminatedException.php` | Phase 13D |
+| `lib/Controller/API/Commons/Exceptions/ConflictError.php` | Phase N+ |
+| `lib/Controller/Services/RateLimiterService.php` | Phase N+ |
 
 #### Controller API
 | File | Cleaned In |
@@ -113,6 +115,8 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/App/Authentication/LoginController.php` | Phase 37 |
 | `lib/Controller/API/App/Authentication/SignupController.php` | Phase 37 |
 | `lib/Controller/API/App/Authentication/LaraAuthController.php` | Phase 0 |
+| `lib/Controller/API/App/Authentication/LaraAuthStandaloneController.php` | Phase N+ |
+| `lib/Controller/API/App/Authentication/Traits/LaraAuthTrait.php` | Phase N+ |
 | `lib/Controller/API/App/CommentController.php` | Phase 5D |
 | `lib/Controller/API/App/CompletionEventController.php` | Phase 31 |
 | `lib/Controller/API/App/ContextUrlController.php` | Phase 31 |
@@ -142,6 +146,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
 | `lib/Controller/API/V2/ChunkTranslationIssueController.php` | Phase 5C |
 | `lib/Controller/API/V2/KeyCheckController.php` | Phase 5C |
+| `lib/Controller/API/V3/CancelRequestController.php` | Phase N+ |
 | `lib/Controller/API/V3/LaraController.php` | Phase 0 |
 | `lib/Controller/API/V3/ModernMTController.php` | Phase 21 |
 | `lib/Controller/API/V3/ProjectTemplateController.php` | Phase 25+ |
@@ -330,6 +335,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/ConnectedServices/GDrive/RemoteFileService.php` | Phase 28 |
 | `lib/Model/ConnectedServices/GDrive/Session.php` | Phase 28 |
 | `lib/Model/ProjectCreation/ProjectManager.php` | Phase 31 |
+| `lib/Model/ProjectCreation/ProjectStructure.php` | Phase N+ |
 | `lib/Model/Files/FileDao.php` | Phase 25 |
 | `lib/Model/Files/MetadataDao.php` | Phase 25 |
 | `lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php` | Phase 25 |
@@ -581,6 +587,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 |------|-----------|
 | `lib/View/API/V3/Json/FilesInfo.php` | Phase 34 |
 | `lib/View/API/App/Json/Analysis/AnalysisFile.php` | Phase 12A |
+| `lib/View/API/App/Json/Analysis/AnalysisJobSummary.php` | Phase N+ |
 | `lib/View/API/App/Json/Analysis/AnalysisFileMetadata.php` | Phase 12A |
 | `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
 | `lib/View/API/V2/Json/Membership.php` | Phase 12A |

@@ -120,6 +120,14 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public string $translation_origin = InternalMatchesConstants::TM;
 
     /**
+     * The original suggestion (draft translation) that was presented to the user
+     * before they edited it. Used to send the X-Lara-Engine-Draft-Translation header.
+     *
+     * @var string
+     */
+    public string $draftTranslation = "";
+
+    /**
      * @var JobStruct
      */
     public JobStruct $jobStruct;

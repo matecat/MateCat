@@ -16,7 +16,6 @@
         "league/oauth2-linkedin": "^5.1",
         "matecat/cwh": "^3.1",
         "matecat/klein": "^3.2",
-        "matecat/lara-php": "^v2.0.0-beta.1",
         "matecat/simple-s3": "^v2.0.0",
         "matecat/subfiltering": "^4.1",
         "matecat/whole-text-finder": "^2.0",
@@ -35,6 +34,7 @@
         "swaggest/json-schema": "^0.12.42",
         "symfony/cache": "~7.3.9",
         "symfony/console": "^5",
+        "translated/lara-sdk": "^1",
         "ext-curl": "*",
         "ext-pcntl": "*",
         "ext-libxml": "*",
@@ -57,6 +57,9 @@
         "use-include-path": true,
         "allow-plugins": {
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": { "CVE-2026-45073": "PdoAdapter unused; MateCat uses FilesystemAdapter only" }
         }
     },
     "autoload": {

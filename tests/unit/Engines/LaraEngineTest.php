@@ -307,7 +307,7 @@ class LaraEngineTest extends AbstractTest
             'lara_style' => 'creative',
         ]);
         self::assertSame(200, $response->responseStatus);
-        self::assertSame('MT-Lara Think', $response->matches[0]->created_by);
+        self::assertSame('MT-Lara', $response->matches[0]->created_by);
         self::assertSame('creative', $response->matches[0]->style);
     }
     /**
@@ -967,7 +967,7 @@ class LaraEngineTest extends AbstractTest
     #[Test]
     public function staticConfigurationMethodsBehaveAsExpected(): void
     {
-        self::assertSame(['enable_mt_analysis', 'lara_style', 'lara_glossaries'], Lara::getConfigurationParameters());
+        self::assertSame(['enable_mt_analysis', 'lara_style', 'lara_style_guideline_id', 'lara_glossaries'], Lara::getConfigurationParameters());
         self::assertSame('faithful', Lara::validateLaraStyle('faithful'));
         $this->expectException(InvalidArgumentException::class);
         Lara::validateLaraStyle('invalid-style');

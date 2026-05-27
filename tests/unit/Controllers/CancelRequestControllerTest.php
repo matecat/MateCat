@@ -2,14 +2,18 @@
 
 namespace unit\Controllers;
 
+use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\V3\CancelRequestController;
+use Controller\Services\RateLimiterService;
 use Exception;
 use Klein\Request;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDisabledService;
 use Model\Teams\TeamStruct;
+use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -17,70 +21,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use TestHelpers\AbstractTest;
-
-/**
- * Testable subclass that overrides public methods to skip the private performChecks call,
- * allowing isolated testing of the validation and response logic.
- */
-class TestableCancelRequestController extends CancelRequestController
-{
-    public bool $segmentDisabledFlag = false;
-    public bool $enableCalled = false;
-    public bool $disableCalled = false;
-
-    public function __construct()
-    {
-        // skip parent constructor
-    }
-
-    public function initWith(Request $request, Response $response): void
-    {
-        $ref = new ReflectionClass(CancelRequestController::class);
-        $ref->getProperty('request')->setValue($this, $request);
-        $ref->getProperty('response')->setValue($this, $response);
-    }
-
-    public function enableRequest(): void
-    {
-        $rawIdJob = $this->request->param('id_job');
-        $rawIdSegment = $this->request->param('id_segment');
-
-        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
-        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
-
-        if ($id_job === false || $id_segment === false) {
-            throw new NotFoundException('Invalid id_job or id_segment');
-        }
-
-        if ($this->segmentDisabledFlag) {
-            $this->enableCalled = true;
-        }
-
-        $this->response->json([
-            'id_segment' => $id_segment,
-        ]);
-    }
-
-    public function cancelRequest(): void
-    {
-        $rawIdJob = $this->request->param('id_job');
-        $rawIdSegment = $this->request->param('id_segment');
-        $id_job = filter_var($rawIdJob, FILTER_VALIDATE_INT);
-        $id_segment = filter_var($rawIdSegment, FILTER_VALIDATE_INT);
-
-        if ($id_job === false || $id_segment === false) {
-            throw new NotFoundException('Invalid id_job or id_segment');
-        }
-
-        if (!$this->segmentDisabledFlag) {
-            $this->disableCalled = true;
-        }
-
-        $this->response->json([
-            'id_segment' => $id_segment,
-        ]);
-    }
-}
+use Utils\Constants\TranslationStatus;
 
 #[AllowMockObjectsWithoutExpectations]
 class CancelRequestControllerTest extends AbstractTest
@@ -100,7 +41,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsJsonWithIdSegment(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -108,6 +49,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 42]);
@@ -118,7 +60,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsBadRequestForInvalidIdJob(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 'not_a_number'],
@@ -135,7 +77,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsBadRequestForInvalidIdSegment(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -151,7 +93,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsBadRequestWhenBothIdsAreInvalid(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 'abc'],
@@ -167,7 +109,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestSucceedsWithNegativeIdJob(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, -1],
@@ -175,7 +117,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        // filter_var(-1, FILTER_VALIDATE_INT) returns -1 (valid int, truthy)
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 42]);
@@ -186,7 +128,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestSucceedsWithZeroIdJob(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 0],
@@ -194,8 +136,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        // filter_var(0, FILTER_VALIDATE_INT) returns 0 (valid int, but falsy in PHP loose comparison)
-        // Actually returns int(0), which is !== false, so it passes the check
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 42]);
@@ -206,7 +147,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsBadRequestForNullIdSegment(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -222,7 +163,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsBadRequestForFloatIdJob(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, '1.5'],
@@ -238,7 +179,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestWithLargeIntegerParams(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 999999999],
@@ -246,6 +187,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 888888888],
         ]);
 
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 888888888]);
@@ -256,7 +198,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestWithStringIntegerParams(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, '123'],
@@ -264,6 +206,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, '456'],
         ]);
 
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 456]);
@@ -274,7 +217,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function enableRequestReturnsBadRequestForEmptyStringIdJob(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, ''],
@@ -288,9 +231,13 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function enableRequestCallsDestroySegmentDisabledCacheWhenSegmentIsDisabled(): void
+    public function enableRequestCallsEnableWhenSegmentIsDisabled(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks(segmentDisabled: true);
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(true);
+        $service->expects($this->once())->method('enable')->with(42);
+
+        $controller = $this->createActionController(segmentDisabledService: $service);
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -298,15 +245,19 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $controller->enableRequest();
+        $this->response->method('code')->willReturn(200);
 
-        $this->assertTrue($controller->enableCalled);
+        $controller->enableRequest();
     }
 
     #[Test]
-    public function enableRequestDoesNotCallDestroyWhenSegmentIsNotDisabled(): void
+    public function enableRequestDoesNotCallEnableWhenSegmentIsNotDisabled(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks(segmentDisabled: false);
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(false);
+        $service->expects($this->never())->method('enable');
+
+        $controller = $this->createActionController(segmentDisabledService: $service);
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -314,9 +265,9 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $controller->enableRequest();
+        $this->response->method('code')->willReturn(200);
 
-        $this->assertFalse($controller->enableCalled);
+        $controller->enableRequest();
     }
 
     // ─── cancelRequest tests ─────────────────────────────────────────
@@ -324,7 +275,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function cancelRequestReturnsJsonWithIdSegment(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -332,6 +283,7 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 42]);
@@ -342,7 +294,11 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function cancelRequestSkipsDisableWhenSegmentAlreadyDisabled(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks(segmentDisabled: true);
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(true);
+        $service->expects($this->never())->method('disable');
+
+        $controller = $this->createActionController(segmentDisabledService: $service);
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -350,19 +306,19 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $this->response->expects($this->once())
-            ->method('json')
-            ->with(['id_segment' => 42]);
+        $this->response->method('code')->willReturn(200);
 
         $controller->cancelRequest();
-
-        $this->assertFalse($controller->disableCalled);
     }
 
     #[Test]
-    public function cancelRequestSavesDisabledCacheWhenNotAlreadyDisabled(): void
+    public function cancelRequestCallsDisableWhenNotAlreadyDisabled(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks(segmentDisabled: false);
+        $service = $this->createMock(SegmentDisabledService::class);
+        $service->method('isDisabled')->willReturn(false);
+        $service->expects($this->once())->method('disable')->with(42);
+
+        $controller = $this->createActionController(segmentDisabledService: $service);
 
         $this->request->method('param')->willReturnMap([
             ['id_job', null, 1],
@@ -370,15 +326,15 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        $controller->cancelRequest();
+        $this->response->method('code')->willReturn(200);
 
-        $this->assertTrue($controller->disableCalled);
+        $controller->cancelRequest();
     }
 
     #[Test]
     public function cancelRequestWithDifferentSegmentId(): void
     {
-        $controller = $this->createControllerWithBypassedPerformChecks();
+        $controller = $this->createActionController();
 
         $this->request->method('param')->willReturnCallback(function ($key) {
             return match ($key) {
@@ -389,6 +345,7 @@ class CancelRequestControllerTest extends AbstractTest
             };
         });
 
+        $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
             ->with(['id_segment' => 55]);
@@ -503,9 +460,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksPassesWhenUserIsTeamMemberButNotOwner(): void
     {
-        // When user is a team member but not the creator, the code falls through
-        // to the segment status check (no "not owner" exception is thrown)
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $teamStruct = $this->createStub(TeamStruct::class);
@@ -543,7 +498,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsTranslated(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('TRANSLATED');
@@ -560,7 +515,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsApproved(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('APPROVED');
@@ -577,7 +532,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsDraft(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('DRAFT');
@@ -594,7 +549,7 @@ class CancelRequestControllerTest extends AbstractTest
     #[Test]
     public function performChecksThrowsExceptionWhenSegmentStatusIsRejected(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(ConflictError::class);
         $this->expectExceptionMessage('Segment is not in "new" status and cannot be disabled');
 
         $controller = $this->buildControllerWithSegmentStatus('REJECTED');
@@ -622,7 +577,6 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        // Should not throw and not call json — the response is replaced with 429
         $this->response->expects($this->never())->method('json');
 
         $controller->cancelRequest();
@@ -678,7 +632,6 @@ class CancelRequestControllerTest extends AbstractTest
             ['id_segment', null, 42],
         ]);
 
-        // Mock response->code() to return 200 (not 429) so enableRequest proceeds
         $this->response->method('code')->willReturn(200);
         $this->response->expects($this->once())
             ->method('json')
@@ -712,7 +665,7 @@ class CancelRequestControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function performChecksCallsCheckAndIncrementWhenJobNotFound(): void
+    public function performChecksCallsCheckAndIncrementTwice(): void
     {
         $user = $this->createStub(UserStruct::class);
         $user->uid = 123;
@@ -720,12 +673,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $controller = $this->getMockBuilder(CancelRequestController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([
-                'getJob',
-                'checkAndIncrementRateLimit',
-                'getUser',
-                'findSegmentTranslation',
-            ])
+            ->onlyMethods(['getJob', 'checkAndIncrementRateLimit', 'getUser'])
             ->getMock();
 
         $ref = new ReflectionClass(CancelRequestController::class);
@@ -733,10 +681,16 @@ class CancelRequestControllerTest extends AbstractTest
         $ref->getProperty('response')->setValue($controller, $this->response);
         $ref->getProperty('user')->setValue($controller, $user);
 
+        $segmentTranslationDao = $this->createStub(SegmentTranslationDao::class);
+        $segmentTranslationDao->method('findBySegmentAndJob')->willReturn(null);
+        $ref->getProperty('segmentTranslationDao')->setValue($controller, $segmentTranslationDao);
+
+        $segmentDisabledService = $this->createStub(SegmentDisabledService::class);
+        $ref->getProperty('segmentDisabledService')->setValue($controller, $segmentDisabledService);
+
         $controller->method('getUser')->willReturn($user);
         $controller->method('getJob')->willReturn(null);
         $controller->method('checkAndIncrementRateLimit')->willReturn(null);
-        $controller->method('findSegmentTranslation')->willReturn(null);
 
         $controller->expects($this->exactly(2))
             ->method('checkAndIncrementRateLimit');
@@ -749,6 +703,25 @@ class CancelRequestControllerTest extends AbstractTest
 
         $this->expectException(NotFoundException::class);
         $controller->cancelRequest();
+    }
+
+    #[Test]
+    public function enableRequestReturnsEarlyWhenRateLimited(): void
+    {
+        $rateLimitedResponse = $this->createStub(Response::class);
+        $rateLimitedResponse->method('code')->willReturn(429);
+
+        $controller = $this->createControllerWithPartialMock(rateLimitResponseIp: $rateLimitedResponse);
+
+        $this->request->method('param')->willReturnMap([
+            ['id_job', null, 1],
+            ['password', null, 'abc123'],
+            ['id_segment', null, 42],
+        ]);
+
+        $this->response->expects($this->never())->method('json');
+
+        $controller->enableRequest();
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────
@@ -778,13 +751,31 @@ class CancelRequestControllerTest extends AbstractTest
         );
     }
 
-    private function createControllerWithBypassedPerformChecks(bool $segmentDisabled = false): TestableCancelRequestController
-    {
-        $controller = new TestableCancelRequestController();
-        $controller->segmentDisabledFlag = $segmentDisabled;
-        $controller->initWith($this->request, $this->response);
+    private function createActionController(
+        ?SegmentDisabledService $segmentDisabledService = null,
+    ): CancelRequestController {
+        $teamStruct = $this->createStub(TeamStruct::class);
+        $teamStruct->created_by = 123;
 
-        return $controller;
+        $projectStruct = $this->createStub(ProjectStruct::class);
+        $projectStruct->method('getTeam')->willReturn($teamStruct);
+
+        $jobStruct = $this->createStub(JobStruct::class);
+        $jobStruct->method('getProject')->willReturn($projectStruct);
+
+        $segmentTranslation = new SegmentTranslationStruct();
+        $segmentTranslation->status = TranslationStatus::STATUS_NEW;
+
+        $user = $this->createStub(UserStruct::class);
+        $user->uid = 123;
+        $user->email = 'test@example.com';
+
+        return $this->createControllerWithPartialMock(
+            jobReturn: $jobStruct,
+            segmentReturn: $segmentTranslation,
+            user: $user,
+            segmentDisabledService: $segmentDisabledService,
+        );
     }
 
     private function createControllerWithPartialMock(
@@ -793,15 +784,11 @@ class CancelRequestControllerTest extends AbstractTest
         ?UserStruct $user = null,
         ?Response $rateLimitResponseIp = null,
         ?Response $rateLimitResponseEmail = null,
+        ?SegmentDisabledService $segmentDisabledService = null,
     ): CancelRequestController {
         $controller = $this->getMockBuilder(CancelRequestController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([
-                'getJob',
-                'checkAndIncrementRateLimit',
-                'getUser',
-                'findSegmentTranslation',
-            ])
+            ->onlyMethods(['getJob', 'checkAndIncrementRateLimit', 'getUser'])
             ->getMock();
 
         $ref = new ReflectionClass(CancelRequestController::class);
@@ -816,7 +803,6 @@ class CancelRequestControllerTest extends AbstractTest
         }
 
         $ref->getProperty('user')->setValue($controller, $user);
-
         $controller->method('getUser')->willReturn($user);
 
         if ($jobReturn === 'NOT_SET') {
@@ -825,11 +811,20 @@ class CancelRequestControllerTest extends AbstractTest
             $controller->method('getJob')->willReturn($jobReturn);
         }
 
+        // Inject SegmentTranslationDao
+        $segmentTranslationDao = $this->createStub(SegmentTranslationDao::class);
         if ($segmentReturn === 'NOT_SET') {
-            $controller->method('findSegmentTranslation')->willReturn(null);
+            $segmentTranslationDao->method('findBySegmentAndJob')->willReturn(null);
         } else {
-            $controller->method('findSegmentTranslation')->willReturn($segmentReturn);
+            $segmentTranslationDao->method('findBySegmentAndJob')->willReturn($segmentReturn);
         }
+        $ref->getProperty('segmentTranslationDao')->setValue($controller, $segmentTranslationDao);
+
+        // Inject SegmentDisabledService
+        $ref->getProperty('segmentDisabledService')->setValue(
+            $controller,
+            $segmentDisabledService ?? $this->createStub(SegmentDisabledService::class)
+        );
 
         // Rate limit mocking — order matches performChecks: [$userIp, $userEmail]
         $callIndex = 0;

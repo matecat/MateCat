@@ -61,6 +61,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable
      * @param array<\Model\Files\MetadataStruct|object> $metadata
      *
      * @throws \TypeError
+     * @throws \RuntimeException
      */
     public function __construct($id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [])
     {

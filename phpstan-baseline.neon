@@ -1936,12 +1936,6 @@ parameters:
 			path: lib/Controller/API/V2/UrlsController.php
 
 		-
-			message: '#^Method Controller\\API\\V3\\CancelRequestController\:\:findSegmentTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/CancelRequestController.php
-
-		-
 			message: '#^Method Controller\\API\\V3\\ChunkController\:\:show\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3456,12 +3450,6 @@ parameters:
 		-
 			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:validateLanguage\(\) has parameter \$lang with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_strlen expects string, string\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
@@ -5919,18 +5907,6 @@ parameters:
 			path: lib/View/API/App/Json/Analysis/AnalysisJob.php
 
 		-
-			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisJobSummary\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisJobSummary.php
-
-		-
-			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisMatch\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisMatch.php
-
-		-
 			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisMatch\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7295,6 +7271,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
+			message: '#^Part \$orders \(list\<mixed\>\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
+
+		-
 			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, array\<int, array\<string, mixed\>\> given\.$#'
 			identifier: argument.type
 			count: 3
@@ -7395,6 +7377,12 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
+
+		-
+			message: '#^Part \$orders \(list\<mixed\>\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
 			message: '#^Call to an undefined method object\:\:toArray\(\)\.$#'

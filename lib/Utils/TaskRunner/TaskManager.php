@@ -396,7 +396,9 @@ class TaskManager extends AbstractDaemon
                     break;
                 }
             }
-        } elseif (empty($pid)) {
+        } else {
+            // At this point $pid, $num and $queueInfo are all empty: kill EVERYTHING.
+            // (Branches above already cover every other combination; see PHPStan analysis.)
             $this->logger->debug("Killing ALL processes.");
             foreach ($this->_queueContextList->list as $queue) {
                 $pNameList = $this->requireQueueHandler()->getRedisClient()->smembers($queue->pid_set_name);
@@ -411,8 +413,6 @@ class TaskManager extends AbstractDaemon
                 }
                 $queue->pid_list_len = 0;
             }
-        } else {
-            $this->logger->debug("Parameters not valid. Killing *** NONE ***");
         }
 
         $this->_runningPids -= $numDeleted;

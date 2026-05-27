@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(31, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(32, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -62,6 +62,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'MMT_GLOSSARIES'                => [ProjectsMetadataMarshaller::MMT_GLOSSARIES, 'mmt_glossaries'],
             'LARA_GLOSSARIES'               => [ProjectsMetadataMarshaller::LARA_GLOSSARIES, 'lara_glossaries'],
             'LARA_STYLE'                    => [ProjectsMetadataMarshaller::LARA_STYLE, 'lara_style'],
+            'LARA_STYLE_GUIDELINE_ID'       => [ProjectsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID, 'lara_style_guideline_id'],
             'INTENTO_ROUTING'               => [ProjectsMetadataMarshaller::INTENTO_ROUTING, 'intento_routing'],
             'INTENTO_PROVIDER'              => [ProjectsMetadataMarshaller::INTENTO_PROVIDER, 'intento_provider'],
             'DEEPL_FORMALITY'               => [ProjectsMetadataMarshaller::DEEPL_FORMALITY, 'deepl_formality'],

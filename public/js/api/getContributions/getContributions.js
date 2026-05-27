@@ -26,6 +26,7 @@ export const getContributions = async ({
   contextListBefore,
   contextListAfter,
   laraStyle,
+  laraModel,
   reasoning = true,
 }) => {
   const contextBefore = globalFunctions.getContextBefore(idSegment)
@@ -50,6 +51,7 @@ export const getContributions = async ({
     context_list_before: JSON.stringify(contextListBefore),
     context_list_after: JSON.stringify(contextListAfter),
     ...(typeof laraStyle === 'string' && {lara_style: laraStyle}),
+    ...(typeof laraModel === 'string' && {lara_model: laraModel}),
     reasoning,
   }
   const dataParams = Object.fromEntries(
