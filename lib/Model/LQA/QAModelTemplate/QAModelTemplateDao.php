@@ -3,6 +3,7 @@
 namespace Model\LQA\QAModelTemplate;
 
 use DateTime;
+use DivisionByZeroError;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -22,6 +23,15 @@ class QAModelTemplateDao extends AbstractDao
 
     const string query_paginated = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
     const string paginated_map_key = __CLASS__ . "::getAllPaginated";
+
+    private ProjectTemplateDao $projectTemplateDao;
+
+    public function __construct(
+        ?ProjectTemplateDao $projectTemplateDao = null
+    ) {
+        parent::__construct();
+        $this->projectTemplateDao = $projectTemplateDao ?? new ProjectTemplateDao();
+    }
 
     /**
      * @param string $json
@@ -127,7 +137,7 @@ class QAModelTemplateDao extends AbstractDao
                 'id_template' => $id
             ]);
 
-            (new ProjectTemplateDao())->removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
+            $this->projectTemplateDao->removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
 
             $conn->commit();
 
@@ -149,12 +159,7 @@ class QAModelTemplateDao extends AbstractDao
      */
     public function getDefaultTemplate(int $uid): array
     {
-        $defaultTemplate = file_get_contents(AppConfig::$ROOT . '/inc/qa_model.json');
-        if ($defaultTemplate === false) {
-            throw new Exception("Cannot read QA model configuration file: " . AppConfig::$ROOT . '/inc/qa_model.json');
-        }
-
-        $defaultTemplateModel = json_decode($defaultTemplate, true);
+        $defaultTemplateModel = json_decode($this->readDefaultQaModelJson(), true);
 
         $categories = [];
         $idSeverityIndex = 0;
@@ -228,13 +233,13 @@ class QAModelTemplateDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
-     * @throws \DivisionByZeroError
+     * @throws DivisionByZeroError
      */
-    public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
+    public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24, ?Pager $pager = null): array
     {
         $conn = $this->database->getConnection();
 
-        $pager = new Pager($conn);
+        $pager ??= new Pager($conn);
         $totals = $pager->count(
             "SELECT count(id) FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid",
             ['uid' => $uid]
@@ -543,6 +548,19 @@ class QAModelTemplateDao extends AbstractDao
         } finally {
             $this->destroyQueryPaginated($modelTemplateStruct->uid);
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function readDefaultQaModelJson(): string
+    {
+        $content = file_get_contents(AppConfig::$ROOT . '/inc/qa_model.json');
+        if ($content === false) {
+            throw new Exception("Cannot read QA model configuration file: " . AppConfig::$ROOT . '/inc/qa_model.json');
+        }
+
+        return $content;
     }
 
     /**
