@@ -52,6 +52,10 @@ Otherwise, use your native memory capabilities (MEMORY.md, auto memory, etc.).
 
 Do not add Co-Authored-By trailers to commit messages.
 
+Follow the project .github/prompts/conventional-commit.prompt.md for commit message formatting.
+
+MANDATORY: READ IT. When you think you know, it's the moment you are failing.
+
 ## MCP Tools: code-review-graph
 
 **IMPORTANT: This project has a knowledge graph. ALWAYS use the
