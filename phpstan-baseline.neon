@@ -13537,12 +13537,6 @@ parameters:
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
-			message: '#^Parameter \#1 \$string of function mb_strlen expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
 			message: '#^Property Model\\PayableRates\\CustomPayableRateStruct\:\:\$breakdowns type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -24716,12 +24710,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Network/MultiCurlHandler.php
-
-		-
-			message: '#^Parameter \#3 \$value of function curl_setopt expects non\-empty\-string, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/Network/MultiCurlHandler.php

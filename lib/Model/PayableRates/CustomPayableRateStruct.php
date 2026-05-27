@@ -110,7 +110,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      */
     private function validateBreakdowns(array $breakdowns): void
     {
-        $size = mb_strlen(json_encode($breakdowns, JSON_NUMERIC_CHECK), '8bit');
+        $size = strlen((string)json_encode($breakdowns, JSON_NUMERIC_CHECK));
 
         if ($size > self::MAX_BREAKDOWN_SIZE) {
             throw new Exception('`breakdowns` string is too large. Max size: 64kb', 400);
