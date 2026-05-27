@@ -1264,6 +1264,12 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
 
 		-
+			message: '#^Method Controller\\API\\Commons\\Validators\\SegmentTranslationIssueValidator\:\:__ensureIssueIsInScope\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
+
+		-
 			message: '#^Method Controller\\API\\Commons\\Validators\\SegmentTranslationIssueValidator\:\:__ensureIssueIsInScope\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -3153,54 +3159,6 @@ parameters:
 
 
 
-
-		-
-			message: '#^Cannot access property \$id on Model\\LQA\\CategoryStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Cannot access property \$version_number on Model\\Translations\\SegmentTranslationStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Cannot call method getJsonSeverities\(\) on Model\\LQA\\CategoryStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryStruct\:\:addComments\(\) has parameter \$comments with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type array\|null is not subtype of native type float\|null\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Property Model\\LQA\\EntryStruct\:\:\$id_category \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Property Model\\LQA\\EntryStruct\:\:\$translation_version \(int\) does not accept int\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryStruct\:\:ensureValid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/LQA/EntryStruct.php
 
 		-
 			message: '#^Method Model\\LQA\\QAModelInterface\:\:getDecodedModel\(\) return type has no value type specified in iterable type array\.$#'

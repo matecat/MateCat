@@ -10,7 +10,6 @@ use Model\Exceptions\ValidationError;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TypeError;
-use Utils\Logger\LoggerFactory;
 
 class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
@@ -37,28 +36,31 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
     protected mixed $_comments;
     protected mixed $_diff;
 
-    /**
-     * @var EntryValidator
-     */
     private EntryValidator $validator;
+    private SegmentTranslationDao $segmentTranslationDao;
 
-    public function __construct(array $array_params = [])
-    {
+    public function __construct(
+        array $array_params = [],
+        ?EntryValidator $validator = null,
+        ?SegmentTranslationDao $segmentTranslationDao = null
+    ) {
         parent::__construct($array_params);
-        $this->validator = new EntryValidator($this);
+        $this->validator = $validator ?? new EntryValidator($this);
+        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
     }
 
     /**
      * @throws ReflectionException
      * @throws ValidationError
      * @throws NotFoundException
+     * @throws Exception
      */
     public function ensureValid(): void
     {
         $this->validator->ensureValid();
     }
 
-    public function addComments($comments): void
+    public function addComments(mixed $comments): void
     {
         $this->_comments = $comments;
     }
@@ -102,11 +104,19 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
         // set the translation reading the version number on the
         // segment translation
-        $translation = (new SegmentTranslationDao())->findBySegmentAndJob($this->id_segment, $this->id_job);
-        $this->translation_version = $translation->version_number;
+        $translation = $this->segmentTranslationDao->findBySegmentAndJob($this->id_segment, $this->id_job);
+        if ($translation === null) {
+            throw new NotFoundException('Segment translation not found');
+        }
+        $this->translation_version = $translation->version_number ?? 0;
 
         $this->penalty_points = $this->getPenaltyPoints();
-        $this->id_category = $this->validator->category->id;
+
+        $category = $this->validator->category;
+        if ($category === null) {
+            throw new NotFoundException('Category not found after validation');
+        }
+        $this->id_category = $category->id ?? throw new NotFoundException('Category id is null');
     }
 
     /**
@@ -122,7 +132,7 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
                 $this->end_offset = $tmp;
                 unset($tmp);
             }
-        } elseif (intval($this->start_node > intval($this->end_node))) {
+        } elseif (intval($this->start_node) > intval($this->end_node)) {
             $tmp = $this->start_offset;
             $this->start_offset = $this->end_offset;
             $this->end_offset = $tmp;
@@ -137,11 +147,15 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
-     * @return array|null
+     * @return float|null
      */
     private function getPenaltyPoints(): ?float
     {
-        $severities = $this->validator->category->getJsonSeverities();
+        $category = $this->validator->category;
+        if ($category === null) {
+            return null;
+        }
+        $severities = $category->getJsonSeverities();
 
         foreach ($severities as $severity) {
             if ($severity['label'] == $this->severity) {
