@@ -3203,58 +3203,10 @@ parameters:
 			path: lib/Model/LQA/EntryStruct.php
 
 		-
-			message: '#^Cannot access property \$id on Model\\LQA\\ModelStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Cannot access property \$id on Model\\Segments\\SegmentStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Cannot access property \$id_model on Model\\LQA\\CategoryStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Cannot access property \$id_qa_model on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryValidator\:\:getErrorMessages\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryValidator\:\:getErrors\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryValidator\:\:validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Model\\LQA\\EntryStruct\:\:ensureValid\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Method Model\\LQA\\EntryValidator\:\:validateCategoryId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Model/LQA/EntryValidator.php
-
-		-
-			message: '#^Property Model\\LQA\\EntryValidator\:\:\$errors type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
-			path: lib/Model/LQA/EntryValidator.php
+			path: lib/Model/LQA/EntryStruct.php
 
 		-
 			message: '#^Method Model\\LQA\\QAModelInterface\:\:getDecodedModel\(\) return type has no value type specified in iterable type array\.$#'
