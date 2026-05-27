@@ -240,7 +240,7 @@ class Lara extends AbstractEngine
         $metadataDao = new MetadataDao();
         $laraStyle = $_config['lara_style'] ?? null;
         $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
-        $laraModel = $_config['lara_model'] ?? 'prosa';
+        $laraModel = $_config['lara_model'] ?: '';
 
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
@@ -417,7 +417,7 @@ class Lara extends AbstractEngine
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning || $laraModel === 'think' ? ' Think' : '')),
+            'created-by' => $this->getMTName($this->engineRecord->name . ($laraModel === 'think' ? ' Think' : ($laraModel === 'prosa' ? ' Prosa' : ''))),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
         ]))->getMatches(
