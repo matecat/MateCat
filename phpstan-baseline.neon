@@ -3850,54 +3850,6 @@ parameters:
 			path: lib/Model/Users/MetadataStruct.php
 
 		-
-			message: '#^Cannot access property \$id on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Cannot access property \$name on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Cannot access property \$password on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Method Model\\Users\\RedeemableProject\:\:__construct\(\) has parameter \$session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Method Model\\Users\\RedeemableProject\:\:__getProject\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Method Model\\Users\\RedeemableProject\:\:getProject\(\) should return Model\\Projects\\ProjectStruct but returns Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Method Model\\Users\\RedeemableProject\:\:tryToRedeem\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
-			message: '#^Property Model\\Users\\RedeemableProject\:\:\$session type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Users/RedeemableProject.php
-
-		-
 			message: '#^Method Model\\Users\\UserStruct\:\:belongsToTeam\(\) has parameter \$teamId with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1

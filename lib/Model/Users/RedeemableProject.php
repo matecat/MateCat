@@ -18,25 +18,32 @@ use Utils\Url\CanonicalRoutes;
 
 class RedeemableProject
 {
-    /**
-     * @var UserStruct
-     */
     protected UserStruct $user;
+
+    /** @var array<string, mixed> */
     protected array $session;
 
-    /**
-     * @var ProjectStruct|null
-     */
     protected ?ProjectStruct $project = null;
 
-    public function __construct(UserStruct $user, array &$session)
-    {
+    private ProjectDao $projectDao;
+    private JobDao $jobDao;
+
+    /** @param array<string, mixed> $session */
+    public function __construct(
+        UserStruct $user,
+        array &$session,
+        ?ProjectDao $projectDao = null,
+        ?JobDao $jobDao = null
+    ) {
         $this->user = $user;
         $this->session =& $session;
+        $this->projectDao = $projectDao ?? new ProjectDao();
+        $this->jobDao = $jobDao ?? new JobDao();
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function isPresent(): bool
     {
@@ -45,12 +52,13 @@ class RedeemableProject
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __getProject(): ?ProjectStruct
     {
         if (!isset($this->project)) {
             if (isset($this->session['last_created_pid'])) {
-                $this->project = (new ProjectDao())->findById($this->session['last_created_pid']);
+                $this->project = $this->projectDao->findById($this->session['last_created_pid']);
             }
         }
 
@@ -74,11 +82,11 @@ class RedeemableProject
             $project->id_team = $this->user->getPersonalTeam()->id;
             $project->id_assignee = $this->user->getUid();
 
-            (new ProjectDao())->updateStruct($project, [
+            $this->projectDao->updateStruct($project, [
                 'fields' => ['id_team', 'id_customer', 'id_assignee']
             ]);
 
-            (new JobDao())->updateOwner($project, $this->user);
+            $this->jobDao->updateOwner($project, $this->user);
         }
 
         $this->clear();
@@ -92,13 +100,14 @@ class RedeemableProject
         unset($_SESSION['last_created_pid']);
     }
 
-    public function getProject(): ProjectStruct
+    public function getProject(): ?ProjectStruct
     {
         return $this->project;
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function tryToRedeem(): void
     {
@@ -112,15 +121,15 @@ class RedeemableProject
      */
     public function getDestinationURL(): ?string
     {
-        if ($this->isPresent()) {
+        if ($this->isPresent() && $this->project !== null) {
             return CanonicalRoutes::analyze([
                 'project_name' => $this->project->name,
                 'id_project' => $this->project->id,
                 'password' => $this->project->password
             ]);
-        } else {
-            return null;
         }
+
+        return null;
     }
 
 }
