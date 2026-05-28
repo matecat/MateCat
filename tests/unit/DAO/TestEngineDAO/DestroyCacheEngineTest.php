@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -49,6 +50,7 @@ class DestroyCacheEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::destroyCache
      */
+    #[Test]
     public function test_destroyCache_with_given_engine_struct_with_ID_type_active_inizialized()
     {
         $this->engine_struct->id = 0;

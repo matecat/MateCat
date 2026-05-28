@@ -39,7 +39,8 @@ a.button-component-container {
     background-color: var(--btnBgColor);
     color: var(--btnTextColor);
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       background-color: var(--btnBgColorAlt);
       color: var(--btnTextColor);
     }
@@ -62,7 +63,8 @@ a.button-component-container {
       background-color: var(--btnBgColorSemitransAlt);
     }
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColorHover);
@@ -111,7 +113,8 @@ a.button-component-container {
       color: var(--btnAltTextColor);
     }
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColor);
     }
@@ -127,7 +130,8 @@ a.button-component-container {
       color: colors.$grey200;
     }
 
-    &:not(:disabled):hover {
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
       color: colors.$black;
     }
 
@@ -229,6 +233,24 @@ a.button-component-container {
 
 // Type modifiers
 .default {
+  --btnTextColor: #{colors.$black};
+  --btnTextColorDisabled: #{colors.$grey200};
+  --btnAltTextColor: #{colors.$black};
+  --btnAltTextColorHover: #{colors.$grey600};
+  --btnAltTextColorDisabled: #{rgba(colors.$grey700, 0.12)};
+
+  --btnBorderColor: #{colors.$grey200};
+  --btnBorderColorHover: #{colors.$grey700};
+  --btnBorderColorActive: #{colors.$grey700};
+  --btnBorderColorDisabled: #{rgba(colors.$grey700, 0.12)};
+
+  --btnBgColor: #{colors.$white};
+  --btnBgColorAlt: #{colors.$grey75};
+  --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
+  --btnBgColorOutline: #{rgba(colors.$white, 0.5)};
+}
+.neutral {
   --btnTextColor: #{colors.$black};
   --btnTextColorDisabled: #{colors.$grey200};
   --btnAltTextColor: #{colors.$black};

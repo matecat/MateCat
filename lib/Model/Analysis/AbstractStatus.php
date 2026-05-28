@@ -15,6 +15,7 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -170,7 +171,7 @@ abstract class AbstractStatus
     protected function loadObjects(): AbstractStatus
     {
         $target = null;
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(MetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
         $matchConstantsClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
 
         $this->result = $project = new AnalysisProject(

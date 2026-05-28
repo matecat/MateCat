@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -26,6 +27,7 @@ class HtmlentitiesFromUnicodeTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::htmlentitiesFromUnicode
      */
+    #[Test]
     public function testHtmlentitiesFromUnicode1()
     {
         $this->source_segment = <<<'LAB'
@@ -44,6 +46,7 @@ LAB;
      * @covers CatUtils::htmlentitiesFromUnicode
      * original_segment=  <g 𐎆 𐏉</g>
      */
+    #[Test]
     public function testHtmlentitiesFromUnicode2()
     {
         $this->source_segment = <<<'LAB'
@@ -62,6 +65,7 @@ LAB;
      * @covers CatUtils::htmlentitiesFromUnicode
      * original_segment= <g id="1">ψ</g>😴<g 😆id="2">🛠λ</g>
      */
+    #[Test]
     public function testHtmlentitiesFromUnicode3()
     {
         $this->source_segment = <<<'LAB'
@@ -79,6 +83,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::htmlentitiesFromUnicode
      */
+    #[Test]
     public function testHtmlentitiesFromUnicode4()
     {
         $source_array = [];
@@ -96,6 +101,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::htmlentitiesFromUnicode
      */
+    #[Test]
     public function testhtmlentitiesFromUnicode_artificial_feeding_of_parameters()
     {
         $source_array_1 = [];

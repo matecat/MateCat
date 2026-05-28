@@ -1,6 +1,9 @@
 import React from 'react'
 
 import SegmentQR from './SegmentQR'
+import FileIcon from '../../../img/icons/FileIcon'
+import FileTypeFile from '../../../img/icons/FileTypeFile'
+import CommonUtils from '../../utils/commonUtils'
 
 function FileDetails(props) {
   const getSegments = () => {
@@ -22,7 +25,11 @@ function FileDetails(props) {
 
   return (
     <div className="qr-segments">
-      <div className="document-name top-10">
+      <div className="document-name">
+        {CommonUtils.getFileIcon(
+          props.file.get('file_name').split('.').slice(-1)[0],
+          16,
+        )}
         FILE {props.file.get('file_name')}
       </div>
       <div className="qr-segments-list">{getSegments()}</div>

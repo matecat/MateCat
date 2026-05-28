@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
@@ -41,6 +42,7 @@ class MagicSetTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::__set
      */
+    #[Test]
     public function test_magic__set_protected_variable_in_engine_struct()
     {
         $this->engine->name = "DeepLingo_Changed_name";
@@ -54,6 +56,7 @@ class MagicSetTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::__set
      */
+    #[Test]
     public function test_magic__set_values_in_array_variable_others()
     {
         $this->engine->alfa = "one_changed";
@@ -70,6 +73,7 @@ class MagicSetTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::__set
      */
+    #[Test]
     public function test_magic__set_values_in_array_variable_extra_parameters()
     {
         $this->engine->gamma = "three_changed";
@@ -86,6 +90,7 @@ class MagicSetTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::__set
      */
+    #[Test]
     public function test_magic__set_values_with_not_existent_variable()
     {
         $this->expectException(DomainException::class);

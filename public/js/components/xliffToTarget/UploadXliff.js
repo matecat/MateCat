@@ -203,9 +203,7 @@ export const UploadXliff = () => {
           {files.map((f, idx) => (
             <div key={idx} className="file-item">
               <div className="file-item-name">
-                <span
-                  className={`file-icon ${CommonUtils.getIconClass(f.ext)}`}
-                />
+                {CommonUtils.getFileIcon(f.ext)}
                 {f.name}
               </div>
               {f.error && (

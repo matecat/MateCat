@@ -7,6 +7,7 @@ namespace Utils\Network;
 
 use CurlHandle;
 use CurlMultiHandle;
+use Exception;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 
@@ -117,7 +118,6 @@ class MultiCurlHandler
      * Execute all curl in multiple parallel calls,
      * Run the sub-connections of the current cURL handle and store the results
      * to a container
-     *
      */
     public function multiExec(): void
     {
@@ -207,12 +207,12 @@ class MultiCurlHandler
             //TIMING nad LOGGING
 
             if ($this->verbose) {
-                $this->_log($this->multi_curl_log[$tokenHash]);
+                $this->log($this->multi_curl_log[$tokenHash]);
             }
         }
     }
 
-    protected function _log(mixed $logging): void
+    protected function log(mixed $logging): void
     {
         if (!empty($this->logger)) {
             $this->logger->debug($logging);

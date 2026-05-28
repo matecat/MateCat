@@ -76,3 +76,45 @@
     }
   }
 }
+
+.job-progress-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.job-progress-bar {
+  position: relative;
+  display: flex;
+  min-width: 196px;
+  height: 8px;
+  border-radius: 10px;
+  background-color: colors.$black100;
+  overflow: hidden;
+
+  .bar {
+    position: absolute;
+    height: 100%;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  .translated-bar {
+    z-index: 4;
+    background-color: colors.$blue500;
+  }
+
+  .approved-bar {
+    z-index: 3;
+    background-color: colors.$green800;
+  }
+
+  .approved-bar-2nd-pass {
+    z-index: 2;
+    background-color: colors.$purple500;
+  }
+  .warning-bar {
+    z-index: 1;
+    background-color: colors.$orange600;
+  }
+}

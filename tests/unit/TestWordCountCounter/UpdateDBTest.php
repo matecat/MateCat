@@ -6,6 +6,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -166,6 +167,7 @@ class UpdateDBTest extends AbstractTest
      * @group  regression
      * @covers CounterModel::updateDB
      */
+    #[Test]
     public function test_updateDB_from_NEW_to_TRANSLATED()
     {
         /**

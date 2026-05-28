@@ -5,6 +5,7 @@ import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
 import {Button} from '../common/Button/Button'
+import {SpinnerLoader} from '../common/SpinnerLoader'
 
 const AnalyzeMain = ({volumeAnalysis, project}) => {
   const [intervalId, setIntervalId] = useState()
@@ -23,9 +24,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
 
   const spinner = (
     <div style={spinnerContainer}>
-      <div className="ui active inverted dimmer">
-        <div className="ui massive text loader">Loading Volume Analysis</div>
-      </div>
+      <SpinnerLoader label="Loading Volume Analysis" />
     </div>
   )
 

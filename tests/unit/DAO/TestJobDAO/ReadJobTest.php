@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -107,6 +108,7 @@ class ReadJobTest extends AbstractTest
      * @group  regression
      * @covers JobDao::read
      */
+    #[Test]
     public function test_read_job_without_params()
     {
         $this->job_struct_param = new JobStruct(['password' => '']);
@@ -118,6 +120,7 @@ class ReadJobTest extends AbstractTest
      * @group  regression
      * @covers JobDao::read
      */
+    #[Test]
     public function test_read__job_with_success_id_and_password_given()
     {
         $this->job_struct_param = new JobStruct([]);

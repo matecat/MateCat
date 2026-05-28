@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -16,27 +17,29 @@ use Utils\Registry\AppConfig;
  */
 class BuildResultUserTest extends AbstractTest
 {
-    protected $array_param;
-    protected $reflector;
-    protected $method;
+    protected ReflectionMethod $method;
+    protected UserDao $userDao;
 
-
+    /**
+     */
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = new UserDao(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
-        $this->reflector = new ReflectionClass($this->databaseInstance);
-        $this->method = $this->reflector->getMethod("_buildResult");
+        $this->userDao = new UserDao(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $reflector = new ReflectionClass($this->userDao);
+        $this->method = $reflector->getMethod("_buildResult");
     }
 
     /**
      * This test builds an user object from an array that describes the properties
      * @group  regression
      * @covers UserDao::_buildResult
+     * @throws ReflectionException
      */
+    #[Test]
     public function test_build_result_from_simple_array()
     {
-        $this->array_param = [
+        $array_param = [
             0 =>
                 [
                     'uid' => null,  //SET NULL FOR AUTOINCREMENT
@@ -51,7 +54,7 @@ class BuildResultUserTest extends AbstractTest
                 ]
         ];
 
-        $actual_array_of_user_structures = $this->method->invoke($this->databaseInstance, $this->array_param);
+        $actual_array_of_user_structures = $this->method->invoke($this->userDao, $array_param);
         $actual_user_struct = $actual_array_of_user_structures['0'];
         $this->assertTrue($actual_user_struct instanceof UserStruct);
 

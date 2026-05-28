@@ -31,6 +31,7 @@ export const UserMenu = () => {
 
     return (
       <Popover
+        className="user-menu-popover"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.GHOST,

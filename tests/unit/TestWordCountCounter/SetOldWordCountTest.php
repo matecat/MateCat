@@ -3,6 +3,7 @@
 
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -19,6 +20,7 @@ class SetOldWordCountTest extends AbstractTest
      * @group  regression
      * @covers CounterModel::setOldWordCount
      */
+    #[Test]
     public function test_setOldWordCount()
     {
         $word_count = new CounterModel();

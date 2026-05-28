@@ -3,6 +3,7 @@
 
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -51,6 +52,7 @@ class ConstructorTest extends AbstractTest
      * @group  regression
      * @covers CounterModel::__construct
      */
+    #[Test]
     public function test__constructor_with_no_args()
     {
         $word_counter = new CounterModel();

@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\Apertium;
 use Utils\Engines\EnginesFactory;
@@ -71,6 +72,7 @@ class GetInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
+    #[Test]
     public function test_getInstance_of_constructed_engine()
     {
         $engine = EnginesFactory::getInstance($this->id_database);
@@ -82,6 +84,7 @@ class GetInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
+    #[Test]
     public function test_getInstance_of_constructed_engine_my_memory()
     {
         $engine = EnginesFactory::getInstance(1);
@@ -93,6 +96,7 @@ class GetInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
+    #[Test]
     public function test_getInstance_of_default_engine()
     {
         $engine = EnginesFactory::getInstance(0);
@@ -104,6 +108,7 @@ class GetInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
+    #[Test]
     public function test_getInstance_without_id()
     {
         $this->expectException(TypeError::class);
@@ -115,6 +120,7 @@ class GetInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
+    #[Test]
     public function test_getInstance_whit_null_id()
     {
         $this->expectException(TypeError::class);
@@ -126,6 +132,7 @@ class GetInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
+    #[Test]
     public function test_getInstance_with_no_mach_for_engine_id()
     {
         $this->expectException(Exception::class);
@@ -138,6 +145,7 @@ class GetInstanceTest extends AbstractTest
      * @covers EnginesFactory::getInstance
      * @throws Exception
      */
+    #[Test]
     public function test_getInstance_with_no_mach_for_engine_class_name()
     {
         $sql_update_engine_class_name = "UPDATE `engines` SET class_load='YourMemory' WHERE id=" . $this->id_database . ";";

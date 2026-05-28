@@ -5,6 +5,8 @@ namespace Model\Projects;
 use DateTime;
 use Exception;
 use Matecat\Locales\Languages;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\HandlersSorter;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -79,7 +81,11 @@ class ProjectTemplateDao extends AbstractDao
         $default->tm = json_encode([]);
         $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");
-        $default->subfiltering_handlers = json_encode(["markup", "twig", "double_snail", "double_square", "double_percent"]);
+        $default->subfiltering_handlers = json_encode(
+            InjectableFiltersTags::tagNamesForArrayClasses(
+                array_keys(HandlersSorter::getDefaultInjectedHandlers())
+            )
+        );
         $default->icu_enabled = false;
 
         return $default;
@@ -391,7 +397,6 @@ class ProjectTemplateDao extends AbstractDao
      */
     public static function save(ProjectTemplateStruct $projectTemplateStruct): ProjectTemplateStruct
     {
-
         $sql = "INSERT INTO " . self::TABLE . " (
                     `name`,
                     `is_default`,

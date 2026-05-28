@@ -26,7 +26,7 @@
         </exclude>
     </source>
     <coverage
-            pathCoverage="true"
+            pathCoverage="false"
             ignoreDeprecatedCodeUnits="true">
     </coverage>
 

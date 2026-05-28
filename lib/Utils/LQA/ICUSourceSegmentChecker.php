@@ -12,6 +12,7 @@ namespace Utils\LQA;
 use Matecat\ICU\MessagePatternValidator;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 
 /**
@@ -43,9 +44,10 @@ trait ICUSourceSegmentChecker
             $sourceSegment,
         );
 
-        if ($this->icuEnabled($projectStruct)) {
-            $this->sourceContainsIcu = $this->icuSourcePatternValidator->containsComplexSyntax() && $this->icuSourcePatternValidator->isValidSyntax();
-        }
+        $this->sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $this->icuSourcePatternValidator,
+            $this->icuEnabled($projectStruct)
+        );
 
         return $this->sourceContainsIcu;
 
@@ -62,7 +64,7 @@ trait ICUSourceSegmentChecker
         if ($this->icuEnabled !== null) {
             return $this->icuEnabled;
         }
-        return $this->icuEnabled = $projectStruct->getMetadataValue(ProjectMetadataDao::ICU_ENABLED) ?? false;
+        return $this->icuEnabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::ICU_ENABLED->value) ?? false;
     }
 
 }

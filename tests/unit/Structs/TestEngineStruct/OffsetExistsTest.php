@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -45,6 +46,7 @@ class OffsetExistsTest extends AbstractTest
      * @group  regression
      * @covers EngineStruct::getStruct
      */
+    #[Test]
     public function test_offsetExists_id_field()
     {
         $this->assertTrue($this->engine_struct_param->offsetExists("id"));

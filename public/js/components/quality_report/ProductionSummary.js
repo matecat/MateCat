@@ -3,9 +3,13 @@ import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
 import HelpCircle from '../../../img/icons/HelpCircle'
 
-export const ProductionSummary = ({qualitySummary, jobInfo}) => {
-  const getTimeToEdit = () => {
-    let time = parseInt(jobInfo.get('total_time_to_edit') / 1000)
+export const ProductionSummary = ({
+  qualitySummary,
+  jobInfo,
+  secondPassReviewEnabled,
+}) => {
+  const getTimeToEdit = (type) => {
+    let time = parseInt(jobInfo.get('time_to_edit').get(type) / 1000)
     let hours = Math.floor(time / 3600)
     let minutes = Math.floor((time % 3600) / 60)
     let seconds = Math.floor((time % 3600) % 60)
@@ -62,7 +66,7 @@ export const ProductionSummary = ({qualitySummary, jobInfo}) => {
 
         <div className="qr-effort source-to-target">
           <div className="qr-source">
-            <b>{jobInfo.get('sourceTxt')}</b>
+            <b>{jobInfo.get('source')}</b>
           </div>
 
           <div className="qr-to">
@@ -70,7 +74,7 @@ export const ProductionSummary = ({qualitySummary, jobInfo}) => {
           </div>
 
           <div className="qr-target">
-            <b>{jobInfo.get('targetTxt')}</b>
+            <b>{jobInfo.get('target')}</b>
           </div>
         </div>
 
@@ -103,12 +107,26 @@ export const ProductionSummary = ({qualitySummary, jobInfo}) => {
           </div>
 
           <div className="qr-effort time-edit">
-            <div className="qr-label">Time to edit</div>
+            <div className="qr-label">TTE Translate</div>
             <div className="qr-info">
-              <b>{getTimeToEdit()}</b>{' '}
+              <b>{getTimeToEdit('t')}</b>{' '}
             </div>
           </div>
 
+          <div className="qr-effort time-edit">
+            <div className="qr-label">TTE revise</div>
+            <div className="qr-info">
+              <b>{getTimeToEdit('r1')}</b>{' '}
+            </div>
+          </div>
+          {secondPassReviewEnabled && (
+            <div className="qr-effort time-edit">
+              <div className="qr-label">TTE revise 2</div>
+              <div className="qr-info">
+                <b>{getTimeToEdit('r2')}</b>{' '}
+              </div>
+            </div>
+          )}
           <div className="qr-effort pee">
             <div className="qr-label">PEE</div>
             <div className="qr-info">

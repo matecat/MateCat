@@ -259,7 +259,7 @@ const AnalyzeHeader = ({data, project}) => {
           position="bottom center"
           trigger={
             <div>
-              <InfoIcon />
+              <InfoIcon size={16} />
             </div>
           }
         />

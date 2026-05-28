@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -76,6 +77,7 @@ class BeginCommitRollbackTest extends AbstractTest
      * @group  regression
      * @covers \Model\DataAccess\Database::begin
      */
+    #[Test]
     public function test_begin_and_rollback()
     {
         $this->client_1_instance->getConnection()->query($this->sql_insert_first_value);
@@ -109,6 +111,7 @@ class BeginCommitRollbackTest extends AbstractTest
      * @group  regression
      * @covers \Model\DataAccess\Database::commit
      */
+    #[Test]
     public function test_commit()
     {
         $this->client_1_instance->getConnection()->query($this->sql_insert_first_value);

@@ -5,6 +5,12 @@
   padding: 10px 10px 10px 1px !important;
   transition-property:
     color, background-color, box-shadow, opacity, padding !important;
+  background-color: colors.$grey100 !important;
+  border: 1px solid colors.$grey200 !important;
+
+  &:disabled {
+    color: colors.$grey400 !important;
+  }
 
   &.not-assignee {
     box-shadow: unset !important;

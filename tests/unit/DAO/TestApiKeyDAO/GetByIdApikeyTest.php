@@ -3,6 +3,7 @@
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -67,6 +68,7 @@ class GetByIdApikeyTest extends AbstractTest
         parent::tearDown();
     }
 
+    #[Test]
     public function test_getById()
     {
         $wrapped_result = $this->apikey_Dao->getById($this->apikey_id);

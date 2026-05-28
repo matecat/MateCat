@@ -448,9 +448,9 @@ function CatTool() {
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
+        tmPrioritization: jobMetadata?.job?.tm_prioritization ?? false,
         characterCounterCountTags:
-          jobMetadata?.job?.character_counter_count_tags === 1,
+          jobMetadata?.job?.character_counter_count_tags ?? false,
         characterCounterMode:
           typeof jobMetadata?.job?.character_counter_mode === 'string'
             ? jobMetadata?.job?.character_counter_mode

@@ -13,6 +13,7 @@ namespace Plugins\Features\TranslationVersions;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 
@@ -40,7 +41,6 @@ interface VersionHandlerInterface
      *          segments_for_propagation: array
      *     },
      *     chunk: JobStruct,
-     *     segment: string,
      *     user: UserStruct,
      *     source_page_code: int,
      *     features: FeatureSet,

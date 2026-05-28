@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en-US" trgLang="it-IT">
+    <!--
+    XLIFF 2.0 file demonstrating all resource types defined in the
+    "Technical Specification: Mapping Between Contextual Markup and Translatable Strings".
+
+    Each unit uses 'name' to carry the nodePath and a custom 'x-restype' attribute
+    to declare the identification method.  The corresponding context HTML is provided
+    as a reference in the <notes> elements and matches the example in the spec.
+
+    Context HTML (the DOM against which all nodePath values were calculated):
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Sample Document</title>
+    </head>
+    <body>
+        <h1>Title</h1>
+        <div class="info">
+            <p>Informational text.</p>
+        </div>
+        <div>
+            <p>Paragraph in the first div.</p>
+        </div>
+        <div>
+            <p>Text in the second div, first paragraph.</p>
+            <span id="node_id">Text identified by an ID.</span>
+            <p class="unique-class">This paragraph is identified by a unique CSS class.</p>
+            <div data-custom-id="xyz-123">Content identified by a custom attribute.</div>
+        </div>
+        <img src="logo.png" id="logo" alt="Company Logo" title="Go to Homepage"/>
+        <input type="text" placeholder="Search the site..."/>
+    </body>
+    </html>
+    -->
+    <file id="f1" original="sample-document.html">
+        <notes>
+            <note>
+                This file demonstrates the mapping between contextual markup and
+                translatable strings as defined in the Technical Specification.
+                All x-restype values are prefixed with 'x-' per the original XLIFF 2.0
+                convention (values not in the standard enumeration must use the 'x-' prefix).
+            </note>
+        </notes>
+
+        <!-- ============================================================ -->
+        <!-- 1. x-restype="x-path" — XPath to a leaf node                 -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <h1>Title</h1> -->
+        <unit id="t1" name="/html/body/h1" x-restype="x-path">
+            <notes>
+                <note>XPath to the &lt;h1&gt; element (leaf node with text content).</note>
+            </notes>
+            <segment>
+                <source>Title</source>
+                <target>Titolo</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <div class="info"><p>Informational text.</p></div> -->
+        <unit id="t2" name="/html/body/div[1]/p[1]" x-restype="x-path">
+            <notes>
+                <note>XPath to the first paragraph inside the first div (div.info).</note>
+            </notes>
+            <segment>
+                <source>Informational text.</source>
+                <target>Testo informativo.</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <div><p>Paragraph in the first div.</p></div> -->
+        <unit id="t3" name="/html/body/div[2]/p[1]" x-restype="x-path">
+            <notes>
+                <note>XPath to the paragraph inside the second div.</note>
+            </notes>
+            <segment>
+                <source>Paragraph in the first div.</source>
+                <target>Paragrafo nel primo div.</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <p>Text in the second div, first paragraph.</p> -->
+        <unit id="t4" name="/html/body/div[3]/p[1]" x-restype="x-path">
+            <notes>
+                <note>XPath to the first paragraph inside the third div.</note>
+            </notes>
+            <segment>
+                <source>Text in the second div, first paragraph.</source>
+                <target>Testo nel secondo div, primo paragrafo.</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 2. x-restype="x-client_nodepath" — Custom path algorithm      -->
+        <!-- ============================================================ -->
+
+        <!-- Same node as t4, but using a custom dot-notation path -->
+        <unit id="t5" name="html.body.div_3.p_1" x-restype="x-client_nodepath">
+            <notes>
+                <note>
+                    Custom path algorithm (dot-notation with underscored indices).
+                    'html.body.div_3.p_1' maps to /html/body/div[3]/p[1].
+                    This algorithm must be previously agreed upon with Matecat.
+                </note>
+            </notes>
+            <segment>
+                <source>Text in the second div, first paragraph.</source>
+                <target>Testo nel secondo div, primo paragrafo.</target>
+            </segment>
+        </unit>
+
+        <!-- Another custom path example -->
+        <unit id="t6" name="html.body.div_1.p_1" x-restype="x-client_nodepath">
+            <notes>
+                <note>
+                    Custom path 'html.body.div_1.p_1' maps to /html/body/div[1]/p[1].
+                </note>
+            </notes>
+            <segment>
+                <source>Informational text.</source>
+                <target>Testo informativo.</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 3. x-restype="x-tag-id" — HTML element id attribute           -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <span id="node_id">Text identified by an ID.</span> -->
+        <unit id="t7" name="node_id" x-restype="x-tag-id">
+            <notes>
+                <note>
+                    Identifies the element via its 'id' attribute.
+                    Corresponds to &lt;span id="node_id"&gt; in the HTML.
+                </note>
+            </notes>
+            <segment>
+                <source>Text identified by an ID.</source>
+                <target>Testo identificato da un ID.</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 4. x-restype="x-css_class" — Unique CSS class                 -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <p class="unique-class">This paragraph is identified by a unique CSS class.</p> -->
+        <unit id="t8" name="unique-class" x-restype="x-css_class">
+            <notes>
+                <note>
+                    Identifies the element via its CSS class.
+                    Corresponds to &lt;p class="unique-class"&gt; in the HTML.
+                    This method only works if the class is used by a single element.
+                </note>
+            </notes>
+            <segment>
+                <source>This paragraph is identified by a unique CSS class.</source>
+                <target>Questo paragrafo è identificato da una classe CSS unica.</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 5. x-restype="x-attribute_name_value" — Custom attribute pair -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <div data-custom-id="xyz-123">Content identified by a custom attribute.</div> -->
+        <unit id="t9" name="data-custom-id=xyz-123" x-restype="x-attribute_name_value">
+            <notes>
+                <note>
+                    Identifies the element via a name=value attribute pair.
+                    Corresponds to &lt;div data-custom-id="xyz-123"&gt; in the HTML.
+                    Useful for data-* attributes that guarantee uniqueness.
+                </note>
+            </notes>
+            <segment>
+                <source>Content identified by a custom attribute.</source>
+                <target>Contenuto identificato da un attributo personalizzato.</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 6. XPath pointing to element ATTRIBUTES (alt, title, etc.)    -->
+        <!--    Still x-restype="x-path", but the XPath targets an attribute -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <img id="logo" alt="Company Logo" .../>/@alt -->
+        <unit id="t10" name="//img[@id='logo']/@alt" x-restype="x-path">
+            <notes>
+                <note>
+                    XPath selecting the 'alt' attribute of the img element with id='logo'.
+                    The translatable string is an attribute value, not node text content.
+                </note>
+            </notes>
+            <segment>
+                <source>Company Logo</source>
+                <target>Logo Aziendale</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <img id="logo" title="Go to Homepage" .../>/@title -->
+        <unit id="t11" name="//img[@id='logo']/@title" x-restype="x-path">
+            <notes>
+                <note>
+                    XPath selecting the 'title' attribute of the img element with id='logo'.
+                </note>
+            </notes>
+            <segment>
+                <source>Go to Homepage</source>
+                <target>Vai alla Home Page</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <input type="text" placeholder="Search the site..."/>/@placeholder -->
+        <unit id="t12" name="//input/@placeholder" x-restype="x-path">
+            <notes>
+                <note>
+                    XPath selecting the 'placeholder' attribute of the input element.
+                </note>
+            </notes>
+            <segment>
+                <source>Search the site...</source>
+                <target>Cerca nel sito...</target>
+            </segment>
+        </unit>
+
+    </file>
+</xliff>
+

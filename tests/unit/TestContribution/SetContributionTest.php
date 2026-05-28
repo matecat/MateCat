@@ -10,6 +10,7 @@
 
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
@@ -110,6 +111,7 @@ class SetContributionTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testSetContributionEnqueue()
     {
         $contributionStruct = new SetContributionRequest();
@@ -150,6 +152,7 @@ class SetContributionTest extends AbstractTest
         $this->assertTrue(true);
     }
 
+    #[Test]
     public function testSetContributionEnqueueException()
     {
         $contributionStruct = new SetContributionRequest();

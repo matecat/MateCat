@@ -14,7 +14,6 @@ use Model\Xliff\DTO\Xliff20Rule;
 use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 
 class XliffRulesModelTest extends AbstractTest
 {
@@ -68,7 +67,7 @@ class XliffRulesModelTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function shouldLoadFromArrayObject()
+    public function shouldLoadFromArray()
     {
         $array = [
             "xliff12" => [
@@ -112,9 +111,7 @@ class XliffRulesModelTest extends AbstractTest
             ]
         ];
 
-        $arrayObject = new RecursiveArrayObject($array);
-
-        $rulesModel = XliffRulesModel::fromArrayObject($arrayObject);
+        $rulesModel = XliffRulesModel::fromArray($array);
 
         $this->assertNotEmpty($rulesModel);
         $this->assertEquals($array, $rulesModel->getArrayCopy());

@@ -14,8 +14,9 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
-use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Users\UserDao;
@@ -65,7 +66,10 @@ class GetContributionController extends KleinController
         $cross_language = $request['cross_language'];
         $reasoning = $request['reasoning'];
 
-        $lara_style = $request['lara_style'] ?: $projectStruct->getMetadataValue('lara_style');
+        // try to get from metadata if Lara style is empty of fallback to the default
+        if (empty($request['lara_style'])) {
+            $lara_style = $projectStruct->getMetadataValue('lara_style') ?? Lara::DEFAULT_STYLE;
+        }
 
         if (empty($num_results)) {
             $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
@@ -91,9 +95,14 @@ class GetContributionController extends KleinController
             $this->rewriteContributionContexts($request, $Filter);
 
             $contributionRequest->mt_evaluation =
-                (bool)$projectStruct->getMetadataValue(ProjectsMetadataDao::MT_EVALUATION) ??
+                (bool)$projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value) ??
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                (bool)(new MetadataDao())->get($id_job, $received_password, ProjectsMetadataDao::MT_EVALUATION, 60 * 60) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                (bool)(new MetadataDao())->get(
+                    $id_job,
+                    $received_password,
+                    ProjectsMetadataMarshaller::MT_EVALUATION->value,
+                    60 * 60
+                ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                 false;
         }
 
@@ -125,9 +134,9 @@ class GetContributionController extends KleinController
         $contributionRequest->fromTarget = $switch_languages;
         $contributionRequest->resultNum = $num_results;
         $contributionRequest->crossLangTargets = $this->getCrossLanguages($cross_language);
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR) ?? 86;
-        $contributionRequest->mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
-        $contributionRequest->mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS)?->toArray();
+        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86;
+        $contributionRequest->mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
+        $contributionRequest->mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value)?->toArray();
         $contributionRequest->subfiltering_handlers = $subfiltering_handlers;
 
         if ($this->isRevision()) {
@@ -137,9 +146,9 @@ class GetContributionController extends KleinController
         }
 
         $jobsMetadataDao = new MetadataDao();
-        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60);
+        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
         $mt_evaluation = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60);
-        $public_tm_penalty = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'public_tm_penalty', 10 * 60);
+        $public_tm_penalty = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
 
         if ($public_tm_penalty !== null) {
             $contributionRequest->public_tm_penalty = (int)$public_tm_penalty->value;
@@ -156,7 +165,7 @@ class GetContributionController extends KleinController
             $contributionRequest->mt_evaluation = $mt_evaluation->value == 1;
         }
 
-        $tm_prioritization = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60);
+        $tm_prioritization = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
 
         if ($tm_prioritization !== null) {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
@@ -261,7 +270,7 @@ class GetContributionController extends KleinController
         }
 
         // validate Lara style
-        if(!empty($lara_style)){
+        if (!empty($lara_style)) {
             $lara_style = Lara::validateLaraStyle($lara_style);
         }
 

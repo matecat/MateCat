@@ -13,6 +13,7 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
@@ -154,7 +155,7 @@ class UpdateJobKeysController extends KleinController
 
         // update character_counter_mode job metadata
         if ($request['public_tm_penalty'] !== null) {
-            $jobsMetadataDao->set($request['job_id'], $request['job_pass'], 'public_tm_penalty', $request['public_tm_penalty']);
+            $jobsMetadataDao->set($request['job_id'], $request['job_pass'], JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, $request['public_tm_penalty']);
         }
 
         $this->response->json([

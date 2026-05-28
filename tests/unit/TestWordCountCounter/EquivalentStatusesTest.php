@@ -2,6 +2,7 @@
 
 
 use Model\WordCount\CounterModel;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -32,6 +33,7 @@ class EquivalentStatusesTest extends AbstractTest
      * @covers CounterModel::equivalentStatuses
      * @return boolean
      */
+    #[Test]
     public function test_equivalentStatuses_true_1()
     {
         $this->word_counter->setOldStatus("TRANSLATED");
@@ -44,6 +46,7 @@ class EquivalentStatusesTest extends AbstractTest
      * @covers CounterModel::equivalentStatuses
      * @return boolean
      */
+    #[Test]
     public function test_equivalentStatuses_false()
     {
         $this->word_counter->setOldStatus("TRANSLATED");
@@ -56,6 +59,7 @@ class EquivalentStatusesTest extends AbstractTest
      * @covers CounterModel::equivalentStatuses
      * @return boolean
      */
+    #[Test]
     public function test_equivalentStatuses_false2()
     {
         $this->word_counter->setOldStatus("APPROVED2");

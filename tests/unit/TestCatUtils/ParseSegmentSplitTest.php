@@ -1,6 +1,7 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -34,6 +35,7 @@ class ParseSegmentSplitTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parseSegmentSplit
      */
+    #[Test]
     public function test_parseSegmentSplit_without_modifications()
     {
         $this->source_segment = <<<'LAB'
@@ -56,6 +58,7 @@ LAB;
      * @covers CatUtils::parseSegmentSplit
      * original_input_segment= <g id="1">􀂾</g><g id="2"> </g><bx id="3"/>Porte d'accès au bureau [1-1-13] d'entrée depuis le haut de l'escalier (P118 et P119)
      */
+    #[Test]
     public function test_parseSegmentSplit_without_modifications_with_special_char()
     {
         $this->source_segment = <<<'LAB'
@@ -74,6 +77,7 @@ LAB;
      * @covers CatUtils::parseSegmentSplit
      * original_input_segment= <g id="1">3.2.124   123 - E</g><g id="2">NSE##$_0A$##MBLE A   PPUI W##$_09$##C ET NICCHIA DE S##$_09$##OUTIEN DU RA    NGEMENT LUMINEUX</g>
      */
+    #[Test]
     public function test_parseSegmentSplit_with_spaces_tabulations_new_lines()
     {
         $this->source_segment = <<<'LAB'

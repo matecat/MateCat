@@ -211,27 +211,32 @@ export const ProjectsBulkActions = ({
     (projectId) => {
       const currentProject = projects.find(({id}) => id === projectId)
 
+      const currentProjectJobs = currentProject.jobs.reduce(
+        (acc, cur) => (acc.some(({id}) => id === cur.id) ? acc : [...acc, cur]),
+        [],
+      )
+
       if (shiftKeyRef.current.isPressed) {
         const lastJobIdProject =
-          currentProject.jobs[currentProject.jobs.length - 1].id
+          currentProjectJobs[currentProject.jobs.length - 1].id
 
         onCheckedJob(
           shiftKeyRef.current.startJob.id > lastJobIdProject
             ? lastJobIdProject
-            : currentProject.jobs[0].id,
+            : currentProjectJobs[0].id,
         )
       } else {
         setJobsBulk((prevState) => {
-          const jobsBulkForCurrentProject = currentProject.jobs.filter(({id}) =>
+          const jobsBulkForCurrentProject = currentProjectJobs.filter(({id}) =>
             prevState.some((value) => value === id),
           )
 
           const isCheckedAllJobs =
-            jobsBulkForCurrentProject.length === currentProject.jobs.length
+            jobsBulkForCurrentProject.length === currentProjectJobs.length
 
           if (
             !isCheckedAllJobs &&
-            prevState.length + currentProject.jobs.length > MAX_JOBS_SELECTABLE
+            prevState.length + currentProjectJobs.length > MAX_JOBS_SELECTABLE
           )
             return prevState
 
@@ -245,12 +250,12 @@ export const ProjectsBulkActions = ({
                   (value) =>
                     !jobsBulkForCurrentProject.some(({id}) => id === value),
                 ),
-                ...currentProject.jobs.map(({id}) => id),
+                ...currentProjectJobs.map(({id}) => id),
               ]
         })
       }
 
-      shiftKeyRef.current.startJob = currentProject.jobs[0]
+      shiftKeyRef.current.startJob = currentProjectJobs[0]
     },
     [projects, onCheckedJob],
   )

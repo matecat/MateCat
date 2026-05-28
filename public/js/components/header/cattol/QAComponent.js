@@ -355,7 +355,7 @@ class QAComponent extends React.Component {
               ) : null}
               {mismatch ? (
                 <div className="qa-mismatch">
-                  <div className="ui basic tiny buttons">{mismatch}</div>
+                  <div>{mismatch}</div>
                 </div>
               ) : null}
             </div>

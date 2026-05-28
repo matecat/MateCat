@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -24,6 +25,7 @@ class CreateMyMemoryKeyTest extends AbstractTest
      * @group  regression
      * @covers MyMemory::createMyMemoryKey
      */
+    #[Test]
     public function test_createMyMemoryKey_mocked_engine_avoiding_uncontrolled_key_spawning()
     {
         $curl_mock_param = [
@@ -83,6 +85,7 @@ T;
      * @group  regression
      * @covers MyMemory::createMyMemoryKey
      */
+    #[Test]
     public function test_createMyMemoryKey_with_error_from_mocked__call_for_coverage_purpose()
     {
         $curl_mock_param = [

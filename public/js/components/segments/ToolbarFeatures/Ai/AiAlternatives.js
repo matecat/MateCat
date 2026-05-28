@@ -44,7 +44,11 @@ export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
         className={`last-ai-feature-button ${isIconsBundled ? 'segment-target-toolbar-icon-bundled' : ''}`}
         size={isIconsBundled ? BUTTON_SIZE.SMALL : BUTTON_SIZE.ICON_SMALL}
         mode={isIconsBundled ? BUTTON_MODE.GHOST : BUTTON_MODE.OUTLINE}
-        title="Ai alternatives"
+        title={
+          isDisabled
+            ? 'Alternative translations by Lara - Highlight parts of the target text to enable'
+            : 'Alternative translations by Lara'
+        }
         onClick={openTab}
         disabled={isDisabled}
       >

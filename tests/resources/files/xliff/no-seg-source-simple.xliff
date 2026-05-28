@@ -1,0 +1,16 @@
+<xliff version='1.2'
+       xmlns='urn:oasis:names:tc:xliff:document:1.2'>
+    <file original='test.txt' source-language='en-US' target-language='it-IT'
+          datatype='plaintext'>
+        <body>
+            <trans-unit id='tu1'>
+                <source xml:lang="en-US">Hello world</source>
+                <target xml:lang="it-IT" state="translated">Ciao mondo</target>
+            </trans-unit>
+            <trans-unit id='tu2'>
+                <source xml:lang="en-US">Goodbye world</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
+

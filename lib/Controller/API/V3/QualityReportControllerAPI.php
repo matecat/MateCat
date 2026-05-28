@@ -16,6 +16,7 @@ use Exception;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
 use Model\QualityReport\QualityReportSegmentModel;
@@ -65,7 +66,7 @@ class QualityReportControllerAPI extends KleinController
     {
         $this->project = $this->chunk->getProject();
 
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(MetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
         $matchConstantsClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
 
         $ref_segment = (int)$this->request->param('ref_segment');
@@ -103,7 +104,7 @@ class QualityReportControllerAPI extends KleinController
             $filesInfoUtility = new FilesInfoUtility($this->chunk);
             $filesInfo = $filesInfoUtility->getInfo(false);
 
-            $mt_qe_workflow_enabled = $this->project->getMetadataValue(MetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
+            $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
             $segments = $this->_formatSegments($segments, $ttlArray, $filesInfo, $mt_qe_workflow_enabled);
 
             $this->response->json([

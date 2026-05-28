@@ -4,6 +4,7 @@ import {debounce} from 'lodash'
 import Filters from './FilterSegments'
 import FileDetails from './FileDetails'
 import QualityReportActions from '../../actions/QualityReportActions'
+import {SPINNER_LOADER_SIZE, SpinnerLoader} from '../common/SpinnerLoader'
 
 function SegmentsDetails(props) {
   const [filter, setFilter] = useState(null)
@@ -81,7 +82,7 @@ function SegmentsDetails(props) {
     <div className="qr-segment-details-container">
       <div className="qr-segments-summary">
         <div className="qr-filter-container">
-          <h3>Segment details</h3>
+          <h6>Segment details</h6>
           <Filters
             applyFilter={filterSegments}
             categories={props.categories}
@@ -102,11 +103,10 @@ function SegmentsDetails(props) {
         totalSegments >= 20 ? (
           <div className="ui one column grid">
             <div className="one column spinner" style={{height: '100px'}}>
-              <div className="ui active inverted dimmer">
-                <div className="ui medium text loader">
-                  Loading more segments
-                </div>
-              </div>
+              <SpinnerLoader
+                label="Loading more segments"
+                size={SPINNER_LOADER_SIZE.MEDIUM}
+              />
             </div>
           </div>
         ) : null}

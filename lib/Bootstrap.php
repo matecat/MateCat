@@ -90,6 +90,7 @@ class Bootstrap
         LoggerFactory::getLogger('decorators', 'decorators.log');
         LoggerFactory::getLogger('feature_set', 'feature_set.log');
         LoggerFactory::getLogger('project_manager', 'project_manager.log');
+        LoggerFactory::getLogger('job_split_merge_manager', 'job_split_merge_manager.log');
         LoggerFactory::getLogger("upload_handler", "upload.log");
         LoggerFactory::getLogger("tos_external_call", "tos.log");
         LoggerFactory::getLogger('engines', 'app_engines_call.log'); //default handler for engines called by web node

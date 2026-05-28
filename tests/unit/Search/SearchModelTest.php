@@ -6,6 +6,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -60,6 +61,7 @@ class SearchModelTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testSearchSource()
     {
         $this->_launchSearchAndVerifyResults('source', 'Hello', 4, [1, 2, 4]);
@@ -80,6 +82,7 @@ class SearchModelTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testSearchTarget()
     {
         $this->_launchSearchAndVerifyResults('target', 'Ciao', 4, [1, 2, 4]);
@@ -91,6 +94,7 @@ class SearchModelTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testWholeWordSearch()
     {
         $this->_launchSearchAndVerifyResults('source', 'is', 1, [3]);

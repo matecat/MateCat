@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -18,21 +19,19 @@ use Utils\Registry\AppConfig;
 class ValidatePrimaryKeyTest extends AbstractTest
 {
 
-    /**
-     * @var EngineDAO
-     */
-    protected $method;
-    protected $reflector;
+    protected ReflectionMethod $method;
+    protected ReflectionClass $reflector;
     /**
      * @var EngineStruct
      */
-    protected $engine_struct_param;
+    protected EngineStruct $engine_struct_param;
+    protected EngineDAO $engineDAO;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
-        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->reflector = new ReflectionClass($this->engineDAO);
         $this->method = $this->reflector->getMethod("_validatePrimaryKey");
         $this->engine_struct_param = new EngineStruct();
     }
@@ -45,12 +44,13 @@ class ValidatePrimaryKeyTest extends AbstractTest
      * @doesNotPerformAssertions
      */
     #[doesNotPerformAssertions]
+    #[Test]
     public function test__validatePrimaryKey_valid_fields()
     {
         $this->engine_struct_param->id = 33;
         $this->engine_struct_param->uid = 1;
 
-        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 
 
@@ -59,12 +59,13 @@ class ValidatePrimaryKeyTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::_validatePrimaryKey
      */
+    #[Test]
     public function test__validatePrimaryKey_invalid_id()
     {
         $this->engine_struct_param->id = null;
         $this->engine_struct_param->uid = 1;
         $this->expectException("Exception");
-        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 
 
@@ -73,11 +74,12 @@ class ValidatePrimaryKeyTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::_validatePrimaryKey
      */
+    #[Test]
     public function test__validatePrimaryKey_invalid_uid()
     {
         $this->engine_struct_param->id = 33;
         $this->engine_struct_param->uid = null;
         $this->expectException("Exception");
-        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
+        $this->method->invoke($this->engineDAO, $this->engine_struct_param);
     }
 }

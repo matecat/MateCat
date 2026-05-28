@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -63,6 +64,7 @@ class GetConnection extends AbstractTest
      * @group  regression
      * @covers Database::getConnection
      */
+    #[Test]
     public function test_getConnection_null_value()
     {
         $this->current_value = $this->instance_after_reset->getConnection();
@@ -78,6 +80,7 @@ class GetConnection extends AbstractTest
      * @group  regression
      * @covers Database::getConnection
      */
+    #[Test]
     public function test_getConnection_not_instance_of_PDO()
     {
         $this->property = $this->reflector->getProperty('connection');
@@ -95,6 +98,7 @@ class GetConnection extends AbstractTest
      * @group  regression
      * @covers Database::getConnection
      */
+    #[Test]
     public function test_getConnection_instance_of_PDO()
     {
         $this->property = $this->reflector->getProperty('connection');

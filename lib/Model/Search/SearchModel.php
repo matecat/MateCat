@@ -94,12 +94,14 @@ class SearchModel
             $searchTerm = (false === empty($this->queryParams->source)) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ($results as $occurrence) {
-                $matches = $this->find($occurrence['text'], $searchTerm);
-                $matchesCount = count($matches);
+                if($occurrence['text'] !== null){
+                    $matches = $this->find($occurrence['text'], $searchTerm);
+                    $matchesCount = count($matches);
 
-                if ($this->hasMatches($matches)) {
-                    $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
-                    $vector['count'] = $vector['count'] + $matchesCount;
+                    if ($this->hasMatches($matches)) {
+                        $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
+                        $vector['count'] = $vector['count'] + $matchesCount;
+                    }
                 }
             }
 
@@ -110,7 +112,7 @@ class SearchModel
         } elseif ($this->queryParams->key === 'coupled') {
             foreach ($results as $id => $occurrence) {
                 // check if exists match target
-                if (isset($occurrence[1])) {
+                if (isset($occurrence[1]) && $occurrence[1] !== null && $occurrence[0] !== null) {
                     // match source
                     $searchTermSource = $this->queryParams->source;
                     $matchesSource = $this->find($occurrence[0], $searchTermSource);

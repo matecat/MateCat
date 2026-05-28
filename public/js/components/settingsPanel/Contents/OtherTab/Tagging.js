@@ -4,11 +4,12 @@ import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
+import SegmentStore from '../../../../stores/SegmentStore'
 
 export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
   {id: 'twig', name: 'Twig', code: '{{text}},{%text%}', default: true},
-  {id: 'ruby_on_rails', name: 'Ruby on Rails', code: '%{text}', default: true},
+  {id: 'ruby_on_rails', name: 'Ruby on Rails', code: '%{text}', default: false},
   {id: 'double_snail', name: 'Double snails', code: '@@text@@', default: true},
   {
     id: 'double_square',
@@ -20,7 +21,7 @@ export const taggingTypes = [
     id: 'dollar_curly',
     name: 'Dollar curly brackets',
     code: '${text}',
-    default: true,
+    default: false,
   },
   {
     id: 'single_curly',
@@ -32,7 +33,7 @@ export const taggingTypes = [
     id: 'objective_c_ns',
     name: 'Objective-C NSString',
     code: '%@,%1$@',
-    default: true,
+    default: false,
   },
   {
     id: 'double_percent',
@@ -45,14 +46,14 @@ export const taggingTypes = [
     name: 'Square bracket Sprintf',
     code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See guides page</a>',
     html: true,
-    default: true,
+    default: false,
   },
   {
     id: 'sprintf',
     name: 'Sprintf',
     code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See guides page</a>',
     html: true,
-    default: true,
+    default: false,
   },
 ]
 
@@ -125,7 +126,9 @@ export const Tagging = () => {
     )
     if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
-      CatToolActions.onRender({segmentToOpen: config.last_opened_segment})
+      CatToolActions.onRender({
+        segmentToOpen: SegmentStore.getCurrentSegmentId(),
+      })
     }
 
     if (config.is_cattool)

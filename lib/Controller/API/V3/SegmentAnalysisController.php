@@ -16,6 +16,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\EntryDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -69,7 +70,7 @@ class SegmentAnalysisController extends KleinController
         $jobStruct = ChunkDao::getByIdAndPassword($idJob, $password);
         $this->project = $jobStruct->getProject();
 
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(MetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $this->response->json($this->getSegmentsForAJob($jobStruct, $page, $perPage, $segmentsCount, $matchClass));
     }
@@ -165,7 +166,7 @@ class SegmentAnalysisController extends KleinController
 
         $this->projectDao = new ProjectDao();
         $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(MetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $segmentsCount = CatUtils::getSegmentTranslationsCount($this->project);
         $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount, $matchClass));

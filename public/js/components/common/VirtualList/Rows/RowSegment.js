@@ -91,10 +91,8 @@ function RowSegment({
         <div className={'projectbar ' + classes}>
           {file ? (
             <div className={'projectbar-filename'}>
-              <span
-                title={segment.filename}
-                className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
-              >
+              {CommonUtils.getFileIcon(fileType[0])}
+              <span className="fileFormat" title={segment.filename}>
                 {file.file_name}
               </span>
             </div>

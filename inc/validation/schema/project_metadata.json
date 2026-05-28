@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "WPML": {
+      "type": ["boolean", "integer", "string"],
+      "description": "Plugin-specific boolean flag. Stored as '1'/'0' or 1/0. Only entry path is the metadata blob."
+    },
+    "from_api": {
+      "type": ["boolean", "integer"],
+      "description": "Backward compatibility. Always overwritten server-side by ProjectMetadataService::save()."
+    },
+    "word_count_type": {
+      "type": "string",
+      "enum": ["raw", "equivalent"],
+      "description": "Backward compatibility. Always overwritten to 'raw' in validateMetadataParam()."
+    }
+  }
+}

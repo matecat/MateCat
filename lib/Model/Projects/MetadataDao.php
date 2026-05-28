@@ -5,35 +5,12 @@ namespace Model\Projects;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
-use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
-use Model\Jobs\ChunkOptionsModel;
 use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao
 {
-    const string FEATURES_KEY = 'features';
     const string TABLE = 'project_metadata';
-
-    const string WORD_COUNT_TYPE_KEY = 'word_count_type';
-
-    const string WORD_COUNT_RAW = 'raw';
-    const string WORD_COUNT_EQUIVALENT = 'equivalent';
-
-    const string SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
-    const string SPLIT_RAW_WORD_TYPE = 'raw_word_count';
-
-    const string MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
-    const string MT_EVALUATION = 'mt_evaluation';
-    const string MT_QE_WORKFLOW_ENABLED = 'mt_qe_workflow_enabled';
-    const string MT_QE_WORKFLOW_PARAMETERS = 'mt_qe_workflow_parameters';
-    const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
-    const string ICU_ENABLED = 'icu_enabled';
-    const string FROM_API = 'from_api';
-    const string PRETRANSLATE_101 = 'pretranslate_101';
-    const string XLIFF_PARAMETERS = 'xliff_parameters';
-    const string FILTERS_EXTRACTION_PARAMETERS = 'filters_extraction_parameters';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
     protected static string $_query_get_metadata_by_key = "SELECT * FROM project_metadata WHERE id_project = :id_project AND `key` = :key ";
@@ -48,9 +25,7 @@ class MetadataDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_query_get_metadata);
 
-        /**
-         * @var $list MetadataStruct[]
-         */
+        /** @var MetadataStruct[] $list */
         $list = $this->_fetchObjectMap($stmt, MetadataStruct::class, ['id_project' => $id]);
         foreach ($list as $metaStruct) {
             $metaStruct->value = ProjectsMetadataMarshaller::unMarshall($metaStruct);
@@ -94,9 +69,7 @@ class MetadataDao extends AbstractDao
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_metadata_by_key);
 
-        /**
-         * @var $result MetadataStruct
-         */
+        /** @var MetadataStruct|null $result */
         $result = $this->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_project' => $id_project,
             'key' => $key
@@ -139,6 +112,46 @@ class MetadataDao extends AbstractDao
         return $conn->lastInsertId();
     }
 
+    /**
+     * Bulk insert/update multiple metadata key-value pairs in a single query.
+     *
+     * @param int $id_project
+     * @param array<string, string> $metadata key => value pairs to upsert
+     *
+     * @throws ReflectionException
+     */
+    public function bulkSet(int $id_project, array $metadata): void
+    {
+        if (empty($metadata)) {
+            return;
+        }
+
+        $placeholders = [];
+        $params = [];
+        $i = 0;
+
+        foreach ($metadata as $key => $value) {
+            $placeholders[] = "(:id_project_{$i}, :key_$i, :value_$i)";
+            $params["id_project_$i"] = $id_project;
+            $params["key_$i"] = $key;
+            $params["value_$i"] = $value;
+            $i++;
+        }
+
+        $sql = "INSERT INTO project_metadata (id_project, `key`, value) VALUES "
+            . implode(', ', $placeholders)
+            . " ON DUPLICATE KEY UPDATE value = VALUES(value)";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+
+        $this->destroyMetadataCache($id_project);
+        foreach ($metadata as $key => $value) {
+            $this->destroyMetadataCache($id_project, $key);
+        }
+    }
+
 
     /**
      * @throws ReflectionException
@@ -165,28 +178,6 @@ class MetadataDao extends AbstractDao
         return "{$key}_chunk_{$chunk->id}_$chunk->password";
     }
 
-    /**
-     * Clean up the chunks options before the job merging
-     *
-     * @param $jobs array Associative array with the Jobs
-     *
-     * @throws ReflectionException
-     * @throws NotFoundException
-     */
-    public function cleanupChunksOptions(array $jobs): void
-    {
-        foreach ($jobs as $job) {
-            $chunk = ChunkDao::getByIdAndPassword($job['id'], $job['password']);
-
-            foreach (ChunkOptionsModel::$valid_keys as $key) {
-                $this->delete(
-                    $chunk->id_project,
-                    self::buildChunkKey($key, $chunk)
-                );
-            }
-        }
-    }
-
     protected function _buildResult(array $array_result)
     {
     }
@@ -199,7 +190,7 @@ class MetadataDao extends AbstractDao
     public function getProjectStaticSubfilteringCustomHandlers(int $id_project): ?array
     {
         try {
-            $subfiltering = $this->setCacheTTL(86400)->get($id_project, MetadataDao::SUBFILTERING_HANDLERS);
+            $subfiltering = $this->setCacheTTL(86400)->get($id_project, ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
 
             return $subfiltering?->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {

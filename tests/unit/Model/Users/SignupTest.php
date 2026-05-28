@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Exceptions\ValidationError;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\UserDao;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 class SignupTest extends AbstractTest
@@ -17,6 +18,7 @@ class SignupTest extends AbstractTest
     /**
      * @throws ValidationError
      */
+    #[Test]
     public function testSignupWithValidParams()
     {
         $session = [];

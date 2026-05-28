@@ -3,6 +3,7 @@
 namespace unit\Model\TmKeyManagement;
 
 use Model\TmKeyManagement\MemoryKeyStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -12,6 +13,7 @@ class MemoryKeyStructTest extends AbstractTest
      * Test to ensure `toArray` method returns all properties as an associative array
      * when no `TmKeyStruct` is present.
      */
+    #[Test]
     public function testToArrayWithoutTmKey(): void
     {
         $memoryKeyStruct = new MemoryKeyStruct();
@@ -29,6 +31,7 @@ class MemoryKeyStructTest extends AbstractTest
     /**
      * Test to ensure `toArray` method returns all properties including a nested `TmKeyStruct`.
      */
+    #[Test]
     public function testToArrayWithTmKey(): void
     {
         $tmKeyStruct = new TmKeyStruct();
@@ -53,6 +56,7 @@ class MemoryKeyStructTest extends AbstractTest
     /**
      * Test to ensure `toArray` handles a `null` value for `tm_key` correctly.
      */
+    #[Test]
     public function testToArrayWithNullTmKey(): void
     {
         $memoryKeyStruct = new MemoryKeyStruct();
@@ -71,6 +75,7 @@ class MemoryKeyStructTest extends AbstractTest
     /**
      * Test to ensure `toArray` works with a partially populated `TmKeyStruct`.
      */
+    #[Test]
     public function testToArrayWithPartialTmKeyButFullStructure(): void
     {
         $tmKeyStruct = new TmKeyStruct();

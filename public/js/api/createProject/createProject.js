@@ -11,7 +11,9 @@ export const createProject = async (options) => {
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {
-    formData.append(key, paramsData[key])
+    if (paramsData[key] != null) {
+      formData.append(key, paramsData[key])
+    }
   })
   const response = await fetch(`${config.basepath}api/app/new-project`, {
     method: 'POST',

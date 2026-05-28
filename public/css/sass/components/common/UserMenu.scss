@@ -12,7 +12,9 @@
   .header-button-signup {
     color: colors.$blue900 !important;
   }
-
+}
+.user-menu-popover {
+  line-height: 0;
 }
 .user-menu-popover-avatar {
   width: 40px;
@@ -26,6 +28,7 @@
   padding: 20px 0;
   gap: 15px;
   min-width: 250px;
+  line-height: 1.2;
 
   > hr {
     margin: 0;

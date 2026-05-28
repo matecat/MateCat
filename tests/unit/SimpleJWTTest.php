@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\SimpleJWT;
 
@@ -22,6 +23,7 @@ class SimpleJWTTest extends AbstractTest
         $this->secretKey = 'test_secret_key';
     }
 
+    #[Test]
     public function testSignWithInjectedPrivateClaimsKeepsAllExceptExp(): void
     {
         $claims = [
@@ -55,6 +57,7 @@ class SimpleJWTTest extends AbstractTest
         );
     }
 
+    #[Test]
     public function testSignWithInjectedPrivateClaimsKeepsAllButNbf(): void
     {
         $claims = [
@@ -76,6 +79,7 @@ class SimpleJWTTest extends AbstractTest
         $jwt->sign();
     }
 
+    #[Test]
     public function testIsValid_withValidToken(): void
     {
         $jwt = new SimpleJWT(
@@ -91,6 +95,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($isValid, "The valid token should be recognized as valid.");
     }
 
+    #[Test]
     public function testIsValid_withTamperedSignature(): void
     {
         $jwt = new SimpleJWT(
@@ -109,6 +114,7 @@ class SimpleJWTTest extends AbstractTest
         SimpleJWT::isValid($signedToken, $this->secretKey);
     }
 
+    #[Test]
     public function testIsValid_withExpiredToken(): void
     {
         $jwt = new SimpleJWT(
@@ -126,6 +132,7 @@ class SimpleJWTTest extends AbstractTest
         SimpleJWT::isValid($signedToken, $this->secretKey);
     }
 
+    #[Test]
     public function testIsValid_withNotYetValidToken(): void
     {
         $jwt = new SimpleJWT(
@@ -143,6 +150,7 @@ class SimpleJWTTest extends AbstractTest
         SimpleJWT::isValid($signedToken, $this->secretKey);
     }
 
+    #[Test]
     public function testIsValid_withValidNbf(): void
     {
         $jwt = new SimpleJWT(
@@ -157,6 +165,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue(SimpleJWT::isValid((string)$jwt, $this->secretKey));
     }
 
+    #[Test]
     public function testIsValid_withStringToken(): void
     {
         $jwt = new SimpleJWT(
@@ -172,6 +181,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($isValid, "The valid token (as a string) should be recognized as valid.");
     }
 
+    #[Test]
     public function testIsValid_withTamperedStringToken(): void
     {
         $jwt = new SimpleJWT(
@@ -192,6 +202,7 @@ class SimpleJWTTest extends AbstractTest
         SimpleJWT::isValid($tamperedTokenString, $this->secretKey);
     }
 
+    #[Test]
     public function testIsValid_withMissingClaims(): void
     {
         $jwt = new SimpleJWT(
@@ -208,6 +219,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($isValid, "Tokens missing non-critical claims should still be valid.");
     }
 
+    #[Test]
     public function testEncryption()
     {
         $invited_by_uid = 166;
@@ -230,6 +242,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($result['payload'][$result['payload']['iss']]['request_info'] == $request_info);
     }
 
+    #[Test]
     public function testValidateTokenEncryption()
     {
         $invited_by_uid = 166;
@@ -246,6 +259,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($x->isValid($result));
     }
 
+    #[Test]
     public function testValidateTokenEncryptionByJWT()
     {
         $invited_by_uid = 166;
@@ -262,6 +276,7 @@ class SimpleJWTTest extends AbstractTest
     }
 
 
+    #[Test]
     public function testInvalidToken_tamper_field()
     {
         $invited_by_uid = 166;
@@ -284,6 +299,7 @@ class SimpleJWTTest extends AbstractTest
         $x->isValid($result);
     }
 
+    #[Test]
     public function testInvalidToken_tamper_hash()
     {
         $invited_by_uid = 166;
@@ -306,6 +322,7 @@ class SimpleJWTTest extends AbstractTest
         $x->isValid($result);
     }
 
+    #[Test]
     public function testArrayAccess()
     {
         $invited_by_uid = 166;
@@ -339,6 +356,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($x->isValid($result));
     }
 
+    #[Test]
     public function testAssignmentRuntime()
     {
         $invited_by_uid = 166;
@@ -367,6 +385,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($x->isValid($result));
     }
 
+    #[Test]
     public function testTimeToLive()
     {
         $invited_by_uid = 166;
@@ -393,6 +412,7 @@ class SimpleJWTTest extends AbstractTest
     }
 
 
+    #[Test]
     public function testSetTimeToLiveWithNegativeValueThrowsException(): void
     {
         $jwt = new SimpleJWT([], 'simple.jwt.claims', $this->secretKey, 3600);
@@ -403,6 +423,7 @@ class SimpleJWTTest extends AbstractTest
         $jwt->setTimeToLive(-10);
     }
 
+    #[Test]
     public function testSetSecretKeyIsFluentAndUsedForSigning(): void
     {
         $jwt = new SimpleJWT(['foo' => 'bar']);
@@ -414,6 +435,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue(SimpleJWT::isValid($signedToken, $this->secretKey));
     }
 
+    #[Test]
     public function testGetExpireDateUsesNowPlusTimeToLive(): void
     {
         $jwt = new SimpleJWT([], 'simple.jwt.claims', $this->secretKey, 100);
@@ -428,6 +450,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertSame(1200, $jwt->getExpireDate());
     }
 
+    #[Test]
     public function testGetPayloadWithCustomNamespaceAndDefault(): void
     {
         $jwtCustom = new SimpleJWT(['foo' => 'bar'], 'my.custom.namespace', $this->secretKey, 3600);
@@ -439,6 +462,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertSame([], $jwtDefault->getPayload());
     }
 
+    #[Test]
     public function testArrayAccessExistsAndGetForPrivateAndCustomClaims(): void
     {
         $jwt = new SimpleJWT([], 'simple.jwt.claims', $this->secretKey, 3600);
@@ -462,6 +486,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertNull($jwt['not_exists']);
     }
 
+    #[Test]
     public function testArrayAccessUnsetCustomClaim(): void
     {
         $jwt = new SimpleJWT([], 'simple.jwt.claims', $this->secretKey, 3600);
@@ -483,6 +508,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertArrayNotHasKey('foo', $signed['payload'][$namespace] ?? []);
     }
 
+    #[Test]
     public function testArrayAccessUnsetPrivateClaimAlsoClearsNamespacedValue(): void
     {
         // Create a JWT with one custom claim ("x") under the "simple.jwt.claims" namespace.
@@ -523,6 +549,7 @@ class SimpleJWTTest extends AbstractTest
         }
     }
 
+    #[Test]
     public function testJsonSerializeReturnsSameAsEncode(): void
     {
         $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
@@ -530,6 +557,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertSame($jwt->encode(), $jwt->jsonSerialize());
     }
 
+    #[Test]
     public function testToStringReturnsCompactJwt(): void
     {
         $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);
@@ -537,6 +565,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertSame($jwt->encode(), (string)$jwt);
     }
 
+    #[Test]
     public function testGetInstanceFromStringWithoutValidation(): void
     {
         $jwt = new SimpleJWT(['foo' => 'bar'], 'my.custom.namespace', $this->secretKey, 3600);
@@ -550,6 +579,7 @@ class SimpleJWTTest extends AbstractTest
     /**
      * @throws ReflectionException
      */
+    #[Test]
     public function testGetInstanceFromStringWithValidationClearsSignature(): void
     {
         $jwt = new SimpleJWT(['foo' => 'bar'], 'my.custom.namespace', $this->secretKey, 3600);
@@ -565,6 +595,7 @@ class SimpleJWTTest extends AbstractTest
         $this->assertNull($storage['signature']);
     }
 
+    #[Test]
     public function testIsValidWhenExpAndNbfAreMissing(): void
     {
         $jwt = new SimpleJWT(['foo' => 'bar'], 'simple.jwt.claims', $this->secretKey, 3600);

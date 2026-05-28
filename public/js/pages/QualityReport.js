@@ -12,6 +12,7 @@ import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import SocketListener from '../sse/SocketListener'
 import {SegmentedControl} from '../components/common/SegmentedControl'
+import {SpinnerLoader} from '../components/common/SpinnerLoader'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
@@ -210,9 +211,7 @@ export const QualityReport = () => {
               </div>
             ) : (
               <div style={spinnerContainer}>
-                <div className="ui active inverted dimmer">
-                  <div className="ui massive text loader">Loading</div>
-                </div>
+                <SpinnerLoader />
               </div>
             )}
           </div>

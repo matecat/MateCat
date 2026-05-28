@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Document</title>
+</head>
+<body>
+    <!-- XPath: /html/body/h1 | restype: x-path -->
+    <h1>Title</h1>
+
+    <!-- XPath: /html/body/div[1]/p[1] | restype: x-path -->
+    <!-- Custom: html.body.div_1.p_1   | restype: x-client_nodepath -->
+    <div class="info">
+        <p>Informational text.</p>
+    </div>
+
+    <!-- XPath: /html/body/div[2]/p[1] | restype: x-path -->
+    <div>
+        <p>Paragraph in the first div.</p>
+    </div>
+
+    <div>
+        <!-- XPath: /html/body/div[3]/p[1] | restype: x-path -->
+        <!-- Custom: html.body.div_3.p_1   | restype: x-client_nodepath -->
+        <p>Text in the second div, first paragraph.</p>
+
+        <!-- resname: node_id | restype: x-tag-id -->
+        <span id="node_id">Text identified by an ID.</span>
+
+        <!-- resname: unique-class | restype: x-css_class -->
+        <p class="unique-class">This paragraph is identified by a unique CSS class.</p>
+
+        <!-- resname: data-custom-id=xyz-123 | restype: x-attribute_name_value -->
+        <div data-custom-id="xyz-123">Content identified by a custom attribute.</div>
+    </div>
+
+    <!-- resname: //img[@id='logo']/@alt         | restype: x-path (attribute: alt) -->
+    <!-- resname: //img[@id='logo']/@title       | restype: x-path (attribute: title) -->
+    <img src="logo.png" id="logo" alt="Company Logo" title="Go to Homepage"/>
+
+    <!-- resname: //input/@placeholder           | restype: x-path (attribute: placeholder) -->
+    <input type="text" placeholder="Search the site..."/>
+</body>
+</html>
+

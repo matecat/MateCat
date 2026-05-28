@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -19,7 +20,7 @@ class PingTest extends AbstractTest
     /**
      * @var Database|IDatabase
      */
-    protected $databaseInstance;
+    protected IDatabase|Database $databaseInstance;
 
     public function setUp(): void
     {
@@ -36,6 +37,7 @@ class PingTest extends AbstractTest
      * @group  regression
      * @covers Database::ping
      */
+    #[Test]
     public function test_ping()
     {
         $this->assertTrue($this->databaseInstance->ping());

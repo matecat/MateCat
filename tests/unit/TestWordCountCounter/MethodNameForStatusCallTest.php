@@ -2,6 +2,7 @@
 
 
 use Model\WordCount\CounterModel;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -32,6 +33,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      *
      * @param "NEW"
      */
+    #[Test]
     public function test_methodNameForStatusCall_NEW()
     {
         $this->assertEquals("NewWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "NEW"));
@@ -43,6 +45,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      *
      * @param "DRAFT"
      */
+    #[Test]
     public function test_methodNameForStatusCall_DRAFT()
     {
         $this->assertEquals("DraftWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "DRAFT"));
@@ -54,6 +57,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      *
      * @param "TRANSLATED"
      */
+    #[Test]
     public function test_methodNameForStatusCall_TRANSLATED()
     {
         $this->assertEquals("TranslatedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "TRANSLATED"));
@@ -65,6 +69,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      *
      * @param "APPROVED"
      */
+    #[Test]
     public function test_methodNameForStatusCall_APPROVED()
     {
         $this->assertEquals("ApprovedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "APPROVED"));
@@ -76,6 +81,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      *
      * @param "REJECTED"
      */
+    #[Test]
     public function test_methodNameForStatusCall_REJECTED()
     {
         $this->assertEquals("RejectedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "REJECTED"));
@@ -87,6 +93,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      *
      * @param "BARANDFOO"
      */
+    #[Test]
     public function test_methodNameForStatusCall_BARANDFOO()
     {
         $this->assertEquals("BarandfooWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "BARANDFOO"));

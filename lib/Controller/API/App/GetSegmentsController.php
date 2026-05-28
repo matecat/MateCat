@@ -16,6 +16,7 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\ContextGroupDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
@@ -24,6 +25,7 @@ use Model\Segments\SegmentUIStruct;
 use ReflectionException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController
@@ -88,7 +90,7 @@ class GetSegmentsController extends KleinController
         $res = [];
 
         $projectMetadata = new ProjectMetadataDao();
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectMetadataDao::ICU_ENABLED)?->value ?? false;
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectsMetadataMarshaller::ICU_ENABLED->value)?->value ?? false;
 
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
@@ -126,7 +128,7 @@ class GetSegmentsController extends KleinController
                     language: $job->source,
                     patternString: $seg['segment']
                 );
-                $string_contains_icu = $analyzer->containsComplexSyntax() && $analyzer->isValidSyntax();
+                $string_contains_icu = ICUSourceSegmentDetector::sourceContainsIcu($analyzer, $icu_enabled);
             }
 
             /** @var MateCatFilter $Filter */

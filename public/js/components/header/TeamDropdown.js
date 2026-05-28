@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import {BUTTON_TYPE, Button} from '../common/Button/Button'
+import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../common/Button/Button'
 import IconDown from '../icons/IconDown'
 import ManageActions from '../../actions/ManageActions'
 import UserActions from '../../actions/UserActions'
@@ -80,6 +80,7 @@ export const TeamDropdown = ({isManage = true, showModals = true}) => {
         ref={triggerRef}
         className={`trigger-button${isDropdownVisible ? ' open' : ''}`}
         type={BUTTON_TYPE.DEFAULT}
+        size={BUTTON_SIZE.SMALL}
         onClick={toggleDropdown}
       >
         {selectedTeam?.name ?? 'Choose team'}

@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use ArrayObject;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -10,8 +9,10 @@ use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
-use Model\ProjectManager\ProjectManager;
+use Model\JobSplitMerge\JobSplitMergeManager;
+use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
@@ -36,19 +37,19 @@ class SplitJobController extends KleinController
             $request['split_raw_words']
         );
 
-        /** @var  $pStruct ArrayObject */
-        $pStruct = $projectStructure['pStruct'];
-        /** @var  $pManager ProjectManager */
+        /** @var SplitMergeProjectData $data */
+        $data = $projectStructure['data'];
+        /** @var JobSplitMergeManager $pManager */
         $pManager = $projectStructure['pManager'];
-        /** @var $project ProjectStruct */
+        /** @var ProjectStruct $project */
         $project = $projectStructure['project'];
 
         $jobStructs = $this->checkMergeAccess($request['job_id'], $project->getJobs());
-        $pStruct['job_to_merge'] = $request['job_id'];
-        $pManager->mergeALL($pStruct, $jobStructs);
+        $data->jobToMerge = $request['job_id'];
+        $pManager->mergeALL($data, $jobStructs);
 
         $this->response->json([
-            "data" => $pStruct['split_result']
+            "data" => $data->splitResult
         ]);
     }
 
@@ -63,12 +64,12 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        /** @var  $pManager ProjectManager */
-        /** @var  $pStruct ArrayObject */
-        [, $pStruct] = $this->checkSplit($request);
+        /** @var  $pManager JobSplitMergeManager */
+        /** @var  $data SplitMergeProjectData */
+        [, $data] = $this->checkSplit($request);
 
         $this->response->json([
-            "data" => $pStruct['split_result']
+            "data" => $data->splitResult
         ]);
     }
 
@@ -83,17 +84,18 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        /** @var  $pManager ProjectManager */
-        /** @var  $pStruct ArrayObject */
-        [$pManager, $pStruct] = $this->checkSplit($request);
-        $pManager->applySplit($pStruct);
+        /** @var  $pManager JobSplitMergeManager */
+        /** @var  $data SplitMergeProjectData */
+        [$pManager, $data] = $this->checkSplit($request);
+        $pManager->applySplit($data);
 
         $this->response->json([
-            "data" => $pStruct['split_result']
+            "data" => $data->splitResult
         ]);
     }
 
     /**
+     * @return array{0: JobSplitMergeManager, 1: SplitMergeProjectData}
      * @throws Exception
      */
     private function checkSplit(array $request): array
@@ -104,22 +106,22 @@ class SplitJobController extends KleinController
             $request['split_raw_words']
         );
 
-        /** @var  $pStruct ArrayObject */
-        $pStruct = $projectStructure['pStruct'];
-        /** @var  $pManager ProjectManager */
+        /** @var SplitMergeProjectData $data */
+        $data = $projectStructure['data'];
+        /** @var JobSplitMergeManager $pManager */
         $pManager = $projectStructure['pManager'];
-        /** @var $project ProjectStruct */
+        /** @var ProjectStruct $project */
         $project = $projectStructure['project'];
         $count_type = $projectStructure['count_type'];
 
         $this->checkSplitAccess($project, $request['job_id'], $request['job_pass'], $project->getJobs());
 
-        $pStruct['job_to_split'] = $request['job_id'];
-        $pStruct['job_to_split_pass'] = $request['job_pass'];
+        $data->jobToSplit = $request['job_id'];
+        $data->jobToSplitPass = $request['job_pass'];
 
-        $pManager->getSplitData($pStruct, $request['num_split'], $request['split_values'], $count_type);
+        $pManager->getSplitData($data, $request['num_split'], $request['split_values'], $count_type);
 
-        return [$pManager, $pStruct];
+        return [$pManager, $data];
     }
 
     /**
@@ -180,16 +182,15 @@ class SplitJobController extends KleinController
      */
     private function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
-        $count_type = $split_raw_words ? MetadataDao::SPLIT_RAW_WORD_TYPE : MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
+        $count_type = $split_raw_words ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
         $project_struct = ProjectDao::findByIdAndPassword($project_id, $project_pass, 60 * 60);
 
-        $pManager = new ProjectManager();
-        $pManager->setProjectAndReLoadFeatures($project_struct);
+        $pManager = new JobSplitMergeManager($project_struct);
 
-        $pStruct = $pManager->getProjectStructure();
+        $data = $pManager->getProjectData();
 
         return [
-            'pStruct' => $pStruct,
+            'data' => $data,
             'pManager' => $pManager,
             'count_type' => $count_type,
             'project' => $project_struct,

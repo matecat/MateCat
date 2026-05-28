@@ -12,6 +12,7 @@ namespace Utils\Email;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
@@ -57,7 +58,7 @@ class ProjectAssignedEmail extends AbstractEmail
             $jobStats->setTranslatedWords($jStruct->translated_words);
             $jobStats->setApprovedWords($jStruct->approved_words);
             $stats = CatUtils::getFastStatsForJob($jobStats, false);
-            $words_count[] = $stats[MetadataDao::WORD_COUNT_RAW]['total'];
+            $words_count[] = $stats[ProjectsMetadataMarshaller::WORD_COUNT_RAW->value]['total'];
         }
 
         return [

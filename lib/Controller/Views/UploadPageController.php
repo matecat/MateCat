@@ -14,7 +14,7 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
 use Exception;
 use Matecat\Locales\LanguageDomains;
-use Model\ProjectManager\ProjectOptionsSanitizer;
+use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Utils\Constants\Constants;
 use Utils\Engines\Intento;
 use Utils\Registry\AppConfig;
@@ -28,7 +28,7 @@ class UploadPageController extends BaseKleinViewController
     /**
      * @throws Exception
      */
-    protected function renderView()
+    protected function renderView(): void
     {
         $guid = $this->checkDriveFilesOrGetGuid();
         if (!empty($guid)) {
@@ -47,7 +47,7 @@ class UploadPageController extends BaseKleinViewController
             'subjects' => new PHPTalMap(LanguageDomains::getInstance()->getEnabledDomains()),
             'formats_number' => $this->countSupportedFileTypes(),
             'translation_engines_intento_prov_json' => new PHPTalMap(Intento::getProviderList()),
-            'tag_projection_languages' => new PHPTalMap(ProjectOptionsSanitizer::$tag_projection_allowed_languages),
+            'tag_projection_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$tagProjectionAllowedLanguages),
             'developerKey' => AppConfig::$GOOGLE_OAUTH_BROWSER_API_KEY,
             'clientId' => AppConfig::$GOOGLE_OAUTH_CLIENT_ID
         ]);
@@ -56,7 +56,7 @@ class UploadPageController extends BaseKleinViewController
             $this->addParamsToView([
                     'lxq_license' => AppConfig::$LXQ_LICENSE,
                     'lxq_partnerid' => AppConfig::$LXQ_PARTNERID,
-                    'lexiqa_languages' => new PHPTalMap(ProjectOptionsSanitizer::$lexiQA_allowed_languages),
+                    'lexiqa_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages),
                     'lexiqaServer' => AppConfig::$LXQ_SERVER,
                 ]
             );
@@ -101,7 +101,7 @@ class UploadPageController extends BaseKleinViewController
      *
      * @return void
      */
-    private function setEmptyCookieValueIfNoHistory(string $cookieName)
+    private function setEmptyCookieValueIfNoHistory(string $cookieName): void
     {
         if (!isset($_COOKIE[$cookieName])) {
             CookieManager::setCookie(

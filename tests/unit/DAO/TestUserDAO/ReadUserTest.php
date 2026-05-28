@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -64,6 +65,7 @@ class ReadUserTest extends AbstractTest
      * @group  regression
      * @covers UserDao::read
      */
+    #[Test]
     public function test_read_user_without_where_conditions()
     {
         $this->user_struct_param = UserStruct::getStruct();
@@ -75,6 +77,7 @@ class ReadUserTest extends AbstractTest
      * @group  regression
      * @covers UserDao::read
      */
+    #[Test]
     public function test_read_user_with_success_uid_given()
     {
         $this->user_struct_param = UserStruct::getStruct();
@@ -97,6 +100,7 @@ class ReadUserTest extends AbstractTest
      * @group  regression
      * @covers UserDao::read
      */
+    #[Test]
     public function test_read_user_with_success_email_given()
     {
         $this->user_struct_param = UserStruct::getStruct();

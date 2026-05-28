@@ -94,16 +94,9 @@ export const FilesMenu = ({projectName}) => {
         label: (
           <>
             <div>
-              <span
-                className={
-                  'file-icon ' +
-                  CommonUtils.getIconClass(
-                    file.file_name.split('.')[
-                      file.file_name.split('.').length - 1
-                    ],
-                  )
-                }
-              />
+              {CommonUtils.getFileIcon(
+                file.file_name.split('.')[file.file_name.split('.').length - 1],
+              )}
               <span className="file-name">{file.file_name}</span>
             </div>
             {currentFile === file.id && <Check size={20} />}

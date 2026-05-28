@@ -66,7 +66,7 @@ class CatUtils
     }
 
     /**
-     * @param $langCode
+     * @param string|null $langCode
      *
      * @return bool
      */

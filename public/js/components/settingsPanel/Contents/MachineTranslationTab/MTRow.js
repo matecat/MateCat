@@ -30,7 +30,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'MMT' && (
@@ -39,7 +39,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'DeepL' && (
@@ -48,7 +48,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'Lara' && (
@@ -57,7 +57,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
         {row.engine_type === 'Intento' && (
@@ -66,11 +66,20 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             target="_blank"
             rel="noreferrer"
           >
-            <InfoIcon />
+            <InfoIcon size={16} />
           </a>
         )}
       </div>
-      <div className="settings-panel-mt-row-description">{row.description}</div>
+      <div
+        className="settings-panel-mt-row-description"
+        {...(typeof row.description === 'string'
+          ? {
+              dangerouslySetInnerHTML: {
+                __html: row.description,
+              },
+            }
+          : {children: row.description})}
+      ></div>
       {!row.default && !config.is_cattool && (
         <div>
           <Button

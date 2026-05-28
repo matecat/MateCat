@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -22,6 +23,7 @@ class ParseTimeToEditTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
+    #[Test]
     public function test_parse_time_to_edit_small_input()
     {
         $this->source_time = 2345;
@@ -34,6 +36,7 @@ class ParseTimeToEditTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
+    #[Test]
     public function test_parse_time_to_edit_bigger_than_maxInt_input_truncate_to_max_int()
     {
         $this->source_time = PHP_INT_MAX;
@@ -49,6 +52,7 @@ class ParseTimeToEditTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
+    #[Test]
     public function test_parse_time_to_edit_string_number()
     {
         $this->source_time = "1234";
@@ -61,6 +65,7 @@ class ParseTimeToEditTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
+    #[Test]
     public function test_parse_time_to_edit_normal_input()
     {
         $this->source_time = 3469000976;
@@ -73,6 +78,7 @@ class ParseTimeToEditTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
+    #[Test]
     public function test_parse_time_to_edit_unexpected_string_input()
     {
         $this->source_time = "hello what's time is it ?";
@@ -86,6 +92,7 @@ class ParseTimeToEditTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
+    #[Test]
     public function test_parse_time_to_edit_unexpected_array_input()
     {
         $this->source_time = ["00", "00", "00", "00"];

@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -73,6 +74,7 @@ class CrudEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::delete
      */
+    #[Test]
     public function test_delete_the_struct_of_constructed_engine()
     {
         $sql_engine = "SELECT name FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id='" . $this->engine_id . "' and uid='" . $this->user_id . "'";
@@ -89,6 +91,7 @@ class CrudEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::delete
      */
+    #[Test]
     public function test_delete_the_struct_of_engine_with_wrong_uid_avoiding_the_delete()
     {
         $this->engine_struct_param->uid++;
@@ -102,6 +105,7 @@ class CrudEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::disable
      */
+    #[Test]
     public function test_disable_the_struct_of_constructed_engine()
     {
         $sql_engine = "SELECT active FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id='" . $this->engine_id . "' and uid='" . $this->user_id . "'";
@@ -119,6 +123,7 @@ class CrudEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::disable
      */
+    #[Test]
     public function test_disable_the_struct_of_engine_with_wrong_uid_avoiding_the_disable()
     {
         $this->engine_struct_param->uid++;
@@ -130,6 +135,7 @@ class CrudEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::updateByStruct
      */
+    #[Test]
     public function test_update_the_struct_of_constructed_engine_check_by_name()
     {
         $this->engine_struct_param->name = "NONE";
@@ -166,6 +172,7 @@ class CrudEngineTest extends AbstractTest
      * @throws Exception @group regression
      * @covers EngineDAO::updateFields
      */
+    #[Test]
     public function test_update_the_struct_of_engine_with_wrong_uid_avoiding_any_update()
     {
         $this->engine_struct_param->uid++;

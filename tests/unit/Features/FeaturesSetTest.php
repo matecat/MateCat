@@ -3,6 +3,7 @@
 use Features\Airbnb;
 use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -39,6 +40,7 @@ class FeaturesSetTest extends AbstractTest
      *
      * @throws Exception
      */
+    #[Test]
     public function testSortFeatures()
     {
         for ($i = 0; $i < 500; $i++) {

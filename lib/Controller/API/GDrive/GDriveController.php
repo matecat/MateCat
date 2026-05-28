@@ -26,8 +26,6 @@ class GDriveController extends AbstractStatefulKleinController
     const string GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
 
     private string $source_lang = Constants::DEFAULT_SOURCE_LANG;
-    private string $target_lang = Constants::DEFAULT_TARGET_LANG;
-    private ?string $segmentation_rule = null;
     private ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
     private bool $isAsyncReq = true;
     private bool $isImportingSuccessful = true;
@@ -52,10 +50,10 @@ class GDriveController extends AbstractStatefulKleinController
         $this->isAsyncReq = filter_var($this->request->param('isAsync'), FILTER_VALIDATE_BOOLEAN);
 
         try {
-            $this->segmentation_rule = Constants::validateSegmentationRules($this->request->param('segmentation_rule'));
+            $segmentation_rule = Constants::validateSegmentationRules($this->request->param('segmentation_rule'));
 
             $this->source_lang = $this->getValidSourceLanguage();
-            $this->target_lang = $this->getValidTargetLanguages();
+            $target_lang = $this->getValidTargetLanguages();
 
             if (!empty($filtersTemplateString)) {
                 $filtersTemplate = new FiltersConfigTemplateStruct();
@@ -110,8 +108,8 @@ class GDriveController extends AbstractStatefulKleinController
             $this->gdriveUserSession->setConversionParams(
                 $guid,
                 $this->source_lang,
-                $this->target_lang,
-                $this->segmentation_rule,
+                $target_lang,
+                $segmentation_rule,
                 $this->filters_extraction_parameters
             );
 
@@ -194,8 +192,6 @@ class GDriveController extends AbstractStatefulKleinController
                 break;
             }
         }
-
-        $_SESSION["gdrive_session"] = $this->gdriveUserSession->getSession();
     }
 
     /**
@@ -420,15 +416,12 @@ class GDriveController extends AbstractStatefulKleinController
         if ($fileId === 'all') {
             $this->gdriveUserSession->removeAllFiles($source, $segmentationRule, $filtersTemplate);
             $success = true;
-            unset($_SESSION["gdrive_session"]);
         } else {
             $success = $this->gdriveUserSession->removeFile($fileId, $source, $segmentationRule, $filtersTemplate);
 
             if ($success) {
                 if (!$this->gdriveUserSession->hasFiles()) {
-                    unset($_SESSION["gdrive_session"]);
-                } else {
-                    unset($_SESSION["gdrive_session"][Session::FILE_LIST][$fileId]);
+                    $this->gdriveUserSession->clearSession();
                 }
             }
         }

@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -123,6 +124,7 @@ class GetByProjectIdTest extends AbstractTest
     /**
      * @throws ReflectionException
      */
+    #[Test]
     public function test_GetByProjectId()
     {
         $actual_result = $this->job_Dao->getByProjectId($this->str_id_project);

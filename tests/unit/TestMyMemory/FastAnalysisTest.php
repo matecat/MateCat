@@ -3,6 +3,8 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -23,8 +25,13 @@ class FastAnalysisTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::fastAnalysis
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_fastAnalysis_general_check()
     {
         $segment_third_position = <<<'Z'
@@ -93,8 +100,13 @@ Z;
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::fastAnalysis
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_fastAnalysis_specific_check()
     {
         $segment_third_position = <<<'Z'
@@ -239,8 +251,13 @@ Z;
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::fastAnalysis
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_fastAnalysis_with_no_array_as_param_for_coverage_purpose()
     {
         $array_paramemeter = ["bar_and_foo"];
@@ -265,6 +282,7 @@ Z;
      * @group  regression
      * @covers MyMemory::fastAnalysis
      */
+    #[Test]
     public function test_fastAnalysis_with_error_from_mocked__call_for_coverage_purpose()
     {
         $segment_third_position = <<<'Z'

@@ -14,6 +14,7 @@ use Model\Analysis\Status;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -139,7 +140,7 @@ class Project
 
         $metadataDao = new MetadataDao();
         $projectInfo = $metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
-        $fromApi = $metadataDao->setCacheTTL(60)->get((int)$project->id, 'from_api');
+        $fromApi = $metadataDao->setCacheTTL(60)->get((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
 
         $_project_data = ProjectDao::getProjectAndJobData($project->id);
         $analysisStatus = new Status($_project_data, $featureSet, $this->user);

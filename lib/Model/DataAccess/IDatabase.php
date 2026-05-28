@@ -102,4 +102,21 @@ interface IDatabase
      */
     public function rowCount(): int;
 
+    /**
+     * Get the underlying PDO connection
+     *
+     * @return PDO
+     */
+    public function getConnection(): PDO;
+
+    /**
+     * Reserve and return a range of sequence IDs
+     *
+     * @param string $sequence_name
+     * @param int $seqIncrement
+     *
+     * @return list<int>
+     */
+    public function nextSequence(string $sequence_name, int $seqIncrement = 1): array;
+
 }

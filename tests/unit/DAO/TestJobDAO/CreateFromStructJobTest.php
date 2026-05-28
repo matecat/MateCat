@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -108,6 +109,7 @@ class CreateFromStructJobTest extends AbstractTest
      * @group  regression
      * @covers JobDao::createFromStruct
      */
+    #[Test]
     public function test_createFromStructsJob()
     {
         $result = $this->job_Dao->createFromStruct($this->job_struct);

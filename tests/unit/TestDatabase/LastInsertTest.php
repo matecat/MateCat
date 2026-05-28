@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -44,6 +45,7 @@ class LastInsertTest extends AbstractTest
      * @covers Database::last_insert
      * User: dinies
      */
+    #[Test]
     public function test_last_insert_simple_table()
     {
         $this->databaseInstance->getConnection()->query($this->sql_create);

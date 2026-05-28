@@ -41,49 +41,81 @@ class GeminiClient implements AIClientInterface
         string $excerpt,
         string $styleInstructions
     ): array {
+        // Tag Protection Mechanism:
+        // Identify all tags in the sentences and replace them with opaque placeholders.
+        // This prevents the AI from attempting to parse or "fix" HTML tags.
+        $tagMap = [];
+        $maskTags = function ( ?string $text ) use ( &$tagMap ) {
+            if ( empty( $text ) ) {
+                return $text;
+            }
+
+            return preg_replace_callback( '/<(?:[^"\'>]|"[^"]*"|\'[^\']*\')*>/u', function ( $matches ) use ( &$tagMap ) {
+                $tag = $matches[ 0 ];
+                $placeholder = array_search( $tag, $tagMap );
+                if ( $placeholder === false ) {
+                    $placeholder = "[[T" . count( $tagMap ) . "]]";
+                    $tagMap[ $placeholder ] = $tag;
+                }
+
+                return $placeholder;
+            }, $text );
+        };
+
+        $mSourceSentence = $maskTags( $sourceSentence );
+        $mSourceContext = $maskTags( $sourceContextSentencesString );
+        $mTargetSentence = $maskTags( $targetSentence );
+        $mTargetContext = $maskTags( $targetContextSentencesString );
+        $mExcerpt = $maskTags( $excerpt );
+
         $prompt = <<<PROMPT
 You are an expert $sourceLanguage to $targetLanguage translator.
 
   Given:
    - Source sentence:
      """
-     {$sourceSentence}
+     {$mSourceSentence}
      """
 
 
    - Source sentence context:
      """
-     {$sourceContextSentencesString}
+     {$mSourceContext}
      """
 
 
    - Target sentence:
      """
-     {$targetSentence}
+     {$mTargetSentence}
      """
 
 
    - Target sentence context:
      """
-     {$targetContextSentencesString}
+     {$mTargetContext}
      """
 
 
    - Target excerpt to be replaced:
      """
-     {$excerpt}
+     {$mExcerpt}
      """
     
- Suggest up to 4 alternative translations in $targetLanguage that replaces "$excerpt" in the target sentence.
+   - Suggest up to 4 alternative translations in $targetLanguage that replace the exact text "$mExcerpt" in the "Target sentence" provided above.
+   - You MUST return the full new target sentence, with the excerpt replaced, in the "alternative" field.
+   - Every character of the "Target sentence" that is NOT part of the "$mExcerpt" MUST remain exactly as it is, including all placeholders, spaces, and punctuation.
 
- *Tag Integrity Protocol*
-   - Every XML/HTML/XLIFF tag is a mandatory placeholder. 
-   - If the original target sentence is "Hello <ex/> world" and the excerpt is "world", the alternative MUST contain "<ex/>".
-   - Do not "fix" the spacing around tags; keep the original tag syntax (e.g., `<ex />` vs `<ex/>`) exactly as provided.
-   
+ *Token Integrity Protocol*
+   - Tokens like [[T0]], [[T1]], etc., are mandatory placeholders representing non-translatable tags.
+   - Treat tokens as atomic, immutable constants.
+   - You MUST NOT translate, modify, or remove these tokens.
+   - You MUST NOT add any content between tokens if they were adjacent in the original sentence.
+   - You MUST NOT wrap any text with these tokens.
+   - Copy every token character-by-character from the original sentence into the alternative.
+
  *Instructions to generate alternative translations*
    - Always ensure that only the specified excerpt is altered, and all other parts of the sentence remain unchanged unless absolutely necessary for grammatical correctness with the new excerpt.
-   - Golden Rule: If "$excerpt" has no meaning in the $targetLanguage, return an empty JSON.
+   - Golden Rule: If "$mExcerpt" has no meaning in the $targetLanguage, return an empty JSON.
   
    {$this->style($styleInstructions, $targetLanguage)}
   
@@ -98,9 +130,11 @@ You are an expert $sourceLanguage to $targetLanguage translator.
      - Context must be understandable in $targetLanguage
      - Make sure it contains all not changed terms of the original target sentence
   
-   - *Golden rule*: If "$excerpt" is a proper noun, a brand, or part of it, return an empty JSON.
+   - *Golden rule*: If "$mExcerpt" is a proper noun, a brand, or part of it, return an empty JSON.
    - *Golden rule* if you don't have any reasonable alternative to suggest it's ok to return an empty JSON.
 PROMPT;
+
+        $model = ( AppConfig::$GEMINI_API_MODEL ) ?: 'gemini-2.5-flash-lite';
 
         $generationConfig = new GenerationConfig(
             temperature: 0.3,
@@ -117,10 +151,24 @@ PROMPT;
             )
         );
 
-        return $this->gemini
-            ->generativeModel(model: 'gemini-2.5-flash-lite')
+        $result = $this->gemini
+            ->generativeModel(model: $model)
             ->withGenerationConfig($generationConfig)
             ->generateContent($prompt)->json();
+
+        // Restore tags:
+        if ( is_array( $result ) && !empty( $tagMap ) ) {
+            foreach ( $result as &$proposal ) {
+                if ( isset( $proposal->alternative ) ) {
+                    $proposal->alternative = str_replace( array_keys( $tagMap ), array_values( $tagMap ), $proposal->alternative );
+                }
+                if ( isset( $proposal->context ) ) {
+                    $proposal->context = str_replace( array_keys( $tagMap ), array_values( $tagMap ), $proposal->context );
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**

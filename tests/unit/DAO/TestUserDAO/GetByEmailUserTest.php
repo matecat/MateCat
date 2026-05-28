@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -63,6 +64,7 @@ class GetByEmailUserTest extends AbstractTest
         parent::tearDown();
     }
 
+    #[Test]
     public function test_getByEmail()
     {
         $user = $this->user_Dao->getByEmail($this->email);

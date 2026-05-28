@@ -21,6 +21,7 @@ use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
@@ -53,6 +54,7 @@ class TmxImportMyMemoryTest extends AbstractTest
      * @covers MyMemory::downloadExport
      * @throws ReflectionException
      */
+    #[Test]
     public function test_about_best_case_scenario_of_TMX_import()
     {
         /**

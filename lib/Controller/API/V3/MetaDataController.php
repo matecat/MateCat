@@ -6,15 +6,14 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Model\Engines\Structs\EngineStruct;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 use stdClass;
 use Utils\Constants\EngineConstants;
-use Utils\Engines\MyMemory;
 
 class MetaDataController extends KleinController
 {
@@ -67,14 +66,7 @@ class MetaDataController extends KleinController
         $myExtraKeys = [];
 
         foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
-            $myExtraKeys = array_merge(
-                $myExtraKeys,
-                (new $engineName(
-                    new EngineStruct([
-                        'type' => $engineName == MyMemory::class ? EngineConstants::TM : EngineConstants::MT,
-                    ])
-                ))->getConfigurationParameters()
-            );
+            $myExtraKeys = array_merge($myExtraKeys, $engineName::getConfigurationParameters());
         }
 
         $myExtraKeys = array_unique($myExtraKeys);
@@ -107,8 +99,8 @@ class MetaDataController extends KleinController
             $metadata->{$metadatum->key} = $metadatum->value;
         }
 
-        if (!property_exists($metadata, MetadataDao::SUBFILTERING_HANDLERS)) {
-            $metadata->{MetadataDao::SUBFILTERING_HANDLERS} = [];
+        if (!property_exists($metadata, JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)) {
+            $metadata->{JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value} = [];
         }
 
         return $metadata;

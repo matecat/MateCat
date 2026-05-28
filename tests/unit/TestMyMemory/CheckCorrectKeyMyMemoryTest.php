@@ -3,6 +3,8 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -23,8 +25,13 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::checkCorrectKey
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_checkCorrectKey_with_success()
     {
         $key_param = "bfb9bd80a43253670c8d";
@@ -59,8 +66,13 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::checkCorrectKey
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_checkCorrectKey_with_failure_with_fake_tmKey()
     {
         $key_param = "b2invalid2d";
@@ -105,6 +117,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
      * @group  regression
      * @covers MyMemory::checkCorrectKey
      */
+    #[Test]
     public function test_checkCorrectKey_mocked()
     {
         $key_param = "bfb9bd80a43253670c8d";
@@ -163,6 +176,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
      * @group  regression
      * @covers MyMemory::checkCorrectKey
      */
+    #[Test]
     public function test_checkCorrectKey_with_error_from_mocked__call_for_coverage_purpose()
     {
         $key_param = "bfb9bd80a43253670c8d";

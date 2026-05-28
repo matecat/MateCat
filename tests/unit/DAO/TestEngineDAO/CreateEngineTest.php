@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -76,6 +77,7 @@ class CreateEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::create
      */
+    #[Test]
     public function test_create_with_success()
     {
         $this->actual = $this->engine_Dao->create($this->engine_struct_param);

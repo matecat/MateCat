@@ -51,11 +51,15 @@
     .ai-feature-content {
       padding: 24px;
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      flex-direction: row;
+      gap: 80px;
       text-align: left;
       font-size: 16px;
-
+      > div.content {
+        display: flex;
+        gap: 16px;
+        flex-direction: column;
+      }
       h4 {
         font-size: 16px;
         margin: 0;

@@ -134,6 +134,17 @@ interface IFilesStorage
     public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
 
     /**
+     * Deletes the queue directory (and any associated converted-files directory).
+     *
+     * @param string $uploadDir
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function deleteQueue(string $uploadDir): void;
+
+    /**
      **********************************************************************************************
      * 4. FAST ANALYSIS
      **********************************************************************************************

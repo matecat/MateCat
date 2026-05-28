@@ -12,30 +12,34 @@ use InvalidArgumentException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
-use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\FilesStorageFactory;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
-use Model\ProjectManager\ProjectManager;
-use Model\Projects\MetadataDao;
+use Model\ProjectCreation\ProjectCreationError;
+use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Model\Xliff\XliffConfigTemplateStruct;
-use Plugins\Features\ProjectCompletion;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\LaraGlossaryValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
+use Utils\Subfiltering\SubfilteringOptionsValidator;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\CatUtils;
@@ -100,96 +104,41 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs = FilesStorageFactory::create();
-        $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE['upload_token'];
+        $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->data['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
-        $projectManager = new ProjectManager();
-        $projectStructure = $projectManager->getProjectStructure();
-
-        $projectStructure['project_name'] = $this->data['project_name'];
-        $projectStructure['private_tm_key'] = $this->data['private_tm_key'];
-        $projectStructure['uploadToken'] = $_COOKIE['upload_token'];
-        $projectStructure['array_files'] = $filesFound['arrayFiles']; //list of file names
-        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta']; //list of file metadata
-        $projectStructure['source_language'] = $this->data['source_lang'];
-        $projectStructure['target_language'] = explode(',', $this->data['target_lang']);
-        $projectStructure['job_subject'] = $this->data['job_subject'];
-        $projectStructure['mt_engine'] = $this->data['mt_engine'];
-        $projectStructure['tms_engine'] = $this->data['tms_engine'] ?? 1;
-        $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure['public_tm_penalty'] = $this->data['public_tm_penalty'];
-        $projectStructure['pretranslate_100'] = $this->data['pretranslate_100'];
-        $projectStructure['pretranslate_101'] = $this->data['pretranslate_101'];
-        $projectStructure['dialect_strict'] = $this->data['dialect_strict'];
-        $projectStructure['only_private'] = $this->data['only_private'];
-        $projectStructure['due_date'] = $this->data['due_date'];
-        $projectStructure['target_language_mt_engine_association'] = $this->data['target_language_mt_engine_association'];
-        $projectStructure['user_ip'] = Utils::getRealIpAddr();
-        $projectStructure['HTTP_HOST'] = AppConfig::$HTTPHOST;
-        $projectStructure['tm_prioritization'] = (!empty($this->data['tm_prioritization'])) ? $this->data['tm_prioritization'] : null;
-        $projectStructure['character_counter_mode'] = (!empty($this->data['character_counter_mode'])) ? $this->data['character_counter_mode'] : null;
-        $projectStructure['character_counter_count_tags'] = (!empty($this->data['character_counter_count_tags'])) ? $this->data['character_counter_count_tags'] : null;
-        $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $this->data[JobsMetadataDao::SUBFILTERING_HANDLERS];
-
-        // GDrive session instance
-        if (isset($_SESSION["gdrive_session"])) {
-            $projectStructure['session'] = $_SESSION["gdrive_session"];
-            $projectStructure['session']['uid'] = $this->user->uid;
-        }
-
-        // MT Extra params
         $engine = EnginesFactory::getInstance($this->data['mt_engine']);
 
-        foreach ($engine->getConfigurationParameters() as $param) {
-            if ($this->data[$param] !== null) {
-                $projectStructure[$param] = $this->data[$param];
-            }
-        }
+        $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
 
-        if (!empty($this->data['filters_extraction_parameters'])) {
-            $projectStructure['filters_extraction_parameters'] = $this->data['filters_extraction_parameters'];
-        }
+        $projectStructure = $this->buildProjectStructure(
+            $this->data,
+            $this->metadata,
+            $filesFound,
+            $this->data['upload_token'],
+            $this->user,
+            $engine,
+            $gdriveSession,
+        );
 
-        if (!empty($this->data['xliff_parameters'])) {
-            $projectStructure['xliff_parameters'] = $this->data['xliff_parameters'];
-        }
-
-        // with the qa template id
-        if (!empty($this->data['qa_model_template'])) {
-            $projectStructure['qa_model_template'] = $this->data['qa_model_template']->getDecodedModel();
-        }
-
-        if (!empty($this->data['payable_rate_model_template'])) {
-            $projectStructure['payable_rate_model'] = $this->data['payable_rate_model_template'];
-            $projectStructure['payable_rate_model_id'] = $this->data['payable_rate_model_template']->id;
-        }
-
-        $projectStructure['metadata'] = $this->metadata;
-        $projectStructure['userIsLogged'] = true;
-        $projectStructure['uid'] = $this->user->uid;
-        $projectStructure['id_customer'] = $this->user->email;
-        $projectStructure['owner'] = $this->user->email;
-        $projectManager->setTeam($this->data['team']); // set the team object to avoid a useless query
-
-        //set features override
-        $projectStructure['project_features'] = $this->data['project_features'];
+        $projectManager = new ProjectManager($projectStructure);
+        $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence
-        $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString();
+        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->ppassword = Utils::randomString();
 
-        $projectManager->sanitizeProjectStructure();
-        $fs::moveFileFromUploadSessionToQueuePath($_COOKIE['upload_token']);
+        $fs::moveFileFromUploadSessionToQueuePath($this->data['upload_token']);
 
         ProjectQueue::sendProject($projectStructure);
 
         $this->clearSessionFiles();
-        $this->assignLastCreatedPid($projectStructure['id_project']);
+        $this->assignLastCreatedPid($projectStructure->id_project);
 
         $this->response->json([
             'data' => [
-                'id_project' => (int)$projectStructure['id_project'],
-                'password' => $projectStructure['ppassword']
+                'id_project' => $projectStructure->id_project,
+                'password' => $projectStructure->ppassword
             ],
             'errors' => [],
         ]);
@@ -214,13 +163,14 @@ class CreateProjectController extends AbstractStatefulKleinController
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $job_subject = filter_var($this->request->param('job_subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $due_date = filter_var($this->request->param('due_date'), FILTER_SANITIZE_NUMBER_INT);
-        $mt_engine = filter_var($this->request->param('mt_engine'), FILTER_SANITIZE_NUMBER_INT);
+        $mt_engine = filter_var($this->request->param('mt_engine'), FILTER_CALLBACK, [
+            'options' => fn($v) => $v !== '' ? (int)filter_var($v, FILTER_SANITIZE_NUMBER_INT) : null,
+        ]);
         $disable_tms_engine_flag = filter_var($this->request->param('disable_tms_engine'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_SANITIZE_NUMBER_INT);
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
-        $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $character_counter_count_tags = filter_var($this->request->param('character_counter_count_tags'), FILTER_VALIDATE_BOOLEAN);
@@ -271,9 +221,20 @@ class CreateProjectController extends AbstractStatefulKleinController
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
 
         $array_keys = json_decode($private_keys_list, true);
-        $array_keys = array_values(array_merge($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous']));
+        $array_keys = is_array($array_keys) && isset($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous'])
+            ? array_values(
+                array_merge(
+                    $array_keys['ownergroup'],
+                    $array_keys['mine'],
+                    $array_keys['anonymous'],
+                )
+            ) : [];
 
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name, ENT_QUOTES, 'UTF-8'));
+
+        if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
+            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
+        }
 
         // Build project name from input or fallback:
         // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
@@ -294,20 +255,11 @@ class CreateProjectController extends AbstractStatefulKleinController
             $array_keys = array_values(array_intersect_key($array_keys, $_array_unique));
         }
 
-        $private_tm_key = array_filter($array_keys, self::sanitizeTmKeyArr(...));
-        $mt_engine = ($mt_engine != null ? $mt_engine : 0);
+        $private_tm_key = array_map(self::sanitizeTmKeyArr(...), $array_keys);
         $only_private = (!is_null($get_public_matches) && !$get_public_matches);
         $due_date = (empty($due_date) ? null : Utils::mysqlTimestamp($due_date));
 
-        $engineStruct = null;
-        // any other engine than Match
-        if ($mt_engine !== null and $mt_engine > 1) {
-            try {
-                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
-            } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage());
-            }
-        }
+        ['mt_engine' => $mt_engine, 'engine' => $engineStruct] = $this->validateMtEngine($mt_engine);
 
         (new DeepLEngineOptionsValidator())->validate(
             EngineValidatorObject::fromArray(
@@ -335,6 +287,8 @@ class CreateProjectController extends AbstractStatefulKleinController
             $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
 
+        $lara_glossaries = $this->validateLaraGlossaries($lara_glossaries);
+
         /**
          * Represents a generic data variable that can hold a variety of information.
          *
@@ -345,6 +299,7 @@ class CreateProjectController extends AbstractStatefulKleinController
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
+            'upload_token' => $_COOKIE['upload_token'],
             'file_name' => $file_name,
             'project_name' => $project_name,
             'source_lang' => $source_lang,
@@ -365,7 +320,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             'deepl_id_glossary' => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
             'deepl_formality' => (!empty($deepl_formality)) ? $deepl_formality : null,
             'deepl_engine_type' => (!empty($deepl_engine_type)) ? $deepl_engine_type : null,
-            'project_completion' => $project_completion,
             'get_public_matches' => $get_public_matches,
             'character_counter_count_tags' => (!empty($character_counter_count_tags)) ? $character_counter_count_tags : null,
             'character_counter_mode' => (!empty($character_counter_mode)) ? $character_counter_mode : null,
@@ -383,7 +337,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             'private_tm_key' => $private_tm_key,
             'only_private' => $only_private,
             'mt_quality_value_in_editor' => (!empty($mt_quality_value_in_editor)) ? $mt_quality_value_in_editor : 85,
-            'due_date' => (empty($due_date) ? null : Utils::mysqlTimestamp($due_date)),
+            'due_date' => $due_date,
             'file_names_list' => $arFiles,
             'public_tm_penalty' => $public_tm_penalty,
 
@@ -397,8 +351,8 @@ class CreateProjectController extends AbstractStatefulKleinController
              * Note:
              * - The values above are expected as strings (e.g., "[]"), not native PHP types.
              */
-            JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode(
-                $this->validateSubfilteringOptions($this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]'))
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode(
+                SubfilteringOptionsValidator::validate($this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]'))
             ),
             'icu_enabled' => $icu_enabled,
         ];
@@ -428,7 +382,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         ) : null;
         $data['source_lang'] = $this->validateSourceLang(Languages::getInstance(), $data['source_lang']);
         $data['target_lang'] = $this->validateTargetLangs(Languages::getInstance(), $data['target_lang']);
-        $data['mt_engine'] = $this->validateUserMTEngine($data['mt_engine']);
         $data['mmt_glossaries'] = $this->validateMMTGlossaries($data['mmt_glossaries']);
         $data['qa_model_template'] = $this->validateQaModelTemplate(
             $data['qa_model_template'],
@@ -446,7 +399,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['xliff_parameters'],
             $data['xliff_parameters_template_id']
         );
-        $data['project_features'] = $this->appendFeaturesToProject($data['project_completion'], $data['mt_engine']);
+        $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
         $data['target_language_mt_engine_association'] = $this->generateTargetEngineAssociation(
             $data['target_lang'],
             $data['mt_engine']
@@ -459,35 +412,27 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Validates the provided subfiltering options by attempting to decode them as JSON.
+     * Check if MT engine (except MyMemory) belongs to the user
      *
-     * This method ensures that the input string is a valid JSON-encoded structure.
-     * If the decoding process encounters an error, it returns an empty array to enforce
-     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
+     * @param int|null $mt_engine
      *
-     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
-     *
-     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
-     * @throws Exception
+     * @return array<int|string, AbstractEngine|null>
      */
-    private function validateSubfilteringOptions(string $subfiltering_handlers): ?array
+    private function validateMtEngine(?int $mt_engine = 0): array
     {
-        if ($subfiltering_handlers == 'none') {
-            // subfiltering is disabled
-            $subfiltering_handlers = 'null';
+        $mt_engine = ($mt_engine != null ? $mt_engine : 0);
+
+        $engineStruct = null;
+        // any other engine than Match
+        if ($mt_engine !== null and $mt_engine > 1) {
+            try {
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage());
+            }
         }
-
-        $validatorObject = new JSONValidatorObject($subfiltering_handlers);
-        $validator = new JSONValidator('subfiltering_handlers.json', true);
-        $validator->validate($validatorObject);
-
-        if (is_null($validatorObject->getValue())) {
-            return null;
-        }
-
-        return $validatorObject->getValue();
+        return ['mt_engine' => $mt_engine, 'engine' => $engineStruct];
     }
-
 
     /**
      * @param $elem
@@ -513,21 +458,13 @@ class CreateProjectController extends AbstractStatefulKleinController
     private function setMetadataFromPostInput(array $data = []): void
     {
         // new raw counter model
-        $options = [MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW];
-
-        if (isset($data['speech2text'])) {
-            $options['speech2text'] = $data['speech2text'];
-        }
-
-        if (isset($data['segmentation_rule'])) {
-            $options['segmentation_rule'] = $data['segmentation_rule'];
-        }
+        $options = [ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value => ProjectsMetadataMarshaller::WORD_COUNT_RAW->value];
 
         if (isset($data['mt_quality_value_in_editor'])) {
-            $options[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $data['mt_quality_value_in_editor'];
+            $options[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $data['mt_quality_value_in_editor'];
         }
 
-        $options[MetadataDao::ICU_ENABLED] = $data['icu_enabled'];
+        $options[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $data['icu_enabled'];
 
         $this->metadata = $options;
     }
@@ -591,26 +528,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Check if MT engine (except MyMemory) belongs to user
-     *
-     * @param int $mt_engine
-     *
-     * @return int
-     */
-    private function validateUserMTEngine(int $mt_engine): int
-    {
-        if ($mt_engine > 1) {
-            try {
-                EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
-            } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage(), -2);
-            }
-        }
-
-        return $mt_engine;
-    }
-
-    /**
      * Validate `mmt_glossaries` string
      *
      * @param null $mmt_glossaries
@@ -630,6 +547,34 @@ class CreateProjectController extends AbstractStatefulKleinController
                 );
 
                 return $mmtGlossaries;
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -6);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate `lara_glossaries` string
+     *
+     * @param null $lara_glossaries
+     *
+     * @return string|null
+     */
+    private function validateLaraGlossaries($lara_glossaries = null): ?string
+    {
+        if (!empty($lara_glossaries)) {
+            try {
+                $laraGlossaries = html_entity_decode($lara_glossaries);
+
+                (new LaraGlossaryValidator)->validate(
+                    EngineValidatorObject::fromArray([
+                        'glossaryString' => $laraGlossaries,
+                    ])
+                );
+
+                return $laraGlossaries;
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage(), -6);
             }
@@ -711,7 +656,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $payableRateModelTemplate->uid = $userId;
         } elseif (!empty($payable_rate_template_id) and $payable_rate_template_id > 0) {
             $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser($payable_rate_template_id, $userId);
-
+            $payableRateModelTemplate?->getBreakdownsArray();
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');
             }
@@ -724,10 +669,10 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * @param null $filters_extraction_parameters
      *
-     * @return mixed|null
+     * @return array|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters($filters_extraction_parameters = null): mixed
+    private function validateFiltersExtractionParameters($filters_extraction_parameters = null): ?array
     {
         if (!empty($filters_extraction_parameters)) {
             $json = html_entity_decode($filters_extraction_parameters);
@@ -735,7 +680,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $validator = new JSONValidator('filters_extraction_parameters.json', true);
             $validator->validate($validatorObject);
 
-            $filters_extraction_parameters = $validatorObject->getValue();
+            $filters_extraction_parameters = $validatorObject->getValue(true);
         }
 
         return $filters_extraction_parameters;
@@ -777,21 +722,14 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param bool $project_completion
      * @param int $mt_engine
      *
      * @return array
      * @throws Exception
      */
-    private function appendFeaturesToProject(bool $project_completion, int $mt_engine): array
+    private function appendFeaturesToProject(int $mt_engine): array
     {
         $projectFeatures = [];
-
-        if ($project_completion) {
-            $feature = new BasicFeatureStruct();
-            $feature->feature_code = ProjectCompletion::FEATURE_CODE;
-            $projectFeatures[$feature->feature_code] = $feature;
-        }
 
         return $this->featureSet->filter(
             'filterCreateProjectFeatures',
@@ -842,6 +780,106 @@ class CreateProjectController extends AbstractStatefulKleinController
         }
 
         return $team;
+    }
+
+    /**
+     * Build a {@see ProjectStructure} from validated request data.
+     *
+     * This method performs the pure mapping from the validated request data
+     * (produced by {@see validateTheRequest()}) and metadata to a
+     * ProjectStructure DTO. Side-effecting operations (database sequence,
+     * random password, queue submission, project sanitization) are
+     * intentionally left in {@see create()}.
+     *
+     * @param array $data Validated request data from validateTheRequest()
+     * @param array $metadata Project metadata from setMetadataFromPostInput()
+     * @param array $filesFound Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string $uploadToken Upload directory token
+     * @param UserStruct $user Authenticated user
+     * @param AbstractEngine $engine MT engine instance (for getConfigurationParameters())
+     * @param array|null $gdriveSession GDrive session data from $_SESSION, or null
+     *
+     * @return ProjectStructure
+     */
+    protected function buildProjectStructure(
+        array $data,
+        array $metadata,
+        array $filesFound,
+        string $uploadToken,
+        UserStruct $user,
+        AbstractEngine $engine,
+        ?array $gdriveSession,
+    ): ProjectStructure {
+        $projectStructure = new ProjectStructure();
+
+        $projectStructure->project_name = $data['project_name'];
+        $projectStructure->private_tm_key = $data['private_tm_key'];
+        $projectStructure->uploadToken = $uploadToken;
+        $projectStructure->array_files = $filesFound['arrayFiles'];
+        $projectStructure->array_files_meta = $filesFound['arrayFilesMeta'];
+        $projectStructure->source_language = $data['source_lang'];
+        $projectStructure->target_language = explode(',', $data['target_lang']);
+        $projectStructure->job_subject = $data['job_subject'];
+        $projectStructure->mt_engine = $data['mt_engine'];
+        $projectStructure->tms_engine = $data['tms_engine'] ?? 1;
+        $projectStructure->status = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure->public_tm_penalty = $data['public_tm_penalty'];
+        $projectStructure->pretranslate_100 = $data['pretranslate_100'];
+        $projectStructure->pretranslate_101 = $data['pretranslate_101'];
+        $projectStructure->dialect_strict = $data['dialect_strict'];
+        $projectStructure->only_private = $data['only_private'];
+        $projectStructure->due_date = $data['due_date'];
+        $projectStructure->target_language_mt_engine_association = $data['target_language_mt_engine_association'];
+        $projectStructure->user_ip = Utils::getRealIpAddr();
+        $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
+        $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
+        $projectStructure->character_counter_mode = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
+        $projectStructure->character_counter_count_tags = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
+        $projectStructure->subfiltering_handlers = $data[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
+
+        // GDrive session
+        if ($gdriveSession !== null) {
+            $projectStructure->session = $gdriveSession;
+            $projectStructure->session['uid'] = $user->uid;
+            $projectStructure->session['user'] = $user;
+        }
+
+        // MT Extra params
+        foreach ($engine->getConfigurationParameters() as $param) {
+            if ($data[$param] !== null) {
+                $projectStructure->$param = $data[$param];
+            }
+        }
+
+        if (!empty($data['filters_extraction_parameters'])) {
+            $projectStructure->filters_extraction_parameters = $data['filters_extraction_parameters'];
+        }
+
+        if (!empty($data['xliff_parameters'])) {
+            $projectStructure->xliff_parameters = $data['xliff_parameters'];
+        }
+
+        // with the qa template id
+        if (!empty($data['qa_model_template'])) {
+            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel();
+        }
+
+        if (!empty($data['payable_rate_model_template'])) {
+            //get an array representation of the payable rate model valid for serialization
+            $projectStructure->payable_rate_model = $data['payable_rate_model_template']->jsonSerialize();
+            $projectStructure->payable_rate_model_id = $data['payable_rate_model_template']->id;
+        }
+
+        $projectStructure->metadata = $metadata;
+        $projectStructure->userIsLogged = true;
+        $projectStructure->uid = $user->uid;
+        $projectStructure->id_customer = $user->email;
+        $projectStructure->owner = $user->email;
+
+        //set features override
+        $projectStructure->project_features = $data['project_features'];
+
+        return $projectStructure;
     }
 
     private function clearSessionFiles(): void

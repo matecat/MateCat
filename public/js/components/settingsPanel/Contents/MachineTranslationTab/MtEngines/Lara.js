@@ -105,7 +105,7 @@ export const Lara = ({
                   }
                 >
                   <div ref={infoIcon1}>
-                    <InfoIcon />
+                    <InfoIcon size={16} />
                   </div>
                 </Tooltip>
               </div>

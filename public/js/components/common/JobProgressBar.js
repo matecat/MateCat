@@ -2,17 +2,17 @@ import React, {useRef} from 'react'
 import Tooltip from './Tooltip'
 import {isUndefined} from 'lodash'
 
-const JobProgressBar = ({stats = {}}) => {
-  const approved2ndPassTooltip = useRef()
-  const approvedTooltip = useRef()
-  const translatedTooltip = useRef()
+const JobProgressBar = ({stats = {}, showPercent = true}) => {
+  const progressTooltipRef = useRef()
+
 
   const {raw} = stats
 
   const newWords = raw ? raw.new : undefined
 
-  const {total, draft, translated, approved, approved2} = raw || {}
+  const {total, draft, new: newRaw, translated, approved, approved2} = raw || {}
 
+  const unconfirmedPerc = ((draft + newRaw) * 100) / total
   const translatedPerc = (translated * 100) / total
   const approvedPerc = (approved * 100) / total
   const approved2Perc = (approved2 * 100) / total
@@ -28,37 +28,81 @@ const JobProgressBar = ({stats = {}}) => {
     : true
 
   return (
-    <div className="job-progress-container">
-      <div className="job-progress-bar">
-        {(stats || !analysisComplete) && (
-          <>
-            <Tooltip content={'Translated ' + translatedPerc.toFixed(1) + '%'}>
+    <div className="job-progress-container" data-testid="progress-bar">
+      <Tooltip
+        content={
+          (unconfirmedPerc > 0 ||
+            translatedPerc > 0 ||
+            approvedPerc > 0 ||
+            approved2Perc > 0) && (
+            <div className="job-progress-bar-tooltip">
+              {unconfirmedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-unconfirmed-quad" />
+                    Unconfirmed
+                  </span>
+                  <span>{unconfirmedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {translatedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-translated-quad" />
+                    Translated
+                  </span>
+                  <span>{translatedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {approvedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-approved-quad" />
+                    Revise
+                  </span>
+                  <span>{approvedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {approved2Perc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-approved2-quad" />
+                    Revise 2
+                  </span>
+                  <span>{approved2Perc.toFixed(1)}%</span>
+                </div>
+              )}
+            </div>
+          )
+        }
+      >
+        <div className="job-progress-bar" ref={progressTooltipRef}>
+          {(stats || !analysisComplete) && (
+            <>
               <span
                 className="bar translated-bar"
                 style={{
                   width: translatedPercBar + '%',
                 }}
-                ref={translatedTooltip}
               />
-            </Tooltip>
-            <Tooltip content={'Approved ' + approvedPerc.toFixed(1) + '%'}>
               <span
                 className="bar approved-bar"
                 style={{width: approvedPercBar + '%'}}
-                ref={approvedTooltip}
               />
-            </Tooltip>
-            <Tooltip content={'Approved ' + approved2Perc.toFixed(1) + '%'}>
               <span
                 className="bar approved-bar-2nd-pass"
                 style={{width: approved2PercBar + '%'}}
-                ref={approved2ndPassTooltip}
               />
-            </Tooltip>
-          </>
-        )}
-      </div>
-      {!isNaN(totalPerc) && isFinite(totalPerc) && `${totalPerc}%`}
+            </>
+          )}
+        </div>
+      </Tooltip>
+
+      {showPercent && (
+        <span data-testid="progress-bar-amount">
+          {!isNaN(totalPerc) && isFinite(totalPerc) ? `${totalPerc}%` : '-'}
+        </span>
+      )}
     </div>
   )
 }

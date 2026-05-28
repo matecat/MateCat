@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -91,6 +92,7 @@ class GetByUidsUserTest extends AbstractTest
      * @group  regression
      * @covers UserDao::getByUids
      */
+    #[Test]
     public function test_getByUids_with_success()
     {
         $array_param = [
@@ -149,6 +151,7 @@ class GetByUidsUserTest extends AbstractTest
      * @group  regression
      * @covers UserDao::getByUids
      */
+    #[Test]
     public function test_getByUids_with_empty_param_for_code_coverage_purpose()
     {
         $this->assertEquals([], $this->user_Dao->getByUids([]));

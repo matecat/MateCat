@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -78,6 +79,7 @@ class CreateUserTest extends AbstractTest
      * @group  regression
      * @covers UserDao::createUser
      */
+    #[Test]
     public function test_create_with_success()
     {
         $this->user_struct_param->uid = $this->uid;

@@ -9,6 +9,7 @@
 
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\LQA\QA;
 
@@ -45,6 +46,7 @@ class TagPositionTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testTagPositionCheck_1()
     {
         $source_seg = <<<TRG
@@ -78,6 +80,7 @@ SRC;
     /**
      * @throws Exception
      */
+    #[Test]
     public function testTagPositionCheck_2()
     {
         $source_seg = <<<TRG
@@ -111,6 +114,7 @@ SRC;
     /**
      * @throws Exception
      */
+    #[Test]
     public function testTagPositionHardNesting_1()
     {
         $source_seg = <<<TRG
@@ -144,6 +148,7 @@ SRC;
     /**
      * @throws Exception
      */
+    #[Test]
     public function testTagPositionHardNesting_2()
     {
         $source_seg = <<<SRC

@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -33,6 +34,7 @@ class ToStringTest extends AbstractTest
      * @group  regression
      * @covers EngineStruct::offsetUnset
      */
+    #[Test]
     public function test_toString_field()
     {
         $expected_string = '999Moses_bar_and_fooMachine translation from bar and foo.';
