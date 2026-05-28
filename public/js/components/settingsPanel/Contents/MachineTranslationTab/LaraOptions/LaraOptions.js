@@ -171,9 +171,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                     </div>
                   ),
                 }))}
-                activeOption={styleGuidesOptions.find(
-                  ({id}) => id === (value ?? styleGuidesOptions[0]?.id),
-                )}
+                activeOption={styleGuidesOptions.find(({id}) => id === value)}
                 checkSpaceToReverse={true}
                 onSelect={(option) => onChange(option.id)}
                 isDisabled={disabled}
