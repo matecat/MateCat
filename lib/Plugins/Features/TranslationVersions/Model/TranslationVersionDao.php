@@ -4,7 +4,6 @@ namespace Plugins\Features\TranslationVersions\Model;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
@@ -25,13 +24,13 @@ class TranslationVersionDao extends AbstractDao
      * @return list<TranslationVersionStruct>
      * @throws PDOException
      */
-    public static function getVersionsForJob(int $id_job): array
+    public function getVersionsForJob(int $id_job): array
     {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job " .
             " ORDER BY creation_date DESC ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         $stmt->execute(
@@ -51,18 +50,49 @@ class TranslationVersionDao extends AbstractDao
      * @return list<TranslationVersionStruct>
      * @throws PDOException
      */
-    public static function getVersionsForChunk(JobStruct $chunk): array
+    public function getVersionsForChunk(JobStruct $chunk): array
     {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job " .
             " ORDER BY creation_date DESC ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         $stmt->execute(
             ['id_job' => $chunk->id]
         );
+
+        $stmt->setFetchMode(
+            PDO::FETCH_CLASS,
+            TranslationVersionStruct::class
+        );
+
+        /** @var list<TranslationVersionStruct> */
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @return list<TranslationVersionStruct>
+     * @throws PDOException
+     */
+    public function getVersionsForTranslation(int $id_job, int $id_segment, ?int $version_number = null): array
+    {
+        $sql = "SELECT * FROM segment_translation_versions " .
+            " WHERE id_job = :id_job AND id_segment = :id_segment ";
+        $params = ['id_job' => $id_job, 'id_segment' => $id_segment];
+
+        if ($version_number !== null) {
+            $sql .= ' AND version_number = :version_number';
+            $params['version_number'] = $version_number;
+        }
+
+        $sql .= " ORDER BY creation_date DESC ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare($sql);
+
+        $stmt->execute($params);
 
         $stmt->setFetchMode(
             PDO::FETCH_CLASS,
@@ -83,7 +113,7 @@ class TranslationVersionDao extends AbstractDao
             " WHERE id_job = :id_job AND id_segment = :id_segment " .
             " AND version_number = :version_number ;";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         $stmt->execute([
@@ -99,38 +129,6 @@ class TranslationVersionDao extends AbstractDao
 
         return $stmt->fetch();
     }
-
-    /**
-     * @return list<TranslationVersionStruct>
-     * @throws PDOException
-     */
-    public static function getVersionsForTranslation(int $id_job, int $id_segment, ?int $version_number = null): array
-    {
-        $sql = "SELECT * FROM segment_translation_versions " .
-            " WHERE id_job = :id_job AND id_segment = :id_segment ";
-        $params = ['id_job' => $id_job, 'id_segment' => $id_segment];
-
-        if ($version_number !== null) {
-            $sql .= ' AND version_number = :version_number';
-            $params['version_number'] = $version_number;
-        }
-
-        $sql .= " ORDER BY creation_date DESC ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-
-        $stmt->execute($params);
-
-        $stmt->setFetchMode(
-            PDO::FETCH_CLASS,
-            TranslationVersionStruct::class
-        );
-
-        /** @var list<TranslationVersionStruct> */
-        return $stmt->fetchAll();
-    }
-
 
     /**
      * Fetches translation versions combined with QA entries for the revision view.
@@ -240,7 +238,7 @@ class TranslationVersionDao extends AbstractDao
     ORDER BY version_number DESC
     ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         return $this->_fetchObjectMap(
@@ -258,7 +256,7 @@ class TranslationVersionDao extends AbstractDao
      */
     public function getAllRelevantEvents(array $segments_id, int $job_id): array
     {
-        $db = Database::obtain()->getConnection();
+        $db = $this->database->getConnection();
 
         $prepare_str_segments_id = implode(', ', array_fill(0, count($segments_id), '?'));
 
@@ -336,7 +334,7 @@ class TranslationVersionDao extends AbstractDao
             " VALUES " .
             " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status ) ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         return $stmt->execute([
@@ -360,7 +358,7 @@ class TranslationVersionDao extends AbstractDao
                 WHERE id_job = :id_job AND id_segment = :id_segment
                 AND version_number = :version_number ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         $stmt->execute([
@@ -418,7 +416,7 @@ class TranslationVersionDao extends AbstractDao
 
         $insert_sql .= implode(',', $insert_placeholders);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $insert = $conn->prepare($insert_sql);
         $insert->execute($insert_values);
         $insert->closeCursor();

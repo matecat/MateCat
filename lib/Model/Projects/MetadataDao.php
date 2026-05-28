@@ -182,7 +182,7 @@ class MetadataDao extends AbstractDao
         $this->destroyMetadataCache($id_project, $key);
     }
 
-    public static function buildChunkKey(string $key, JobStruct $chunk): string
+    public function buildChunkKey(string $key, JobStruct $chunk): string
     {
         return "{$key}_chunk_{$chunk->id}_$chunk->password";
     }

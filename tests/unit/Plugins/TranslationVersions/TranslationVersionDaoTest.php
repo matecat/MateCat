@@ -3,6 +3,9 @@
 namespace unit\Plugins\TranslationVersions;
 
 use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
@@ -42,6 +45,9 @@ class TranslationVersionDaoTest extends AbstractTest
         $this->database->getConnection()->exec(
             "DELETE FROM segment_translation_versions WHERE id_job = " . self::JOB_ID
         );
+        $this->database->getConnection()->exec(
+            "DELETE FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND id_segment BETWEEN 900000 AND 900100"
+        );
     }
 
     private function makeStruct(int $idSegment, int $versionNumber, ?string $translation = 'Test translation'): TranslationVersionStruct
@@ -73,58 +79,6 @@ class TranslationVersionDaoTest extends AbstractTest
         $this->assertEquals(1, (int)$rows[0]['version_number']);
         $this->assertEquals('Test translation', $rows[0]['translation']);
         $this->assertEquals(1500, (int)$rows[0]['time_to_edit']);
-    }
-
-    #[Test]
-    public function getVersionsForJobReturnsAllVersions(): void
-    {
-        $dao = new TranslationVersionDao();
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Second'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other segment'));
-
-        $results = TranslationVersionDao::getVersionsForJob(self::JOB_ID);
-
-        $this->assertCount(3, $results);
-        $this->assertContainsOnlyInstancesOf(TranslationVersionStruct::class, $results);
-    }
-
-    #[Test]
-    public function getVersionsForJobReturnsEmptyForNonexistentJob(): void
-    {
-        $results = TranslationVersionDao::getVersionsForJob(0);
-
-        $this->assertSame([], $results);
-    }
-
-    #[Test]
-    public function getVersionsForTranslationFiltersCorrectly(): void
-    {
-        $dao = new TranslationVersionDao();
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other'));
-
-        $results = TranslationVersionDao::getVersionsForTranslation(self::JOB_ID, self::SEGMENT_ID_1);
-
-        $this->assertCount(2, $results);
-        foreach ($results as $result) {
-            $this->assertEquals(self::SEGMENT_ID_1, $result->id_segment);
-        }
-    }
-
-    #[Test]
-    public function getVersionsForTranslationFiltersByVersionNumber(): void
-    {
-        $dao = new TranslationVersionDao();
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
-        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
-
-        $results = TranslationVersionDao::getVersionsForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 2);
-
-        $this->assertCount(1, $results);
-        $this->assertEquals(2, $results[0]->version_number);
-        $this->assertEquals('V2', $results[0]->translation);
     }
 
     #[Test]
@@ -183,6 +137,91 @@ class TranslationVersionDaoTest extends AbstractTest
         $this->assertEquals(0, $rowCount);
     }
 
+    // --- Instance method tests (Step 1 — specular + new) ---
+
+    #[Test]
+    public function instanceGetVersionsForJobReturnsAllVersions(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Second'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other segment'));
+
+        $results = $dao->getVersionsForJob(self::JOB_ID);
+
+        $this->assertCount(3, $results);
+        $this->assertContainsOnlyInstancesOf(TranslationVersionStruct::class, $results);
+    }
+
+    #[Test]
+    public function instanceGetVersionsForJobReturnsEmptyForNonexistentJob(): void
+    {
+        $dao = new TranslationVersionDao();
+
+        $results = $dao->getVersionsForJob(0);
+
+        $this->assertSame([], $results);
+    }
+
+    #[Test]
+    public function instanceGetVersionsForChunkReturnsAllVersions(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Second'));
+
+        $chunk = new JobStruct();
+        $chunk->id = self::JOB_ID;
+
+        $results = $dao->getVersionsForChunk($chunk);
+
+        $this->assertCount(2, $results);
+        $this->assertContainsOnlyInstancesOf(TranslationVersionStruct::class, $results);
+    }
+
+    #[Test]
+    public function instanceGetVersionsForChunkReturnsEmptyForNonexistentJob(): void
+    {
+        $dao = new TranslationVersionDao();
+
+        $chunk = new JobStruct();
+        $chunk->id = 0;
+
+        $results = $dao->getVersionsForChunk($chunk);
+
+        $this->assertSame([], $results);
+    }
+
+    #[Test]
+    public function instanceGetVersionsForTranslationFiltersCorrectly(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other'));
+
+        $results = $dao->getVersionsForTranslation(self::JOB_ID, self::SEGMENT_ID_1);
+
+        $this->assertCount(2, $results);
+        foreach ($results as $result) {
+            $this->assertEquals(self::SEGMENT_ID_1, $result->id_segment);
+        }
+    }
+
+    #[Test]
+    public function instanceGetVersionsForTranslationFiltersByVersionNumber(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
+
+        $results = $dao->getVersionsForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 2);
+
+        $this->assertCount(1, $results);
+        $this->assertEquals(2, $results[0]->version_number);
+        $this->assertEquals('V2', $results[0]->translation);
+    }
+
     #[Test]
     public function saveVersionPreservesNullableFields(): void
     {
@@ -204,4 +243,88 @@ class TranslationVersionDaoTest extends AbstractTest
         $this->assertNull($fetched->translation);
         $this->assertNull($fetched->time_to_edit);
     }
+
+    #[Test]
+    public function savePropagationVersionsInsertsBatchRecords(): void
+    {
+        $propagator = new SegmentTranslationStruct();
+        $propagator->id_job = self::JOB_ID;
+        $propagator->id_segment = self::SEGMENT_ID_1;
+        $propagator->autopropagated_from = self::SEGMENT_ID_1;
+
+        $seg1 = new SegmentTranslationStruct();
+        $seg1->id_job = self::JOB_ID;
+        $seg1->id_segment = self::SEGMENT_ID_2;
+        $seg1->translation = 'Propagated text';
+        $seg1->version_number = 1;
+
+        $jobStruct = new JobStruct();
+        $jobStruct->id = self::JOB_ID;
+
+        $dao = new TranslationVersionDao();
+        $dao->savePropagationVersions($propagator, self::SEGMENT_ID_1, $jobStruct, [$seg1]);
+
+        $rows = $this->database->getConnection()
+            ->query("SELECT * FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND id_segment = " . self::SEGMENT_ID_2)
+            ->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->assertCount(1, $rows);
+        $this->assertEquals('Propagated text', $rows[0]['translation']);
+        $this->assertEquals(self::SEGMENT_ID_1, (int)$rows[0]['propagated_from']);
+    }
+
+    #[Test]
+    public function savePropagationVersionsChunksLargeArrays(): void
+    {
+        $propagator = new SegmentTranslationStruct();
+        $propagator->id_job = self::JOB_ID;
+        $propagator->id_segment = self::SEGMENT_ID_1;
+        $propagator->autopropagated_from = self::SEGMENT_ID_1;
+
+        $jobStruct = new JobStruct();
+        $jobStruct->id = self::JOB_ID;
+
+        $segments = [];
+        for ($i = 0; $i < 25; $i++) {
+            $seg = new SegmentTranslationStruct();
+            $seg->id_job = self::JOB_ID;
+            $seg->id_segment = 900000 + $i;
+            $seg->translation = "Propagated $i";
+            $seg->version_number = 1;
+            $segments[] = $seg;
+        }
+
+        $dao = new TranslationVersionDao();
+        $dao->savePropagationVersions($propagator, self::SEGMENT_ID_1, $jobStruct, $segments);
+
+        $count = $this->database->getConnection()
+            ->query("SELECT COUNT(*) FROM segment_translation_versions WHERE id_job = " . self::JOB_ID . " AND propagated_from = " . self::SEGMENT_ID_1)
+            ->fetchColumn();
+
+        $this->assertEquals(25, (int)$count);
+    }
+
+    #[Test]
+    public function getVersionsForRevisionReturnsEmptyForNonexistentData(): void
+    {
+        $dao = new TranslationVersionDao();
+
+        $results = $dao->getVersionsForRevision(0, 0);
+
+        $this->assertSame([], $results);
+    }
+
+    #[Test]
+    public function getVersionsForRevisionReturnsVersionRecords(): void
+    {
+        $dao = new TranslationVersionDao();
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Version 1'));
+        $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Version 2'));
+
+        $results = $dao->getVersionsForRevision(self::JOB_ID, self::SEGMENT_ID_1);
+
+        $this->assertNotEmpty($results);
+        $this->assertContainsOnlyInstancesOf(ShapelessConcreteStruct::class, $results);
+    }
+
 }

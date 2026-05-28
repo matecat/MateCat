@@ -95,164 +95,376 @@ class SegmentFilterDaoTest extends AbstractTest
         return $this->baseSegmentId + 7;
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsBySimpleFilter
-     */
-    public function test_findSegmentIdsBySimpleFilter_excludes_segments_with_show_in_cattool_0(): void
+    // --- Instance method tests ---
+
+    public function test_instance_findSegmentIdsBySimpleFilter_excludes_show_in_cattool_0(): void
     {
         $filter = new FilterDefinition(['status' => 'TRANSLATED']);
-        $results = SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsBySimpleFilter($this->chunk, $filter);
 
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
-        // Segments 1-5 are TRANSLATED, but 8-10 have show_in_cattool=0
-        // So only segments 1-5 should be returned (all have show_in_cattool=1)
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
 
         $this->assertNotEmpty($ids);
         $this->assertCount(5, $ids);
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsBySimpleFilter
-     */
-    public function test_findSegmentIdsBySimpleFilter_NEW_excludes_show_in_cattool_0(): void
+    public function test_instance_findSegmentIdsBySimpleFilter_NEW_excludes_show_in_cattool_0(): void
     {
         $filter = new FilterDefinition(['status' => 'NEW']);
-        $results = SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsBySimpleFilter($this->chunk, $filter);
 
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
-        // Segments 6-10 are NEW, but 8-10 have show_in_cattool=0
-        // Only segments 6,7 should be returned
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
 
         $this->assertCount(2, $ids);
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsForSample
-     */
-    public function test_findSegmentIdsForSample_matchType_excludes_show_in_cattool_0(): void
+    public function test_instance_findSegmentIdsForSample_matchType(): void
     {
         $filter = new FilterDefinition([
             'status' => '',
-            'sample' => [
-                'type' => 'mt',
-                'size' => 0,
-            ]
+            'sample' => ['type' => 'mt', 'size' => 0]
         ]);
 
-        $results = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
-        // All segments have match_type = MT, but 8-10 have show_in_cattool=0
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
 
         $this->assertCount(7, $ids);
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsForSample
-     */
-    public function test_findSegmentIdsForSample_todo_excludes_show_in_cattool_0(): void
+    public function test_instance_findSegmentIdsForSample_todo(): void
     {
         $filter = new FilterDefinition([
             'status' => '',
-            'sample' => [
-                'type' => 'todo',
-                'size' => 0,
-            ]
+            'sample' => ['type' => 'todo', 'size' => 0]
         ]);
 
-        $results = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
-        // NEW segments are 6-10; segments 8-10 have show_in_cattool=0
-        // Only 6,7 should be returned
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
 
         $this->assertCount(2, $ids);
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsForSample
-     */
-    public function test_findSegmentIdsForSample_editDistance_excludes_show_in_cattool_0(): void
+    public function test_instance_findSegmentIdsForSample_editDistance(): void
     {
         $filter = new FilterDefinition([
             'status' => '',
-            'sample' => [
-                'type' => 'edit_distance_high_to_low',
-                'size' => 100,
-            ]
+            'sample' => ['type' => 'edit_distance_high_to_low', 'size' => 100]
         ]);
 
-        $results = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
         $this->assertNotEmpty($ids);
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsForSample
-     */
-    public function test_findSegmentIdsForSample_segmentLength_excludes_show_in_cattool_0(): void
+    public function test_instance_findSegmentIdsForSample_segmentLength(): void
     {
         $filter = new FilterDefinition([
             'status' => '',
-            'sample' => [
-                'type' => 'segment_length_high_to_low',
-                'size' => 100,
-            ]
+            'sample' => ['type' => 'segment_length_high_to_low', 'size' => 100]
         ]);
 
-        $results = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
         $this->assertNotEmpty($ids);
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
     }
 
-    /**
-     * @group regression
-     * @covers \Plugins\Features\SegmentFilter\Model\SegmentFilterDao::findSegmentIdsForSample
-     */
-    public function test_findSegmentIdsForSample_unlocked_excludes_show_in_cattool_0(): void
+    public function test_instance_findSegmentIdsForSample_unlocked(): void
     {
         $filter = new FilterDefinition([
             'status' => '',
-            'sample' => [
-                'type' => 'unlocked',
-                'size' => 0,
-            ]
+            'sample' => ['type' => 'unlocked', 'size' => 0]
         ]);
 
-        $results = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $filter);
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
         foreach ($ids as $id) {
-            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id, "Segment with show_in_cattool=0 should not be included");
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), $id);
         }
+    }
+
+    // --- SQL builder unit tests ---
+
+    public function test_instance_getSqlForUnlocked_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => ' AND st.status = :status ', 'data' => ['status' => 'NEW']];
+
+        $sql = $dao->getSqlForUnlocked($where);
+
+        $this->assertStringContainsString('locked = 0', $sql);
+        $this->assertStringContainsString('AND st.status = :status', $sql);
+    }
+
+    public function test_instance_getSqlForIce_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForIce($where);
+
+        $this->assertStringContainsString("match_type = 'ICE'", $sql);
+        $this->assertStringContainsString('version_number = 0', $sql);
+    }
+
+    public function test_instance_getSqlForModifiedIce_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForModifiedIce($where);
+
+        $this->assertStringContainsString("match_type = 'ICE'", $sql);
+        $this->assertStringContainsString('version_number > 0', $sql);
+    }
+
+    public function test_instance_getSqlForToDo_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForToDo($where);
+        $this->assertStringContainsString('status_new', $sql);
+        $this->assertStringContainsString('status_draft', $sql);
+    }
+
+    public function test_instance_getSqlForToDo_includes_review_condition(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForToDo($where, true);
+        $this->assertStringContainsString('status_translated', $sql);
+    }
+
+    public function test_instance_getSqlForToDo_includes_second_pass_review_condition(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForToDo($where, false, true);
+        $this->assertStringContainsString('status_translated', $sql);
+        $this->assertStringContainsString('status_approved', $sql);
+    }
+
+    public function test_instance_getSqlForMatchType_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForMatchType($where);
+        $this->assertStringContainsString('match_type = :match_type', $sql);
+    }
+
+    public function test_instance_getSqlForMatches_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForMatches($where);
+        $this->assertStringContainsString('match_type_100_public', $sql);
+        $this->assertStringContainsString('match_type_100', $sql);
+    }
+
+    public function test_instance_getSqlForRepetition_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForRepetition($where);
+        $this->assertStringContainsString('segment_hash', $sql);
+        $this->assertStringContainsString('HAVING COUNT', $sql);
+    }
+
+    public function test_instance_getSqlForEditDistance_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $limit = ['limit' => 10, 'count' => 100, 'sample_size' => 10];
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForEditDistance($limit, $where, 'high_to_low');
+        $this->assertStringContainsString('edit_distance DESC', $sql);
+        $this->assertStringContainsString('LIMIT 10', $sql);
+
+        $sql = $dao->getSqlForEditDistance($limit, $where, 'low_to_high');
+        $this->assertStringContainsString('edit_distance ASC', $sql);
+    }
+
+    public function test_instance_getSqlForSegmentLength_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $limit = ['limit' => 5, 'count' => 50, 'sample_size' => 10];
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForSegmentLength($limit, $where, 'high_to_low');
+        $this->assertStringContainsString('CHAR_LENGTH(s.segment) DESC', $sql);
+        $this->assertStringContainsString('LIMIT 5', $sql);
+    }
+
+    public function test_instance_getSqlForRegularIntervals_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao();
+        $limit = ['limit' => 10, 'count' => 100, 'sample_size' => 10];
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForRegularIntervals($limit, $where);
+        $this->assertStringContainsString('row_number', $sql);
+        $this->assertStringContainsString('@curRow', $sql);
+    }
+
+    public function test_instance_findSegmentIdsForSample_ice_returns_empty_when_no_ice(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'ice', 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $this->assertSame([], $results);
+    }
+
+    public function test_instance_findSegmentIdsForSample_modified_ice_returns_empty_when_no_modified_ice(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'modified_ice', 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $this->assertSame([], $results);
+    }
+
+    public function test_instance_findSegmentIdsForSample_matches_returns_empty_when_no_100_matches(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'matches', 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $this->assertSame([], $results);
+    }
+
+    public function test_instance_findSegmentIdsForSample_fuzzies_return_empty_when_no_fuzzies(): void
+    {
+        $dao = new SegmentFilterDao();
+
+        foreach (['fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99'] as $type) {
+            $filter = new FilterDefinition([
+                'status' => '',
+                'sample' => ['type' => $type, 'size' => 0]
+            ]);
+
+            $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+            $this->assertSame([], $results, "Expected empty for $type since fixtures have match_type=MT");
+        }
+    }
+
+    public function test_instance_findSegmentIdsForSample_edit_distance_low_to_high(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'edit_distance_low_to_high', 'size' => 100]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $this->assertNotEmpty($results);
+        foreach ($results as $r) {
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), (int)$r->id);
+        }
+    }
+
+    public function test_instance_findSegmentIdsForSample_segment_length_low_to_high(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'segment_length_low_to_high', 'size' => 100]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $this->assertNotEmpty($results);
+        foreach ($results as $r) {
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), (int)$r->id);
+        }
+    }
+
+    public function test_instance_findSegmentIdsForSample_regular_intervals(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'regular_intervals', 'size' => 50]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $this->assertNotEmpty($results);
+        foreach ($results as $r) {
+            $this->assertLessThanOrEqual($this->maxVisibleSegmentId(), (int)$r->id);
+        }
+    }
+
+    public function test_instance_findSegmentIdsForSample_with_status_filter(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => 'TRANSLATED',
+            'sample' => ['type' => 'mt', 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao();
+        $results = $dao->findSegmentIdsForSample($this->chunk, $filter);
+        $ids = array_map(fn($r) => (int)$r->id, $results);
+
+        $this->assertCount(5, $ids);
+    }
+
+    public function test_instance_findSegmentIdsForSample_invalid_type_throws(): void
+    {
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => 'invalid_type', 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Sample type is not valid');
+        $dao->findSegmentIdsForSample($this->chunk, $filter);
     }
 }
 

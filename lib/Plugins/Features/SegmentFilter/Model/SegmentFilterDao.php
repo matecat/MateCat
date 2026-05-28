@@ -6,7 +6,6 @@ use DivisionByZeroError;
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use PDOException;
@@ -17,15 +16,12 @@ class SegmentFilterDao extends AbstractDao
 {
 
     /**
-     * @param JobStruct $chunk
-     * @param FilterDefinition $filter
-     *
      * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      * @throws PDOException
      * @throws Exception
      */
-    public static function findSegmentIdsBySimpleFilter(JobStruct $chunk, FilterDefinition $filter): array
+    public function findSegmentIdsBySimpleFilter(JobStruct $chunk, FilterDefinition $filter): array
     {
         $sql = "SELECT st.id_segment AS id
             FROM
@@ -46,16 +42,320 @@ class SegmentFilterDao extends AbstractDao
             'status' => $filter->getSegmentStatus()
         ];
 
-        $thisDao = new self();
-        $stmt = $thisDao->_getStatementForQuery($sql);
+        $stmt = $this->_getStatementForQuery($sql);
 
-        return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $data);
+        return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $data);
+    }
+
+    /**
+     * @return ShapelessConcreteStruct[]
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws DivisionByZeroError
+     */
+    public function findSegmentIdsForSample(JobStruct $chunk, FilterDefinition $filter): array
+    {
+        $where = $this->getWhereFromFilter($filter);
+
+        if ($filter->sampleSize() > 0) {
+            $limit = $this->getLimit($chunk, $filter, $where);
+        } else {
+            $limit = ['limit' => 0, 'count' => 0, 'sample_size' => 0];
+        }
+
+        $data = $this->getData($chunk, $filter);
+
+        $sql = match ($filter->sampleType()) {
+            'segment_length_high_to_low' => $this->getSqlForSegmentLength($limit, $where, 'high_to_low'),
+            'segment_length_low_to_high' => $this->getSqlForSegmentLength($limit, $where, 'low_to_high'),
+            'edit_distance_high_to_low' => $this->getSqlForEditDistance($limit, $where, 'high_to_low'),
+            'edit_distance_low_to_high' => $this->getSqlForEditDistance($limit, $where, 'low_to_high'),
+            'regular_intervals' => $this->getSqlForRegularIntervals($limit, $where),
+            'unlocked' => $this->getSqlForUnlocked($where),
+            'ice' => $this->getSqlForIce($where),
+            'modified_ice' => $this->getSqlForModifiedIce($where),
+            'repetitions' => $this->getSqlForRepetition($where),
+            'matches' => $this->getSqlForMatches($where),
+            'mt', 'fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99' => $this->getSqlForMatchType($where),
+            'todo' => $this->getSqlForToDo($where, $chunk->getIsReview(), $chunk->isSecondPassReview()),
+            default => throw new Exception('Sample type is not valid: ' . $filter->sampleType()),
+        };
+
+        $stmt = $this->_getStatementForQuery($sql);
+
+        return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $data);
+    }
+
+    /**
+     * @param array{limit: int, count: int, sample_size: int|float} $limit
+     * @param array{sql: string, data: array<string, string>} $where
+     *
+     * @throws DivisionByZeroError
+     */
+    public function getSqlForRegularIntervals(array $limit, array $where): string
+    {
+        $ratio = (int)round($limit['count'] / $limit['limit']);
+
+        return "SELECT id FROM (
+            SELECT st.id_segment AS id,
+            @curRow := @curRow + 1 AS row_number
+
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.password = :password
+           AND jobs.id = :id_job
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           JOIN (SELECT @curRow := -1) r --  using -1 here makes the sample start from the first segment
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment ASC
+           ) sub WHERE `row_number` % $ratio = 0 ";
+    }
+
+    /**
+     * @param array{limit: int, count: int, sample_size: int|float} $limit
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForEditDistance(array $limit, array $where, string $sort): string
+    {
+        $sqlSort = '';
+
+        if ($sort === 'high_to_low') {
+            $sqlSort = 'DESC';
+        } elseif ($sort === 'low_to_high') {
+            $sqlSort = 'ASC';
+        }
+
+        return "SELECT st.id_segment AS id
+              FROM
+               segment_translations st JOIN jobs
+               ON jobs.id = st.id_job
+               AND jobs.password = :password
+               AND jobs.id = :id_job
+               AND st.id_segment
+               BETWEEN :job_first_segment AND :job_last_segment
+               JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+            WHERE 1
+               {$where['sql']}
+               ORDER BY st.edit_distance $sqlSort
+               LIMIT {$limit['limit']} ;";
+    }
+
+    /**
+     * @param array{limit: int, count: int, sample_size: int|float} $limit
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForSegmentLength(array $limit, array $where, string $sort): string
+    {
+        $sqlSort = '';
+
+        if ($sort === 'high_to_low') {
+            $sqlSort = 'DESC';
+        } elseif ($sort === 'low_to_high') {
+            $sqlSort = 'ASC';
+        }
+
+        return "SELECT st.id_segment AS id
+          FROM
+           segment_translations st
+           JOIN jobs ON jobs.id = st.id_job
+               AND jobs.password = :password
+               AND jobs.id = :id_job
+               AND st.id_segment
+               BETWEEN :job_first_segment AND :job_last_segment
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY CHAR_LENGTH(s.segment) $sqlSort
+           LIMIT {$limit['limit']}";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForUnlocked(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.locked = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForMatchType(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.match_type = :match_type
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForIce(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+
+           AND st.match_type = 'ICE'
+           AND locked = 1
+           AND version_number = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForModifiedIce(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+
+           AND st.match_type = 'ICE'
+           AND locked = 1
+           AND version_number > 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForRepetition(array $where): string
+    {
+        return "
+            SELECT id_segment AS id, segment_hash FROM segment_translations JOIN(
+                SELECT
+                    GROUP_CONCAT( st.id_segment ) AS id,
+                    st.segment_hash as hash
+                FROM segment_translations st
+                JOIN jobs
+                        ON jobs.id = st.id_job
+                        AND jobs.id = :id_job
+                        AND jobs.password = :password
+                        AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
+                JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+                WHERE 1
+
+                        {$where['sql']}
+
+                GROUP BY segment_hash, CONCAT( id_job, '-', password )
+                HAVING COUNT( segment_hash ) > 1
+            ) AS REPETITIONS ON REPETITIONS.hash = segment_translations.segment_hash AND FIND_IN_SET( id_segment, REPETITIONS.id )
+            GROUP BY id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForMatches(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND (st.match_type = :match_type_100_public
+           OR st.match_type = :match_type_100)
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForToDo(array $where, bool $isReview = false, bool $isSecondPassReview = false): string
+    {
+        $sql_condition = "";
+
+        if ($isReview) {
+            $sql_condition = " OR st.status = :status_translated ";
+        }
+
+        if ($isSecondPassReview) {
+            $sql_condition = " OR st.status = :status_translated OR st.status = :status_approved ";
+        }
+
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND (st.status = :status_new
+           OR st.status = :status_draft " . $sql_condition . ")
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
     }
 
     /**
      * @return array{sql: string, data: array<string, string>}
      */
-    private static function __getWhereFromFilter(FilterDefinition $filter): array
+    private function getWhereFromFilter(FilterDefinition $filter): array
     {
         $where = '';
         $where_data = [];
@@ -68,11 +368,10 @@ class SegmentFilterDao extends AbstractDao
         return ['sql' => $where, 'data' => $where_data];
     }
 
-
     /**
      * @return array<string, mixed>
      */
-    private static function __getData(JobStruct $chunk, FilterDefinition $filter): array
+    private function getData(JobStruct $chunk, FilterDefinition $filter): array
     {
         $data = [
             'id_job' => $chunk->id,
@@ -158,7 +457,7 @@ class SegmentFilterDao extends AbstractDao
      * @return array{limit: int, count: int, sample_size: int|float}
      * @throws PDOException
      */
-    private static function __getLimit(JobStruct $chunk, FilterDefinition $filter, array $where): array
+    private function getLimit(JobStruct $chunk, FilterDefinition $filter, array $where): array
     {
         $countSql = "SELECT st.id_segment AS id
           FROM
@@ -172,10 +471,10 @@ class SegmentFilterDao extends AbstractDao
            WHERE 1
            {$where['sql']} ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($countSql);
 
-        $data = self::__getData($chunk, $filter);
+        $data = $this->getData($chunk, $filter);
 
         if (!empty($where['data'])) {
             $data = array_merge($data, $where['data']);
@@ -191,316 +490,6 @@ class SegmentFilterDao extends AbstractDao
             'count' => $count,
             'sample_size' => $filter->sampleSize()
         ];
-    }
-
-    /**
-     * @param JobStruct $chunk
-     * @param FilterDefinition $filter
-     *
-     * @return ShapelessConcreteStruct[]
-     * @throws Exception
-     * @throws PDOException
-     * @throws ReflectionException
-     * @throws DivisionByZeroError
-     */
-    public static function findSegmentIdsForSample(JobStruct $chunk, FilterDefinition $filter): array
-    {
-        $where = self::__getWhereFromFilter($filter);
-
-        if ($filter->sampleSize() > 0) {
-            $limit = self::__getLimit($chunk, $filter, $where);
-        } else {
-            $limit = ['limit' => 0, 'count' => 0, 'sample_size' => 0];
-        }
-
-        $data = self::__getData($chunk, $filter);
-
-        $sql = match ($filter->sampleType()) {
-            'segment_length_high_to_low' => self::getSqlForSegmentLength($limit, $where, 'high_to_low'),
-            'segment_length_low_to_high' => self::getSqlForSegmentLength($limit, $where, 'low_to_high'),
-            'edit_distance_high_to_low' => self::getSqlForEditDistance($limit, $where, 'high_to_low'),
-            'edit_distance_low_to_high' => self::getSqlForEditDistance($limit, $where, 'low_to_high'),
-            'regular_intervals' => self::getSqlForRegularIntervals($limit, $where),
-            'unlocked' => self::getSqlForUnlocked($where),
-            'ice' => self::getSqlForIce($where),
-            'modified_ice' => self::getSqlForModifiedIce($where),
-            'repetitions' => self::getSqlForRepetition($where),
-            'matches' => self::getSqlForMatches($where),
-            'mt', 'fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99' => self::getSqlForMatchType($where),
-            'todo' => self::getSqlForTodo($where, $chunk->getIsReview(), $chunk->isSecondPassReview()),
-            default => throw new Exception('Sample type is not valid: ' . $filter->sampleType()),
-        };
-
-        $thisDao = new self();
-        $stmt = $thisDao->_getStatementForQuery($sql);
-
-        return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $data);
-    }
-
-    /**
-     * @param array{limit: int, count: int, sample_size: int|float} $limit
-     * @param array{sql: string, data: array<string, string>} $where
-     *
-     * @throws DivisionByZeroError
-     */
-    public static function getSqlForRegularIntervals(array $limit, array $where): string
-    {
-        $ratio = (int)round($limit['count'] / $limit['limit']);
-
-        return "SELECT id FROM (
-            SELECT st.id_segment AS id,
-            @curRow := @curRow + 1 AS row_number
-
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.password = :password
-           AND jobs.id = :id_job
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           JOIN (SELECT @curRow := -1) r --  using -1 here makes the sample start from the first segment
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment ASC
-           ) sub WHERE `row_number` % $ratio = 0 ";
-    }
-
-    /**
-     * @param array{limit: int, count: int, sample_size: int|float} $limit
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForEditDistance(array $limit, array $where, string $sort): string
-    {
-        $sqlSort = '';
-
-        if ($sort === 'high_to_low') {
-            $sqlSort = 'DESC';
-        } elseif ($sort === 'low_to_high') {
-            $sqlSort = 'ASC';
-        }
-
-        return "SELECT st.id_segment AS id
-              FROM
-               segment_translations st JOIN jobs
-               ON jobs.id = st.id_job
-               AND jobs.password = :password
-               AND jobs.id = :id_job
-               AND st.id_segment
-               BETWEEN :job_first_segment AND :job_last_segment
-               JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-            WHERE 1
-               {$where['sql']}
-               ORDER BY st.edit_distance $sqlSort
-               LIMIT {$limit['limit']} ;";
-    }
-
-    /**
-     * @param array{limit: int, count: int, sample_size: int|float} $limit
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForSegmentLength(array $limit, array $where, string $sort): string
-    {
-        $sqlSort = '';
-
-        if ($sort === 'high_to_low') {
-            $sqlSort = 'DESC';
-        } elseif ($sort === 'low_to_high') {
-            $sqlSort = 'ASC';
-        }
-
-        return "SELECT st.id_segment AS id
-          FROM
-           segment_translations st
-           JOIN jobs ON jobs.id = st.id_job
-               AND jobs.password = :password
-               AND jobs.id = :id_job
-               AND st.id_segment
-               BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY CHAR_LENGTH(s.segment) $sqlSort
-           LIMIT {$limit['limit']}";
-    }
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForUnlocked(array $where): string
-    {
-        return "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND st.locked = 0
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment
-        ";
-    }
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForMatchType(array $where): string
-    {
-        return "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND st.match_type = :match_type
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment
-        ";
-    }
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForIce(array $where): string
-    {
-        return "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-
-           AND st.match_type = 'ICE'
-           AND locked = 1
-           AND version_number = 0
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment
-        ";
-    }
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForModifiedIce(array $where): string
-    {
-        return "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-
-           AND st.match_type = 'ICE'
-           AND locked = 1
-           AND version_number > 0
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment
-        ";
-    }
-
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForRepetition(array $where): string
-    {
-        return "
-            SELECT id_segment AS id, segment_hash FROM segment_translations JOIN(
-                SELECT 
-                    GROUP_CONCAT( st.id_segment ) AS id,
-                    st.segment_hash as hash
-                FROM segment_translations st
-                JOIN jobs 
-                        ON jobs.id = st.id_job 
-                        AND jobs.id = :id_job
-                        AND jobs.password = :password
-                        AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
-                JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-                WHERE 1
-
-                        {$where['sql']}
-
-                GROUP BY segment_hash, CONCAT( id_job, '-', password )
-                HAVING COUNT( segment_hash ) > 1
-            ) AS REPETITIONS ON REPETITIONS.hash = segment_translations.segment_hash AND FIND_IN_SET( id_segment, REPETITIONS.id )
-            GROUP BY id_segment
-        ";
-    }
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForMatches(array $where): string
-    {
-        return "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND (st.match_type = :match_type_100_public 
-           OR st.match_type = :match_type_100)
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment
-        ";
-    }
-
-    /**
-     * @param array{sql: string, data: array<string, string>} $where
-     */
-    public static function getSqlForToDo(array $where, bool $isReview = false, bool $isSecondPassReview = false): string
-    {
-        $sql_condition = "";
-
-        if ($isReview) {
-            $sql_condition = " OR st.status = :status_translated ";
-        }
-
-        if ($isSecondPassReview) {
-            $sql_condition = " OR st.status = :status_translated OR st.status = :status_approved ";
-        }
-
-        return "
-          SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND (st.status = :status_new
-           OR st.status = :status_draft " . $sql_condition . ")
-           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
-           WHERE 1
-           {$where['sql']}
-           ORDER BY st.id_segment
-        ";
     }
 
 }

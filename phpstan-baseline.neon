@@ -3573,10 +3573,10 @@ parameters:
 			path: lib/Plugins/Features/SegmentFilter/Model/FilterDefinition.php
 
 		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\SegmentFilterModel\:\:getSegmentList\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:index\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/SegmentFilterModel.php
+			path: lib/Plugins/Features/SegmentFilter/Controller/API/FilterController.php
 
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEvent\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'

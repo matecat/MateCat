@@ -38,7 +38,7 @@ class SegmentVersionController extends KleinController
      */
     public function index(): void
     {
-        $results = TranslationVersionDao::getVersionsForTranslation(
+        $results = (new TranslationVersionDao())->getVersionsForTranslation(
             $this->request->param('id_job'),
             $this->request->param('id_segment')
         );
@@ -62,7 +62,7 @@ class SegmentVersionController extends KleinController
      */
     public function detail(): void
     {
-        $results = TranslationVersionDao::getVersionsForTranslation(
+        $results = (new TranslationVersionDao())->getVersionsForTranslation(
             $this->request->param('id_job'),
             $this->request->param('id_segment'),
             $this->request->param('version_number')

@@ -144,8 +144,9 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/API/V2/ProjectCreationStatusController.php` | Phase 0 |
 | `lib/Controller/API/V2/ReviseTranslationIssuesController.php` | Phase 31 |
 | `lib/Controller/API/V2/SegmentTranslationIssueController.php` | Phase 5C |
-| `lib/Controller/API/V2/SegmentVersionController.php` | Phase 31 |
+| `lib/Controller/API/V2/SegmentVersionController.php` | Phase 31 | TO BE COVERED |
 | `lib/Controller/API/V2/SplitJobController.php` | Phase 19 |
+| `lib/Controller/API/V2/ChunkTranslationVersionController.php` | Phase N+ | TO BE COVERED |
 | `lib/Controller/API/V2/ChunkTranslationIssueController.php` | Phase 5C |
 | `lib/Controller/API/V2/KeyCheckController.php` | Phase 5C |
 | `lib/Controller/API/V3/CancelRequestController.php` | Phase N+ |
@@ -630,7 +631,7 @@ Files that are PHPStan-clean but not yet covered by the test suite (controllers/
 | `lib/Controller/API/App/ContextUrlController.php` | Phase 31 | API controller |
 | `lib/Controller/API/V2/JobsController.php` | Phase 31 | API controller |
 | `lib/Controller/API/V2/ReviseTranslationIssuesController.php` | Phase 31 | API controller |
-| `lib/Controller/API/V2/SegmentVersionController.php` | Phase 31 | API controller |
+| `lib/Controller/API/V2/SegmentVersionController.php` | Phase 31 | API controller — TO BE COVERED |
 | `lib/Model/Segments/ContextResType.php` | Phase 31 | Enum — no executable lines |
 | `lib/Routes/api_v3_routes.php` | Phase 31 | Route definitions |
 | `lib/Routes/view_routes.php` | Phase 31 | Route definitions |
