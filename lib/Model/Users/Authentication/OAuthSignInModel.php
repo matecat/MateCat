@@ -77,6 +77,7 @@ class OAuthSignInModel
      *
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws \TypeError
      */
     public function setAccessToken(string $token): void
     {

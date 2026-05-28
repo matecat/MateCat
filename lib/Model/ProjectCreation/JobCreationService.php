@@ -345,7 +345,7 @@ class JobCreationService
             $this->insertFilesJob((int)$job->id, $fid);
 
             if ($gdriveSession && $gdriveSession->hasFiles()) {
-                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
+                $client = (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
                 $gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$job->id, $client);
             }
         }

@@ -241,6 +241,7 @@ class Session
     /**
      * @return array<string, mixed>|null
      * @throws Exception
+     * @throws TypeError
      */
     public function getToken(): ?array
     {
@@ -258,6 +259,7 @@ class Session
      *
      * @return array<string, mixed>|null
      * @throws Exception
+     * @throws TypeError
      */
     public function getTokenByUser(UserStruct $user): ?array
     {
@@ -340,6 +342,7 @@ class Session
      *
      * @return Google_Service_Drive|null
      * @throws Exception
+     * @throws TypeError
      */
     public function getService(Google_Client $gClient): ?Google_Service_Drive
     {
@@ -541,6 +544,7 @@ class Session
      * @param Google_Client $gClient
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function createRemoteFile(int $fileId, string $remoteFileId, Google_Client $gClient): void
     {
@@ -594,6 +598,7 @@ class Session
      *
      * @return Google_Service_Drive_Permission
      * @throws Exception
+     * @throws TypeError
      */
     public function grantFileAccessByUrl(string $googleFileId, Google_Client $gClient): Google_Service_Drive_Permission
     {
@@ -619,6 +624,7 @@ class Session
      * @param Google_Client $gClient
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function importFile(string $googleFileId, Google_Client $gClient): void
     {

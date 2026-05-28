@@ -180,7 +180,7 @@ class GDriveController extends AbstractStatefulKleinController
     {
         for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
-                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
                 $this->gdriveUserSession->importFile($listOfIds[$i], $client);
             } catch (Exception $e) {
                 $this->isImportingSuccessful = false;

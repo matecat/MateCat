@@ -15,6 +15,7 @@ use Model\ConnectedServices\Oauth\Github\GithubProvider;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -36,6 +37,7 @@ class OauthClient
      */
     private AbstractProvider $provider;
 
+    /** @var array<string, class-string<AbstractProvider>> */
     private static array $providers = [
         GoogleProvider::PROVIDER_NAME => GoogleProvider::class,
         GithubProvider::PROVIDER_NAME => GithubProvider::class,
@@ -49,14 +51,15 @@ class OauthClient
      * @param string|null $redirectUrl
      *
      * @return OauthClient
+     * @throws TypeError
      */
     public static function getInstance(?string $provider = null, ?string $redirectUrl = null): OauthClient
     {
-        if (self::$instance == null or self::$instance->provider_name != $provider) {
+        if (self::$instance == null or self::$instance->provider_name != ($provider ?? 'Mock')) {
             self::$instance = new OauthClient($provider, $redirectUrl);
         }
 
-        self::$instance->provider_name = $provider;
+        self::$instance->provider_name = $provider ?? 'Mock';
 
         return self::$instance;
     }
@@ -66,11 +69,16 @@ class OauthClient
      *
      * @param string|null $provider
      * @param string|null $redirectUrl
+     * @throws TypeError
      */
     private function __construct(?string $provider = null, ?string $redirectUrl = null)
     {
-        $className = self::$providers[$provider] ?? GoogleProvider::class;
-        $this->provider = new $className($redirectUrl);
+        $className = self::$providers[$provider ?? ''] ?? GoogleProvider::class;
+        $instance = new $className($redirectUrl);
+        if (!$instance instanceof AbstractProvider) {
+            throw new TypeError('Provider class must extend AbstractProvider');
+        }
+        $this->provider = $instance;
     }
 
     /**
@@ -83,7 +91,7 @@ class OauthClient
 
     /**
      * @param string|null $suffixKey
-     * @param array|null $_session
+     * @param array<string, mixed>|null $_session
      *
      * @return string
      * @throws Exception

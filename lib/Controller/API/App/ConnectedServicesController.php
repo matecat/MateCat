@@ -18,6 +18,7 @@ use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\NotFoundException;
 use PDOException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use View\API\App\Json\ConnectedService;
@@ -42,6 +43,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function verify(): void
     {
@@ -55,37 +57,41 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): void
     {
         $this->__validateOwnership();
+        $service = $this->connectedServiceStruct ?? throw new TypeError('connectedServiceStruct is null');
 
         $params = filter_var_array($this->request->params(), [
             'disabled' => FILTER_VALIDATE_BOOLEAN
         ]);
 
         if ($params['disabled']) {
-            $this->connectedServiceStruct->disabled_at = Utils::mysqlTimestamp(time());
+            $service->disabled_at = Utils::mysqlTimestamp(time());
         } else {
-            $this->connectedServiceStruct->disabled_at = null;
+            $service->disabled_at = null;
         }
 
-        (new ConnectedServiceDao())->updateStruct($this->connectedServiceStruct, ['fields' => ['disabled_at']]);
+        (new ConnectedServiceDao())->updateStruct($service, ['fields' => ['disabled_at']]);
 
         $this->refreshClientSessionIfNotApi();
 
         $formatter = new ConnectedService([]);
-        $this->response->json(['connected_service' => $formatter->renderItem($this->connectedServiceStruct)]);
+        $this->response->json(['connected_service' => $formatter->renderItem($service)]);
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function __handleGDrive(): void
     {
-        $verifier = new GDriveTokenVerifyModel($this->connectedServiceStruct);
+        $service = $this->connectedServiceStruct ?? throw new TypeError('connectedServiceStruct is null');
+        $verifier = new GDriveTokenVerifyModel($service);
 
-        $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+        $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
 
         if ($verifier->validOrRefreshed($client)) {
             $this->response->code(200);

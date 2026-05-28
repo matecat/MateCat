@@ -29,7 +29,7 @@
         "predis/predis": "^v3",
         "psr/log": "^3.0",
         "psr/event-dispatcher": "^1.0",
-        "stevenmaguire/oauth2-microsoft": "^2.2",
+        "untt/oauth2-microsoft": "^0.0.3",
         "stomp-php/stomp-php": "^5.0",
         "swaggest/json-schema": "^0.12.42",
         "symfony/cache": "~7.3.9",

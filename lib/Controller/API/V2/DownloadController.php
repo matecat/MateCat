@@ -707,7 +707,7 @@ class DownloadController extends AbstractDownloadController
         $verifier = new GDriveTokenVerifyModel($connectedService, $dao);
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+        $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
 
         if ($verifier->validOrRefreshed($client)) {
             $this->remoteFileService = new RemoteFileService($raw_token ?? throw new Exception('Token not available'), $client);

@@ -303,7 +303,7 @@ class FileInsertionService
                 if ($this->gdriveSession) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
                     if ($gdriveFileId) {
-                        $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                        $client = (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
                         $this->gdriveSession->createRemoteFile($fid, $gdriveFileId, $client);
                     }
                 }

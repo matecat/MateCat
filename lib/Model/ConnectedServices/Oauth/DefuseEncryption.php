@@ -42,9 +42,10 @@ class DefuseEncryption
     {
         if (file_exists($this->keyFilePath)) {
             $keyFile = fopen($this->keyFilePath, 'r');
+            $size = filesize($this->keyFilePath);
 
-            if ($keyFile) {
-                $keyFileContents = fread($keyFile, filesize($this->keyFilePath));
+            if ($keyFile && $size > 0) {
+                $keyFileContents = fread($keyFile, $size);
                 fclose($keyFile);
 
                 if ($keyFileContents) {
@@ -66,6 +67,7 @@ class DefuseEncryption
      */
     public function createEncryptionKey(): void
     {
+        $keyFile = false;
         try {
             $keyFile = fopen($this->keyFilePath, 'w');
 
@@ -100,10 +102,11 @@ class DefuseEncryption
      *
      * @return string   Encrypted text
      * @throws EnvironmentIsBrokenException
+     * @throws \TypeError
      */
     public function encrypt(string $text): string
     {
-        return Crypto::encrypt($text, $this->key);
+        return Crypto::encrypt($text, $this->key ?? throw new \TypeError('Encryption key not loaded'));
     }
 
     /**
@@ -113,11 +116,12 @@ class DefuseEncryption
      *
      * @return null|string  Decrypted text or FALSE when found an error in decryption
      * @throws EnvironmentIsBrokenException
+     * @throws \TypeError
      */
     public function decrypt(string $cipherText): ?string
     {
         try {
-            return Crypto::decrypt($cipherText, $this->key);
+            return Crypto::decrypt($cipherText, $this->key ?? throw new \TypeError('Encryption key not loaded'));
         } catch (WrongKeyOrModifiedCiphertextException) {
             return null;
         }

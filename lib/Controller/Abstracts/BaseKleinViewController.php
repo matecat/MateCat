@@ -19,6 +19,7 @@ use Model\ConnectedServices\Oauth\OauthClient;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
@@ -104,18 +105,30 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $nonce = Utils::uuid4();
         $this->view->{'x_nonce_unique_id'} = $nonce;
 
-        // init oauth clients
-        $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        // init oauth clients — graceful degradation on provider init failure
+        try {
+            $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        } catch (TypeError) {
+            $this->view->{'googleAuthURL'} = "";
+            $this->view->{'githubAuthUrl'} = "";
+            $this->view->{'linkedInAuthUrl'} = "";
+            $this->view->{'microsoftAuthUrl'} = "";
+            $this->view->{'facebookAuthUrl'} = "";
+        }
 
         $this->view->{'googleDriveEnabled'} = new PHPTalBoolean(AppConfig::isGDriveConfigured());
-        $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
-            GoogleProvider::PROVIDER_NAME,
-            AppConfig::$HTTPHOST . "/gdrive/oauth/response"
-        )->getAuthorizationUrl($_SESSION, 'drive') : "";
+        try {
+            $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
+                GoogleProvider::PROVIDER_NAME,
+                AppConfig::$HTTPHOST . "/gdrive/oauth/response"
+            )->getAuthorizationUrl($_SESSION, 'drive') : "";
+        } catch (TypeError) {
+            $this->view->{'gdriveAuthURL'} = "";
+        }
 
         $parsedHost = parse_url(AppConfig::$HTTPHOST);
         $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])

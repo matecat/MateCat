@@ -4,11 +4,14 @@ namespace Model\ConnectedServices\Oauth\LinkedIn;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use League\OAuth2\Client\Provider\LinkedIn;
 use League\OAuth2\Client\Token\AccessToken;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use RuntimeException;
+use TypeError;
+use UnexpectedValueException;
 use Utils\Registry\AppConfig;
 
 class LinkedInProvider extends AbstractProvider
@@ -19,11 +22,11 @@ class LinkedInProvider extends AbstractProvider
     /**
      * @param string|null $redirectUrl
      *
-     * @return LinkedIn
+     * @return LinkedinFinal
      */
-    public static function getClient(?string $redirectUrl = null): LinkedIn
+    public function getClient(?string $redirectUrl = null): LinkedinFinal
     {
-        return new LinkedIn([
+        return new LinkedinFinal([
             'clientId' => AppConfig::$LINKEDIN_OAUTH_CLIENT_ID,
             'clientSecret' => AppConfig::$LINKEDIN_OAUTH_CLIENT_SECRET,
             'redirectUri' => $redirectUrl ?? AppConfig::$LINKEDIN_OAUTH_REDIRECT_URL,
@@ -36,6 +39,7 @@ class LinkedInProvider extends AbstractProvider
      *
      * @return string
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
@@ -44,11 +48,11 @@ class LinkedInProvider extends AbstractProvider
             'scope' => [
                 'email',
                 'profile',
-                'openid',
+                'openid'
             ],
             'prompt' => 'select_account'
         ];
-        $linkedInClient = static::getClient();
+        $linkedInClient = $this->getClient();
 
         return $linkedInClient->getAuthorizationUrl($options);
     }
@@ -59,10 +63,11 @@ class LinkedInProvider extends AbstractProvider
      * @return AccessToken
      * @throws GuzzleException
      * @throws IdentityProviderException
+     * @throws UnexpectedValueException
      */
     public function getAccessTokenFromAuthCode(string $code): AccessToken
     {
-        $linkedInClient = static::getClient($this->redirectUrl);
+        $linkedInClient = $this->getClient($this->redirectUrl);
 
         /** @var AccessToken $token */
         $token = $linkedInClient->getAccessToken('authorization_code', [
@@ -77,33 +82,23 @@ class LinkedInProvider extends AbstractProvider
      *
      * @return ProviderUser
      * @throws GuzzleException
+     * @throws TypeError
+     * @throws RuntimeException
+     * @throws IdentityProviderException
      */
     public function getResourceOwner(AccessToken $token): ProviderUser
     {
-        $linkedInClient = static::getClient($this->redirectUrl);
-        $response = $linkedInClient->getHttpClient()->request(
-            'GET',
-            'https://api.linkedin.com/v2/userinfo',
-            [
-                'headers' =>
-                    [
-                        'Authorization' => "Bearer $token"
-                    ]
-            ]
-        );
-
-        $fetched = json_decode($response->getBody()->getContents());
+        $linkedInClient = $this->getClient($this->redirectUrl);
+        $response = $linkedInClient->getResourceOwner($token);
 
         $user = new ProviderUser();
-        $user->email = $fetched->email;
-        $user->name = $fetched->given_name;
-        $user->lastName = $fetched->family_name;
-        $user->picture = $fetched->picture;
-        $user->authToken = $token;
+        $user->email = $response->getEmail() ?? throw new TypeError('LinkedIn OAuth: email is required');
+        $user->name = (string)($response->getAttribute('given_name') ?? throw new TypeError('LinkedIn OAuth: name is required'));
+        $user->lastName = $response->getAttribute('family_name') ?: null;
+        $user->picture = $response->getAttribute('picture') ?: null;
+        $user->authToken = (string)$token;
         $user->provider = self::PROVIDER_NAME;
 
         return $user;
     }
 }
-
-//config.linkedInAuthUrl

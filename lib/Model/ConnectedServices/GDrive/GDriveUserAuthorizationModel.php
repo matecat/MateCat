@@ -84,6 +84,7 @@ class GDriveUserAuthorizationModel
      * @param ConnectedServiceStruct $service
      *
      * @throws Exception
+     * @throws \TypeError
      */
     private function __updateService(ConnectedServiceStruct $service): void
     {
@@ -98,6 +99,7 @@ class GDriveUserAuthorizationModel
     /**
      * @return ConnectedServiceStruct
      * @throws Exception
+     * @throws \TypeError
      */
     private function __insertService(): ConnectedServiceStruct
     {
@@ -131,7 +133,7 @@ class GDriveUserAuthorizationModel
      */
     protected function __collectProperties(string $code): void
     {
-        $gdriveClient = $this->googleClient ?? GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+        $gdriveClient = $this->googleClient ?? (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
         $gdriveClient->fetchAccessTokenWithAuthCode($code);
         $accessToken = $gdriveClient->getAccessToken();
         $this->token = is_array($accessToken)

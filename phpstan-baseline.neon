@@ -208,18 +208,6 @@ parameters:
 			path: lib/Controller/API/App/ChangeJobsStatusController.php
 
 		-
-			message: '#^Parameter \#1 \$item of method View\\API\\App\\Json\\ConnectedService\:\:renderItem\(\) expects Model\\ConnectedServices\\ConnectedServiceStruct, Model\\ConnectedServices\\ConnectedServiceStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
-			message: '#^Parameter \#1 \$service of class Model\\ConnectedServices\\GDrive\\GDriveTokenVerifyModel constructor expects Model\\ConnectedServices\\ConnectedServiceStruct, Model\\ConnectedServices\\ConnectedServiceStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/ConnectedServicesController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\ConvertFileController\:\:validateFiltersExtractionParametersTemplateId\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -1333,6 +1321,12 @@ parameters:
 			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:open\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
+			path: lib/Controller/API/GDrive/GDriveController.php
+
+		-
+			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:doImport\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
@@ -2737,7 +2731,13 @@ parameters:
 		-
 			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
+			path: lib/Controller/Views/OauthResponseHandlerController.php
+
+		-
+			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 		-
@@ -2823,266 +2823,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Model/Comments/CommentStruct.php
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\DefuseEncryption\:\:decrypt\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/DefuseEncryption.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\DefuseEncryption\:\:encrypt\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/DefuseEncryption.php
-
-		-
-			message: '#^Parameter \#2 \$key of static method Defuse\\Crypto\\Crypto\:\:decrypt\(\) expects Defuse\\Crypto\\Key, Defuse\\Crypto\\Key\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/DefuseEncryption.php
-
-		-
-			message: '#^Parameter \#2 \$key of static method Defuse\\Crypto\\Crypto\:\:encrypt\(\) expects Defuse\\Crypto\\Key, Defuse\\Crypto\\Key\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/DefuseEncryption.php
-
-		-
-			message: '#^Parameter \#2 \$length of function fread expects int\<1, max\>, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/DefuseEncryption.php
-
-		-
-			message: '#^Variable \$keyFile might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/DefuseEncryption.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Facebook\\FacebookProvider\:\:getAccessTokenFromAuthCode\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Facebook/FacebookProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Facebook\\FacebookProvider\:\:getClient\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Facebook/FacebookProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Facebook\\FacebookProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ConnectedServices/Oauth/Facebook/FacebookProvider.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\ProviderUser\:\:\$email \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Facebook/FacebookProvider.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\ProviderUser\:\:\$name \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Facebook/FacebookProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Github\\GithubProvider\:\:getAccessTokenFromAuthCode\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Github/GithubProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Github\\GithubProvider\:\:getAuthorizationUrl\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Github/GithubProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Github\\GithubProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ConnectedServices/Oauth/Github/GithubProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Github\\GithubProvider\:\:getResourceOwner\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Github/GithubProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Google\\AccessToken\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/AccessToken.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Google\\AccessToken\:\:__toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/AccessToken.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\Google\\AccessToken\:\:\$originalValues type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/AccessToken.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Google\\GoogleClientLogsFormatter\:\:formatBatch\(\) has parameter \$records with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleClientLogsFormatter.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Google\\GoogleClientLogsFormatter\:\:formatBatch\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleClientLogsFormatter.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type string\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleClientLogsFormatter.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Google\\GoogleProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleProvider.php
-
-		-
-			message: '#^Parameter \#1 \$applicationName of method Google\\Client\:\:setApplicationName\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleProvider.php
-
-		-
-			message: '#^Parameter \#1 \$clientId of method Google\\Client\:\:setClientId\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleProvider.php
-
-		-
-			message: '#^Parameter \#1 \$clientSecret of method Google\\Client\:\:setClientSecret\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleProvider.php
-
-		-
-			message: '#^Parameter \#1 \$redirectUri of method Google\\Client\:\:setRedirectUri\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleProvider.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\Google\\GoogleProvider\:\:\$OAUTH_SCOPES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Google/GoogleProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\LinkedIn\\LinkedInProvider\:\:getAccessTokenFromAuthCode\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/LinkedIn/LinkedInProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\LinkedIn\\LinkedInProvider\:\:getResourceOwner\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/LinkedIn/LinkedInProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\LinkedIn\\LinkedInProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: lib/Model/ConnectedServices/Oauth/LinkedIn/LinkedInProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getAccessTokenFromAuthCode\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getAuthorizationUrl\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getResourceOwner\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\Microsoft\\MicrosoftProvider\:\:getResourceOwner\(\) throws checked exception UnexpectedValueException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type Model\\ConnectedServices\\Oauth\\ProviderUser\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\ProviderUser\:\:\$email \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\ProviderUser\:\:\$name \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/Microsoft/MicrosoftProvider.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\OauthClient\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\OauthClient\:\:getAuthorizationUrl\(\) has parameter \$_session with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-		-
-			message: '#^Method Model\\ConnectedServices\\Oauth\\OauthClient\:\:getInstance\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\OauthClient\:\:\$provider \(Model\\ConnectedServices\\Oauth\\AbstractProvider\) does not accept object\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\OauthClient\:\:\$provider_name \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-		-
-			message: '#^Property Model\\ConnectedServices\\Oauth\\OauthClient\:\:\$providers type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/ConnectedServices/Oauth/OauthClient.php
-
-
-
 
 		-
 			message: '#^Method Model\\EditLog\\EditLogSegmentStruct\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -3313,6 +3053,12 @@ parameters:
 			message: '#^Parameter \#2 \$context of method Utils\\Logger\\MatecatLogger\:\:error\(\) expects array\<string, mixed\>, array\<int, mixed\> given\.$#'
 			identifier: argument.type
 			count: 2
+			path: lib/Model/ProjectCreation/FileInsertionService.php
+
+		-
+			message: '#^Method Model\\ProjectCreation\\FileInsertionService\:\:insertFiles\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Model/ProjectCreation/FileInsertionService.php
 
 		-
@@ -3677,6 +3423,12 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$db_hashed_pass of static method Utils\\Tools\\Utils\:\:verifyPass\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: lib/Model/Users/UserStruct.php
+
+		-
+			message: '#^Method Model\\Users\\UserStruct\:\:getDecryptedOauthAccessToken\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Model/Users/UserStruct.php
 
@@ -5835,6 +5587,12 @@ parameters:
 			path: lib/View/API/App/Json/ConnectedService.php
 
 		-
+			message: '#^Method View\\API\\App\\Json\\ConnectedService\:\:renderItem\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/View/API/App/Json/ConnectedService.php
+
+		-
 			message: '#^Method View\\API\\App\\Json\\OutsourceConfirmation\:\:render\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6534,6 +6292,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\:\:homeRoute\(\) has parameter \$service with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner.php
+
+		-
+			message: '#^Method Features\\Aligner\:\:getConfigs\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner.php
 

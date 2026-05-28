@@ -13,6 +13,7 @@ use Exception;
 use Google_Client;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
+use TypeError;
 
 class GDriveTokenVerifyModel
 {
@@ -31,6 +32,7 @@ class GDriveTokenVerifyModel
     /**
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws TypeError
      */
     public function validOrRefreshed(Google_Client $gClient): bool
     {
@@ -77,6 +79,7 @@ class GDriveTokenVerifyModel
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function __updateToken(string $newToken): void
     {

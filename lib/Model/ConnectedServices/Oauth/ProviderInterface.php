@@ -4,7 +4,9 @@ namespace Model\ConnectedServices\Oauth;
 
 use Exception;
 use Google_Client;
+use InvalidArgumentException;
 use League\OAuth2\Client\Token\AccessToken;
+use TypeError;
 
 /**
  * Every OAuth2 provider MUST implement this interface
@@ -21,6 +23,8 @@ interface ProviderInterface
      * @param string $csrfTokenState
      *
      * @return string
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function getAuthorizationUrl(string $csrfTokenState): string;
 
@@ -42,6 +46,7 @@ interface ProviderInterface
      * @param AccessToken $token
      *
      * @return ProviderUser
+     * @throws TypeError
      */
     public function getResourceOwner(AccessToken $token): ProviderUser;
 
@@ -50,8 +55,7 @@ interface ProviderInterface
      *
      * @param string|null $redirectUrl
      *
-     * @return AbstractProvider|Google_Client
      */
-    public static function getClient(?string $redirectUrl = null): mixed;
+    public function getClient(?string $redirectUrl = null): mixed;
 
 }

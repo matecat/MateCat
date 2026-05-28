@@ -29,6 +29,8 @@ class TestableSession extends Session
     /** @var array<string, mixed>|null */
     public ?array $forcedToken = null;
 
+    public ?Google_Service_Drive $mockService = null;
+
     public function doConversion(string $file_name): array
     {
         if ($this->conversionException !== null) {
@@ -52,6 +54,23 @@ class TestableSession extends Session
         }
 
         return parent::getTokenByUser($user);
+    }
+
+    public function getService(Google_Client $gClient): ?Google_Service_Drive
+    {
+        if ($this->mockService !== null) {
+            $this->serviceStruct = $this->serviceStruct ?? new ConnectedServiceStruct([
+                'id' => 1,
+                'uid' => 42,
+                'service' => 'gdrive',
+                'email' => 'test@example.com',
+                'name' => 'Test',
+                'created_at' => '2024-01-01 00:00:00',
+            ]);
+            return $this->mockService;
+        }
+
+        return parent::getService($gClient);
     }
 }
 
@@ -1038,6 +1057,200 @@ class SessionTest extends AbstractTest
         $result = $method->invoke($session, ['test.docx'], '/tmp/test-upload', '/tmp/test-err', 'upload-token-789');
 
         $this->assertInstanceOf(\Model\Conversion\FilesConverter::class, $result);
+    }
+
+    #[Test]
+    public function importFileDownloadsAndConverts(): void
+    {
+        $origUploadRepo = \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY;
+        $tmpDir = sys_get_temp_dir() . '/matecat_upload_test_' . uniqid();
+        mkdir($tmpDir, 0755, true);
+        \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY = $tmpDir;
+
+        try {
+            $sessionData = $this->createSessionData();
+            $session = new TestableSession($sessionData);
+            $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+            $session->lastConversionHash = ['cacheHash' => 'abc123', 'diskHash' => 'def456'];
+
+            $fileMeta = new \Google_Service_Drive_DriveFile();
+            $fileMeta->setName('test-document');
+            $fileMeta->setMimeType('application/vnd.google-apps.document');
+
+            $body = $this->createStub(\GuzzleHttp\Psr7\Stream::class);
+            $body->method('getSize')->willReturn(100);
+            $body->method('read')->willReturn('file-content-here');
+
+            $response = $this->createStub(\GuzzleHttp\Psr7\Response::class);
+            $response->method('getStatusCode')->willReturn(200);
+            $response->method('getBody')->willReturn($body);
+
+            $filesResource = $this->createStub(\Google_Service_Drive_Resource_Files::class);
+            $filesResource->method('get')->willReturn($fileMeta);
+            $filesResource->method('export')->willReturn($response);
+
+            $mockService = $this->createStub(Google_Service_Drive::class);
+            $mockService->files = $filesResource;
+
+            $session->mockService = $mockService;
+
+            $session->importFile('google-file-id-123', $this->createStub(Google_Client::class));
+
+            $this->assertTrue($session->hasFiles());
+            $fileId = $session->findFileIdByName('test-document.docx');
+            $this->assertSame('google-file-id-123', $fileId);
+        } finally {
+            \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY = $origUploadRepo;
+            self::deleteRecursiveDir($tmpDir);
+        }
+    }
+
+    #[Test]
+    public function importFileThrowsWhenServiceIsNull(): void
+    {
+        $sessionData = $this->createSessionData();
+        $session = new TestableSession($sessionData);
+        $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+        $session->mockService = null;
+        $session->forcedToken = null;
+
+        $this->expectException(Exception::class);
+        $session->importFile('google-file-id', $this->createStub(Google_Client::class));
+    }
+
+    #[Test]
+    public function importFileThrowsOnDownloadError(): void
+    {
+        $sessionData = $this->createSessionData();
+        $session = new TestableSession($sessionData);
+        $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+
+        $fileMeta = new \Google_Service_Drive_DriveFile();
+        $fileMeta->setName('test.docx');
+        $fileMeta->setMimeType('application/vnd.google-apps.document');
+
+        $response = $this->createStub(\GuzzleHttp\Psr7\Response::class);
+        $response->method('getStatusCode')->willReturn(500);
+
+        $filesResource = $this->createStub(\Google_Service_Drive_Resource_Files::class);
+        $filesResource->method('get')->willReturn($fileMeta);
+        $filesResource->method('export')->willReturn($response);
+
+        $mockService = $this->createStub(Google_Service_Drive::class);
+        $mockService->files = $filesResource;
+        $session->mockService = $mockService;
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Error when downloading file');
+
+        $session->importFile('google-file-id', $this->createStub(Google_Client::class));
+    }
+
+    #[Test]
+    public function reConvertReturnsTrueOnSuccess(): void
+    {
+        $sessionData = $this->createSessionData();
+        $sessionData[Session::SESSION_KEY] = [
+            Session::FILE_LIST => [
+                'gfile1' => [
+                    Session::FILE_NAME => 'doc.docx',
+                    Session::FILE_HASH => ['cacheHash' => 'old', 'diskHash' => 'old'],
+                ],
+            ],
+        ];
+
+        $session = new TestableSession($sessionData);
+        $session->lastConversionHash = ['cacheHash' => 'new123', 'diskHash' => 'new456'];
+
+        $result = $session->reConvert('fr-FR');
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function reConvertReturnsFalseOnConversionError(): void
+    {
+        $sessionData = $this->createSessionData();
+        $sessionData[Session::SESSION_KEY] = [
+            Session::FILE_LIST => [
+                'gfile1' => [
+                    Session::FILE_NAME => 'doc.docx',
+                    Session::FILE_HASH => ['cacheHash' => 'old', 'diskHash' => 'old'],
+                ],
+            ],
+        ];
+
+        $session = new TestableSession($sessionData);
+        $session->conversionException = new Exception('Conversion failed');
+
+        $result = $session->reConvert('fr-FR');
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function reConvertReturnsFalseOnEmptyHash(): void
+    {
+        $sessionData = $this->createSessionData();
+        $sessionData[Session::SESSION_KEY] = [
+            Session::FILE_LIST => [
+                'gfile1' => [
+                    Session::FILE_NAME => 'doc.docx',
+                    Session::FILE_HASH => ['cacheHash' => 'old', 'diskHash' => 'old'],
+                ],
+            ],
+        ];
+
+        $session = new TestableSession($sessionData);
+        $session->lastConversionHash = [];
+
+        $result = $session->reConvert('fr-FR');
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function importFileThrowsOnEmptyConversionHash(): void
+    {
+        $origUploadRepo = \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY;
+        $tmpDir = sys_get_temp_dir() . '/matecat_upload_test_' . uniqid();
+        mkdir($tmpDir, 0755, true);
+        \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY = $tmpDir;
+
+        try {
+            $sessionData = $this->createSessionData();
+            $session = new TestableSession($sessionData);
+            $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+            $session->lastConversionHash = [];
+
+            $fileMeta = new \Google_Service_Drive_DriveFile();
+            $fileMeta->setName('test-document');
+            $fileMeta->setMimeType('application/vnd.google-apps.document');
+
+            $body = $this->createStub(\GuzzleHttp\Psr7\Stream::class);
+            $body->method('getSize')->willReturn(100);
+            $body->method('read')->willReturn('file-content');
+
+            $response = $this->createStub(\GuzzleHttp\Psr7\Response::class);
+            $response->method('getStatusCode')->willReturn(200);
+            $response->method('getBody')->willReturn($body);
+
+            $filesResource = $this->createStub(\Google_Service_Drive_Resource_Files::class);
+            $filesResource->method('get')->willReturn($fileMeta);
+            $filesResource->method('export')->willReturn($response);
+
+            $mockService = $this->createStub(Google_Service_Drive::class);
+            $mockService->files = $filesResource;
+            $session->mockService = $mockService;
+
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('Error when converting file');
+
+            $session->importFile('file-id', $this->createStub(Google_Client::class));
+        } finally {
+            \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY = $origUploadRepo;
+            self::deleteRecursiveDir($tmpDir);
+        }
     }
 
     private static function deleteRecursiveDir(string $dir): void

@@ -9,6 +9,7 @@ use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
 use PDO;
 use PDOException;
+use TypeError;
 use Utils\Tools\Utils;
 
 class ConnectedServiceDao extends AbstractDao
@@ -28,6 +29,7 @@ class ConnectedServiceDao extends AbstractDao
      *
      * @return ConnectedServiceStruct
      * @throws Exception
+     * @throws TypeError
      */
     public function updateOauthToken(string $token, ConnectedServiceStruct $service): ConnectedServiceStruct
     {

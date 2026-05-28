@@ -35,6 +35,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return string|null
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws \TypeError
      */
     public function getDecryptedOauthAccessToken(): ?string
     {
@@ -50,6 +51,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      *
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws \TypeError
      */
     public function setEncryptedAccessToken(string $token): void
     {
@@ -61,6 +63,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      *
      * @return array<string, mixed>|null
      * @throws Exception
+     * @throws \TypeError
      */
     public function getDecodedOauthAccessToken(?string $field = null): ?array
     {
