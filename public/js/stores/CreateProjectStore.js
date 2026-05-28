@@ -49,9 +49,6 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
   getFiltersTemplate: function () {
     return this.projectData.filtersTemplate
   },
-  getLaraStyleGuide: function () {
-    return this.projectData.laraStyleGuide
-  },
 })
 
 // Register callback to handle all updates

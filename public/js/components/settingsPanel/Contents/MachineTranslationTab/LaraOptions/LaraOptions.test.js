@@ -145,7 +145,9 @@ describe('LaraOptions', () => {
     renderComponent({isAnInternalUser: true})
 
     expect(screen.getByText('Style guide')).toBeInTheDocument()
-    expect(screen.getByTestId('select-lara_style_guide')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('select-lara_style_guideline_id'),
+    ).toBeInTheDocument()
   })
 
   test('fetches style guides on mount and populates options', async () => {
@@ -168,7 +170,7 @@ describe('LaraOptions', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByTestId('option-lara_style_guide-sg1'),
+        screen.getByTestId('option-lara_style_guideline_id-sg1'),
       ).toBeInTheDocument()
     })
   })
@@ -186,50 +188,6 @@ describe('LaraOptions', () => {
 
     const switchEl = screen.getByTestId('switch-enable_mt_analysis')
     expect(switchEl).toBeDisabled()
-  })
-
-  test('style guide select shows lara_style_guideline_id from CatToolStore when isCattoolPage', async () => {
-    const CatToolStore = require('../../../../../stores/CatToolStore')
-    CatToolStore.getJobMetadata.mockReturnValue({
-      project: {mt_extra: {lara_style_guideline_id: 'sg-from-job'}},
-    })
-
-    const {
-      laraStyleguides,
-    } = require('../../../../../api/laraStyleguides/laraStyleguides')
-    laraStyleguides.mockResolvedValue([
-      {id: 'sg-from-job', name: 'Job Guide', description: ''},
-    ])
-
-    renderComponent({isCattoolPage: true, isAnInternalUser: true})
-
-    await waitFor(() => {
-      expect(
-        screen.getByTestId('select-lara_style_guide-active'),
-      ).toHaveTextContent('sg-from-job')
-    })
-  })
-
-  test('updates CreateProjectStore when laraStyleGuide watch value changes', async () => {
-    const useOptions = require('../useOptions')
-    const CreateProjectStore = require('../../../../../stores/CreateProjectStore')
-
-    const mockSetValue = jest.fn()
-    useOptions.mockReturnValue({
-      watch: jest.fn((field) =>
-        field === 'lara_style_guide' ? 'sg1' : undefined,
-      ),
-      control: {},
-      setValue: mockSetValue,
-    })
-
-    renderComponent()
-
-    await waitFor(() => {
-      expect(CreateProjectStore.updateProject).toHaveBeenCalledWith({
-        laraStyleGuide: 'sg1',
-      })
-    })
   })
 
   test('renders LaraGlossary with mt id from template', async () => {

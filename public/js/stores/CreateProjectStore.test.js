@@ -8,7 +8,6 @@ describe('CreateProjectStore', () => {
     targetLang: undefined,
     selectedTeam: undefined,
     filtersTemplate: undefined,
-    laraStyleGuide: undefined,
   }
 
   beforeEach(() => {
@@ -19,13 +18,11 @@ describe('CreateProjectStore', () => {
   test('updateProject merges incoming data', () => {
     CreateProjectStore.updateProject({
       sourceLang: {id: 'en-US', name: 'English'},
-      laraStyleGuide: 'sg-1',
     })
 
     expect(CreateProjectStore.projectData).toEqual({
       ...initialProjectData,
       sourceLang: {id: 'en-US', name: 'English'},
-      laraStyleGuide: 'sg-1',
     })
   })
 
@@ -67,19 +64,6 @@ describe('CreateProjectStore', () => {
     expect(CreateProjectStore.getTargetLangsNames()).toBe('French,German')
   })
 
-  test('getFiltersTemplate and getLaraStyleGuide return stored values', () => {
-    CreateProjectStore.updateProject({
-      filtersTemplate: {id: 99, name: 'Default'},
-      laraStyleGuide: 'sg-5',
-    })
-
-    expect(CreateProjectStore.getFiltersTemplate()).toEqual({
-      id: 99,
-      name: 'Default',
-    })
-    expect(CreateProjectStore.getLaraStyleGuide()).toBe('sg-5')
-  })
-
   test('UPDATE_PROJECT_DATA action updates store and emits change with data', () => {
     const emitSpy = jest.spyOn(CreateProjectStore, 'emitChange')
 
@@ -87,7 +71,6 @@ describe('CreateProjectStore', () => {
       actionType: NewProjectConstants.UPDATE_PROJECT_DATA,
       data: {
         sourceLang: {id: 'en-US', name: 'English'},
-        laraStyleGuide: 'sg-action',
       },
     })
 
@@ -95,7 +78,6 @@ describe('CreateProjectStore', () => {
       id: 'en-US',
       name: 'English',
     })
-    expect(CreateProjectStore.getLaraStyleGuide()).toBe('sg-action')
     expect(emitSpy).toHaveBeenCalledWith(
       NewProjectConstants.UPDATE_PROJECT_DATA,
       CreateProjectStore.projectData,
@@ -133,11 +115,9 @@ describe('CreateProjectStore', () => {
 
     AppDispatcher.dispatch({
       actionType: NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
-      data: {laraStyleGuide: 'sg-key'},
       message: 'created',
     })
 
-    expect(CreateProjectStore.getLaraStyleGuide()).toBe('sg-key')
     expect(emitSpy).toHaveBeenCalledWith(
       NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
       'created',

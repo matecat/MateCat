@@ -581,9 +581,6 @@ const NewProject = () => {
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
       icu_enabled: icuEnabled,
-      ...(CreateProjectStore.getLaraStyleGuide() && {
-        lara_style_guideline_id: CreateProjectStore.getLaraStyleGuide(),
-      }),
     })
 
     if (!projectSent) {
