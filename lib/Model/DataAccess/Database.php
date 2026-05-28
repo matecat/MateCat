@@ -298,7 +298,7 @@ class Database implements IDatabase
      */
     public function insert(string $table, array $data, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $onDuplicateKey = []): string
     {
-        [$query, $dupBindValues] = static::buildInsertStatement($table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey);
+        [$query, $dupBindValues] = $this->buildInsertStatement($table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey);
 
         $preparedStatement = $this->getConnection()->prepare($query);
 
@@ -332,7 +332,7 @@ class Database implements IDatabase
      *
      * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array
+    public function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array
     {
         if (empty($table)) {
             throw new Exception('TABLE constant is not defined');

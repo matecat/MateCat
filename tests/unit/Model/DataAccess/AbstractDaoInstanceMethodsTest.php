@@ -7,6 +7,7 @@ namespace unit\Model\DataAccess;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOStatement;
@@ -426,6 +427,9 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($pdo);
+        $database->method('buildInsertStatement')->willReturnCallback(
+            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => Database::obtain()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
+        );
 
         $dao = new AutoIncrementTestableDao($database);
         $struct = new DaoObjectTestStruct(['name' => 'created']);
@@ -454,6 +458,9 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($pdo);
+        $database->method('buildInsertStatement')->willReturnCallback(
+            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => Database::obtain()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
+        );
 
         $dao = new AutoIncrementTestableDao($database);
         $struct = new DaoObjectTestStruct(['name' => 'created']);
@@ -485,6 +492,9 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($pdo);
+        $database->method('buildInsertStatement')->willReturnCallback(
+            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => Database::obtain()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
+        );
 
         $dao = new AutoIncrementTestableDao($database);
         $struct = new DaoObjectTestStruct(['name' => 'created']);

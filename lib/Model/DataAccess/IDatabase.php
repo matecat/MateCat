@@ -2,6 +2,7 @@
 
 namespace Model\DataAccess;
 
+use Exception;
 use PDO;
 use PDOException;
 use Throwable;
@@ -144,5 +145,15 @@ interface IDatabase
      * @throws PDOException
      */
     public function nextSequence(string $sequence_name, int $seqIncrement = 1): array;
+
+    /**
+     * @param array<string, mixed> $attrs
+     * @param array<int|string, mixed> $mask
+     * @param array<string, string> $on_duplicate_update
+     *
+     * @return array{0: string, 1: array<string, scalar|null>}
+     * @throws Exception
+     */
+    public function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array;
 
 }

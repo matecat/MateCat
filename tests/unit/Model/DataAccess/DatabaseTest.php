@@ -280,7 +280,7 @@ class DatabaseTest extends AbstractTest
         $attrs = ['name' => 'test', 'type' => 'NONE'];
         $mask = ['name', 'type'];
 
-        [$sql, $dupBindValues] = Database::buildInsertStatement('engines', $attrs, $mask);
+        [$sql, $dupBindValues] = $this->db->buildInsertStatement('engines', $attrs, $mask);
 
         $this->assertStringContainsString('INSERT', $sql);
         $this->assertStringContainsString('`name`', $sql);
@@ -296,7 +296,7 @@ class DatabaseTest extends AbstractTest
         $attrs = ['name' => 'test'];
         $mask = ['name'];
 
-        [$sql] = Database::buildInsertStatement('engines', $attrs, $mask, true);
+        [$sql] = $this->db->buildInsertStatement('engines', $attrs, $mask, true);
 
         $this->assertStringContainsString('INSERT  IGNORE ', $sql);
     }
@@ -307,7 +307,7 @@ class DatabaseTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('TABLE constant is not defined');
 
-        Database::buildInsertStatement('', ['a' => 1]);
+        $this->db->buildInsertStatement('', ['a' => 1]);
     }
 
     #[Test]
@@ -317,7 +317,7 @@ class DatabaseTest extends AbstractTest
         $this->expectExceptionMessage('INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together');
 
         $mask = [];
-        Database::buildInsertStatement('t', ['a' => 1], $mask, true, false, ['a' => 'override']);
+        $this->db->buildInsertStatement('t', ['a' => 1], $mask, true, false, ['a' => 'override']);
     }
 
     #[Test]
@@ -327,7 +327,7 @@ class DatabaseTest extends AbstractTest
         $mask = ['name', 'type'];
         $onDup = ['name' => 'value'];
 
-        [$sql, $dupBindValues] = Database::buildInsertStatement('engines', $attrs, $mask, false, false, $onDup);
+        [$sql, $dupBindValues] = $this->db->buildInsertStatement('engines', $attrs, $mask, false, false, $onDup);
 
         $this->assertStringContainsString('ON DUPLICATE KEY UPDATE', $sql);
         $this->assertStringContainsString('VALUES( name )', $sql);
@@ -341,7 +341,7 @@ class DatabaseTest extends AbstractTest
         $mask = ['name', 'type'];
         $onDup = ['name' => 'some_literal_string'];
 
-        [$sql, $dupBindValues] = Database::buildInsertStatement('engines', $attrs, $mask, false, false, $onDup);
+        [$sql, $dupBindValues] = $this->db->buildInsertStatement('engines', $attrs, $mask, false, false, $onDup);
 
         $this->assertStringContainsString('ON DUPLICATE KEY UPDATE', $sql);
         $this->assertStringContainsString(':dupUpdate_name', $sql);
@@ -355,7 +355,7 @@ class DatabaseTest extends AbstractTest
         $attrs = ['name' => 'test', 'type' => null];
         $mask = ['name', 'type'];
 
-        [$sql] = Database::buildInsertStatement('engines', $attrs, $mask, false, true);
+        [$sql] = $this->db->buildInsertStatement('engines', $attrs, $mask, false, true);
 
         $this->assertStringContainsString('`name`', $sql);
         $this->assertStringNotContainsString('`type`', $sql);

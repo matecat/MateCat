@@ -147,13 +147,13 @@ class SegmentNoteDaoTest extends AbstractTest
 
     public function testGetAggregatedBySegmentIdInIntervalReturnsGroupedArray(): void
     {
-        $grouped = [
-            100 => [['id_segment' => 100, 'id' => 1, 'note' => 'First note']],
-            101 => [['id_segment' => 101, 'id' => 2, 'note' => 'Second note']],
+        $flatRows = [
+            ['id_segment' => 100, 'id' => 1, 'note' => 'First note'],
+            ['id_segment' => 101, 'id' => 2, 'note' => 'Second note'],
         ];
 
         $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn($grouped);
+        $this->stmtStub->method('fetchAll')->willReturn($flatRows);
 
         $dao = new SegmentNoteDao($this->dbStub);
         $result = $dao->getAggregatedBySegmentIdInInterval(100, 101);
@@ -161,6 +161,7 @@ class SegmentNoteDaoTest extends AbstractTest
         $this->assertIsArray($result);
         $this->assertArrayHasKey(100, $result);
         $this->assertArrayHasKey(101, $result);
+        $this->assertSame('First note', $result[100][0]['note']);
     }
 
     public function testGetAggregatedBySegmentIdInIntervalReturnsEmptyWhenNoNotes(): void
@@ -179,13 +180,13 @@ class SegmentNoteDaoTest extends AbstractTest
 
     public function testGetAllAggregatedBySegmentIdInIntervalReturnsGroupedArrayWithJson(): void
     {
-        $grouped = [
-            200 => [['id_segment' => 200, 'id' => 3, 'note' => null, 'json' => '{"key":"val"}']],
-            201 => [['id_segment' => 201, 'id' => 4, 'note' => 'Plain note', 'json' => null]],
+        $flatRows = [
+            ['id_segment' => 200, 'id' => 3, 'note' => null, 'json' => '{"key":"val"}'],
+            ['id_segment' => 201, 'id' => 4, 'note' => 'Plain note', 'json' => null],
         ];
 
         $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn($grouped);
+        $this->stmtStub->method('fetchAll')->willReturn($flatRows);
 
         $dao = new SegmentNoteDao($this->dbStub);
         $result = $dao->getAllAggregatedBySegmentIdInInterval(200, 201);
@@ -193,6 +194,7 @@ class SegmentNoteDaoTest extends AbstractTest
         $this->assertIsArray($result);
         $this->assertArrayHasKey(200, $result);
         $this->assertArrayHasKey(201, $result);
+        $this->assertSame('{"key":"val"}', $result[200][0]['json']);
     }
 
     public function testGetAllAggregatedBySegmentIdInIntervalReturnsEmptyWhenNoNotes(): void

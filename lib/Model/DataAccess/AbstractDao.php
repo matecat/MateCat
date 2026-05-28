@@ -202,7 +202,7 @@ abstract class AbstractDao
         $mask = array_keys($struct->toArray());
         $mask = array_values(array_diff($mask, static::$auto_increment_field));
 
-        [$sql, $dupBindValues] = static::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_update);
+        [$sql, $dupBindValues] = $this->buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_update);
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
@@ -441,9 +441,9 @@ abstract class AbstractDao
      * @return array{0: string, 1: array<string, scalar|null>} [sql, dupBindValues]
      * @throws Exception
      */
-     public static function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array
+     public function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []): array
     {
-        return Database::buildInsertStatement(static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update);
+        return $this->database->buildInsertStatement(static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update);
     }
 
 

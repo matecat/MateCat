@@ -48,19 +48,15 @@ class EntryCommentDaoTest extends AbstractTest
     #[Test]
     public function fetchCommentsGroupedByIssueIds_returns_grouped_array(): void
     {
-        $expected = [
-            1 => [
-                ['id' => 10, 'id_qa_entry' => 1, 'comment' => 'First comment'],
-                ['id' => 11, 'id_qa_entry' => 1, 'comment' => 'Second comment'],
-            ],
-            2 => [
-                ['id' => 20, 'id_qa_entry' => 2, 'comment' => 'Other comment'],
-            ],
+        $flatRows = [
+            ['id_qa_entry' => 1, 'id' => 10, 'comment' => 'First comment'],
+            ['id_qa_entry' => 1, 'id' => 11, 'comment' => 'Second comment'],
+            ['id_qa_entry' => 2, 'id' => 20, 'comment' => 'Other comment'],
         ];
 
         $stmt = $this->createStub(PDOStatement::class);
         $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetchAll')->willReturn($expected);
+        $stmt->method('fetchAll')->willReturn($flatRows);
 
         $pdo = $this->createStub(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
@@ -71,7 +67,11 @@ class EntryCommentDaoTest extends AbstractTest
         $dao = new EntryCommentDao($db);
         $result = $dao->fetchCommentsGroupedByIssueIds([1, 2]);
 
-        $this->assertSame($expected, $result);
+        $this->assertCount(2, $result);
+        $this->assertCount(2, $result[1]);
+        $this->assertCount(1, $result[2]);
+        $this->assertSame('First comment', $result[1][0]['comment']);
+        $this->assertSame('Other comment', $result[2][0]['comment']);
     }
 
     #[Test]

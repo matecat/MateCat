@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Combining constants with \| is not allowed for parameter \#1 \$mode of method PDOStatement\:\:fetchAll\(\)\.$#'
-			identifier: argument.bitmaskNotAllowed
-			count: 1
-			path: lib/Model/LQA/EntryCommentDao.php
-
-		-
-			message: '#^Combining constants with \| is not allowed for parameter \#1 \$mode of method PDOStatement\:\:fetchAll\(\)\.$#'
-			identifier: argument.bitmaskNotAllowed
-			count: 2
-			path: lib/Model/Segments/SegmentNoteDao.php
-
-		-
 			message: '#^Method Utils\\AsyncTasks\\Workers\\GlossaryWorker\:\:set\(\) has parameter \$payload with no value type specified in unsealed extra keys \(\.\.\.\)\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -6116,10 +6104,10 @@ parameters:
 			path: plugins/airbnb/lib/Features/Airbnb.php
 
 		-
-			message: '#^Method Features\\Airbnb\\Model\\SegmentDelivery\\SegmentDeliveryDao\:\:isAJobDeliverable\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
-			path: plugins/airbnb/lib/Features/Airbnb/Model/SegmentDelivery/SegmentDeliveryDao.php
+			count: 1
+			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
 
 		-
 			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'

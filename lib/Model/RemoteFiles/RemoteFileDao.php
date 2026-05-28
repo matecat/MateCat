@@ -2,12 +2,16 @@
 
 namespace Model\RemoteFiles;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use PDO;
 use PDOException;
 
 class RemoteFileDao extends AbstractDao
 {
+    /**
+     * @throws Exception
+     */
     public function insert(int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0): void
     {
         $data = [];

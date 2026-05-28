@@ -93,7 +93,12 @@ class EntryCommentDao extends AbstractDao
         $stmt = $conn->prepare($sql);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[(int)$row['id_qa_entry']][] = $row;
+        }
+        return $grouped;
     }
 
     /**

@@ -63,7 +63,12 @@ class SegmentNoteDao extends AbstractDao
         );
         $stmt->execute(['start' => $start, 'stop' => $stop]);
 
-        return $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[(int)$row['id_segment']][] = $row;
+        }
+        return $grouped;
     }
 
     /**
@@ -81,7 +86,12 @@ class SegmentNoteDao extends AbstractDao
         );
         $stmt->execute(['start' => $start, 'stop' => $stop]);
 
-        return $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[(int)$row['id_segment']][] = $row;
+        }
+        return $grouped;
     }
 
     /**
