@@ -271,6 +271,10 @@ class MultiCurlHandler
      */
     public function createResource(string $url, ?array $options = [], ?string $tokenHash = null): ?string
     {
+        if ($url === '') {
+            return null;
+        }
+
         if ($tokenHash === null) {
             $tokenHash = md5(uniqid("", true));
         }
