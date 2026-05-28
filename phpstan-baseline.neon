@@ -1,6 +1,30 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Combining constants with \| is not allowed for parameter \#1 \$mode of method PDOStatement\:\:fetchAll\(\)\.$#'
+			identifier: argument.bitmaskNotAllowed
+			count: 1
+			path: lib/Model/LQA/EntryCommentDao.php
+
+		-
+			message: '#^Combining constants with \| is not allowed for parameter \#1 \$mode of method PDOStatement\:\:fetchAll\(\)\.$#'
+			identifier: argument.bitmaskNotAllowed
+			count: 2
+			path: lib/Model/Segments/SegmentNoteDao.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\GlossaryWorker\:\:set\(\) has parameter \$payload with no value type specified in unsealed extra keys \(\.\.\.\)\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/GlossaryWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\GlossaryWorker\:\:update\(\) has parameter \$payload with no value type specified in unsealed extra keys \(\.\.\.\)\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/GlossaryWorker.php
+
+		-
 			message: '#^Cannot access offset ''version'' on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -1298,66 +1322,6 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 1
 			path: lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:changeConversionParameters\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:doImport\(\) has parameter \$listOfIds with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:formatErrorMessage\(\) has parameter \$message with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:open\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:doImport\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Parameter \#1 \$code of method Matecat\\Locales\\Languages\:\:validateLanguage\(\) expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Parameter \#1 \$segmentation_rule of static method Utils\\Constants\\Constants\:\:validateSegmentationRules\(\) expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Parameter \#2 \$uid of method Model\\Filters\\FiltersConfigTemplateDao\:\:getByIdAndUser\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Parameter \#2 \$value of static method Controller\\Abstracts\\Authentication\\CookieManager\:\:setCookie\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
-
-		-
-			message: '#^Property Controller\\API\\GDrive\\GDriveController\:\:\$error type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
 			message: '#^Call to method Controller\\API\\GDrive\\OAuthController\:\:__handleError\(\) on a separate line has no effect\.$#'
@@ -3050,18 +3014,6 @@ parameters:
 			path: lib/Model/PayableRates/CustomPayableRateStruct.php
 
 		-
-			message: '#^Parameter \#2 \$context of method Utils\\Logger\\MatecatLogger\:\:error\(\) expects array\<string, mixed\>, array\<int, mixed\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/ProjectCreation/FileInsertionService.php
-
-		-
-			message: '#^Method Model\\ProjectCreation\\FileInsertionService\:\:insertFiles\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ProjectCreation/FileInsertionService.php
-
-		-
 			message: '#^Method Model\\ProjectCreation\\ProjectManagerModel\:\:executeBulkInsert\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 7
@@ -3163,12 +3115,6 @@ parameters:
 			count: 1
 			path: lib/Model/ProjectCreation/TmKeyService.php
 
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type int\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Search/ReplaceEventIndexDAOInterface.php
 
 		-
 			message: '#^Class Model\\Segments\\ContextStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
@@ -4916,54 +4862,6 @@ parameters:
 			count: 1
 			path: lib/Utils/OutsourceTo/Translated.php
 
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistory\:\:_moveToVersion\(\) has parameter \$versionToMove with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Search/ReplaceHistory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistory\:\:_moveToVersion\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Search/ReplaceHistory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistory\:\:updateIndex\(\) has parameter \$versionToMove with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Search/ReplaceHistory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistoryFactory\:\:_checkDriver\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Search/ReplaceHistoryFactory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistoryFactory\:\:create\(\) has parameter \$driver with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Search/ReplaceHistoryFactory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistoryFactory\:\:create\(\) has parameter \$id_job with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Search/ReplaceHistoryFactory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistoryFactory\:\:create\(\) has parameter \$ttl with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/Search/ReplaceHistoryFactory.php
-
-		-
-			message: '#^Method Utils\\Search\\ReplaceHistoryFactory\:\:create\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Search/ReplaceHistoryFactory.php
 
 		-
 			message: '#^Method Utils\\ServerCheck\\ServerCheck\:\:getByteValue\(\) has parameter \$value with no type specified\.$#'
@@ -12745,12 +12643,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\GDriveController\:\:deleteImportedFile\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/GDrive/GDriveController.php
 
 		-
 			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleCode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'

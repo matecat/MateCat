@@ -4,15 +4,26 @@ namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use PDO;
 use PDOException;
 
-class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface
+class MySQLReplaceEventDao extends AbstractDao implements ReplaceEventDAOInterface
 {
 
     const string STRUCT_TYPE = ReplaceEventStruct::class;
     const string TABLE = 'replace_events';
+
+    private ?\PDO $pdo;
+    private ?SegmentTranslationDao $segmentTranslationDao;
+
+    public function __construct(?IDatabase $con = null, ?\PDO $pdo = null, ?SegmentTranslationDao $segmentTranslationDao = null)
+    {
+        parent::__construct($con);
+        $this->pdo = $pdo;
+        $this->segmentTranslationDao = $segmentTranslationDao;
+    }
 
     /**
      * @param int $id_job
@@ -23,7 +34,7 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      */
     public function getEvents(int $id_job, int $version): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->pdo ?? Database::obtain()->getConnection();
         $query = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job  AND replace_version = :replace_version ORDER BY created_at DESC";
 
         $stmt = $conn->prepare($query);
@@ -43,12 +54,13 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      */
     public function save(ReplaceEventStruct $eventStruct): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->pdo ?? Database::obtain()->getConnection();
 
         // if not directly passed
         // try to assign the current version of the segment if it exists
         if (null === $eventStruct->segment_version) {
-            $segment = (new SegmentTranslationDao())->getByJobId($eventStruct->id_job)[0];
+            $dao = $this->segmentTranslationDao ?? new SegmentTranslationDao();
+            $segment = $dao->getByJobId($eventStruct->id_job)[0];
             $eventStruct->segment_version = $segment->version_number;
         }
 

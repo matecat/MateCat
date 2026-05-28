@@ -4,13 +4,22 @@ namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDOException;
 
-class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface
+class MySQLReplaceEventIndexDao extends AbstractDao implements ReplaceEventIndexDaoInterface
 {
 
     const string STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
     const string TABLE = 'replace_events_current_version';
+
+    private ?\PDO $pdo;
+
+    public function __construct(?IDatabase $con = null, ?\PDO $pdo = null)
+    {
+        parent::__construct($con);
+        $this->pdo = $pdo;
+    }
 
     /**
      * @param int $idJob
@@ -20,7 +29,7 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      */
     public function getActualIndex(int $idJob): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->pdo ?? Database::obtain()->getConnection();
         $query = "SELECT version as v FROM " . self::TABLE . " WHERE id_job=:id_job";
         $stmt = $conn->prepare($query);
         $stmt->execute([
@@ -39,7 +48,7 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      */
     public function save(int $id_job, int $version): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->pdo ?? Database::obtain()->getConnection();
 
         if (0 !== $this->getActualIndex($id_job)) {
             $query = "UPDATE " . self::TABLE . " SET version = :version WHERE id_job=:id_job";

@@ -2,7 +2,7 @@
 
 namespace Model\Search;
 
-interface ReplaceEventIndexDAOInterface
+interface ReplaceEventIndexDaoInterface
 {
 
     /**
@@ -16,7 +16,7 @@ interface ReplaceEventIndexDAOInterface
      * @param int $id_job
      * @param int $version
      *
-     * @return mixed
+     * @return int
      */
     public function save(int $id_job, int $version): int;
 

@@ -11,7 +11,7 @@ use Predis\ClientInterface;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
 
-class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface
+class RedisReplaceEventDao extends AbstractDao implements ReplaceEventDAOInterface
 {
 
     const string TABLE = 'replace_events';
@@ -26,19 +26,18 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      */
     private int $ttl = 10800; // 3 hours
 
+    private ?SegmentTranslationDao $segmentTranslationDao;
+
     /**
-     * RedisReplaceEventDAO constructor.
-     *
-     * @param IDatabase|null $con
-     *
      * @throws Exception
      * @throws ReflectionException
      */
-    public function __construct(?IDatabase $con = null)
+    public function __construct(?IDatabase $con = null, ?ClientInterface $redis = null, ?SegmentTranslationDao $segmentTranslationDao = null)
     {
         parent::__construct($con);
 
-        $this->redis = (new RedisHandler())->getConnection();
+        $this->redis = $redis ?? (new RedisHandler())->getConnection();
+        $this->segmentTranslationDao = $segmentTranslationDao;
     }
 
     /**
@@ -69,7 +68,8 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
         // if not directly passed
         // try to assign the current version of the segment if it exists
         if (null === $eventStruct->segment_version) {
-            $segment = (new SegmentTranslationDao())->getByJobId($eventStruct->id_job)[0];
+            $dao = $this->segmentTranslationDao ?? new SegmentTranslationDao();
+            $segment = $dao->getByJobId($eventStruct->id_job)[0];
             $eventStruct->segment_version = $segment->version_number;
         }
 

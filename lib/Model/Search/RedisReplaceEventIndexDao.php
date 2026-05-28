@@ -5,38 +5,28 @@ namespace Model\Search;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
-use Predis\Client;
+use Predis\ClientInterface;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
 
-class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface
+class RedisReplaceEventIndexDao extends AbstractDao implements ReplaceEventIndexDaoInterface
 {
 
     const string TABLE = 'replace_events_current_version';
 
-    /**
-     * @var Client
-     */
-    private Client $redis;
+    private ClientInterface $redis;
 
-    /**
-     * @var int
-     */
     private int $ttl = 10800; // 3 hours
 
     /**
-     * RedisReplaceEventDAO constructor.
-     *
-     * @param IDatabase|null $con
-     *
      * @throws Exception
      * @throws ReflectionException
      */
-    public function __construct(?IDatabase $con = null)
+    public function __construct(?IDatabase $con = null, ?ClientInterface $redis = null)
     {
         parent::__construct($con);
 
-        $this->redis = (new RedisHandler())->getConnection();
+        $this->redis = $redis ?? (new RedisHandler())->getConnection();
     }
 
     /**

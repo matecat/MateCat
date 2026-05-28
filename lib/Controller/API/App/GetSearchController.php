@@ -240,8 +240,7 @@ class GetSearchController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param int $job_id
-     * @return ReplaceHistory
+     * @throws \Exception
      */
     private function getReplaceHistory(int $job_id): ReplaceHistory
     {
@@ -579,7 +578,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $event->status = $tRow['status'];
 
         $srh->save($event);
-        $srh->updateIndex($replace_version);
+        $srh->updateIndex((int) $replace_version);
 
         $this->logger->debug('Replacement event for segment #' . $tRow['id_segment'] . ' correctly saved.');
     }
