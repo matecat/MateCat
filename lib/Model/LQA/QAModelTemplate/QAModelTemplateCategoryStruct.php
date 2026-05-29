@@ -21,7 +21,7 @@ class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements I
     public array $severities = [];
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

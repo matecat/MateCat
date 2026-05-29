@@ -14,7 +14,7 @@ class QAModelTemplatePassfailThresholdStruct extends AbstractDaoSilentStruct imp
     public ?float $passfail_value = 0.0;
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

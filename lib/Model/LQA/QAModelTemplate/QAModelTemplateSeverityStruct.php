@@ -16,7 +16,7 @@ class QAModelTemplateSeverityStruct extends AbstractDaoSilentStruct implements I
     public ?int $sort = null;
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

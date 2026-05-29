@@ -24,6 +24,9 @@ class CategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct
         return json_decode($this->severities, true);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArrayWithJsonDecoded(): array
     {
         $result = $this->toArray();

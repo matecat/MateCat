@@ -2,11 +2,11 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-29 (last updated)  
-**Commits (refactor + fix + security + test):** 363+
+**Commits (refactor + fix + security + test):** 364+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,984 | −5,382 (−73.1%) |
+| **PHPStan baseline entries** | 7,366 | 1,972 | −5,394 (−73.2%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,251 | +4,003 (+178.1%) |
 | **PHPUnit assertions** | ~19,449 | 16,870 | — |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 501 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 510 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -293,16 +293,26 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/JobSplitMerge/JobSplitMergeManager.php` | Phase 5C |
 | `lib/Model/JobSplitMerge/JobSplitMergeService.php` | Phase 31 |
 | `lib/Model/LQA/CategoryDao.php` | Phase 0 |
+| `lib/Model/LQA/CategoryStruct.php` | Phase 47 |
 | `lib/Model/LQA/ChunkReviewDao.php` | Phase 5C |
+| `lib/Model/LQA/ChunkReviewStruct.php` | Phase 47 |
 | `lib/Model/LQA/EntryCommentDao.php` | Phase 16 |
+| `lib/Model/LQA/EntryCommentStruct.php` | Phase 47 |
 | `lib/Model/LQA/EntryDao.php` | Phase 25 |
 | `lib/Model/LQA/EntryStruct.php` | Phase N+ |
-| `lib/Model/Pagination/Pager.php` | Phase N+ |
-| `lib/Model/Pagination/PaginationParameters.php` | Phase N+ |
 | `lib/Model/LQA/EntryValidator.php` | Phase 39 |
+| `lib/Model/LQA/EntryWithCategoryStruct.php` | Phase 47 |
 | `lib/Model/LQA/ModelDao.php` | Phase 0 |
 | `lib/Model/LQA/ModelStruct.php` | Phase 0 |
+| `lib/Model/LQA/QAModelInterface.php` | Phase 47 |
+| `lib/Model/LQA/QAModelTemplate/QAModelTemplateCategoryStruct.php` | Phase 47 |
 | `lib/Model/LQA/QAModelTemplate/QAModelTemplateDao.php` | Phase 25 |
+| `lib/Model/LQA/QAModelTemplate/QAModelTemplatePassfailStruct.php` | Phase 47 |
+| `lib/Model/LQA/QAModelTemplate/QAModelTemplatePassfailThresholdStruct.php` | Phase 47 |
+| `lib/Model/LQA/QAModelTemplate/QAModelTemplateSeverityStruct.php` | Phase 47 |
+| `lib/Model/LQA/QAModelTemplate/QAModelTemplateStruct.php` | Phase 47 |
+| `lib/Model/Pagination/Pager.php` | Phase N+ |
+| `lib/Model/Pagination/PaginationParameters.php` | Phase N+ |
 
 #### Model/OwnerFeatures
 | File | Cleaned In |
@@ -2376,10 +2386,42 @@ No cascade errors. No tests needed — pure data classes covered by caller tests
 
 ---
 
+### Phase 47: LQA Directory — Full Cleanup — ✅ DONE (−12 baseline entries, 0 tests needed)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Model/LQA/` — all 19 files PHPStan-clean. 10 already on ledger, 9 fixed/added. Pure struct/interface files with no complex logic.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `CategoryStruct.php` | 1→0 | `@return array<string, mixed>` |
+| `ChunkReviewStruct.php` | 1→0 | Added `: ?array` return type on `getUndoData()` |
+| `EntryCommentStruct.php` | 1→0 | Removed unused `$ttl` from closure |
+| `QAModelInterface.php` | 1→0 | `@return array<string, mixed>` |
+| `QAModelTemplateCategoryStruct.php` | 1→0 | `@return array<string, mixed>` on `jsonSerialize` |
+| `QAModelTemplatePassfailStruct.php` | 1→0 | Same |
+| `QAModelTemplatePassfailThresholdStruct.php` | 1→0 | Same |
+| `QAModelTemplateSeverityStruct.php` | 1→0 | Same |
+| `QAModelTemplateStruct.php` | 4→0 | Native `string` param on `hydrateFromJSON`, `isset` → `!== 0` on non-nullable `$id`, null guard on `$passfail` property, `@throws \RuntimeException` |
+
+No cascade errors. No tests needed — pure data structs covered by existing tests.
+
+#### Baseline
+
+- **Removed:** 12 entries
+- **Net:** 1,984 → **1,972** (−12)
+- **Files added to ledger:** +10 (9 fixed + 1 already clean EntryWithCategoryStruct)
+- **Ledger total:** 504 → **510** (note: adjusted for Pagination entries already counted)
+- **Tests:** 6,254 (unchanged)
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (1,984 entries)
+2. Continue PHPStan baseline reduction from remaining targets (1,972 entries)
 
 ---
 
