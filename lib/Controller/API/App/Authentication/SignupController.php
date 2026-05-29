@@ -136,8 +136,9 @@ class SignupController extends AbstractStatefulKleinController
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
             new AuthenticationHelper($_SESSION);
 
-            if (InvitedUser::hasPendingInvitations()) {
-                InvitedUser::completeTeamSignUp($user, $_SESSION['invited_to_team']);
+            $invitedUser = new InvitedUser();
+            if ($invitedUser->hasPendingInvitations()) {
+                $invitedUser->completeTeamSignUp($user, $_SESSION['invited_to_team']);
             }
 
             $project = new RedeemableProject($user, $_SESSION);

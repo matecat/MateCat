@@ -318,7 +318,7 @@ class TeamModel
             'members' => $this->member_emails
         ]);
 
-        $this->new_memberships = $this->all_memberships = $team->getMembers() ?? [];
+        $this->new_memberships = $this->all_memberships = $team->getMembers();
 
         Database::obtain()->commit();
 

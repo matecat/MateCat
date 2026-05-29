@@ -2,14 +2,14 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-29 (last updated)  
-**Commits (refactor + fix + security + test):** 360+
+**Commits (refactor + fix + security + test):** 361+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,032 | −5,334 (−72.4%) |
+| **PHPStan baseline entries** | 7,366 | 2,025 | −5,341 (−72.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,224 | +3,976 (+176.9%) |
-| **PHPUnit assertions** | ~19,449 | 16,833 | — |
+| **PHPUnit tests** | ~2,248 | 6,244 | +3,996 (+177.7%) |
+| **PHPUnit assertions** | ~19,449 | 16,858 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 483 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 486 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -390,10 +390,13 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Segments/SegmentNoteDao.php` | Phase 25 |
 | `lib/Model/Segments/SegmentOriginalDataDao.php` | Phase 0 |
 | `lib/Model/Segments/SegmentUIStruct.php` | Phase 0 |
+| `lib/Model/Teams/InvitedUser.php` | Phase 44 |
 | `lib/Model/Teams/MembershipDao.php` | Phase 15 |
 | `lib/Model/Teams/MembershipStruct.php` | Phase 0 |
+| `lib/Model/Teams/PendingInvitations.php` | Phase 44 |
 | `lib/Model/Teams/TeamDao.php` | Phase 5C |
 | `lib/Model/Teams/TeamModel.php` | Phase 6A |
+| `lib/Model/Teams/TeamStruct.php` | Phase 44 |
 | `lib/Model/TmKeyManagement/MemoryKeyDao.php` | Phase 6C |
 | `lib/Model/TmKeyManagement/MemoryKeyStruct.php` | Phase 6C |
 | `lib/Model/TmKeyManagement/UserKeysModel.php` | Phase 6C |
@@ -2224,10 +2227,58 @@ Key changes:
 
 ---
 
+### Phase 44: Teams Directory — Full Cleanup + DI Refactor + Tests — ✅ DONE (−7 net baseline entries, +20 tests)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Model/Teams/` — all 7 files PHPStan-clean. 4 files already on ledger, 3 files fixed and added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `InvitedUser.php` | 6→0 | `@var array<string, mixed>` on `$jwt`, `@throws TypeError/UnexpectedValueException/Exception`, typed `$invitation` param, null guard on `fetchById` result, **DI refactor:** static→instance methods, constructor-injected `TeamDao`+`RedisHandler`, caller updated in SignupController |
+| `PendingInvitations.php` | 3→0 | `@var` typed property, native `int` on `hasPendingInvitation`, `@return array<string>`, `Client` → `ClientInterface`, `sadd` array param fix |
+| `TeamStruct.php` | 1→0 | `getMembers()` return `?array` → `array` (property always initialized) |
+
+#### Cascade Fixes
+
+- **On-ledger:** TeamModel `getMembers() ?? []` → `getMembers()`, CattoolController same
+- **Off-ledger → baseline:** TeamsInvitationsController (+1), TeamMembersController (+5), Team.php (+1), updated existing Membership `|null` entry
+
+#### New Test Files (3 files, 11 tests)
+
+| File | Tests | Notes |
+|------|-------|-------|
+| `TeamStructTest.php` | 5 | setMembers, getMembers, hasUser (3 paths) |
+| `PendingInvitationsTest.php` | 4 | set, remove, hasPendingInvitation (2 paths). Anonymous ClientInterface impl |
+| `InvitedUserTest.php` | 11 | Constructor (valid, empty, tampered, malformed), prepareSignUpRedirect, hasPendingInvitations (4 paths), completeTeamSignUp (success + not found) |
+
+#### Coverage
+
+| File | Methods | Lines | Notes |
+|------|---------|-------|-------|
+| TeamStruct | 100% (3/3) | 100% (7/7) | |
+| PendingInvitations | 100% (4/4) | 100% (6/6) | |
+| InvitedUser | 100% (4/4) | 100% (28/28) | DI refactor: static→instance, RedisHandler+TeamDao injected |
+
+#### Baseline
+
+- **Removed:** 10 entries (6 InvitedUser + 3 PendingInvitations + 1 TeamStruct)
+- **Added:** 7 cascade (1 TeamsInvitationsController + 5 TeamMembersController + 1 Team.php)
+- **Removed:** 1 stale TeamMembersController entry (Membership `|null` — getMembers no longer nullable)
+- **Updated:** 1 UserKeysController regex
+- **Net:** 2,032 → **2,025** (−7)
+- **Files added to ledger:** +3 (InvitedUser, PendingInvitations, TeamStruct)
+- **Ledger total:** 483 → **486**
+- **Tests:** 6,244 tests, 16,858 assertions, 0 errors
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,032 entries)
+2. Continue PHPStan baseline reduction from remaining targets (2,025 entries)
 
 ---
 

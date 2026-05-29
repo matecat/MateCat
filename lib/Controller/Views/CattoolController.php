@@ -374,7 +374,7 @@ class CattoolController extends BaseKleinViewController
             $teamModel = new TeamModel($team);
             $teamModel->updateMembersProjectsCount();
             $membersIdList = [];
-            $members = $team->getMembers() ?? [];
+            $members = $team->getMembers();
             if ($team->type == Teams::PERSONAL) {
                 $firstMember = $members[0] ?? null;
                 if ($firstMember !== null) {
