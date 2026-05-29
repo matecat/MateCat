@@ -33,9 +33,20 @@ class ProjectCompletionStatusModel
     /** @var array<string, mixed> */
     protected array $cachedStatus = [];
 
-    public function __construct(ProjectStruct $project)
-    {
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+    private FeatureSet $featureSet;
+
+    /**
+     * @throws Exception
+     */
+    public function __construct(
+        ProjectStruct $project,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
+        ?FeatureSet $featureSet = null,
+    ) {
         $this->project = $project;
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        $this->featureSet = $featureSet ?? new FeatureSet();
     }
 
     /**
@@ -81,13 +92,12 @@ class ProjectCompletionStatusModel
             $translate = $this->dataForChunkStatus($chunk, false);
             $revise = $this->dataForChunkStatus($chunk, true);
 
-            $featureSet = new FeatureSet();
-            $featureSet->loadForProject($this->project);
+            $this->featureSet->loadForProject($this->project);
             $filterJobPasswordToReviewPasswordEvent = new FilterJobPasswordToReviewPasswordEvent(
                 $chunk->password ?? throw new \RuntimeException('Chunk password is required'),
                 $chunk->id ?? throw new \RuntimeException('Chunk id is required')
             );
-            $featureSet->dispatch($filterJobPasswordToReviewPasswordEvent);
+            $this->featureSet->dispatch($filterJobPasswordToReviewPasswordEvent);
             $revise['password'] = $filterJobPasswordToReviewPasswordEvent->getPassword();
 
             $response['translate'][] = $translate;
@@ -110,7 +120,7 @@ class ProjectCompletionStatusModel
      */
     private function dataForChunkStatus(JobStruct $chunk, bool $is_review): array
     {
-        $record = (new ChunkCompletionEventDao())->lastCompletionRecord($chunk, [
+        $record = $this->chunkCompletionEventDao->lastCompletionRecord($chunk, [
             'is_review' => $is_review
         ]);
 
