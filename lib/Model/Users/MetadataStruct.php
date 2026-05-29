@@ -12,11 +12,11 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     public string $uid;
     public string $key;
 
-    /** @var string|int|object|array */
+    /** @var string|int|object|array<string, mixed> */
     public string|int|object|array $value;
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

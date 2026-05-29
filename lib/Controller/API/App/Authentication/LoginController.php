@@ -90,7 +90,7 @@ class LoginController extends AbstractStatefulKleinController
         $dao = new UserDao();
         $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
 
-        if ($user && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
+        if ($user && is_string($params['password']) && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
             $user->clearAuthToken();
 
             $dao->updateUser($user);

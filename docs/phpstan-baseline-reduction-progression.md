@@ -2,14 +2,14 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-29 (last updated)  
-**Commits (refactor + fix + security + test):** 359+
+**Commits (refactor + fix + security + test):** 360+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,049 | −5,317 (−72.2%) |
+| **PHPStan baseline entries** | 7,366 | 2,032 | −5,334 (−72.4%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,175 | +3,927 (+174.7%) |
-| **PHPUnit assertions** | ~19,449 | 16,746 | — |
+| **PHPUnit tests** | ~2,248 | 6,224 | +3,976 (+176.9%) |
+| **PHPUnit assertions** | ~19,449 | 16,833 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 478 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 483 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -405,10 +405,15 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
 | `lib/Model/Translators/TranslatorsModel.php` | Phase 6D |
 | `lib/Model/Translators/TranslatorsProfilesDao.php` | Phase 25 |
+| `lib/Model/Users/Authentication/ChangePasswordModel.php` | Phase 43 |
 | `lib/Model/Users/Authentication/OAuthSignInModel.php` | Phase 37 |
+| `lib/Model/Users/Authentication/PasswordResetModel.php` | Phase 43 |
 | `lib/Model/Users/Authentication/SignupModel.php` | Phase 26 |
+| `lib/Model/Users/ClientUserFacade.php` | Phase 43 |
 | `lib/Model/Users/MetadataDao.php` | Phase 25 |
+| `lib/Model/Users/MetadataStruct.php` | Phase 43 |
 | `lib/Model/Users/UserDao.php` | Phase 5C |
+| `lib/Model/Users/UserStruct.php` | Phase 43 |
 | `lib/Model/FeaturesBase/BasicFeatureStruct.php` | Phase 27 |
 | `lib/Model/FeaturesBase/FeatureCodes.php` | Phase 27 |
 | `lib/Model/FeaturesBase/FeatureSet.php` | Phase 27 |
@@ -2160,10 +2165,69 @@ Key changes:
 
 ---
 
+### Phase 43: Users Directory — Full Cleanup + DI + Tests — ✅ DONE (−17 net baseline entries, +49 tests)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Model/Users/` — all 11 files PHPStan-clean. 6 files already on ledger, 5 files fixed and added. DI refactor on ChangePasswordModel, PasswordResetModel, and UserStruct for testability.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `ChangePasswordModel.php` | 6→0 | Native param types, null guards on salt/pass, `@throws TypeError`, DI for UserDao |
+| `PasswordResetModel.php` | 6→0 | `@var`/`@param` array types, `@throws TypeError`, strtotime null guard, salt null guard, DI for UserDao |
+| `ClientUserFacade.php` | 2→0 | `foreach` on non-iterable → `get_object_vars()`, `json_encode` false guard |
+| `MetadataStruct.php` | 2→0 | `@var array<string, mixed>` on `$value`, `@return array<string, mixed>` on `jsonSerialize` |
+| `UserStruct.php` | 6→0 | Native param types on `belongsToTeam`/`passwordMatch`, null guards on salt/pass, `@throws TypeError`/`RuntimeException`, `@return array<string, mixed>`, DI on 4 methods |
+
+#### Cascade (algorithm step 6 — off-ledger → added to baseline)
+
+- `ForgotPasswordController`: +3 entries (`@throws TypeError` cascade)
+- `App/Authentication/UserController`: +3 entries (argument.type + `@throws TypeError`)
+- `UserKeysController`: regex updated for `MetadataStruct::$value` type change
+
+#### On-Ledger Cascade Fixed
+
+- `LoginController`: `is_string($params['password'])` guard added (passwordMatch now expects `string`)
+
+#### New Test Files (7 files, 49 tests)
+
+| File | Tests | Notes |
+|------|-------|-------|
+| `ChangePasswordModelTest.php` | 5 | Success, wrong password, same password, email_confirmed, salt null |
+| `PasswordResetModelTest.php` | 11 | Constructor, validateUser (3 paths), resetPassword (3 paths), flushWantedUrl (2), getUser |
+| `ClientUserFacadeTest.php` | 2 | Constructor copies properties, toString returns JSON |
+| `MetadataStructTest.php` | 8 | getValue (int, float, string, array, serialised, short string), jsonSerialize |
+| `UserStructTest.php` | 14 | isLogged, fullName, shortName, getters, clearAuth, initAuth, passwordMatch null guards, everSignedIn, getDecrypted null |
+| `UserStructDITest.php` | 9 | getPersonalTeam, getUserTeams, belongsToTeam (3 paths), getMetadataAsKeyValue (3 paths) |
+
+#### Coverage
+
+| File | Methods | Lines |
+|------|---------|-------|
+| ChangePasswordModel | 100% (2/2) | 100% (18/18) |
+| PasswordResetModel | 100% (6/6) | 100% (40/40) |
+| ClientUserFacade | 100% (2/2) | 100% (4/4) |
+| MetadataStruct | 100% (3/3) | 100% (23/23) |
+| UserStruct | 89.47% (17/19) | 83.61% (51/61) |
+
+#### Baseline
+
+- **Removed:** 22 entries (6 ChangePasswordModel + 6 PasswordResetModel + 2 ClientUserFacade + 2 MetadataStruct + 6 UserStruct)
+- **Added:** 6 entries (3 ForgotPasswordController + 3 App/Authentication/UserController)
+- **Updated:** 1 entry (UserKeysController regex for MetadataStruct type change)
+- **Net:** 2,049 → **2,032** (−17)
+- **Files added to ledger:** +5 (ChangePasswordModel, PasswordResetModel, ClientUserFacade, MetadataStruct, UserStruct)
+- **Ledger total:** 478 → **483**
+- **Tests:** 6,224 tests, 16,833 assertions, 0 errors
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,049 entries)
+2. Continue PHPStan baseline reduction from remaining targets (2,032 entries)
 
 ---
 
