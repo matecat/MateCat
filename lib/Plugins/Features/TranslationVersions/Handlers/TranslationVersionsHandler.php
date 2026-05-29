@@ -10,7 +10,6 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
-use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
@@ -47,10 +46,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      */
     private int $id_segment;
 
-    /**
-     * @var int
-     */
-    private int $uid;
     private ProjectStruct $projectStruct;
 
     /**
@@ -58,15 +53,15 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      *
      * @param JobStruct $chunkStruct
      * @param int|null $id_segment
-     * @param UserStruct $userStruct
      * @param ProjectStruct $projectStruct
+     *
+     * @throws RuntimeException
      */
-    public function __construct(JobStruct $chunkStruct, ?int $id_segment, UserStruct $userStruct, ProjectStruct $projectStruct)
+    public function __construct(JobStruct $chunkStruct, ?int $id_segment, ProjectStruct $projectStruct)
     {
         $this->chunkStruct = $chunkStruct;
-        $this->id_job = $chunkStruct->id;
-        $this->id_segment = $id_segment;
-        $this->uid = $userStruct->uid;
+        $this->id_job = $chunkStruct->id ?? throw new RuntimeException('Job id is required');
+        $this->id_segment = $id_segment ?? throw new RuntimeException('Segment id is required');
         $this->dao = new TranslationVersionDao();
         $this->projectStruct = $projectStruct;
     }
@@ -80,6 +75,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      * @param SegmentTranslationStruct $old_translation
      *
      * @return bool
+     * @throws \TypeError
+     * @throws \PDOException
      */
     public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
     {
@@ -114,6 +111,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      * @param SegmentTranslationStruct $old_translation
      *
      * @return bool
+     * @throws \TypeError
+     * @throws \PDOException
      */
     private function saveVersion(
         SegmentTranslationStruct $new_translation,
@@ -166,6 +165,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function storeTranslationEvent(array $params): void
     {
