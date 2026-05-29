@@ -119,6 +119,7 @@ class QualityReportSegmentModel
     /**
      * @throws Exception
      * @throws DivisionByZeroError
+     * @throws \TypeError
      */
     protected function _commonSegmentAssignments(QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, bool $isForUI = false): void
     {

@@ -24,7 +24,10 @@ class SegmentOriginalDataStruct extends AbstractDaoSilentStruct implements IDaoS
         return $this;
     }
 
-    /** @return array<string, string> */
+    /**
+     * @return array<string, string>
+     * @throws \TypeError
+     */
     public function getMap(): array
     {
         if (empty($this->decoded_map)) {

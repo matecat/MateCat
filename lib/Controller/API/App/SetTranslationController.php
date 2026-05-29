@@ -191,6 +191,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @return array{segment: string, translation: string, check: QA, err_json: string}
      * @throws Exception
      * @throws PDOException
+     * @throws \TypeError
      */
     private function prepareTranslation(): array
     {
@@ -779,6 +780,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     protected function setSubFilteringBehavior(): void
     {

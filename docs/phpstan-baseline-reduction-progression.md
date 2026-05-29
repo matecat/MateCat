@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,972 | −5,394 (−73.2%) |
+| **PHPStan baseline entries** | 7,366 | 1,966 | −5,400 (−73.3%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,251 | +4,003 (+178.1%) |
 | **PHPUnit assertions** | ~19,449 | 16,870 | — |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 510 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 515 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -402,12 +402,17 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Search/ReplaceHistoryFactory.php` | Phase 40 |
 | `lib/Model/Segments/ContextGroupDao.php` | Phase 25 |
 | `lib/Model/Segments/ContextResType.php` | Phase 31 |
+| `lib/Model/Segments/ContextStruct.php` | Phase 48 |
 | `lib/Model/Segments/ContextUrlResolver.php` | Phase 31 |
 | `lib/Model/Segments/SegmentDao.php` | Phase 25 |
 | `lib/Model/Segments/SegmentDisabledService.php` | Phase 5C |
+| `lib/Model/Segments/SegmentMetadataCollection.php` | Phase 48 |
 | `lib/Model/Segments/SegmentMetadataDao.php` | Phase 5C |
+| `lib/Model/Segments/SegmentMetadataMarshaller.php` | Phase 48 |
 | `lib/Model/Segments/SegmentNoteDao.php` | Phase 25 |
 | `lib/Model/Segments/SegmentOriginalDataDao.php` | Phase 0 |
+| `lib/Model/Segments/SegmentOriginalDataStruct.php` | Phase 48 |
+| `lib/Model/Segments/SegmentStruct.php` | Phase 48 |
 | `lib/Model/Segments/SegmentUIStruct.php` | Phase 0 |
 | `lib/Model/Teams/InvitedUser.php` | Phase 44 |
 | `lib/Model/Teams/MembershipDao.php` | Phase 15 |
@@ -2420,8 +2425,50 @@ No cascade errors. No tests needed — pure data structs covered by existing tes
 
 ## Next Action
 
+### Phase 48: Segments Directory — Full Cleanup — ✅ DONE (−6 net baseline entries, 0 tests needed)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Model/Segments/` — all 17 files PHPStan-clean. 12 already on ledger, 5 fixed and added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `ContextStruct.php` | 3→0 | `@implements ArrayAccess<string, mixed>`, native `bool` param, `is_string()` guard before `json_decode` |
+| `SegmentMetadataCollection.php` | 1→0 | `@return array<int, array<string, mixed>>` on `jsonSerialize` |
+| `SegmentMetadataMarshaller.php` | 1→0 | `self::TRANSLATION_DISABLED` → `self::TRANSLATION_DISABLED->value` (enum case vs string match) |
+| `SegmentOriginalDataStruct.php` | 1→0 | `@throws \TypeError` on `getMap()` |
+| `SegmentStruct.php` | 1→0 | `@implements ArrayAccess<string, mixed>` |
+
+#### Cascade fixes (on-ledger)
+
+- `SegmentOriginalDataDao::getSegmentDataRefMap()`: `@throws \TypeError`
+- `GetWarningController::local()`: `@throws \TypeError`
+- `SetTranslationController::prepareTranslation()` + `setSubFilteringBehavior()`: `@throws \TypeError`
+- `SegmentStorageService::prepareAndPersistSegment()`: `@throws \TypeError`
+- `QualityReportSegmentStruct::getLocalWarning()`: `@throws \TypeError`
+- `QualityReportSegmentModel::_commonSegmentAssignments()`: `@throws \TypeError`
+
+#### Off-ledger cascade → baseline
+
+- `GetTagProjectionController::call()`: +1 entry (TypeError)
+
+#### Baseline
+
+- **Removed:** 7 entries
+- **Added:** 1 cascade (GetTagProjectionController)
+- **Net:** 1,972 → **1,966** (−6)
+- **Files added to ledger:** +5
+- **Ledger total:** 510 → **515**
+- **Tests:** 6,254 (unchanged)
+
+---
+
+## Next Action
+
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (1,972 entries)
+2. Continue PHPStan baseline reduction from remaining targets (1,966 entries)
 
 ---
 

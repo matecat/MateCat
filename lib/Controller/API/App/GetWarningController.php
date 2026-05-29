@@ -103,6 +103,7 @@ class GetWarningController extends KleinController
      * @return void
      * @throws Exception
      * @throws DomainException
+     * @throws \TypeError
      */
     public function local(): void
     {

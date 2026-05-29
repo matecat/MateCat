@@ -176,6 +176,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     /**
      * @return array<string, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
     public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array
     {

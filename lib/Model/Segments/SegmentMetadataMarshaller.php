@@ -33,7 +33,7 @@ enum SegmentMetadataMarshaller: string
     public static function unMarshall(SegmentMetadataStruct $struct): mixed
     {
         return match ($struct->meta_key) {
-            self::TRANSLATION_DISABLED => (bool)$struct->meta_value,
+            self::TRANSLATION_DISABLED->value => (bool)$struct->meta_value,
             self::SIZE_RESTRICTION->value => (int)$struct->meta_value,
             default => $struct->meta_value,
         };

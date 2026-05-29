@@ -143,6 +143,7 @@ class SegmentStorageService
      * @throws ReQueueException
      * @throws \PDOException
      * @throws \Exception
+     * @throws \TypeError
      */
     private function prepareAndPersistSegment(
         int $position,

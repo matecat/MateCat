@@ -34,6 +34,7 @@ class SegmentOriginalDataDao extends AbstractDao
      * @return array<string, mixed>
      * @throws \ReflectionException
      * @throws \Exception
+     * @throws \TypeError
      */
     public function getSegmentDataRefMap(int $id_segment, int $ttl = 86400): array
     {

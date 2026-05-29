@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 
+/** @implements ArrayAccess<string, mixed> */
 class SegmentStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
 

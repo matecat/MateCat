@@ -71,6 +71,7 @@ class SegmentMetadataCollection implements IteratorAggregate, Countable, JsonSer
         return empty($this->structs);
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function jsonSerialize(): array
     {
         return array_map(fn(SegmentMetadataStruct $s) => [
