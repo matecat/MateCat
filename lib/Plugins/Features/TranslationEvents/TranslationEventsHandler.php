@@ -18,6 +18,7 @@ use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
@@ -120,7 +121,7 @@ class TranslationEventsHandler
     /**
      * @throws ValidationError
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function prepareEventStruct(TranslationEvent $event): void
     {
@@ -159,7 +160,7 @@ class TranslationEventsHandler
 
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function saveEvent(TranslationEvent $event): void
     {
@@ -200,7 +201,7 @@ class TranslationEventsHandler
      * @param BatchReviewProcessor $batchReviewProcessor
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function save(BatchReviewProcessor $batchReviewProcessor): void
     {
