@@ -27,6 +27,7 @@ use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -267,6 +268,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function sendNotificationEmail(): void
     {
@@ -285,7 +287,6 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     /**
      * @param int $source_page
      *
-     * @throws ReflectionException
      * @throws PDOException
      * @throws RuntimeException
      */
@@ -306,6 +307,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      * @param array<int, ChunkReviewStruct> $chunkReviewsWithFinalRevisions
      *
      * @throws Exception
+     * @throws TypeError
      */
     private function _sendNotificationEmail(array $finalRevisions, array $chunkReviewsWithFinalRevisions): void
     {

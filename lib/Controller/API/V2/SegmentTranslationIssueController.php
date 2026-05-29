@@ -21,6 +21,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use RuntimeException;
 use TypeError;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
@@ -279,7 +280,14 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws \TypeError
      */
     protected function _getSegmentTranslationIssueModel( int $id_job, string $password, EntryStruct $issue ): TranslationIssueModel {
-        return new TranslationIssueModel( $id_job, $password, $issue );
+        return new TranslationIssueModel(
+            $id_job,
+            $password,
+            $issue,
+            new ChunkReviewDao(),
+            new EntryDao(),
+            new TranslationVersionDao()
+        );
     }
 
     protected function afterConstruct(): void {
