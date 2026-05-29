@@ -46,6 +46,7 @@ class QAProcessor
      * @param string $targetLang target language code (e.g. 'it-IT')
      *
      * @throws Exception
+     * @throws \DomainException
      */
     public function process(
         ProjectStructure $projectStructure,
@@ -102,6 +103,7 @@ class QAProcessor
      *
      * @return array{0: ?MessagePatternComparator, 1: bool}
      *         [comparator (null when ICU is not detected), sourceContainsIcu flag]
+     * @throws \DomainException
      */
     private function detectIcu(
         string $sourceLang,

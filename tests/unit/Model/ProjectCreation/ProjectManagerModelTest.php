@@ -2,8 +2,10 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
+use PDOException;
 use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
 use PDOStatement;
@@ -847,5 +849,73 @@ class ProjectManagerModelTest extends AbstractTest
             ['id_project' => 42, 'start' => 10, 'end' => 30],
             $this->executedValues[$fpDeleteIndices[0]]
         );
+    }
+
+    // ── bulkInsertContextsGroups ────────────────────────────────────
+
+    public function testBulkInsertContextsGroupsEmpty(): void
+    {
+        $model = $this->createModel();
+        $model->bulkInsertContextsGroups(1, []);
+
+        self::assertEmpty($this->preparedQueries);
+    }
+
+    public function testBulkInsertContextsGroupsSingleGroup(): void
+    {
+        $model = $this->createModel();
+        $model->bulkInsertContextsGroups(42, [
+            [
+                'context_json' => ['source' => 'ctx1', 'target' => 'ctx2'],
+                'context_json_segment_ids' => [100, 101],
+            ],
+        ]);
+
+        self::assertCount(1, $this->preparedQueries);
+        self::assertStringContainsString('INSERT INTO context_groups', $this->preparedQueries[0]);
+        self::assertCount(1, $this->executedValues);
+        // 2 segments × 3 fields = 6 values
+        self::assertCount(6, $this->executedValues[0]);
+        self::assertSame(42, $this->executedValues[0][0]);
+        self::assertSame(100, $this->executedValues[0][1]);
+        self::assertSame(42, $this->executedValues[0][3]);
+        self::assertSame(101, $this->executedValues[0][4]);
+    }
+
+    public function testBulkInsertContextsGroupsMultipleGroups(): void
+    {
+        $model = $this->createModel();
+        $model->bulkInsertContextsGroups(1, [
+            [
+                'context_json' => ['a' => 'b'],
+                'context_json_segment_ids' => [10],
+            ],
+            [
+                'context_json' => ['c' => 'd'],
+                'context_json_segment_ids' => [20, 30],
+            ],
+        ]);
+
+        self::assertCount(1, $this->preparedQueries);
+        // 3 segments total × 3 fields = 9 values
+        self::assertCount(9, $this->executedValues[0]);
+    }
+
+    // ── insertFile exception path ──────────────────────────────────
+
+    public function testInsertFileThrowsOnPdoException(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Database insert file error');
+
+        $mockDb = $this->createStub(IDatabase::class);
+        $mockDb->method('insert')->willThrowException(
+            new PDOException('Duplicate entry', 1062)
+        );
+
+        $mockLogger = $this->createStub(MatecatLogger::class);
+        $model = new ProjectManagerModel($mockDb, $mockLogger);
+
+        $model->insertFile(1, 'en-US', 'test.xliff', 'application/xliff+xml', 'abc123');
     }
 }

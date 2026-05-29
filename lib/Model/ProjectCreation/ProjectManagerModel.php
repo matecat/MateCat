@@ -50,7 +50,7 @@ class ProjectManagerModel
         $data['pretranslate_100'] = $projectStructure->pretranslate_100;
         $data['remote_ip_address'] = empty($projectStructure->user_ip) ? 'UNKNOWN' : $projectStructure->user_ip;
         $data['id_assignee'] = $idAssignee;
-        $data['instance_id'] = $projectStructure->instance_id ?? AppConfig::$INSTANCE_ID;
+        $data['instance_id'] = $projectStructure->instance_id ?: AppConfig::$INSTANCE_ID;
         $data['due_date'] = $projectStructure->due_date;
 
         $this->dbHandler->begin();
@@ -97,6 +97,7 @@ class ProjectManagerModel
     /**
      * @param list<array<string, mixed>> $query_translations_values
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function insertPreTranslations(array $query_translations_values): void
     {
@@ -138,6 +139,7 @@ class ProjectManagerModel
      * @param int $errorCode Code to attach to re-thrown PDOException
      *
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function executeBulkInsert(
         string $insertTemplate,
@@ -187,6 +189,7 @@ class ProjectManagerModel
      * @param array<int|string, array<string, mixed>> $notes
      *
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function bulkInsertSegmentNotesAndMetadata(array $notes): void
     {
@@ -264,6 +267,7 @@ class ProjectManagerModel
      * @param array<int|string, array<string, mixed>> $contextGroups
      *
      * @throws PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {

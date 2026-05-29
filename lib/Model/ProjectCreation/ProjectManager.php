@@ -488,6 +488,9 @@ class ProjectManager
      * Validate and insert private TM keys. Aborts if validation errors occur.
      *
      * @throws EndQueueException
+     * @throws \DomainException
+     * @throws \TypeError
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function setPrivateTmKeysOrFail(string $firstTMXFileName): void
     {
@@ -647,6 +650,7 @@ class ProjectManager
      * @param array<int, array<string, mixed>> $totalFilesStructure
      *
      * @throws Exception
+     * @throws \TypeError
      */
     private function extractSegmentsFromFiles(array &$totalFilesStructure): void
     {
@@ -1016,6 +1020,7 @@ class ProjectManager
      * @param array<string, mixed> $file_info
      *
      * @throws Exception
+     * @throws \TypeError
      */
     protected function extractSegments(int $fid, array $file_info): void
     {
@@ -1057,6 +1062,7 @@ class ProjectManager
     /**
      * Store segments for a file — delegates to SegmentStorageService.
      * @throws Exception
+     * @throws \TypeError
      */
     protected function storeSegments(int $fid): void
     {
@@ -1078,6 +1084,7 @@ class ProjectManager
 
     /**
      * @throws \PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function insertContextsForFile(): void
     {

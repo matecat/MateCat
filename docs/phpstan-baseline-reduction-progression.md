@@ -2,14 +2,14 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-29 (last updated)  
-**Commits (refactor + fix + security + test):** 362+
+**Commits (refactor + fix + security + test):** 363+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,001 | −5,365 (−72.8%) |
+| **PHPStan baseline entries** | 7,366 | 1,984 | −5,382 (−73.1%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,244 | +3,996 (+177.7%) |
-| **PHPUnit assertions** | ~19,449 | 16,858 | — |
+| **PHPUnit tests** | ~2,248 | 6,251 | +4,003 (+178.1%) |
+| **PHPUnit assertions** | ~19,449 | 16,870 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 33.43% (231/691) | +24.95% (+178 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 62.65% (2,617/4,177) | +40.91% (+1,773 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 63.13% (22,390/35,466) | +41.94% (+15,117 lines) |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 495 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 501 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -352,9 +352,18 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/ConnectedServices/GDrive/GDriveUserAuthorizationModel.php` | Phase 28 |
 | `lib/Model/ConnectedServices/GDrive/RemoteFileService.php` | Phase 28 |
 | `lib/Model/ConnectedServices/GDrive/Session.php` | Phase 28 |
+| `lib/Model/ProjectCreation/FileInsertionException.php` | Phase 46 |
 | `lib/Model/ProjectCreation/FileInsertionService.php` | Phase 40 |
+| `lib/Model/ProjectCreation/ProjectCreationError.php` | Phase 46 |
 | `lib/Model/ProjectCreation/ProjectManager.php` | Phase 31 |
+| `lib/Model/ProjectCreation/ProjectManagerModel.php` | Phase 46 |
+| `lib/Model/ProjectCreation/ProjectMetadataService.php` | Phase 46 |
 | `lib/Model/ProjectCreation/ProjectStructure.php` | Phase N+ |
+| `lib/Model/ProjectCreation/QAProcessor.php` | Phase 46 |
+| `lib/Model/ProjectCreation/SegmentExtractor.php` | Phase 46 |
+| `lib/Model/ProjectCreation/SegmentStorageService.php` | Phase 46 |
+| `lib/Model/ProjectCreation/TmKeyService.php` | Phase 46 |
+| `lib/Model/ProjectCreation/TranslationTuple.php` | Phase 46 |
 | `lib/Model/Files/FileDao.php` | Phase 25 |
 | `lib/Model/Files/MetadataDao.php` | Phase 25 |
 | `lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php` | Phase 25 |
@@ -658,6 +667,7 @@ Files that are PHPStan-clean but not yet covered by the test suite (controllers/
 | `lib/View/fileupload/index.php` | Phase 31 | View template |
 | `lib/Model/ProjectCreation/JobCreationService.php` | Phase 32 | DAO migration — CustomPayableRateDao DI |
 | `lib/Controller/API/V1/NewController.php` | Phase 32 | PHPStan-clean, DAO migration caller |
+| `lib/Model/ProjectCreation/TmKeyService.php` | Phase 46 | Heavily coupled to MyMemory API (64% lines) |
 
 </details>
 
@@ -2316,10 +2326,61 @@ No cascade errors. No tests needed — pure data classes covered by caller tests
 
 ---
 
+### Phase 46: ProjectCreation Directory — Full Cleanup + Tests — ✅ DONE (−17 baseline entries, +3 tests)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Model/ProjectCreation/` — all 13 files PHPStan-clean. 4 already on ledger, 9 fixed/added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `ProjectManagerModel.php` | 8→0 | `??` → `?:` on non-nullable `instance_id`, `@throws \Psr\Log\InvalidArgumentException` on 4 methods |
+| `ProjectMetadataService.php` | 1→0 | Removed dead `isset()` on non-nullable `pretranslate_101` |
+| `QAProcessor.php` | 1→0 | `@throws \DomainException` on `detectIcu` + cascade to `process` |
+| `SegmentExtractor.php` | 6→0 | `XliffRulesModel::fromArray()` fix (was `new XliffRulesModel($arr)`), `@throws` cascades, `getXliffFileContent` private→protected for testability |
+| `SegmentStorageService.php` | 5→0 | `(int)` cast on `$id_segment`, `@throws` on 4 methods |
+| `TmKeyService.php` | 5→0 | `@throws \DomainException/\TypeError/\Psr\Log\InvalidArgumentException/\Exception` |
+
+#### Cascade fixes (on-ledger: ProjectManager.php)
+
+- `setPrivateTmKeysOrFail()`: `@throws \DomainException/\TypeError/\Psr\Log\InvalidArgumentException`
+- `extractSegments()`, `extractSegmentsFromFiles()`: `@throws \TypeError`
+- `storeSegments()`: `@throws \TypeError`
+- `insertContextsForFile()`: `@throws \Psr\Log\InvalidArgumentException`
+
+#### New Test Files
+
+| File | Tests | Notes |
+|------|-------|-------|
+| `SegmentExtractorErrorPathsTest.php` | 3 | Error paths: null project ID, unreadable file, invalid XLIFF |
+
+#### Coverage
+
+| File | Methods | Lines | Notes |
+|------|---------|-------|-------|
+| ProjectMetadataService | 100% (2/2) | 100% (39/39) | |
+| QAProcessor | 100% (4/4) | 100% (37/37) | |
+| SegmentStorageService | 69% (9/13) | 97.10% (134/138) | |
+| SegmentExtractor | 45% (10/22) | 80.63% (283/351) | +3 error path tests |
+| ProjectManagerModel | 62% (8/13) | 83.49% (177/212) | +4 tests for contextGroups + insertFile |
+| TmKeyService | 29% (2/7) | 64.13% (59/92) | TODO: heavily coupled to MyMemory API |
+
+#### Baseline
+
+- **Removed:** 17 entries
+- **Net:** 2,001 → **1,984** (−17)
+- **Files added to ledger:** +9 (6 fixed + 3 already clean)
+- **Ledger total:** 495 → **501** (4 were already on ledger)
+- **Tests:** 6,247 tests, 16,864 assertions, 0 errors
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,001 entries)
+2. Continue PHPStan baseline reduction from remaining targets (1,984 entries)
 
 ---
 

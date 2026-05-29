@@ -112,6 +112,7 @@ class SegmentExtractor
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function extract(int $fid, array $file_info, ProjectStructure $projectStructure): void
     {
@@ -183,6 +184,8 @@ class SegmentExtractor
      * @return int Number of segments marked as show-in-cattool in this file element
      * @throws ReflectionException
      * @throws Exception
+     * @throws \PDOException
+     * @throws \TypeError
      */
     private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
     {
@@ -249,6 +252,9 @@ class SegmentExtractor
      *
      * @return int|null The file-parts ID if an 'original' attribute was found, null otherwise
      * @throws ReflectionException
+     * @throws \PDOException
+     * @throws \Exception
+     * @throws \TypeError
      */
     private function persistXliffFileAttributes(array $xliff_file, int $fid): ?int
     {
@@ -744,7 +750,7 @@ class SegmentExtractor
      *
      * @throws Exception
      */
-    private function getXliffFileContent(string $xliffFilePath): false|string
+    protected function getXliffFileContent(string $xliffFilePath): false|string
     {
         if (AbstractFilesStorage::isOnS3()) {
             $s3Client = S3FilesStorage::getStaticS3Client();
@@ -889,7 +895,7 @@ class SegmentExtractor
         $configModel = $projectStructure->xliff_parameters;
 
         if (is_array($configModel)) {
-            $configModel = new XliffRulesModel($configModel);
+            $configModel = XliffRulesModel::fromArray($configModel);
         }
 
         $rule = $configModel->getMatchingRule(

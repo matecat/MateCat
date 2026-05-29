@@ -52,9 +52,7 @@ readonly class ProjectMetadataService
         }
 
         // pretranslate_101
-        if (isset($projectStructure->pretranslate_101)) {
-            $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value] = (string)$projectStructure->pretranslate_101;
-        }
+        $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value] = (string)$projectStructure->pretranslate_101;
 
         // mt evaluation => ice_mt already in metadata
         // adds JSON parameters to the project metadata as JSON string

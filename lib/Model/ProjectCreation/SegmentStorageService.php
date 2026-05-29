@@ -83,6 +83,7 @@ class SegmentStorageService
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function storeSegments(string|int $fid, ProjectStructure $projectStructure): void
     {
@@ -140,6 +141,8 @@ class SegmentStorageService
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws \PDOException
+     * @throws \Exception
      */
     private function prepareAndPersistSegment(
         int $position,
@@ -162,7 +165,7 @@ class SegmentStorageService
             $map = $sanitizeEvent->getOriginalDataMap();
 
             // persist an original data map if present
-            $this->insertOriginalDataRecord($id_segment, $map);
+            $this->insertOriginalDataRecord((int)$id_segment, $map);
 
             $correctTagErrorsEvent = new CorrectTagErrorsEvent(
                 $projectStructure->segments[$fid][$position]->segment,
@@ -176,7 +179,7 @@ class SegmentStorageService
         $metadataCollection = $projectStructure->segments_meta_data[$fid][$position] ?? new SegmentMetadataCollection();
 
         foreach ($metadataCollection as $segmentMetadataStruct) {
-            $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
+            $this->saveSegmentMetadata((int)$id_segment, $segmentMetadataStruct);
         }
 
         if (!isset($projectStructure->file_segments_count[$fid])) {
@@ -307,6 +310,7 @@ class SegmentStorageService
      *
      * @param int $id_segment
      * @param array<string, mixed> $map
+     * @throws \PDOException
      */
     protected function insertOriginalDataRecord(int $id_segment, array $map): void
     {
@@ -316,6 +320,7 @@ class SegmentStorageService
     /**
      * Persist a single segment metadata record.
      * Protected so test subclasses can override to capture calls.
+     * @throws \Exception
      */
     protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
@@ -334,6 +339,7 @@ class SegmentStorageService
      *
      * @param array<int, array<string, mixed>> $segmentsMetadata
      * @param ProjectStructure $projectStructure
+     * @throws \TypeError
      */
     private function linkSegmentIdsToRelatedData(array $segmentsMetadata, ProjectStructure $projectStructure): void
     {
@@ -392,6 +398,8 @@ class SegmentStorageService
 
     /**
      * Validate and persist segment metadata if the struct has valid key/value.
+     *
+     * @throws \Exception
      */
     protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {

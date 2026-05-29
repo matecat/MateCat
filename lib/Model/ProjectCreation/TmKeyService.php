@@ -71,6 +71,9 @@ class TmKeyService
      *
      * @param ProjectStructure $projectStructure
      * @param string|null $firstTMXFileName
+     * @throws \DomainException
+     * @throws \TypeError
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
@@ -304,6 +307,7 @@ class TmKeyService
      * Get a UserStruct by UID.
      * Protected so test subclasses can override for injection.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function getUserByUid(int $uid): ?UserStruct
     {
