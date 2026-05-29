@@ -14,6 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use InvalidArgumentException;
+use Model\LQA\ChunkReviewDao;
 use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\ActiveMQ\WorkerClient;
@@ -52,7 +53,7 @@ class MarkAllSegmentStatusController extends KleinController
         $source_page = null;
 
         if ($this->request->param('revision_number')) {
-            $validRevisions = ReviewUtils::validRevisionNumbers($this->chunk);
+            $validRevisions = (new ReviewUtils(new ChunkReviewDao()))->validRevisionNumbers($this->chunk);
             if (!in_array($this->request->param('revision_number'), $validRevisions)) {
                 throw new InvalidArgumentException('Invalid revision number');
             }

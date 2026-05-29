@@ -2,6 +2,9 @@
 
 namespace unit\Features\ReviewExtended;
 
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -143,5 +146,64 @@ class ReviewUtilsTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([10, 20]);
 
         $this->assertSame(20, ReviewUtils::filterLQAModelLimit($lqaModel, 3));
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // validRevisionNumbers
+    // ─────────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function validRevisionNumbers_returnsFilteredRevisionNumbers(): void
+    {
+        $chunk = $this->createStub(JobStruct::class);
+
+        $review1 = $this->createStub(ChunkReviewStruct::class);
+        $review1->source_page = SourcePages::SOURCE_PAGE_REVISION; // 2 → revision 1
+        $review2 = $this->createStub(ChunkReviewStruct::class);
+        $review2->source_page = SourcePages::SOURCE_PAGE_REVISION_2; // 3 → revision 2
+
+        $dao = $this->createMock(ChunkReviewDao::class);
+        $dao->expects($this->once())
+            ->method('findChunkReviews')
+            ->with($chunk)
+            ->willReturn([$review1, $review2]);
+
+        $utils = new ReviewUtils($dao);
+        $result = $utils->validRevisionNumbers($chunk);
+
+        $this->assertSame([1, 2], $result);
+    }
+
+    #[Test]
+    public function validRevisionNumbers_filtersOutNullRevisionNumbers(): void
+    {
+        $chunk = $this->createStub(JobStruct::class);
+
+        $review1 = $this->createStub(ChunkReviewStruct::class);
+        $review1->source_page = SourcePages::SOURCE_PAGE_TRANSLATE; // 1 → null (filtered out)
+        $review2 = $this->createStub(ChunkReviewStruct::class);
+        $review2->source_page = SourcePages::SOURCE_PAGE_REVISION; // 2 → revision 1
+
+        $dao = $this->createStub(ChunkReviewDao::class);
+        $dao->method('findChunkReviews')->willReturn([$review1, $review2]);
+
+        $utils = new ReviewUtils($dao);
+        $result = $utils->validRevisionNumbers($chunk);
+
+        $this->assertSame([1], $result);
+    }
+
+    #[Test]
+    public function validRevisionNumbers_returnsEmptyArrayWhenNoReviews(): void
+    {
+        $chunk = $this->createStub(JobStruct::class);
+
+        $dao = $this->createStub(ChunkReviewDao::class);
+        $dao->method('findChunkReviews')->willReturn([]);
+
+        $utils = new ReviewUtils($dao);
+        $result = $utils->validRevisionNumbers($chunk);
+
+        $this->assertSame([], $result);
     }
 }

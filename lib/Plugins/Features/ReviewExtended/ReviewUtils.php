@@ -17,6 +17,12 @@ use Utils\Constants\TranslationStatus;
 
 class ReviewUtils
 {
+    private ChunkReviewDao $chunkReviewDao;
+
+    public function __construct(ChunkReviewDao $chunkReviewDao)
+    {
+        $this->chunkReviewDao = $chunkReviewDao;
+    }
 
     /**
      * @param int|null $number
@@ -80,9 +86,9 @@ class ReviewUtils
      * @return int[]
      * @throws Exception
      */
-    public static function validRevisionNumbers(JobStruct $chunk): array
+    public function validRevisionNumbers(JobStruct $chunk): array
     {
-        $chunkReviews = (new ChunkReviewDao())->findChunkReviews($chunk);
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk);
 
         return array_values(array_filter(array_map(function ($chunkReview) {
             return self::sourcePageToRevisionNumber($chunkReview->source_page);
