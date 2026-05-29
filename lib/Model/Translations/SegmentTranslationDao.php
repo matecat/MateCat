@@ -209,6 +209,9 @@ class SegmentTranslationDao extends AbstractDao
      * @param array $data
      *
      * @return int
+     *
+     * @throws \PDOException
+     * @throws \Exception
      */
     public static function setAnalysisValue(array $data): int
     {

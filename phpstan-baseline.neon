@@ -16411,12 +16411,6 @@ parameters:
 			path: lib/Model/Translations/SegmentTranslationDao.php
 
 		-
-			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:setAnalysisValue\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Model/Translations/SegmentTranslationDao.php
-
-		-
 			message: '#^Method Model\\Translations\\SegmentTranslationDao\:\:updateFirstTimeOpenedContribution\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
