@@ -17,6 +17,7 @@ use PHPUnit\Framework\MockObject\Stub as MockStub;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
 
 /**
@@ -396,6 +397,86 @@ class TmKeyServiceTest extends AbstractTest
     }
 
     // ──────────────────────────────────────────────────────────────
+    // pushTMXToMyMemory() — success path
+    // ──────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function testPushTMXUploadsSuccessfully(): void
+    {
+        $ps = new ProjectStructure([
+            'private_tm_key'   => [['key' => 'abc123']],
+            'array_files'      => ['my.tmx'],
+            'array_files_meta' => [['extension' => 'tmx']],
+            'uid'              => 42,
+            'result'           => ['errors' => []],
+        ]);
+
+        $this->tmxService->expects(self::once())
+            ->method('addTmxInMyMemory');
+
+        $this->service->setSkipLoopForTMXLoadStatus(true);
+        $this->service->pushTMXToMyMemory($ps, '/tmp/upload');
+
+        self::assertEmpty($ps->result['errors']);
+        // TMX file removed from array_files after upload
+        self::assertArrayNotHasKey(0, $ps->array_files);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // loopForTMXLoadStatus() — direct tests
+    // ──────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function testLoopCompletesImmediately(): void
+    {
+        $ps = new ProjectStructure([
+            'private_tm_key'   => [['key' => 'abc123']],
+            'array_files'      => [0 => 'my.tmx'],
+            'array_files_meta' => [0 => ['extension' => 'tmx']],
+            'uid'              => 42,
+            'result'           => ['errors' => []],
+        ]);
+
+        $this->tmxService->method('tmxUploadStatus')
+            ->willReturn(['completed' => true]);
+
+        $file = $this->createStub(TMSFile::class);
+        $file->method('getUuid')->willReturn('test-uuid-123');
+        $file->method('getName')->willReturn('my.tmx');
+        $file->method('getPosition')->willReturn(0);
+
+        $this->service->callLoopForTMXLoadStatus($ps, [$file]);
+
+        self::assertEmpty($ps->result['errors']);
+        self::assertArrayNotHasKey(0, $ps->array_files);
+    }
+
+    #[Test]
+    public function testLoopThrowsOnError(): void
+    {
+        $ps = new ProjectStructure([
+            'private_tm_key'   => [['key' => 'abc123']],
+            'array_files'      => [0 => 'my.tmx'],
+            'array_files_meta' => [0 => ['extension' => 'tmx']],
+            'uid'              => 42,
+            'result'           => ['errors' => []],
+        ]);
+
+        $this->tmxService->method('tmxUploadStatus')
+            ->willThrowException(new Exception('API error', -10));
+
+        $file = $this->createStub(TMSFile::class);
+        $file->method('getUuid')->willReturn('test-uuid-123');
+        $file->method('getName')->willReturn('my.tmx');
+        $file->method('getPosition')->willReturn(0);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('API error');
+
+        $this->service->callLoopForTMXLoadStatus($ps, [$file]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────────────────────
 
@@ -419,6 +500,7 @@ class TestableTmKeyService extends TmKeyService
     private ?MemoryKeyDao $memoryKeyDaoOverride = null;
     private array $keyringOwnerKeys = [];
     private ?UserStruct $userStruct = null;
+    private bool $skipLoop = false;
 
     public function setMemoryKeyDao(MemoryKeyDao $dao): void
     {
@@ -435,6 +517,16 @@ class TestableTmKeyService extends TmKeyService
         $this->userStruct = $user;
     }
 
+    public function setSkipLoopForTMXLoadStatus(bool $skip): void
+    {
+        $this->skipLoop = $skip;
+    }
+
+    public function callLoopForTMXLoadStatus(ProjectStructure $ps, array $files): void
+    {
+        parent::loopForTMXLoadStatus($ps, $files);
+    }
+
     protected function createMemoryKeyDao(): MemoryKeyDao
     {
         return $this->memoryKeyDaoOverride ?? parent::createMemoryKeyDao();
@@ -448,5 +540,22 @@ class TestableTmKeyService extends TmKeyService
     protected function getUserByUid(int $uid): ?UserStruct
     {
         return $this->userStruct;
+    }
+
+    protected function loopForTMXLoadStatus(ProjectStructure $projectStructure, array $memoryFiles): void
+    {
+        if ($this->skipLoop) {
+            foreach ($memoryFiles as $file) {
+                unset($projectStructure->array_files[$file->getPosition()]);
+                unset($projectStructure->array_files_meta[$file->getPosition()]);
+            }
+            return;
+        }
+        parent::loopForTMXLoadStatus($projectStructure, $memoryFiles);
+    }
+
+    protected function pollSleep(int $seconds): void
+    {
+        // no-op in tests
     }
 }

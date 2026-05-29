@@ -262,7 +262,7 @@ class TmKeyService
                     $elapsed = time() - $startTime;
                     $this->log("Waiting for TMX \"{$file->getName()}\" — elapsed {$elapsed}s, next poll in {$pollInterval}s");
 
-                    sleep($pollInterval);
+                    $this->pollSleep($pollInterval);
                     $pollInterval = min($pollInterval * 2, self::TMX_POLL_MAX_INTERVAL);
                 } catch (Exception $e) {
                     $projectStructure->addError($e->getCode(), $e->getMessage());
@@ -277,6 +277,11 @@ class TmKeyService
             unset($projectStructure->array_files[$file->getPosition()]);
             unset($projectStructure->array_files_meta[$file->getPosition()]);
         }
+    }
+
+    protected function pollSleep(int $seconds): void
+    {
+        sleep($seconds);
     }
 
     // ──────────────────────────────────────────────────────────────

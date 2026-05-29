@@ -667,7 +667,6 @@ Files that are PHPStan-clean but not yet covered by the test suite (controllers/
 | `lib/View/fileupload/index.php` | Phase 31 | View template |
 | `lib/Model/ProjectCreation/JobCreationService.php` | Phase 32 | DAO migration — CustomPayableRateDao DI |
 | `lib/Controller/API/V1/NewController.php` | Phase 32 | PHPStan-clean, DAO migration caller |
-| `lib/Model/ProjectCreation/TmKeyService.php` | Phase 46 | Heavily coupled to MyMemory API (64% lines) |
 
 </details>
 
@@ -2365,7 +2364,7 @@ No cascade errors. No tests needed — pure data classes covered by caller tests
 | SegmentStorageService | 69% (9/13) | 97.10% (134/138) | |
 | SegmentExtractor | 45% (10/22) | 80.63% (283/351) | +3 error path tests |
 | ProjectManagerModel | 62% (8/13) | 83.49% (177/212) | +4 tests for contextGroups + insertFile |
-| TmKeyService | 29% (2/7) | 64.13% (59/92) | TODO: heavily coupled to MyMemory API |
+| TmKeyService | 25% (2/8) | 81.72% (76/93) | +3 tests: pushTMX success, loop complete, loop error |
 
 #### Baseline
 
