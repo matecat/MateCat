@@ -10,6 +10,7 @@ namespace Plugins\Features\ReviewExtended\Email;
 
 use Exception;
 use Model\Users\UserStruct;
+use TypeError;
 use Utils\Email\AbstractEmail;
 
 class RevisionChangedNotificationEmail extends AbstractEmail
@@ -23,7 +24,7 @@ class RevisionChangedNotificationEmail extends AbstractEmail
     /**
      * @var UserStruct
      */
-    protected $recipientUser;
+    protected UserStruct $recipientUser;
 
     protected ?string $title = 'Revised segment changed';
     /** @var array<string, mixed> */
@@ -36,6 +37,7 @@ class RevisionChangedNotificationEmail extends AbstractEmail
      * @param array<string, mixed>  $data
      * @param string                $segmentUrl
      * @param UserStruct|null       $changeAuthor
+     * @throws TypeError
      */
     public function __construct(array $segmentInfo, array $data, string $segmentUrl, ?UserStruct $changeAuthor = null)
     {
@@ -55,7 +57,7 @@ class RevisionChangedNotificationEmail extends AbstractEmail
     protected function _getTemplateVariables(): array
     {
         return [
-            'changeAuthor' => ($this->changeAuthor ? $this->changeAuthor->toArray() : null),
+            'changeAuthor' => $this->changeAuthor?->toArray(),
             'recipientUser' => $this->data['recipient']->toArray(),
             'segmentUrl' => $this->segmentUrl,
             'data' => $this->data,
