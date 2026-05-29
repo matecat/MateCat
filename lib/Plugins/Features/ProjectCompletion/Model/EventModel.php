@@ -52,10 +52,7 @@ class EventModel
             $this->eventStruct
         );
 
-        $project = (new ProjectDao())->findById($this->chunk->id_project);
-        if ($project === null) {
-            throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
-        }
+        $project = (new ProjectDao())->findById($this->chunk->id_project) ?? throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
         $featureSet = new FeatureSet();
         $featureSet->loadForProject($project);
         $featureSet->dispatch(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));

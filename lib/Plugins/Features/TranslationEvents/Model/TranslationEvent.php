@@ -68,7 +68,7 @@ class TranslationEvent
     private bool $revisionFlagAllowed = true;
 
     /**
-     * @var array
+     * @var array<int, int>
      */
     private array $unsetFinalRevision = [];
 
@@ -88,6 +88,7 @@ class TranslationEvent
      * @param UserStruct|null $user
      * @param int $source_page_code
      *
+     * @throws RuntimeException
      */
     public function __construct(
         SegmentTranslationStruct $old_translation,
@@ -101,7 +102,7 @@ class TranslationEvent
         $this->source_page = $source_page_code;
 
         try {
-            $this->chunk = $this->wanted_translation->getChunk();
+            $this->chunk = $this->wanted_translation->getChunk() ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
         } catch (Error) {
             throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
         }
@@ -170,14 +171,15 @@ class TranslationEvent
     /**
      * @return SegmentStruct|null
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getSegmentStruct(): ?SegmentStruct
     {
         $dao = new SegmentDao(Database::obtain());
 
         return $dao->getByChunkIdAndSegmentId(
-            $this->chunk->id,
-            $this->chunk->password,
+            $this->chunk->id ?? throw new RuntimeException('Chunk id is required'),
+            $this->chunk->password ?? throw new RuntimeException('Chunk password is required'),
             $this->wanted_translation->id_segment
         );
     }
@@ -234,6 +236,7 @@ class TranslationEvent
      * This may return null in some cases because prior event can be missing.
      *
      * @return TranslationEventStruct|null
+     * @throws \PDOException
      */
     private function getLatestEventForSegment(): ?TranslationEventStruct
     {

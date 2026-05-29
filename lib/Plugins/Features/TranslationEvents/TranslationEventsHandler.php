@@ -114,6 +114,7 @@ class TranslationEventsHandler
     /**
      * @throws ValidationError
      * @throws Exception
+     * @throws \TypeError
      */
     public function prepareEventStruct(TranslationEvent $event): void
     {
@@ -134,7 +135,7 @@ class TranslationEventsHandler
         $eventStruct = new TranslationEventStruct();
         $eventStruct->id_job = $event->getWantedTranslation()['id_job'];
         $eventStruct->id_segment = $event->getWantedTranslation()['id_segment'];
-        $eventStruct->uid = ($event->getUser() != null ? $event->getUser()->uid : 0);
+        $eventStruct->uid = ($event->getUser() != null ? ($event->getUser()->uid ?? 0) : 0);
         $eventStruct->status = $event->getWantedTranslation()['status'];
         $eventStruct->version_number = $event->getWantedTranslation()['version_number'] ?? 0;
         $eventStruct->source_page = $event->getSourcePage();
@@ -152,6 +153,7 @@ class TranslationEventsHandler
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     private function saveEvent(TranslationEvent $event): void
     {
@@ -160,21 +162,27 @@ class TranslationEventsHandler
         if (!$event->isFinalRevisionFlagAllowed()) {
             $eventStruct->final_revision = 0;
         } else {
-            $eventStruct->final_revision = $eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
+            $eventStruct->final_revision = (int)($eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange());
         }
 
-        $eventStruct->id = (new TranslationEventDao())->insertStruct($eventStruct);
+        $result = (new TranslationEventDao())->insertStruct($eventStruct);
+        $eventStruct->id = $result !== false ? $result : null;
     }
 
     /**
      * @throws Exception
+     * @throws \ReflectionException
      */
     private function removeOldFinalRevisionFlag(TranslationEvent $event): void
     {
         if (!empty($event->getUnsetFinalRevision())) {
+            $segment = $event->getSegmentStruct();
+            if ($segment === null) {
+                throw new Exception('Segment not found for final revision flag removal');
+            }
             (new TranslationEventDao())->unsetFinalRevisionFlag(
                 (int)$this->getChunk()->id,
-                [$event->getSegmentStruct()->id],
+                [$segment->id],
                 $event->getUnsetFinalRevision()
             );
         }
@@ -183,9 +191,10 @@ class TranslationEventsHandler
     /**
      * Save events
      *
-     * @param BatchReviewProcessor $batchReviewProcessor *
+     * @param BatchReviewProcessor $batchReviewProcessor
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function save(BatchReviewProcessor $batchReviewProcessor): void
     {

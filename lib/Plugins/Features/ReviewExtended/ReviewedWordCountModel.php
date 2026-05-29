@@ -71,6 +71,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      *
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws Exception
      */
     public function __construct(TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews)
     {
