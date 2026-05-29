@@ -30,6 +30,7 @@ class ProjectCompletionStatusModel
      */
     protected ProjectStruct $project;
 
+    /** @var array<string, mixed> */
     protected array $cachedStatus = [];
 
     public function __construct(ProjectStruct $project)
@@ -38,11 +39,14 @@ class ProjectCompletionStatusModel
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws NotFoundException
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws ValidationError
      * @throws AuthenticationError
+     * @throws Exception
      */
     public function getStatus(): array
     {
@@ -60,6 +64,8 @@ class ProjectCompletionStatusModel
      * @throws ValidationError
      * @throws AuthenticationError
      * @throws Exception
+     *
+     * @return array<string, mixed>
      */
     private function populateStatus(): array
     {
@@ -78,8 +84,8 @@ class ProjectCompletionStatusModel
             $featureSet = new FeatureSet();
             $featureSet->loadForProject($this->project);
             $filterJobPasswordToReviewPasswordEvent = new FilterJobPasswordToReviewPasswordEvent(
-                $chunk->password,
-                $chunk->id
+                $chunk->password ?? throw new \RuntimeException('Chunk password is required'),
+                $chunk->id ?? throw new \RuntimeException('Chunk id is required')
             );
             $featureSet->dispatch($filterJobPasswordToReviewPasswordEvent);
             $revise['password'] = $filterJobPasswordToReviewPasswordEvent->getPassword();
@@ -98,6 +104,8 @@ class ProjectCompletionStatusModel
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws Exception
      */
     private function dataForChunkStatus(JobStruct $chunk, bool $is_review): array

@@ -19,6 +19,7 @@ class ProjectCompletion extends BaseFeature
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function postAddSegmentTranslation(PostAddSegmentTranslationEvent $event): void
     {
@@ -34,7 +35,7 @@ class ProjectCompletion extends BaseFeature
         $chunk_completion_update_struct = new ChunkCompletionUpdateStruct($chunk->toArray());
         $chunk_completion_update_struct->is_review = $params['is_review'];
         $chunk_completion_update_struct->source = 'user';
-        $chunk_completion_update_struct->id_job = $chunk->id;
+        $chunk_completion_update_struct->id_job = $chunk->id ?? throw new RuntimeException('Job id is required');
 
         if (isset($params['logged_user']) && $params['logged_user']->uid) {
             $chunk_completion_update_struct->uid = $params['logged_user']->uid;

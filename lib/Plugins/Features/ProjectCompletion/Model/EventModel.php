@@ -41,18 +41,23 @@ class EventModel
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function save(): void
     {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = (new ChunkCompletionEventDao())->createFromChunk(
+        $this->chunkCompletionEventId = (int)(new ChunkCompletionEventDao())->createFromChunk(
             $this->chunk,
             $this->eventStruct
         );
 
+        $project = (new ProjectDao())->findById($this->chunk->id_project);
+        if ($project === null) {
+            throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
+        }
         $featureSet = new FeatureSet();
-        $featureSet->loadForProject((new ProjectDao())->findById($this->chunk->id_project));
+        $featureSet->loadForProject($project);
         $featureSet->dispatch(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));
     }
 
