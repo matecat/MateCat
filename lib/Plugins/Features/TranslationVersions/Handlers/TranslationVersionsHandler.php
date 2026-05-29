@@ -10,6 +10,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
@@ -48,22 +49,40 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
     private ProjectStruct $projectStruct;
 
+    private SegmentTranslationDao $segmentTranslationDao;
+    private JobDao $jobDao;
+    private ProjectDao $projectDao;
+
     /**
      * TranslationVersionsHandler constructor.
      *
      * @param JobStruct $chunkStruct
      * @param int|null $id_segment
      * @param ProjectStruct $projectStruct
+     * @param TranslationVersionDao|null $translationVersionDao
+     * @param SegmentTranslationDao|null $segmentTranslationDao
+     * @param JobDao|null $jobDao
+     * @param ProjectDao|null $projectDao
      *
      * @throws RuntimeException
      */
-    public function __construct(JobStruct $chunkStruct, ?int $id_segment, ProjectStruct $projectStruct)
-    {
+    public function __construct(
+        JobStruct $chunkStruct,
+        ?int $id_segment,
+        ProjectStruct $projectStruct,
+        ?TranslationVersionDao $translationVersionDao = null,
+        ?SegmentTranslationDao $segmentTranslationDao = null,
+        ?JobDao $jobDao = null,
+        ?ProjectDao $projectDao = null,
+    ) {
         $this->chunkStruct = $chunkStruct;
         $this->id_job = $chunkStruct->id ?? throw new RuntimeException('Job id is required');
         $this->id_segment = $id_segment ?? throw new RuntimeException('Segment id is required');
-        $this->dao = new TranslationVersionDao();
+        $this->dao = $translationVersionDao ?? new TranslationVersionDao();
         $this->projectStruct = $projectStruct;
+        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
+        $this->jobDao = $jobDao ?? new JobDao();
+        $this->projectDao = $projectDao ?? new ProjectDao();
     }
 
     /**
@@ -96,7 +115,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      */
     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
     {
-        return (new SegmentTranslationDao())->propagateTranslation(
+        return $this->segmentTranslationDao->propagateTranslation(
             $translationStruct,
             $this->chunkStruct,
             $this->id_segment,
@@ -190,14 +209,15 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         /** @var ProjectStruct $project */
         $project = $params['project'];
 
-        $sourceEvent = new TranslationEvent(
+        $sourceEvent = $this->createTranslationEvent(
             $old_translation,
             $translation,
             $user,
-            $source_page_code
+            $source_page_code,
+            $chunk,
         );
 
-        $translationEventsHandler = new TranslationEventsHandler($chunk);
+        $translationEventsHandler = $this->createTranslationEventsHandler($chunk);
         $translationEventsHandler->setFeatureSet($features);
         $translationEventsHandler->addEvent($sourceEvent);
         $translationEventsHandler->setProject($project);
@@ -224,11 +244,12 @@ class TranslationVersionsHandler implements VersionHandlerInterface
                 $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment; // nullable
                 $propagatedSegmentAfterChange->time_to_edit = 0;
 
-                $propagatedEvent = new TranslationEvent(
+                $propagatedEvent = $this->createTranslationEvent(
                     $segmentTranslationBeforeChange,
                     $propagatedSegmentAfterChange,
                     $user,
-                    $source_page_code
+                    $source_page_code,
+                    $chunk,
                 );
 
                 $propagatedEvent->setPropagationSource(false);
@@ -237,12 +258,41 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         }
 
         try {
-            $translationEventsHandler->save(new BatchReviewProcessor());
-            (new JobDao())->destroyCacheByProjectId($chunk->id_project);
-            (new ProjectDao())->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
+            $translationEventsHandler->save($this->createBatchReviewProcessor());
+            $this->jobDao->destroyCacheByProjectId($chunk->id_project);
+            $this->projectDao->destroyFetchByIdCache($chunk->id_project, ProjectStruct::class);
         } catch (Exception $e) {
             throw new RuntimeException($e->getMessage(), -2000, $e);
         }
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    protected function createTranslationEvent(
+        SegmentTranslationStruct $old_translation,
+        SegmentTranslationStruct $translation,
+        ?UserStruct $user,
+        int $source_page_code,
+        JobStruct $chunk,
+    ): TranslationEvent {
+        return new TranslationEvent(
+            $old_translation,
+            $translation,
+            $user,
+            $source_page_code,
+            $chunk,
+        );
+    }
+
+    protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
+    {
+        return new TranslationEventsHandler($chunk);
+    }
+
+    protected function createBatchReviewProcessor(): BatchReviewProcessor
+    {
+        return new BatchReviewProcessor();
     }
 
 }
