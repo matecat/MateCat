@@ -8,6 +8,7 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DivisionByZeroError;
 use Exception;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
@@ -24,6 +25,7 @@ class FilterController extends KleinController
 
     /**
      * @throws Exception
+     * @throws DivisionByZeroError
      */
     public function index(): void
     {

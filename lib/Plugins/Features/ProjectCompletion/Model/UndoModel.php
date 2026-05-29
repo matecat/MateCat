@@ -9,15 +9,14 @@
 namespace Plugins\Features\ProjectCompletion\Model;
 
 
+use Model\ChunksCompletion\ChunkCompletionEventStruct;
+
 class UndoModel
 {
 
-    /**
-     * @var \Model\ChunksCompletion\ChunkCompletionEventStruct
-     */
-    protected $event;
+    protected ChunkCompletionEventStruct $event;
 
-    public function __construct($event)
+    public function __construct(ChunkCompletionEventStruct $event)
     {
         $this->event = $event;
     }

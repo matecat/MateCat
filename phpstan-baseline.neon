@@ -3453,18 +3453,6 @@ parameters:
 			path: lib/Model/Xliff/XliffConfigTemplateStruct.php
 
 		-
-			message: '#^Method Plugins\\Features\\IBaseFeature\:\:getConflictingDependencies\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/IBaseFeature.php
-
-		-
-			message: '#^Method Plugins\\Features\\IBaseFeature\:\:getDependencies\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/IBaseFeature.php
-
-		-
 			message: '#^Method Plugins\\Features\\ProjectCompletion\:\:postAddSegmentTranslation\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -3535,36 +3523,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/Plugins/Features/ProjectCompletion/Model/ProjectCompletionStatusModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\ProjectCompletion\\Model\\UndoModel\:\:__construct\(\) has parameter \$event with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Plugins/Features/ProjectCompletion/Model/UndoModel.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\FilterDefinition\:\:__construct\(\) has parameter \$filter_data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/FilterDefinition.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Model\\FilterDefinition\:\:sampleData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/FilterDefinition.php
-
-		-
-			message: '#^Property Plugins\\Features\\SegmentFilter\\Model\\FilterDefinition\:\:\$filter_data type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Model/FilterDefinition.php
-
-		-
-			message: '#^Method Plugins\\Features\\SegmentFilter\\Controller\\API\\FilterController\:\:index\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Plugins/Features/SegmentFilter/Controller/API/FilterController.php
 
 		-
 			message: '#^Method Plugins\\Features\\TranslationEvents\\Model\\TranslationEvent\:\:__construct\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -3651,27 +3609,9 @@ parameters:
 			path: lib/Plugins/Features/TranslationEvents/TranslationEventsHandler.php
 
 		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\DummyTranslationVersionHandler\:\:propagateTranslation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 2
-			path: lib/Plugins/Features/TranslationVersions/Handlers/DummyTranslationVersionHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\DummyTranslationVersionHandler\:\:storeTranslationEvent\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/Handlers/DummyTranslationVersionHandler.php
-
-		-
 			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\TranslationVersionsHandler\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
-			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\TranslationVersionsHandler\:\:propagateTranslation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 2
 			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
 
 		-
@@ -3684,12 +3624,6 @@ parameters:
 			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\TranslationVersionsHandler\:\:saveVersion\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
-			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\Handlers\\TranslationVersionsHandler\:\:storeTranslationEvent\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
 
 		-
@@ -3715,24 +3649,6 @@ parameters:
 			identifier: property.onlyWritten
 			count: 1
 			path: lib/Plugins/Features/TranslationVersions/Handlers/TranslationVersionsHandler.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\VersionHandlerInterface\:\:propagateTranslation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 2
-			path: lib/Plugins/Features/TranslationVersions/VersionHandlerInterface.php
-
-		-
-			message: '#^Method Plugins\\Features\\TranslationVersions\\VersionHandlerInterface\:\:storeTranslationEvent\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/VersionHandlerInterface.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type bool\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Plugins/Features/TranslationVersions/VersionHandlerInterface.php
 
 		-
 			message: '#^Parameter \#3 \$callback of function route expects array\{class\-string\<Controller\\Abstracts\\KleinController\>, string\}, array\{''Controller\\\\API\\\\App…'', ''update''\} given\.$#'

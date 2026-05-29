@@ -13,12 +13,12 @@ class FilterDefinition
 {
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     private array $filter_data;
 
     /**
-     * @param array $filter_data
+     * @param array<string, mixed> $filter_data
      */
     public function __construct(array $filter_data)
     {
@@ -40,6 +40,9 @@ class FilterDefinition
         return !empty($this->filter_data['status']);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function sampleData(): array
     {
         return $this->filter_data['sample'] ?? [];
