@@ -501,7 +501,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         $guardPos = strpos($source, 'if ($updateRes === 0)');
         $this->assertNotFalse($guardPos);
 
-        $logPos = strpos($source, 'not updated (already DONE/SKIPPED or missing), skipping side-effects', $guardPos);
+        $logPos = strpos($source, 'not updated (already DONE or missing), skipping side-effects', $guardPos);
         $this->assertNotFalse(
             $logPos,
             'TMAnalysisWorker must log explicit idempotency message after zero-update guard.'
