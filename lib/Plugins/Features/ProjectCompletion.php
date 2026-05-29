@@ -6,10 +6,12 @@ use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
+use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\Jobs\JobStruct;
 use RuntimeException;
+use TypeError;
 use Utils\Tools\Utils;
 
 class ProjectCompletion extends BaseFeature
@@ -17,9 +19,22 @@ class ProjectCompletion extends BaseFeature
 
     const string FEATURE_CODE = 'project_completion';
 
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+    private ChunkCompletionUpdateDao $chunkCompletionUpdateDao;
+
+    public function __construct(
+        BasicFeatureStruct $feature,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
+        ?ChunkCompletionUpdateDao $chunkCompletionUpdateDao = null,
+    ) {
+        parent::__construct($feature);
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        $this->chunkCompletionUpdateDao = $chunkCompletionUpdateDao ?? new ChunkCompletionUpdateDao();
+    }
+
     /**
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function postAddSegmentTranslation(PostAddSegmentTranslationEvent $event): void
     {
@@ -43,8 +58,7 @@ class ProjectCompletion extends BaseFeature
 
         $chunk_completion_update_struct->setTimestamp('last_translation_at', time());
 
-        $dao = new ChunkCompletionEventDao();
-        $current_phase = $dao->currentPhase($chunk);
+        $current_phase = $this->chunkCompletionEventDao->currentPhase($chunk);
 
         /**
          * Only save the record if the current phase is compatible
@@ -53,7 +67,7 @@ class ProjectCompletion extends BaseFeature
             ($current_phase == ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review) ||
             ($current_phase == ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review)
         ) {
-            (new ChunkCompletionUpdateDao())->createOrUpdateFromStruct($chunk_completion_update_struct);
+            $this->chunkCompletionUpdateDao->createOrUpdateFromStruct($chunk_completion_update_struct);
         }
     }
 
@@ -65,11 +79,8 @@ class ProjectCompletion extends BaseFeature
         $idJob = $event->job->id ?? throw new RuntimeException('Job id is required when updating completion passwords');
         $password = $event->job->password ?? throw new RuntimeException('Job password is required when updating completion passwords');
 
-        $dao = new ChunkCompletionUpdateDao();
-        $dao->updatePassword($idJob, $password, $event->oldPassword);
-
-        $dao = new ChunkCompletionEventDao();
-        $dao->updatePassword($idJob, $password, $event->oldPassword);
+        $this->chunkCompletionUpdateDao->updatePassword($idJob, $password, $event->oldPassword);
+        $this->chunkCompletionEventDao->updatePassword($idJob, $password, $event->oldPassword);
     }
 
 }
