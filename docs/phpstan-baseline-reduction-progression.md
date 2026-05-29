@@ -1,15 +1,15 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-28 (last updated)  
-**Commits (refactor + fix + security + test):** 358+
+**Date:** 2026-05-29 (last updated)  
+**Commits (refactor + fix + security + test):** 359+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,105 | −5,261 (−71.4%) |
+| **PHPStan baseline entries** | 7,366 | 2,049 | −5,317 (−72.2%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,025 | +3,777 (+168.0%) |
-| **PHPUnit assertions** | ~19,449 | 16,409 | — |
+| **PHPUnit tests** | ~2,248 | 6,175 | +3,927 (+174.7%) |
+| **PHPUnit assertions** | ~19,449 | 16,746 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 28.38% (195/687) | +19.90% (+142 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 57.22% (2,373/4,147) | +35.48% (+1,529 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 59.28% (20,917/35,283) | +38.09% (+13,644 lines) |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 475 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 478 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -432,8 +432,11 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/WordCount/CounterModel.php` | Phase 31 |
 | `lib/Model/WordCount/WordCounterDao.php` | Phase 25 |
 | `lib/Model/Xliff/DTO/AbstractXliffRule.php` | Phase 0 |
+| `lib/Model/Xliff/DTO/DefaultRule.php` | Phase 42 |
 | `lib/Model/Xliff/DTO/XliffRuleInterface.php` | Phase 0 |
+| `lib/Model/Xliff/DTO/XliffRulesModel.php` | Phase 42 |
 | `lib/Model/Xliff/XliffConfigTemplateDao.php` | Phase 25 |
+| `lib/Model/Xliff/XliffConfigTemplateStruct.php` | Phase 42 |
 
 #### Plugins
 | File | Cleaned In |
@@ -2118,10 +2121,49 @@ Key changes:
 
 ---
 
+### Phase 42: Xliff Directory — Full Cleanup + Tests — ✅ DONE (−10 baseline entries, +13 tests)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Model/Xliff/` — all 8 files PHPStan-clean. 5 files already on ledger, 3 files fixed and added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `DefaultRule.php` | 5→0 | `@throws LogicException` on `setAnalysis()`, `@throws Exception` on `isTranslated()` |
+| `XliffRulesModel.php` | 6→0 | `@var array<string, list<XliffRuleInterface>>` on `$ruleSets`, `new static()` → `new self()`, `@throws DomainException` on `getRulesForVersion()`, typed `jsonSerialize`/`getArrayCopy` returns, `json_encode` false guard in `__toString` |
+| `XliffConfigTemplateStruct.php` | 2→0 | Typed `$rules` param on `hydrateRulesFromDataArray()`, typed `jsonSerialize()` return |
+
+#### New Test Files (2 files, 13 tests)
+
+| File | Tests | Notes |
+|------|-------|-------|
+| `DefaultRuleCoverageTest.php` | 5 | `asEditorStatus` branch coverage (signed-off, final, new states), `isTranslated` edge cases |
+| `XliffConfigTemplateStructTest.php` | 8 | `hydrateFromJSON` (minimal, all fields, uid fallback, rules as array, rules as JSON string, error paths), `jsonSerialize` |
+
+#### Coverage
+
+| File | Methods | Lines |
+|------|---------|-------|
+| DefaultRule | 100% (3/3) | 100% (24/24) |
+| XliffRulesModel | 62.5% (5/8) | 92.11% (35/38) |
+| XliffConfigTemplateStruct | 75% (3/4) | 94.74% (36/38) |
+
+#### Baseline
+
+- **Removed:** 10 entries (2 DefaultRule + 6 XliffRulesModel + 2 XliffConfigTemplateStruct)
+- **Net:** 2,059 → **2,049** (−10)
+- **Files added to ledger:** +3 (DefaultRule, XliffRulesModel, XliffConfigTemplateStruct)
+- **Ledger total:** 475 → **478**
+- **Tests:** 6,175 tests, 16,746 assertions, 0 errors
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,286 entries)
+2. Continue PHPStan baseline reduction from remaining targets (2,049 entries)
 
 ---
 

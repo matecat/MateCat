@@ -2,6 +2,7 @@
 
 namespace Model\Xliff\DTO;
 
+use Exception;
 use LogicException;
 use Utils\Constants\TranslationStatus;
 use Utils\Constants\XliffTranslationStatus;
@@ -20,6 +21,8 @@ class DefaultRule extends AbstractXliffRule
 
     /**
      * @param $analysis
+     *
+     * @throws LogicException
      */
     protected function setAnalysis($analysis): void
     {
@@ -68,6 +71,7 @@ class DefaultRule extends AbstractXliffRule
      * @param string $target
      *
      * @return bool
+     * @throws Exception
      */
     public function isTranslated(string $source, string $target): bool
     {

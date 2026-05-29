@@ -76,6 +76,8 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
     }
 
     /**
+     * @param array<string, list<array{states: list<string>, analysis: string, editor?: string|null, match_category?: string|null}>> $rules
+     *
      * @throws Exception
      */
     protected function hydrateRulesFromDataArray(array $rules): XliffConfigTemplateStruct
@@ -115,7 +117,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function jsonSerialize(): array
