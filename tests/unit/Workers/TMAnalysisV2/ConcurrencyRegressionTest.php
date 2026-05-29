@@ -515,6 +515,31 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
+    public function test_skipped_segment_branch_must_not_early_return(): void
+    {
+        $source = $this->readSource($this->workerPath());
+
+        $skippedBranchPos = strpos($source, 'elseif ($updateRes === -1)');
+        $this->assertNotFalse(
+            $skippedBranchPos,
+            'TMAnalysisWorker must have an explicit branch for SKIPPED segments (updateRes === -1).'
+        );
+
+        $nextReturnPos = strpos($source, 'return;', $skippedBranchPos);
+        $sideEffectsPos = strpos($source, 'applyPostCommitSideEffects', $skippedBranchPos);
+
+        $this->assertNotFalse($sideEffectsPos, 'applyPostCommitSideEffects must appear after the SKIPPED branch.');
+        $this->assertLessThan(
+            $nextReturnPos,
+            $sideEffectsPos,
+            'SKIPPED branch (-1) must NOT early-return before applyPostCommitSideEffects. '
+            . 'The original worker (6582cd31) always ran side-effects regardless of updateRes. '
+            . 'The DONE guard (updateRes === 0) was added for idempotency but must not block SKIPPED segments, '
+            . 'otherwise the Redis counter never reaches the total and project analysis never completes.'
+        );
+    }
+
+    #[Test]
     public function test_analysis_redis_service_wait_uses_correct_constants(): void
     {
         $source = $this->readSource($this->analysisRedisServicePath());
