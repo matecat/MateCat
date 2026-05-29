@@ -46,14 +46,20 @@ class TranslationEventsHandler
      */
     protected ProjectStruct $_project;
 
+    private TranslationEventDao $translationEventDao;
+
     /**
      * TranslationEventsHandler constructor.
      *
      * @param JobStruct $chunkStruct
+     * @param TranslationEventDao|null $translationEventDao
      */
-    public function __construct(JobStruct $chunkStruct)
-    {
+    public function __construct(
+        JobStruct $chunkStruct,
+        ?TranslationEventDao $translationEventDao = null,
+    ) {
         $this->_chunk = $chunkStruct;
+        $this->translationEventDao = $translationEventDao ?? new TranslationEventDao();
     }
 
     /**
@@ -165,7 +171,7 @@ class TranslationEventsHandler
             $eventStruct->final_revision = (int)($eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange());
         }
 
-        $result = (new TranslationEventDao())->insertStruct($eventStruct);
+        $result = $this->translationEventDao->insertStruct($eventStruct);
         $eventStruct->id = $result !== false ? $result : null;
     }
 
@@ -180,7 +186,7 @@ class TranslationEventsHandler
             if ($segment === null) {
                 throw new Exception('Segment not found for final revision flag removal');
             }
-            (new TranslationEventDao())->unsetFinalRevisionFlag(
+            $this->translationEventDao->unsetFinalRevisionFlag(
                 (int)$this->getChunk()->id,
                 [$segment->id],
                 $event->getUnsetFinalRevision()
