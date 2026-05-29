@@ -82,11 +82,17 @@ class TranslationEvent
      */
     private array $issues_to_delete = [];
 
+    private TranslationEventDao $translationEventDao;
+    private SegmentDao $segmentDao;
+
     /**
      * @param SegmentTranslationStruct $old_translation
      * @param SegmentTranslationStruct $translation
      * @param UserStruct|null $user
      * @param int $source_page_code
+     * @param JobStruct|null $chunk
+     * @param TranslationEventDao|null $translationEventDao
+     * @param SegmentDao|null $segmentDao
      *
      * @throws RuntimeException
      */
@@ -94,17 +100,26 @@ class TranslationEvent
         SegmentTranslationStruct $old_translation,
         SegmentTranslationStruct $translation,
         ?UserStruct $user,
-        int $source_page_code
+        int $source_page_code,
+        ?JobStruct $chunk = null,
+        ?TranslationEventDao $translationEventDao = null,
+        ?SegmentDao $segmentDao = null,
     ) {
         $this->old_translation = $old_translation;
         $this->wanted_translation = $translation;
         $this->user = $user;
         $this->source_page = $source_page_code;
+        $this->translationEventDao = $translationEventDao ?? new TranslationEventDao();
+        $this->segmentDao = $segmentDao ?? new SegmentDao(Database::obtain());
 
-        try {
-            $this->chunk = $this->wanted_translation->getChunk() ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
-        } catch (Error) {
-            throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
+        if ($chunk !== null) {
+            $this->chunk = $chunk;
+        } else {
+            try {
+                $this->chunk = $this->wanted_translation->getChunk() ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
+            } catch (Error) {
+                throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
+            }
         }
 
         $this->getLatestEventForSegment();
@@ -175,9 +190,7 @@ class TranslationEvent
      */
     public function getSegmentStruct(): ?SegmentStruct
     {
-        $dao = new SegmentDao(Database::obtain());
-
-        return $dao->getByChunkIdAndSegmentId(
+        return $this->segmentDao->getByChunkIdAndSegmentId(
             $this->chunk->id ?? throw new RuntimeException('Chunk id is required'),
             $this->chunk->password ?? throw new RuntimeException('Chunk password is required'),
             $this->wanted_translation->id_segment
@@ -241,7 +254,7 @@ class TranslationEvent
     private function getLatestEventForSegment(): ?TranslationEventStruct
     {
         if (empty($this->previous_event)) {
-            $this->previous_event = (new TranslationEventDao())->getLatestEventForSegment(
+            $this->previous_event = $this->translationEventDao->getLatestEventForSegment(
                 $this->old_translation->id_job,
                 $this->old_translation->id_segment
             );
