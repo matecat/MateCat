@@ -25,6 +25,7 @@ class JobStatus
     const string STATUS_CANCELLED = 'cancelled';
     const string STATUS_DELETED = 'deleted';
 
+    /** @var list<string> */
     public static array $ALLOWED_STATUSES = [
         self::STATUS_ACTIVE,
         self::STATUS_ARCHIVED,

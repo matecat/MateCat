@@ -10,5 +10,6 @@ namespace Utils\Constants;
  */
 class TmKeyPermissions
 {
+    /** @var list<string> */
     public static array $_accepted_grants = ["r", "w", "rw"];
 }

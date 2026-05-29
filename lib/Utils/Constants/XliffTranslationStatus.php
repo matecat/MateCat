@@ -101,7 +101,7 @@ class XliffTranslationStatus
      *
      * @return bool
      */
-    public static function isStateQualifierNew($status): bool
+    public static function isStateQualifierNew(?string $status): bool
     {
         return in_array($status, [
             self::FUZZY_MATCH,
@@ -117,7 +117,7 @@ class XliffTranslationStatus
      *
      * @return bool
      */
-    public static function isStatusNew($status): bool
+    public static function isStatusNew(?string $status): bool
     {
         return in_array($status, [
             self::NEW_STATE,
@@ -133,7 +133,7 @@ class XliffTranslationStatus
      *
      * @return bool
      */
-    public static function isTranslated($status): bool
+    public static function isTranslated(?string $status): bool
     {
         return in_array($status, [
             self::TRANSLATED,
@@ -148,7 +148,7 @@ class XliffTranslationStatus
      *
      * @return bool
      */
-    public static function isRevision($status): bool
+    public static function isRevision(?string $status): bool
     {
         return self::isR1($status);
     }
@@ -158,7 +158,7 @@ class XliffTranslationStatus
      *
      * @return bool
      */
-    public static function isR1($status): bool
+    public static function isR1(?string $status): bool
     {
         return in_array($status, [
             self::REVIEWED, // xliff 2.0
@@ -171,7 +171,7 @@ class XliffTranslationStatus
      *
      * @return bool
      */
-    public static function isFinalState($status): bool
+    public static function isFinalState(?string $status): bool
     {
         return $status === self::FINAL_STATE; // xliff 2.0 / 1.2
     }

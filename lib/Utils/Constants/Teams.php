@@ -15,13 +15,14 @@ class Teams
     const string PERSONAL = 'personal';
     const string GENERAL = 'general';
 
+    /** @var list<string> */
     protected static array $TYPES = [
         self::PERSONAL,
         self::GENERAL
     ];
 
 
-    public static function isAllowedType($type): bool
+    public static function isAllowedType(string $type): bool
     {
         return in_array(strtolower($type), self::$TYPES);
     }

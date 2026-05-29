@@ -20,6 +20,7 @@ class TranslationStatus
     const string STATUS_REJECTED = 'REJECTED';
     const string STATUS_FIXED = 'FIXED';
 
+    /** @var array<string, int> */
     public static array $DB_STATUSES_MAP = [
         self::STATUS_NEW => 1,
         self::STATUS_DRAFT => 2,
@@ -30,6 +31,7 @@ class TranslationStatus
         self::STATUS_APPROVED2 => 8,
     ];
 
+    /** @var list<string> */
     public static array $STATUSES = [
         self::STATUS_NEW,
         self::STATUS_DRAFT,
@@ -38,28 +40,31 @@ class TranslationStatus
         self::STATUS_APPROVED2,
     ];
 
+    /** @var list<string> */
     public static array $INITIAL_STATUSES = [
         self::STATUS_NEW,
         self::STATUS_DRAFT
     ];
 
+    /** @var list<string> */
     public static array $TRANSLATION_STATUSES = [
         self::STATUS_TRANSLATED
     ];
 
 
+    /** @var list<string> */
     public static array $REVISION_STATUSES = [
         self::STATUS_APPROVED,
         self::STATUS_APPROVED2,
         self::STATUS_REJECTED
     ];
 
-    public static function isReviewedStatus($status): bool
+    public static function isReviewedStatus(string $status): bool
     {
         return in_array($status, TranslationStatus::$REVISION_STATUSES);
     }
 
-    public static function isNotInitialStatus($status): bool
+    public static function isNotInitialStatus(string $status): bool
     {
         return !in_array($status, TranslationStatus::$INITIAL_STATUSES);
     }

@@ -2,11 +2,11 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-29 (last updated)  
-**Commits (refactor + fix + security + test):** 361+
+**Commits (refactor + fix + security + test):** 362+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 2,025 | −5,341 (−72.5%) |
+| **PHPStan baseline entries** | 7,366 | 2,001 | −5,365 (−72.8%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,244 | +3,996 (+177.7%) |
 | **PHPUnit assertions** | ~19,449 | 16,858 | — |
@@ -89,7 +89,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 486 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 495 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -497,7 +497,16 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/AsyncTasks/Workers/SetContributionWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/GlossaryWorker.php` | Phase 17 |
 | `lib/Utils/AsyncTasks/Workers/Traits/ProjectWordCount.php` | Phase 4C |
+| `lib/Utils/Constants/Constants.php` | Phase 45 |
 | `lib/Utils/Constants/EngineConstants.php` | Phase 6C |
+| `lib/Utils/Constants/Ices.php` | Phase 45 |
+| `lib/Utils/Constants/JobStatus.php` | Phase 45 |
+| `lib/Utils/Constants/Mime2Extension.php` | Phase 45 |
+| `lib/Utils/Constants/ProjectStatus.php` | Phase 45 |
+| `lib/Utils/Constants/Teams.php` | Phase 45 |
+| `lib/Utils/Constants/TmKeyPermissions.php` | Phase 45 |
+| `lib/Utils/Constants/TranslationStatus.php` | Phase 45 |
+| `lib/Utils/Constants/XliffTranslationStatus.php` | Phase 45 |
 | `lib/Utils/Contribution/ContributionContexts.php` | Phase 4A |
 | `lib/Utils/Contribution/GetContributionRequest.php` | Phase 4A |
 | `lib/Utils/Contribution/SetContributionRequest.php` | Phase 5B |
@@ -2275,10 +2284,42 @@ Key changes:
 
 ---
 
+### Phase 45: Constants Directory — Full Cleanup — ✅ DONE (−24 baseline entries, 0 tests needed)
+
+**Date:** 2026-05-29
+
+**Why:** Complete `lib/Utils/Constants/` — all 13 files PHPStan-clean. Pure constant/enum classes with no complex logic. 4 files already on ledger, 9 files fixed and added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `Constants.php` | 2→0 | `@var list<string>`, removed dead `== null` check (always false — `== ''` already catches null) |
+| `Ices.php` | 1→0 | `@var list<string>` |
+| `JobStatus.php` | 1→0 | `@var list<string>` |
+| `Mime2Extension.php` | 2→0 | `@var array<string, list<string>>`, typed return |
+| `ProjectStatus.php` | 2→0 | `@var list<string>`, native `string` param |
+| `Teams.php` | 2→0 | `@var list<string>`, native `string` param |
+| `TmKeyPermissions.php` | 1→0 | `@var list<string>` |
+| `TranslationStatus.php` | 7→0 | 5× `@var` typed arrays, 2× native `string` params |
+| `XliffTranslationStatus.php` | 6→0 | 6× native `?string` params (nullable — callers pass null) |
+
+No cascade errors. No tests needed — pure data classes covered by caller tests.
+
+#### Baseline
+
+- **Removed:** 24 entries
+- **Net:** 2,025 → **2,001** (−24)
+- **Files added to ledger:** +9
+- **Ledger total:** 486 → **495**
+- **Tests:** 6,244 (unchanged)
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (2,025 entries)
+2. Continue PHPStan baseline reduction from remaining targets (2,001 entries)
 
 ---
 

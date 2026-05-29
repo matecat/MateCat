@@ -22,6 +22,7 @@ class ProjectStatus
 
     const string PROJECT_QUEUE_HASH = 'project_completed:%u';
 
+    /** @var list<string> */
     public static array $ALLOWED_STATUSES = [
         self::STATUS_DONE,
         self::STATUS_FAST_OK,
@@ -32,7 +33,7 @@ class ProjectStatus
         self::STATUS_NOT_READY_FOR_ANALYSIS,
     ];
 
-    public static function isAllowedStatus($status): bool
+    public static function isAllowedStatus(string $status): bool
     {
         return in_array(strtoupper($status), self::$ALLOWED_STATUSES);
     }
