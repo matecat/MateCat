@@ -31,11 +31,25 @@ class EventModel
     protected JobStruct $chunk;
     protected ?int $chunkCompletionEventId = null;
 
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+    private ProjectDao $projectDao;
+    private FeatureSet $featureSet;
 
-    public function __construct(JobStruct $chunk, CompletionEventStruct $eventStruct)
-    {
+    /**
+     * @throws Exception
+     */
+    public function __construct(
+        JobStruct $chunk,
+        CompletionEventStruct $eventStruct,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
+        ?ProjectDao $projectDao = null,
+        ?FeatureSet $featureSet = null,
+    ) {
         $this->eventStruct = $eventStruct;
         $this->chunk = $chunk;
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        $this->projectDao = $projectDao ?? new ProjectDao();
+        $this->featureSet = $featureSet ?? new FeatureSet();
     }
 
     /**
@@ -47,15 +61,14 @@ class EventModel
     {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = (int)(new ChunkCompletionEventDao())->createFromChunk(
+        $this->chunkCompletionEventId = (int)$this->chunkCompletionEventDao->createFromChunk(
             $this->chunk,
             $this->eventStruct
         );
 
-        $project = (new ProjectDao())->findById($this->chunk->id_project) ?? throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
-        $featureSet = new FeatureSet();
-        $featureSet->loadForProject($project);
-        $featureSet->dispatch(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));
+        $project = $this->projectDao->findById($this->chunk->id_project) ?? throw new Exception('Project not found for chunk ' . $this->chunk->id_project);
+        $this->featureSet->loadForProject($project);
+        $this->featureSet->dispatch(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));
     }
 
     public function getChunkCompletionEventId(): ?int
@@ -68,8 +81,7 @@ class EventModel
      */
     private function _checkStatusIsValid(): void
     {
-        $dao = new ChunkCompletionEventDao();
-        $current_phase = $dao->currentPhase($this->chunk);
+        $current_phase = $this->chunkCompletionEventDao->currentPhase($this->chunk);
 
         if (
             ($this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE) ||
