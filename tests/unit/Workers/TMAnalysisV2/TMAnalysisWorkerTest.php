@@ -218,6 +218,33 @@ class TMAnalysisWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function process_when_setAnalysisValue_returns_minus_one_still_calls_increment_and_close(): void
+    {
+        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
+        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+        $engine     = $this->createStub(EngineServiceInterface::class);
+        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
+        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+
+        $this->stubLockLoserInit($redis);
+        $this->stubMatchPipeline($engine, $processor, $redis);
+
+        $updater->method('setAnalysisValue')->willReturn(-1);
+
+        $redis->expects($this->once())->method('incrementAnalyzedCount');
+        $completion->expects($this->once())->method('tryCloseProject');
+
+        $worker = $this->buildWorker(
+            redis: $redis,
+            updater: $updater,
+            completion: $completion,
+            engine: $engine,
+            processor: $processor,
+        );
+        $worker->process($this->makeQueueElement());
+    }
+
+    #[Test]
     public function process_when_setAnalysisValue_returns_positive_calls_increment_and_close(): void
     {
         $redis      = $this->createMock(AnalysisRedisServiceInterface::class);

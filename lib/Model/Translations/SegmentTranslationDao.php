@@ -9,7 +9,6 @@ use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Files\FileStruct;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
@@ -210,6 +209,9 @@ class SegmentTranslationDao extends AbstractDao
      * @param array $data
      *
      * @return int
+     *
+     * @throws \PDOException
+     * @throws \Exception
      */
     public static function setAnalysisValue(array $data): int
     {
@@ -229,7 +231,21 @@ class SegmentTranslationDao extends AbstractDao
 
         $stmt->execute($data);
 
-        return $stmt->rowCount();
+        $rc = $stmt->rowCount();
+        if ($rc === 0) {
+            $sql = "SELECT tm_analysis_status FROM segment_translations WHERE id_segment = :id_segment AND id_job = :id_job";
+            $stmt = $db->getConnection()->prepare($sql);
+            $stmt->execute([
+                'id_segment' => $data['id_segment'] ?? throw new Exception('Missing id_segment in data'),
+                'id_job' => $data['id_job'] ?? throw new Exception('Missing id_job in data'),
+            ]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!empty($result) && $result['tm_analysis_status'] === 'SKIPPED') {
+                return -1;
+            }
+        }
+
+        return $rc;
     }
 
 
