@@ -62,6 +62,7 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function __construct(
         AMQHandler $queueHandler,

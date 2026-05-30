@@ -3072,24 +3072,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
 
 		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\Health\:\:fastAnalysisIsRunning\(\) has parameter \$redisHandler with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/Health.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\Health\:\:tmAnalysisIsRunning\(\) has parameter \$redisHandler with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/Health.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$redisHandler Client\)\: Unexpected token "\$redisHandler", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: lib/Utils/AsyncTasks/Workers/Analysis/Health.php
-
-		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
 			identifier: argument.type
 			count: 1
@@ -11392,12 +11374,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysisWorker.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'

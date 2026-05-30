@@ -24,23 +24,15 @@ use Utils\Registry\AppConfig;
 class Health
 {
 
-    public static function fastAnalysisIsRunning($redisHandler): bool
+    public static function fastAnalysisIsRunning(Client $redisHandler): bool
     {
-        /**
-         * @var $redisHandler Client
-         */
-
         $fastList = $redisHandler->srandmember(RedisKeys::FAST_PID_SET);
 
         return !empty($fastList);
     }
 
-    public static function tmAnalysisIsRunning($redisHandler): bool
+    public static function tmAnalysisIsRunning(Client $redisHandler): bool
     {
-        /**
-         * @var $redisHandler Client
-         */
-
         return (bool)$redisHandler->get(RedisKeys::VOLUME_ANALYSIS_PID);
     }
 
