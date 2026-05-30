@@ -4,7 +4,6 @@ namespace Model\Files;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDOException;
 use ReflectionException;
 
@@ -27,7 +26,7 @@ class FileDao extends AbstractDao
         }
 
         $sql = "DELETE FROM files WHERE id IN ( " . str_repeat('?,', count($idFiles) - 1) . '?' . " ) ";
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($idFiles);
 

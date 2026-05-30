@@ -2812,18 +2812,6 @@ parameters:
 			count: 1
 			path: lib/Model/EditLog/EditLogSegmentStruct.php
 
-		-
-			message: '#^Method Model\\Files\\FilesMetadataMarshaller\:\:marshall\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: lib/Model/Files/FilesMetadataMarshaller.php
-
-		-
-			message: '#^Method Model\\Files\\FilesMetadataMarshaller\:\:marshall\(\) should return string\|null but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/Files/FilesMetadataMarshaller.php
-
 
 		-
 			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureStruct\:\:getOptions\(\) has no return type specified\.$#'

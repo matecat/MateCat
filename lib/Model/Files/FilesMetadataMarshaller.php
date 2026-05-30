@@ -16,7 +16,7 @@ enum FilesMetadataMarshaller: string
     public function marshall(mixed $value): ?string
     {
         return match ($this) {
-            self::PDF_ANALYSIS => is_string($value) ? $value : json_encode($value),
+            self::PDF_ANALYSIS => is_string($value) ? $value : (json_encode($value) ?: null),
             default            => (string)$value,
         };
     }
