@@ -116,7 +116,7 @@ class TranslationEvent
             $this->chunk = $chunk;
         } else {
             try {
-                $this->chunk = $this->wanted_translation->getChunk() ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
+                $this->chunk = $this->wanted_translation->getJob() ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
             } catch (Error) {
                 throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
             }

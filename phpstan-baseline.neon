@@ -2813,18 +2813,6 @@ parameters:
 
 
 		-
-			message: '#^Class Model\\Translations\\SegmentTranslationStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationStruct.php
-
-		-
-			message: '#^PHPDoc tag @return with type array\<Model\\Jobs\\JobStruct\>\|null is not subtype of native type Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Model/Translations/SegmentTranslationStruct.php
-
-		-
 			message: '#^Property Model\\TranslationsSplit\\SegmentSplitStruct\:\:\$source_chunk_lengths type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
