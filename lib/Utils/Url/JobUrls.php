@@ -40,12 +40,12 @@ class JobUrls
     private ?string $segmentId;
 
     /**
-     * @var array
+     * @var array<string, string|null>
      */
     private array $passwords;
 
     /**
-     * @var array
+     * @var array<string, string>
      */
     private array $urls = [];
 
@@ -56,7 +56,7 @@ class JobUrls
      * @param string $projectName
      * @param string $source
      * @param string $target
-     * @param array $passwords
+     * @param array<string, string|null> $passwords
      * @param string|null $httpHost
      * @param string|null $segmentId
      */
@@ -203,7 +203,7 @@ class JobUrls
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getUrls(): array
     {
