@@ -49,6 +49,7 @@ class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonS
      *
      * @return array The object properties as an associative array.
      */
+    /** @return array<string, mixed> */
     public function jsonSerialize(): array
     {
         return $this->getArrayCopy();
@@ -61,7 +62,7 @@ class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonS
      */
     public function __toString(): string
     {
-        return json_encode($this->jsonSerialize());
+        return json_encode($this->jsonSerialize()) ?: '';
     }
 
 }

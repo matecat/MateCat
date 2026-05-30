@@ -26,6 +26,7 @@ class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializ
     /**
      * @inheritDoc
      */
+    /** @return array<string, mixed> */
     public function jsonSerialize(): array
     {
         return $this->getArrayCopy();
@@ -33,7 +34,7 @@ class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializ
 
     public function __toString(): string
     {
-        return json_encode($this->jsonSerialize());
+        return json_encode($this->jsonSerialize()) ?: '';
     }
 
 }

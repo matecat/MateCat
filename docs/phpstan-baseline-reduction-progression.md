@@ -6,15 +6,15 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,966 | −5,400 (−73.3%) |
+| **PHPStan baseline entries** | 7,366 | 1,956 | −5,410 (−73.4%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,251 | +4,003 (+178.1%) |
+| **PHPUnit tests** | ~2,248 | 6,284 | +4,036 (+179.5%) |
 | **PHPUnit assertions** | ~19,449 | 16,870 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 33.43% (231/691) | +24.95% (+178 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 62.65% (2,617/4,177) | +40.91% (+1,773 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 63.13% (22,390/35,466) | +41.94% (+15,117 lines) |
 | **New test files** | 235 | 420 | +185 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 320 | +320 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 324 | +324 |
 
 ---
 
@@ -376,8 +376,12 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/ProjectCreation/TranslationTuple.php` | Phase 46 |
 | `lib/Model/Files/FileDao.php` | Phase 25 |
 | `lib/Model/Files/MetadataDao.php` | Phase 25 |
+| `lib/Model/MTQE/PayableRate/DTO/MTQEPayableRateBreakdowns.php` | Phase 49 |
+| `lib/Model/MTQE/PayableRate/MTQEPayableRateStruct.php` | Phase 49 |
 | `lib/Model/MTQE/PayableRate/MTQEPayableRateTemplateDao.php` | Phase 25 |
+| `lib/Model/MTQE/Templates/DTO/MTQEWorkflowParams.php` | Phase 49 |
 | `lib/Model/MTQE/Templates/MTQEWorkflowTemplateDao.php` | Phase 25 |
+| `lib/Model/MTQE/Templates/MTQEWorkflowTemplateStruct.php` | Phase 49 |
 | `lib/Model/Outsource/ConfirmationDao.php` | Phase 25 |
 | `lib/Model/Outsource/ConfirmationStruct.php` | Phase 0 |
 | `lib/Model/PayableRates/CustomPayableRateDao.php` | Phase 25 |
@@ -2424,6 +2428,52 @@ No cascade errors. No tests needed — pure data structs covered by existing tes
 ---
 
 ## Next Action
+
+### Phase 49: MTQE Directory — Full Cleanup — ✅ DONE (−10 baseline entries, +30 tests)
+
+**Date:** 2026-05-30
+
+**Why:** Complete `lib/Model/MTQE/` — all 6 files PHPStan-clean. 2 DAOs already on ledger, 4 fixed and added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `MTQEPayableRateBreakdowns.php` | 2→0 | `@return array<string, mixed>` on `jsonSerialize`, `json_encode() ?: ''` on `__toString` |
+| `MTQEPayableRateStruct.php` | 3→0 | `@return array<string, mixed>` on `jsonSerialize`, `@param array<string, mixed>` on `hydrateBreakdownsFromDataArray`, `json_encode() ?: ''` on `__toString` |
+| `MTQEWorkflowParams.php` | 2→0 | `@return array<string, mixed>` on `jsonSerialize`, `json_encode() ?: ''` on `__toString` |
+| `MTQEWorkflowTemplateStruct.php` | 3→0 | `@return array<string, mixed>` on `jsonSerialize`, `@param array<string, mixed>` on `hydrateParamsFromDataArray`, `json_encode() ?: ''` on `__toString` |
+
+#### Cascade fixes
+
+None — no cascades triggered.
+
+#### Tests Added
+
+- `MTQEPayableRateBreakdownsTest.php` — 4 tests (defaults, jsonSerialize, toString, hydrate from constructor)
+- `MTQEPayableRateStructTest.php` — 11 tests (hydrateFromJSON variants, breakdowns hydration, serialization, error paths)
+- `MTQEWorkflowParamsTest.php` — 4 tests (defaults, jsonSerialize, toString, hydrate from constructor)
+- `MTQEWorkflowTemplateStructTest.php` — 11 tests (hydrateFromJSON variants, params hydration, serialization, error paths)
+
+#### Coverage
+
+| File | Methods | Lines |
+|------|---------|-------|
+| `MTQEPayableRateBreakdowns.php` | 100% (2/2) | 100% (2/2) |
+| `MTQEPayableRateStruct.php` | 100% (5/5) | 100% (28/28) |
+| `MTQEWorkflowParams.php` | 100% (2/2) | 100% (2/2) |
+| `MTQEWorkflowTemplateStruct.php` | 100% (5/5) | 100% (26/26) |
+
+#### Baseline
+
+- **Removed:** 10 entries
+- **Added:** 0
+- **Net:** 1,966 → **1,956** (−10)
+- **Files added to ledger:** +4
+- **Ledger total:** 515 → **519**
+- **Tests:** 6,254 → **6,284** (+30)
+
+---
 
 ### Phase 48: Segments Directory — Full Cleanup — ✅ DONE (−6 net baseline entries, 0 tests needed)
 
