@@ -919,6 +919,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     private function clearSessionFiles(): void
     {

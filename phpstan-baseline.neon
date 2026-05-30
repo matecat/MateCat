@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GlossaryWorker\:\:set\(\) has parameter \$payload with no value type specified in unsealed extra keys \(\.\.\.\)\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GlossaryWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\GlossaryWorker\:\:update\(\) has parameter \$payload with no value type specified in unsealed extra keys \(\.\.\.\)\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/GlossaryWorker.php
-
-		-
 			message: '#^Cannot access offset ''version'' on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -121,6 +109,12 @@ parameters:
 			path: lib/Controller/API/App/AjaxUtilsController.php
 
 		-
+			message: '#^Method Controller\\API\\App\\AjaxUtilsController\:\:clearNotCompletedUploads\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/AjaxUtilsController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\AjaxUtilsController\:\:ping\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -218,6 +212,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/ChangeJobsStatusController.php
+
+		-
+			message: '#^Method Controller\\API\\App\\ConvertFileController\:\:handle\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Controller/API/App/ConvertFileController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\ConvertFileController\:\:validateFiltersExtractionParametersTemplateId\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
@@ -2781,12 +2781,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: lib/Controller/Views/XliffToTargetController.php
-
-		-
-			message: '#^PHPDoc type list\<array\<string, mixed\>\> of property Model\\ActivityLog\\ActivityLogStruct\:\:\$cached_results is not covariant with PHPDoc type array\<string, mixed\> of overridden property Model\\DataAccess\\AbstractDaoObjectStruct\:\:\$cached_results\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: lib/Model/ActivityLog/ActivityLogStruct.php
 
 		-
 			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
@@ -6681,6 +6675,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 
 		-
+			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:convert\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
+
+		-
 			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:_sanitizeFileName\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9314,6 +9314,12 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:_getSegmentsFromJson\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
+
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getProgress\(\) has no return type specified\.$#'
@@ -9502,12 +9508,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
-			message: '#^Cannot call method decode\(\) on Matecat\\SimpleS3\\Components\\Encoders\\SafeNameEncoderInterface\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_checkForReQueueEnd\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -9523,6 +9523,24 @@ parameters:
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_createSegments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_createSegments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_file2segments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_saveSegmentsAsJson\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
@@ -10245,6 +10263,12 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCachePackage\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Utils/FilesStorage/S3AlignerFilesStorage.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCacheFolder\(\) has no return type specified\.$#'

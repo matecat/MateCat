@@ -130,6 +130,7 @@ class FilesConverter
     /**
      * @return ConvertedFileList
      * @throws Exception
+     * @throws \TypeError
      */
     public function convertFiles(): ConvertedFileList
     {
@@ -173,6 +174,7 @@ class FilesConverter
      *
      * @return ConversionHandler
      * @throws Exception
+     * @throws \TypeError
      */
     private function getConversionHandlerInstance(string $fileName): ConversionHandler
     {
@@ -198,6 +200,7 @@ class FilesConverter
      * @return ConvertedFileModel
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     private function convertFile(string $fileName): ConvertedFileModel
     {
@@ -209,6 +212,7 @@ class FilesConverter
 
     /**
      * @throws Exception
+     * @throws \TypeError
      * @return string[]
      */
     private function getExtractedFilesContentList(string $zipName): array

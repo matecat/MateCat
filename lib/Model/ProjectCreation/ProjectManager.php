@@ -414,6 +414,7 @@ class ProjectManager
     /**
      * Initialize a Google Drive session if a UID is present in the session data.
      * @throws Exception
+     * @throws \TypeError
      */
     private function initGdriveSession(): void
     {
@@ -543,6 +544,7 @@ class ProjectManager
      *
      * @throws EndQueueException
      * @throws \Psr\Log\InvalidArgumentException
+     * @throws \TypeError
      */
     private function handleZipFiles(array $linkFiles): void
     {
@@ -824,6 +826,7 @@ class ProjectManager
      * @param string $fileName
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function getSingleS3QueueFile(string $fileName): void
     {
@@ -870,6 +873,7 @@ class ProjectManager
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     private function writeFastAnalysisData(): void
     {
@@ -960,6 +964,7 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws Exception
+     * @throws \TypeError
      */
     protected function zipFileHandling(array $linkFiles): void
     {

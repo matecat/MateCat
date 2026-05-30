@@ -80,7 +80,7 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     const int TRANSLATION_DELIVERED = 101;
 
-    /** @var list<array<string, mixed>> */
+    /** @var array<string, mixed> */
     protected array $cached_results = [];
 
     /**

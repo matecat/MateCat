@@ -97,6 +97,7 @@ class Session
      * @param ConnectedServiceDao|null $dao
      * @param AbstractFilesStorage|null $filesStorage
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
     {
@@ -130,6 +131,7 @@ class Session
      * @return Session
      * @throws RuntimeException
      * @throws Exception
+     * @throws \TypeError
      */
     public static function getInstanceForCLI(array $session): Session
     {
@@ -146,6 +148,7 @@ class Session
      * @param FiltersConfigTemplateStruct|null $filtersExtractionParameters
      *
      * @return bool
+     * @throws \TypeError
      */
     public function reConvert(string $newSourceLang, ?string $newSegmentationRule = null, ?FiltersConfigTemplateStruct $filtersExtractionParameters = null): bool
     {
@@ -705,6 +708,7 @@ class Session
      *
      * @return array<string, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
     public function doConversion(string $file_name): array
     {

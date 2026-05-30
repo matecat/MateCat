@@ -73,6 +73,7 @@ class ConversionHandler
      * @param MatecatLogger|null                $logger         Logger (default: LoggerFactory::getLogger('conversion')).
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(
         ?AbstractFilesStorage        $filesStorage = null,

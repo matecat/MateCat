@@ -756,10 +756,7 @@ class SegmentExtractor
             $s3Client = S3FilesStorage::getStaticS3Client();
 
             if ($s3Client->hasEncoder()) {
-                $encoder = $s3Client->getEncoder();
-                if ($encoder !== null) {
-                    $xliffFilePath = $encoder->decode($xliffFilePath);
-                }
+                $xliffFilePath = $s3Client->getEncoder()->decode($xliffFilePath);
             }
 
             return $s3Client->openItem(['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliffFilePath]);

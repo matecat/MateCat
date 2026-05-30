@@ -169,6 +169,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     private function initSessionService(): void
     {
@@ -441,6 +442,7 @@ class GDriveController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     protected function afterConstruct(): void
     {

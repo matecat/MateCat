@@ -2,18 +2,18 @@
 
 **Branch:** `context-review` (based on `develop`)  
 **Date:** 2026-05-30 (last updated)  
-**Commits (refactor + fix + security + test):** 365+
+**Commits (refactor + fix + security + test):** 441+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,952 | −5,414 (−73.5%) |
+| **PHPStan baseline entries** | 7,366 | 1,950 | −5,416 (−73.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,296 | +4,048 (+180.1%) |
-| **PHPUnit assertions** | ~19,449 | 16,870 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 33.43% (231/691) | +24.95% (+178 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 62.65% (2,617/4,177) | +40.91% (+1,773 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 63.13% (22,390/35,466) | +41.94% (+15,117 lines) |
-| **New test files** | 235 | 420 | +185 |
+| **PHPUnit tests** | ~2,248 | 6,412 | +4,164 (+185.2%) |
+| **PHPUnit assertions** | ~19,449 | 17,176 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 34.54% (239/692) | +26.06% (+186 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 63.99% (2,683/4,193) | +42.25% (+1,839 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 64.50% (22,856/35,437) | +43.31% (+15,583 lines) |
+| **New test files** | 235 | 455 | +220 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 325 | +325 |
 
 ---
@@ -42,6 +42,7 @@ Execution order:
 3. **Types MUST be certain** — no speculative type changes. Confirm actual runtime behavior via tests/callers labefore narrowing or changing a type.
 4. **Minimize scope** — fix the PHPStan error, don't refactor surrounding code.
 5. **No `@phpstan-ignore`** or baseline suppression.
+6. **When adding the exception to the phpdoc prefer `use` over FQDN. 
 
 ### Baseline Reduction Algorithm (MANDATORY)
 

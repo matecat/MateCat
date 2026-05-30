@@ -10,7 +10,6 @@ namespace Model\ActivityLog;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
 use PDOException;
@@ -28,7 +27,7 @@ class ActivityLogDao extends AbstractDao
      */
     public function getAllForProject(int $id_project): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC ";
 
@@ -46,7 +45,7 @@ class ActivityLogDao extends AbstractDao
      */
     public function getLastActionInProject(int $id_project): array
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
            SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project GROUP BY id_job
@@ -65,7 +64,7 @@ class ActivityLogDao extends AbstractDao
      */
     public function create(ActivityLogStruct $activityStruct): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $jobStructToArray = $activityStruct->toArray(
             [
                 'id_job',
