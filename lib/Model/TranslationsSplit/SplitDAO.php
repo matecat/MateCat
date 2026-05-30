@@ -4,7 +4,6 @@ namespace Model\TranslationsSplit;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 
 
@@ -51,7 +50,7 @@ class SplitDAO extends AbstractDao
         }
 
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($query);
 
         $result = $this->_fetchObjectMap($stmt, SegmentSplitStruct::class, $values);

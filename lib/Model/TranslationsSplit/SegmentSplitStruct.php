@@ -28,11 +28,11 @@ class SegmentSplitStruct extends AbstractDaoObjectStruct implements IDaoStruct
     public int $id_job;
 
     /**
-     * @var array|string|null
+     * @var array<int, int|string>|string|null
      */
     public $source_chunk_lengths;
     /**
-     * @var array|string|null
+     * @var array<int, int|string>|string|null
      */
     public $target_chunk_lengths;
 

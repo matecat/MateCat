@@ -2812,19 +2812,6 @@ parameters:
 
 
 
-		-
-			message: '#^Property Model\\TranslationsSplit\\SegmentSplitStruct\:\:\$source_chunk_lengths type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TranslationsSplit/SegmentSplitStruct.php
-
-		-
-			message: '#^Property Model\\TranslationsSplit\\SegmentSplitStruct\:\:\$target_chunk_lengths type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/TranslationsSplit/SegmentSplitStruct.php
-
-
 
 
 		-
