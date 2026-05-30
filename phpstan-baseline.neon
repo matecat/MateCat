@@ -11496,30 +11496,6 @@ parameters:
 			path: plugins/translated/lib/Features/Translated/Utils/SupportedLanguages.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$segment\.$#'
-			identifier: property.notFound
-			count: 1
-			path: plugins/uber/lib/Features/Uber.php
-
-		-
-			message: '#^Method Features\\Uber\:\:filterContributionStructOnSetTranslation\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/uber/lib/Features/Uber.php
-
-		-
-			message: '#^PHPDoc type array<string, float> of property Features\\Uber\\Model\\Analysis\\CustomPayableRates::\$DEFAULT_PAYABLE_RATES is not covariant with PHPDoc type array<string, int> of overridden property Model\\Analysis\\PayableRates::\$DEFAULT_PAYABLE_RATES\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: plugins/uber/lib/Features/Uber/Model/Analysis/CustomPayableRates.php
-
-		-
-			message: '#^PHPDoc type array<string, array<string, array<string, float\|int>>> of property Features\\Uber\\Model\\Analysis\\CustomPayableRates::\$langPair2MTpayableRates is not covariant with PHPDoc type array<string, array<string, array<string, int>>> of overridden property Model\\Analysis\\PayableRates::\$langPair2MTpayableRates\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: plugins/uber/lib/Features/Uber/Model/Analysis/CustomPayableRates.php
-
-		-
 			message: '#^Offset ''Additional Info''\|''AdditionalInfo''\|''Component''\|''Content Type''\|''Description''\|''DynamicValueExample''\|''KeyName''\|''MobileUsages''\|''Preview Link''\|''ReferenceLinks''\|''Repo''\|''Target Audience'' might not exist on array\{\}\|array\{Repo\?\: non\-falsy\-string, KeyName\?\: non\-falsy\-string, Description\?\: non\-falsy\-string, ''Content Type''\?\: non\-falsy\-string, ''Preview Link''\?\: non\-falsy\-string, ''Additional Info''\?\: non\-falsy\-string, DynamicValueExample\?\: non\-falsy\-string, Component\?\: non\-falsy\-string, \.\.\.\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 2
