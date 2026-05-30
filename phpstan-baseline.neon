@@ -2845,24 +2845,6 @@ parameters:
 			path: lib/Controller/API/App/Authentication/UserController.php
 
 		-
-			message: '#^Method Model\\WordCount\\WordCountStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/WordCount/WordCountStruct.php
-
-		-
-			message: '#^Method Model\\WordCount\\WordCountStruct\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/WordCount/WordCountStruct.php
-
-		-
-			message: '#^Property Model\\WordCount\\WordCountStruct\:\:\$job_password \(string\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Model/WordCount/WordCountStruct.php
-
-		-
 			message: '#^Parameter \#3 \$callback of function route expects array\{class\-string\<Controller\\Abstracts\\KleinController\>, string\}, array\{''Controller\\\\API\\\\App…'', ''update''\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3444,11 +3426,6 @@ parameters:
 			count: 1
 			path: lib/Utils/Email/ProjectAssignedEmail.php
 
-		-
-			message: '#^Parameter \#1 \$job_password of method Model\\WordCount\\WordCountStruct\:\:setJobPassword\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/Email/ProjectAssignedEmail.php
 
 		-
 			message: '#^Parameter \#2 \$subject of method Utils\\Email\\AbstractEmail\:\:doSend\(\) expects string, string\|null given\.$#'

@@ -18,7 +18,7 @@ class WordCountStruct implements JsonSerializable
 {
 
     protected int $id_job;
-    protected string $job_password;
+    protected ?string $job_password = null;
     protected float $new_words = 0;
     protected float $draft_words = 0;
     protected float $translated_words = 0;
@@ -188,11 +188,11 @@ class WordCountStruct implements JsonSerializable
     }
 
     /**
-     * @param string $job_password
+     * @param string|null $job_password
      *
      * @return $this
      */
-    public function setJobPassword(string $job_password): WordCountStruct
+    public function setJobPassword(?string $job_password): WordCountStruct
     {
         $this->job_password = $job_password;
 
@@ -200,9 +200,9 @@ class WordCountStruct implements JsonSerializable
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getJobPassword(): string
+    public function getJobPassword(): ?string
     {
         return $this->job_password;
     }
@@ -440,7 +440,7 @@ class WordCountStruct implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, float>>
      */
     public function jsonSerialize(): array
     {
@@ -465,7 +465,7 @@ class WordCountStruct implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, float>>
      */
     public function toArray(): array
     {

@@ -11,7 +11,6 @@ namespace Model\WordCount;
 
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use Utils\Logger\LoggerFactory;
@@ -24,7 +23,7 @@ class WordCounterDao extends AbstractDao
      */
     public function updateWordCount(WordCountStruct $wStruct): int
     {
-        $db = Database::obtain();
+        $db = $this->database;
 
         //Update in Transaction
         $query = "UPDATE jobs AS j SET
@@ -74,7 +73,7 @@ class WordCounterDao extends AbstractDao
 
     public function initializeWordCount(WordCountStruct $wStruct): int
     {
-        $db = Database::obtain();
+        $db = $this->database;
 
         $data = [];
         $data['new_words'] = $wStruct->getNewWords();
@@ -175,7 +174,7 @@ class WordCounterDao extends AbstractDao
  			    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			";
 
-        $db = Database::obtain();
+        $db = $this->database;
 
         $bind_values = ['id_job' => $id_job];
 
