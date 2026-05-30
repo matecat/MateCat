@@ -41,7 +41,7 @@ class CommentStruct extends BaseCommentStruct implements IDaoStruct, JsonSeriali
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

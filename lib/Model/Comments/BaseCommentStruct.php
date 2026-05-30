@@ -32,6 +32,7 @@ class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, J
     /**
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws \Exception
      */
     public function templateMessage(): void
     {
@@ -39,18 +40,21 @@ class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, J
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {
+        $createDate = date_create($this->create_date ?: 'now') ?: new \DateTime();
+        $resolvedAt = !empty($this->resolve_date) ? date_create($this->resolve_date) : null;
+
         return [
             'id' => $this->id,
             'id_job' => $this->id_job,
             'id_segment' => $this->id_segment,
-            'create_at' => date_format(date_create($this->create_date ?: 'now'), DATE_ATOM),
+            'create_at' => date_format($createDate, DATE_ATOM),
             'full_name' => $this->getFullName(),
             'uid' => $this->uid,
-            'resolved_at' => !empty($this->resolve_date) ? date_format(date_create($this->resolve_date), DATE_ATOM) : null,
+            'resolved_at' => $resolvedAt ? date_format($resolvedAt, DATE_ATOM) : null,
             'is_anonymous' => $this->is_anonymous,
             'source_page' => $this->source_page,
             'message_type' => $this->message_type,

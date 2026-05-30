@@ -50,6 +50,7 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
 
     /**
      * @return float
+     * @throws \DivisionByZeroError
      */
     public function getSecsPerWord(): float
     {
@@ -61,6 +62,7 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
     /**
      * Returns true if the number of seconds per word
      * @return bool
+     * @throws \DivisionByZeroError
      */
     public function isValidForEditLog(): bool
     {

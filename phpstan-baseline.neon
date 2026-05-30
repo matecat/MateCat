@@ -2782,36 +2782,6 @@ parameters:
 			count: 1
 			path: lib/Controller/Views/XliffToTargetController.php
 
-		-
-			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/BaseCommentStruct.php
-
-		-
-			message: '#^Method Model\\Comments\\BaseCommentStruct\:\:templateMessage\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/Comments/BaseCommentStruct.php
-
-		-
-			message: '#^Parameter \#1 \$object of function date_format expects DateTimeInterface, DateTime\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Model/Comments/BaseCommentStruct.php
-
-		-
-			message: '#^Method Model\\Comments\\CommentStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Model/Comments/CommentStruct.php
-
-		-
-			message: '#^Method Model\\EditLog\\EditLogSegmentStruct\:\:getSecsPerWord\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/EditLog/EditLogSegmentStruct.php
-
 
 		-
 			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureStruct\:\:getOptions\(\) has no return type specified\.$#'

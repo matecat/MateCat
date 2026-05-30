@@ -4,7 +4,6 @@ namespace Model\Comments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;
@@ -242,7 +241,7 @@ class CommentDao extends AbstractDao
     {
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
 
-        $db = Database::obtain()->getConnection();
+        $db = $this->database->getConnection();
         $comments_query = "SELECT * FROM comments 
         JOIN ( 
                 SELECT ? as id_segment
