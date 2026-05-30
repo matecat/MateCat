@@ -2870,12 +2870,6 @@ parameters:
 			path: lib/Controller/API/App/Authentication/UserController.php
 
 		-
-			message: '#^Class Model\\Warnings\\GlobalWarningStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: lib/Model/Warnings/GlobalWarningStruct.php
-
-		-
 			message: '#^Method Model\\WordCount\\WordCountStruct\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
