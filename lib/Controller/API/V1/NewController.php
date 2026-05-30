@@ -164,7 +164,7 @@ class NewController extends KleinController
         $projectManager = new ProjectManager($projectStructure);
         $projectManager->setTeam($request['team']);
 
-        $fs::moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
+        $fs->moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
 
         //reserve a project id from the sequence
         $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];

@@ -900,7 +900,7 @@ class ProjectManager
         unset($segmentElement); // break the reference to the last array element to avoid accidental overwrites
 
         $fs = FilesStorageFactory::create();
-        $fs::storeFastAnalysisFile((string)$this->project->id, $this->projectStructure->segments_metadata);
+        $fs->storeFastAnalysisFile((string)$this->project->id, $this->projectStructure->segments_metadata);
 
         $this->logger->debug("Stored fast analysis data for project {$this->project->id} with " . count($this->projectStructure->segments_metadata) . " segments.");
 

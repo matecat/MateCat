@@ -117,7 +117,7 @@ class S3FilesStorageTest extends AbstractTest
         copy($source2, $destination2);
 
         // TEST
-        S3FilesStorage::moveFileFromUploadSessionToQueuePath($uploadSession);
+        $this->fs->moveFileFromUploadSessionToQueuePath($uploadSession);
 
         $items = $this->s3Client->getItemsInABucket([
             'bucket' => S3FilesStorage::getFilesStorageBucket(),
@@ -189,11 +189,11 @@ class S3FilesStorageTest extends AbstractTest
             ]
         ];
 
-        S3FilesStorage::storeFastAnalysisFile($id_project, $segments_metadata);
+        $this->fs->storeFastAnalysisFile($id_project, $segments_metadata);
 
-        $this->assertEquals(S3FilesStorage::getFastAnalysisData($id_project), $segments_metadata);
+        $this->assertEquals($this->fs->getFastAnalysisData($id_project), $segments_metadata);
 
-        S3FilesStorage::deleteFastAnalysisFile($id_project);
+        $this->fs->deleteFastAnalysisFile($id_project);
     }
 
     /**

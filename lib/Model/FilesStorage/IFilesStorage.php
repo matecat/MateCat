@@ -131,7 +131,7 @@ interface IFilesStorage
      *
      * @return void
      */
-    public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
+    public function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
 
     /**
      * Deletes the queue directory (and any associated converted-files directory).
@@ -160,7 +160,7 @@ interface IFilesStorage
      * @throws \UnexpectedValueException
      * @throws \ReflectionException
      */
-    public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void;
+    public function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void;
 
     /**
      * Gets a serialized file from fast analysis storage
@@ -171,7 +171,7 @@ interface IFilesStorage
      * @throws \UnexpectedValueException
      * @throws \ReflectionException
      */
-    public static function getFastAnalysisData(int $id_project): array;
+    public function getFastAnalysisData(int $id_project): array;
 
     /**
      * Deletes a serialized file from fast analysis storage
@@ -180,7 +180,7 @@ interface IFilesStorage
      *
      * @return bool
      */
-    public static function deleteFastAnalysisFile(string $id_project): bool;
+    public function deleteFastAnalysisFile(string $id_project): bool;
 
     /**
      **********************************************************************************************

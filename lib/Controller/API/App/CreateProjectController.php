@@ -138,7 +138,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
         $projectStructure->ppassword = Utils::randomString();
 
-        $fs::moveFileFromUploadSessionToQueuePath($this->data['upload_token']);
+        $fs->moveFileFromUploadSessionToQueuePath($this->data['upload_token']);
 
         ProjectQueue::sendProject($projectStructure);
 

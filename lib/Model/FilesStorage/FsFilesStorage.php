@@ -3,17 +3,13 @@
 namespace Model\FilesStorage;
 
 use Exception;
-use FilesystemIterator;
 use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\DataAccess\IDatabase;
 use Model\FilesStorage\Exceptions\FileSystemException;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use SplFileInfo;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Utils;
 
 /**
  * Class FsFilesStorage
@@ -33,31 +29,22 @@ class FsFilesStorage extends AbstractFilesStorage
 {
 
     /**
-     * @param string|null $files
-     * @param string|null $cache
-     * @param string|null $zip
+     * @param FilesystemAdapter|null $filesystem
+     * @param IDatabase|null $database
+     *
+     * @throws \TypeError
      */
-    public function __construct(?string $files = null, ?string $cache = null, ?string $zip = null)
+    public function __construct(?FilesystemAdapter $filesystem = null, ?IDatabase $database = null)
     {
-        parent::__construct($zip);
-        //override default config
-        if ($files) {
-            $this->filesDir = $files;
-        } else {
-            $this->filesDir = AppConfig::$FILES_REPOSITORY;
-        }
-
-        if ($cache) {
-            $this->cacheDir = $cache;
-        } else {
-            $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
-        }
+        parent::__construct($filesystem, $database);
+        $this->filesDir = AppConfig::$FILES_REPOSITORY;
+        $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
     }
 
-    protected static function ensureDirectoryExists(string $path): bool
+    protected function ensureDirectoryExists(string $path): bool
     {
-        if (!file_exists($path)) {
-            return mkdir($path, 0755, true);
+        if (!$this->filesystem->fileExists($path)) {
+            return $this->filesystem->mkdir($path, 0755, true);
         }
 
         return true;
@@ -84,7 +71,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $cacheTree = implode(DIRECTORY_SEPARATOR, static::composeCachePath($hash));
 
         //don't save in cache when a specified filter version is forced
-        if (AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && file_exists($this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang)) {
+        if (AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $this->filesystem->fileExists($this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang)) {
             return true;
         }
 
@@ -115,7 +102,7 @@ class FsFilesStorage extends AbstractFilesStorage
             $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
             $file_name = array_pop($raw_file_path);
 
-            $outcome1 = copy($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
+            $outcome1 = $this->filesystem->copy($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
 
             if (!$outcome1) {
                 // Original directory deleted!!!
@@ -124,11 +111,11 @@ class FsFilesStorage extends AbstractFilesStorage
                 $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang;
 
                 // check if cache dir exists
-                if (!file_exists($cacheDirToDelete)) {
+                if (!$this->filesystem->fileExists($cacheDirToDelete)) {
                     throw new FileSystemException($cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.');
                 }
 
-                Utils::deleteDir($cacheDirToDelete);
+                $this->filesystem->deleteDir($cacheDirToDelete);
 
                 return false;
             }
@@ -142,7 +129,7 @@ class FsFilesStorage extends AbstractFilesStorage
         //move converted xliff
         //In Unix you can't rename or move between filesystems,
         //Instead you must copy the file from one source location to the destination location, then delete the source.
-        $outcome2 = copy($xliffPath, $xliffDestination);
+        $outcome2 = $this->filesystem->copy($xliffPath, $xliffDestination);
 
         if (!$outcome2) {
             //Original directory deleted!!!
@@ -151,16 +138,16 @@ class FsFilesStorage extends AbstractFilesStorage
             $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang;
 
             // check if cache dir exists
-            if (!file_exists($cacheDirToDelete)) {
+            if (!$this->filesystem->fileExists($cacheDirToDelete)) {
                 throw new FileSystemException($cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.');
             }
 
-            Utils::deleteDir($this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang);
+            $this->filesystem->deleteDir($this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang);
 
             return false;
         }
 
-        unlink($xliffPath);
+        $this->filesystem->unlink($xliffPath);
 
         return true;
     }
@@ -233,12 +220,12 @@ class FsFilesStorage extends AbstractFilesStorage
         $fileDir = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
 
-        $this->logger?->debug($fileDir);
-        $this->logger?->debug($cacheDir);
+        $this->logger->debug($fileDir);
+        $this->logger->debug($cacheDir);
 
         $res = true;
         //check if it doesn't exist
-        if (!is_dir($fileDir)) {
+        if (!$this->filesystem->isDir($fileDir)) {
             //make files' directory structure
             $res &= $this->ensureDirectoryExists($fileDir);
             $res &= $this->ensureDirectoryExists($fileDir . DIRECTORY_SEPARATOR . "package");
@@ -252,12 +239,12 @@ class FsFilesStorage extends AbstractFilesStorage
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
-        $this->logger?->debug($origDir);
+        $this->logger->debug($origDir);
 
         $origFilePath = $this->getSingleFileInPath($origDir);
-        if (is_string($origFilePath) && is_file($origFilePath)) {
+        if (is_string($origFilePath) && $this->filesystem->isFile($origFilePath)) {
             $tmpOrigFileName = !empty($newFileName) ? $newFileName : $origFilePath;
-            $res &= link($origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . static::basename_fix($tmpOrigFileName));
+            $res &= $this->filesystem->link($origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . static::basename_fix($tmpOrigFileName));
         }
 
         //work
@@ -265,14 +252,14 @@ class FsFilesStorage extends AbstractFilesStorage
          * Force the new filename if it is provided
          */
         $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
-        $this->logger?->debug($d);
+        $this->logger->debug($d);
         $convertedFilePath = $this->getSingleFileInPath($d);
 
         if (!is_string($convertedFilePath)) {
             throw new UnexpectedValueException('Internal Error: Failed to create/copy the file on disk from cache.', -13);
         }
 
-        $this->logger?->debug($convertedFilePath);
+        $this->logger->debug($convertedFilePath);
 
         $tmpConvertedFilePath = $convertedFilePath;
         if (!empty($newFileName)) {
@@ -283,13 +270,13 @@ class FsFilesStorage extends AbstractFilesStorage
             }
         }
 
-        $this->logger?->debug($convertedFilePath);
+        $this->logger->debug($convertedFilePath);
 
         $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix($tmpConvertedFilePath);
 
-        $this->logger?->debug($dest);
+        $this->logger->debug($dest);
 
-        $res &= link($convertedFilePath, $dest);
+        $res &= $this->filesystem->link($convertedFilePath, $dest);
 
         if (!$res) {
             throw new UnexpectedValueException('Internal Error: Failed to create/copy the file on disk from cache.', -13);
@@ -349,7 +336,7 @@ class FsFilesStorage extends AbstractFilesStorage
     public function getHashesFromDir(string $dirToScan): array
     {
         //fetch cache links, created by converter, from a directory
-        $linkFiles = scandir($dirToScan) ?: [];
+        $linkFiles = $this->filesystem->scandir($dirToScan) ?: [];
         $zipFilesHash = [];
         $filesHashInfo = [];
         //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
@@ -361,7 +348,7 @@ class FsFilesStorage extends AbstractFilesStorage
                 unset($linkFiles[$k]);
             } else {
                 $filesHashInfo['sha'][] = $linkFile;
-                $filesHashInfo['fileName'][$linkFile] = file(
+                $filesHashInfo['fileName'][$linkFile] = $this->filesystem->file(
                     $dirToScan . DIRECTORY_SEPARATOR . $linkFile,
                     FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
                 );
@@ -387,18 +374,15 @@ class FsFilesStorage extends AbstractFilesStorage
      * @throws UnexpectedValueException
      * @throws Exception
      */
-    public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void
+    public function moveFileFromUploadSessionToQueuePath(string $uploadSession): void
     {
         $destination = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
-        self::ensureDirectoryExists($destination);
+        $this->ensureDirectoryExists($destination);
 
-        /** @var SplFileInfo $item */
-        foreach (
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            ) as $item
-        ) {
+        $iterator = $this->filesystem->iterateDirectoryRecursive(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
+
+        /** @var \SplFileInfo $item */
+        foreach ($iterator as $item) {
             if ($item->isDir()) {
                 /**
                  * RecursiveIteratorIterator at the C level delegates unknown method calls to
@@ -409,7 +393,7 @@ class FsFilesStorage extends AbstractFilesStorage
                  *
                  * @noinspection PhpUndefinedMethodInspection
                  */
-                mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                $this->filesystem->mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
                 /**
                  * RecursiveIteratorIterator at the C level delegates unknown method calls to
@@ -441,11 +425,11 @@ class FsFilesStorage extends AbstractFilesStorage
                     $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
                 }
 
-                copy($item, $destination . DIRECTORY_SEPARATOR . $subPathName);
+                $this->filesystem->copy((string)$item, $destination . DIRECTORY_SEPARATOR . $subPathName);
             }
         }
 
-        Utils::deleteDir(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
+        $this->filesystem->deleteDir(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
     }
 
     /**
@@ -453,9 +437,9 @@ class FsFilesStorage extends AbstractFilesStorage
      */
     public function deleteQueue(string $uploadDir): void
     {
-        Utils::deleteDir($uploadDir);
-        if (is_dir($uploadDir . '_converted')) {
-            Utils::deleteDir($uploadDir . '_converted');
+        $this->filesystem->deleteDir($uploadDir);
+        if ($this->filesystem->isDir($uploadDir . '_converted')) {
+            $this->filesystem->deleteDir($uploadDir . '_converted');
         }
     }
 
@@ -472,9 +456,9 @@ class FsFilesStorage extends AbstractFilesStorage
      * @return void
      * @throws UnexpectedValueException
      */
-    public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void
+    public function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void
     {
-        $storedBytes = file_put_contents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser", serialize($segments_metadata));
+        $storedBytes = $this->filesystem->filePutContents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser", serialize($segments_metadata));
         if ($storedBytes === false) {
             throw new UnexpectedValueException('Internal Error: Failed to store segments for fast analysis on disk.', -14);
         }
@@ -486,9 +470,9 @@ class FsFilesStorage extends AbstractFilesStorage
      * @return array<string|int, mixed>
      * @throws UnexpectedValueException
      */
-    public static function getFastAnalysisData(int $id_project): array
+    public function getFastAnalysisData(int $id_project): array
     {
-        $rawContent = file_get_contents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser");
+        $rawContent = $this->filesystem->fileGetContents(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser");
         if ($rawContent === false) {
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }
@@ -506,9 +490,9 @@ class FsFilesStorage extends AbstractFilesStorage
      *
      * @return bool
      */
-    public static function deleteFastAnalysisFile(string $id_project): bool
+    public function deleteFastAnalysisFile(string $id_project): bool
     {
-        return unlink(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser");
+        return $this->filesystem->unlink(AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser");
     }
 
     /**
@@ -531,8 +515,8 @@ class FsFilesStorage extends AbstractFilesStorage
         $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER;
 
         //ensure old stuff is overwritten
-        if (is_dir($thisZipDir)) {
-            Utils::deleteDir($thisZipDir);
+        if ($this->filesystem->isDir($thisZipDir)) {
+            $this->filesystem->deleteDir($thisZipDir);
         }
 
         //create cache dir structure
@@ -543,20 +527,20 @@ class FsFilesStorage extends AbstractFilesStorage
         }
 
         //move original
-        $outcome1 = copy($zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::basename_fix($zipPath));
+        $outcome1 = $this->filesystem->copy($zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::basename_fix($zipPath));
 
         if (!$outcome1) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE
-            Utils::deleteDir($this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER);
+            $this->filesystem->deleteDir($this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER);
 
             return false;
         }
 
-        unlink($zipPath);
+        $this->filesystem->unlink($zipPath);
 
         //link this zip to the upload directory by creating a file name as the ash of the zip file
-        touch(dirname($zipPath) . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER);
+        $this->filesystem->touch(dirname($zipPath) . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER);
 
         return true;
     }
@@ -588,13 +572,13 @@ class FsFilesStorage extends AbstractFilesStorage
             return false;
         }
 
-        $outcome1 = link($zipFilePath, $newZipDir . DIRECTORY_SEPARATOR . $fileName);
+        $outcome1 = $this->filesystem->link($zipFilePath, $newZipDir . DIRECTORY_SEPARATOR . $fileName);
 
         if (!$outcome1) {
             return false;
         }
 
-        Utils::deleteDir($this->zipDir . DIRECTORY_SEPARATOR . $zipHash);
+        $this->filesystem->deleteDir($this->zipDir . DIRECTORY_SEPARATOR . $zipHash);
 
         return true;
     }

@@ -1,8 +1,8 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-29 (last updated)  
-**Commits (refactor + fix + security + test):** 364+
+**Date:** 2026-05-30 (last updated)  
+**Commits (refactor + fix + security + test):** 365+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
@@ -2635,6 +2635,50 @@ None — no cascades triggered.
 3. ~~**GlossaryWorker** — familiar worker pattern from contribution stack~~ ✅ Done (Phase 17)
 4. **GetSegmentsController** — high business value, moderate difficulty
 5. **Remaining Tier 1** — ManageModel (19), ProjectModel (18)
+
+---
+
+## Phase 51 — FilesStorage (lib/Model/FilesStorage)
+
+**Date:** 2026-05-30
+**Commit:** pending
+
+### Summary
+- **2 PHPStan errors fixed** in S3FilesStorage (nullsafe.neverNull, missingType.checkedException)
+- **FilesystemAdapter refactoring**: extracted all ~30 native PHP filesystem calls behind `FilesystemAdapter` interface
+- **Static→instance conversion**: 4 methods (`moveFileFromUploadSessionToQueuePath`, `storeFastAnalysisFile`, `getFastAnalysisData`, `deleteFastAnalysisFile`) converted from static to instance across `IFilesStorage`, `FsFilesStorage`, `S3FilesStorage` + 5 call sites
+- **Logger nullability fix**: `AbstractFilesStorage::$logger` changed from `?MatecatLogger` to `MatecatLogger` (constructor always assigns)
+
+### New files
+- `lib/Model/FilesStorage/FilesystemAdapter.php` — interface (15 methods)
+- `lib/Model/FilesStorage/NativeFilesystemAdapter.php` — production implementation
+
+### Modified files
+- `AbstractFilesStorage.php` — DI for FilesystemAdapter, non-nullable logger
+- `FsFilesStorage.php` — all native FS calls → `$this->filesystem->`, 4 static→instance
+- `S3FilesStorage.php` — all native FS calls → `$this->filesystem->`, 4 static→instance
+- `IFilesStorage.php` — removed `static` from 4 method signatures
+- `CreateProjectController.php:141` — `$fs::` → `$fs->`
+- `NewController.php:167` — `$fs::` → `$fs->`
+- `ProjectManager.php:903` — `$fs::` → `$fs->`
+- `FastAnalysis.php:352,382` — `$fs::` → `$fs->`
+
+### Tests
+- 63 FilesStorage tests pass (19 AbstractFilesStorage, 29 FsFilesStorage, 5 S3FilesStorage + 10 existing)
+- Full suite: 6,350 tests, 1 failure (pre-existing RedisHandlerTest)
+
+### Coverage
+| File | Methods | Lines |
+|------|---------|-------|
+| AbstractFilesStorage | 92.31% (12/13) | 99.14% (115/116) |
+| FsFilesStorage | 84.21% (16/19) | 93.89% (169/180) |
+| S3FilesStorage | 87.10% (27/31) | 91.37% (254/278) |
+| NativeFilesystemAdapter | 100% (15/15) | 100% (19/19) |
+| FilesStorageFactory | 100% (1/1) | 100% (4/4) |
+
+### Baseline
+- 1,952 → 1,950 (−2: removed nullsafe.neverNull + missingType.checkedException from S3FilesStorage)
+- 0 remaining entries for `lib/Model/FilesStorage/`
 
 ---
 

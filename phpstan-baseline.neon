@@ -2830,17 +2830,6 @@ parameters:
 			count: 1
 			path: lib/Model/Files/FilesMetadataMarshaller.php
 
-		-
-			message: '#^Method Model\\FilesStorage\\S3FilesStorage\:\:storeOriginalFileAndGetXliffDestination\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
-
-		-
-			message: '#^Using nullsafe method call on non\-nullable type Utils\\Logger\\MatecatLogger\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: lib/Model/FilesStorage/S3FilesStorage.php
 
 		-
 			message: '#^Method Model\\OwnerFeatures\\OwnerFeatureStruct\:\:getOptions\(\) has no return type specified\.$#'

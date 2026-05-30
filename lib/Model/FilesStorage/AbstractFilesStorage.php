@@ -2,9 +2,9 @@
 
 namespace Model\FilesStorage;
 
-use DirectoryIterator;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -33,19 +33,24 @@ abstract class AbstractFilesStorage implements IFilesStorage
     protected string $cacheDir;
     protected string $zipDir;
 
-    protected ?MatecatLogger $logger;
+    protected MatecatLogger $logger;
+
+    protected FilesystemAdapter $filesystem;
+
+    protected IDatabase $database;
 
     /**
-     * @param string|null $zip
+     * @param FilesystemAdapter|null $filesystem
+     * @param IDatabase|null $database
+     *
+     * @throws \TypeError
      */
-    public function __construct(?string $zip = null)
+    public function __construct(?FilesystemAdapter $filesystem = null, ?IDatabase $database = null)
     {
+        $this->filesystem = $filesystem ?? new NativeFilesystemAdapter();
+        $this->database = $database ?? Database::obtain();
         $this->logger = LoggerFactory::getLogger('files');
-        if ($zip) {
-            $this->zipDir = $zip;
-        } else {
-            $this->zipDir = AppConfig::$ZIP_REPOSITORY;
-        }
+        $this->zipDir = AppConfig::$ZIP_REPOSITORY;
     }
 
     /**
@@ -137,7 +142,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
         $filePath = false;
         $files = [];
         try {
-            $files = new DirectoryIterator($path);
+            $files = $this->filesystem->iterateDirectory($path);
         } catch (Exception) {
             //directory does not exist
             LoggerFactory::doJsonLog("Directory $path does not exists. If you are creating a project check the source language.");
@@ -183,7 +188,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
         [$shaSum,] = explode("|", $linkFile);
         [$shaSum,] = explode("_", $shaSum); // remove the segmentation rule from hash to clean all reverse index maps
 
-        $iterator = new DirectoryIterator($uploadDirPath);
+        $iterator = $this->filesystem->iterateDirectory($uploadDirPath);
 
         foreach ($iterator as $fileInfo) {
             if ($fileInfo->isDot() || $fileInfo->isDir()) {
@@ -194,7 +199,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             // retained because of the file name append
             if ($fileInfo->getFilename() != $linkFile &&
                 stripos($fileInfo->getFilename(), $shaSum) !== false) {
-                unlink($fileInfo->getPathname());
+                $this->filesystem->unlink($fileInfo->getPathname());
                 LoggerFactory::doJsonLog("Deleted Hash " . $fileInfo->getPathname());
 
                 return true;
@@ -360,7 +365,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             WHERE files_job.id_job = :id_job 
             GROUP BY files_job.id_file";
 
-        $db = Database::obtain();
+        $db = $this->database;
         $stmt = $db->getConnection()->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(['id_job' => $id_job]);

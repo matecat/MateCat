@@ -349,7 +349,7 @@ class FastAnalysis extends AbstractDaemon
 
                 self::_updateProject($pid, $status);
                 $fs = $this->files_storage;
-                $fs::deleteFastAnalysisFile((string)$pid);
+                $fs->deleteFastAnalysisFile((string)$pid);
 
                 (new JobDao())->destroyCacheByProjectId($pid);
                 (new ProjectDao())->destroyFetchByIdCache($pid, ProjectStruct::class);
@@ -379,7 +379,7 @@ class FastAnalysis extends AbstractDaemon
 
         try {
             $this->logger->debug("Fetching data from disk");
-            $this->segments = $fs::getFastAnalysisData($pid);
+            $this->segments = $fs->getFastAnalysisData($pid);
         } catch (UnexpectedValueException) {
             $this->logger->debug("Error Fetching data from disk. Fallback to database.");
 
