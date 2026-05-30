@@ -4,7 +4,6 @@ namespace Model\OwnerFeatures;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDOException;
 use ReflectionException;
@@ -28,9 +27,9 @@ class OwnerFeatureDao extends AbstractDao
      */
     public function create(IDaoStruct $obj): ?OwnerFeatureStruct
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
-        Database::obtain()->begin();
+        $this->database->begin();
 
         /**
          * @var OwnerFeatureStruct $obj
