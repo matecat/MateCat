@@ -35,6 +35,7 @@ class CustomPayableRateDaoTest extends AbstractTest
         $conn = Database::obtain()->getConnection();
         $uids = implode(',', self::TEST_UIDS);
         $conn->exec("DELETE FROM payable_rate_templates WHERE uid IN ($uids)");
+        $conn->exec("DELETE FROM job_custom_payable_rates WHERE id_job = 999999");
     }
 
     private function makeBreakdowns(): array
@@ -227,5 +228,21 @@ class CustomPayableRateDaoTest extends AbstractTest
     {
         $result = $this->dao->getByIdAndUser(999999999, 1);
         $this->assertNull($result);
+    }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function assocModelToJobInsertsRow(): void
+    {
+        $this->dao->assocModelToJob(1, 999999, 1, 'Test Model');
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM job_custom_payable_rates WHERE id_job = :id_job");
+        $stmt->execute(['id_job' => 999999]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        $this->assertNotFalse($row);
+        $this->assertSame(1, (int)$row['custom_payable_rate_model_id']);
+        $this->assertSame('Test Model', $row['custom_payable_rate_model_name']);
     }
 }

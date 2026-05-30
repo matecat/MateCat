@@ -6,15 +6,15 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,956 | −5,410 (−73.4%) |
+| **PHPStan baseline entries** | 7,366 | 1,952 | −5,414 (−73.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,284 | +4,036 (+179.5%) |
+| **PHPUnit tests** | ~2,248 | 6,296 | +4,048 (+180.1%) |
 | **PHPUnit assertions** | ~19,449 | 16,870 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 33.43% (231/691) | +24.95% (+178 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 62.65% (2,617/4,177) | +40.91% (+1,773 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 63.13% (22,390/35,466) | +41.94% (+15,117 lines) |
 | **New test files** | 235 | 420 | +185 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 324 | +324 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 325 | +325 |
 
 ---
 
@@ -385,6 +385,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/Outsource/ConfirmationDao.php` | Phase 25 |
 | `lib/Model/Outsource/ConfirmationStruct.php` | Phase 0 |
 | `lib/Model/PayableRates/CustomPayableRateDao.php` | Phase 25 |
+| `lib/Model/PayableRates/CustomPayableRateStruct.php` | Phase 50 |
 | `lib/Model/Propagation/PropagationTotalStruct.php` | Phase 0 |
 | `lib/Model/QualityReport/QualityReportDao.php` | Phase 13 |
 | `lib/Model/QualityReport/QualityReportModel.php` | Phase 13B |
@@ -2428,6 +2429,40 @@ No cascade errors. No tests needed — pure data structs covered by existing tes
 ---
 
 ## Next Action
+
+### Phase 50: PayableRates Directory — Full Cleanup — ✅ DONE (−4 baseline entries, +12 tests)
+
+**Date:** 2026-05-30
+
+**Why:** Complete `lib/Model/PayableRates/` — both files PHPStan-clean. DAO already on ledger, struct fixed and added.
+
+#### Files Fixed
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `CustomPayableRateStruct.php` | 4→0 | Local variable narrowing for `string\|array` union in `getBreakdownsArray()`, `json_encode() ?: ''` on `breakdownsToJson()`, native `string` param on `validateLanguage()` |
+
+#### Cascade fixes
+
+None.
+
+#### Coverage
+
+| File | Methods | Lines |
+|------|---------|-------|
+| `CustomPayableRateStruct.php` | 100% (7/7) | 100% (46/46) |
+| `CustomPayableRateDao.php` | 100% (13/13) | 100% (108/108) |
+
+#### Baseline
+
+- **Removed:** 4 entries
+- **Added:** 0
+- **Net:** 1,956 → **1,952** (−4)
+- **Files added to ledger:** +1
+- **Ledger total:** 519 → **520**
+- **Tests:** 6,284 → **6,296** (+12)
+
+---
 
 ### Phase 49: MTQE Directory — Full Cleanup — ✅ DONE (−10 baseline entries, +30 tests)
 

@@ -2872,30 +2872,6 @@ parameters:
 
 
 		-
-			message: '#^Argument of an invalid type array\|string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:breakdownsToJson\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:getBreakdownsArray\(\) should return array\<string, array\<string, array\<string, int\>\>\> but returns array\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
-			message: '#^Method Model\\PayableRates\\CustomPayableRateStruct\:\:validateLanguage\(\) has parameter \$lang with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/PayableRates/CustomPayableRateStruct.php
-
-		-
 			message: '#^Class Model\\Translations\\SegmentTranslationStruct implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
