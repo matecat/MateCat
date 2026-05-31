@@ -35,25 +35,29 @@ class JSONValidator extends AbstractValidator
      *
      * @throws InvalidValue
      * @throws \Swaggest\JsonSchema\Exception
+     * @throws Exception
      */
     public function __construct(string $jsonSchema, bool $throwExceptions = false)
     {
         if (is_file(AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema)) {
-            $jsonSchema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema);
+            $jsonSchema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema) ?: $jsonSchema;
         } elseif (is_file($jsonSchema)) {
-            $jsonSchema = file_get_contents($jsonSchema);
+            $jsonSchema = file_get_contents($jsonSchema) ?: $jsonSchema;
         }
 
         $this->schemaContract = Schema::import(
             static::getValidJSONSchema($jsonSchema),
             new Context(
                 new class implements RemoteRefProvider {
+                    /**
+                     * @throws RuntimeException
+                     */
                     public function getSchemaData($url): object
                     {
                         if (is_file($url)) {
-                            $url = file_get_contents($url);
+                            $url = file_get_contents($url) ?: $url;
                         } elseif (is_file(AppConfig::$ROOT . '/inc/validation/schema/' . $url)) {
-                            $url = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $url);
+                            $url = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $url) ?: $url;
                         }
 
                         return JSONValidator::getValidJSONSchema($url);
@@ -69,6 +73,7 @@ class JSONValidator extends AbstractValidator
      * @param string $jsonSchema
      *
      * @return stdClass
+     * @throws RuntimeException
      */
     public static function getValidJSONSchema(string $jsonSchema): object
     {

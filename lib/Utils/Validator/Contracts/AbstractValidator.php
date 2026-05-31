@@ -8,9 +8,7 @@ use Throwable;
 abstract class AbstractValidator
 {
 
-    /**
-     * @return Throwable[]
-     */
+    /** @var Throwable[] */
     protected array $errors = [];
 
     /**

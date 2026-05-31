@@ -5,6 +5,7 @@ namespace Utils\Validator;
 use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use Exception;
+use RuntimeException;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\LQA\ChunkReviewDao;
 use ReflectionException;
@@ -53,7 +54,7 @@ class IsJobRevisionValidator extends AbstractValidator
         }
 
         if ($data->t != 0) {
-            $this->errors[] = 'Given job password is the T password';
+            $this->errors[] = new RuntimeException('Given job password is the T password');
         }
 
         return null;

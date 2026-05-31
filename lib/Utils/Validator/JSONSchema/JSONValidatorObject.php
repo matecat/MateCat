@@ -113,18 +113,18 @@ class JSONValidatorObject extends ValidatorObject
      *                       Numeric indexed arrays are cast to objects to ensure
      *                       compatibility with the function signature.
      *
-     * @return array An associative array representing the structure and data of the input object.
+     * @return array<string, mixed>
      */
     private function toArray(object $object): array
     {
         $collector = [];
-        foreach ($object as $key => $value) {
+        foreach ((array)$object as $key => $value) {
             // Determine if the value is structured (array or object).
             $isStructured = is_array($value) || is_object($value);
 
             if ($isStructured) {
                 // Recursively convert structured values into arrays.
-                $collector[$key] = $this->toArray((object)$value); // Force cast to an object to respect the function signature.
+                $collector[$key] = $this->toArray((object)$value);
             } else {
                 // Add scalar values directly to the resulting array.
                 $collector[$key] = $value;

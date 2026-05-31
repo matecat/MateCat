@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,770 | −5,596 (−76.0%) |
+| **PHPStan baseline entries** | 7,366 | 1,750 | −5,616 (−76.2%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 543 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 556 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -660,6 +660,40 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 |------|-----------|
 | `lib/Utils/Files/CSV.php` | Phase N+ |
 | `lib/Utils/Files/File.php` | Phase N+ |
+
+#### Utils/Autopropagation
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Autopropagation/PropagationAnalyser.php` | Phase N+ |
+
+#### Utils/Currency
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Currency/ChangeRatesFetcher.php` | Phase N+ |
+| `lib/Utils/Currency/TranslatedChangeRatesFetcher.php` | Phase N+ |
+
+#### Utils/ServerCheck
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/ServerCheck/ServerCheck.php` | Phase N+ |
+| `lib/Utils/ServerCheck/UploadParams.php` | Phase N+ |
+
+#### Utils/Subfiltering
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Subfiltering/SubfilteringOptionsValidator.php` | Phase N+ |
+
+#### Utils/Validator
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Validator/Contracts/AbstractValidator.php` | Phase N+ |
+| `lib/Utils/Validator/Contracts/ValidatorObject.php` | Phase N+ |
+| `lib/Utils/Validator/GlossaryCSVValidator.php` | Phase N+ |
+| `lib/Utils/Validator/IsJobRevisionValidator.php` | Phase 13A |
+| `lib/Utils/Validator/JSONSchema/Errors/JSONValidatorException.php` | Phase N+ |
+| `lib/Utils/Validator/JSONSchema/Errors/JsonValidatorGenericException.php` | Phase N+ |
+| `lib/Utils/Validator/JSONSchema/JSONValidator.php` | Phase N+ |
+| `lib/Utils/Validator/JSONSchema/JSONValidatorObject.php` | Phase N+ |
 
 #### Utils (other)
 | File | Cleaned In |

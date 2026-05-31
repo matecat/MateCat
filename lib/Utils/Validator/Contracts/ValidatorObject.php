@@ -6,11 +6,15 @@ use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 class ValidatorObject implements ArrayAccess
 {
 
     use ArrayAccessTrait;
 
+    /** @var array<string, mixed> */
     protected array $store = [];
 
     /**
