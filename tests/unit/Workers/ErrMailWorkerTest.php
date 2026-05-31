@@ -3,6 +3,7 @@
 namespace unit\Workers;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -12,11 +13,12 @@ use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class ErrMailWorkerTest extends AbstractTest
 {
     private function createWorkerWithMailer(PHPMailer $mailer): ErrMailWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(ErrMailWorker::class)
             ->setConstructorArgs([$amq])
@@ -54,7 +56,7 @@ class ErrMailWorkerTest extends AbstractTest
     #[Test]
     public function getLoggerNameReturnsExpected(): void
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
         $worker = new ErrMailWorker($amq);
 
         $this->assertSame('err_mail.log', $worker->getLoggerName());
@@ -63,7 +65,7 @@ class ErrMailWorkerTest extends AbstractTest
     #[Test]
     public function processSuccessfullySendsEmail(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $mailer->method('send')->willReturn(true);
 
         $worker = $this->createWorkerWithMailer($mailer);
@@ -75,7 +77,7 @@ class ErrMailWorkerTest extends AbstractTest
     #[Test]
     public function processThrowsEmptyElementOnNoServerConfig(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $worker = $this->createWorkerWithMailer($mailer);
 
         $queueElement = $this->createQueueElement();
@@ -88,7 +90,7 @@ class ErrMailWorkerTest extends AbstractTest
     #[Test]
     public function processThrowsEmptyElementOnNoEmailList(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $worker = $this->createWorkerWithMailer($mailer);
 
         $queueElement = $this->createQueueElement();
@@ -101,7 +103,7 @@ class ErrMailWorkerTest extends AbstractTest
     #[Test]
     public function processThrowsReQueueOnSendFailure(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $mailer->method('send')->willReturn(false);
         $mailer->ErrorInfo = 'SMTP failed';
 
@@ -114,7 +116,7 @@ class ErrMailWorkerTest extends AbstractTest
     #[Test]
     public function processUsesDefaultSubjectWhenEmpty(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $mailer->method('send')->willReturn(true);
 
         $worker = $this->createWorkerWithMailer($mailer);

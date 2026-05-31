@@ -4,6 +4,7 @@ namespace unit\Workers;
 
 use Model\ProjectCreation\ProjectManager;
 use PDOException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -13,6 +14,7 @@ use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class ProjectCreationWorkerTest extends AbstractTest
 {
     protected function setUp(): void
@@ -31,7 +33,7 @@ class ProjectCreationWorkerTest extends AbstractTest
 
     private function createWorker(): ProjectCreationWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         return $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq])
@@ -133,7 +135,7 @@ class ProjectCreationWorkerTest extends AbstractTest
     #[Test]
     public function publishResultsHandlesUninitializedStructure(): void
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq])

@@ -3,6 +3,7 @@
 namespace unit\Workers;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -12,11 +13,12 @@ use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class MailWorkerTest extends AbstractTest
 {
     private function createWorkerWithMailer(PHPMailer $mailer): MailWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(MailWorker::class)
             ->setConstructorArgs([$amq])
@@ -53,7 +55,7 @@ class MailWorkerTest extends AbstractTest
     #[Test]
     public function processSuccessfullySendsEmail(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $mailer->method('send')->willReturn(true);
 
         $worker = $this->createWorkerWithMailer($mailer);
@@ -65,7 +67,7 @@ class MailWorkerTest extends AbstractTest
     #[Test]
     public function processThrowsReQueueOnSendFailure(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
         $mailer->method('send')->willReturn(false);
         $mailer->ErrorInfo = 'SMTP connection failed';
 
@@ -78,7 +80,7 @@ class MailWorkerTest extends AbstractTest
     #[Test]
     public function processThrowsEndQueueOnEmptyAddress(): void
     {
-        $mailer = $this->createMock(PHPMailer::class);
+        $mailer = $this->createStub(PHPMailer::class);
 
         $queueElement = $this->createQueueElement();
         $queueElement->params->address = [null, null];

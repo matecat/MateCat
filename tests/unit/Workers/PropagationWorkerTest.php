@@ -9,6 +9,7 @@ use Model\Translations\SegmentTranslationStruct;
 use PDO;
 use PDOException;
 use PDOStatement;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use TestHelpers\AbstractTest;
@@ -19,6 +20,7 @@ use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class PropagationWorkerTest extends AbstractTest
 {
     private PDOStatement $stmtStub;
@@ -40,10 +42,10 @@ class PropagationWorkerTest extends AbstractTest
 
     private function createWorker(): PropagationWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
-        $dbMock = $this->createMock(IDatabase::class);
+        $amq = $this->createStub(AMQHandler::class);
+        $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
-        $versionDao = $this->createMock(TranslationVersionDao::class);
+        $versionDao = $this->createStub(TranslationVersionDao::class);
 
         return $this->getMockBuilder(PropagationWorker::class)
             ->setConstructorArgs([$amq, $dbMock, $versionDao])
@@ -64,7 +66,7 @@ class PropagationWorkerTest extends AbstractTest
         $propagatorSegment->serialized_errors_list = null;
         $propagatorSegment->warning = false;
 
-        $propagationTotal = $this->createMock(PropagationTotalStruct::class);
+        $propagationTotal = $this->createStub(PropagationTotalStruct::class);
         $propagationTotal->method('getSegmentsForPropagation')->willReturn($segmentsForPropagation);
         $propagationTotal->method('getAllToPropagate')->willReturn($segmentsForPropagation);
         $propagationTotal->method('getPropagatedIdsToUpdateVersion')->willReturn($idsToUpdateVersion);

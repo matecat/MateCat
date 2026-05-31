@@ -11,6 +11,7 @@ use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
@@ -22,6 +23,7 @@ use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class BulkSegmentStatusChangeWorkerTest extends AbstractTest
 {
     private \PDO $pdoStub;
@@ -47,7 +49,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $chunk->id = 1;
         $chunk->password = 'abc';
 
-        $project = $this->createMock(ProjectStruct::class);
+        $project = $this->createStub(ProjectStruct::class);
         $project->method('getFeaturesSet')->willReturn(new FeatureSet());
         $project->method('hasFeature')->willReturn($hasTranslationVersions);
 
@@ -61,16 +63,16 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         ?JobStruct $chunk = null,
         bool $hasTranslationVersions = false
     ): BulkSegmentStatusChangeWorker {
-        $amq = $this->createMock(AMQHandler::class);
-        $userDao = $this->createMock(UserDao::class);
+        $amq = $this->createStub(AMQHandler::class);
+        $userDao = $this->createStub(UserDao::class);
         $userDao->method('getByUid')->willReturn(new UserStruct());
 
-        $dbMock = $this->createMock(IDatabase::class);
+        $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
 
         $chunk = $chunk ?? $this->createChunkWithProject($hasTranslationVersions);
 
-        $eventsHandler = $this->createMock(TranslationEventsHandler::class);
+        $eventsHandler = $this->createStub(TranslationEventsHandler::class);
 
         $worker = $this->getMockBuilder(BulkSegmentStatusChangeWorker::class)
             ->setConstructorArgs([$amq, $userDao, $dbMock])
@@ -107,7 +109,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
     #[Test]
     public function getLoggerNameReturnsExpected(): void
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
         $worker = new BulkSegmentStatusChangeWorker($amq);
 
         $this->assertSame('bulk_segment_status_change.log', $worker->getLoggerName());
@@ -178,7 +180,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
 
         $chunk = $this->createChunkWithProject(true);
-        $translationEvent = $this->createMock(TranslationEvent::class);
+        $translationEvent = $this->createStub(TranslationEvent::class);
 
         $worker = $this->createWorker($chunk, true);
         $worker->method('createTranslationEvent')->willReturn($translationEvent);

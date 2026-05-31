@@ -123,7 +123,7 @@ class SegmentTranslationStructTest extends AbstractTest
         $job = new JobStruct();
         $job->id = 5;
 
-        $jobDao = $this->createMock(JobDao::class);
+        $jobDao = $this->createStub(JobDao::class);
         $jobDao->method('getNotDeletedById')->willReturn([$job]);
 
         $struct = new SegmentTranslationStruct();
@@ -138,7 +138,7 @@ class SegmentTranslationStructTest extends AbstractTest
     #[Test]
     public function getJobReturnsNullWhenNotFound(): void
     {
-        $jobDao = $this->createMock(JobDao::class);
+        $jobDao = $this->createStub(JobDao::class);
         $jobDao->method('getNotDeletedById')->willReturn([]);
 
         $struct = new SegmentTranslationStruct();

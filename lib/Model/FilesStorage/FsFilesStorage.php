@@ -477,7 +477,7 @@ class FsFilesStorage extends AbstractFilesStorage
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }
 
-        $analysisData = unserialize($rawContent);
+        $analysisData = @unserialize($rawContent);
         if ($analysisData === false) {
             throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from disk.', -15);
         }

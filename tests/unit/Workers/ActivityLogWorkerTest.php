@@ -4,6 +4,7 @@ namespace unit\Workers;
 
 use Model\ActivityLog\ActivityLogDao;
 use Model\ActivityLog\ActivityLogStruct;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -12,6 +13,7 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 
+#[AllowMockObjectsWithoutExpectations]
 class ActivityLogWorkerTest extends AbstractTest
 {
     protected function setUp(): void
@@ -30,7 +32,7 @@ class ActivityLogWorkerTest extends AbstractTest
 
     private function createWorker(): ActivityLogWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         return new ActivityLogWorker($amq);
     }

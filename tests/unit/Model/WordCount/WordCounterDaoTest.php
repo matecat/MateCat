@@ -71,7 +71,7 @@ class WordCounterDaoTest extends AbstractTest
     #[Test]
     public function initializeWordCountReturnsRowCount(): void
     {
-        $dbMock = $this->createMock(Database::class);
+        $dbMock = $this->createStub(Database::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $dbMock->method('rowCount')->willReturn(1);
 
@@ -86,7 +86,7 @@ class WordCounterDaoTest extends AbstractTest
     #[Test]
     public function initializeWordCountReturnsNegativeCodeOnPdoException(): void
     {
-        $dbMock = $this->createMock(Database::class);
+        $dbMock = $this->createStub(Database::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $dbMock->method('update')->willThrowException(new PDOException('test', 99));
 

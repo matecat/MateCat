@@ -16,6 +16,7 @@ use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class AIAssistantWorkerTest extends AbstractTest
 {
     private Client $redisMock;
@@ -69,7 +70,6 @@ class AIAssistantWorkerTest extends AbstractTest
     // ─── process() ───
 
     #[Test]
-    #[AllowMockObjectsWithoutExpectations]
     public function processThrowsOnInvalidAction(): void
     {
         $worker = $this->createWorker();
@@ -237,7 +237,6 @@ class AIAssistantWorkerTest extends AbstractTest
     }
 
     #[Test]
-    #[AllowMockObjectsWithoutExpectations]
     public function explainMeaningProcessesStreamedData(): void
     {
         $openAi = $this->createStub(OpenAIClient::class);
@@ -271,7 +270,6 @@ class AIAssistantWorkerTest extends AbstractTest
     }
 
     #[Test]
-    #[AllowMockObjectsWithoutExpectations]
     public function explainMeaningHandlesLockMismatch(): void
     {
         $lockCallCount = 0;
@@ -338,7 +336,6 @@ class AIAssistantWorkerTest extends AbstractTest
     }
 
     #[Test]
-    #[AllowMockObjectsWithoutExpectations]
     public function explainMeaningHandlesInvalidJson(): void
     {
         $openAi = $this->createStub(OpenAIClient::class);

@@ -5,6 +5,7 @@ namespace unit\Workers;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
@@ -14,6 +15,7 @@ use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
+#[AllowMockObjectsWithoutExpectations]
 class JobsWorkerTest extends AbstractTest
 {
     protected function setUp(): void
@@ -32,7 +34,7 @@ class JobsWorkerTest extends AbstractTest
 
     private function createWorker(?JobDao $jobDao = null): JobsWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(JobsWorker::class)
             ->setConstructorArgs([$amq, $jobDao])

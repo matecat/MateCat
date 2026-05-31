@@ -36,7 +36,7 @@ class CSVTest extends TestCase
     #[Test]
     public function headersReturnsNullForNonexistentFile(): void
     {
-        $result = CSV::headers($this->tmpDir . '/nonexistent.csv');
+        $result = @CSV::headers($this->tmpDir . '/nonexistent.csv');
 
         $this->assertNull($result);
     }
@@ -70,7 +70,7 @@ class CSVTest extends TestCase
     #[Test]
     public function parseToArrayReturnsEmptyForNonexistentFile(): void
     {
-        $data = CSV::parseToArray($this->tmpDir . '/nope.csv');
+        $data = @CSV::parseToArray($this->tmpDir . '/nope.csv');
 
         $this->assertSame([], $data);
     }

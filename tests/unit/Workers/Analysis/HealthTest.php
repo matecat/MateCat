@@ -13,7 +13,7 @@ class HealthTest extends AbstractTest
     #[Test]
     public function fastAnalysisIsRunningReturnsTrueWhenListNotEmpty(): void
     {
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willReturn('some-pid');
 
         $this->assertTrue(Health::fastAnalysisIsRunning($redis));
@@ -22,7 +22,7 @@ class HealthTest extends AbstractTest
     #[Test]
     public function fastAnalysisIsRunningReturnsFalseWhenEmpty(): void
     {
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willReturn(null);
 
         $this->assertFalse(Health::fastAnalysisIsRunning($redis));
@@ -31,7 +31,7 @@ class HealthTest extends AbstractTest
     #[Test]
     public function tmAnalysisIsRunningReturnsTrueWhenSet(): void
     {
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willReturn('1');
 
         $this->assertTrue(Health::tmAnalysisIsRunning($redis));
@@ -40,7 +40,7 @@ class HealthTest extends AbstractTest
     #[Test]
     public function tmAnalysisIsRunningReturnsFalseWhenNotSet(): void
     {
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willReturn(null);
 
         $this->assertFalse(Health::tmAnalysisIsRunning($redis));
@@ -54,7 +54,7 @@ class HealthTest extends AbstractTest
         $originalEnabled = AppConfig::$VOLUME_ANALYSIS_ENABLED;
         AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
 
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willReturn(null);
 
         $result = Health::thereIsAMisconfiguration($redis);
@@ -70,7 +70,7 @@ class HealthTest extends AbstractTest
         $originalEnabled = AppConfig::$VOLUME_ANALYSIS_ENABLED;
         AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
 
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
 
         $result = Health::thereIsAMisconfiguration($redis);
 
@@ -82,7 +82,7 @@ class HealthTest extends AbstractTest
     #[Test]
     public function thereIsAMisconfigurationReturnsFalseOnException(): void
     {
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willThrowException(new \Exception('Redis down'));
 
         $this->assertFalse(Health::thereIsAMisconfiguration($redis));
@@ -94,7 +94,7 @@ class HealthTest extends AbstractTest
         $originalEnabled = AppConfig::$VOLUME_ANALYSIS_ENABLED;
         AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
 
-        $redis = $this->createMock(Client::class);
+        $redis = $this->createStub(Client::class);
         $redis->method('__call')->willReturn('some-pid');
 
         $result = Health::thereIsAMisconfiguration($redis);

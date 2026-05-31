@@ -120,7 +120,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function saveCommentSetsDefaultMessageType(): void
     {
-        $dbMock = $this->createMock(Database::class);
+        $dbMock = $this->createStub(Database::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $dbMock->method('insert')->willReturn('1');
         $dbMock->method('last_insert')->willReturn('42');
@@ -284,7 +284,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function resolveThreadSetsTypeAndResolveDate(): void
     {
-        $dbMock = $this->createMock(Database::class);
+        $dbMock = $this->createStub(Database::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $dbMock->method('insert')->willReturn('1');
         $dbMock->method('last_insert')->willReturn('99');
