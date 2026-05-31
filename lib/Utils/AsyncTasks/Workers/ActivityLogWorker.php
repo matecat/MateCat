@@ -41,10 +41,9 @@ class ActivityLogWorker extends AbstractWorker
     /**
      * @throws PDOException
      */
-    protected function _writeLog(ActivityLogStruct $logEvent): void
+    protected function _writeLog(ActivityLogStruct $logEvent, ?ActivityLogDao $dao = null): void
     {
-        $logActivityDao = new ActivityLogDao();
-        $logActivityDao->create($logEvent);
+        ($dao ?? new ActivityLogDao())->create($logEvent);
     }
 
 }

@@ -35,7 +35,7 @@ class MailWorker extends AbstractWorker
          */
         $this->_checkForReQueueEnd($queueElement);
 
-        $mail = new PHPMailer();
+        $mail = $this->createMailer();
 
         $mail->isSMTP();
 
@@ -74,6 +74,11 @@ class MailWorker extends AbstractWorker
         }
 
         $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message has been sent.");
+    }
+
+    protected function createMailer(): PHPMailer
+    {
+        return new PHPMailer();
     }
 
 }
