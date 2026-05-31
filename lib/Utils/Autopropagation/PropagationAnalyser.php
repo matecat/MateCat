@@ -77,10 +77,10 @@ class PropagationAnalyser
                     $this->notPropagatedIceCount++;
                 } else {
                     $propagation->addPropagatedNotIce($segmentTranslation);
-                    $propagation->addPropagatedId($segmentTranslation->id_segment);
+                    $propagation->addPropagatedId((string) $segmentTranslation->id_segment);
 
                     if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
-                        $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
+                        $propagation->addPropagatedIdToUpdateVersion((string) $segmentTranslation->id_segment);
                     }
 
                     $this->propagatedCount++;
@@ -91,10 +91,10 @@ class PropagationAnalyser
                 //Propagate to other ICEs
                 if ($this->detectMatchingIce($parentSegmentTranslation, $segmentTranslation)) {
                     $propagation->addPropagatedIce($segmentTranslation);
-                    $propagation->addPropagatedId($segmentTranslation->id_segment);
+                    $propagation->addPropagatedId((string) $segmentTranslation->id_segment);
 
                     if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
-                        $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
+                        $propagation->addPropagatedIdToUpdateVersion((string) $segmentTranslation->id_segment);
                     }
 
                     $this->propagatedIceCount++;

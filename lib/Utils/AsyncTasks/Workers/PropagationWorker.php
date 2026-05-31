@@ -44,9 +44,9 @@ class PropagationWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            throw new EndQueueException('Invalid queue element type');
+        }
         $this->_checkForReQueueEnd($queueElement);
         $this->_checkDatabaseConnection();
 
@@ -60,8 +60,10 @@ class PropagationWorker extends AbstractWorker
      */
     protected function propagateTranslation(array $structures): void
     {
-        /** @var ?PropagationTotalStruct $propagationTotalStruct */
         $propagationTotalStruct = $structures['propagationAnalysis'];
+        if (!$propagationTotalStruct instanceof PropagationTotalStruct) {
+            return;
+        }
 
         /** @var SegmentTranslationStruct $propagatorSegment */
         $propagatorSegment = $structures['translationStructTemplate'];
@@ -129,7 +131,7 @@ class PropagationWorker extends AbstractWorker
                             $propagatorSegment,
                             $structures['id_segment'],
                             $structures['job'],
-                            $segmentsToIncrementMap,
+                            array_values($segmentsToIncrementMap),
                         );
 
                         $increaseVersionSql = "

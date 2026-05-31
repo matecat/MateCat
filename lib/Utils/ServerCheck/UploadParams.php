@@ -33,7 +33,7 @@ class UploadParams
         return $this->upload_max_filesize;
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
         if (!property_exists($this, $name)) {
             throw new UnknownPropertyException($name);
@@ -64,13 +64,9 @@ class UploadParams
         return $this;
     }
 
-    public function __clone()
+    public function __clone(): void
     {
-        $cloned = new UploadParams();
-        $cloned->setPostMaxSize($this->getPostMaxSize());
-        $cloned->setUploadMaxFilesize($this->getUploadMaxFilesize());
-
-        return $cloned;
+        // Properties are already copied by PHP's clone mechanism
     }
 
 }
