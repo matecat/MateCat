@@ -22,6 +22,13 @@ class CloudWatchHandlerProvider implements ProviderInterface
 
     private static ?CloudWatchLogsClient $CLIENT = null;
 
+    public function __construct(?CloudWatchLogsClient $client = null)
+    {
+        if ($client !== null) {
+            self::$CLIENT = $client;
+        }
+    }
+
     public function getHandlerClassName(): string
     {
         return CloudWatch::class;
@@ -56,7 +63,7 @@ class CloudWatchHandlerProvider implements ProviderInterface
          */
         return array_merge(
             [
-                'client' => self::getClient(),
+                'client' => $this->getClient(),
                 'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname() ?: '')[0] ?? 'base') . '-node',
                 'stream' => pathinfo($name, PATHINFO_FILENAME),
                 'retention' => 30,
@@ -71,27 +78,33 @@ class CloudWatchHandlerProvider implements ProviderInterface
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    protected function getClientConfig(): array
+    {
+        $awsRegion = AppConfig::$AWS_REGION ?? 'eu-central-1';
+        $config = [
+            'version' => 'latest',
+            'region' => $awsRegion,
+        ];
+
+        if (null !== AppConfig::$AWS_ACCESS_KEY_ID && null !== AppConfig::$AWS_SECRET_KEY) {
+            $config['credentials'] = [
+                'key' => AppConfig::$AWS_ACCESS_KEY_ID,
+                'secret' => AppConfig::$AWS_SECRET_KEY,
+            ];
+        }
+
+        return $config;
+    }
+
+    /**
      * @throws InvalidArgumentException
      */
-    private static function getClient(): CloudWatchLogsClient
+    private function getClient(): CloudWatchLogsClient
     {
-        if (empty(self::$CLIENT)) {
-            // init the client
-            $awsRegion = AppConfig::$AWS_REGION ?? 'eu-central-1';
-
-            $config = [
-                'version' => 'latest',
-                'region' => $awsRegion,
-            ];
-
-            if (null !== AppConfig::$AWS_ACCESS_KEY_ID and null !== AppConfig::$AWS_SECRET_KEY) {
-                $config['credentials'] = [
-                    'key' => AppConfig::$AWS_ACCESS_KEY_ID,
-                    'secret' => AppConfig::$AWS_SECRET_KEY,
-                ];
-            }
-
-            self::$CLIENT = new CloudWatchLogsClient($config);
+        if (self::$CLIENT === null) {
+            self::$CLIENT = new CloudWatchLogsClient($this->getClientConfig());
         }
 
         return self::$CLIENT;

@@ -23,7 +23,7 @@ use Utils\Registry\AppConfig;
 class HandlersProviderFactory
 {
     /**
-     * @return list<\Monolog\Handler\AbstractProcessingHandler>
+     * @return list<AbstractProcessingHandler>
      */
     public static function loadWithName(string $handlerName): array
     {

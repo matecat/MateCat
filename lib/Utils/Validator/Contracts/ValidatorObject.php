@@ -18,6 +18,14 @@ class ValidatorObject implements ArrayAccess
     protected array $store = [];
 
     /**
+     * Set a public final constructor to prevent
+     * bad constructor calls in new static()
+     */
+    public final function __construct()
+    {
+    }
+
+    /**
      * @param stdClass $object
      *
      * @return static

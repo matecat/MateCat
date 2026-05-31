@@ -11,12 +11,20 @@ namespace Utils\Logger\Handlers;
 
 use DateTime;
 use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\ClientInterface;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\ElasticsearchHandler;
 
 class ElasticSearchHandlerProvider implements ProviderInterface
 {
+
+    private ?ClientInterface $client;
+
+    public function __construct(?ClientInterface $client = null)
+    {
+        $this->client = $client;
+    }
 
     /**
      * @inheritDoc
@@ -35,7 +43,7 @@ class ElasticSearchHandlerProvider implements ProviderInterface
     public function getHandlerParams(string $name, array $configurationParams): array
     {
         $hosts = explode(',', $configurationParams['hosts']);
-        $client = ClientBuilder::create()->setHosts($hosts)->build();
+        $client = $this->client ?? ClientBuilder::create()->setHosts($hosts)->build();
         return [
             'client' => $client,
             'options' => [
