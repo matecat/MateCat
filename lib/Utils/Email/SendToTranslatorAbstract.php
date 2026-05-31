@@ -66,6 +66,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     }
 
     /**
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws \Exception
      */

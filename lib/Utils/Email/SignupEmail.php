@@ -47,6 +47,7 @@ class SignupEmail extends AbstractEmail
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _getTemplateVariables(): array
@@ -58,6 +59,9 @@ class SignupEmail extends AbstractEmail
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();
@@ -66,6 +70,9 @@ class SignupEmail extends AbstractEmail
         return $vars;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getDefaultMailConf(): array
     {
         $mailConf = parent::_getDefaultMailConf();

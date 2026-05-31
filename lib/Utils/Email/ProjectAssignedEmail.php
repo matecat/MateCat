@@ -48,6 +48,9 @@ class ProjectAssignedEmail extends AbstractEmail
         $this->_setTemplate('Project/project_assigned_content.html');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getTemplateVariables(): array
     {
         $words_count = [];
@@ -77,6 +80,9 @@ class ProjectAssignedEmail extends AbstractEmail
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();

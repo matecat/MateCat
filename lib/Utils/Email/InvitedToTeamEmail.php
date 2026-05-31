@@ -34,7 +34,9 @@ class InvitedToTeamEmail extends AbstractEmail
     }
 
     /**
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
     protected function _getTemplateVariables(): array
     {
