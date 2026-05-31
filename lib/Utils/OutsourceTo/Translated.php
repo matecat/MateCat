@@ -245,6 +245,7 @@ class Translated extends AbstractProvider
      *
      * @throws RuntimeException
      * @throws LogicException
+     * @throws TypeError
      *
      * @see GUIDE->"PROCEDURE"->POINT 2 for details
      *
@@ -333,6 +334,7 @@ class Translated extends AbstractProvider
      *
      * @throws RuntimeException
      * @throws LogicException
+     * @throws TypeError
      *
      * @see GUIDE->"PROCEDURE"->POINT 3 for details
      *
@@ -445,6 +447,7 @@ class Translated extends AbstractProvider
      * @param array<string, mixed>  $apiCallResult
      *
      * @return ItemHTSQuoteJob|null
+     * @throws LogicException
      */
     private function __prepareOutsourcedJobCart(string $jpid, array $volAnalysis, string $subject, array $apiCallResult): ?ItemHTSQuoteJob
     {
@@ -504,6 +507,7 @@ class Translated extends AbstractProvider
      * @param array<string, mixed>  $apiCallResult
      *
      * @return ItemHTSQuoteJob
+     * @throws LogicException
      */
     private function __prepareQuotedJobCart(string $jpid, array $volAnalysis, string $subject, array $apiCallResult): ItemHTSQuoteJob
     {
@@ -620,6 +624,7 @@ class Translated extends AbstractProvider
      *
      * @throws RuntimeException
      * @throws LogicException
+     * @throws TypeError
      *
      * @see Translated::__addCartElement
      */
@@ -651,6 +656,7 @@ class Translated extends AbstractProvider
      *
      * @throws LogicException
      * @throws RuntimeException
+     * @throws TypeError
      *
      * @see Translated::__addCartElementToCart
      *
@@ -690,6 +696,7 @@ class Translated extends AbstractProvider
      *
      * @throws LogicException
      * @throws RuntimeException
+     * @throws TypeError
      *
      * @see Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
      *

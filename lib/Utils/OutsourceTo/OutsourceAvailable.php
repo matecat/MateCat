@@ -6,11 +6,9 @@ namespace Utils\OutsourceTo;
 class OutsourceAvailable
 {
     /**
-     * @param $outsourceAvailableInfo
-     *
-     * @return bool
+     * @param mixed $outsourceAvailableInfo
      */
-    public static function isOutsourceAvailable($outsourceAvailableInfo): bool
+    public static function isOutsourceAvailable(mixed $outsourceAvailableInfo): bool
     {
         if (!is_array($outsourceAvailableInfo)) {
             return false;
