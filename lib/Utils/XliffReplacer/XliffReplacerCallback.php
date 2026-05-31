@@ -20,9 +20,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
     use ICUSourceSegmentChecker;
 
 
-    /**
-     * @var ?array
-     */
+    /** @var array<string>|null */
     private ?array $subfilteringCustomHandlers;
 
 
@@ -37,7 +35,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
     private string $targetLang;
 
     private FeatureSet $featureSet;
-    private ?JobStruct $jobStruct;
+    private JobStruct $jobStruct;
 
     /**
      * XliffReplacerCallback constructor.
@@ -55,7 +53,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
         $this->jobStruct = $jobStruct;
 
         $metadataDao = new MetadataDao();
-        $this->subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
+        $this->subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers((int)$jobStruct->id, (string)$jobStruct->password);
 
     }
 
@@ -116,13 +114,13 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
         $check = new QA(
             $segment,
             $translation,
-            MessagePatternComparator::fromValidators(
+            $this->icuSourcePatternValidator !== null ? MessagePatternComparator::fromValidators(
                 $this->icuSourcePatternValidator,
                 new MessagePatternValidator(
                     $this->jobStruct->target,
                     $translation
                 )
-            ),
+            ) : null,
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
             $this->sourceContainsIcu
         ); // Layer 1 here
