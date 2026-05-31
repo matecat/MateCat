@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,732 | −5,634 (−76.5%) |
+| **PHPStan baseline entries** | 7,366 | 1,714 | −5,652 (−76.7%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 563 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 573 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -531,6 +531,14 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/AsyncTasks/Workers/SetContributionMTWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/SetContributionWorker.php` | Phase 5B |
 | `lib/Utils/AsyncTasks/Workers/GlossaryWorker.php` | Phase 17 |
+| `lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/BulkSegmentStatusChangeWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/ErrMailWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/JobsWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/MailWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/ProjectCreationWorker.php` | Phase N+ |
+| `lib/Utils/AsyncTasks/Workers/PropagationWorker.php` | Phase N+ |
 | `lib/Utils/AsyncTasks/Workers/Traits/ProjectWordCount.php` | Phase 4C |
 | `lib/Utils/Constants/Constants.php` | Phase 45 |
 | `lib/Utils/Constants/EngineConstants.php` | Phase 6C |
@@ -688,6 +696,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 |------|-----------|
 | `lib/Utils/Validator/Contracts/AbstractValidator.php` | Phase N+ |
 | `lib/Utils/Validator/Contracts/ValidatorObject.php` | Phase N+ |
+| `lib/Utils/Validator/Contracts/ValidatorObjectInterface.php` | Phase N+ |
 | `lib/Utils/Validator/GlossaryCSVValidator.php` | Phase N+ |
 | `lib/Utils/Validator/IsJobRevisionValidator.php` | Phase 13A |
 | `lib/Utils/Validator/JSONSchema/Errors/JSONValidatorException.php` | Phase N+ |

@@ -2,6 +2,7 @@
 
 namespace Utils\AIAssistant;
 
+use BadMethodCallException;
 use Gemini\Contracts\ClientContract;
 use Gemini\Data\GenerationConfig;
 use Gemini\Data\Schema;
@@ -198,5 +199,27 @@ PROMPT;
         ];
 
         return $styleInstructionsMap[$style] ?? '';
+    }
+
+    /**
+     * @throws BadMethodCallException
+     */
+    public function evaluateTranslation(
+        string $sourceLanguage,
+        string $targetLanguage,
+        string $text,
+        string $translation,
+        string $style
+    ): bool|array
+    {
+        throw new BadMethodCallException('evaluateTranslation is not supported by GeminiClient');
+    }
+
+    /**
+     * @throws BadMethodCallException
+     */
+    public function findContextForAWord(string $word, string $phrase, string $target, callable $callback): void
+    {
+        throw new BadMethodCallException('findContextForAWord is not supported by GeminiClient');
     }
 }

@@ -36,9 +36,10 @@ class JobsWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
 
         $jobStruct = new JobStruct($queueElement->params->toArray());

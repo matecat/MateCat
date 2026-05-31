@@ -25,9 +25,10 @@ class ActivityLogWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
 
         $logEvent = new ActivityLogStruct($queueElement->params->toArray());

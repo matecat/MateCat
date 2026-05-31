@@ -2,6 +2,7 @@
 
 namespace Utils\AIAssistant;
 
+use BadMethodCallException;
 use Exception;
 use Orhanerday\OpenAi\OpenAi;
 use Utils\Registry\AppConfig;
@@ -165,5 +166,22 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
         ];
 
         $this->openAi->chat($opts, $callback);
+    }
+
+    /**
+     * @throws BadMethodCallException
+     */
+    public function manageAlternativeTranslations(
+        string $sourceLanguage,
+        string $targetLanguage,
+        string $sourceSentence,
+        string $sourceContextSentencesString,
+        string $targetSentence,
+        string $targetContextSentencesString,
+        string $excerpt,
+        string $styleInstructions
+    ): array
+    {
+        throw new BadMethodCallException('manageAlternativeTranslations is not supported by OpenAIClient');
     }
 }

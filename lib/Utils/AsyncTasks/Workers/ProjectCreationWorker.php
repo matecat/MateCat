@@ -44,9 +44,10 @@ class ProjectCreationWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
         $this->_checkDatabaseConnection();
 
@@ -104,6 +105,7 @@ class ProjectCreationWorker extends AbstractWorker
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _publishResults(): void
     {
@@ -127,6 +129,7 @@ class ProjectCreationWorker extends AbstractWorker
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function publishProjectResults(ProjectStructure $structure): void
     {

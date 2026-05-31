@@ -56,9 +56,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
         $this->_checkDatabaseConnection();
         $this->_doLog('data: ' . var_export($queueElement->params->toArray(), true));
@@ -79,7 +80,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         $batchEventCreator->setFeatureSet($chunk->getProject()->getFeaturesSet());
         $batchEventCreator->setProject($chunk->getProject());
 
-        $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], $chunk->id);
+        $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], (int)$chunk->id);
 
         $new_translations = [];
 

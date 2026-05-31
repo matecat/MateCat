@@ -151,13 +151,15 @@ class AIAssistantWorker extends AbstractWorker
     {
         try {
             $openAi = $this->createAIClient("openai");
-            $message = $openAi->evaluateTranslation(
+            $result = $openAi->evaluateTranslation(
                 sourceLanguage: $payload['localized_source'],
                 targetLanguage: $payload['localized_target'],
                 text: $payload['text'],
                 translation: $payload['translation'],
                 style: $payload['style']
             );
+
+            $message = is_array($result) ? $result : null;
 
             $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
         } catch (Exception $e) {
@@ -172,7 +174,7 @@ class AIAssistantWorker extends AbstractWorker
      */
     private function explain_meaning(array $payload): void
     {
-        $phraseTrimLimit = ceil(AppConfig::$OPEN_AI_MAX_TOKENS / 2);
+        $phraseTrimLimit = ceil((int)AppConfig::$OPEN_AI_MAX_TOKENS / 2);
         $phrase = strip_tags(html_entity_decode($payload['phrase']));
         $phrase = Utils::truncatePhrase($phrase, (int)$phraseTrimLimit);
         $txt = "";
@@ -296,7 +298,7 @@ class AIAssistantWorker extends AbstractWorker
      * @param string $type
      * @param string $idClient
      * @param string $idSegment
-     * @param null|array<string, mixed>|string $message
+     * @param null|array<mixed>|string $message
      * @param bool $hasError
      * @param bool $completed
      * @param int|null $errorCode
