@@ -7,6 +7,7 @@ class OutsourceAvailable
 {
     /**
      * @param mixed $outsourceAvailableInfo
+     * @return bool
      */
     public static function isOutsourceAvailable(mixed $outsourceAvailableInfo): bool
     {
