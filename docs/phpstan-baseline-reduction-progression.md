@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,697 | −5,669 (−77.0%) |
+| **PHPStan baseline entries** | 7,366 | 1,696 | −5,670 (−77.0%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 585 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 586 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -757,6 +757,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/TaskRunner/Executor.php` | Phase 26 |
 | `lib/Utils/TaskRunner/executor_worker.php` | Phase 31 |
 | `lib/Utils/TaskRunner/TaskManager.php` | Phase 31 |
+| `lib/Utils/TMS/TMSService.php` | Phase N+ |
 | `lib/Utils/TmKeyManagement/Filter.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/ShareKeyEmail.php` | Phase 6C |
 | `lib/Utils/TmKeyManagement/TmKeyManager.php` | Phase 6C |

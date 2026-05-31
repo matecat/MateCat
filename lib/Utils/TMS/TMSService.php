@@ -26,6 +26,7 @@ use SplTempFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\EngineInterface;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
@@ -75,7 +76,7 @@ class TMSService
         $this->database = $database ?? Database::obtain();
 
         //get MyMemory service
-        $mymemory_engine = EnginesFactory::getInstance(1);
+        $mymemory_engine = EnginesFactory::getInstance(1, MyMemory::class);
 
         if (!$mymemory_engine instanceof MyMemory) {
             throw new RuntimeException('MyMemory engine instance is required');
@@ -240,7 +241,7 @@ class TMSService
                             $this->logger->debug("Invalid engine ID value for user $user->uid: " . print_r($engineId, true));
                             continue;
                         }
-                        $engine = EnginesFactory::getInstance((int)$engineId);
+                        $engine = EnginesFactory::getInstance((int)$engineId, AbstractEngine::class);
                         $userAdaptiveEngines[] = $engine;
                         $this->logger->debug("User [$user->uid, '$user->email'] found adaptive engine: {$engine->getEngineRecord()->class_load}");
                     }

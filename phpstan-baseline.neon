@@ -2861,12 +2861,6 @@ parameters:
 			path: lib/Routes/app_routes.php
 
 		-
-			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
-			identifier: argument.templateType
-			count: 2
-			path: lib/Utils/TMS/TMSService.php
-
-		-
 			message: '#^Method Features\\Translated\:\:swapOff\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
