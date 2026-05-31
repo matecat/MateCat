@@ -367,7 +367,7 @@ class QA
      * When XML parsing fails, this returns the tags that differ
      * between source and target segments.
      *
-     * @return array{source: array, target: array} Tags present in source but not target and vice versa
+     * @return array{source: list<string>, target: list<string>} Tags present in source but not target and vice versa
      */
     public function getMalformedXmlStructs(): array
     {
@@ -377,7 +377,7 @@ class QA
     /**
      * Gets the tags that have position errors.
      *
-     * @return array List of tag strings with position mismatches
+     * @return list<string> List of tag strings with position mismatches
      */
     public function getTargetTagPositionError(): array
     {

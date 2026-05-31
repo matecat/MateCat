@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,884 | −5,482 (−74.4%) |
+| **PHPStan baseline entries** | 7,366 | 1,835 | −5,531 (−75.1%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,10 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 515 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 525 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+
+**Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
+- `lib/Model/` — all files clean, no baseline entries
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -433,6 +436,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Model/TMSService/TMSServiceDao.php` | Phase 25 |
 | `lib/Model/Translations/SegmentTranslationDao.php` | Phase 25 |
 | `lib/Model/Translations/WarningDao.php` | Phase 25 |
+| `lib/Model/TranslationsSplit/SegmentSplitStruct.php` | Phase N+ |
 | `lib/Model/TranslationsSplit/SplitDAO.php` | Phase 25 |
 | `lib/Model/Translators/JobsTranslatorsDao.php` | Phase 25 |
 | `lib/Model/Translators/JobsTranslatorsStruct.php` | Phase 0 |
@@ -614,11 +618,20 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/LQA/BxExG/Validator.php` | Phase 9A |
 | `lib/Utils/LQA/ICUSourceSegmentChecker.php` | Phase 14 |
 | `lib/Utils/LQA/ICUSourceSegmentDetector.php` | Phase 14 |
+| `lib/Utils/LQA/PostProcess.php` | Phase N+ |
+| `lib/Utils/LQA/QA.php` | Phase N+ |
+| `lib/Utils/LQA/QA/ContentPreprocessor.php` | Phase N+ |
+| `lib/Utils/LQA/QA/DomHandler.php` | Phase N+ |
 | `lib/Utils/LQA/QA/ErrObject.php` | Phase 9A |
+| `lib/Utils/LQA/QA/ErrorManager.php` | Phase N+ |
+| `lib/Utils/LQA/QA/ICUChecker.php` | Phase N+ |
 | `lib/Utils/LQA/QA/SizeRestrictionChecker.php` | Phase 31 |
 | `lib/Utils/LQA/QA/SymbolChecker.php` | Phase 9A |
+| `lib/Utils/LQA/QA/TagChecker.php` | Phase N+ |
+| `lib/Utils/LQA/QA/WhitespaceChecker.php` | Phase N+ |
 | `lib/Utils/LQA/SizeRestriction/CJKLangUtils.php` | Phase 9A |
 | `lib/Utils/LQA/SizeRestriction/EmojiUtils.php` | Phase 9A |
+| `lib/Utils/LQA/SizeRestriction/SizeRestriction.php` | Phase N+ |
 
 #### Utils (other)
 | File | Cleaned In |

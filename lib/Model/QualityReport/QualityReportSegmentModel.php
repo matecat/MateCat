@@ -159,6 +159,7 @@ class QualityReportSegmentModel
      * @param BaseCommentStruct[] $comments
      * @throws RuntimeException
      * @throws ReflectionException
+     * @throws \Exception
      */
     protected function _assignComments(QualityReportSegmentStruct $seg, array $comments): void
     {

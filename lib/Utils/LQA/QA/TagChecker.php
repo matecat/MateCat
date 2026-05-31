@@ -207,7 +207,7 @@ class TagChecker
     public function checkTagPositions(): void
     {
         if ($this->featureSet && $this->qaInstance) {
-            $checkTagPositionsEvent = new CheckTagPositionsEvent(ErrorManager::ERR_NONE, $this->qaInstance);
+            $checkTagPositionsEvent = new CheckTagPositionsEvent(false, $this->qaInstance);
             $this->featureSet->dispatch($checkTagPositionsEvent);
             $customCheckTagPositions = $checkTagPositionsEvent->getErrorCode();
         } else {

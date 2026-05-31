@@ -486,7 +486,7 @@ class ErrorManager
             preg_match('/"outcome":\s*?(\d+),/', $jsonString, $matches);
             if (!empty($matches)) {
                 // Register the extracted error code, defaulting to ERR_TAG_MISMATCH if the capture group is missing (conservative)
-                $manager->addError((int)($matches[1] ?? self::ERR_TAG_MISMATCH));
+                $manager->addError((int)$matches[1]);
             }
         } else {
             // Parse valid JSON into an associative array

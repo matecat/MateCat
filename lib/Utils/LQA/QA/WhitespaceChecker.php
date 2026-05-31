@@ -127,7 +127,7 @@ class WhitespaceChecker
                     continue;
                 }
 
-                $domSrcNodeString = $srcNode->ownerDocument?->saveXML($srcNode) ?? '';
+                $domSrcNodeString = $srcNode->ownerDocument?->saveXML($srcNode) ?: '';
 
                 if (isset($trgNodeContent) && isset($srcNodeContent)) {
                     if (!preg_match('/^<g[^>]+></', $domSrcNodeString)) {

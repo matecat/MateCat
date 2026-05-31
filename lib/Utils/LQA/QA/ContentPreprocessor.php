@@ -27,17 +27,7 @@ class ContentPreprocessor
     /** @var string Placeholder used to fill empty HTML tags */
     public const string EMPTY_HTML_TAGS_PLACEHOLDER = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    /**
-     * Map of ASCII control characters to their placeholder representations.
-     *
-     * Keys are hex codes (00-1F, 7F), values contain:
-     * - symbol: ASCII symbol name (e.g., 'NULL', 'SOH', 'LF')
-     * - placeHold: Placeholder string
-     * - numeral: Numeric value
-     *
-     * @var array<string, array{symbol: string, placeHold: string, numeral: int}>
-     */
-    protected static array $asciiPlaceHoldMap = [
+    private const array ASCII_PLACE_HOLD_MAP = [
         '00' => ['symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00],
         '01' => ['symbol' => 'SOH', 'placeHold' => '##$_01$##', 'numeral' => 0x01],
         '02' => ['symbol' => 'STX', 'placeHold' => '##$_02$##', 'numeral' => 0x02],
@@ -79,12 +69,12 @@ class ContentPreprocessor
 
     public static function getTabPlaceholder(): string
     {
-        return self::$asciiPlaceHoldMap['09']['placeHold'];
+        return self::ASCII_PLACE_HOLD_MAP['09']['placeHold'];
     }
 
     public static function getNewlinePlaceholder(): string
     {
-        return self::$asciiPlaceHoldMap['0A']['placeHold'];
+        return self::ASCII_PLACE_HOLD_MAP['0A']['placeHold'];
     }
 
     /**
@@ -95,7 +85,7 @@ class ContentPreprocessor
         $segment = $segment ?? '';
 
         $encoding = mb_detect_encoding($segment);
-        $segment = mb_convert_encoding($segment, 'UTF-8', $encoding ?: null);
+        $segment = mb_convert_encoding($segment, 'UTF-8', $encoding ?: 'UTF-8') ?: $segment;
 
         // Replace non-printable chars with placeholders (DOMDocument can't handle them)
         $segment = $this->replaceAscii($segment);
@@ -120,7 +110,7 @@ class ContentPreprocessor
                 $key = sprintf("%02X", ord($v));
                 $test_src = preg_replace(
                     sprintf("/(\\x{%s}{1})/u", sprintf("%02X", ord($v))),
-                    self::$asciiPlaceHoldMap[$key]['placeHold'],
+                    self::ASCII_PLACE_HOLD_MAP[$key]['placeHold'],
                     $test_src,
                     1
                 ) ?? $test_src;
@@ -151,8 +141,8 @@ class ContentPreprocessor
                 }
 
                 $key = sprintf("%02X", hexdec($v));
-                if (array_key_exists($key, self::$asciiPlaceHoldMap)) {
-                    $test_src = preg_replace($regexp, self::$asciiPlaceHoldMap[$key]['placeHold'], $test_src) ?? $test_src;
+                if (array_key_exists($key, self::ASCII_PLACE_HOLD_MAP)) {
+                    $test_src = preg_replace($regexp, self::ASCII_PLACE_HOLD_MAP[$key]['placeHold'], $test_src) ?? $test_src;
                 }
             }
 

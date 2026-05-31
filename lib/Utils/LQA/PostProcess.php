@@ -310,7 +310,7 @@ class PostProcess
         if (($headSrcWhiteSpaces === 0) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces) {
             // Source starts with space, target doesn't -> add space to target
             $_trgNodeContent = " " . $_trgNodeContent;
-        } elseif (($headSrcWhiteSpaces !== 0 && $headTrgWhiteSpaces === 0) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces) {
+        } elseif ($headTrgWhiteSpaces === 0 && $headSrcWhiteSpaces !== $headTrgWhiteSpaces) {
             // Target starts with space, the source doesn't -> remove space from target
             $_trgNodeContent = mb_substr($_trgNodeContent, 1, mb_strlen($_trgNodeContent));
         }

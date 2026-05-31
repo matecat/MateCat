@@ -41,18 +41,18 @@ class SizeRestriction
      */
     private function clearStringFromTags(string $string): string
     {
-        $cleanedText = preg_replace('#&lt;ph(?:(?!id).)*?id="[^"].*?"(?:(?!equiv-text).)*?equiv-text="base64:((?:(?!&gt;).)*?)"/&gt;#iu', '', $string);
-        $cleanedText = preg_replace('/&lt;g .*?id="(.*?)".*?&gt;/iu', '', $cleanedText);
-        $cleanedText = preg_replace('#&lt;(/g)&gt;#iu', '', $cleanedText);
-        $cleanedText = preg_replace('#&lt;bx .*?id="(.*?)".*?/&gt;#iu', '', $cleanedText);
-        $cleanedText = preg_replace('#&lt;ex .*?id="(.*?)".*?/&gt;#iu', '', $cleanedText);
-        $cleanedText = preg_replace('/&lt;x .*?id="(.*?)".*?&gt;/iu', '', $cleanedText);
-        $cleanedText = preg_replace('/##\$(_A0)\$##/iu', ' ', $cleanedText);
-        $cleanedText = preg_replace('/##\$(_09)\$##/iu', ' ', $cleanedText);
-        $cleanedText = preg_replace('/##\$(_0D)\$##/iu', ' ', $cleanedText);
-        $cleanedText = preg_replace('/##\$(_0A)\$##/iu', ' ', $cleanedText);
-        $cleanedText = preg_replace('/##\$_(SPLIT)\$##/iu', ' ', $cleanedText);
-        $cleanedText = preg_replace('/&nbsp;/iu', ' ', $cleanedText);
+        $cleanedText = preg_replace('#&lt;ph(?:(?!id).)*?id="[^"].*?"(?:(?!equiv-text).)*?equiv-text="base64:((?:(?!&gt;).)*?)"/&gt;#iu', '', $string) ?? $string;
+        $cleanedText = preg_replace('/&lt;g .*?id="(.*?)".*?&gt;/iu', '', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('#&lt;(/g)&gt;#iu', '', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('#&lt;bx .*?id="(.*?)".*?/&gt;#iu', '', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('#&lt;ex .*?id="(.*?)".*?/&gt;#iu', '', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/&lt;x .*?id="(.*?)".*?&gt;/iu', '', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/##\$(_A0)\$##/iu', ' ', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/##\$(_09)\$##/iu', ' ', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/##\$(_0D)\$##/iu', ' ', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/##\$(_0A)\$##/iu', ' ', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/##\$_(SPLIT)\$##/iu', ' ', $cleanedText) ?? $cleanedText;
+        $cleanedText = preg_replace('/&nbsp;/iu', ' ', $cleanedText) ?? $cleanedText;
 
         return html_entity_decode($cleanedText, ENT_QUOTES | ENT_HTML5);
     }

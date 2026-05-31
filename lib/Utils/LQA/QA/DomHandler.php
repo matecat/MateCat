@@ -238,8 +238,10 @@ class DomHandler
             throw new DOMException('Source or target DOM not loaded');
         }
 
-        $srcNodeList = @$this->srcDom->getElementsByTagName('root')->item(0)->childNodes;
-        $trgNodeList = @$this->trgDom->getElementsByTagName('root')->item(0)->childNodes;
+        $srcRoot = $this->srcDom->getElementsByTagName('root')->item(0);
+        $trgRoot = $this->trgDom->getElementsByTagName('root')->item(0);
+        $srcNodeList = $srcRoot?->childNodes;
+        $trgNodeList = $trgRoot?->childNodes;
 
         if (!$srcNodeList instanceof DOMNodeList || !$trgNodeList instanceof DOMNodeList) {
             throw new DOMException('Bad DOMNodeList');
@@ -252,7 +254,8 @@ class DomHandler
         $this->normalizedTrgDOM = clone $this->trgDom;
 
         // Save normalized Dom Node list
-        $this->normalizedTrgDOMNodeList = @$this->normalizedTrgDOM->getElementsByTagName('root')->item(0)->childNodes;
+        $normalizedRoot = $this->normalizedTrgDOM->getElementsByTagName('root')->item(0);
+        $this->normalizedTrgDOMNodeList = $normalizedRoot?->childNodes;
 
         return [$srcNodeList, $trgNodeList];
     }
@@ -296,7 +299,7 @@ class DomHandler
                 $elementID = $element->getAttribute('id');
 
                 if ($this->addThisElementToDomMap($element)) {
-                    $innerHTML = $element->ownerDocument?->saveXML($element) ?? '';
+                    $innerHTML = $element->ownerDocument?->saveXML($element) ?: '';
                     $plainRef = [
                         'type' => 'DOMElement',
                         'name' => $element->tagName,
