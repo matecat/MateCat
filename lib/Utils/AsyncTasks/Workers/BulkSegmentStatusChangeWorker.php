@@ -1,36 +1,44 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: fregini
- * Date: 21/01/2019
- * Time: 10:57
- */
 
 namespace Utils\AsyncTasks\Workers;
 
-
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use TypeError;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
-
 class BulkSegmentStatusChangeWorker extends AbstractWorker
 {
-
     protected int $maxRequeueNum = 3;
+
+    private UserDao $userDao;
+    private IDatabase $database;
+
+    /**
+     * @throws ReflectionException
+     */
+    public function __construct(AMQHandler $queueHandler, ?UserDao $userDao = null, ?IDatabase $database = null)
+    {
+        parent::__construct($queueHandler);
+        $this->userDao = $userDao ?? new UserDao();
+        $this->database = $database ?? Database::obtain();
+    }
 
     public function getLoggerName(): string
     {
@@ -57,19 +65,17 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $params = $queueElement->params->toArray();
 
-        $chunk = new JobStruct($params['chunk']);
+        $chunk = $this->createJobStruct($params['chunk']);
         $status = $params['destination_status'];
         $client_id = $params['client_id'];
-        $user = (new UserDao())->getByUid($params['id_user']);
+        $user = $this->userDao->getByUid($params['id_user']);
         $source_page = ReviewUtils::revisionNumberToSourcePage($params['revision_number']);
 
+        $this->database->begin();
 
-        $database = Database::obtain();
-        $database->begin();
+        $segmentTranslationDao = new SegmentTranslationDao($this->database);
 
-        $segmentTranslationDao = new SegmentTranslationDao($database);
-
-        $batchEventCreator = new TranslationEventsHandler($chunk);
+        $batchEventCreator = $this->createTranslationEventsHandler($chunk);
         $batchEventCreator->setFeatureSet($chunk->getProject()->getFeaturesSet());
         $batchEventCreator->setProject($chunk->getProject());
 
@@ -78,7 +84,6 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         $new_translations = [];
 
         if (empty($old_translations)) {
-            //no segment found
             return;
         }
 
@@ -91,9 +96,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
             if ($chunk->getProject()->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
-                    $segmentTranslationEvent = new TranslationEvent($old_translation, $new_translation, $user, $source_page);
+                    $segmentTranslationEvent = $this->createTranslationEvent($old_translation, $new_translation, $user, $source_page);
                 } catch (Exception $e) {
-                    // job archived or deleted, runtime exception on TranslationEvent creation
                     throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
                 }
 
@@ -107,7 +111,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $this->_doLog('completed');
 
-        $database->commit();
+        $this->database->commit();
 
         if ($client_id) {
             $segment_ids = $params['segment_ids'];
@@ -128,6 +132,31 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
             $this->publishToNodeJsClients($message);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    protected function createJobStruct(array $params): JobStruct
+    {
+        return new JobStruct($params);
+    }
+
+    protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
+    {
+        return new TranslationEventsHandler($chunk);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createTranslationEvent(
+        SegmentTranslationStruct $oldTranslation,
+        SegmentTranslationStruct $newTranslation,
+        ?UserStruct $user,
+        int $sourcePage
+    ): TranslationEvent {
+        return new TranslationEvent($oldTranslation, $newTranslation, $user, $sourcePage);
     }
 
 }
