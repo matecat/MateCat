@@ -55,7 +55,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public ?string $id_translator = null;
     public ?string $job_type = null;
     public int $total_time_to_edit = 0;
-    public int $avg_post_editing_effort = 0;
+    public float $avg_post_editing_effort = 0.0;
     public int $only_private_tm = 0;
     public ?int $last_opened_segment = null;
     public int $id_tms = 1;
