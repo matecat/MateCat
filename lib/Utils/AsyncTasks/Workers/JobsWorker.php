@@ -23,6 +23,9 @@ class JobsWorker extends AbstractWorker
 
     /**
      * @throws EndQueueException|ReflectionException
+     * @throws \PDOException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function process(AbstractElement $queueElement): void
     {
@@ -65,6 +68,9 @@ class JobsWorker extends AbstractWorker
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws \PDOException
+     * @throws \TypeError
      */
     protected function _recountAvgPee(JobStruct $jobStruct): void
     {

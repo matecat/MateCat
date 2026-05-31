@@ -2976,12 +2976,6 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
 
 		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
 			message: '#^Call to an undefined method Utils\\AIAssistant\\AIClientInterface\:\:evaluateTranslation\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2998,72 +2992,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:alternative_translations\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:alternative_translations\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:emitErrorMessage\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:emitMessage\(\) has parameter \$message with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:explain_meaning\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:feedback\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:getLockValue\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Parameter \#2 \$max_words of static method Utils\\Tools\\Utils\:\:truncatePhrase\(\) expects int, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
-
-		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\ActivityLogWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\ActivityLogWorker\:\:_writeLog\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/ActivityLogWorker.php
 
 		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
@@ -3088,36 +3016,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/ErrMailWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:_recountAvgPee\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:_recountAvgPee\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:_recountAvgPee\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/JobsWorker.php
 
 		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\AsyncTasks\\Workers\\JobsWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
@@ -3162,38 +3060,38 @@ parameters:
 			path: lib/Utils/AsyncTasks/Workers/ProjectCreationWorker.php
 
 		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\PropagationWorker\:\:propagateTranslation\(\) has parameter \$structures with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\PropagationWorker\:\:rebuildObjects\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$propagationTotalStruct \?PropagationTotalStruct\)\: Unexpected token "\$propagationTotalStruct", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$propagatorSegment SegmentTranslationStruct\)\: Unexpected token "\$propagatorSegment", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
-
-		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkForReQueueEnd\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
 
 		-
-			message: '#^Parameter \#4 \$segmentsToUpdate of method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:savePropagationVersions\(\) expects list\<Model\\Translations\\SegmentTranslationStruct\>, array given\.$#'
+			message: '#^Parameter \#4 \$segmentsToUpdate of method Plugins\\Features\\TranslationVersions\\Model\\TranslationVersionDao\:\:savePropagationVersions\(\) expects list\<Model\\Translations\\SegmentTranslationStruct\>, array\<int\<0, max\>, Model\\Translations\\SegmentTranslationStruct\> given\.$#'
 			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
+
+		-
+			message: '#^Cannot call method getSegmentsForPropagation\(\) on Model\\Propagation\\PropagationTotalStruct\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
+
+		-
+			message: '#^Cannot call method getAllToPropagate\(\) on Model\\Propagation\\PropagationTotalStruct\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
+
+		-
+			message: '#^Cannot call method getPropagatedIdsToUpdateVersion\(\) on Model\\Propagation\\PropagationTotalStruct\|null\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
+
+		-
+			message: '#^Cannot call method getPropagatedIds\(\) on Model\\Propagation\\PropagationTotalStruct\|null\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/PropagationWorker.php
 
@@ -11368,12 +11266,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Utils\\AsyncTasks\\Workers\\AIAssistantWorker\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/AsyncTasks/Workers/AIAssistantWorker.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'

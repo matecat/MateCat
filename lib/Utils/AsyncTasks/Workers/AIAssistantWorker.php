@@ -45,6 +45,7 @@ class AIAssistantWorker extends AbstractWorker
      * @param AMQHandler $queueHandler
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct(AMQHandler $queueHandler)
     {
@@ -59,6 +60,7 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * @inheritDoc
      * @throws EndQueueException
+     * @throws \PDOException
      */
     public function process(AbstractElement $queueElement): void
     {
@@ -86,7 +88,7 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * Manages the generation and processing of alternative translations for a given payload.
      *
-     * @param array $payload The input data required to generate alternative translations, including:
+     * @param array<string, mixed> $payload The input data required to generate alternative translations, including:
      *                       - localized_source: The localized source language code.
      *                       - localized_target: The localized target language code.
      *                       - source_sentence: The source sentence to translate.
@@ -96,7 +98,10 @@ class AIAssistantWorker extends AbstractWorker
      *                       - excerpt: The text excerpt to assist in translation.
      *                       - style_instructions: Guidelines for translation style.
      *                       - id_segment: The identifier for the segment, used for logging and messaging.
-     *                       - id_client*/
+     *                       - id_client
+     *
+     * @throws Exception
+     */
     private function alternative_translations(array $payload): void
     {
         try {
@@ -134,7 +139,7 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * Processes feedback by evaluating translation and emitting relevant messages.
      *
-     * @param array $payload The data containing translation details, including:
+     * @param array<string, mixed> $payload The data containing translation details, including:
      *                       - localized_source: The source language.
      *                       - localized_target: The target language.
      *                       - text: The original text.
@@ -167,7 +172,7 @@ class AIAssistantWorker extends AbstractWorker
     }
 
     /**
-     * @param array $payload
+     * @param array<string, mixed> $payload
      *
      * @throws Exception
      */
@@ -175,7 +180,7 @@ class AIAssistantWorker extends AbstractWorker
     {
         $phraseTrimLimit = ceil(AppConfig::$OPEN_AI_MAX_TOKENS / 2);
         $phrase = strip_tags(html_entity_decode($payload['phrase']));
-        $phrase = Utils::truncatePhrase($phrase, $phraseTrimLimit);
+        $phrase = Utils::truncatePhrase($phrase, (int)$phraseTrimLimit);
         $txt = "";
 
         $lockValue = $this->generateLockValue();
@@ -291,7 +296,7 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * @param string $type
      * @param string $message
-     * @param array $payload
+     * @param array<string, mixed> $payload
      * @param int|null $errorCode
      *
      * @throws Exception
@@ -306,7 +311,7 @@ class AIAssistantWorker extends AbstractWorker
      * @param string $type
      * @param string $idClient
      * @param string $idSegment
-     * @param string $message
+     * @param null|array<string, mixed>|string $message
      * @param bool $hasError
      * @param bool $completed
      * @param int|null $errorCode
@@ -369,9 +374,9 @@ class AIAssistantWorker extends AbstractWorker
      * @param int $idJob
      * @param string $password
      *
-     * @return string
+     * @return string|null
      */
-    private function getLockValue(string $idSegment, int $idJob, string $password): string
+    private function getLockValue(string $idSegment, int $idJob, string $password): ?string
     {
         $key = $this->getLockKey($idSegment, $idJob, $password);
 

@@ -46,20 +46,18 @@ class PropagationWorker extends AbstractWorker
     }
 
     /**
+     * @param array<string, mixed> $structures
+     *
      * @throws Exception
      */
     protected function propagateTranslation(array $structures): void
     {
         $translationVersionsDao = new TranslationVersionDao();
 
-        /**
-         * @var $propagationTotalStruct ?PropagationTotalStruct
-         */
+        /** @var ?PropagationTotalStruct $propagationTotalStruct */
         $propagationTotalStruct = $structures['propagationAnalysis'];
 
-        /**
-         * @var $propagatorSegment SegmentTranslationStruct
-         */
+        /** @var SegmentTranslationStruct $propagatorSegment */
         $propagatorSegment = $structures['translationStructTemplate'];
 
         if (true === $structures['execute_update'] and !empty($propagationTotalStruct->getSegmentsForPropagation())) {
@@ -167,6 +165,8 @@ class PropagationWorker extends AbstractWorker
 
     /**
      * Cast to the proper objects from payload
+     *
+     * @return array<string, mixed>
      */
     protected function rebuildObjects(Params $params): array
     {
