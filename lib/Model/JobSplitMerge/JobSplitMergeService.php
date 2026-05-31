@@ -3,7 +3,9 @@
 namespace Model\JobSplitMerge;
 
 use ArrayObject;
+use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Model\Analysis\AnalysisDao;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
@@ -195,6 +197,8 @@ class JobSplitMergeService
     /**
      * Enqueue a worker job — overridable in tests.
      * @param array<string, mixed> $data
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     protected function enqueueWorker(string $queue, string $workerClass, array $data): void
     {

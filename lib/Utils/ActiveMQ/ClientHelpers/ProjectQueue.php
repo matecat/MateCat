@@ -47,9 +47,11 @@ class ProjectQueue
     }
 
     /**
+     * @return array<string, mixed>|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function getPublishedResults($id_project): ?array
+    public static function getPublishedResults(int $id_project): ?array
     {
         $redisHandler = (new RedisHandler())->getConnection();
         $response = json_decode($redisHandler->get(sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $id_project)) ?? 'null', true);
@@ -60,6 +62,7 @@ class ProjectQueue
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function publishResults(ProjectStructure $projectStructure): ?Status
     {

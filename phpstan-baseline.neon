@@ -91,6 +91,12 @@ parameters:
 			path: lib/Bootstrap.php
 
 		-
+			message: '#^Method Bootstrap\:\:installApplicationSingletons\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Bootstrap.php
+
+		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 3
@@ -2934,78 +2940,6 @@ parameters:
 			path: lib/Utils/AIAssistant/OpenAIClient.php
 
 		-
-			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:getPublishedResults\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:getPublishedResults\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:getPublishedResults\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\ClientHelpers\\ProjectQueue\:\:publishResults\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueue\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueue\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueueWithClient\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:init\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueueWithClient\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueueWithClient\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Method Utils\\ActiveMQ\\WorkerClient\:\:enqueueWithClient\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
-			message: '#^Property Utils\\ActiveMQ\\WorkerClient\:\:\$_QUEUES type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/ActiveMQ/WorkerClient.php
-
-		-
 			message: '#^Binary operation "/" between string and 2 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -3074,6 +3008,12 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$queueElement of method Utils\\AsyncTasks\\Workers\\ProjectCreationWorker\:\:_createProject\(\) expects Utils\\TaskRunner\\Commons\\QueueElement, Utils\\TaskRunner\\Commons\\AbstractElement given\.$#'
 			identifier: argument.type
+			count: 1
+			path: lib/Utils/AsyncTasks/Workers/ProjectCreationWorker.php
+
+		-
+			message: '#^Method Utils\\AsyncTasks\\Workers\\ProjectCreationWorker\:\:publishProjectResults\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: lib/Utils/AsyncTasks/Workers/ProjectCreationWorker.php
 
@@ -10961,4 +10901,28 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OauthResponseHandlerController.php
+
+		-
+			message: '#^Method Model\\ActivityLog\\Activity\:\:save\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ActivityLog/Activity.php
+
+		-
+			message: '#^Method Model\\ActivityLog\\Activity\:\:save\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Model/ActivityLog/Activity.php
+
+		-
+			message: '#^Method Utils\\Email\\AbstractEmail\:\:_enqueueEmailDelivery\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Email/AbstractEmail.php
+
+		-
+			message: '#^Method Utils\\Email\\AbstractEmail\:\:_enqueueEmailDelivery\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Email/AbstractEmail.php
 
