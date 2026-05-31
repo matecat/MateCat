@@ -1,19 +1,19 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-30 (last updated)  
-**Commits (refactor + fix + security + test):** 441+
+**Date:** 2026-05-31 (last updated)  
+**Commits (refactor + fix + security + test):** 452+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,950 | −5,416 (−73.5%) |
+| **PHPStan baseline entries** | 7,366 | 1,902 | −5,464 (−74.2%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,412 | +4,164 (+185.2%) |
-| **PHPUnit assertions** | ~19,449 | 17,176 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 34.54% (239/692) | +26.06% (+186 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 63.99% (2,683/4,193) | +42.25% (+1,839 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 64.50% (22,856/35,437) | +43.31% (+15,583 lines) |
-| **New test files** | 235 | 455 | +220 |
+| **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
+| **PHPUnit assertions** | ~19,449 | 17,507 | — |
+| **Coverage — Classes** | 8.48% (53/625) | 35.69% (247/692) | +27.21% (+194 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 64.77% (2,715/4,192) | +43.03% (+1,871 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 65.12% (23,076/35,438) | +43.93% (+15,803 lines) |
+| **New test files** | 235 | 480 | +245 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 325 | +325 |
 
 ---
