@@ -7,6 +7,8 @@
 namespace Utils\Shop;
 
 use LogicException;
+use RuntimeException;
+use TypeError;
 
 /**
  * Generic Cart Container / Manager attached to the session
@@ -29,7 +31,7 @@ class Cart
     /**
      * The cart content storage
      *
-     * @var array
+     * @var array<string, array<string, mixed>>
      */
     protected array $cart;
 
@@ -46,6 +48,7 @@ class Cart
      * @param String $cartName
      *
      * @return Cart
+     * @throws TypeError
      */
     public static function getInstance(string $cartName): Cart
     {
@@ -61,6 +64,7 @@ class Cart
      * That instance is automatically attached to session vars
      *
      * @param string $cartName
+     * @throws TypeError
      */
     protected function __construct(string $cartName)
     {
@@ -136,6 +140,8 @@ class Cart
      * @param string $item_id
      *
      * @return ?AbstractItem
+     * @throws RuntimeException
+     * @throws LogicException
      */
     public function getItem(string $item_id): ?AbstractItem
     {
@@ -184,7 +190,7 @@ class Cart
     /**
      * Return the cart content
      *
-     * @return AbstractItem[]
+     * @return array<string, array<string, mixed>>
      */
     public function getCart(): array
     {

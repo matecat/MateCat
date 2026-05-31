@@ -8,6 +8,7 @@ namespace Utils\Shop;
 use ArrayObject;
 use LogicException;
 use Model\DataAccess\UnknownPropertyException;
+use RuntimeException;
 
 /**
  * Abstract parent for Items to use with Cart class
@@ -16,6 +17,9 @@ use Model\DataAccess\UnknownPropertyException;
  * Date: 17/04/14
  * Time: 16.44
  *
+ */
+/**
+ * @extends ArrayObject<string, mixed>
  */
 abstract class AbstractItem extends ArrayObject implements ItemInterface
 {
@@ -34,7 +38,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      * );
      * </pre>
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $__storage = [
         '_id_type_class' => null,
@@ -44,14 +48,17 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
     ];
 
     /**
-     * @param $storage array{_id_type_class: class-string, ...string: string}
+     * @param array<string, mixed> $storage
      *
-     *
-     * @return AbstractItem
+     * @throws RuntimeException
+     * @throws LogicException
      */
-    public static function getInflate($storage): AbstractItem
+    public static function getInflate(array $storage): AbstractItem
     {
         $obj = new $storage['_id_type_class']();
+        if (!$obj instanceof AbstractItem) {
+            throw new RuntimeException('Invalid item class: ' . $storage['_id_type_class']);
+        }
         foreach ($storage as $key => $value) {
             $obj->offsetSet($key, $value);
         }
@@ -60,8 +67,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
     }
 
     /**
-     * Class Constructor
-     *
+     * @throws LogicException
      */
     public function __construct()
     {
@@ -87,7 +93,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
     /**
      * Return an array copy of the storage content
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getStorage(): array
     {
@@ -109,6 +115,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface
      * @return void
      *
      * @throws UnknownPropertyException
+     * @throws LogicException
      * @see  $__storage
      *
      * @link http://php.net/manual/en/arrayaccess.offsetset.php

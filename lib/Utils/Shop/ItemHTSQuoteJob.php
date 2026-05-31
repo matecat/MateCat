@@ -23,7 +23,7 @@ class ItemHTSQuoteJob extends AbstractItem
      * @see AbstractItem::offsetSet
      * @see AbstractItem::offsetUnset
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $__storage = [
         'id' => null,

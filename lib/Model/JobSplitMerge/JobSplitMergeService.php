@@ -6,6 +6,7 @@ use ArrayObject;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use TypeError;
 use Model\Analysis\AnalysisDao;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
@@ -100,6 +101,7 @@ class JobSplitMergeService
 
     /**
      * Wrapper around Cart static access — overridable in tests.
+     * @throws TypeError
      */
     protected function getCart(): Cart
     {

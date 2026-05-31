@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,810 | −5,556 (−75.4%) |
+| **PHPStan baseline entries** | 7,366 | 1,805 | −5,561 (−75.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 532 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 536 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -633,6 +633,14 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/LQA/SizeRestriction/CJKLangUtils.php` | Phase 9A |
 | `lib/Utils/LQA/SizeRestriction/EmojiUtils.php` | Phase 9A |
 | `lib/Utils/LQA/SizeRestriction/SizeRestriction.php` | Phase N+ |
+
+#### Utils/Shop
+| File | Cleaned In |
+|------|-----------|
+| `lib/Utils/Shop/AbstractItem.php` | Phase N+ |
+| `lib/Utils/Shop/Cart.php` | Phase N+ |
+| `lib/Utils/Shop/ItemHTSQuoteJob.php` | Phase N+ |
+| `lib/Utils/Shop/ItemInterface.php` | Phase N+ |
 
 #### Utils/XliffReplacer
 | File | Cleaned In |
