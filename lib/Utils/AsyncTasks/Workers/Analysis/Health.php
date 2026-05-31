@@ -40,14 +40,13 @@ class Health
      *
      * @return bool
      */
-    public static function thereIsAMisconfiguration(): bool
+    public static function thereIsAMisconfiguration(?Client $redisClient = null): bool
     {
         try {
-            $redisHandler = new RedisHandler();
-            $redisHandler = $redisHandler->getConnection();
+            $redisHandler = $redisClient ?? (new RedisHandler())->getConnection();
 
             return (AppConfig::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning($redisHandler) && !self::tmAnalysisIsRunning($redisHandler));
-        } catch (Exception $ex) {
+        } catch (Exception) {
             $msg = "****** No REDIS instances found. ******";
             LoggerFactory::doJsonLog($msg);
 

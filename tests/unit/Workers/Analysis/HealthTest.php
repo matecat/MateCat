@@ -6,6 +6,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\AsyncTasks\Workers\Analysis\Health;
+use Utils\Registry\AppConfig;
 
 class HealthTest extends AbstractTest
 {
@@ -43,5 +44,63 @@ class HealthTest extends AbstractTest
         $redis->method('__call')->willReturn(null);
 
         $this->assertFalse(Health::tmAnalysisIsRunning($redis));
+    }
+
+    // ─── thereIsAMisconfiguration() ───
+
+    #[Test]
+    public function thereIsAMisconfigurationReturnsTrueWhenNothingRunning(): void
+    {
+        $originalEnabled = AppConfig::$VOLUME_ANALYSIS_ENABLED;
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
+
+        $redis = $this->createMock(Client::class);
+        $redis->method('__call')->willReturn(null);
+
+        $result = Health::thereIsAMisconfiguration($redis);
+
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = $originalEnabled;
+
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function thereIsAMisconfigurationReturnsFalseWhenDisabled(): void
+    {
+        $originalEnabled = AppConfig::$VOLUME_ANALYSIS_ENABLED;
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
+
+        $redis = $this->createMock(Client::class);
+
+        $result = Health::thereIsAMisconfiguration($redis);
+
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = $originalEnabled;
+
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function thereIsAMisconfigurationReturnsFalseOnException(): void
+    {
+        $redis = $this->createMock(Client::class);
+        $redis->method('__call')->willThrowException(new \Exception('Redis down'));
+
+        $this->assertFalse(Health::thereIsAMisconfiguration($redis));
+    }
+
+    #[Test]
+    public function thereIsAMisconfigurationReturnsFalseWhenAnalysisRunning(): void
+    {
+        $originalEnabled = AppConfig::$VOLUME_ANALYSIS_ENABLED;
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
+
+        $redis = $this->createMock(Client::class);
+        $redis->method('__call')->willReturn('some-pid');
+
+        $result = Health::thereIsAMisconfiguration($redis);
+
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = $originalEnabled;
+
+        $this->assertFalse($result);
     }
 }
