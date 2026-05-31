@@ -77,7 +77,7 @@ class ErrMailWorker extends AbstractWorker
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message not sent.");
             throw new EmptyElementException("No eMail in configuration file found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data.");
         } else {
-            $mail = new PHPMailer();
+            $mail = $this->createMailer();
 
             $mail->isSMTP();
             $mail->Host = $mailConf->server_configuration['Host'];
@@ -145,6 +145,11 @@ class ErrMailWorker extends AbstractWorker
         $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message has been sent.");
 
         return true;
+    }
+
+    protected function createMailer(): PHPMailer
+    {
+        return new PHPMailer();
     }
 
 }
