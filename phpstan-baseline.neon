@@ -484,12 +484,6 @@ parameters:
 			path: lib/Controller/API/App/GetVolumeAnalysisController.php
 
 		-
-			message: '#^Cannot call method getValue\(\) on Utils\\Validator\\JSONSchema\\JSONValidatorObject\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/App/GlossaryController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\GlossaryController\:\:checkWritePermissions\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -588,12 +582,6 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\JobMetadataController\:\:sanitizeRequestParams\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/JobMetadataController.php
-
-		-
-			message: '#^Parameter \#1 \$json of class Utils\\Validator\\JSONSchema\\JSONValidatorObject constructor expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/JobMetadataController.php
 
@@ -2470,12 +2458,6 @@ parameters:
 			path: lib/Controller/API/V3/PayableRateController.php
 
 		-
-			message: '#^Parameter \#1 \$json of class Utils\\Validator\\JSONSchema\\JSONValidatorObject constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/PayableRateController.php
-
-		-
 			message: '#^Parameter \#1 \$json of method Controller\\API\\V3\\PayableRateController\:\:validateJSON\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -2556,12 +2538,6 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:validateJSON\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Parameter \#1 \$json of class Utils\\Validator\\JSONSchema\\JSONValidatorObject constructor expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/V3/QAModelTemplateController.php
 
@@ -3058,18 +3034,6 @@ parameters:
 			identifier: argument.templateType
 			count: 2
 			path: lib/Utils/TMS/TMSService.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 2
-			path: lib/Utils/Validator/Contracts/ValidatorObject.php
-
-		-
-			message: '#^Access to an undefined property Utils\\Validator\\Contracts\\ValidatorObject\:\:\$csv\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/Utils/Validator/GlossaryCSVValidator.php
 
 		-
 			message: '#^Method Features\\Translated\:\:swapOff\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'

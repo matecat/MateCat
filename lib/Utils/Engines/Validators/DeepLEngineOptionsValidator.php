@@ -14,7 +14,7 @@ use InvalidArgumentException;
 use Utils\Engines\DeepL;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class DeepLEngineOptionsValidator extends AbstractValidator
 {
@@ -23,9 +23,9 @@ class DeepLEngineOptionsValidator extends AbstractValidator
      * Validate DeepL params
      *
      * @param EngineValidatorObject $object
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
         if (empty($object->engineStruct) || !$object->engineStruct instanceof DeepL) {
             return null;

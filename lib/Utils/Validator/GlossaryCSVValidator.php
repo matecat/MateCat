@@ -7,7 +7,7 @@ use RuntimeException;
 use Utils\Files\CSV;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class GlossaryCSVValidator extends AbstractValidator
 {
@@ -15,10 +15,9 @@ class GlossaryCSVValidator extends AbstractValidator
     /**
      * @inheritDoc
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        $headers = $this->getHeaders($object->csv);
+        $headers = $this->getHeaders($object['csv']);
         $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages

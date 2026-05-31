@@ -10,6 +10,7 @@
 namespace Utils\Engines\Validators\Contracts;
 
 use Model\Engines\Structs\EngineStruct;
+use stdClass;
 use Utils\Validator\Contracts\ValidatorObject;
 
 /**
@@ -23,4 +24,35 @@ use Utils\Validator\Contracts\ValidatorObject;
  */
 class EngineValidatorObject extends ValidatorObject
 {
+
+    /**
+     * @param stdClass $object
+     *
+     * @return self
+     */
+    public static function fromObject(stdClass $object): self
+    {
+        $that = new self();
+        foreach (get_object_vars($object) as $key => $value) {
+            $that->store[$key] = $value;
+        }
+
+        return $that;
+    }
+
+    /**
+     * @param array<string, mixed> $array
+     *
+     * @return self
+     */
+    public static function fromArray(array $array): self
+    {
+        $that = new self();
+        foreach ($array as $key => $value) {
+            $that->store[$key] = $value;
+        }
+
+        return $that;
+    }
+
 }

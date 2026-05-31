@@ -12,7 +12,7 @@ use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
 use Utils\Registry\AppConfig;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
@@ -87,13 +87,13 @@ class JSONValidator extends AbstractValidator
     }
 
     /**
-     * @param ValidatorObject $object
+     * @param ValidatorObjectInterface $object
      *
      * @return JSONValidatorObject|null
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    public function validate(ValidatorObject $object): ?JSONValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?JSONValidatorObject
     {
         try {
             /** @var JSONValidatorObject $object */

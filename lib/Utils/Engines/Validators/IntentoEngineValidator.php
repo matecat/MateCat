@@ -14,17 +14,17 @@ use Exception;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class IntentoEngineValidator extends AbstractValidator
 {
 
     /**
      * @param EngineValidatorObject $object
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      * @throws Exception
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
         $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
         $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);

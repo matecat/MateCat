@@ -10,7 +10,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\LQA\ChunkReviewDao;
 use ReflectionException;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class IsJobRevisionValidator extends AbstractValidator
 {
@@ -25,14 +25,14 @@ class IsJobRevisionValidator extends AbstractValidator
      * Validates the provided ValidatorObject for specific criteria, ensuring required parameters are present
      * and verifying against the data obtained from the ChunkReviewDao.
      *
-     * @param ValidatorObject $object The object to validate, containing the necessary parameters such as 'jid' and 'password'.
-     * @return ValidatorObject|null Returns the validated object if criteria are met, otherwise null. Throws exceptions on validation errors.
-     * @throws ValidationError If the required parameters are missing.
+     * @param ValidatorObjectInterface $object
+     * @return ValidatorObjectInterface|null
+     * @throws ValidationError
      * @throws DomainException
      * @throws ReflectionException
      * @throws Exception
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
         if (!isset($object['jid'])) {
             throw new ValidationError('Missing jid parameter');
