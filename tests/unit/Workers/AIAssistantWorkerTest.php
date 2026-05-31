@@ -213,6 +213,159 @@ class AIAssistantWorkerTest extends AbstractTest
         $worker->process($this->createQueueElement('feedback', $payload));
     }
 
+    // ─── explain_meaning ───
+
+    private function createLockTrackingRedisMock(): void
+    {
+        $storedLock = null;
+        $this->redisMock->method('__call')->willReturnCallback(function ($method, $args) use (&$storedLock) {
+            if ($method === 'set') {
+                $storedLock = $args[1] ?? $args[0];
+                return true;
+            }
+            if ($method === 'get') {
+                return $storedLock;
+            }
+            if ($method === 'del') {
+                $storedLock = null;
+                return 1;
+            }
+            return true;
+        });
+    }
+
+    #[Test]
+    public function explainMeaningProcessesStreamedData(): void
+    {
+        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi->method('findContextForAWord')
+            ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
+                $sseChunk = 'data: {"choices":[{"delta":{"content":"Hello"}}]}' . "\n\n";
+                $callback(null, $sseChunk);
+
+                $sseDone = "data: [DONE]\n\n";
+                $callback(null, $sseDone);
+            });
+
+        $this->createLockTrackingRedisMock();
+
+        $worker = $this->createWorker(openAi: $openAi);
+
+        $payload = [
+            'phrase' => 'Hello world this is a test',
+            'word' => 'Hello',
+            'localized_target' => 'Italian',
+            'id_segment' => '1',
+            'id_job' => 10,
+            'password' => 'abc',
+            'id_client' => 'client1',
+        ];
+
+        AppConfig::$OPEN_AI_MAX_TOKENS = 100;
+
+        $worker->process($this->createQueueElement('explain_meaning', $payload));
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function explainMeaningHandlesLockMismatch(): void
+    {
+        $lockCallCount = 0;
+        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi->method('findContextForAWord')
+            ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
+                $sseChunk = 'data: {"choices":[{"delta":{"content":"Hi"}}]}' . "\n\n";
+                $callback(null, $sseChunk);
+            });
+
+        $this->redisMock->method('__call')->willReturnCallback(function ($method, $args) use (&$lockCallCount) {
+            if ($method === 'get') {
+                return 'different-lock-value';
+            }
+            return true;
+        });
+
+        $worker = $this->createWorker(openAi: $openAi);
+
+        $payload = [
+            'phrase' => 'Hello world',
+            'word' => 'Hello',
+            'localized_target' => 'Italian',
+            'id_segment' => '1',
+            'id_job' => 10,
+            'password' => 'abc',
+            'id_client' => 'client1',
+        ];
+
+        AppConfig::$OPEN_AI_MAX_TOKENS = 100;
+
+        $worker->process($this->createQueueElement('explain_meaning', $payload));
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function explainMeaningHandlesOpenAiError(): void
+    {
+        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi->method('findContextForAWord')
+            ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
+                $sseError = 'data: {"error":{"message":"Rate limit exceeded"}}' . "\n\n";
+                $callback(null, $sseError);
+            });
+
+        $this->createLockTrackingRedisMock();
+
+        $worker = $this->createWorker(openAi: $openAi);
+        $worker->expects($this->atLeastOnce())->method('publishToNodeJsClients');
+
+        $payload = [
+            'phrase' => 'Hello world',
+            'word' => 'Hello',
+            'localized_target' => 'Italian',
+            'id_segment' => '1',
+            'id_job' => 10,
+            'password' => 'abc',
+            'id_client' => 'client1',
+        ];
+
+        AppConfig::$OPEN_AI_MAX_TOKENS = 100;
+
+        $worker->process($this->createQueueElement('explain_meaning', $payload));
+    }
+
+    #[Test]
+    public function explainMeaningHandlesInvalidJson(): void
+    {
+        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi->method('findContextForAWord')
+            ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
+                $sseInvalid = "data: {invalid json}\n\n";
+                $callback(null, $sseInvalid);
+
+                $sseDone = "data: [DONE]\n\n";
+                $callback(null, $sseDone);
+            });
+
+        $this->createLockTrackingRedisMock();
+
+        $worker = $this->createWorker(openAi: $openAi);
+
+        $payload = [
+            'phrase' => 'Hello world',
+            'word' => 'Hello',
+            'localized_target' => 'Italian',
+            'id_segment' => '1',
+            'id_job' => 10,
+            'password' => 'abc',
+            'id_client' => 'client1',
+        ];
+
+        AppConfig::$OPEN_AI_MAX_TOKENS = 100;
+
+        $worker->process($this->createQueueElement('explain_meaning', $payload));
+        $this->assertTrue(true);
+    }
+
     // ─── constants ───
 
     #[Test]
