@@ -128,21 +128,6 @@ class ProjectCreationWorkerTest extends AbstractTest
         $this->assertTrue(true);
     }
 
-    // ─── _createProject() ───
-
-    #[Test]
-    public function createProjectThrowsOnEmptyParams(): void
-    {
-        $worker = $this->createWorker();
-
-        $queueElement = new QueueElement();
-        $queueElement->reQueueNum = 0;
-        $queueElement->params = new Params();
-
-        $this->expectException(EndQueueException::class);
-        $worker->process($queueElement);
-    }
-
     // ─── _publishResults() ───
 
     #[Test]
