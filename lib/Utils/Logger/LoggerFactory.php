@@ -48,7 +48,7 @@ class LoggerFactory
     {
         if (!isset(self::$loggersMap[$name])) {
             $handlers = HandlersProviderFactory::loadWithName($fileName);
-            self::$loggersMap[$name] = new MatecatLogger(new Logger($name, $handlers, [new LogProcessor(Level::Debug, [__NAMESPACE__])]));
+            self::$loggersMap[$name] = new MatecatLogger(new Logger($name, array_values($handlers), [new LogProcessor(Level::Debug, [__NAMESPACE__])]));
         }
 
         return self::$loggersMap[$name];
@@ -95,7 +95,7 @@ class LoggerFactory
     /**
      * Sets aliases for a logger instance.
      *
-     * @param array $names The aliases to set.
+     * @param list<string> $names The aliases to set.
      * @param MatecatLogger $logger The logger instance to associate with the aliases.
      *
      * @throws Exception If an error occurs while setting aliases.
@@ -110,7 +110,7 @@ class LoggerFactory
     /**
      * Generates a hexdump of the provided data and optionally logs it.
      *
-     * @param mixed $data The data to generate a hexdump for.
+     * @param string|array<mixed> $data The data to generate a hexdump for.
      * @param bool $htmlOutput Whether to format the output as HTML. Defaults to false.
      * @param bool $uppercase Whether to use uppercase hex characters. Defaults to true.
      * @param bool $return Whether to return the hexdump as a string. Defaults to false.

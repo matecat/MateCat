@@ -28,6 +28,8 @@ class ElasticSearchHandlerProvider implements ProviderInterface
 
     /**
      * @inheritDoc
+     * @param array<string, mixed> $configurationParams
+     * @return array<string, mixed>
      * @throws AuthenticationException
      */
     public function getHandlerParams(string $name, array $configurationParams): array

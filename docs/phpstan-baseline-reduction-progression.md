@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,750 | −5,616 (−76.2%) |
+| **PHPStan baseline entries** | 7,366 | 1,733 | −5,633 (−76.5%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 556 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 563 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -705,6 +705,13 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/ActiveMQ/AMQHandler.php` | Phase 27 |
 | `lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php` | Phase N+ |
 | `lib/Utils/ActiveMQ/WorkerClient.php` | Phase N+ |
+| `lib/Utils/Logger/Handlers/CloudWatchHandlerProvider.php` | Phase N+ |
+| `lib/Utils/Logger/Handlers/ElasticSearchHandlerProvider.php` | Phase N+ |
+| `lib/Utils/Logger/Handlers/ProviderInterface.php` | Phase N+ |
+| `lib/Utils/Logger/Handlers/StreamHandlerProvider.php` | Phase N+ |
+| `lib/Utils/Logger/HandlersProviderFactory.php` | Phase N+ |
+| `lib/Utils/Logger/LogProcessor.php` | Phase N+ |
+| `lib/Utils/Logger/LoggerFactory.php` | Phase N+ |
 | `lib/Utils/Logger/MatecatLogger.php` | Phase 12A |
 | `lib/Utils/Network/MultiCurlHandler.php` | Phase 27 |
 | `lib/Utils/Redis/RedisHandler.php` | Phase N+ |

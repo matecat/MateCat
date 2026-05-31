@@ -3,6 +3,7 @@
 namespace Utils\Logger\Handlers;
 
 use Aws\CloudWatchLogs\CloudWatchLogsClient;
+use InvalidArgumentException;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use PhpNexus\Cwh\Handler\CloudWatch;
@@ -26,6 +27,12 @@ class CloudWatchHandlerProvider implements ProviderInterface
         return CloudWatch::class;
     }
 
+    /**
+     * @param string $name
+     * @param array<string, mixed> $configurationParams
+     * @return array<string, mixed>
+     * @throws InvalidArgumentException
+     */
     public function getHandlerParams(string $name, array $configurationParams): array
     {
         $tags = json_decode($configurationParams['tags'] ?? 'null', true);
@@ -50,7 +57,7 @@ class CloudWatchHandlerProvider implements ProviderInterface
         return array_merge(
             [
                 'client' => self::getClient(),
-                'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname())[0] ?? 'base') . '-node',
+                'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname() ?: '')[0] ?? 'base') . '-node',
                 'stream' => pathinfo($name, PATHINFO_FILENAME),
                 'retention' => 30,
                 'batchSize' => AppConfig::$IS_DAEMON_INSTANCE ? 1 : 10000,
@@ -63,6 +70,9 @@ class CloudWatchHandlerProvider implements ProviderInterface
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private static function getClient(): CloudWatchLogsClient
     {
         if (empty(self::$CLIENT)) {
