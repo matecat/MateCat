@@ -2,7 +2,7 @@
 
 namespace Utils\AIAssistant;
 
-interface AIClientInterface
+interface AlternativeTranslationsClientInterface
 {
     /**
      * @return list<mixed>
@@ -17,17 +17,4 @@ interface AIClientInterface
         string $excerpt,
         string $styleInstructions
     ): array;
-
-    /**
-     * @return bool|array<string, mixed>
-     */
-    public function evaluateTranslation(
-        string $sourceLanguage,
-        string $targetLanguage,
-        string $text,
-        string $translation,
-        string $style
-    ): bool|array;
-
-    public function findContextForAWord(string $word, string $phrase, string $target, callable $callback): void;
 }

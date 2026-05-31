@@ -7,7 +7,9 @@ use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\AIClientFactory;
-use Utils\AIAssistant\AIClientInterface;
+use Utils\AIAssistant\AlternativeTranslationsClientInterface;
+use Utils\AIAssistant\ContextExplainerClientInterface;
+use Utils\AIAssistant\TranslationEvaluatorClientInterface;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -42,13 +44,27 @@ class AIAssistantWorker extends AbstractWorker
     }
 
     /**
-     * @param string $agent
-     * @return AIClientInterface
      * @throws Exception
      */
-    protected function createAIClient(string $agent): AIClientInterface
+    protected function createAlternativeTranslationsClient(): AlternativeTranslationsClientInterface
     {
-        return AIClientFactory::create($agent);
+        return AIClientFactory::createAlternativeTranslationsClient();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createTranslationEvaluator(): TranslationEvaluatorClientInterface
+    {
+        return AIClientFactory::createTranslationEvaluator();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createContextExplainer(): ContextExplainerClientInterface
+    {
+        return AIClientFactory::createContextExplainer();
     }
 
     /**
@@ -100,8 +116,8 @@ class AIAssistantWorker extends AbstractWorker
     {
         try {
             $errorCode = self::codeErrorsMap['NO_ERROR'];
-            $gemini = $this->createAIClient("gemini");
-            $alternativeTranslations = $gemini->manageAlternativeTranslations(
+            $client = $this->createAlternativeTranslationsClient();
+            $alternativeTranslations = $client->manageAlternativeTranslations(
                 sourceLanguage: $payload['localized_source'],
                 targetLanguage:  $payload['localized_target'],
                 sourceSentence:  $payload['source_sentence'],
@@ -150,8 +166,8 @@ class AIAssistantWorker extends AbstractWorker
     private function feedback(array $payload): void
     {
         try {
-            $openAi = $this->createAIClient("openai");
-            $result = $openAi->evaluateTranslation(
+            $evaluator = $this->createTranslationEvaluator();
+            $result = $evaluator->evaluateTranslation(
                 sourceLanguage: $payload['localized_source'],
                 targetLanguage: $payload['localized_target'],
                 text: $payload['text'],
@@ -186,11 +202,11 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
-            $openAi = $this->createAIClient("openai");
+            $explainer = $this->createContextExplainer();
 
             $buffer = '';
 
-            $openAi->findContextForAWord(
+            $explainer->findContextForAWord(
                 $payload['word'],
                 $phrase,
                 $payload['localized_target'],

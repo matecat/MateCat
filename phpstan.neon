@@ -6,6 +6,10 @@ parameters:
     paths:
         - lib
         - plugins
+    # Vendor type stubs — correct wrong/missing types in third-party libraries
+    # OpenAi::chat() declares $stream as null but accepts callable at runtime
+    stubFiles:
+        - phpstan-stubs/OpenAi.stub
     scanFiles:
         - router.php
     excludePaths:

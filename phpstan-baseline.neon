@@ -2861,12 +2861,6 @@ parameters:
 			path: lib/Routes/app_routes.php
 
 		-
-			message: '#^Parameter \#2 \$stream of method Orhanerday\\OpenAi\\OpenAi\:\:chat\(\) expects null, callable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
 			message: '#^Parameter \#1 \$confirmation_token of static method Utils\\Url\\CanonicalRoutes\:\:passwordReset\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1

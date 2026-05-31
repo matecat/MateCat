@@ -8,8 +8,11 @@ use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\AIAssistant\AlternativeTranslationsClientInterface;
+use Utils\AIAssistant\ContextExplainerClientInterface;
 use Utils\AIAssistant\GeminiClient;
 use Utils\AIAssistant\OpenAIClient;
+use Utils\AIAssistant\TranslationEvaluatorClientInterface;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Params;
@@ -36,19 +39,37 @@ class AIAssistantWorkerTest extends AbstractTest
         parent::tearDown();
     }
 
-    private function createWorker(?GeminiClient $gemini = null, ?OpenAIClient $openAi = null): AIAssistantWorker
-    {
+    private function createWorker(
+        ?AlternativeTranslationsClientInterface $altTransClient = null,
+        ?TranslationEvaluatorClientInterface $evaluator = null,
+        ?ContextExplainerClientInterface $explainer = null,
+    ): AIAssistantWorker {
         $amq = $this->createStub(AMQHandler::class);
+
+        $methods = ['_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients'];
+        if ($altTransClient) {
+            $methods[] = 'createAlternativeTranslationsClient';
+        }
+        if ($evaluator) {
+            $methods[] = 'createTranslationEvaluator';
+        }
+        if ($explainer) {
+            $methods[] = 'createContextExplainer';
+        }
 
         $worker = $this->getMockBuilder(AIAssistantWorker::class)
             ->setConstructorArgs([$amq, $this->redisMock])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients', 'createAIClient'])
+            ->onlyMethods($methods)
             ->getMock();
 
-        if ($gemini || $openAi) {
-            $worker->method('createAIClient')->willReturnCallback(function (string $agent) use ($gemini, $openAi) {
-                return $agent === 'gemini' ? $gemini : $openAi;
-            });
+        if ($altTransClient) {
+            $worker->method('createAlternativeTranslationsClient')->willReturn($altTransClient);
+        }
+        if ($evaluator) {
+            $worker->method('createTranslationEvaluator')->willReturn($evaluator);
+        }
+        if ($explainer) {
+            $worker->method('createContextExplainer')->willReturn($explainer);
         }
 
         return $worker;
@@ -84,7 +105,7 @@ class AIAssistantWorkerTest extends AbstractTest
         $gemini = $this->createStub(GeminiClient::class);
         $gemini->method('manageAlternativeTranslations')->willReturn(['translation1', 'translation2']);
 
-        $worker = $this->createWorker(gemini: $gemini);
+        $worker = $this->createWorker(altTransClient: $gemini);
         $worker->expects($this->atLeastOnce())->method('publishToNodeJsClients');
 
         $payload = [
@@ -109,7 +130,7 @@ class AIAssistantWorkerTest extends AbstractTest
         $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('evaluateTranslation')->willReturn(['feedback' => 'Good translation']);
 
-        $worker = $this->createWorker(openAi: $openAi);
+        $worker = $this->createWorker(evaluator: $openAi);
         $worker->expects($this->atLeastOnce())->method('publishToNodeJsClients');
 
         $payload = [
@@ -133,7 +154,7 @@ class AIAssistantWorkerTest extends AbstractTest
         $gemini = $this->createStub(GeminiClient::class);
         $gemini->method('manageAlternativeTranslations')->willReturn([]);
 
-        $worker = $this->createWorker(gemini: $gemini);
+        $worker = $this->createWorker(altTransClient: $gemini);
         $worker->expects($this->atLeastOnce())
             ->method('publishToNodeJsClients')
             ->with($this->callback(function (array $data) {
@@ -163,7 +184,7 @@ class AIAssistantWorkerTest extends AbstractTest
         $gemini = $this->createStub(GeminiClient::class);
         $gemini->method('manageAlternativeTranslations')->willThrowException(new Exception('API error'));
 
-        $worker = $this->createWorker(gemini: $gemini);
+        $worker = $this->createWorker(altTransClient: $gemini);
         $worker->expects($this->atLeastOnce())
             ->method('publishToNodeJsClients')
             ->with($this->callback(function (array $data) {
@@ -195,7 +216,7 @@ class AIAssistantWorkerTest extends AbstractTest
         $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('evaluateTranslation')->willThrowException(new Exception('API error'));
 
-        $worker = $this->createWorker(openAi: $openAi);
+        $worker = $this->createWorker(evaluator: $openAi);
         $worker->expects($this->atLeastOnce())
             ->method('publishToNodeJsClients')
             ->with($this->callback(function (array $data) {
@@ -251,7 +272,7 @@ class AIAssistantWorkerTest extends AbstractTest
 
         $this->createLockTrackingRedisMock();
 
-        $worker = $this->createWorker(openAi: $openAi);
+        $worker = $this->createWorker(explainer: $openAi);
 
         $payload = [
             'phrase' => 'Hello world this is a test',
@@ -272,7 +293,6 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function explainMeaningHandlesLockMismatch(): void
     {
-        $lockCallCount = 0;
         $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('findContextForAWord')
             ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
@@ -280,14 +300,14 @@ class AIAssistantWorkerTest extends AbstractTest
                 $callback(null, $sseChunk);
             });
 
-        $this->redisMock->method('__call')->willReturnCallback(function ($method, $args) use (&$lockCallCount) {
+        $this->redisMock->method('__call')->willReturnCallback(function ($method, $args) {
             if ($method === 'get') {
                 return 'different-lock-value';
             }
             return true;
         });
 
-        $worker = $this->createWorker(openAi: $openAi);
+        $worker = $this->createWorker(explainer: $openAi);
 
         $payload = [
             'phrase' => 'Hello world',
@@ -317,7 +337,7 @@ class AIAssistantWorkerTest extends AbstractTest
 
         $this->createLockTrackingRedisMock();
 
-        $worker = $this->createWorker(openAi: $openAi);
+        $worker = $this->createWorker(explainer: $openAi);
         $worker->expects($this->atLeastOnce())->method('publishToNodeJsClients');
 
         $payload = [
@@ -350,7 +370,7 @@ class AIAssistantWorkerTest extends AbstractTest
 
         $this->createLockTrackingRedisMock();
 
-        $worker = $this->createWorker(openAi: $openAi);
+        $worker = $this->createWorker(explainer: $openAi);
 
         $payload = [
             'phrase' => 'Hello world',
