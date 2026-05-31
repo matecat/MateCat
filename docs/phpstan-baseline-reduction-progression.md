@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,794 | −5,572 (−75.6%) |
+| **PHPStan baseline entries** | 7,366 | 1,783 | −5,583 (−75.8%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 539 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 543 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -664,6 +664,10 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Utils (other)
 | File | Cleaned In |
 |------|-----------|
+| `lib/Utils/AIAssistant/AIClientFactory.php` | Phase N+ |
+| `lib/Utils/AIAssistant/AIClientInterface.php` | Phase N+ |
+| `lib/Utils/AIAssistant/GeminiClient.php` | Phase N+ |
+| `lib/Utils/AIAssistant/OpenAIClient.php` | Phase N+ |
 | `lib/Utils/ActiveMQ/AMQHandler.php` | Phase 27 |
 | `lib/Utils/ActiveMQ/ClientHelpers/ProjectQueue.php` | Phase N+ |
 | `lib/Utils/ActiveMQ/WorkerClient.php` | Phase N+ |

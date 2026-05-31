@@ -2874,75 +2874,9 @@ parameters:
 			path: lib/Routes/app_routes.php
 
 		-
-			message: '#^Method Utils\\AIAssistant\\AIClientFactory\:\:create\(\) has parameter \$agent with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AIAssistant/AIClientFactory.php
-
-		-
-			message: '#^Access to static property \$GEMINI_API_MODEL on an unknown class Utils\\AIAssistant\\AppConfig\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Utils/AIAssistant/GeminiClient.php
-
-		-
-			message: '#^Method Utils\\AIAssistant\\GeminiClient\:\:manageAlternativeTranslations\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AIAssistant/GeminiClient.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type array\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Utils/AIAssistant/GeminiClient.php
-
-		-
-			message: '#^Parameter \#2 \$callback of function preg_replace_callback expects callable\(array\<string\>\)\: string, Closure\(mixed\)\: \(int\|string\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AIAssistant/GeminiClient.php
-
-		-
-			message: '#^Method Utils\\AIAssistant\\OpenAIClient\:\:evaluateTranslation\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
-			message: '#^Method Utils\\AIAssistant\\OpenAIClient\:\:findContextForAWord\(\) has parameter \$phrase with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
-			message: '#^Method Utils\\AIAssistant\\OpenAIClient\:\:findContextForAWord\(\) has parameter \$target with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
-			message: '#^Method Utils\\AIAssistant\\OpenAIClient\:\:findContextForAWord\(\) has parameter \$word with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, bool\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
 			message: '#^Parameter \#2 \$stream of method Orhanerday\\OpenAi\\OpenAi\:\:chat\(\) expects null, callable given\.$#'
 			identifier: argument.type
 			count: 1
-			path: lib/Utils/AIAssistant/OpenAIClient.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between non\-falsy\-string and '''' will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 4
 			path: lib/Utils/AIAssistant/OpenAIClient.php
 
 		-

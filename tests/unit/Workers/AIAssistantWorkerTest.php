@@ -3,6 +3,7 @@
 namespace unit\Workers;
 
 use Exception;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
@@ -24,7 +25,7 @@ class AIAssistantWorkerTest extends AbstractTest
         parent::setUp();
         AppConfig::$SKIP_SQL_CACHE = true;
         $this->createDatabaseMock();
-        $this->redisMock = $this->createMock(Client::class);
+        $this->redisMock = $this->createStub(Client::class);
     }
 
     protected function tearDown(): void
@@ -36,7 +37,7 @@ class AIAssistantWorkerTest extends AbstractTest
 
     private function createWorker(?GeminiClient $gemini = null, ?OpenAIClient $openAi = null): AIAssistantWorker
     {
-        $amq = $this->createMock(AMQHandler::class);
+        $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(AIAssistantWorker::class)
             ->setConstructorArgs([$amq, $this->redisMock])
@@ -68,6 +69,7 @@ class AIAssistantWorkerTest extends AbstractTest
     // ─── process() ───
 
     #[Test]
+    #[AllowMockObjectsWithoutExpectations]
     public function processThrowsOnInvalidAction(): void
     {
         $worker = $this->createWorker();
@@ -79,7 +81,7 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function processCallsAlternativeTranslations(): void
     {
-        $gemini = $this->createMock(GeminiClient::class);
+        $gemini = $this->createStub(GeminiClient::class);
         $gemini->method('manageAlternativeTranslations')->willReturn(['translation1', 'translation2']);
 
         $worker = $this->createWorker(gemini: $gemini);
@@ -104,7 +106,7 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function processCallsFeedback(): void
     {
-        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('evaluateTranslation')->willReturn(['feedback' => 'Good translation']);
 
         $worker = $this->createWorker(openAi: $openAi);
@@ -128,7 +130,7 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function alternativeTranslationsEmitsErrorOnEmpty(): void
     {
-        $gemini = $this->createMock(GeminiClient::class);
+        $gemini = $this->createStub(GeminiClient::class);
         $gemini->method('manageAlternativeTranslations')->willReturn([]);
 
         $worker = $this->createWorker(gemini: $gemini);
@@ -158,7 +160,7 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function alternativeTranslationsEmitsErrorOnException(): void
     {
-        $gemini = $this->createMock(GeminiClient::class);
+        $gemini = $this->createStub(GeminiClient::class);
         $gemini->method('manageAlternativeTranslations')->willThrowException(new Exception('API error'));
 
         $worker = $this->createWorker(gemini: $gemini);
@@ -190,7 +192,7 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function feedbackEmitsErrorOnException(): void
     {
-        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('evaluateTranslation')->willThrowException(new Exception('API error'));
 
         $worker = $this->createWorker(openAi: $openAi);
@@ -235,9 +237,10 @@ class AIAssistantWorkerTest extends AbstractTest
     }
 
     #[Test]
+    #[AllowMockObjectsWithoutExpectations]
     public function explainMeaningProcessesStreamedData(): void
     {
-        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('findContextForAWord')
             ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
                 $sseChunk = 'data: {"choices":[{"delta":{"content":"Hello"}}]}' . "\n\n";
@@ -268,10 +271,11 @@ class AIAssistantWorkerTest extends AbstractTest
     }
 
     #[Test]
+    #[AllowMockObjectsWithoutExpectations]
     public function explainMeaningHandlesLockMismatch(): void
     {
         $lockCallCount = 0;
-        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('findContextForAWord')
             ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
                 $sseChunk = 'data: {"choices":[{"delta":{"content":"Hi"}}]}' . "\n\n";
@@ -306,7 +310,7 @@ class AIAssistantWorkerTest extends AbstractTest
     #[Test]
     public function explainMeaningHandlesOpenAiError(): void
     {
-        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('findContextForAWord')
             ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
                 $sseError = 'data: {"error":{"message":"Rate limit exceeded"}}' . "\n\n";
@@ -334,9 +338,10 @@ class AIAssistantWorkerTest extends AbstractTest
     }
 
     #[Test]
+    #[AllowMockObjectsWithoutExpectations]
     public function explainMeaningHandlesInvalidJson(): void
     {
-        $openAi = $this->createMock(OpenAIClient::class);
+        $openAi = $this->createStub(OpenAIClient::class);
         $openAi->method('findContextForAWord')
             ->willReturnCallback(function ($word, $phrase, $target, callable $callback) {
                 $sseInvalid = "data: {invalid json}\n\n";

@@ -10,11 +10,9 @@ use Utils\Registry\AppConfig;
 class AIClientFactory
 {
     /**
-     * @param $agent
-     * @return AIClientInterface
      * @throws Exception
      */
-    public static function create($agent): AIClientInterface
+    public static function create(string $agent): AIClientInterface
     {
         switch ($agent) {
             case "openai":
