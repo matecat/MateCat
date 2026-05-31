@@ -25,7 +25,8 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     protected UserStruct $user;
     protected string $projectName;
     protected JobsTranslatorsStruct $translator;
-    protected array $_RoutesMethod;
+    /** @var callable */
+    protected mixed $_RoutesMethod;
 
     /**
      * @throws DateInvalidTimeZoneException
@@ -96,7 +97,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
         ];
     }
 
-    protected function _offsetToTimeZone($offset)
+    protected function _offsetToTimeZone(int|float $offset): string
     {
         $offset = $offset * 60 * 60;
         $abbreviations_list = array_reverse(timezone_abbreviations_list());

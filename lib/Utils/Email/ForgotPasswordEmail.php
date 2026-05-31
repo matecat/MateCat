@@ -53,7 +53,7 @@ class  ForgotPasswordEmail extends AbstractEmail
     {
         return [
             'user' => $this->user->toArray(),
-            'password_reset_url' => CanonicalRoutes::passwordReset($this->user->confirmation_token)
+            'password_reset_url' => CanonicalRoutes::passwordReset($this->user->confirmation_token ?? '')
         ];
     }
 

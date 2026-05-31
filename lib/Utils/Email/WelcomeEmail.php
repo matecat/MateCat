@@ -9,6 +9,7 @@
 namespace Utils\Email;
 
 
+use Exception;
 use Model\Users\UserStruct;
 
 class WelcomeEmail extends AbstractEmail
@@ -51,6 +52,9 @@ class WelcomeEmail extends AbstractEmail
         return $vars;
     }
 
+    /**
+     * @throws Exception
+     */
     public function send(): void
     {
         $recipient = [$this->user->email, $this->user->fullName()];

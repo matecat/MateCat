@@ -6,7 +6,7 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,713 | −5,653 (−76.7%) |
+| **PHPStan baseline entries** | 7,366 | 1,697 | −5,669 (−77.0%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
 | **PHPUnit assertions** | ~19,449 | 17,507 | — |
@@ -90,10 +90,11 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 575 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 585 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
+- `lib/Utils/Email/` — all files clean, no baseline entries
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
@@ -564,6 +565,16 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Utils/Email/CommentResolveEmail.php` | Phase 31 |
 | `lib/Utils/Email/MembershipCreatedEmail.php` | Phase 12A |
 | `lib/Utils/Email/MembershipDeletedEmail.php` | Phase 12A |
+| `lib/Utils/Email/AbstractEmail.php` | Phase N+ |
+| `lib/Utils/Email/ForgotPasswordEmail.php` | Phase N+ |
+| `lib/Utils/Email/InvitedToTeamEmail.php` | Phase N+ |
+| `lib/Utils/Email/ProjectAssignedEmail.php` | Phase N+ |
+| `lib/Utils/Email/SendToTranslatorAbstract.php` | Phase N+ |
+| `lib/Utils/Email/SendToTranslatorForDeliveryChangeEmail.php` | Phase N+ |
+| `lib/Utils/Email/SendToTranslatorForJobSplitEmail.php` | Phase N+ |
+| `lib/Utils/Email/SendToTranslatorForNewJobEmail.php` | Phase N+ |
+| `lib/Utils/Email/SignupEmail.php` | Phase N+ |
+| `lib/Utils/Email/WelcomeEmail.php` | Phase N+ |
 
 #### Utils/Engines (full hierarchy)
 | File | Cleaned In |

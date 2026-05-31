@@ -8,7 +8,9 @@
 
 namespace Utils\Email;
 
+use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\MailWorker;
 use Utils\Logger\LoggerFactory;
@@ -54,9 +56,9 @@ abstract class AbstractEmail
     }
 
     /**
-     *
      * @param array<string, mixed> $mailConf
-     *
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     protected function _enqueueEmailDelivery(array $mailConf): void
     {

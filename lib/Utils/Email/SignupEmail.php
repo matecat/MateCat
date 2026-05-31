@@ -54,7 +54,7 @@ class SignupEmail extends AbstractEmail
     {
         return [
             'user' => $this->user->toArray(),
-            'activation_url' => CanonicalRoutes::signupConfirmation($this->user->confirmation_token),
+            'activation_url' => CanonicalRoutes::signupConfirmation($this->user->confirmation_token ?? ''),
             'signup_url' => CanonicalRoutes::appRoot()
         ];
     }

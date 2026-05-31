@@ -9,8 +9,10 @@
 namespace Utils\Email;
 
 
+use DivisionByZeroError;
 use DomainException;
 use Exception;
+use PDOException;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -50,6 +52,9 @@ class ProjectAssignedEmail extends AbstractEmail
 
     /**
      * @return array<string, mixed>
+     * @throws DivisionByZeroError
+     * @throws PDOException
+     * @throws Exception
      */
     protected function _getTemplateVariables(): array
     {
@@ -57,7 +62,7 @@ class ProjectAssignedEmail extends AbstractEmail
         foreach ($this->jobs as $job) {
             $jStruct = new JobStruct($job->getArrayCopy());
             $jobStats = new WordCountStruct();
-            $jobStats->setIdJob($jStruct->id);
+            $jobStats->setIdJob((int)$jStruct->id);
             $jobStats->setJobPassword($jStruct->password);
             $jobStats->setDraftWords($jStruct->draft_words + $jStruct->new_words); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords($jStruct->rejected_words);

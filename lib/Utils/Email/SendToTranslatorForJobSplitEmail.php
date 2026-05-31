@@ -16,7 +16,7 @@ use Utils\Url\CanonicalRoutes;
 class SendToTranslatorForJobSplitEmail extends SendToTranslatorAbstract
 {
 
-    public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, $projectName)
+    public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, string $projectName)
     {
         parent::__construct($user, $translator, $projectName);
         $this->title = "Matecat - Job delivery updated.";
