@@ -16,21 +16,21 @@ final class PrepareNotesForRenderingEvent extends FilterEvent
         return 'prepareNotesForRendering';
     }
     /**
-     * @param array<string, mixed> $notes
+     * @param array<int|string, mixed> $notes
      */
     public function __construct(
         private array $notes,
     ) {
     }
     /**
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     public function getNotes(): array
     {
         return $this->notes;
     }
     /**
-     * @param array<string, mixed> $notes
+     * @param array<int|string, mixed> $notes
      */
     public function setNotes(array $notes): void
     {

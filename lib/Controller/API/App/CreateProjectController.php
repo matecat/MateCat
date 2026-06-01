@@ -759,7 +759,7 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * @param int $mt_engine
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      * @throws Exception
      */
     private function appendFeaturesToProject(int $mt_engine): array

@@ -789,7 +789,7 @@ class NewController extends KleinController
      * @param bool $project_completion
      * @param int $mt_engine
      *
-     * @return array<string, BasicFeatureStruct>
+     * @return array<int|string, mixed>
      * @throws Exception
      */
     private function appendFeaturesToProject(bool $project_completion, int $mt_engine): array

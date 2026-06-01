@@ -17,7 +17,7 @@ final class FilterCreateProjectFeaturesEvent extends FilterEvent
         return 'filterCreateProjectFeatures';
     }
     /**
-     * @param array<string, mixed> $projectFeatures
+     * @param array<int|string, mixed> $projectFeatures
      */
     public function __construct(
         private array $projectFeatures,
@@ -25,14 +25,14 @@ final class FilterCreateProjectFeaturesEvent extends FilterEvent
     ) {
     }
     /**
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     public function getProjectFeatures(): array
     {
         return $this->projectFeatures;
     }
     /**
-     * @param array<string, mixed> $projectFeatures
+     * @param array<int|string, mixed> $projectFeatures
      */
     public function setProjectFeatures(array $projectFeatures): void
     {

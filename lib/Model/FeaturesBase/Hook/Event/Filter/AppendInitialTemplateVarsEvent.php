@@ -16,17 +16,17 @@ final class AppendInitialTemplateVarsEvent extends FilterEvent
     {
         return 'appendInitialTemplateVars';
     }
-    /** @param array<string, mixed> $codes */
+    /** @param array<int|string, mixed> $codes */
     public function __construct(
         private array $codes,
     ) {
     }
-    /** @return array<string, mixed> */
+    /** @return array<int|string, mixed> */
     public function getCodes(): array
     {
         return $this->codes;
     }
-    /** @param array<string, mixed> $codes */
+    /** @param array<int|string, mixed> $codes */
     public function setCodes(array $codes): void
     {
         $this->codes = $codes;
