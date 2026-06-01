@@ -1782,13 +1782,19 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\V2\\TeamsController\:\:create\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 1
+			count: 2
 			path: lib/Controller/API/V2/TeamsController.php
 
 		-
 			message: '#^Method Controller\\API\\V2\\TeamsController\:\:getTeamList\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
+			path: lib/Controller/API/V2/TeamsController.php
+
+		-
+			message: '#^Method Controller\\API\\V2\\TeamsController\:\:getTeamList\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: lib/Controller/API/V2/TeamsController.php
 
 		-
@@ -3135,48 +3141,6 @@ parameters:
 			identifier: varTag.differentVariable
 			count: 1
 			path: lib/View/API/V2/Json/SegmentVersion.php
-
-		-
-			message: '#^Parameter \#2 \$payload of class Model\\Teams\\PendingInvitations constructor expects array\{team_id\: int, email\: string\}, array\{\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Team\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Team\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Team\:\:renderItem\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Team\:\:renderItem\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$data TeamStruct\[\]\)\: Unexpected token "\$data", expected type at offset 20 on line 2$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
-
-		-
-			message: '#^Property View\\API\\V2\\Json\\Team\:\:\$data type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Team.php
 
 		-
 			message: '#^Parameter \#1 \$chunk_id of method View\\API\\V3\\Json\\Chunk\:\:getTimeToEditArray\(\) expects int, int\|null given\.$#'
