@@ -110,11 +110,12 @@ class ManageModel
      * @param UserStruct|null $assignee
      * @param bool $no_assignee
      *
-     * @return array<string, mixed>
+     * @return list<array<string, mixed>>
      *
      * @throws ReflectionException
      * @throws PDOException
      * @throws Exception
+     * @throws \TypeError
      */
     public static function getProjects(
         UserStruct $user,
