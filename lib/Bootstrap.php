@@ -260,20 +260,31 @@ class Bootstrap
      */
     public static function shutdownFunctionHandler(): never
     {
+        self::handleFatalError(error_get_last());
+        die();
+    }
 
+    /**
+     * @param array{type: int, message: string, file: string, line: int}|null $error
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws BootstrapTerminatedException
+     * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     */
+    public static function handleFatalError(?array $error): void
+    {
+        /** @var array<int, string> $errorType */
         $errorType = [
             E_CORE_ERROR => 'E_CORE_ERROR',
             E_COMPILE_ERROR => 'E_COMPILE_ERROR',
             E_ERROR => 'E_ERROR',
             E_USER_ERROR => 'E_USER_ERROR',
             E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-            E_DEPRECATED => 'DEPRECATION_NOTICE', //From PHP 5.3
+            E_DEPRECATED => 'DEPRECATION_NOTICE',
         ];
 
-        # Getting the last error
-        $error = error_get_last();
-
-        # Checking if the last error is a fatal error
         if (isset($error['type'])) {
             switch ($error['type']) {
                 case E_CORE_ERROR:
@@ -303,8 +314,6 @@ class Bootstrap
                     break;
             }
         }
-
-        die();
     }
 
     public static function sessionClose(): void

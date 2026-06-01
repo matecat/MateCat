@@ -391,4 +391,69 @@ class BootstrapTest extends TestCase
         }
     }
 
+    // --- handleFatalError tests ---
+
+    #[Test]
+    public function handleFatalError_does_nothing_on_null(): void
+    {
+        Bootstrap::handleFatalError(null);
+        $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function handleFatalError_does_nothing_on_non_fatal_error(): void
+    {
+        Bootstrap::handleFatalError([
+            'type' => E_WARNING,
+            'message' => 'some warning',
+            'file' => '/tmp/test.php',
+            'line' => 1,
+        ]);
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @return array<string, array{array{type: int, message: string, file: string, line: int}}>
+     */
+    public static function fatalErrorProvider(): array
+    {
+        return [
+            'E_CORE_ERROR' => [['type' => E_CORE_ERROR, 'message' => 'core error', 'file' => '/tmp/test.php', 'line' => 1]],
+            'E_COMPILE_ERROR' => [['type' => E_COMPILE_ERROR, 'message' => 'compile error', 'file' => '/tmp/test.php', 'line' => 2]],
+            'E_ERROR' => [['type' => E_ERROR, 'message' => 'fatal error', 'file' => '/tmp/test.php', 'line' => 3]],
+            'E_USER_ERROR' => [['type' => E_USER_ERROR, 'message' => 'user error', 'file' => '/tmp/test.php', 'line' => 4]],
+            'E_RECOVERABLE_ERROR' => [['type' => E_RECOVERABLE_ERROR, 'message' => 'recoverable error', 'file' => '/tmp/test.php', 'line' => 5]],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('fatalErrorProvider')]
+    public function handleFatalError_throws_on_fatal_error_types(array $error): void
+    {
+        $oldEnv = AppConfig::$ENV;
+        AppConfig::$ENV = 'testing';
+
+        ob_start();
+        try {
+            Bootstrap::handleFatalError($error);
+            $this->fail('Expected BootstrapTerminatedException');
+        } catch (BootstrapTerminatedException $e) {
+            $this->assertSame(500, $e->httpStatusCode);
+        } finally {
+            ob_end_clean();
+            AppConfig::$ENV = $oldEnv;
+        }
+    }
+
+    #[Test]
+    public function handleFatalError_does_nothing_on_deprecated(): void
+    {
+        Bootstrap::handleFatalError([
+            'type' => E_DEPRECATED,
+            'message' => 'deprecated thing',
+            'file' => '/tmp/test.php',
+            'line' => 1,
+        ]);
+        $this->assertTrue(true);
+    }
 }
