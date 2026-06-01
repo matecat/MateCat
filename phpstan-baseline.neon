@@ -1,102 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Cannot access offset ''version'' on array\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Method Bootstrap\:\:getConfigurationForEnvironment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Method Bootstrap\:\:initMandatoryPlugins\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Parameter \#1 \$directory of function mkdir expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Parameter \#1 \$filename of function is_dir expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function stripos expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Property Bootstrap\:\:\$CONFIG type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Property Bootstrap\:\:\$TASK_RUNNER_CONFIG type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Property Bootstrap\:\:\$autoLoadedFeatureSet is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Static property Bootstrap\:\:\$CONFIG \(array\) does not accept array\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Static property Bootstrap\:\:\$TASK_RUNNER_CONFIG \(array\) does not accept array\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Static property Bootstrap\:\:\$_ROOT \(string\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Method Bootstrap\:\:initRegistryClass\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
-			message: '#^Method Bootstrap\:\:installApplicationSingletons\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Bootstrap.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 3
@@ -10069,12 +9973,6 @@ parameters:
 			count: 1
 			path: lib/Controller/API/GDrive/OAuthController.php
 
-
-		-
-			message: '#^Method Bootstrap\:\:formatOutputExceptions\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Bootstrap.php
 
 		-
 			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'

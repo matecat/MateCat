@@ -34,6 +34,15 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * dependency-related operations for projects and users.
  *
  * Implements EventDispatcherInterface.
+ *
+ * NOTE: When called with no arguments (i.e. `new FeatureSet()`), the constructor
+ * invokes `loadFromMandatory()` → `getAutoloadPlugins()` → `merge()`, which
+ * iterates over {@see AppConfig::$AUTOLOAD_PLUGINS} and calls `toNewObject()`
+ * on each {@see BasicFeatureStruct}, forcing PHP to autoload the plugin feature
+ * classes. All state is stored in instance properties (`$this->features`) — there
+ * is no static registry. {@see \Bootstrap::initMandatoryPlugins()} creates and
+ * immediately discards a FeatureSet instance purely to trigger this early
+ * autoloading of plugin classes during bootstrap.
  */
 class FeatureSet implements EventDispatcherInterface
 {
