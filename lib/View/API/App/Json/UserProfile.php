@@ -24,11 +24,12 @@ class UserProfile
      * @param UserStruct $user
      * @param TeamStruct[] $teams
      * @param ConnectedServiceStruct[]|null $servicesStruct
-     * @param array $userMetadata
+     * @param array<string, mixed> $userMetadata
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws \Exception
      */
     public function renderItem(UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = []): array
     {

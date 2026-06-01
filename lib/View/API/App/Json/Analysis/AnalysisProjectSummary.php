@@ -11,7 +11,6 @@ namespace View\API\App\Json\Analysis;
 
 use JsonSerializable;
 use Utils\Constants\ProjectStatus;
-use Utils\Registry\AppConfig;
 
 class AnalysisProjectSummary implements JsonSerializable
 {
@@ -65,6 +64,9 @@ class AnalysisProjectSummary implements JsonSerializable
         $this->analysis_status = $analysis_status;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [
@@ -77,28 +79,6 @@ class AnalysisProjectSummary implements JsonSerializable
             'total_equivalent' => round($this->total_equivalent),
             'discount' => $this->getDiscount()
         ];
-    }
-
-    private function getEstimatedWorkTime(): string
-    {
-        $wc_time = $this->total_equivalent / AppConfig::$ANALYSIS_WORDS_PER_DAYS;
-        $wc_unit = 'day';
-
-        if ($wc_time > 0 and $wc_time < 1) {
-            $wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $wc_unit = 'hour';
-        }
-
-        if ($wc_time > 0 and $wc_time < 1) {
-            $wc_time *= 60; //convert to minutes
-            $wc_unit = 'minute';
-        }
-
-        if ($wc_time > 1) {
-            $wc_unit .= 's';
-        }
-
-        return number_format(round($wc_time)) . " work " . $wc_unit;
     }
 
     /**
