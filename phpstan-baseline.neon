@@ -2885,60 +2885,6 @@ parameters:
 			path: lib/View/API/App/Json/Analysis/AnalysisChunk.php
 
 		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:fillUrls\(\) has parameter \$result with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:fillUrls\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:getKeyList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:getKeyList\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:getKeyList\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:renderItem\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Job\:\:renderItem\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of function strtotime expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Parameter \#1 \$pid of method Model\\Projects\\ProjectDao\:\:getProjectData\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/API/V2/Json/Job.php
-
-		-
 			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer2\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3003,12 +2949,6 @@ parameters:
 			identifier: varTag.differentVariable
 			count: 1
 			path: lib/View/API/V2/Json/SegmentVersion.php
-
-		-
-			message: '#^Parameter \#1 \$chunk_id of method View\\API\\V3\\Json\\Chunk\:\:getTimeToEditArray\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/API/V3/Json/Chunk.php
 
 		-
 			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'

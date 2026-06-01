@@ -37,12 +37,11 @@ class Chunk extends \View\API\V2\Json\Chunk
     protected JobStruct $chunk;
 
     private JobDao $jobDao;
-    private ChunkReviewDao $chunkReviewDao;
 
     public function __construct(?JobDao $jobDao = null, ?ChunkReviewDao $chunkReviewDao = null)
     {
+        parent::__construct($chunkReviewDao);
         $this->jobDao = $jobDao ?? new JobDao();
-        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
     }
 
     /**
@@ -110,7 +109,7 @@ class Chunk extends \View\API\V2\Json\Chunk
             'subject' => $chunk->subject,
             'subject_printable' => $subjectsHashMap[$chunk->subject],
             'owner' => $chunk->owner,
-            'time_to_edit' => $this->getTimeToEditArray($chunk->id),
+            'time_to_edit' => $this->getTimeToEditArray((int)$chunk->id),
             'total_time_to_edit' => $chunk->total_time_to_edit,
             'avg_post_editing_effort' => (float)$chunk->avg_post_editing_effort,
             'open_threads_count' => (int)$chunk->getOpenThreadsCount(),
@@ -147,6 +146,7 @@ class Chunk extends \View\API\V2\Json\Chunk
     protected function getChunkReviews(): array
     {
         if (empty($this->chunk_reviews)) {
+            $this->chunkReviewDao ??= new ChunkReviewDao();
             $this->chunk_reviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
         }
 

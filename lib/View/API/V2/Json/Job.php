@@ -46,6 +46,11 @@ class Job
     protected ?string $status = null;
 
     /**
+     * @var ChunkReviewDao|null
+     */
+    protected ?ChunkReviewDao $chunkReviewDao = null;
+
+    /**
      * @var UserStruct
      */
     protected UserStruct $user;
@@ -54,6 +59,14 @@ class Job
      * @var bool
      */
     protected bool $called_from_api = false;
+
+    /**
+     * @param ChunkReviewDao|null $chunkReviewDao
+     */
+    public function __construct(?ChunkReviewDao $chunkReviewDao = null)
+    {
+        $this->chunkReviewDao = $chunkReviewDao;
+    }
 
     /**
      * @param string $status
@@ -90,7 +103,9 @@ class Job
     /**
      * @param JobStruct $jStruct
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws Exception
+     * @throws \TypeError
      */
     protected function getKeyList(JobStruct $jStruct): array
     {
@@ -108,13 +123,13 @@ class Job
     }
 
     /**
-     * @param                         $chunk JobStruct
-     *
+     * @param JobStruct     $chunk
      * @param ProjectStruct $project
-     * @param FeatureSet $featureSet
+     * @param FeatureSet    $featureSet
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws \TypeError
      */
     public function renderItem(JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
@@ -138,7 +153,8 @@ class Job
         $warningsCount = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
-        $chunkReviews = (new ChunkReviewDao())->findChunkReviews($chunk, 60 * 5);
+        $this->chunkReviewDao ??= new ChunkReviewDao();
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk, 60 * 5);
 
         // is outsource available?
         $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($chunk->target, (string)$chunk->getProject()->id_customer, (int)$chunk->id);
@@ -169,7 +185,7 @@ class Job
             'subject_printable' => $subjectsHashMap[$chunk->subject],
             'owner' => $chunk->owner,
             'open_threads_count' => (int)$chunk->getOpenThreadsCount(),
-            'create_timestamp' => strtotime($chunk->create_date),
+            'create_timestamp' => strtotime($chunk->create_date ?? ''),
             'created_at' => Utils::api_timestamp($chunk->create_date),
             'create_date' => $chunk->create_date,
             'formatted_create_date' => ManageModel::formatJobDate($chunk->create_date),
@@ -214,6 +230,9 @@ class Job
 
 
     /**
+     * @param array<string, mixed> $result
+     *
+     * @return array<string, mixed>
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws ReQueueException
@@ -224,7 +243,7 @@ class Job
      */
     protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData($project->id, $project->password);
+        $projectData = (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$project->id, $project->password);
 
         $formatted = new ProjectUrls($projectData);
 
