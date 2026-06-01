@@ -2861,24 +2861,6 @@ parameters:
 			path: lib/Routes/app_routes.php
 
 		-
-			message: '#^Method Features\\Translated\:\:swapOff\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Utils/Engines/Traits/HotSwap.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobStruct\:\:\$id_mt_engine \(int\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/Engines/Traits/HotSwap.php
-
-		-
-			message: '#^Property Model\\Jobs\\JobStruct\:\:\$id_tms \(int\) does not accept string\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Utils/Engines/Traits/HotSwap.php
-
-		-
 			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
@@ -3646,24 +3628,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/View/API/V3/Json/Chunk.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$segment\.$#'
-			identifier: property.notFound
-			count: 2
-			path: plugins/airbnb/lib/Features/Airbnb.php
-
-		-
-			message: '#^Method Features\\Airbnb\:\:filterContributionStructOnMTSet\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 4
-			path: plugins/airbnb/lib/Features/Airbnb.php
-
-		-
-			message: '#^Method Features\\Airbnb\\Decorator\\CatDecorator\:\:_checkSessionCookie\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/airbnb/lib/Features/Airbnb/Decorator/CatDecorator.php
 
 		-
 			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'
@@ -10013,83 +9977,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/migrations/20210313183027_add_jobs_exported_table.php
 
-		-
-			message: '#^Method Features\\Translated\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Method Features\\Translated\:\:__construct\(\) throws checked exception Stomp\\Exception\\ConnectionException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Method Features\\Translated\:\:checkForRealData\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Method Features\\Translated\:\:tmAnalysisDisabled\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Parameter \#1 \$codes of method Model\\FeaturesBase\\Hook\\Event\\Filter\\AppendInitialTemplateVarsEvent\:\:setCodes\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Parameter \#1 \$notes of method Model\\FeaturesBase\\Hook\\Event\\Filter\\PrepareNotesForRenderingEvent\:\:setNotes\(\) expects array\<string, mixed\>, list\<mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Parameter \#1 \$projectFeatures of method Model\\FeaturesBase\\Hook\\Event\\Filter\\FilterCreateProjectFeaturesEvent\:\:setProjectFeatures\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/translated/lib/Features/Translated.php
-
-		-
-			message: '#^Method Features\\Translated\\Http\\TOSApiClient\:\:send\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
-
-		-
-			message: '#^Method Features\\Translated\\Http\\TOSApiClient\:\:send\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
-
-		-
-			message: '#^Strict comparison using !== between string and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
-
-		-
-			message: '#^Method Features\\Translated\\Http\\TOSApiClient\:\:send\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/translated/lib/Features/Translated/Http/TOSApiClient.php
-
-		-
-			message: '#^Method Features\\Translated\\Utils\\SupportedLanguages\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/translated/lib/Features/Translated/Utils/SupportedLanguages.php
-
-		-
-			message: '#^Offset ''Additional Info''\|''AdditionalInfo''\|''Component''\|''Content Type''\|''Description''\|''DynamicValueExample''\|''KeyName''\|''MobileUsages''\|''Preview Link''\|''ReferenceLinks''\|''Repo''\|''Target Audience'' might not exist on array\{\}\|array\{Repo\?\: non\-falsy\-string, KeyName\?\: non\-falsy\-string, Description\?\: non\-falsy\-string, ''Content Type''\?\: non\-falsy\-string, ''Preview Link''\?\: non\-falsy\-string, ''Additional Info''\?\: non\-falsy\-string, DynamicValueExample\?\: non\-falsy\-string, Component\?\: non\-falsy\-string, \.\.\.\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: plugins/uber/lib/Features/Uber/Utils/NoteExtractor.php
 
 	
 		-
