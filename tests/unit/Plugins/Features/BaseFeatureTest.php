@@ -29,6 +29,8 @@ class InvalidFeatureCodeTestFeature extends BaseFeature
 #[Group('unit')]
 class BaseFeatureTest extends TestCase
 {
+    private TestFeature $feature;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -36,18 +38,20 @@ class BaseFeatureTest extends TestCase
         if (AppConfig::$LOG_REPOSITORY === null) {
             AppConfig::$LOG_REPOSITORY = sys_get_temp_dir();
         }
+
+        $this->feature = new TestFeature($this->createFeatureStruct());
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
 
-        $configPath = self::configPath();
+        $configPath = $this->configPath();
         if ($configPath !== '' && file_exists($configPath)) {
             @unlink($configPath);
         }
 
-        $buildDir = self::buildDirPath();
+        $buildDir = $this->buildDirPath();
         if ($buildDir !== '' && is_dir($buildDir)) {
             $files = scandir($buildDir);
             if (is_array($files)) {
@@ -84,22 +88,16 @@ class BaseFeatureTest extends TestCase
     #[Test]
     public function constructorSetsFeatureStructAndFlags(): void
     {
-        $featureStruct = $this->createFeatureStruct();
-
-        $feature = new TestFeature($featureStruct);
-
-        self::assertSame($featureStruct, $feature->getFeatureStruct());
-        self::assertTrue($feature->isAutoActivableOnProject());
-        self::assertFalse($feature->isForceableOnProject());
+        self::assertSame($this->createFeatureStruct()->feature_code, $this->feature->getFeatureStruct()->feature_code);
+        self::assertTrue($this->feature->isAutoActivableOnProject());
+        self::assertFalse($this->feature->isForceableOnProject());
     }
 
     #[Test]
     public function getLoggerReturnsLoggerAndCachesInstance(): void
     {
-        $feature = new TestFeature($this->createFeatureStruct());
-
-        $logger1 = $feature->getLogger();
-        $logger2 = $feature->getLogger();
+        $logger1 = $this->feature->getLogger();
+        $logger2 = $this->feature->getLogger();
 
         self::assertInstanceOf(LoggerInterface::class, $logger1);
         self::assertSame($logger1, $logger2);
@@ -108,9 +106,7 @@ class BaseFeatureTest extends TestCase
     #[Test]
     public function logFilePathIncludesLoggerNameAndLogExtension(): void
     {
-        $feature = new TestFeature($this->createFeatureStruct());
-
-        $path = $this->invokeProtectedMethod($feature, 'logFilePath');
+        $path = $this->invokeProtectedMethod($this->feature, 'logFilePath');
 
         self::assertStringEndsWith('/test_feature_plugin.log', $path);
     }
@@ -118,9 +114,9 @@ class BaseFeatureTest extends TestCase
     #[Test]
     public function classAndPluginPathsAreResolvedFromConcreteSubclass(): void
     {
-        $classPath = TestFeature::getClassPath();
-        $pluginBasePath = TestFeature::getPluginBasePath();
-        $templatesPath = TestFeature::getTemplatesPath();
+        $classPath = $this->feature->getClassPath();
+        $pluginBasePath = $this->feature->getPluginBasePath();
+        $templatesPath = $this->feature->getTemplatesPath();
 
         self::assertStringEndsWith('/tests/unit/Plugins/Features/BaseFeatureTest', $classPath);
         self::assertSame(realpath(dirname($classPath, 2)), $pluginBasePath);
@@ -140,7 +136,7 @@ class BaseFeatureTest extends TestCase
     #[Test]
     public function getConfigThrowsWhenConfigFileDoesNotExist(): void
     {
-        $configPath = self::configPath();
+        $configPath = $this->configPath();
         if ($configPath !== '' && file_exists($configPath)) {
             @unlink($configPath);
         }
@@ -148,47 +144,53 @@ class BaseFeatureTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Config file not found');
 
-        TestFeature::getConfig();
+        $this->feature->getConfig();
     }
 
     #[Test]
     public function getConfigThrowsWhenIniCannotBeParsed(): void
     {
-        $configPath = self::configPath();
+        $configPath = $this->configPath();
         self::assertNotSame('', $configPath);
         file_put_contents($configPath, "[broken_section\nkey=value\n");
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Unable to parse config file');
 
-        TestFeature::getConfig();
+        $this->feature->getConfig();
     }
 
     #[Test]
     public function getConfigReturnsParsedIniArray(): void
     {
-        $configPath = self::configPath();
+        $configPath = $this->configPath();
         self::assertNotSame('', $configPath);
         file_put_contents($configPath, "[feature]\nname=test\nvalue=1\n");
 
-        $config = TestFeature::getConfig();
+        $config = $this->feature->getConfig();
 
         self::assertSame(['feature' => ['name' => 'test', 'value' => '1']], $config);
     }
 
     #[Test]
+    public function getConfigReturnsInjectedConfigWhenProvided(): void
+    {
+        $injectedConfig = ['section' => ['key' => 'injected_value']];
+        $feature = new TestFeature($this->createFeatureStruct(), $injectedConfig);
+
+        self::assertSame($injectedConfig, $feature->getConfig());
+    }
+
+    #[Test]
     public function getBuildFilesReturnsNullWhenBuildDirectoryDoesNotExist(): void
     {
-        $feature = new TestFeature($this->createFeatureStruct());
-
-        self::assertNull($feature->getBuildFiles());
+        self::assertNull($this->feature->getBuildFiles());
     }
 
     #[Test]
     public function getBuildFilesReturnsDirectoryListingWhenBuildDirectoryExists(): void
     {
-        $feature = new TestFeature($this->createFeatureStruct());
-        $buildDir = self::buildDirPath();
+        $buildDir = $this->buildDirPath();
         self::assertNotSame('', $buildDir);
 
         if (!is_dir($buildDir)) {
@@ -197,7 +199,7 @@ class BaseFeatureTest extends TestCase
 
         file_put_contents($buildDir . '/asset.js', 'console.log(1);');
 
-        $files = $feature->getBuildFiles();
+        $files = $this->feature->getBuildFiles();
 
         self::assertIsArray($files);
         self::assertContains('asset.js', $files);
@@ -216,9 +218,9 @@ class BaseFeatureTest extends TestCase
         return new BasicFeatureStruct(['feature_code' => TestFeature::FEATURE_CODE]);
     }
 
-    private static function configPath(): string
+    private function configPath(): string
     {
-        $basePath = TestFeature::getPluginBasePath();
+        $basePath = $this->feature->getPluginBasePath();
         if (!is_string($basePath)) {
             return '';
         }
@@ -226,9 +228,9 @@ class BaseFeatureTest extends TestCase
         return $basePath . '/../config.ini';
     }
 
-    private static function buildDirPath(): string
+    private function buildDirPath(): string
     {
-        $basePath = TestFeature::getPluginBasePath();
+        $basePath = $this->feature->getPluginBasePath();
         if (!is_string($basePath)) {
             return '';
         }

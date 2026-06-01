@@ -19,6 +19,9 @@ abstract class BaseFeature implements IBaseFeature
 
     protected BasicFeatureStruct $feature;
 
+    /** @var ?array<string, mixed> */
+    protected ?array $configCache = null;
+
     /**
      * @var ?LoggerInterface
      */
@@ -63,9 +66,13 @@ abstract class BaseFeature implements IBaseFeature
      * @return array<string, mixed>
      * @throws Exception
      */
-    public static function getConfig(): array
+    public function getConfig(): array
     {
-        $config_file_path = realpath(self::getPluginBasePath() . '/../config.ini');
+        if ($this->configCache !== null) {
+            return $this->configCache;
+        }
+
+        $config_file_path = realpath($this->getPluginBasePath() . '/../config.ini');
         if ($config_file_path === false || !file_exists($config_file_path)) {
             throw new Exception('Config file not found', 500);
         }
@@ -81,18 +88,19 @@ abstract class BaseFeature implements IBaseFeature
     /**
      * Constructor method for the class.
      *
-     * @param BasicFeatureStruct $feature An instance of BasicFeatureStruct representing the feature data.
-     * @return void
+     * @param array<string, mixed>|null $config
+     * @param array<string, mixed>|null $config
      *
      * @throws LogicException If the plugin code is not defined.
      */
-    public function __construct(BasicFeatureStruct $feature)
+    public function __construct(BasicFeatureStruct $feature, ?array $config = null)
     {
         $fCode = static::FEATURE_CODE;
         if (empty($fCode)) {
             throw new LogicException("Plugin code not defined.");
         }
         $this->feature = $feature;
+        $this->configCache = $config;
         $this->logger_name = $this->feature->feature_code . '_plugin';
     }
 
@@ -138,9 +146,9 @@ abstract class BaseFeature implements IBaseFeature
     /**
      * @throws LogicException
      */
-    public static function getClassPath(): string
+    public function getClassPath(): string
     {
-        $rc = new ReflectionClass(get_called_class());
+        $rc = new ReflectionClass(static::class);
         $fileName = $rc->getFileName();
         if ($fileName === false) {
             throw new LogicException('Class file path not available');
@@ -152,17 +160,17 @@ abstract class BaseFeature implements IBaseFeature
     /**
      * @throws LogicException
      */
-    public static function getPluginBasePath(): false|string
+    public function getPluginBasePath(): false|string
     {
-        return realpath(dirname(static::getClassPath(), 2));
+        return realpath(dirname($this->getClassPath(), 2));
     }
 
     /**
      * @throws LogicException
      */
-    public static function getTemplatesPath(): string
+    public function getTemplatesPath(): string
     {
-        return static::getClassPath() . '/View';
+        return $this->getClassPath() . '/View';
     }
 
     public function getFeatureStruct(): BasicFeatureStruct
@@ -189,7 +197,7 @@ abstract class BaseFeature implements IBaseFeature
      */
     public function getBuildFiles(): ?array
     {
-        $path = realpath(self::getPluginBasePath() . '/../static/build');
+        $path = realpath($this->getPluginBasePath() . '/../static/build');
         if ($path === false) {
             return null;
         }

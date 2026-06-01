@@ -3818,7 +3818,13 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 9
+			count: 8
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
 		-
@@ -4377,7 +4383,13 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobTmxController\:\:pushTMXInTM\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\JobTmxController\:\:pushTMXInTM\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
 
 		-
@@ -8434,12 +8446,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/Email/SendTMXEmail.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\Email\\SendTMXEmail\:\:__construct\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/Email/SendTMXEmail.php
-
-		-
 			message: '#^Access to an undefined property Features\\Aligner\\Utils\\GoogleTranslate\:\:\$client_secret\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8874,7 +8880,13 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:getAlignment\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:getAlignment\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
 
 		-
@@ -9566,7 +9578,13 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:translateSegments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 6
+			count: 5
+			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:translateSegments\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
 		-
@@ -9822,7 +9840,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/TaskRunner/Commons/AbstractWorker.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkDatabaseConnection\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\\Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkDatabaseConnection\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/TaskRunner/Commons/AbstractWorker.php

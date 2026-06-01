@@ -1,19 +1,19 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-05-31 (last updated)  
-**Commits (refactor + fix + security + test):** 452+
+**Date:** 2026-06-01 (last updated)  
+**Commits (refactor + fix + security + test):** 490+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,696 | −5,670 (−77.0%) |
+| **PHPStan baseline entries** | 7,366 | 1,677 | −5,689 (−77.2%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,580 | +4,332 (+192.7%) |
-| **PHPUnit assertions** | ~19,449 | 17,507 | — |
+| **PHPUnit tests** | ~2,248 | 6,892 | +4,644 (+206.6%) |
+| **PHPUnit assertions** | ~19,449 | 18,030 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 35.69% (247/692) | +27.21% (+194 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 64.77% (2,715/4,192) | +43.03% (+1,871 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 65.12% (23,076/35,438) | +43.93% (+15,803 lines) |
-| **New test files** | 235 | 480 | +245 |
+| **New test files** | 235 | 512 | +277 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 325 | +325 |
 
 ---
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 586 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 589 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -497,6 +497,9 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Plugins/Features/SegmentFilter/Model/SegmentFilterDao.php` | Phase 0 |
 | `lib/Plugins/Features/TranslationEvents/Model/TranslationEventDao.php` | Phase 12A |
 | `lib/Plugins/Features/TranslationVersions/Model/TranslationVersionDao.php` | Phase 0 |
+| `plugins/airbnb/lib/Features/Airbnb.php` | Phase N+ |
+| `plugins/translated/lib/Features/Translated.php` | Phase N+ |
+| `plugins/uber/lib/Features/Uber.php` | Phase N+ |
 
 #### Routes
 | File | Cleaned In |
