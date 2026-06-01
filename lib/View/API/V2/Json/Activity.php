@@ -23,12 +23,16 @@ class Activity
      */
     private array $data;
 
+    /**
+     * @param ActivityLogStruct[] $data
+     */
     public function __construct(array $data = [])
     {
         $this->data = $data;
     }
 
     /**
+     * @return array<int, array<string, mixed>>
      * @throws Exception
      */
     public function render(): array

@@ -34,7 +34,7 @@ class AnalysisMatch implements JsonSerializable
      */
     public static function forName(string $name, ConstantsInterface $matchConstantsClass): AnalysisMatch
     {
-        return new static($name, $matchConstantsClass);
+        return new self($name, $matchConstantsClass);
     }
 
     /**
@@ -48,6 +48,9 @@ class AnalysisMatch implements JsonSerializable
         $this->type = $matchConstantsClass::validate($name);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

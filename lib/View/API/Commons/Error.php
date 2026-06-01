@@ -29,6 +29,9 @@ class Error implements JsonSerializable
         $this->data = $exceptions;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function render(bool $force_print_errors = false): array
     {
         $row = [
@@ -58,6 +61,9 @@ class Error implements JsonSerializable
         return $row;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->render();

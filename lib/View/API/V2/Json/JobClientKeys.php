@@ -29,6 +29,9 @@ class JobClientKeys
         $this->data = $data;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function renderItem(ClientTmKeyStruct $keyStruct): array
     {
         return [
@@ -40,7 +43,7 @@ class JobClientKeys
     }
 
     /**
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function render(): array
     {

@@ -107,21 +107,21 @@ class AnalysisProject implements JsonSerializable
     }
 
     /**
-     * @param string $id
+     * @param int $id
      *
      * @return bool
      */
-    public function hasJob(string $id): bool
+    public function hasJob(int $id): bool
     {
         return array_key_exists($id, $this->jobs);
     }
 
     /**
-     * @param $id
+     * @param int $id
      *
      * @return AnalysisJob
      */
-    public function getJob($id): AnalysisJob
+    public function getJob(int $id): AnalysisJob
     {
         return $this->jobs[$id];
     }
@@ -159,7 +159,7 @@ class AnalysisProject implements JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

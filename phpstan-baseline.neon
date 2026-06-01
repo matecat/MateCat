@@ -1306,6 +1306,12 @@ parameters:
 			path: lib/Controller/API/V1/NewController.php
 
 		-
+			message: '#^Parameter \#1 \$data of class View\\API\\V2\\Json\\Activity constructor expects array\<Model\\ActivityLog\\ActivityLogStruct\>, array\<Model\\DataAccess\\IDaoStruct\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/V2/ActivityLogController.php
+
+		-
 			message: '#^Cannot access property \$id on Model\\Teams\\TeamStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -2837,30 +2843,6 @@ parameters:
 			path: lib/View/API/App/Json/Analysis/AnalysisJob.php
 
 		-
-			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisMatch\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisMatch.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisMatch.php
-
-		-
-			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisProject\:\:getJob\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisProject.php
-
-		-
-			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisProject\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/App/Json/Analysis/AnalysisProject.php
-
-		-
 			message: '#^Method View\\API\\App\\Json\\Analysis\\AnalysisProjectSummary\:\:getEstimatedWorkTime\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
@@ -2933,43 +2915,6 @@ parameters:
 			path: lib/View/API/App/Json/UserProfile.php
 
 		-
-			message: '#^Method View\\API\\Commons\\Error\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/Commons/Error.php
-
-		-
-			message: '#^Method View\\API\\Commons\\Error\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/Commons/Error.php
-
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Activity\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Activity.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Activity\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Activity.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\CreationStatus\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/CreationStatus.php
-
-		-
-			message: '#^Property View\\API\\V2\\Json\\CreationStatus\:\:\$data in isset\(\) is not nullable nor uninitialized\.$#'
-			identifier: isset.initializedProperty
-			count: 4
-			path: lib/View/API/V2/Json/CreationStatus.php
-
-		-
 			message: '#^Method View\\API\\V2\\Json\\Engine\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3040,18 +2985,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/View/API/V2/Json/Job.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\JobClientKeys\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/JobClientKeys.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\JobClientKeys\:\:renderItem\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/JobClientKeys.php
 
 		-
 			message: '#^Cannot access property \$key on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
@@ -3466,30 +3399,6 @@ parameters:
 			identifier: property.unused
 			count: 1
 			path: lib/View/API/V2/Json/TranslationIssueComment.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\User\:\:renderItem\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/User.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\User\:\:renderItemPublic\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/User.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\UserMetadata\:\:renderMetadataCollection\(\) has parameter \$collection with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/UserMetadata.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\UserMetadata\:\:renderMetadataCollection\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/UserMetadata.php
 
 		-
 			message: '#^Parameter \#1 \$chunk_id of method View\\API\\V3\\Json\\Chunk\:\:getTimeToEditArray\(\) expects int, int\|null given\.$#'
