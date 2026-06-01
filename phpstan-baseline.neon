@@ -382,6 +382,12 @@ parameters:
 			path: lib/Controller/API/App/GetTranslationMismatchesController.php
 
 		-
+			message: '#^Parameter \#1 \$Translation_mismatches of class View\\API\\V2\\Json\\SegmentTranslationMismatches constructor expects array<int, array<string, mixed>>, list<array<string, int\|null>\|Model\\DataAccess\\ShapelessConcreteStruct> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: lib/Controller/API/App/GetTranslationMismatchesController.php
+
+		-
 			message: '#^Method Controller\\API\\App\\GetVolumeAnalysisController\:\:validateTheRequest\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -3033,48 +3039,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: lib/View/API/V2/Json/SegmentTranslationIssue.php
-
-		-
-			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer2\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\SegmentTranslationMismatches\:\:__construct\(\) has parameter \$Translation_mismatches with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\SegmentTranslationMismatches\:\:__construct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\SegmentTranslationMismatches\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
-
-		-
-			message: '#^Parameter \#1 \$id_job of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
-
-		-
-			message: '#^Parameter \#2 \$password of method Model\\Jobs\\MetadataDao\:\:getSubfilteringCustomHandlers\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
-
-		-
-			message: '#^Property View\\API\\V2\\Json\\SegmentTranslationMismatches\:\:\$data type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/SegmentTranslationMismatches.php
 
 		-
 			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer2\(\)\.$#'
