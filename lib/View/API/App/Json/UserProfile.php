@@ -11,6 +11,7 @@ namespace View\API\App\Json;
 
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Model\ConnectedServices\ConnectedServiceStruct;
+use TypeError;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -30,12 +31,13 @@ class UserProfile
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      * @throws \Exception
+     * @throws TypeError
      */
     public function renderItem(UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = []): array
     {
         return [
             'user' => User::renderItem($user),
-            'connected_services' => (new ConnectedService($servicesStruct))->render(),
+            'connected_services' => (new ConnectedService($servicesStruct ?? []))->render(),
             'teams' => (new Team())->render($teams),
             'metadata' => (empty($userMetadata) ? null : $userMetadata),
         ];

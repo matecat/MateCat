@@ -119,6 +119,7 @@ class AuthenticationHelper
      * @throws EnvironmentIsBrokenException
      * @throws RuntimeException
      * @throws Exception
+     * @throws TypeError
      */
     protected function setUserSession(): void
     {
@@ -138,6 +139,7 @@ class AuthenticationHelper
      * @throws EnvironmentIsBrokenException
      * @throws RuntimeException
      * @throws Exception
+     * @throws TypeError
      */
     protected static function getUserProfile(UserStruct $user): array
     {
