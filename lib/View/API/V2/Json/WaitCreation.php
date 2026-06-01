@@ -13,6 +13,9 @@ namespace View\API\V2\Json;
 class WaitCreation
 {
 
+    /**
+     * @return array<string, mixed>
+     */
     public function render(): array
     {
         return [

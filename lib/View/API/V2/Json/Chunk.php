@@ -18,7 +18,7 @@ class Chunk extends Job
     /**
      * @param JobStruct $chunk
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      * @throws NotFoundException
      */

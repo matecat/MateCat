@@ -22,6 +22,9 @@ class Ping
         $this->controller = $kleinController;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function render(): array
     {
         $_request_uri = parse_url($this->controller->getRequest()->server()['REQUEST_URI']);

@@ -40,7 +40,7 @@ class QALocalWarning extends QAWarning
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function render(): array

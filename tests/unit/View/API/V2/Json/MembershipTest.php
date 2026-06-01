@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\unit\View\API\V2\Json;
+namespace unit\View\API\V2\Json;
 
 use Model\Teams\MembershipStruct;
 use TestHelpers\AbstractTest;

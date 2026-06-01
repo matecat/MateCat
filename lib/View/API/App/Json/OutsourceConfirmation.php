@@ -22,6 +22,9 @@ class OutsourceConfirmation
         $this->data = $confirmation;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function render(): array
     {
         $result = $this->data->toArray();

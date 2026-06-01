@@ -2915,18 +2915,6 @@ parameters:
 			path: lib/View/API/App/Json/ConnectedService.php
 
 		-
-			message: '#^Method View\\API\\App\\Json\\OutsourceConfirmation\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/App/Json/OutsourceConfirmation.php
-
-		-
-			message: '#^Method View\\API\\App\\Json\\Ping\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/App/Json/Ping.php
-
-		-
 			message: '#^Method View\\API\\App\\Json\\UserProfile\:\:renderItem\(\) has parameter \$userMetadata with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -2968,12 +2956,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/View/API/V2/Json/Activity.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\Chunk\:\:renderOne\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Chunk.php
 
 		-
 			message: '#^Method View\\API\\V2\\Json\\CreationStatus\:\:render\(\) return type has no value type specified in iterable type array\.$#'
@@ -3192,12 +3174,6 @@ parameters:
 			path: lib/View/API/V2/Json/ProjectUrls.php
 
 		-
-			message: '#^Method View\\API\\V2\\Json\\Propagation\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/Propagation.php
-
-		-
 			message: '#^Method View\\API\\V2\\Json\\QAGlobalWarning\:\:__construct\(\) has parameter \$tagIssues with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3232,12 +3208,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/View/API/V2/Json/QAGlobalWarning.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\QALocalWarning\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/QALocalWarning.php
 
 		-
 			message: '#^Method View\\API\\V2\\Json\\QAWarning\:\:pushErrorSegment\(\) has parameter \$content with no type specified\.$#'
@@ -3520,12 +3490,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: lib/View/API/V2/Json/UserMetadata.php
-
-		-
-			message: '#^Method View\\API\\V2\\Json\\WaitCreation\:\:render\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/View/API/V2/Json/WaitCreation.php
 
 		-
 			message: '#^Parameter \#1 \$chunk_id of method View\\API\\V3\\Json\\Chunk\:\:getTimeToEditArray\(\) expects int, int\|null given\.$#'

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\unit\View\API\V3\Json;
+namespace unit\View\API\V3\Json;
 
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;

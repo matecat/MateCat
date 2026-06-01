@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\View\Analysis;
+namespace unit\View\Analysis;
 
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 use PHPUnit\Framework\Attributes\Test;
