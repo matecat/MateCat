@@ -213,4 +213,106 @@ class SegmentVersionTest extends AbstractTest
         $this->assertArrayHasKey('translation', $result);
         $this->assertIsString($result['translation']);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testRenderWithIssuesAttachesIssuesToVersion(): void
+    {
+        $records = [
+            $this->makeRecord([
+                'id' => 1, 'id_segment' => 10, 'version_number' => 1,
+                'raw_diff' => null,
+                'qa_id_segment' => 10, 'qa_uid' => 1, 'qa_id' => 100,
+                'qa_id_job' => 1, 'qa_id_category' => 5, 'qa_severity' => 'minor',
+                'qa_translation_version' => 1, 'qa_start_node' => 0, 'qa_start_offset' => 0,
+                'qa_end_node' => 0, 'qa_end_offset' => 5, 'qa_is_full_segment' => 0,
+                'qa_penalty_points' => 1.0, 'qa_comment' => 'typo',
+                'qa_create_date' => '2024-01-01 00:00:00', 'qa_target_text' => 'test',
+                'qa_source_page' => 1,
+            ]),
+            $this->makeRecord([
+                'id' => 2, 'id_segment' => 10, 'version_number' => 2,
+                'raw_diff' => '{"1":"added"}',
+                'qa_id_segment' => null,
+            ]),
+        ];
+
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $result = $view->render();
+
+        $this->assertCount(2, $result);
+        $this->assertNotEmpty($result[0]['issues']);
+        $this->assertArrayHasKey('id', $result[0]['issues'][0]);
+        $this->assertSame([], $result[1]['issues']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testRenderWithIssuesMultipleIssuesSameVersion(): void
+    {
+        $base = [
+            'id' => 1, 'id_segment' => 10, 'version_number' => 1,
+            'raw_diff' => null,
+            'qa_uid' => 1, 'qa_id_job' => 1, 'qa_id_category' => 5,
+            'qa_severity' => 'minor', 'qa_translation_version' => 1,
+            'qa_start_node' => 0, 'qa_start_offset' => 0,
+            'qa_end_node' => 0, 'qa_end_offset' => 5, 'qa_is_full_segment' => 0,
+            'qa_penalty_points' => 1.0, 'qa_comment' => 'issue',
+            'qa_create_date' => '2024-01-01 00:00:00', 'qa_target_text' => 'text',
+            'qa_source_page' => 1,
+        ];
+
+        $records = [
+            $this->makeRecord(array_merge($base, ['qa_id' => 100, 'qa_id_segment' => 10])),
+            $this->makeRecord(array_merge($base, ['qa_id' => 101, 'qa_id_segment' => 10])),
+        ];
+
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $result = $view->render();
+
+        $this->assertCount(1, $result);
+        $this->assertCount(2, $result[0]['issues']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testRenderWithIssuesHandlesRawDiffJson(): void
+    {
+        $records = [
+            $this->makeRecord([
+                'id' => 1, 'id_segment' => 10, 'version_number' => 1,
+                'raw_diff' => '{"0":"hello","1":"world"}',
+                'qa_id_segment' => null,
+            ]),
+        ];
+
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $result = $view->render();
+
+        $this->assertCount(1, $result);
+        $this->assertSame(['hello', 'world'], $result[0]['diff']);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testRenderWithIssuesHandlesNullRawDiff(): void
+    {
+        $records = [
+            $this->makeRecord([
+                'id' => 1, 'id_segment' => 10, 'version_number' => 1,
+                'raw_diff' => null,
+                'qa_id_segment' => null,
+            ]),
+        ];
+
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $result = $view->render();
+
+        $this->assertCount(1, $result);
+        $this->assertNull($result[0]['diff']);
+    }
 }
