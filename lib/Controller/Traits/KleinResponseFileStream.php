@@ -9,6 +9,7 @@
 namespace Controller\Traits;
 
 
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\FilesStorage\AbstractFilesStorage;
 
@@ -33,7 +34,7 @@ class KleinResponseFileStream
     /**
      * @param resource $filePointer
      *
-     * @throws \Klein\Exceptions\ResponseAlreadySentException
+     * @throws ResponseAlreadySentException
      */
     public function streamFileFromPointer($filePointer, string $mimeType, string $disposition, string $filename): void
     {
@@ -59,7 +60,7 @@ class KleinResponseFileStream
     /**
      * @param resource $filePointer
      *
-     * @throws \Klein\Exceptions\ResponseAlreadySentException
+     * @throws ResponseAlreadySentException
      */
     public function streamFileDownloadFromPointer($filePointer, string $filename): void
     {
@@ -69,7 +70,7 @@ class KleinResponseFileStream
     /**
      * @param resource $filePointer
      *
-     * @throws \Klein\Exceptions\ResponseAlreadySentException
+     * @throws ResponseAlreadySentException
      */
     public function streamFileInlineFromPointer($filePointer, string $filename, string $mimeType): void
     {
