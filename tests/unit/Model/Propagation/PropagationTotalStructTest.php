@@ -5,9 +5,9 @@ namespace unit\Model\Propagation;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class PropagationTotalStructTest extends TestCase
+class PropagationTotalStructTest extends AbstractTest
 {
     private function makeSegment(int $id = 1): SegmentTranslationStruct
     {

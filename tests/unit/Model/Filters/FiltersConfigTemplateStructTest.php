@@ -12,9 +12,9 @@ use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
 use Model\Filters\FiltersConfigTemplateStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class FiltersConfigTemplateStructTest extends TestCase
+class FiltersConfigTemplateStructTest extends AbstractTest
 {
     #[Test]
     public function constructor_sets_defaults(): void

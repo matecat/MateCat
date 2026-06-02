@@ -5,9 +5,9 @@ namespace unit\Model\MTQE;
 use DomainException;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use Model\MTQE\PayableRate\MTQEPayableRateStruct;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class MTQEPayableRateStructTest extends TestCase
+class MTQEPayableRateStructTest extends AbstractTest
 {
     public function testHydrateFromJSONMinimal(): void
     {

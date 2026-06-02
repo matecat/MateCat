@@ -17,9 +17,9 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class EntryValidatorTest extends TestCase
+class EntryValidatorTest extends AbstractTest
 {
     private function makeStruct(int $idSegment = 1, int $idJob = 2, int $idCategory = 3): EntryStruct
     {

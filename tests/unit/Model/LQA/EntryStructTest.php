@@ -9,9 +9,9 @@ use Model\LQA\EntryValidator;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class EntryStructTest extends TestCase
+class EntryStructTest extends AbstractTest
 {
     #[Test]
     public function constructor_sets_properties_from_array(): void

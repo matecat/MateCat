@@ -13,10 +13,10 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use RuntimeException;
 
-class FilesInfoUtilityTest extends TestCase
+class FilesInfoUtilityTest extends AbstractTest
 {
     private function makeChunk(?int $projectId): JobStruct
     {

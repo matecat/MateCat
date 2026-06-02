@@ -8,9 +8,9 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\RedeemableProject;
 use Model\Users\UserStruct;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class RedeemableProjectTest extends TestCase
+class RedeemableProjectTest extends AbstractTest
 {
     private UserStruct $user;
     private ProjectDao $projectDao;
@@ -18,6 +18,7 @@ class RedeemableProjectTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->user = $this->createStub(UserStruct::class);
         $this->projectDao = $this->createStub(ProjectDao::class);
         $this->jobDao = $this->createStub(JobDao::class);

@@ -3,10 +3,10 @@
 namespace unit\Utils\Templating;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Templating\PHPTalMap;
 
-class PHPTalMapTest extends TestCase
+class PHPTalMapTest extends AbstractTest
 {
     #[Test]
     public function constructorConvertsNestedArraysToMaps(): void

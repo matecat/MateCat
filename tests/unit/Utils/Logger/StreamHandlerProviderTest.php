@@ -5,11 +5,11 @@ namespace unit\Utils\Logger;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\StreamHandler;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\Handlers\StreamHandlerProvider;
 use Utils\Registry\AppConfig;
 
-class StreamHandlerProviderTest extends TestCase
+class StreamHandlerProviderTest extends AbstractTest
 {
     #[Test]
     public function getHandlerClassNameReturnsStreamHandler(): void

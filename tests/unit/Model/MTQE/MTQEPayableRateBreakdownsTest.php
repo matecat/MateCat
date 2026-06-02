@@ -3,9 +3,9 @@
 namespace unit\Model\MTQE;
 
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class MTQEPayableRateBreakdownsTest extends TestCase
+class MTQEPayableRateBreakdownsTest extends AbstractTest
 {
     public function testDefaults(): void
     {

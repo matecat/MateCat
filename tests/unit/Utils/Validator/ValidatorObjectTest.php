@@ -3,11 +3,11 @@
 namespace unit\Utils\Validator;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use stdClass;
 use Utils\Validator\Contracts\ValidatorObject;
 
-class ValidatorObjectTest extends TestCase
+class ValidatorObjectTest extends AbstractTest
 {
     #[Test]
     public function fromObjectCopiesProperties(): void

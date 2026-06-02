@@ -4,9 +4,9 @@ namespace Tests\unit\Model\Pagination;
 
 use Model\Pagination\PaginationParameters;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class PaginationParametersTest extends TestCase
+class PaginationParametersTest extends AbstractTest
 {
     #[Test]
     public function constructor_sets_all_properties(): void

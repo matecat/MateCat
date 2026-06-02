@@ -4,10 +4,10 @@ namespace unit\Utils\Tools;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Tools\PostEditing;
 
-class PostEditingTest extends TestCase
+class PostEditingTest extends AbstractTest
 {
     // -------------------------------------------------------------------------
     // getPee

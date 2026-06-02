@@ -5,11 +5,11 @@ namespace unit\Utils\Logger;
 use Monolog\Level;
 use Monolog\LogRecord;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\LogProcessor;
 
-class LogProcessorTest extends TestCase
+class LogProcessorTest extends AbstractTest
 {
     #[Test]
     public function invokeAddsExtraFields(): void

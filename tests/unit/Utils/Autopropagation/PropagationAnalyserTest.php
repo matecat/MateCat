@@ -5,10 +5,10 @@ namespace unit\Utils\Autopropagation;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Autopropagation\PropagationAnalyser;
 
-class PropagationAnalyserTest extends TestCase
+class PropagationAnalyserTest extends AbstractTest
 {
     private function makeSegment(array $overrides = []): SegmentTranslationStruct
     {

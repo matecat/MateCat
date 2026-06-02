@@ -3,10 +3,10 @@
 namespace unit\Utils\Registry;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class AppConfigTest extends TestCase
+class AppConfigTest extends AbstractTest
 {
     private ?string $origGoogleClientId;
     private ?string $origGoogleBrowserApiKey;
@@ -18,6 +18,7 @@ class AppConfigTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->origGoogleClientId = AppConfig::$GOOGLE_OAUTH_CLIENT_ID;
         $this->origGoogleBrowserApiKey = AppConfig::$GOOGLE_OAUTH_BROWSER_API_KEY;
         $this->origRoot = AppConfig::$ROOT;
@@ -40,6 +41,7 @@ class AppConfigTest extends TestCase
             ['CLI_HTTP_HOST' => $this->origCliHttpHost, 'COOKIE_DOMAIN' => $this->origCookieDomain],
             [],
         );
+        parent::tearDown();
     }
 
     #[Test]

@@ -5,9 +5,9 @@ namespace unit\Model\MTQE;
 use DomainException;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\MTQE\Templates\MTQEWorkflowTemplateStruct;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class MTQEWorkflowTemplateStructTest extends TestCase
+class MTQEWorkflowTemplateStructTest extends AbstractTest
 {
     public function testHydrateFromJSONMinimal(): void
     {

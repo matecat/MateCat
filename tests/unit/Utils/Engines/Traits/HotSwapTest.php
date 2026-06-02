@@ -4,7 +4,7 @@ namespace Tests\unit\Utils\Engines\Traits;
 
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Predis\Client;
 use Utils\Engines\Traits\HotSwap;
 use Utils\Redis\RedisHandler;
@@ -71,12 +71,13 @@ class FakePredisClient extends Client
     }
 }
 
-class HotSwapTest extends TestCase
+class HotSwapTest extends AbstractTest
 {
     private HotSwapTestClass $sut;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->sut = new HotSwapTestClass();
     }
 

@@ -3,15 +3,16 @@
 namespace unit\Utils\Files;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Files\CSV;
 
-class CSVTest extends TestCase
+class CSVTest extends AbstractTest
 {
     private string $tmpDir;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->tmpDir = sys_get_temp_dir() . '/csv_test_' . uniqid();
         mkdir($this->tmpDir);
     }
@@ -20,6 +21,7 @@ class CSVTest extends TestCase
     {
         array_map('unlink', glob($this->tmpDir . '/*') ?: []);
         rmdir($this->tmpDir);
+        parent::tearDown();
     }
 
     #[Test]

@@ -5,13 +5,13 @@ use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\PluginsLoader;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Plugins\Features\ProjectCompletion;
 use Plugins\Features\UnknownFeature;
 use Utils\Registry\AppConfig;
 
 #[Group('unit')]
-class PluginsLoaderTest extends TestCase
+class PluginsLoaderTest extends AbstractTest
 {
     private string $originalIncludePath;
     private string $originalAppConfigRoot;

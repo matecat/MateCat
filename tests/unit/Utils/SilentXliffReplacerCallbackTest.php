@@ -3,10 +3,10 @@
 namespace unit\Utils;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\XliffReplacer\SilentXliffReplacerCallback;
 
-class SilentXliffReplacerCallbackTest extends TestCase
+class SilentXliffReplacerCallbackTest extends AbstractTest
 {
     #[Test]
     public function thereAreErrorsAlwaysReturnsFalse(): void

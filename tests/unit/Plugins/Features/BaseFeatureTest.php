@@ -10,7 +10,7 @@ use LogicException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Plugins\Features\BaseFeature;
 use Psr\Log\LoggerInterface;
 use ReflectionMethod;
@@ -27,7 +27,7 @@ class InvalidFeatureCodeTestFeature extends BaseFeature
 }
 
 #[Group('unit')]
-class BaseFeatureTest extends TestCase
+class BaseFeatureTest extends AbstractTest
 {
     private TestFeature $feature;
 

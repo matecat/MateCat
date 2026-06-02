@@ -3,11 +3,11 @@
 namespace unit\Utils\Logger;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\HandlersProviderFactory;
 use Utils\Registry\AppConfig;
 
-class HandlersProviderFactoryTest extends TestCase
+class HandlersProviderFactoryTest extends AbstractTest
 {
     /** @var array<string, mixed> */
     private array $originalHandlers;

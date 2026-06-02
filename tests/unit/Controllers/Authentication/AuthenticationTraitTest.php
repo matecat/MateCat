@@ -7,7 +7,7 @@ use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
 
 /**
@@ -48,7 +48,7 @@ class TraitTestSubject
     }
 }
 
-class AuthenticationTraitTest extends TestCase
+class AuthenticationTraitTest extends AbstractTest
 {
     // ─── isLoggedIn / getUser / getApiRecord ────────────────────────────
 

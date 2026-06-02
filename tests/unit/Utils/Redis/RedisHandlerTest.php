@@ -5,13 +5,13 @@ namespace Tests\unit\Utils\Redis;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Predis\Client;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 #[Group('PersistenceNeeded')]
-class RedisHandlerTest extends TestCase
+class RedisHandlerTest extends AbstractTest
 {
     private RedisHandler $handler;
 
@@ -24,6 +24,7 @@ class RedisHandlerTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->originalServers         = AppConfig::$REDIS_SERVERS;
         $this->originalMode            = AppConfig::$REDIS_MODE;
         $this->originalSentinelService = AppConfig::$REDIS_SENTINEL_SERVICE;
@@ -41,6 +42,7 @@ class RedisHandlerTest extends TestCase
         AppConfig::$REDIS_SENTINEL_SERVICE = $this->originalSentinelService;
         AppConfig::$REDIS_PASSWORD         = $this->originalPassword;
         AppConfig::$INSTANCE_ID            = $this->originalInstanceId;
+        parent::tearDown();
     }
 
     // ── Single mode (backward compat) ──

@@ -10,7 +10,7 @@ use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
 /**
  * Testable subclass — overrides factory methods and injectable callers.
@@ -37,7 +37,7 @@ class TestableOAuthSignInModel extends OAuthSignInModel
     }
 }
 
-class OAuthSignInModelTest extends TestCase
+class OAuthSignInModelTest extends AbstractTest
 {
     private function makeSession(): array
     {

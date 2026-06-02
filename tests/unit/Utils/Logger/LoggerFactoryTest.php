@@ -3,12 +3,12 @@
 namespace unit\Utils\Logger;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
-class LoggerFactoryTest extends TestCase
+class LoggerFactoryTest extends AbstractTest
 {
     /** @var array<string, mixed> */
     private array $originalHandlers;

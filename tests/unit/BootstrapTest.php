@@ -8,15 +8,16 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Exceptions\BootstrapTerminatedException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class BootstrapTest extends TestCase
+class BootstrapTest extends AbstractTest
 {
     private string $tmpDir;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->tmpDir = sys_get_temp_dir() . '/bootstrap_test_' . uniqid();
         mkdir($this->tmpDir, 0755, true);
     }
@@ -32,6 +33,7 @@ class BootstrapTest extends TestCase
         if (is_dir($this->tmpDir)) {
             rmdir($this->tmpDir);
         }
+        parent::tearDown();
     }
 
     private function createBootstrapInstance(): Bootstrap

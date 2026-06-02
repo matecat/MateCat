@@ -8,10 +8,10 @@ use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
-class PagerTest extends TestCase
+class PagerTest extends AbstractTest
 {
     #[Test]
     public function count_returns_integer(): void

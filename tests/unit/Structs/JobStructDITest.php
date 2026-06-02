@@ -14,11 +14,11 @@ use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Constants\JobStatus;
 
 #[AllowMockObjectsWithoutExpectations]
-class JobStructDITest extends TestCase
+class JobStructDITest extends AbstractTest
 {
     private JobStruct $struct;
 

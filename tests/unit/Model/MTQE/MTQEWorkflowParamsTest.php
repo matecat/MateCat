@@ -3,10 +3,10 @@
 namespace unit\Model\MTQE;
 
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Constants\TranslationStatus;
 
-class MTQEWorkflowParamsTest extends TestCase
+class MTQEWorkflowParamsTest extends AbstractTest
 {
     public function testDefaults(): void
     {

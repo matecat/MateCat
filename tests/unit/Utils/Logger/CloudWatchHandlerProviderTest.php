@@ -4,11 +4,11 @@ namespace unit\Utils\Logger;
 
 use Aws\CloudWatchLogs\CloudWatchLogsClient;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\Handlers\CloudWatchHandlerProvider;
 use Utils\Registry\AppConfig;
 
-class CloudWatchHandlerProviderTest extends TestCase
+class CloudWatchHandlerProviderTest extends AbstractTest
 {
     private string $originalEnv;
 

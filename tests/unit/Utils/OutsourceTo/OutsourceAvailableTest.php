@@ -3,10 +3,10 @@
 namespace unit\Utils\OutsourceTo;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\OutsourceTo\OutsourceAvailable;
 
-class OutsourceAvailableTest extends TestCase
+class OutsourceAvailableTest extends AbstractTest
 {
     #[Test]
     public function returnsFalseForNonArray(): void

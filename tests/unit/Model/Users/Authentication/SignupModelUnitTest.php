@@ -7,10 +7,10 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
 #[Group('unit')]
-class SignupModelUnitTest extends TestCase
+class SignupModelUnitTest extends AbstractTest
 {
     #[Test]
     public function testConstructPopulatesParams()

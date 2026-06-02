@@ -3,12 +3,12 @@
 namespace unit\Utils\Validator;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Swaggest\JsonSchema\Exception\Error;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
-class JSONValidatorExceptionTest extends TestCase
+class JSONValidatorExceptionTest extends AbstractTest
 {
     private function makeError(): Error
     {

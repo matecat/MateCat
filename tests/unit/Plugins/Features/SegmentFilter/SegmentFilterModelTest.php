@@ -5,12 +5,12 @@ namespace unit\Plugins\Features\SegmentFilter;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterDao;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
 
-class SegmentFilterModelTest extends TestCase
+class SegmentFilterModelTest extends AbstractTest
 {
     private JobStruct $chunk;
 

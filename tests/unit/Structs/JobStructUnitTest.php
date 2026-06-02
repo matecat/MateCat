@@ -3,10 +3,10 @@
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
 #[Group('unit')]
-class JobStructUnitTest extends TestCase
+class JobStructUnitTest extends AbstractTest
 {
     private function createStruct(): JobStruct
     {

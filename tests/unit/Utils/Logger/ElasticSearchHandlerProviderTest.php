@@ -5,10 +5,10 @@ namespace unit\Utils\Logger;
 use Elastic\Elasticsearch\ClientInterface;
 use Monolog\Handler\ElasticsearchHandler;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Logger\Handlers\ElasticSearchHandlerProvider;
 
-class ElasticSearchHandlerProviderTest extends TestCase
+class ElasticSearchHandlerProviderTest extends AbstractTest
 {
     #[Test]
     public function getHandlerClassNameReturnsElasticsearchHandler(): void
