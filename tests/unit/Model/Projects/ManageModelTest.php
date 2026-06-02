@@ -16,23 +16,23 @@ use TestHelpers\AbstractTest;
 class ManageModelTest extends AbstractTest
 {
     #[Test]
-    public function formatJobDateForTodayReturnsMonthDayTimeBecauseNowIsMutated(): void
+    public function formatJobDateForTodayReturnsTodayPrefix(): void
     {
         $date = (new DateTime())->setTime(10, 15, 0);
 
         $actual = ManageModel::formatJobDate($date->format('Y-m-d H:i:s'));
 
-        $this->assertSame($date->format('M d, H:i'), $actual);
+        $this->assertSame('Today, 10:15', $actual);
     }
 
     #[Test]
-    public function formatJobDateForYesterdayReturnsTodayPrefixWithTime(): void
+    public function formatJobDateForYesterdayReturnsYesterdayPrefix(): void
     {
         $date = (new DateTime('yesterday'))->setTime(8, 20, 0);
 
         $actual = ManageModel::formatJobDate($date->format('Y-m-d H:i:s'));
 
-        $this->assertSame('Today, 08:20', $actual);
+        $this->assertSame('Yesterday, 08:20', $actual);
     }
 
     #[Test]
@@ -45,7 +45,16 @@ class ManageModelTest extends AbstractTest
 
         $actual = ManageModel::formatJobDate($date->format('Y-m-d H:i:s'));
 
-        $this->assertSame($date->format('M d, H:i'), $actual);
+        // If the date happens to be today or yesterday, those branches take priority
+        $now = new DateTime();
+        $yesterday = (clone $now)->sub(new DateInterval('P1D'));
+        if ($date->format('Y-m-d') === $now->format('Y-m-d')) {
+            $this->assertSame('Today, ' . $date->format('H:i'), $actual);
+        } elseif ($date->format('Y-m-d') === $yesterday->format('Y-m-d')) {
+            $this->assertSame('Yesterday, ' . $date->format('H:i'), $actual);
+        } else {
+            $this->assertSame($date->format('M d, H:i'), $actual);
+        }
     }
 
     #[Test]
@@ -72,11 +81,11 @@ class ManageModelTest extends AbstractTest
     }
 
     #[Test]
-    public function formatJobDateWithNullDefaultsToNowMonthDayTime(): void
+    public function formatJobDateWithNullDefaultsToToday(): void
     {
         $actual = ManageModel::formatJobDate(null);
 
-        $this->assertMatchesRegularExpression('/^[A-Z][a-z]{2} \d{2}, \d{2}:\d{2}$/', $actual);
+        $this->assertMatchesRegularExpression('/^Today, \d{2}:\d{2}$/', $actual);
     }
 
     #[Test]

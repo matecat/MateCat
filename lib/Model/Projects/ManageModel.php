@@ -282,7 +282,7 @@ class ManageModel
         $formattedDate = $date->format('Y M d H:i');
 
         $now = new DateTime();
-        $yesterday = $now->sub(new DateInterval('P1D'));
+        $yesterday = (clone $now)->sub(new DateInterval('P1D'));
 
         //today
         if ($now->format('Y-m-d') == $date->format('Y-m-d')) {
