@@ -19,6 +19,7 @@ class SegmentTranslationIssueTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->commentStub = $this->createStub(EntryCommentDao::class);
         $this->commentStub->method('findByIssueId')->willReturn([]);
         $this->view = new SegmentTranslationIssue($this->commentStub);

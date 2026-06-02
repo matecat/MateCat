@@ -8,12 +8,12 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Stub;
-use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use TestHelpers\AbstractTest;
 use View\API\V2\Json\SegmentTranslationMismatches;
 
 #[CoversClass(SegmentTranslationMismatches::class)]
-class SegmentTranslationMismatchesTest extends TestCase
+class SegmentTranslationMismatchesTest extends AbstractTest
 {
     private function makeJobStruct(int $id = 1, string $password = 'abc123'): JobStruct
     {

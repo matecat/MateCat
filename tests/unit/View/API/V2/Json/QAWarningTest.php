@@ -3,12 +3,12 @@
 namespace unit\View\API\V2\Json;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\LQA\QA;
 use View\API\V2\Json\QAWarning;
 
 #[CoversClass(QAWarning::class)]
-class QAWarningTest extends TestCase
+class QAWarningTest extends AbstractTest
 {
     /**
      * Concrete subclass exposing pushErrorSegment for testing.

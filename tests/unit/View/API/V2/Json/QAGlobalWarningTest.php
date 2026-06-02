@@ -4,12 +4,12 @@ namespace unit\View\API\V2\Json;
 
 use Model\Warnings\GlobalWarningStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\LQA\QA;
 use View\API\V2\Json\QAGlobalWarning;
 
 #[CoversClass(QAGlobalWarning::class)]
-class QAGlobalWarningTest extends TestCase
+class QAGlobalWarningTest extends AbstractTest
 {
     private function makeGlobalWarningStruct(string $serializedErrors, string $idSegment = '1'): GlobalWarningStruct
     {

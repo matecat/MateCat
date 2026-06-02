@@ -6,10 +6,10 @@ use DomainException;
 use Exception;
 use Model\DataAccess\UnknownPropertyException;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use View\API\Commons\ZipContentObject;
 
-class ZipContentObjectTest extends TestCase
+class ZipContentObjectTest extends AbstractTest
 {
     #[Test]
     public function constructorWithAssociativeArraySetsProperties(): void

@@ -10,11 +10,11 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Stub;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use View\API\V2\Json\SegmentVersion;
 
 #[CoversClass(SegmentVersion::class)]
-class SegmentVersionTest extends TestCase
+class SegmentVersionTest extends AbstractTest
 {
     private function makeJobStruct(int $id = 1, string $password = 'abc123', string $source = 'en-US', string $target = 'it-IT'): JobStruct
     {
