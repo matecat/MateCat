@@ -103,6 +103,8 @@ class DownloadJobTMXController extends AbstractDownloadController
 
     /**
      * @throws TypeError
+     * @throws \DomainException
+     * @throws \InvalidArgumentException
      */
     protected function _saveActivity(): void
     {

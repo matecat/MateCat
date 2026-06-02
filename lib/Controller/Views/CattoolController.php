@@ -407,6 +407,10 @@ class CattoolController extends BaseKleinViewController
         ];
     }
 
+    /**
+     * @throws \DomainException
+     * @throws \InvalidArgumentException
+     */
     protected function _saveActivity(int $job_id, int $project_id, bool $isRevision): void
     {
         $action = $isRevision ? ActivityLogStruct::ACCESS_REVISE_PAGE : ActivityLogStruct::ACCESS_TRANSLATE_PAGE;

@@ -1432,12 +1432,6 @@ parameters:
 			path: lib/Controller/API/V2/ChangeProjectNameController.php
 
 		-
-			message: '#^Method Controller\\API\\V2\\DownloadJobTMXController\:\:_saveActivity\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/DownloadJobTMXController.php
-
-		-
 			message: '#^Offset ''basename'' might not exist on array\{dirname\?\: string, basename\?\: string, extension\: string, filename\?\: string\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -9270,17 +9264,5 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\Activity\:\:save\(\) throws checked exception DomainException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ActivityLog/Activity.php
-
-		-
-			message: '#^Method Model\\ActivityLog\\Activity\:\:save\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Model/ActivityLog/Activity.php
 
 
