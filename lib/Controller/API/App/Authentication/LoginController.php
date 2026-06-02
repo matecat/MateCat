@@ -87,7 +87,7 @@ class LoginController extends AbstractStatefulKleinController
             return;
         }
 
-        $dao = new UserDao();
+        $dao = $this->createUserDao();
         $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
 
         if ($user && is_string($params['password']) && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
@@ -107,6 +107,11 @@ class LoginController extends AbstractStatefulKleinController
         } else {
             $this->response->code(404);
         }
+    }
+
+    protected function createUserDao(): UserDao
+    {
+        return new UserDao();
     }
 
     /**

@@ -37,81 +37,6 @@ parameters:
 			path: lib/Controller/API/App/ApiKeyController.php
 
 		-
-			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:doForgotPassword\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Parameter \#1 \$new_password of method Model\\Users\\Authentication\\PasswordResetModel\:\:resetPassword\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Parameter \#1 \$password of method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:validatePasswordRequirements\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Parameter \#1 \$url of function parse_url expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Parameter \#2 \$password_confirmation of method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:validatePasswordRequirements\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Property Controller\\Abstracts\\KleinController\:\:\$user \(Model\\Users\\UserStruct\) does not accept Model\\Users\\UserStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-
-
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\UserController\:\:changePasswordAsLoggedUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
-			message: '#^Parameter \#1 \$password of method Controller\\API\\App\\Authentication\\UserController\:\:validatePasswordRequirements\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
-			message: '#^Parameter \#2 \$password_confirmation of method Controller\\API\\App\\Authentication\\UserController\:\:validatePasswordRequirements\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
 			message: '#^Method Controller\\API\\App\\ChangeJobsStatusController\:\:validateTheRequest\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -2727,36 +2652,6 @@ parameters:
 
 
 
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:authForPasswordReset\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\ForgotPasswordController\:\:setNewPassword\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/App/Authentication/ForgotPasswordController.php
-
-		-
-			message: '#^Parameter \#1 \$old_password of method Model\\Users\\Authentication\\ChangePasswordModel\:\:changePassword\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
-			message: '#^Parameter \#2 \$new_password of method Model\\Users\\Authentication\\ChangePasswordModel\:\:changePassword\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\Authentication\\UserController\:\:changePasswordAsLoggedUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/Authentication/UserController.php
 
 		-
 			message: '#^Parameter \#3 \$callback of function route expects array\{class\-string\<Controller\\Abstracts\\KleinController\>, string\}, array\{''Controller\\\\API\\\\App…'', ''update''\} given\.$#'

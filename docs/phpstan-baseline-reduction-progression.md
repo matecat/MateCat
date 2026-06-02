@@ -1,20 +1,20 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-06-01 (last updated)  
-**Commits (refactor + fix + security + test):** 490+
+**Date:** 2026-06-02 (last updated)  
+**Commits (refactor + fix + security + test):** 491+
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,533 | −5,833 (−79.2%) |
+| **PHPStan baseline entries** | 7,366 | 1,516 | −5,850 (−79.4%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 7,234 | +4,986 (+221.8%) |
-| **PHPUnit assertions** | ~19,449 | 18,030 | — |
+| **PHPUnit tests** | ~2,248 | 7,292 | +5,044 (+224.4%) |
+| **PHPUnit assertions** | ~19,449 | 18,882 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 41.21% (286/694) | +32.73% (+233 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 68.50% (2,890/4,219) | +46.76% (+2,046 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 68.96% (24,495/35,521) | +47.77% (+17,222 lines) |
-| **New test files** | 235 | 558 | +323 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 370 | +370 |
+| **New test files** | 235 | 562 | +327 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 372 | +372 |
 
 ---
 
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 627 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 629 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -123,8 +123,10 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Controller API
 | File | Cleaned In |
 |------|-----------|
+| `lib/Controller/API/App/Authentication/ForgotPasswordController.php` | Phase 56 |
 | `lib/Controller/API/App/Authentication/LoginController.php` | Phase 37 |
 | `lib/Controller/API/App/Authentication/SignupController.php` | Phase 37 |
+| `lib/Controller/API/App/Authentication/UserController.php` | Phase 56 |
 | `lib/Controller/API/App/Authentication/LaraAuthController.php` | Phase 0 |
 | `lib/Controller/API/App/Authentication/LaraAuthStandaloneController.php` | Phase N+ |
 | `lib/Controller/API/App/Authentication/Traits/LaraAuthTrait.php` | Phase N+ |
