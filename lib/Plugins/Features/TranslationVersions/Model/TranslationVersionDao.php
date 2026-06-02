@@ -4,7 +4,7 @@ namespace Plugins\Features\TranslationVersions\Model;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\SegmentEventsStruct;
@@ -136,7 +136,7 @@ class TranslationVersionDao extends AbstractDao
      * Note: parameters are intentionally typed as int|string because callers
      * may pass request params directly (string) or struct properties (int).
      *
-     * @return list<IDaoStruct>
+     * @return list<AbstractDaoObjectStruct>
      * @throws PDOException
      * @throws Exception
      */
