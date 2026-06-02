@@ -10,9 +10,9 @@
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
 | **PHPUnit tests** | ~2,248 | 7,234 | +4,986 (+221.8%) |
 | **PHPUnit assertions** | ~19,449 | 18,030 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 35.69% (247/692) | +27.21% (+194 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 64.77% (2,715/4,192) | +43.03% (+1,871 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 65.12% (23,076/35,438) | +43.93% (+15,803 lines) |
+| **Coverage — Classes** | 8.48% (53/625) | 41.21% (286/694) | +32.73% (+233 classes) |
+| **Coverage — Methods** | 21.74% (844/3,883) | 68.50% (2,890/4,219) | +46.76% (+2,046 methods) |
+| **Coverage — Lines** | 21.19% (7,273/34,320) | 68.96% (24,495/35,521) | +47.77% (+17,222 lines) |
 | **New test files** | 235 | 558 | +323 |
 | **Files fully clean (0 PHPStan errors)** | 0 | 370 | +370 |
 

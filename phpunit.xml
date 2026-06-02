@@ -17,7 +17,6 @@
     <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
             <directory suffix=".php">./lib</directory>
-            <directory suffix=".php">./plugins/*/lib</directory>
         </include>
         <exclude>
             <file>./lib/View/fileupload/index.php</file>
