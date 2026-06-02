@@ -146,7 +146,6 @@ jest.mock('../api/tmCreateRandUser', () => ({
 jest.mock('../stores/CreateProjectStore', () => ({
   addListener: jest.fn(),
   removeListener: jest.fn(),
-  getLaraStyleGuide: jest.fn(() => null),
   getSourceLang: jest.fn(() => 'en-US'),
 }))
 jest.mock('../utils/commonUtils', () => ({

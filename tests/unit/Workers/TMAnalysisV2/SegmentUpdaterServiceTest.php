@@ -96,7 +96,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->assertStringContainsString(
             '->setAnalysisValue(',
             $source,
-            'setAnalysisValue() must delegate to SegmentTranslationDao::setAnalysisValue().'
+            'setAnalysisValue() must delegate to SegmentTranslationDao.'
         );
     }
 
@@ -302,5 +302,66 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $service = new SegmentUpdaterService($db);
 
         $this->assertInstanceOf(SegmentUpdaterServiceInterface::class, $service);
+    }
+
+    // ── Coverage for SKIPPED detection and exception paths ────────────
+
+    #[Test]
+    public function setAnalysisValue_returns_minus_one_for_skipped_segment(): void
+    {
+        $this->seedTestSegmentTranslation();
+
+        try {
+            $conn = Database::obtain()->getConnection();
+            $conn->exec(
+                "UPDATE segment_translations SET tm_analysis_status = 'SKIPPED'"
+                . " WHERE id_segment = " . self::TEST_SEGMENT_ID
+                . " AND id_job = " . self::TEST_JOB_ID
+            );
+
+            $service = new SegmentUpdaterService(Database::obtain());
+
+            $result = $service->setAnalysisValue([
+                'id_segment'         => self::TEST_SEGMENT_ID,
+                'id_job'             => self::TEST_JOB_ID,
+                'tm_analysis_status' => 'DONE',
+                'match_type'         => 'ICE',
+                'eq_word_count'      => 0.0,
+            ]);
+
+            $this->assertEquals(-1, $result, 'setAnalysisValue must return -1 for SKIPPED segments');
+        } finally {
+            $this->cleanupTestSegmentTranslation();
+        }
+    }
+
+    #[Test]
+    public function setAnalysisValue_throws_when_id_segment_missing(): void
+    {
+        $service = new SegmentUpdaterService(Database::obtain());
+
+        $this->expectException(\Throwable::class);
+
+        $service->setAnalysisValue([
+            'id_job'             => self::TEST_JOB_ID,
+            'tm_analysis_status' => 'DONE',
+            'match_type'         => 'ICE',
+            'eq_word_count'      => 0.0,
+        ]);
+    }
+
+    #[Test]
+    public function setAnalysisValue_throws_when_id_job_missing(): void
+    {
+        $service = new SegmentUpdaterService(Database::obtain());
+
+        $this->expectException(\Throwable::class);
+
+        $service->setAnalysisValue([
+            'id_segment'         => self::TEST_SEGMENT_ID,
+            'tm_analysis_status' => 'DONE',
+            'match_type'         => 'ICE',
+            'eq_word_count'      => 0.0,
+        ]);
     }
 }

@@ -8,8 +8,6 @@ import {LaraGlossary} from '../LaraGlossary/LaraGlossary'
 import {Select} from '../../../../common/Select'
 import {laraStyleguides} from '../../../../../api/laraStyleguides/laraStyleguides'
 import {laraAuth} from '../../../../../api/laraAuth'
-import CreateProjectStore from '../../../../../stores/CreateProjectStore'
-import CatToolStore from '../../../../../stores/CatToolStore'
 
 export const LARA_STYLES = {
   FAITHFUL: 'faithful',
@@ -55,9 +53,7 @@ export const LaraOptions = ({isCattoolPage}) => {
 
   const [styleGuidesOptions, setStyleGuidesOptions] = useState([])
 
-  const {watch, control, setValue} = useOptions(['lara_style_guide'])
-
-  const laraStyleGuide = watch('lara_style_guide')
+  const {control, setValue} = useOptions()
 
   const setGlossaries = useCallback(
     (value) => setValue('lara_glossaries', value),
@@ -81,12 +77,6 @@ export const LaraOptions = ({isCattoolPage}) => {
       })
     }
   }, [])
-
-  useEffect(() => {
-    CreateProjectStore.updateProject({
-      laraStyleGuide,
-    })
-  }, [laraStyleGuide])
 
   return (
     <div className="options-container-content">
@@ -164,7 +154,7 @@ export const LaraOptions = ({isCattoolPage}) => {
           </div>
           <Controller
             control={control}
-            name="lara_style_guide"
+            name="lara_style_guideline_id"
             disabled={isCattoolPage || styleGuidesOptions.length === 0}
             render={({field: {onChange, value, name, disabled}}) => (
               <Select
@@ -181,14 +171,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                     </div>
                   ),
                 }))}
-                activeOption={styleGuidesOptions.find(
-                  ({id}) =>
-                    id ===
-                    (isCattoolPage && CatToolStore.getJobMetadata()
-                      ? CatToolStore.getJobMetadata().project.mt_extra
-                          .lara_style_guideline_id
-                      : value),
-                )}
+                activeOption={styleGuidesOptions.find(({id}) => id === value)}
                 checkSpaceToReverse={true}
                 onSelect={(option) => onChange(option.id)}
                 isDisabled={disabled}

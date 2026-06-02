@@ -20,6 +20,7 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
     /**
      * @param array<string, mixed> $tmData
      * @throws \PDOException
+     * @throws \Exception
      */
     public function setAnalysisValue(array $tmData): int
     {

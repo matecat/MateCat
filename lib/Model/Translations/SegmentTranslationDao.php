@@ -276,6 +276,7 @@ class SegmentTranslationDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws Exception
      */
     public function setAnalysisValue(array $data): int
     {
@@ -294,7 +295,21 @@ class SegmentTranslationDao extends AbstractDao
 
         $stmt->execute($data);
 
-        return $stmt->rowCount();
+        $rc = $stmt->rowCount();
+        if ($rc === 0) {
+            $sql = "SELECT tm_analysis_status FROM segment_translations WHERE id_segment = :id_segment AND id_job = :id_job";
+            $stmt = $this->database->getConnection()->prepare($sql);
+            $stmt->execute([
+                'id_segment' => $data['id_segment'] ?? throw new Exception('Missing id_segment in data'),
+                'id_job' => $data['id_job'] ?? throw new Exception('Missing id_job in data'),
+            ]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!empty($result) && $result['tm_analysis_status'] === 'SKIPPED') {
+                return -1;
+            }
+        }
+
+        return $rc;
     }
 
     /**

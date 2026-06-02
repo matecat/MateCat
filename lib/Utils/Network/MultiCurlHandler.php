@@ -284,15 +284,17 @@ class MultiCurlHandler
      */
     public function createResource(string $url, ?array $options = [], ?string $tokenHash = null): string
     {
+        if ($url === '') {
+            throw new RuntimeException('URL cannot be empty');
+        }
+
         if ($tokenHash === null) {
             $tokenHash = md5(uniqid("", true));
         }
 
         $curl_resource = curl_init();
 
-        if ($url === '') {
-            throw new RuntimeException('URL cannot be empty');
-        }
+
         curl_setopt($curl_resource, CURLOPT_URL, $url);
         if (is_array($options)) {
             @curl_setopt_array($curl_resource, $options);

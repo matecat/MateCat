@@ -221,8 +221,10 @@ class TMAnalysisWorker extends AbstractWorker
             }
 
             if ($updateRes === 0) {
-                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (already DONE/SKIPPED or missing), skipping side-effects.");
+                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (already DONE or missing), skipping side-effects.");
                 return;
+            } elseif ($updateRes === -1) {
+                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (SKIPPED) pre-translation");
             }
 
             $this->_doLog("Row found: {$tmData['id_segment']}-{$tmData['id_job']} - UPDATED.");
