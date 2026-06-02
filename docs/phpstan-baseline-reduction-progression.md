@@ -6,15 +6,15 @@
 
 | Metric | develop (baseline) | context-review (current) | Delta |
 |--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,677 | −5,689 (−77.2%) |
+| **PHPStan baseline entries** | 7,366 | 1,533 | −5,833 (−79.2%) |
 | **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 6,892 | +4,644 (+206.6%) |
+| **PHPUnit tests** | ~2,248 | 7,234 | +4,986 (+221.8%) |
 | **PHPUnit assertions** | ~19,449 | 18,030 | — |
 | **Coverage — Classes** | 8.48% (53/625) | 35.69% (247/692) | +27.21% (+194 classes) |
 | **Coverage — Methods** | 21.74% (844/3,883) | 64.77% (2,715/4,192) | +43.03% (+1,871 methods) |
 | **Coverage — Lines** | 21.19% (7,273/34,320) | 65.12% (23,076/35,438) | +43.93% (+15,803 lines) |
-| **New test files** | 235 | 512 | +277 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 325 | +325 |
+| **New test files** | 235 | 558 | +323 |
+| **Files fully clean (0 PHPStan errors)** | 0 | 370 | +370 |
 
 ---
 
@@ -90,7 +90,7 @@ Every file we touch **MUST** be clean. The baseline is managed by surgical remov
 
 Every file listed here **MUST** have zero PHPStan errors when tested without a baseline. If a cascade fix introduces errors in any of these files, those errors must be fixed immediately — never added to the baseline.
 
-**Total: 589 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
+**Total: 627 files** (verified via `git diff --name-only 7d529165b7...HEAD` cross-referenced with `phpstan-baseline.neon`)
 
 **Fully clean directories** (every `.php` file is on this ledger — zero baseline entries remain):
 - `lib/Model/` — all files clean, no baseline entries
@@ -98,6 +98,12 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 
 <details>
 <summary>Click to expand full ledger (436 files)</summary>
+
+#### Root
+| File | Cleaned In |
+|------|-----------|
+| `lib/Bootstrap.php` | Phase 52 |
+| `lib/Exceptions/BootstrapTerminatedException.php` | Phase 52 |
 
 #### Controller Abstracts & Auth
 | File | Cleaned In |
@@ -171,6 +177,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/Controller/Traits/ChunkNotFoundHandlerTrait.php` | Phase 5C |
 | `lib/Controller/Traits/RateLimiterTrait.php` | Phase 5C |
 | `lib/Controller/Traits/TimeLoggerTrait.php` | Phase 14 |
+| `lib/Controller/Traits/KleinResponseFileStream.php` | Phase 54 |
 | `lib/Controller/Views/QualityReportController.php` | Phase 13C |
 
 #### Model/DataAccess
@@ -340,6 +347,7 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 #### Model (other)
 | File | Cleaned In |
 |------|-----------|
+| `lib/Model/ActivityLog/Activity.php` | Phase 54 |
 | `lib/Model/ActivityLog/ActivityLogDao.php` | Phase 25 |
 | `lib/Model/Analysis/AbstractStatus.php` | Phase 31 |
 | `lib/Model/Analysis/AnalysisDao.php` | Phase 25 |
@@ -782,6 +790,40 @@ Every file listed here **MUST** have zero PHPStan errors when tested without a b
 | `lib/View/API/V2/Json/JobTranslator.php` | Phase 0 |
 | `lib/View/API/V2/Json/Membership.php` | Phase 12A |
 | `lib/View/API/V3/Json/QualitySummary.php` | Phase 16 |
+| `lib/View/API/App/Json/Analysis/AnalysisChunk.php` | Phase 53 |
+| `lib/View/API/App/Json/Analysis/AnalysisJob.php` | Phase 53 |
+| `lib/View/API/App/Json/Analysis/AnalysisMatch.php` | Phase 53 |
+| `lib/View/API/App/Json/Analysis/AnalysisProject.php` | Phase 53 |
+| `lib/View/API/App/Json/Analysis/AnalysisProjectSummary.php` | Phase 53 |
+| `lib/View/API/App/Json/Analysis/MatchContainerInterface.php` | Phase 53 |
+| `lib/View/API/App/Json/ConnectedService.php` | Phase 53 |
+| `lib/View/API/App/Json/OutsourceConfirmation.php` | Phase 53 |
+| `lib/View/API/App/Json/Ping.php` | Phase 53 |
+| `lib/View/API/App/Json/UserProfile.php` | Phase 53 |
+| `lib/View/API/Commons/Error.php` | Phase 53 |
+| `lib/View/API/Commons/ZipContentObject.php` | Phase 53 |
+| `lib/View/API/V2/Json/Activity.php` | Phase 53 |
+| `lib/View/API/V2/Json/Chunk.php` | Phase 53 |
+| `lib/View/API/V2/Json/CreationStatus.php` | Phase 53 |
+| `lib/View/API/V2/Json/Engine.php` | Phase 53 |
+| `lib/View/API/V2/Json/Job.php` | Phase 53 |
+| `lib/View/API/V2/Json/JobClientKeys.php` | Phase 53 |
+| `lib/View/API/V2/Json/MemoryKeys.php` | Phase 53 |
+| `lib/View/API/V2/Json/Project.php` | Phase 53 |
+| `lib/View/API/V2/Json/ProjectUrls.php` | Phase 53 |
+| `lib/View/API/V2/Json/Propagation.php` | Phase 53 |
+| `lib/View/API/V2/Json/QAGlobalWarning.php` | Phase 53 |
+| `lib/View/API/V2/Json/QALocalWarning.php` | Phase 53 |
+| `lib/View/API/V2/Json/QAWarning.php` | Phase 53 |
+| `lib/View/API/V2/Json/SegmentTranslationIssue.php` | Phase 53 |
+| `lib/View/API/V2/Json/SegmentTranslationMismatches.php` | Phase 53 |
+| `lib/View/API/V2/Json/SegmentVersion.php` | Phase 53 |
+| `lib/View/API/V2/Json/Team.php` | Phase 53 |
+| `lib/View/API/V2/Json/TranslationIssueComment.php` | Phase 53 |
+| `lib/View/API/V2/Json/User.php` | Phase 53 |
+| `lib/View/API/V2/Json/UserMetadata.php` | Phase 53 |
+| `lib/View/API/V2/Json/WaitCreation.php` | Phase 53 |
+| `lib/View/API/V3/Json/Chunk.php` | Phase 53 |
 | `lib/View/fileupload/index.php` | Phase 31 |
 | `lib/View/fileupload/UploadHandler.php` | Phase 31 |
 
@@ -2665,10 +2707,139 @@ None — no cascades triggered.
 
 ---
 
+### Phase 52: Bootstrap.php — Full Cleanup + Tests — ✅ DONE (−17 baseline entries, +36 tests)
+
+**Date:** 2026-06-02
+
+**Why:** Bootstrap.php had 17 PHPStan errors covering the entire application initialization path — config parsing, error reporting, exception handling, directory creation.
+
+#### Changes
+
+| File | Errors Fixed | Type |
+|------|-------------|------|
+| `Bootstrap.php` | 17→0 | `realpath()` false guard, `parse_ini_file()` false guards (×3), `@var array<string, mixed>` on CONFIG/TASK_RUNNER_CONFIG, null guards on createSystemDirectories/setErrorReporting, `@throws` on 6 methods, return type on `getConfigurationForEnvironment()` |
+
+- **Dead code removed**: `initMandatoryPlugins()` method + `$autoLoadedFeatureSet` property + `FeatureSet` import — only needed for `bootstrapCompleted` hook removed in `5d16cb98`
+- **New file**: `lib/Exceptions/BootstrapTerminatedException.php` — testing-mode `die()` replacement (same pattern as `RenderTerminatedException`)
+- **Extracted**: `handleFatalError(?array $error)` from `shutdownFunctionHandler()` for testability
+- **Comments**: Explanatory docblock on `FeatureSet` class about constructor side effects
+
+#### Tests
+
+| File | Tests | Assertions |
+|------|-------|------------|
+| `tests/unit/BootstrapTest.php` | 36 | 44 |
+
+Coverage: **57%** (blocked by `__construct` DB/AMQ, `setLoggers`, `formatOutputExceptions` Klein stack)
+
+#### Baseline
+
+- **Removed:** 17 entries
+- **Net:** 1,950 → **1,933**
+
+---
+
+### Phase 53: View/API Directory — Full Cleanup + Tests — ✅ DONE (−100 net baseline entries, +~270 tests)
+
+**Date:** 2026-06-02
+
+**Why:** Complete `lib/View/API/` — all 41 files PHPStan-clean, 0 baseline entries remaining. JSON serializer layer for the entire API.
+
+#### Wave 1: Easy Wins (18 files, 32 errors)
+
+| Sub-batch | Files | Errors Fixed | Tests |
+|-----------|-------|-------------|-------|
+| 1A (1-error) | Ping, OutsourceConfirmation, WaitCreation, Propagation, QALocalWarning, V2/Chunk | 6 | 24 |
+| 1B (2-error) | Activity, CreationStatus, JobClientKeys, UserMetadata, User, Error, AnalysisMatch, AnalysisProject | 16 | 53 |
+| 1C (3-error) | Engine, UserProfile, AnalysisProjectSummary, AnalysisJob | 10 | 39 |
+
+#### Wave 2: Medium Complexity (6 files, 33 errors)
+
+| Sub-batch | Files | Errors Fixed | Tests | Cascades |
+|-----------|-------|-------------|-------|----------|
+| 2A | QAWarning, QAGlobalWarning | 10 | 15 | 0 |
+| 2B | ConnectedService, MemoryKeys | 11 | 14 | 0 (on-ledger: UserProfile, AuthenticationHelper) |
+| 2C | TranslationIssueComment, Project | 12 | 7 | 6 off-ledger controller entries |
+
+#### Wave 3: Complex Files (7 files, 62 errors)
+
+| Task | File | Errors | Tests | DI Added | Coverage |
+|------|------|--------|-------|----------|----------|
+| 3A | Team.php | 7 | 9 | — | 80.77% |
+| 3B | SegmentTranslationMismatches.php | 7 | 10 | MetadataDao | 100% |
+| 3C | SegmentTranslationIssue.php | 8 | 9 | EntryCommentDao | 81.54% |
+| 3D | ProjectUrls.php | 9 | 13 | ChunkReviewDao | 91.67% |
+| 3E | Job.php | 9+1 (V3/Chunk) | 8 | ChunkReviewDao (V2→V3 inheritance) | 77.08% |
+| 3F | AnalysisChunk.php | 11 | 22 | — | 81.40% |
+| 3G | SegmentVersion.php | 11 | 16 | MetadataDao | 98.73% |
+
+#### Coverage Summary (real, measured via `--coverage-text --coverage-filter=lib/View/API`)
+
+| File | Lines | File | Lines |
+|------|-------|------|-------|
+| AnalysisChunk | 81.40% | Membership | 100% |
+| AnalysisFile | 100% | MemoryKeys | 100% |
+| AnalysisFileMetadata | 100% | Project | 25.40% ⚠️ |
+| AnalysisJob | 100% | ProjectUrls | 91.67% |
+| AnalysisJobSummary | 100% | Propagation | 100% |
+| AnalysisMatch | 100% | QAGlobalWarning | 79.31% ⚠️ |
+| AnalysisProject | 100% | QALocalWarning | 81.40% |
+| AnalysisProjectSummary | 100% | QAWarning | 100% |
+| ConnectedService | 100% | SegmentTranslationIssue | 81.54% |
+| OutsourceConfirmation | 100% | SegmentTranslationMismatches | 100% |
+| Ping | 88.89% | SegmentVersion | 98.73% |
+| UserProfile | 100% | Team | 80.77% |
+| Error | 100% | TranslationIssueComment | 100% |
+| ZipContentObject | 72.73% ⚠️ | User | 100% |
+| Activity | 100% | UserMetadata | 100% |
+| V2/Chunk | 100% | WaitCreation | 100% |
+| CreationStatus | 100% | V3/Chunk | 87.95% |
+| Engine | 100% | FilesInfo | 100% |
+| Job | 77.08% ⚠️ | QualitySummary | 96.58% |
+| JobClientKeys | 100% | JobTranslator | 100% |
+
+**Below 80% (coverage debt):** Project (25.40%), ZipContentObject (72.73%), Job (77.08%), QAGlobalWarning (79.31%)
+
+#### Baseline
+
+- **Removed:** ~107 entries (View/API direct)
+- **Added:** ~7 cascade entries (off-ledger controllers)
+- **Net:** 1,933 → ~1,833 (View/API portion)
+
+---
+
+### Phase 54: Activity.php + KleinResponseFileStream.php — ✅ DONE (−11 baseline entries, +5 tests)
+
+**Date:** 2026-06-02
+
+| File | Errors Fixed | Tests | Notes |
+|------|-------------|-------|-------|
+| `Activity.php` | 2→0 | 0 | `@throws DomainException/InvalidArgumentException` — pure wiring class |
+| `KleinResponseFileStream.php` | 8→0 | 5 | Native param types (string), return types (void), `@throws ResponseAlreadySentException` |
+
+**Cascade fixes (on-ledger):** DownloadJobTMXController `@throws`, CattoolController `@throws`
+
+**Baseline:** −3 (Activity) −8 (KleinResponseFileStream) = −11
+
+---
+
+### Phase 55: Test Suite Standardization — ✅ DONE
+
+**Date:** 2026-06-02
+
+- Changed `extends TestCase` → `extends AbstractTest` in **38 test files**
+- Added missing `parent::setUp()` in **7 test files**
+- Added missing `parent::tearDown()` in **5 test files**
+- Fixed `namespace Tests\unit\` → `namespace unit\` in **10 View test files**
+
+---
+
 ## Next Action
 
 1. **Push & verify CI** — confirm latest commits pass GitHub Actions
-2. Continue PHPStan baseline reduction from remaining targets (1,966 entries)
+2. **Coverage debt** — resolve Project (25%), Job (77%), QAGlobalWarning (79%), ZipContentObject (73%) via DI refactoring
+3. **Ledger registration** — add all new files to fixed-files ledger tables
+4. Continue PHPStan baseline reduction from remaining targets (1,533 entries)
 
 ---
 
