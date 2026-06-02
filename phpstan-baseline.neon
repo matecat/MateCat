@@ -2554,54 +2554,6 @@ parameters:
 			path: lib/Controller/Abstracts/IController.php
 
 		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has parameter \$filePointer with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileDownloadFromPointer\(\) has parameter \$filename with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileFromPointer\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileInlineFromPointer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileInlineFromPointer\(\) has parameter \$filePointer with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileInlineFromPointer\(\) has parameter \$filename with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
-			message: '#^Method Controller\\Traits\\KleinResponseFileStream\:\:streamFileInlineFromPointer\(\) has parameter \$mimeType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Traits/KleinResponseFileStream.php
-
-		-
 			message: '#^Cannot access offset ''id_project'' on array\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 3
