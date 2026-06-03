@@ -1,31 +1,32 @@
 {
-  "name": "matecat-socket-server",
-  "version": "2.0.0",
-  "engines": {
-    "node": ">=20"
-  },
-  "private": true,
-  "files": [
-    "src/"
-  ],
-  "dependencies": {
-    "node-ini": "^1.0.0",
-    "cors": "2.8.6",
-    "custom-env": "2.0.6",
-    "ip-regex": "^4.3.0",
-    "jsonwebtoken": "^9.0.2",
-    "socket.io": "^4.8.1",
-    "@socket.io/cluster-adapter": "^0.3.0",
-    "@socket.io/sticky": "^1.0.4",
-    "ioredis": "^5.4.2",
-    "@socket.io/redis-adapter": "^8.3.0",
-    "stompit": "1.0.0",
-    "uuid": "^13.0.0",
-    "websocket": "1.0.34",
-    "winston": "^3",
-    "winston-daily-rotate-file": "^5.0.0"
-  },
-  "scripts": {
-    "start": "node --max-semi-space-size=256 socketServer.js"
-  }
+    "name": "matecat-socket-server",
+    "version": "2.0.0",
+    "engines": {
+        "node": ">=20"
+    },
+    "private": true,
+    "files": [
+        "src/"
+    ],
+    "dependencies": {
+        "node-ini": "^1.0.0",
+        "cors": "^2.8.6",
+        "custom-env": "2.0.6",
+        "ip-regex": "^4.3.0",
+        "jsonwebtoken": "^9.0.2",
+        "socket.io": "^4.8.1",
+        "@socket.io/cluster-adapter": "^0.3.0",
+        "@socket.io/sticky": "^1.0.4",
+        "ioredis": "^5.4.2",
+        "@socket.io/redis-adapter": "^8.3.0",
+        "stompit": "1.0.0",
+        "@stomp/stompjs": "^7.3.0",
+        "uuid": "^13.0.0",
+        "websocket": "^1.0.34",
+        "winston": "^3",
+        "winston-daily-rotate-file": "^5.0.0"
+    },
+    "scripts": {
+        "start": "node --max-semi-space-size=256 socketServer.js"
+    }
 }

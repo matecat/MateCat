@@ -13,7 +13,7 @@ const {verify} = require('jsonwebtoken');
 const Redis = require("ioredis");
 module.exports.Application = class {
 
-  constructor(server, amqConnector, options) {
+  constructor(server, amqParameters, options) {
     this._registry = {
       allSockets: new Map(),
     };
@@ -96,12 +96,10 @@ module.exports.Application = class {
 
     });
 
-    this._amqConnector = amqConnector;
-    this._amqMessageHandler = new MessageHandler(this);
     this._Reader = new Reader(
-      amqConnector.read_queue,
-      this._amqMessageHandler.onReceive,
-      amqConnector.channelFactory
+        amqParameters.read_queue,
+        amqParameters.connectOptions,
+        (new MessageHandler(this)).onReceive,
     );
   }
 
