@@ -100,7 +100,7 @@ if (cluster.isPrimary) {
   ['SIGINT', 'SIGTERM'].forEach(
     signal => process.on(signal, (sig) => {
       logger.info([sig + ' received...']);
-      notifyUpgrade(app);
+      notifyUpgrade(app, false);
     })
   );
 

@@ -36,17 +36,20 @@ module.exports.Reader = class {
       logger.error('Additional details: ' + frame.body);
     };
 
-    if (!this.client.connected) {
-      this.client.activate();
-    }
+    this.client.activate();
 
   }
 
   subscribe(message) {
-    const quote = JSON.parse(message.body);
-    logger.debug('Received message from new queue', quote);
-    this.messageHandler(quote);
-    message.ack();
+    try {
+      const quote = JSON.parse(message.body);
+      logger.debug('Received message from new queue', quote);
+      this.messageHandler(quote);
+      message.ack();
+    } catch (err) {
+      logger.error('Failed to process AMQ message: ' + err.message, {body: message.body});
+      message.nack();
+    }
   }
 
 };
