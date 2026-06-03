@@ -99,7 +99,7 @@ class SegmentFilterDao extends AbstractDao
 
         return "SELECT id FROM (
             SELECT st.id_segment AS id,
-            @curRow := @curRow + 1 AS row_number
+            @curRow := @curRow + 1 AS rowNumber
 
           FROM
            segment_translations st JOIN jobs
@@ -113,7 +113,7 @@ class SegmentFilterDao extends AbstractDao
            WHERE 1
            {$where['sql']}
            ORDER BY st.id_segment ASC
-           ) sub WHERE `row_number` % $ratio = 0 ";
+           ) sub WHERE `rowNumber` % $ratio = 0 ";
     }
 
     /**
