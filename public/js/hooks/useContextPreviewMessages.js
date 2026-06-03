@@ -66,6 +66,7 @@ const useContextPreviewMessages = ({
             Number(seg.sid) === numericSid ? {...seg, target} : seg,
           )
           segmentsRef.current = updated
+          setSegments(updated)
           if (targetRef.current) {
             const map = getSegmentNodeMap(targetRef.current)
             const nodeIndices = map?.sidToNodeIndices.get(numericSid) ?? []
