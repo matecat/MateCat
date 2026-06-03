@@ -1,0 +1,305 @@
+<?php
+
+
+namespace Matecat\Core\TestMyMemory;
+
+use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
+use ReflectionMethod;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Registry\AppConfig;
+
+
+/**
+ * @group  regression
+ * @covers MyMemory::_decode
+ * User: dinies
+ * Date: 28/04/16
+ * Time: 17.58
+ */
+#[Group('PersistenceNeeded')]
+class DecodeMyMemoryTest extends AbstractTest
+{
+    protected ReflectionMethod $method;
+    protected MyMemory $myMemory;
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engine_struct = EngineStruct::getStruct();
+        $engine_struct->id = 1;
+        $eng = $engineDAO->read($engine_struct);
+
+        /**
+         * @var $engineRecord EngineStruct
+         */
+        $engine_struct_param = $eng[0];
+
+
+        $this->myMemory = new MyMemory($engine_struct_param);
+        $reflector = new ReflectionClass($this->myMemory);
+        $this->method = $reflector->getMethod("_decode");
+    }
+
+    /**
+     * It tests the behaviour of the decoding of json input.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_with_json_in_input_deusch_segment()
+    {
+        $json_input = <<<LAB
+{"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":"235","matches":[]}
+LAB;
+
+        $array_params = [
+            'q' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
+            'langpair' => "en-US|fr-FR",
+            'de' => "demo@matecat.com",
+            'mt' => null,
+            'numres' => 100
+        ];
+        $input_function_purpose = "gloss_get_relative_url";
+
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
+
+        /**
+         * general check on the keys of TSM object returned
+         */
+        $this->assertTrue($actual_result instanceof GetMemoryResponse);
+        $this->assertTrue(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
+    }
+
+    /**
+     * It tests the behaviour of the decoding of json input.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_with_json_in_input_from_italian_to_aragonese_segment_with_private_TM()
+    {
+        $json_input = <<<LAB
+{"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":null,"matches":[]}
+LAB;
+
+        $array_params = [
+            'q' => "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.",
+            'langpair' => "it-IT|an-ES",
+            'de' => "demo@matecat.com",
+            'mt' => true,
+            'numres' => "3",
+            'key' => "a6043e606ac9b5d7ff24"
+        ];
+        $input_function_purpose = "translate_relative_url";
+
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
+        /**
+         * general check on the keys of GetMemoryResponse object returned
+         */
+        $this->assertTrue($actual_result instanceof GetMemoryResponse);
+        $this->assertTrue(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
+    }
+
+    /**
+     * It tests the behaviour of the decoding of json input.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_1()
+    {
+        $json_input = <<<LAB
+{"responseData":"OK","responseStatus":200,"responseDetails":[484525156]}
+LAB;
+
+        $prop = <<<'LABEL'
+{"project_id":"10","project_name":"tyuio","job_id":"10"}
+LABEL;
+
+
+        $array_params = [
+            'seg' => "Il Sistema registra le informazioni sul nuovo film.",
+            'tra' => "The system records the information on the new movie.",
+            'tnote' => null,
+            'langpair' => "it-IT|en-US",
+            'de' => "demo@matecat.com",
+            'prop' => $prop,
+            'key' => "a6043e606ac9b5d7ff24"
+        ];
+
+        $input_function_purpose = "contribute_relative_url";
+
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
+        /**
+         * general check on the keys of SetContributionResponse object returned
+         */
+        $this->assertTrue($actual_result instanceof SetContributionResponse);
+        $this->assertFalse(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
+
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals(['0' => 484525156], $actual_result->responseDetails);
+        $this->assertEquals("OK", $actual_result->responseData);
+        $this->assertNull($actual_result->error);
+        /**
+         * check of protected property
+         */
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
+
+
+        $this->assertEquals("", $property->getValue($actual_result));
+    }
+
+
+    /**
+     * It tests the behaviour of the decoding of json input.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_2()
+    {
+        $json_input = <<<LAB
+{"responseData":"OK","responseStatus":200,"responseDetails":[484540480]}
+LAB;
+        $prop = <<<'LABEL'
+{"project_id":"9","project_name":"eryt","job_id":"9"}
+LABEL;
+        $segment = <<<'LABEL'
+Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.
+LABEL;
+
+        $translation = <<<'LABEL'
+For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.
+LABEL;
+
+
+        $array_params = [
+            'seg' => $segment,
+            'tra' => $translation,
+            'tnote' => null,
+            'langpair' => "it-IT|en-US",
+            'de' => "demo@matecat.com",
+            'prop' => $prop,
+            'key' => "a6043e606ac9b5d7ff24"
+        ];
+
+        $input_function_purpose = "contribute_relative_url";
+
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
+        /**
+         * general check on the keys of SetContributionResponse object returned
+         */
+        $this->assertTrue($actual_result instanceof SetContributionResponse);
+        $this->assertFalse(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
+
+
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals(['0' => 484540480], $actual_result->responseDetails);
+        $this->assertEquals("OK", $actual_result->responseData);
+        $this->assertNull($actual_result->error);
+        /**
+         * check of protected property
+         */
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
+
+
+        $this->assertEquals("", $property->getValue($actual_result));
+    }
+
+
+    /**
+     * It tests the behaviour of the decoding of json input.
+     * @group   regression
+     * @covers  MyMemory::_decode
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_delete_method_check()
+    {
+        $json_input = <<<LAB
+{"responseStatus":200,"responseData":"Found and deleted 1 segments"}
+LAB;
+
+        $array_params = [
+            'seg' => "Il Sistema registra le informazioni sul nuovo film.",
+            'tra' => "The system records the information on the new movie.",
+            'langpair' => "IT|EN",
+            'de' => "demo@matecat.com",
+        ];
+
+
+        $input_function_purpose = "delete_relative_url";
+
+        /**
+         * @var $actual_result GetMemoryResponse
+         */
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
+
+
+        /**
+         * general check on the keys of TSM object returned
+         */
+        $this->assertTrue($actual_result instanceof GetMemoryResponse);
+        $this->assertTrue(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
+
+        $this->assertEquals([], $actual_result->matches);
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals("", $actual_result->responseDetails);
+        $this->assertEquals("Found and deleted 1 segments", $actual_result->responseData);
+        $this->assertNull($actual_result->error);
+        /**
+         * check of protected property
+         */
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
+
+
+        $this->assertEquals("", $property->getValue($actual_result));
+    }
+
+
+}

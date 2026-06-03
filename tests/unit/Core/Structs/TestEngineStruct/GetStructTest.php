@@ -1,0 +1,44 @@
+<?php
+
+
+namespace Matecat\Core\Structs\TestEngineStruct;
+
+use Matecat\TestHelpers\AbstractTest;
+use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
+use ReflectionMethod;
+
+
+/**
+ * @group  regression
+ * @covers EngineStruct::getStruct
+ * User: dinies
+ * Date: 20/04/16
+ * Time: 18.57
+ */
+class GetStructTest extends AbstractTest
+{
+    protected ReflectionMethod $method;
+    protected EngineStruct $engineStruct;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->engineStruct = new EngineStruct;
+        $reflector = new ReflectionClass($this->engineStruct);
+        $this->method = $reflector->getMethod("getStruct");
+    }
+
+    /**
+     * It returns an EngineStruct
+     * @group  regression
+     * @covers EngineStruct::getStruct
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test_getStruct_simple()
+    {
+        $this->assertTrue($this->method->invoke($this->engineStruct, null) instanceof EngineStruct);
+    }
+}

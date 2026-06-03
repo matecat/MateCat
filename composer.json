@@ -66,5 +66,10 @@
         "psr-4": {
             "": "lib/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matecat\\": "tests/unit"
+        }
     }
 }

@@ -30,11 +30,12 @@
     </coverage>
 
     <php>
-        <includePath>tests/TestHelpers</includePath>
+        <includePath>tests/unit/TestHelpers</includePath>
     </php>
     <testsuites>
         <testsuite name="Matecat Unit tests">
             <directory>tests/unit</directory>
+            <exclude>tests/unit/TestHelpers</exclude>
         </testsuite>
         <testsuite name="Plugins Unit tests">
             <directory>plugins/*/tests/unit</directory>

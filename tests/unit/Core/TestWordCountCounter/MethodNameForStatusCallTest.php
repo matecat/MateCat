@@ -1,0 +1,104 @@
+<?php
+
+
+namespace Matecat\Core\TestWordCountCounter;
+
+use Matecat\TestHelpers\AbstractTest;
+use Model\WordCount\CounterModel;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
+
+/**
+ * @group  regression
+ * @covers CounterModel::methodNameForStatusCall
+ * User: dinies
+ * Date: 13/06/16
+ * Time: 12.34
+ */
+class MethodNameForStatusCallTest extends AbstractTest
+{
+
+    protected $word_counter;
+    protected $mirror_word_counter;
+    protected $method_methodNameForStatusCall;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->word_counter = new CounterModel();
+        $this->mirror_word_counter = new ReflectionClass($this->word_counter);
+        $this->method_methodNameForStatusCall = $this->mirror_word_counter->getMethod('methodNameForStatusCall');
+    }
+
+    /**
+     * @group  regression
+     * @covers CounterModel::methodNameForStatusCall
+     *
+     * @param "NEW"
+     */
+    #[Test]
+    public function test_methodNameForStatusCall_NEW()
+    {
+        $this->assertEquals("NewWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "NEW"));
+    }
+
+    /**
+     * @group  regression
+     * @covers CounterModel::methodNameForStatusCall
+     *
+     * @param "DRAFT"
+     */
+    #[Test]
+    public function test_methodNameForStatusCall_DRAFT()
+    {
+        $this->assertEquals("DraftWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "DRAFT"));
+    }
+
+    /**
+     * @group     regression
+     * @covers    CounterModel::methodNameForStatusCall
+     *
+     * @param "TRANSLATED"
+     */
+    #[Test]
+    public function test_methodNameForStatusCall_TRANSLATED()
+    {
+        $this->assertEquals("TranslatedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "TRANSLATED"));
+    }
+
+    /**
+     * @group     regression
+     * @covers    CounterModel::methodNameForStatusCall
+     *
+     * @param "APPROVED"
+     */
+    #[Test]
+    public function test_methodNameForStatusCall_APPROVED()
+    {
+        $this->assertEquals("ApprovedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "APPROVED"));
+    }
+
+    /**
+     * @group     regression
+     * @covers    CounterModel::methodNameForStatusCall
+     *
+     * @param "REJECTED"
+     */
+    #[Test]
+    public function test_methodNameForStatusCall_REJECTED()
+    {
+        $this->assertEquals("RejectedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "REJECTED"));
+    }
+
+    /**
+     * @group  regression
+     * @covers CounterModel::methodNameForStatusCall
+     *
+     * @param "BARANDFOO"
+     */
+    #[Test]
+    public function test_methodNameForStatusCall_BARANDFOO()
+    {
+        $this->assertEquals("BarandfooWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "BARANDFOO"));
+    }
+}
