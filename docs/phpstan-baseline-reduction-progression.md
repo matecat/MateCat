@@ -1,20 +1,20 @@
 # PHPStan Baseline Reduction — Comprehensive Progression
 
 **Branch:** `context-review` (based on `develop`)  
-**Date:** 2026-06-02 (last updated)  
+**Date:** 2026-06-03 (last updated)  
 **Commits (refactor + fix + security + test):** 491+
 
-| Metric | develop (baseline) | context-review (current) | Delta |
-|--------|-------------------|--------------------------|-------|
-| **PHPStan baseline entries** | 7,366 | 1,516 | −5,850 (−79.4%) |
-| **PHPStan — full codebase** | ~25,000 errors | **0 errors** | — |
-| **PHPUnit tests** | ~2,248 | 7,292 | +5,044 (+224.4%) |
-| **PHPUnit assertions** | ~19,449 | 18,882 | — |
-| **Coverage — Classes** | 8.48% (53/625) | 41.21% (286/694) | +32.73% (+233 classes) |
-| **Coverage — Methods** | 21.74% (844/3,883) | 68.50% (2,890/4,219) | +46.76% (+2,046 methods) |
-| **Coverage — Lines** | 21.19% (7,273/34,320) | 68.96% (24,495/35,521) | +47.77% (+17,222 lines) |
-| **New test files** | 235 | 562 | +327 |
-| **Files fully clean (0 PHPStan errors)** | 0 | 372 | +372 |
+| Metric                                   | develop (baseline)    | context-review (current) | Delta                    |
+|------------------------------------------|-----------------------|--------------------------|--------------------------|
+| **PHPStan baseline entries**             | 7,366                 | 1,516                    | −5,850 (−79.4%)          |
+| **PHPStan — full codebase**              | ~25,000 errors        | **0 errors**             | —                        |
+| **PHPUnit tests**                        | ~2,248                | 7,318                    | +5,070 (+225.5%)         |
+| **PHPUnit assertions**                   | ~19,449               | 19,028                   | −421 (−2.2%)             |
+| **Coverage — Classes**                   | 8.48% (53/625)        | 41.35% (287/694)         | +32.87% (+234 classes)   |
+| **Coverage — Methods**                   | 21.74% (844/3,883)    | 68.66% (2,903/4,228)     | +46.92% (+2,059 methods) |
+| **Coverage — Lines**                     | 21.19% (7,273/34,320) | 69.63% (24,747/35,540)   | +48.44% (+17,474 lines)  |
+| **New test files**                       | 235                   | 562                      | +327                     |
+| **Files fully clean (0 PHPStan errors)** | 0                     | 372                      | +372                     |
 
 ---
 

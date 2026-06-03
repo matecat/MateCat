@@ -8,12 +8,7 @@ require('winston-daily-rotate-file');
 const path = require("path");
 const {format} = winston;
 
-//exports prototypes
-if (!String.prototype.isEmpty) {
-  String.prototype.isEmpty = function () {
-    return !this || 0 === this.length || !this.trim();
-  };
-}
+const ipRegex = require('ip-regex');
 
 const enrichLogContext = winston.format((info) => {
   info['timestamp'] = new Date().toJSON();
@@ -42,8 +37,6 @@ const logger = winston.createLogger({
 exports.logger = logger;
 
 const parseHeaderRemoteAddress = (headersList) => {
-  const ipRegex = require('ip-regex');
-
   for (let key of [
     'client-ip',
     'x-forwarded-for',
@@ -54,7 +47,7 @@ const parseHeaderRemoteAddress = (headersList) => {
     'remote-addr',
   ]) {
     if (headersList[key]) {
-      const ip = headersList[key].split(',').pop().trim(); // avoid ip spoofing by pop-ing
+      const ip = headersList[key].split(',')[0].trim();
       if (ipRegex.v4({exact: true}).test(ip)) {
         return ip;
       }
@@ -70,24 +63,10 @@ exports.getWebSocketClientAddress = (socket) => {
 exports.setMonitoring = () => {
 
   const v8 = require('v8');
-  // enabling trace-gc
   v8.setFlagsFromString('--trace-gc');
   const {PerformanceObserver} = require('node:perf_hooks');
-  // Create a performance observer
   const obs = new PerformanceObserver(list => {
     const entry = list.getEntries()[0];
-    /*
-    The entry is an instance of PerformanceEntry containing
-    metrics of a single garbage collection event.
-    For example,
-    PerformanceEntry {
-      name: 'gc',
-      entryType: 'gc',
-      startTime: 2820.567669,
-      duration: 1.315709,
-      kind: 1
-    }
-    */
     logger.verbose(['GC: ', entry]);
   });
 
