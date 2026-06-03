@@ -339,7 +339,7 @@ class SegmentFilterDaoTest extends AbstractTest
         $where = ['sql' => '', 'data' => []];
 
         $sql = $dao->getSqlForRegularIntervals($limit, $where);
-        $this->assertStringContainsString('row_number', $sql);
+        $this->assertStringContainsString('rowNumber', $sql);
         $this->assertStringContainsString('@curRow', $sql);
     }
 
@@ -462,7 +462,7 @@ class SegmentFilterDaoTest extends AbstractTest
 
         $dao = new SegmentFilterDao();
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage('Sample type is not valid');
         $dao->findSegmentIdsForSample($this->chunk, $filter);
     }
