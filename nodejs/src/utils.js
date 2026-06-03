@@ -55,6 +55,7 @@ const parseHeaderRemoteAddress = (headersList) => {
   }
 };
 
+exports.parseHeaderRemoteAddress = parseHeaderRemoteAddress;
 exports.getWebSocketClientAddress = (socket) => {
   let remoteAddress = parseHeaderRemoteAddress(socket.handshake.headers);
   return remoteAddress ? remoteAddress : socket.handshake.address;

@@ -21,7 +21,11 @@
         "winston": "^3",
         "winston-daily-rotate-file": "^5.0.0"
     },
+    "devDependencies": {
+        "jest": "^29.7.0"
+    },
     "scripts": {
-        "start": "node --max-semi-space-size=256 server.js"
+        "start": "node --max-semi-space-size=256 server.js",
+        "test": "jest"
     }
 }
