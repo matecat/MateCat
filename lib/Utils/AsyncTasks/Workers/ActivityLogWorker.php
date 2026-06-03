@@ -4,11 +4,11 @@ namespace Utils\AsyncTasks\Workers;
 
 use Model\ActivityLog\ActivityLogDao;
 use Model\ActivityLog\ActivityLogStruct;
-use Model\DataAccess\Database;
 use PDOException;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 /**
  * Created by PhpStorm.
@@ -19,11 +19,16 @@ use Utils\TaskRunner\Commons\QueueElement;
 class ActivityLogWorker extends AbstractWorker
 {
 
+    /**
+     * @throws PDOException
+     * @throws EndQueueException
+     */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
 
         $logEvent = new ActivityLogStruct($queueElement->params->toArray());
@@ -34,35 +39,12 @@ class ActivityLogWorker extends AbstractWorker
         $this->_writeLog($logEvent);
     }
 
-    protected function _writeLog(ActivityLogStruct $logEvent): void
-    {
-        $logActivityDao = new ActivityLogDao();
-        $logActivityDao->create($logEvent);
-    }
-
     /**
-     * Check the connection.
-     * MySql timeout close the socket and throws Exception in the nex read/write access
-     *
-     * <code>
-     * By default, the server closes the connection after eight hours if nothing has happened.
-     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
-     * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
-     * </code>
-     *
+     * @throws PDOException
      */
-    protected function _checkDatabaseConnection(): void
+    protected function _writeLog(ActivityLogStruct $logEvent, ?ActivityLogDao $dao = null): void
     {
-        $db = Database::obtain();
-        try {
-            $db->ping();
-        } catch (PDOException $e) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} ");
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Database connection reloaded. ");
-            $db->close();
-            //reconnect
-            $db->getConnection();
-        }
+        ($dao ?? new ActivityLogDao())->create($logEvent);
     }
 
 }

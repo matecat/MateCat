@@ -10,6 +10,7 @@ class FilesStorageFactory
     /**
      * @return AbstractFilesStorage
      * @throws Exception
+     * @throws \TypeError
      */
     public static function create(): AbstractFilesStorage
     {

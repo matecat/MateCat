@@ -10,7 +10,6 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
@@ -60,13 +59,13 @@ class SetContributionWorker extends AbstractWorker
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws Exception
-     * @throws ValidationError
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            throw new EndQueueException('Invalid queue element type for SetContributionWorker::process');
+        }
+
         $this->_checkForReQueueEnd($queueElement);
 
         $this->_checkDatabaseConnection();
@@ -83,22 +82,23 @@ class SetContributionWorker extends AbstractWorker
     /**
      * @param SetContributionRequest $contributionStruct
      *
+     * @throws EndQueueException
      * @throws ReQueueException
      * @throws Exception
-     * @throws ValidationError
      */
     protected function _execContribution(SetContributionRequest $contributionStruct): void
     {
         $jobStruct = $contributionStruct->getJobStruct();
+        $engine = $this->requireEngine();
 
         /**
          * @see AbstractEngine::$_isAdaptiveMT
          */
-        if (!$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS()) {
+        if (!$engine->isAdaptiveMT() && !$engine->isTMS()) {
             return;
         }
 
-        $config = $this->_engine->getConfigStruct();
+        $config = $engine->getConfigStruct();
         $config['source'] = $jobStruct->source;
         $config['target'] = $jobStruct->target;
         $config['email'] = $contributionStruct->api_key;
@@ -126,21 +126,25 @@ class SetContributionWorker extends AbstractWorker
     protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
         try {
-            return EnginesFactory::getInstance($jobStruct->id_tms); //Load MyMemory
+            $engine = EnginesFactory::getInstance($jobStruct->id_tms, AbstractEngine::class); //Load MyMemory
+
+            return $engine;
         } catch (Exception $e) {
             throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
     }
 
     /**
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param SetContributionRequest $contributionStruct
      *
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws \LogicException
      */
     protected function _set(array $config, SetContributionRequest $contributionStruct): void
     {
+        $engine = $this->requireEngine();
         $jobStruct = $contributionStruct->getJobStruct();
 
         $config['uid'] = $contributionStruct->uid;
@@ -154,10 +158,12 @@ class SetContributionWorker extends AbstractWorker
         $config['prop'] = json_encode($contributionStruct->getProp());
 
         // set the contribution for every key in the job belonging to the user
-        $res = $this->_engine->set($config);
-        if ($res?->responseStatus >= 200 && $res?->responseStatus < 300) {
+        $res = $engine->set($config);
+        $responseStatus = (is_object($res) && isset($res->responseStatus) && is_numeric($res->responseStatus)) ? (int)$res->responseStatus : null;
+
+        if ($responseStatus !== null && $responseStatus >= 200 && $responseStatus < 300) {
             $this->_doLog("Update complete");
-        } elseif ($res?->responseStatus >= 400 && $res?->responseStatus < 500) {
+        } elseif ($responseStatus !== null && $responseStatus >= 400 && $responseStatus < 500) {
             $this->_raiseEndQueueException('Update', $config);
         } else {
             $this->_raiseReQueueException('Update', $config);
@@ -165,15 +171,17 @@ class SetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param SetContributionRequest $contributionStruct
      * @param int $id_mt_engine
      *
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws \LogicException
      */
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1): void
     {
+        $engine = $this->requireEngine();
         // update the contribution for every key in the job belonging to the user
         $config['uid'] = $contributionStruct->uid;
         $config['segment'] = $contributionStruct->oldSegment;
@@ -192,12 +200,14 @@ class SetContributionWorker extends AbstractWorker
         $config['newtranslation'] = $contributionStruct->translation;
         $config['spiceMatch'] = $contributionStruct->contextIsSpice;
 
-        $this->_doLog("Executing Update on " . get_class($this->_engine));
+        $this->_doLog("Executing Update on " . get_class($engine));
 
-        $res = $this->_engine->update($config);
-        if ($res?->responseStatus >= 200 && $res?->responseStatus < 300) {
+        $res = $engine->update($config);
+        $responseStatus = (is_object($res) && isset($res->responseStatus) && is_numeric($res->responseStatus)) ? (int)$res->responseStatus : null;
+
+        if ($responseStatus !== null && $responseStatus >= 200 && $responseStatus < 300) {
             $this->_doLog("Update complete");
-        } elseif ($res?->responseStatus >= 400 && $res?->responseStatus < 500) {
+        } elseif ($responseStatus !== null && $responseStatus >= 400 && $responseStatus < 500) {
             $this->_raiseEndQueueException('Update', $config);
         } else {
             $this->_raiseReQueueException('Update', $config);
@@ -208,7 +218,7 @@ class SetContributionWorker extends AbstractWorker
      * @param SetContributionRequest $contributionStruct
      * @param JobStruct $jobStruct
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     protected function _extractAvailableKeysForUser(SetContributionRequest $contributionStruct, JobStruct $jobStruct): array
@@ -234,15 +244,15 @@ class SetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param       $type
-     * @param array $config
+     * @param string $type
+     * @param array<string, mixed> $config
      *
      * @throws ReQueueException
      */
-    protected function _raiseReQueueException($type, array $config)
+    protected function _raiseReQueueException(string $type, array $config): never
     {
         //reset the engine
-        $engineName = get_class($this->_engine);
+        $engineName = $this->_engine !== null ? get_class($this->_engine) : 'unknown';
         $this->_engine = null;
 
         switch (strtolower($type)) {
@@ -260,14 +270,14 @@ class SetContributionWorker extends AbstractWorker
 
     /**
      * @param string $type
-     * @param array $config
+     * @param array<string, mixed> $config
      *
      * @throws EndQueueException
      */
-    protected function _raiseEndQueueException(string $type, array $config)
+    protected function _raiseEndQueueException(string $type, array $config): never
     {
         //reset the engine
-        $engineName = get_class($this->_engine);
+        $engineName = $this->_engine !== null ? get_class($this->_engine) : 'unknown';
         $this->_engine = null;
 
         switch (strtolower($type)) {
@@ -281,6 +291,18 @@ class SetContributionWorker extends AbstractWorker
         }
 
         throw new EndQueueException("$type failed on " . $engineName . ": Values " . var_export($config, true), $errNum);
+    }
+
+    /**
+     * @throws \LogicException
+     */
+    protected function requireEngine(): EngineInterface
+    {
+        if ($this->_engine === null) {
+            throw new \LogicException('TM engine is not initialized');
+        }
+
+        return $this->_engine;
     }
 
 }

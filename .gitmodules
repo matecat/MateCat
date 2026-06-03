@@ -24,3 +24,6 @@
         path = plugins/roblox
         url = git@github.com:matecat/roblox_plugin.git
 
+[submodule "plugins/vite"]
+	path = plugins/vite
+	url = git@github.com:matecat/vite_plugin.git

@@ -19,6 +19,9 @@ class Engine
      */
     private array $data;
 
+    /**
+     * @param EngineStruct[] $data
+     */
     public function __construct(array $data = [])
     {
         $this->data = $data;
@@ -27,7 +30,7 @@ class Engine
     /**
      * @param EngineStruct[] $data
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function render(array $data = []): array
     {
@@ -37,9 +40,6 @@ class Engine
             $data = $this->data;
         }
 
-        /**
-         * @var $data EngineStruct[]
-         */
         foreach ($data as $engine) {
             $out[] = $engine->arrayRepresentation();
         }

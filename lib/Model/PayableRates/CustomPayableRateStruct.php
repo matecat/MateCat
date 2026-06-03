@@ -9,6 +9,7 @@ use Matecat\Locales\Languages;
 use Model\Analysis\PayableRates;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
@@ -20,7 +21,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     public int $version;
     public string $name;
     /**
-     * @var string|array
+     * @var array<string, array<string, array<string, int>>>|string
      */
     public string|array $breakdowns;
     public ?string $created_at = null;
@@ -29,39 +30,46 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
 
     /**
      * @return string
+     * @throws TypeError
      */
     public function breakdownsToJson(): string
     {
-        return json_encode($this->getBreakdownsArray());
+        return json_encode($this->getBreakdownsArray()) ?: '';
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, array<string, int>>>
+     * @throws TypeError
      */
     public function getBreakdownsArray(): array
     {
-        $this->breakdowns = (is_string($this->breakdowns) ? json_decode($this->breakdowns, true) : $this->breakdowns);
+        /** @var array<string, array<string, array<string, int>>> $breakdowns */
+        $breakdowns = is_string($this->breakdowns) ? json_decode($this->breakdowns, true) : $this->breakdowns;
 
         // WARNING: backward compatibility for old data stored, they could not have ICE_MT
-        foreach ($this->breakdowns as $sourceLang => $targetLanguages) {
+        foreach ($breakdowns as $sourceLang => $targetLanguages) {
             if ($sourceLang == 'default') {
                 continue;
             }
             foreach ($targetLanguages as $targetLanguage => $targetPayableRates) {
                 if (!isset($targetPayableRates['ICE_MT'])) {
-                    $this->breakdowns[$sourceLang][$targetLanguage]['ICE_MT'] = $targetPayableRates['MT'];
+                    $breakdowns[$sourceLang][$targetLanguage]['ICE_MT'] = $targetPayableRates['MT'];
                 }
             }
         }
 
-        return $this->breakdowns;
+        $this->breakdowns = $breakdowns;
+
+        return $breakdowns;
     }
 
     /**
      * @param string $source
      * @param string $target
      *
-     * @return array
+     * @return array<string, int>
+     * @throws DomainException
+     * @throws TypeError
      */
     public function getPayableRates(string $source, string $target): array
     {
@@ -79,6 +87,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      * @return $this
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function hydrateFromJSON(string $json): CustomPayableRateStruct
     {
@@ -104,7 +113,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     }
 
     /**
-     * @param array $breakdowns
+     * @param array<string, mixed> $breakdowns
      *
      * @throws Exception
      */
@@ -125,16 +134,16 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
         foreach ($breakdowns as $language => $breakdown) {
             $this->validateLanguage($language);
 
-            foreach ($breakdown as $targetLanguage => $rates) {
+            foreach ($breakdown as $targetLanguage => $_rates) {
                 $this->validateLanguage($targetLanguage);
             }
         }
     }
 
     /**
-     * @param $lang
+     * @throws DomainException
      */
-    private function validateLanguage($lang): void
+    private function validateLanguage(string $lang): void
     {
         // rfc3066code --->  es-ES
         // isocode     --->  es
@@ -145,8 +154,9 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws TypeError
      */
     public function jsonSerialize(): array
     {

@@ -14,16 +14,17 @@ use ReflectionException;
 use Utils\Engines\Intento;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class IntentoEngineOptionsValidator extends AbstractValidator
 {
     /**
      * @param EngineValidatorObject $object
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
         if (empty($object->engineStruct) || !$object->engineStruct instanceof Intento) {
             return null;

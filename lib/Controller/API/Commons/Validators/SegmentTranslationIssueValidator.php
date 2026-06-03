@@ -111,7 +111,7 @@ class SegmentTranslationIssueValidator extends Base
      */
     protected function __ensureIssueIsInScope(): void
     {
-        $this->issue = EntryDao::findById($this->request->param('id_issue'));
+        $this->issue = (new EntryDao())->findById($this->request->param('id_issue'));
 
         if (!$this->issue) {
             throw new ValidationError('issue not found');

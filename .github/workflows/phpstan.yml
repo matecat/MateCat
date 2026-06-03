@@ -17,10 +17,14 @@ jobs:
       contents: read
 
     steps:
+      # Checkout the repo including all git submodules.
+      # Falls back to the built-in github.token for fork PRs where
+      # CI_USER_TOKEN_MATECATBOT is not available.
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
 
       - name: Setup PHP project
         uses: ./.github/actions/setup-php-project

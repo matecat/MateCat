@@ -38,6 +38,7 @@ class EngineConstants
     const string GOOGLE_TRANSLATE = 'GoogleTranslate';
     const string INTENTO = 'Intento';
 
+    /** @var array<class-string<AbstractEngine>, class-string<AbstractEngine>> */
     protected static array $ENGINES_LIST = [
         MyMemory::class => MyMemory::class,
         Apertium::class => Apertium::class,
@@ -52,7 +53,7 @@ class EngineConstants
     ];
 
     /**
-     * @return AbstractEngine[]
+     * @return array<class-string<AbstractEngine>, class-string<AbstractEngine>>
      */
     public static function getAvailableEnginesList(): array
     {

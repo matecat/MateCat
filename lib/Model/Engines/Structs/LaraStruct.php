@@ -51,7 +51,7 @@ class LaraStruct extends EngineStruct
     public ?string $update_relative_url = "memories/content";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $others = [
         "tmx_import_relative_url" => "memories/content",
@@ -65,7 +65,7 @@ class LaraStruct extends EngineStruct
 
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'Lara-AccessKeyId' => "",
@@ -83,12 +83,9 @@ class LaraStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return LaraStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new LaraStruct();
+        return new static();
     }
 }

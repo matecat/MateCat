@@ -18,9 +18,10 @@ class Chunk extends Job
     /**
      * @param JobStruct $chunk
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function renderOne(JobStruct $chunk): array
     {

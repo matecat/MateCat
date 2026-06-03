@@ -44,8 +44,8 @@ class PostEditing
         preg_match_all('/<.*?>/s', $seg2, $temp2);
         $c = count(self::array_xor($temp1[0], $temp2[0]));
 
-        $seg1 = preg_replace('/<.*?>/s', ' ', $seg1);
-        $seg2 = preg_replace('/<.*?>/s', ' ', $seg2);
+        $seg1 = preg_replace('/<.*?>/s', ' ', $seg1) ?? '';
+        $seg2 = preg_replace('/<.*?>/s', ' ', $seg2) ?? '';
 
         $penalty += 0.01 * $c;
 
@@ -56,8 +56,8 @@ class PostEditing
         preg_match_all('/(0-9|,|\.)+/u', $seg2, $temp2);
         $c = count(self::array_xor($temp1[0], $temp2[0]));
 
-        $seg1 = preg_replace('/(0-9|,|\.)+/u', ' ', $seg1);
-        $seg2 = preg_replace('/(0-9|,|\.)+/u', ' ', $seg2);
+        $seg1 = preg_replace('/(0-9|,|\.)+/u', ' ', $seg1) ?? '';
+        $seg2 = preg_replace('/(0-9|,|\.)+/u', ' ', $seg2) ?? '';
 
         $penalty_placeable = 0.01 * $c;
 
@@ -69,16 +69,16 @@ class PostEditing
         preg_match_all('/(\p{P}|\p{S}|\x{00a0})+/u', $seg2, $temp2);
         $c = count(self::array_xor($temp1[0], $temp2[0]));
 
-        $seg1 = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1);
-        $seg2 = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2);
+        $seg1 = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1) ?? '';
+        $seg2 = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2) ?? '';
         $penalty_placeable += 0.02 * $c;
 
         // penalty per case-sensitive / formatting
         $penalty_formatting = 0.00;
 
         // Remove all double spaces
-        $seg1 = preg_replace('/ +/u', ' ', $seg1);
-        $seg2 = preg_replace('/ +/u', ' ', $seg2);
+        $seg1 = preg_replace('/ +/u', ' ', $seg1) ?? '';
+        $seg2 = preg_replace('/ +/u', ' ', $seg2) ?? '';
 
         if (CatUtils::isCJK($language)) {
             $a = self::CJK_tokenizer($seg1);
@@ -87,8 +87,8 @@ class PostEditing
             $a = explode(' ', ($seg1));
             $b = explode(' ', ($seg2));
         }
-        $a = array_filter($a, 'trim');
-        $b = array_filter($b, 'trim');
+        $a = array_filter($a, static fn(string $s): bool => trim($s) !== '');
+        $b = array_filter($b, static fn(string $s): bool => trim($s) !== '');
 
         $a_lower = array_map('mb_strtolower', $a, array_fill(0, count($a), 'UTF-8'));
         $b_lower = array_map('mb_strtolower', $b, array_fill(0, count($b), 'UTF-8'));
@@ -107,6 +107,10 @@ class PostEditing
         return min(1, max(0, $result));
     }
 
+    /**
+     * @param list<string> $array1
+     * @param list<string> $array2
+     */
     protected static function arrayDistance(array $array1, array $array2): float
     {
         // No Longer symmetric
@@ -150,7 +154,8 @@ class PostEditing
         return ($p > 0 ? (1 - $lmax / max($lmax, $min_words_norm) * (1 - $p / 100)) : 0);
     }
 
-    protected static function CJK_tokenizer($text): array
+    /** @return list<string> */
+    protected static function CJK_tokenizer(string $text): array
     {
         $words = explode(' ', ($text));
         //If characters aren't latin, then use bigram
@@ -171,9 +176,13 @@ class PostEditing
         return $tokens;
     }
 
+    /** @return list<string> */
     protected static function compute_bigram(string $text): array
     {
         $chrArray = preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if ($chrArray === false) {
+            return [];
+        }
         $length = count($chrArray);
         if ($length > 1) {
             for ($i = 0; $i < $length - 1; $i++) {
@@ -182,14 +191,13 @@ class PostEditing
             array_pop($chrArray);
         }
 
-        return $chrArray;
+        return array_values($chrArray);
     }
 
     /**
-     * @param array $array_a
-     * @param array $array_b
-     *
-     * @return array
+     * @param list<string> $array_a
+     * @param list<string> $array_b
+     * @return list<string>
      */
     // Expect this to be in PHP in the future
     protected static function array_xor(array $array_a, array $array_b): array
@@ -197,7 +205,7 @@ class PostEditing
         $union_array = array_merge($array_a, $array_b);
         $intersect_array = array_intersect($array_a, $array_b);
 
-        return array_diff($union_array, $intersect_array);
+        return array_values(array_diff($union_array, $intersect_array));
     }
 
 }

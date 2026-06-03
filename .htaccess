@@ -9,9 +9,8 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 #RewriteRule ^offline\.html$ /lib/View/offline.html [L]
 #RewriteCond %{REQUEST_URI} !/offline.html [NC]
-#RewriteCond %{REQUEST_URI} !/public/build/runtime\.(.+)\.js [NC]
-#RewriteCond %{REQUEST_URI} !/public/build/commonCss\.(.+)\.(css|js) [NC]
-#RewriteCond %{REQUEST_URI} !/public/build/images/(.+)\.svg [NC]
+#RewriteCond %{REQUEST_URI} !/public/build/(.+)\.js [NC]
+#RewriteCond %{REQUEST_URI} !/public/build/assets/(.+)\.css [NC]
 #RewriteCond %{REQUEST_URI} !/img/meta/favicon(.+)\.svg [NC]
 #RewriteRule $ /offline.html [R=307,L]
 RewriteCond %{REQUEST_URI} /offline.html

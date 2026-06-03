@@ -3,7 +3,7 @@
 namespace Utils\Search;
 
 use Model\Search\ReplaceEventDAOInterface;
-use Model\Search\ReplaceEventIndexDAOInterface;
+use Model\Search\ReplaceEventIndexDaoInterface;
 use Model\Search\ReplaceEventStruct;
 use Model\Translations\SegmentTranslationDao;
 
@@ -21,19 +21,19 @@ class ReplaceHistory
     private ReplaceEventDAOInterface $replaceEventDAO;
 
     /**
-     * @var ReplaceEventIndexDAOInterface
+     * @var ReplaceEventIndexDaoInterface
      */
-    private ReplaceEventIndexDAOInterface $replaceEventIndexDAO;
+    private ReplaceEventIndexDaoInterface $replaceEventIndexDAO;
 
     /**
      * ReplaceHistory constructor.
      *
      * @param int $idJob
      * @param ReplaceEventDAOInterface $replaceEventDAO
-     * @param ReplaceEventIndexDAOInterface $replaceEventIndexDAO
+     * @param ReplaceEventIndexDaoInterface $replaceEventIndexDAO
      * @param int $ttl
      */
-    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDAOInterface $replaceEventIndexDAO, int $ttl = 0)
+    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDaoInterface $replaceEventIndexDAO, int $ttl = 0)
     {
         $this->idJob = $idJob;
         $this->replaceEventDAO = $replaceEventDAO;
@@ -64,7 +64,7 @@ class ReplaceHistory
     }
 
     /**
-     * @return int
+     * @throws \PDOException
      */
     public function redo(): int
     {
@@ -84,7 +84,7 @@ class ReplaceHistory
     }
 
     /**
-     * @return int
+     * @throws \PDOException
      */
     public function undo(): int
     {
@@ -94,16 +94,14 @@ class ReplaceHistory
     }
 
     /**
-     * @param $versionToMove
-     *
-     * @return int
+     * @throws \PDOException
      */
-    private function _moveToVersion($versionToMove): int
+    private function _moveToVersion(int $versionToMove): int
     {
         $events = $this->get($versionToMove);
 
         if (count($events) > 0) {
-            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents($events);
+            $replacedEvents = (new SegmentTranslationDao())->rebuildFromReplaceEvents($events);
 
             $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
 
@@ -113,10 +111,7 @@ class ReplaceHistory
         return 0;
     }
 
-    /**
-     * @param $versionToMove
-     */
-    public function updateIndex($versionToMove): void
+    public function updateIndex(int $versionToMove): void
     {
         $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
     }

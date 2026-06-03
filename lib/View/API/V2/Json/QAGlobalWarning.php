@@ -10,24 +10,24 @@
 namespace View\API\V2\Json;
 
 
-use ArrayObject;
 use Utils\LQA\QA;
 
 class QAGlobalWarning extends QAWarning
 {
 
+    /** @var array<int, mixed> */
     protected array $tagIssues;
-    protected array $translationMismatches;
 
-    protected array $structure;
+    /** @var array<int, mixed> */
+    protected array $translationMismatches;
 
     /**
      * QAGlobalWarning constructor.
      *
      * from query: getWarning(id_job, password)
      *
-     * @param array $tagIssues [ [ total_sources, translations_available, first_of_my_job ] ]
-     * @param array $translationMismatches [ [ total_sources, translations_available, first_of_my_job ] ]
+     * @param array<int, mixed> $tagIssues
+     * @param array<int, mixed> $translationMismatches
      */
     public function __construct(array $tagIssues, array $translationMismatches)
     {
@@ -36,19 +36,19 @@ class QAGlobalWarning extends QAWarning
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function render(): array
     {
         $this->structure = [
             'ERROR' => [
-                'Categories' => new ArrayObject()
+                'Categories' => []
             ],
             'WARNING' => [
-                'Categories' => new ArrayObject()
+                'Categories' => []
             ],
             'INFO' => [
-                'Categories' => new ArrayObject()
+                'Categories' => []
             ]
         ];
 

@@ -34,6 +34,7 @@ class JobsTranslatorsController extends KleinController
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws \TypeError
      */
     public function add(): void
     {
@@ -60,7 +61,7 @@ class JobsTranslatorsController extends KleinController
         $TranslatorsModel
             ->setUserInvite($this->user)
             ->setDeliveryDate($this->params['delivery_date'])
-            ->setJobOwnerTimezone($this->params['timezone'])
+            ->setJobOwnerTimezone((float)$this->params['timezone'])
             ->setEmail($this->params['email']);
 
         $tStruct = $TranslatorsModel->update();
@@ -79,6 +80,7 @@ class JobsTranslatorsController extends KleinController
      * @throws ReflectionException
      * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
+     * @throws Exception
      */
     public function get(): void
     {

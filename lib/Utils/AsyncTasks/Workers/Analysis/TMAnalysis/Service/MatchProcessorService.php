@@ -2,6 +2,7 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use DomainException;
 use Exception;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
@@ -37,7 +38,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      * @param array<string, mixed>              $mtResult
      * @param array<int, array<string, mixed>>  $tmMatches
      *
-     * @return array<int, array<string, mixed>>
+     * @return list<array<string, mixed>>
      */
     public function sortMatches(array $mtResult, array $tmMatches): array
     {
@@ -55,6 +56,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      *
      * @return array{0: ?MessagePatternComparator, 1: bool}
      *         [comparator (null when ICU is not detected), sourceContainsIcu flag]
+     * @throws DomainException
      */
     private function detectIcu(
         string $sourceLang,

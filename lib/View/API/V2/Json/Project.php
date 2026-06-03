@@ -74,15 +74,33 @@ class Project
     }
 
     /**
+     * @var MetadataDao|null
+     */
+    protected ?MetadataDao $metadataDao = null;
+
+    /**
+     * @var ProjectDao|null
+     */
+    protected ?ProjectDao $projectDao = null;
+
+    /**
      * Project constructor.
      *
      * @param ProjectStruct[] $data
      * @param string|null $search_status
+     * @param MetadataDao|null $metadataDao
+     * @param ProjectDao|null $projectDao
      */
-    public function __construct(array $data = [], ?string $search_status = null)
-    {
+    public function __construct(
+        array $data = [],
+        ?string $search_status = null,
+        ?MetadataDao $metadataDao = null,
+        ?ProjectDao $projectDao = null
+    ) {
         $this->data = $data;
         $this->status = $search_status;
+        $this->metadataDao = $metadataDao;
+        $this->projectDao = $projectDao;
         $jRendered = new Job();
 
         if ($search_status) {
@@ -93,11 +111,12 @@ class Project
     }
 
     /**
-     * @param       $project ProjectStruct
+     * @param ProjectStruct $project
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function renderItem(ProjectStruct $project): array
     {
@@ -107,9 +126,7 @@ class Project
         $jobJSONs = [];
         $jobStatuses = [];
         if (!empty($jobs)) {
-            /**
-             * @var $jobJSON Job
-             */
+            /** @var Job $jobJSON */
             $jobJSON = new $this->jRenderer();
 
             if (!empty($this->user)) {
@@ -138,11 +155,12 @@ class Project
             }
         }
 
-        $metadataDao = new MetadataDao();
-        $projectInfo = $metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
-        $fromApi = $metadataDao->setCacheTTL(60)->get((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
+        $this->metadataDao ??= new MetadataDao();
+        $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
+        $fromApi = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
 
-        $_project_data = ProjectDao::getProjectAndJobData($project->id);
+        $this->projectDao ??= new ProjectDao();
+        $_project_data = $this->projectDao->getProjectAndJobData((int)$project->id);
         $analysisStatus = new Status($_project_data, $featureSet, $this->user);
 
         return [
@@ -169,8 +187,10 @@ class Project
     }
 
     /**
-     * @return array
+     * @return list<array<string, mixed>>
      * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function render(): array
     {

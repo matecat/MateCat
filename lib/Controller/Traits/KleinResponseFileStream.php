@@ -9,6 +9,7 @@
 namespace Controller\Traits;
 
 
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\FilesStorage\AbstractFilesStorage;
 
@@ -31,23 +32,9 @@ class KleinResponseFileStream
     }
 
     /**
-     * Sends a file streaming from a file pointer resource
+     * @param resource $filePointer
      *
-     * It should be noted that this method disables caching
-     * of the response by default, as dynamically created
-     * files responses are usually downloads of some type
-     * and rarely make sense to be HTTP cached
-     *
-     * Also, this method removes any data/content
-     * currently in the response body and replaces it with
-     * the file's data
-     *
-     * @param resource $filePointer The pointer to the file to send
-     * @param string $filename The file's name
-     * @param string $mimeType
-     * @param string $disposition
-     *
-     * @internal param KleinController $controller The MIME type of the file
+     * @throws ResponseAlreadySentException
      */
     public function streamFileFromPointer($filePointer, string $mimeType, string $disposition, string $filename): void
     {
@@ -70,12 +57,22 @@ class KleinResponseFileStream
         fclose($filePointer);
     }
 
-    public function streamFileDownloadFromPointer($filePointer, $filename)
+    /**
+     * @param resource $filePointer
+     *
+     * @throws ResponseAlreadySentException
+     */
+    public function streamFileDownloadFromPointer($filePointer, string $filename): void
     {
         $this->streamFileFromPointer($filePointer, "application/download", 'attachment', $filename);
     }
 
-    public function streamFileInlineFromPointer($filePointer, $filename, $mimeType)
+    /**
+     * @param resource $filePointer
+     *
+     * @throws ResponseAlreadySentException
+     */
+    public function streamFileInlineFromPointer($filePointer, string $filename, string $mimeType): void
     {
         $this->streamFileFromPointer($filePointer, $mimeType, 'inline', $filename);
     }

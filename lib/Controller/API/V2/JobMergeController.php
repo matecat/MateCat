@@ -67,7 +67,7 @@ class JobMergeController extends KleinController
             $this->project = $validator->getProject();
 
             // Retrieve the job list associated with the project.
-            $this->jobList = JobDao::getById((int)$this->request->param('id_job'));
+            $this->jobList = (new JobDao())->getNotDeletedById((int)$this->request->param('id_job'));
 
             // Validate the first job in the list.
             $firstChunk = $this->jobList[0] ?? null;

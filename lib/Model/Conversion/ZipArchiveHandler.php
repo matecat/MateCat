@@ -29,7 +29,9 @@ class ZipArchiveHandler extends ZipArchive
 
     const string ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
+    /** @var array<string, mixed> */
     public array $tree = [];
+    /** @var list<string> */
     public array $treeList = [];
 
     protected static int $MAX_FILES;
@@ -86,11 +88,13 @@ class ZipArchiveHandler extends ZipArchive
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function createTree(): void
     {
         self::$MAX_FILES = AppConfig::$MAX_NUM_FILES;
 
+        /** @var array<string, mixed> $Tree */
         $Tree = [];
         $path2numOfFolders = [];
         $filePaths = [];
@@ -101,7 +105,11 @@ class ZipArchiveHandler extends ZipArchive
         for ($i = 0; $i < $this->numFiles; $i++) {
             $path = $this->getNameIndex($i);
 
-            $pathBySlash = array_values(explode('/', $path));
+            if ($path === false) {
+                continue;
+            }
+
+            $pathBySlash = explode('/', $path);
 
             if ($pathBySlash[0] == '__MACOSX') {
                 continue;
@@ -123,7 +131,7 @@ class ZipArchiveHandler extends ZipArchive
                 continue;
             }
 
-            $pathBySlash = array_map([ZipArchiveHandler::class, 'treeKey'], $pathBySlash);
+            $pathBySlash = array_map(static fn(string $k): string => self::ARRAY_FILES_PREFIX . $k, $pathBySlash);
 
             $pathWithoutFile = $pathBySlash;
             $fileName = array_pop($pathWithoutFile);
@@ -189,9 +197,17 @@ class ZipArchiveHandler extends ZipArchive
         }
 
         $this->tree = $Tree;
-        $this->treeList = array_unique($filePaths);
-        $this->treeList = str_replace(DIRECTORY_SEPARATOR, self::INTERNAL_SEPARATOR, $this->treeList);
-        $this->treeList = array_map([ZipArchiveHandler::class, 'prependZipFileName'], $this->treeList);
+        $this->treeList = array_values(array_unique($filePaths));
+        $this->treeList = array_map(
+            static fn(string $p): string => str_replace(DIRECTORY_SEPARATOR, self::INTERNAL_SEPARATOR, $p),
+            $this->treeList
+        );
+        $rawBasename = AbstractFilesStorage::pathinfo_fix((string)$this->filename, PATHINFO_BASENAME);
+        $zipBasename = is_string($rawBasename) ? $rawBasename : '';
+        $this->treeList = array_map(
+            static fn(string $f): string => $zipBasename . self::INTERNAL_SEPARATOR . $f,
+            $this->treeList
+        );
     }
 
     /**
@@ -201,8 +217,9 @@ class ZipArchiveHandler extends ZipArchive
      *
      * @param string $tmp_folder Absolute path to the temporary extraction directory (with trailing slash).
      *
-     * @return array An associative array keyed by an internal file path, each value containing
-     *               'size', 'name', 'tmp_name', 'error', and 'type'.
+     * @return array<string, array{size: int, name: string, tmp_name: string, error: string|null, type: string|null}>
+     * @throws \LogicException
+     * @throws RuntimeException
      */
     public function extractFilesInTmp(string $tmp_folder): array
     {
@@ -211,8 +228,10 @@ class ZipArchiveHandler extends ZipArchive
 
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ($this->treeList as $filePath) {
+            $rawBasename = AbstractFilesStorage::pathinfo_fix((string)$this->filename, PATHINFO_BASENAME);
+        $zipBasename = is_string($rawBasename) ? $rawBasename : '';
             $realPath = str_replace(
-                [self::INTERNAL_SEPARATOR, AbstractFilesStorage::pathinfo_fix($this->filename, PATHINFO_BASENAME)],
+                [self::INTERNAL_SEPARATOR, $zipBasename],
                 [DIRECTORY_SEPARATOR, ""],
                 $filePath
             );
@@ -221,17 +240,22 @@ class ZipArchiveHandler extends ZipArchive
 
             $fp = $this->getStream($realPath);
 
-            $tmpFp = fopen($tmp_folder . $filePath, "w");
-
             if (!$fp) {
                 throw new RuntimeException("Unable to extract the file.");
+            }
+
+            $tmpFp = fopen($tmp_folder . $filePath, "w");
+
+            if ($tmpFp === false) {
+                throw new RuntimeException("Unable to create temp file.");
             }
 
             $sizeExceeded = false;
             $fileSize = 0;
             while (!feof($fp) && !$sizeExceeded) {
-                $realSize = fwrite($tmpFp, fread($fp, 8192));
-                $fileSize += $realSize;
+                $chunk = fread($fp, 8192);
+                $realSize = fwrite($tmpFp, $chunk !== false ? $chunk : '');
+                $fileSize += ($realSize !== false ? $realSize : 0);
 
                 if ($fileSize > AppConfig::$MAX_UPLOAD_FILE_SIZE) {
                     $sizeExceeded = true;
@@ -261,36 +285,12 @@ class ZipArchiveHandler extends ZipArchive
     }
 
     /**
-     * Prefixes a ZIP tree key with ARRAY_FILES_PREFIX to distinguish directory entries from file entries.
-     *
-     * @param string $key A path segment from the ZIP entry.
-     *
-     * @return string
-     */
-    private function treeKey(string $key): string
-    {
-        return self::ARRAY_FILES_PREFIX . $key;
-    }
-
-    /**
-     * Prepends the ZIP archive base filename to an internal file name,
-     * using INTERNAL_SEPARATOR as the delimiter.
-     *
-     * @param string $fName An internal file name from $this->treeList.
-     *
-     * @return string
-     */
-    private function prependZipFileName(string $fName): string
-    {
-        return AbstractFilesStorage::pathinfo_fix($this->filename, PATHINFO_BASENAME) . self::INTERNAL_SEPARATOR . $fName;
-    }
-
-    /**
      * Gets path information for a file unzipped using ZipArchiveExtended.
      *
-     * @param $path        string A valid ZipArchiveExtended path. It must be a path that uses the internal separator of this class.
+     * @param string $path A valid ZipArchiveExtended path using the internal separator of this class.
      *
-     * @return array|null Returns null if the path is not valid, otherwise it will return the array returned by pathinfo() function, plus a 'zipfilename' key, containing the zip file name.
+     * @return array{dirname: string, basename: string, extension: string, filename: string, zipfilename: string}|null
+     *   Returns null if the path is not valid, otherwise an array with pathinfo keys plus 'zipfilename'.
      */
     public static function zipPathInfo(string $path): ?array
     {
@@ -299,11 +299,11 @@ class ZipArchiveHandler extends ZipArchive
         }
         $path = explode(self::INTERNAL_SEPARATOR, $path);
 
-        $zipFile = array_shift($path);
-        $basename = array_pop($path);
+        $zipFile = array_shift($path) ?? '';
+        $basename = array_pop($path) ?? '';
 
         $filenameInfo = explode(".", $basename);
-        $extension = array_pop($filenameInfo);
+        $extension = array_pop($filenameInfo) ?? '';
         $filename = implode(".", $filenameInfo);
         $dirname = implode(DIRECTORY_SEPARATOR, $path);
 
@@ -317,7 +317,7 @@ class ZipArchiveHandler extends ZipArchive
     }
 
     /**
-     * @param $internalFileName string
+     * @param string $internalFileName
      *
      * @return string
      */

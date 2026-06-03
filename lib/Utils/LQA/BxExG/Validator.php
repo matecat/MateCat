@@ -12,7 +12,7 @@ class Validator
      *
      * @var QA
      */
-    private $qa;
+    private QA $qa;
 
     /**
      * Validator constructor.
@@ -31,7 +31,7 @@ class Validator
      * - ERR_EX_BX_COUNT_MISMATCH:  [ERROR]    when there is a tag count mismatch between source and target
      * - ERR_EX_BX_WRONG_POSITION:  [WARNING]  when there is nested <bx> or <ex> inside a <g> in source and NOT in target or any other mismatch error
      *
-     * @return array
+     * @return array<int>
      */
     public function validate(): array
     {
@@ -89,7 +89,7 @@ class Validator
     }
 
     /**
-     * @param array $map
+     * @param array<Element> $map
      *
      * @return bool
      */

@@ -1,5 +1,4 @@
 import {createRoot} from 'react-dom/client'
-import '../globalFunctions'
 import {ApplicationWrapper} from '../components/common/ApplicationWrapper'
 import React from 'react'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'

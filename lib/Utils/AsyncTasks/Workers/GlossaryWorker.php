@@ -7,17 +7,11 @@ use Model\FeaturesBase\FeatureSet;
 use Stomp\Exception\StompException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
-use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
-/**
- * Class GlossaryWorker
- * @package Utils\AsyncTasks\Workers
- *
- */
 class GlossaryWorker extends AbstractWorker
 {
 
@@ -38,9 +32,8 @@ class GlossaryWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        assert($queueElement instanceof QueueElement);
+
         $params = $queueElement->params->toArray();
         $action = $params['action'];
         $payload = $params['payload'];
@@ -80,13 +73,8 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Check a key on MyMemory
-     *
      * @param array{
-     *     jobData: array{
-     *       id: int,
-     *        password: string
-     *     },
+     *     jobData: array{id: int, password: string},
      *     id_client: string,
      *     source: string,
      *     target: string,
@@ -121,13 +109,8 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Delete a key from MyMemory
-     *
      * @param array{
-     *     jobData: array{
-     *        id: int,
-     *        password: string
-     *     },
+     *     jobData: array{id: int, password: string},
      *     id_client: string,
      *     id_job: int,
      *     password: string,
@@ -141,8 +124,7 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        /** @var UpdateGlossaryResponse $response */
-        $response = $client->glossaryDelete($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $response = $client->glossaryDelete($payload['id_segment'], (string) $payload['id_job'], $payload['password'], $payload['term']);
 
         $message = [
             'id_segment' => $payload['id_segment'],
@@ -174,13 +156,8 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Exposes domains from MyMemory
-     *
      * @param array{
-     *     jobData: array{
-     *       id: int,
-     *        password: string
-     *     },
+     *     jobData: array{id: int, password: string},
      *     id_client: string,
      *     source: string,
      *     target: string,
@@ -215,9 +192,16 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Get a key from MyMemory
-     *
-     * @param array $payload
+     * @param array{
+     *     jobData: array{id: int, password: string},
+     *     id_client: string,
+     *     id_segment: string,
+     *     source: string,
+     *     source_language: string,
+     *     target_language: string,
+     *     id_job: int,
+     *     tmKeys: array<array{key: string}>
+     * } $payload
      *
      * @throws EndQueueException
      * @throws Exception
@@ -241,7 +225,7 @@ class GlossaryWorker extends AbstractWorker
         $client = $this->getMyMemoryClient();
 
         $response = $client->glossaryGet(
-            $payload['id_job'],
+            (string) $payload['id_job'],
             $payload['id_segment'],
             $payload['source'],
             $payload['source_language'],
@@ -262,9 +246,13 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Check a key on MyMemory
-     *
-     * @param array $payload
+     * @param array{
+     *     jobData: array{id: int, password: string},
+     *     id_client: string,
+     *     source_language: string,
+     *     target_language: string,
+     *     keys: array<string>
+     * } $payload
      *
      * @throws Exception
      */
@@ -287,9 +275,15 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Search sentence in MyMemory
-     *
-     * @param array $payload
+     * @param array{
+     *     jobData: array{id: int, password: string},
+     *     id_client: string,
+     *     sentence: string,
+     *     source_language: string,
+     *     target_language: string,
+     *     tmKeys: array<array{key: string}>,
+     *     id_segment?: string
+     * } $payload
      *
      * @throws EndQueueException
      * @throws Exception
@@ -318,10 +312,10 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * @param array $matches
-     * @param array $payload
+     * @param array<int|string, mixed> $matches
+     * @param array<string, mixed> $payload
      *
-     * @return array
+     * @return array<int|string, mixed>
      * @throws EndQueueException
      */
     private function formatGetGlossaryMatches(array $matches, array $payload): array
@@ -330,7 +324,8 @@ class GlossaryWorker extends AbstractWorker
             throw new EndQueueException("Empty response received from Glossary");
         }
 
-        if ($matches['id_segment'] === null or $matches['id_segment'] === "") {
+        $idSegment = $matches['id_segment'] ?? null;
+        if ($idSegment === null || $idSegment === "") {
             $matches['id_segment'] = $payload['id_segment'] ?? null;
         }
 
@@ -338,9 +333,15 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Set a key in MyMemory
-     *
-     * @param array $payload
+     * @param array{
+     *     jobData: array{id: int, password: string},
+     *     id_client: string,
+     *     id_segment: string,
+     *     id_job: int,
+     *     password: string,
+     *     term: array<string, mixed>,
+     *     ...
+     * } $payload
      *
      * @throws Exception
      */
@@ -348,7 +349,7 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        $response = $client->glossarySet($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $response = $client->glossarySet($payload['id_segment'], (string) $payload['id_job'], $payload['password'], $payload['term']);
         $id_segment = $payload['id_segment'] ?? null;
 
         $message = [
@@ -367,7 +368,6 @@ class GlossaryWorker extends AbstractWorker
         }
 
         if ($response->responseStatus < 300) {
-            // reduce $payload['term']['matching_words'] to simple array
             $matchingWords = $payload['term']['matching_words'] ?? [];
             $matchingWordsAsArray = [];
 
@@ -377,11 +377,10 @@ class GlossaryWorker extends AbstractWorker
 
             $payload['term']['matching_words'] = $matchingWordsAsArray;
 
-            // reduce $payload['term']['metadata']['keys'] to simple array
-            $keys = $payload['term']['metadata']['keys'];
+            $metadataKeys = $payload['term']['metadata']['keys'] ?? [];
             $keysAsArray = [];
 
-            foreach ($keys as $key) {
+            foreach ($metadataKeys as $key) {
                 $keysAsArray[] = $key;
             }
 
@@ -403,9 +402,15 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * Update a key from MyMemory
-     *
-     * @param array $payload
+     * @param array{
+     *     jobData: array{id: int, password: string},
+     *     id_client: string,
+     *     id_segment: string,
+     *     id_job: int,
+     *     password: string,
+     *     term: array<string, mixed>,
+     *     ...
+     * } $payload
      *
      * @throws Exception
      */
@@ -413,7 +418,7 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        $response = $client->glossaryUpdate($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $response = $client->glossaryUpdate($payload['id_segment'], (string) $payload['id_job'], $payload['password'], $payload['term']);
         $id_segment = $payload['id_segment'] ?? null;
 
         $message = [
@@ -421,7 +426,7 @@ class GlossaryWorker extends AbstractWorker
             'payload' => null,
         ];
 
-        if ($response->responseStatus >= 300) {
+        if ($response->responseStatus === 202 || $response->responseStatus >= 300) {
             $errMessage = match ($response->responseStatus) {
                 202 => "MyMemory is busy, please try later",
                 default => "Error, please try later",
@@ -434,8 +439,7 @@ class GlossaryWorker extends AbstractWorker
             ];
         }
 
-        if ($response->responseStatus < 300) {
-            // reduce $payload['term']['matching_words'] to simple array
+        if ($response->responseStatus < 300 && $response->responseStatus !== 202) {
             $matchingWords = $payload['term']['matching_words'];
             $matchingWordsAsArray = [];
 
@@ -459,14 +463,12 @@ class GlossaryWorker extends AbstractWorker
     }
 
     /**
-     * @param      $type
-     * @param      $id_client
-     * @param      $jobData
-     * @param      $message
+     * @param array{id: int, password: string} $jobData
+     * @param array<int|string, mixed> $message
      *
-     * @return array
+     * @return array{_type: string, data: array{payload: array<int|string, mixed>, id_client: string, id_job: int, passwords: string}}
      */
-    private function setResponsePayload($type, $id_client, $jobData, $message): array
+    private function setResponsePayload(string $type, string $id_client, array $jobData, array $message): array
     {
         return [
             '_type' => $type,
@@ -481,24 +483,23 @@ class GlossaryWorker extends AbstractWorker
 
     /**
      * @param FeatureSet $featureSet
-     *
      * @return MyMemory
      * @throws Exception
      */
     private function getEngine(FeatureSet $featureSet): MyMemory
     {
-        $_TMS = EnginesFactory::getInstance(1);
-        $_TMS->setFeatureSet($featureSet);
+        /** @var MyMemory $engine */
+        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine->setFeatureSet($featureSet);
 
-        /** @var MyMemory $_TMS */
-        return $_TMS;
+        return $engine;
     }
 
     /**
      * @return MyMemory
      * @throws Exception
      */
-    private function getMyMemoryClient(): MyMemory
+    protected function getMyMemoryClient(): MyMemory
     {
         return $this->getEngine(new FeatureSet());
     }

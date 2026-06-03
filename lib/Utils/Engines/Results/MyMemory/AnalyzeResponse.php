@@ -2,6 +2,7 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
+use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
@@ -13,7 +14,12 @@ use Utils\Engines\Results\TMSAbstractResponse;
 class AnalyzeResponse extends TMSAbstractResponse
 {
 
-    public function __construct($response)
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
     {
         $this->responseStatus = (int)($response['responseStatus'] ?? 200);
         $this->responseDetails = $response['responseData'] ?? '';

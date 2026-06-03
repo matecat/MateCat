@@ -10,6 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
+use TypeError;
 use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController
@@ -23,11 +24,12 @@ class UserController extends AbstractStatefulKleinController
     /**
      * Edit the user profile
      *
+     * @throws TypeError
      */
     public function edit(): void
     {
         $json = $this->request->body();
-        $json = json_decode($json, true);
+        $json = json_decode($json ?? '', true);
 
         $data = filter_var_array(
             $json,
@@ -60,12 +62,13 @@ class UserController extends AbstractStatefulKleinController
             $user = $this->user;
             $user->first_name = $data['first_name'];
             $user->last_name = $data['last_name'];
+            $uid = $user->uid ?? throw new Exception('User not authenticated');
 
             $userDao = new UserDao();
             $userDao->updateUser($user);
-            $userDao->destroyCacheByUid($user->uid);
+            $userDao->destroyCacheByUid($uid);
 
-            AuthenticationHelper::refreshSession($_SESSION);
+            (new AuthenticationHelper($_SESSION))->refreshSession();
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -85,6 +88,7 @@ class UserController extends AbstractStatefulKleinController
 
     /**
      * @return void
+     * @throws InvalidArgumentException
      */
     public function setMetadata(): void
     {
@@ -104,10 +108,10 @@ class UserController extends AbstractStatefulKleinController
             ],
         ];
 
-        $json = json_decode($json, true);
+        $json = json_decode($json ?? '', true);
 
         $filtered = [];
-        foreach ($json as $key => $value) {
+        foreach ((array)$json as $key => $value) {
             if (is_array($value)) {
                 $filtered[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY);
             } else {
@@ -115,23 +119,25 @@ class UserController extends AbstractStatefulKleinController
             }
         }
 
-        if (!isset($filtered['key'])) {
+        if (!isset($filtered['key']) || !is_string($filtered['key'])) {
             throw new InvalidArgumentException('`key` required', 400);
         }
 
-        if (!isset($filtered['value'])) {
+        if (!isset($filtered['value']) || !is_string($filtered['value'])) {
             throw new InvalidArgumentException('`value` required', 400);
         }
+
+        $uid = $this->user->uid ?? throw new InvalidArgumentException('User not authenticated', 403);
 
         try {
             $userMetaDao = new MetadataDao();
             $metadata = $userMetaDao->set(
-                $this->user->uid,
+                $uid,
                 $filtered['key'],
                 $filtered['value']
             );
 
-            AuthenticationHelper::refreshSession($_SESSION);
+            (new AuthenticationHelper($_SESSION))->refreshSession();
 
             $this->response->json($metadata);
         } catch (Exception $exception) {

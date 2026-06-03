@@ -13,7 +13,6 @@ namespace Plugins\Features\TranslationVersions;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 
@@ -27,36 +26,35 @@ interface VersionHandlerInterface
      * @param SegmentTranslationStruct $new_translation
      * @param SegmentTranslationStruct $old_translation
      *
-     * @return mixed
+     * @return bool
      */
     public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool;
 
     /**
-     * @param $params array{
+     * @param array{
      *     translation: SegmentTranslationStruct,
      *     old_translation: SegmentTranslationStruct,
-     *     propagation: array{
-     *          totals: array,
-     *          propagated_ids: int[],
-     *          segments_for_propagation: array
-     *     },
+     *     propagation: array<string, mixed>,
      *     chunk: JobStruct,
      *     user: UserStruct,
      *     source_page_code: int,
      *     features: FeatureSet,
      *     project: ProjectStruct
-     * }
-     *
+     * } $params
      *
      * @return void
      */
     public function storeTranslationEvent(array $params): void;
 
-    /**
-     * @param SegmentTranslationStruct $translationStruct
-     *
-     * @return array
-     */
-    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array;
+     /**
+      * @param SegmentTranslationStruct $translationStruct
+      *
+      * @return array{
+      *     totals?: array<string, mixed>,
+      *     propagated_ids?: int[],
+      *     segments_for_propagation?: array<int, mixed>
+      * }
+      */
+     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array;
 
 }

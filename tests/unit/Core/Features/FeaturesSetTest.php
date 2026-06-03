@@ -1,0 +1,66 @@
+<?php
+
+
+namespace Matecat\Core\Features;
+use Features\Airbnb;
+use Matecat\TestHelpers\AbstractTest;
+use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
+use PHPUnit\Framework\Attributes\Test;
+
+
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 01/02/19
+ * Time: 16.34
+ *
+ */
+class FeaturesSetTest extends AbstractTest
+{
+
+    protected static array $airbnbDependencies = [
+        FeatureCodes::TRANSLATION_VERSIONS,
+//            FeatureCodes::REVIEW_EXTENDED  // FIX: Undefined index: review_extended
+    ];
+
+    protected static array $abstractReviewDependencies = [
+        FeatureCodes::TRANSLATION_VERSIONS
+    ];
+
+    protected function _testForDependenciesOrder($dependenciesSet)
+    {
+        foreach (self::$airbnbDependencies as $dep) {
+            $this->assertTrue($dependenciesSet[$dep] < $dependenciesSet[Airbnb::FEATURE_CODE]);
+        }
+
+        return true;
+    }
+
+    /**
+     * This test is dependent from shuffle, to get a better coverage (heuristic), let's run it 500 times.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testSortFeatures()
+    {
+        for ($i = 0; $i < 500; $i++) {
+            $codes = explode(",", "airbnb,translation_versions,project_completion,review_extended,translated");
+            shuffle($codes);
+            shuffle($codes);
+            $code_string = implode(",", $codes);
+
+            $featureSet = new FeatureSet();
+            $featureSet->loadFromString($code_string);
+
+            $set = array_flip(array_values($featureSet->getCodes()));
+
+            $this->assertCount(8, $featureSet->getCodes());
+            $this->assertCount(8, $set);
+
+            $this->assertTrue($this->_testForDependenciesOrder($set));
+        }
+    }
+
+}

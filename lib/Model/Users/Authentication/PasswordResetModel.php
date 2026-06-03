@@ -12,6 +12,8 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use RuntimeException;
+use TypeError;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -24,16 +26,22 @@ class PasswordResetModel
      * @var ?UserStruct
      */
     protected ?UserStruct $user = null;
+    /** @var array<string, mixed> */
     protected array $session;
+    protected UserDao $userDao;
 
     /**
-     * @param array $session reference to global $_SESSSION var
+     * @param array<string, mixed> $session reference to global $_SESSSION var
      * @param string|null $token
+     * @param UserDao|null $userDao
+     *
+     * @throws TypeError
      */
-    public function __construct(array &$session, ?string $token = null)
+    public function __construct(array &$session, ?string $token = null, ?UserDao $userDao = null)
     {
         $this->token = $token;
         $this->session =& $session;
+        $this->userDao = $userDao ?? new UserDao();
         if (empty($token)) {
             $this->token = $session['password_reset_token'];
         }
@@ -54,15 +62,14 @@ class PasswordResetModel
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
-    protected function getUserFromResetToken(): ?UserStruct
-    {
-        if (!isset($this->user)) {
-            $dao = new UserDao();
-            $this->user = $dao->getByConfirmationToken($this->token);
-        }
+     protected function getUserFromResetToken(): ?UserStruct
+     {
+         if (!isset($this->user)) {
+             $this->user = $this->userDao->getByConfirmationToken($this->token ?? throw new RuntimeException('Missing reset token'));
+         }
 
-        return $this->user;
-    }
+         return $this->user;
+     }
 
     /**
      * Validates the user based on the reset token
@@ -78,9 +85,9 @@ class PasswordResetModel
             throw new ValidationError('Invalid authentication token');
         }
 
-        if (strtotime($this->user->confirmation_token_created_at) < strtotime('30 minutes ago')) {
+        if (strtotime($this->user->confirmation_token_created_at ?? '') < strtotime('30 minutes ago')) {
             $this->user->clearAuthToken();
-            UserDao::updateStruct($this->user, ['fields' => ['confirmation_token']]);
+            $this->userDao->updateStruct($this->user, ['fields' => ['confirmation_token']]);
 
             throw new ValidationError('Auth token expired, repeat the operation.');
         }
@@ -94,6 +101,7 @@ class PasswordResetModel
      * @return void
      * @throws ValidationError
      * @throws Exception
+     * @throws TypeError
      */
     public function resetPassword(string $new_password): void
     {
@@ -105,7 +113,8 @@ class PasswordResetModel
 
         unset($this->session['password_reset_token']);
 
-        $this->user->pass = Utils::encryptPass($new_password, $this->user->salt);
+        $salt = $this->user->salt ?? throw new RuntimeException('User salt must be set');
+        $this->user->pass = Utils::encryptPass($new_password, $salt);
 
         // reset token
         $this->user->clearAuthToken();
@@ -124,9 +133,9 @@ class PasswordResetModel
             $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        UserDao::updateStruct($this->user, $fieldsToUpdate);
-        (new UserDao)->destroyCacheByEmail($this->user->email);
-        (new UserDao)->destroyCacheByUid($this->user->uid);
+        $this->userDao->updateStruct($this->user, $fieldsToUpdate);
+        $this->userDao->destroyCacheByEmail($this->user->email ?? throw new RuntimeException('User email must be set before cache invalidation'));
+        $this->userDao->destroyCacheByUid($this->user->uid ?? throw new RuntimeException('User uid must be set before cache invalidation'));
     }
 
     /**

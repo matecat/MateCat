@@ -20,6 +20,9 @@ trait LogsMessages
 {
     private MatecatLogger $logger;
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     private function log(mixed $_msg, ?Throwable $exception = null): void
     {
         if (!$exception) {

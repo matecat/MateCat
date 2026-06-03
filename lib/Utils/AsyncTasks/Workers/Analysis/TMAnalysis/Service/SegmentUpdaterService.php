@@ -2,7 +2,6 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
-use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use PDOException;
@@ -20,8 +19,8 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
 
     /**
      * @param array<string, mixed> $tmData
-     * @throws PDOException
-     * @throws Exception
+     * @throws \PDOException
+     * @throws \Exception
      */
     public function setAnalysisValue(array $tmData): int
     {

@@ -3,10 +3,11 @@
 namespace Utils\Validator;
 
 use Matecat\Locales\Languages;
+use RuntimeException;
 use Utils\Files\CSV;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class GlossaryCSVValidator extends AbstractValidator
 {
@@ -14,10 +15,9 @@ class GlossaryCSVValidator extends AbstractValidator
     /**
      * @inheritDoc
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        $headers = $this->getHeaders($object->csv);
+        $headers = $this->getHeaders($object['csv']);
         $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
@@ -31,7 +31,7 @@ class GlossaryCSVValidator extends AbstractValidator
         preg_match_all('/^(forbidden)?(domain)?(subdomain)?(definition)?(((' . $allowedLanguagesRegex . ')((notes)?(example of use)?){2,})+$)/', implode("", $headers), $headerMatches);
 
         if (empty($headerMatches[0])) {
-            $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
+            $this->errors[] = new RuntimeException('The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.');
 
             return null;
         }
@@ -40,16 +40,14 @@ class GlossaryCSVValidator extends AbstractValidator
     }
 
     /**
-     * @param string $filePath
-     *
-     * @return array
+     * @return list<string>
      */
     private function getHeaders(string $filePath): array
     {
-        $headers = CSV::headers($filePath);
-        $headers = array_map([Utils::class, 'trimAndLowerCase'], $headers);
+        $headers = CSV::headers($filePath) ?? [];
+        $headers = array_map(static fn(?string $h): string => Utils::trimAndLowerCase($h ?? ''), $headers);
 
-        return Utils::removeEmptyStringFromTail($headers);
+        return array_values(Utils::removeEmptyStringFromTail($headers));
     }
 
     /**
@@ -79,7 +77,7 @@ class GlossaryCSVValidator extends AbstractValidator
     }
 
     /**
-     * @param array $headers
+     * @param list<string> $headers
      * @param Languages $languagesHandler
      *
      * @return bool
@@ -98,7 +96,7 @@ class GlossaryCSVValidator extends AbstractValidator
         $languages = array_diff($headers, $skipKeys);
 
         if (count($languages) < 2) {
-            $this->errors[] = 'Only one language detected, please upload a glossary with at least two languages. In case of doubts, refer to <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this page</a>.';
+            $this->errors[] = new RuntimeException('Only one language detected, please upload a glossary with at least two languages. In case of doubts, refer to <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this page</a>.');
 
             return false;
         }
@@ -106,7 +104,7 @@ class GlossaryCSVValidator extends AbstractValidator
         foreach ($languages as $language) {
             if (empty($language)) {
                 $error = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
-                $this->errors[] = $error;
+                $this->errors[] = new RuntimeException($error);
 
                 return false;
             }
@@ -116,7 +114,7 @@ class GlossaryCSVValidator extends AbstractValidator
                     $language,
                     '_'
                 ) ? 'The column header <b>' . $language . '</b> contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : '<b>' . $language . '</b> is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
-                $this->errors[] = $error;
+                $this->errors[] = new RuntimeException($error);
 
                 return false;
             }

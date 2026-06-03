@@ -8,12 +8,16 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
+use PDOException;
+use TypeError;
 
 class RevisionFeedbackController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
     /**
+     * @throws TypeError
+     * @throws PDOException
      */
     public function feedback(): void
     {
@@ -26,7 +30,7 @@ class RevisionFeedbackController extends KleinController
 
         $this->return404IfTheJobWasDeleted();
 
-        $rows = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
+        $rows = $this->createFeedbackDao()->insertOrUpdate($feedbackStruct);
         $status = ($rows > 0) ? 'ok' : 'ko';
 
         $this->response->json([
@@ -44,5 +48,9 @@ class RevisionFeedbackController extends KleinController
 
         $this->appendValidator($validator);
     }
-}
 
+    protected function createFeedbackDao(): FeedbackDAO
+    {
+        return new FeedbackDAO();
+    }
+}

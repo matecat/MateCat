@@ -10,7 +10,6 @@
 namespace Model\DataAccess;
 
 use Countable;
-use DomainException;
 use ReflectionObject;
 use ReflectionProperty;
 use stdClass;
@@ -20,8 +19,12 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
 
     use RecursiveArrayCopy;
 
+    /** @var array<string, mixed> */
     protected array $cached_results = [];
 
+    /**
+     * @param array<string, mixed> $array_params
+     */
     public function __construct(array $array_params = [])
     {
         if ($array_params != null) {
@@ -41,12 +44,12 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @param string $name
      * @param mixed $value
      *
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __set($name, $value)
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Unknown property ' . $name);
+            throw new UnknownPropertyException($name);
         }
         $this->$name = $value;
     }
@@ -84,10 +87,8 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      */
     protected function cachable(string $cache_key_name, callable $function)
     {
-        /** @var  $resultset ?T */
         $resultset = $this->cached_results[$cache_key_name] ?? null;
         if ($resultset == null) {
-            /** @var  $resultset ?T */
             $resultset = $this->cached_results[$cache_key_name] = call_user_func($function);
         }
 
@@ -95,21 +96,28 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     }
 
     /**
-     * @param $name
+     * @param string $name
      *
      * @return mixed
-     * @throws DomainException
+     * @throws UnknownPropertyException
      */
     public function __get($name)
     {
         if (!property_exists($this, $name)) {
-            throw new DomainException('Trying to get an undefined property ' . $name);
+            throw new UnknownPropertyException($name);
         }
 
         return $this->$name;
     }
 
-    public function setTimestamp($attribute, $timestamp)
+    /**
+     * @param string $attribute
+     * @param int    $timestamp
+     *
+     * @return void
+     * @throws UnknownPropertyException
+     */
+    public function setTimestamp(string $attribute, int $timestamp): void
     {
         $this->$attribute = date('c', $timestamp);
     }
@@ -117,9 +125,9 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     /**
      * Compatibility with ArrayObject
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getArrayCopy()
+    public function getArrayCopy(): array
     {
         return $this->toArray();
     }

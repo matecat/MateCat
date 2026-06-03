@@ -29,26 +29,22 @@ class EnginesFactory
      */
     public static function getInstance(int $id, ?string $engineClass = null): AbstractEngine
     {
-        if (!is_numeric($id)) {
-            throw new Exception("Missing id engineRecord", -1);
-        }
-
         $engineDAO = new EngineDAO(Database::obtain());
         $engineStruct = EngineStruct::getStruct();
         $engineStruct->id = $id;
 
         $eng = $engineDAO->setCacheTTL(60 * 5)->read($engineStruct);
 
-        /**
-         * @var $engineRecord EngineStruct
-         */
+        /** @var EngineStruct|null $engineRecord */
         $engineRecord = $eng[0] ?? null;
 
         if (empty($engineRecord)) {
             throw new Exception("Engine $id not found", -2);
         }
 
-        $className = self::getFullyQualifiedClassName($engineRecord->class_load);
+        $className = self::getFullyQualifiedClassName($engineRecord->class_load ?? throw new Exception("Engine $id has no class_load"));
+
+        /** @var T $engine */
         $engine = new $className($engineRecord);
 
         if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
@@ -66,10 +62,13 @@ class EnginesFactory
      */
     public static function createTempInstance(EngineStruct $engineRecord): EngineInterface
     {
-        $className = self::getFullyQualifiedClassName($engineRecord->class_load);
+        $className = self::getFullyQualifiedClassName($engineRecord->class_load ?? throw new Exception("Engine has no class_load"));
         $engineRecord->class_load = $className;
 
-        return new $engineRecord->class_load($engineRecord);
+        /** @var EngineInterface $engine */
+        $engine = new $className($engineRecord);
+
+        return $engine;
     }
 
     /**

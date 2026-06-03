@@ -46,6 +46,7 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface
 
     /**
      * @inheritDoc
+     * @throws RuntimeException
      */
     public function guessMimeType(string $path): ?string
     {
@@ -54,6 +55,10 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface
         }
         $buffer = fread($fp, 1024);
         fclose($fp);
+
+        if ($buffer === false) {
+            return null;
+        }
 
         $r1 = stripos($buffer, '<?xml') !== false;
         $r2 = stripos($buffer, '<xliff') !== false && $r1;

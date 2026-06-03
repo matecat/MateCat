@@ -1,0 +1,109 @@
+<?php
+
+namespace Model\Search;
+
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDatabase;
+use Model\Translations\SegmentTranslationDao;
+use PDOException;
+use Predis\ClientInterface;
+use ReflectionException;
+use Utils\Redis\RedisHandler;
+
+class RedisReplaceEventDao extends AbstractDao implements ReplaceEventDAOInterface
+{
+
+    const string TABLE = 'replace_events';
+
+    /**
+     * @var ClientInterface
+     */
+    private ClientInterface $redis;
+
+    /**
+     * @var int
+     */
+    private int $ttl = 10800; // 3 hours
+
+    private ?SegmentTranslationDao $segmentTranslationDao;
+
+    /**
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    public function __construct(?IDatabase $con = null, ?ClientInterface $redis = null, ?SegmentTranslationDao $segmentTranslationDao = null)
+    {
+        parent::__construct($con);
+
+        $this->redis = $redis ?? (new RedisHandler())->getConnection();
+        $this->segmentTranslationDao = $segmentTranslationDao;
+    }
+
+    /**
+     * @param int $id_job
+     * @param int $version
+     *
+     * @return ReplaceEventStruct[]
+     */
+    public function getEvents(int $id_job, int $version): array
+    {
+        $results = [];
+
+        foreach ($this->redis->hgetall($this->getRedisKey($id_job, $version)) as $value) {
+            $results[] = unserialize($value);
+        }
+
+        return $results;
+    }
+
+    /**
+     * @param ReplaceEventStruct $eventStruct
+     *
+     * @return int
+     * @throws PDOException
+     */
+    public function save(ReplaceEventStruct $eventStruct): int
+    {
+        // if not directly passed
+        // try to assign the current version of the segment if it exists
+        if (null === $eventStruct->segment_version) {
+            $dao = $this->segmentTranslationDao ?? new SegmentTranslationDao();
+            $segment = $dao->getByJobId($eventStruct->id_job)[0];
+            $eventStruct->segment_version = $segment->version_number;
+        }
+
+        $eventStruct->created_at = date('Y-m-d H:i:s');
+
+        // insert
+        $replaceVersion = (int)$eventStruct->replace_version;
+        $redisKey = $this->getRedisKey($eventStruct->id_job, $replaceVersion);
+        $index = count($this->getEvents($eventStruct->id_job, $replaceVersion));
+
+        $result = $this->redis->hset($redisKey, (string)$index, serialize($eventStruct));
+        $this->redis->expire($redisKey, $this->ttl);
+
+        return $result ? 1 : 0;
+    }
+
+    /**
+     * @param int $idJob
+     * @param int $version
+     *
+     * @return string
+     */
+    private function getRedisKey(int $idJob, int $version): string
+    {
+        return md5(self::TABLE . '::' . $idJob . '::' . $version);
+    }
+
+    /**
+     * @param $ttl
+     *
+     * @return void
+     */
+    public function setTtl(int $ttl): void
+    {
+        $this->ttl = $ttl;
+    }
+}

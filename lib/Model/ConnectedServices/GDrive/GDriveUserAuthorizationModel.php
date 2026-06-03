@@ -10,12 +10,14 @@ namespace Model\ConnectedServices\GDrive;
 
 use Exception;
 use Google\Service\Oauth2\Userinfo;
+use Google_Client;
 use Google_Service_Oauth2;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -25,15 +27,20 @@ class GDriveUserAuthorizationModel
     protected UserStruct $user;
 
     protected Userinfo $userInfo;
-    protected array|string $token;
+    protected string $token;
 
     protected string $user_email;
     protected string $user_remote_id;
     protected string $user_name;
 
-    public function __construct(UserStruct $user)
+    protected ?ConnectedServiceDao $dao = null;
+    protected ?Google_Client $googleClient = null;
+
+    public function __construct(UserStruct $user, ?ConnectedServiceDao $dao = null, ?Google_Client $googleClient = null)
     {
         $this->user = $user;
+        $this->dao = $dao;
+        $this->googleClient = $googleClient;
     }
 
     /**
@@ -50,13 +57,14 @@ class GDriveUserAuthorizationModel
      * @throws ValidationError
      * @throws \Google\Service\Exception
      * @throws Exception
+     * @throws TypeError
      */
     public function updateOrCreateRecordByCode(string $code): void
     {
         $this->__collectProperties($code);
 
         // We have the user info email and name, we can save it along with the gdrive token to identify it.
-        $dao = new ConnectedServiceDao();
+        $dao = $this->dao ?? new ConnectedServiceDao();
         $service = $dao->findUserServicesByNameAndEmail(
             $this->user,
             ConnectedServiceDao::GDRIVE_SERVICE,
@@ -76,10 +84,11 @@ class GDriveUserAuthorizationModel
      * @param ConnectedServiceStruct $service
      *
      * @throws Exception
+     * @throws \TypeError
      */
     private function __updateService(ConnectedServiceStruct $service): void
     {
-        $dao = new ConnectedServiceDao();
+        $dao = $this->dao ?? new ConnectedServiceDao();
         $dao->updateOauthToken($this->token, $service);
 
         $service->expired_at = null;
@@ -90,6 +99,7 @@ class GDriveUserAuthorizationModel
     /**
      * @return ConnectedServiceStruct
      * @throws Exception
+     * @throws \TypeError
      */
     private function __insertService(): ConnectedServiceStruct
     {
@@ -102,11 +112,16 @@ class GDriveUserAuthorizationModel
             'created_at' => Utils::mysqlTimestamp(time())
         ]);
         $service->setEncryptedAccessToken($this->token);
-        $dao = new ConnectedServiceDao();
+        $dao = $this->dao ?? new ConnectedServiceDao();
 
         $lastId = $dao->insertStruct($service);
 
-        return $dao->findById($lastId);
+        if ($lastId === false) {
+            throw new Exception('Unable to insert connected service');
+        }
+
+        return $dao->fetchById($lastId, ConnectedServiceStruct::class)
+            ?? throw new Exception('Unable to retrieve inserted connected service');
     }
 
     /**
@@ -114,18 +129,16 @@ class GDriveUserAuthorizationModel
      *
      * @throws \Google\Service\Exception
      * @throws Exception
+     * @throws TypeError
      */
-    private function __collectProperties(string $code): void
+    protected function __collectProperties(string $code): void
     {
-        $gdriveClient = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+        $gdriveClient = $this->googleClient ?? (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
         $gdriveClient->fetchAccessTokenWithAuthCode($code);
-        $this->token = $gdriveClient->getAccessToken();
-
-        if (is_array($this->token)) {
-            // Enforce token to be passed passed around as json_string, to favour encryption and storage.
-            // Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
-            $this->token = GDriveTokenHandler::accessTokenToJsonString($this->token);
-        }
+        $accessToken = $gdriveClient->getAccessToken();
+        $this->token = is_array($accessToken)
+            ? GDriveTokenHandler::accessTokenToJsonString($accessToken)
+            : $accessToken;
 
         $infoService = new Google_Service_Oauth2($gdriveClient);
         $this->userInfo = $infoService->userinfo->get();

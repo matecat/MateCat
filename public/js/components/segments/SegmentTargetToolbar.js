@@ -35,10 +35,11 @@ export const SegmentTargetToolbar = ({
   const [isIconsBundled, setIsIconsBundled] = useState(false)
 
   const getIconButton = (props) => {
-    const {children, ...rest} = props
+    const {children, key, ...rest} = props
 
     return (
       <Button
+        key={key}
         className="segment-target-toolbar-icon"
         size={BUTTON_SIZE.ICON_SMALL}
         mode={BUTTON_MODE.OUTLINE}
@@ -54,17 +55,20 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
-            component: <LaraStyles {...{key: 'larastyle', sid, segment}} />,
+            component: <LaraStyles key="larastyle" sid={sid} segment={segment} />,
           },
           {
             group: 0,
-            component: <AiFeedback {...{key: 'aifeedback', sid, segment}} />,
+            component: <AiFeedback key="aifeedback" sid={sid} segment={segment} />,
           },
           {
             group: 0,
             component: (
               <AiAlternatives
-                {...{key: 'aialternatives', sid, segment, editArea}}
+                key="aialternatives"
+                sid={sid}
+                segment={segment}
+                editArea={editArea}
               />
             ),
           },
@@ -232,9 +236,9 @@ export const SegmentTargetToolbar = ({
 
   return (
     <div className="segment-target-toolbar">
-      {buttons.map((button) => {
-        if (button.dropdownGroup) return button.dropdownGroup
-        return button.component
+      {buttons.map((button, index) => {
+        if (button.dropdownGroup) return <React.Fragment key={`group-${index}`}>{button.dropdownGroup}</React.Fragment>
+        return <React.Fragment key={`btn-${index}`}>{button.component}</React.Fragment>
       })}
     </div>
   )

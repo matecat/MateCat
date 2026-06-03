@@ -17,6 +17,13 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class FiltersConfigTemplateController extends KleinController
 {
+    private ?FiltersConfigTemplateDao $filtersConfigTemplateDao = null;
+
+    private function getFiltersConfigTemplateDao(): FiltersConfigTemplateDao
+    {
+        return $this->filtersConfigTemplateDao ??= new FiltersConfigTemplateDao();
+    }
+
     protected function afterConstruct(): void
     {
         parent::afterConstruct();
@@ -53,7 +60,7 @@ class FiltersConfigTemplateController extends KleinController
 
             $this->response->status()->setCode(200);
 
-            return $this->response->json(FiltersConfigTemplateDao::getAllPaginated($uid, "/api/v3/filters-config-template?page=", (int)$currentPage, (int)$pagination));
+            return $this->response->json($this->getFiltersConfigTemplateDao()->getAllPaginated($uid, "/api/v3/filters-config-template?page=", (int)$currentPage, (int)$pagination));
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
@@ -72,7 +79,7 @@ class FiltersConfigTemplateController extends KleinController
         try {
             $id = (int)$this->request->param('id');
 
-            $model = FiltersConfigTemplateDao::getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getFiltersConfigTemplateDao()->getByIdAndUser($id, $this->getUser()->uid);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -107,7 +114,7 @@ class FiltersConfigTemplateController extends KleinController
 
             $json = $this->request->body();
             $this->validateJSON($json);
-            $struct = FiltersConfigTemplateDao::createFromJSON($json, $this->getUser()->uid);
+            $struct = $this->getFiltersConfigTemplateDao()->createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
 
@@ -162,7 +169,7 @@ class FiltersConfigTemplateController extends KleinController
             $uid = $this->getUser()->uid;
 
 
-            $model = FiltersConfigTemplateDao::getByIdAndUser($id, $uid);
+            $model = $this->getFiltersConfigTemplateDao()->getByIdAndUser($id, $uid);
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -171,7 +178,7 @@ class FiltersConfigTemplateController extends KleinController
             $json = $this->request->body();
             $this->validateJSON($json);
 
-            $struct = FiltersConfigTemplateDao::editFromJSON($model, $json, $uid);
+            $struct = $this->getFiltersConfigTemplateDao()->editFromJSON($model, $json, $uid);
 
             $this->response->code(200);
 
@@ -204,7 +211,7 @@ class FiltersConfigTemplateController extends KleinController
             $id = (int)$this->request->paramsNamed()->get('id');
             $uid = $this->getUser()->uid;
 
-            $count = FiltersConfigTemplateDao::remove($id, $uid);
+            $count = $this->getFiltersConfigTemplateDao()->remove($id, $uid);
 
             if ($count == 0) {
                 throw new Exception('Model not found', 404);

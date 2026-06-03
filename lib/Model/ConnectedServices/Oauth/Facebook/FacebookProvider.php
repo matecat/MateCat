@@ -4,6 +4,7 @@ namespace Model\ConnectedServices\Oauth\Facebook;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Facebook;
 use League\OAuth2\Client\Token\AccessToken;
@@ -20,8 +21,9 @@ class FacebookProvider extends AbstractProvider
      * @param string|null $redirectUrl
      *
      * @return Facebook
+     * @throws InvalidArgumentException
      */
-    public static function getClient(?string $redirectUrl = null): Facebook
+    public function getClient(?string $redirectUrl = null): Facebook
     {
         return new Facebook([
             'clientId' => AppConfig::$FACEBOOK_OAUTH_CLIENT_ID,
@@ -46,7 +48,7 @@ class FacebookProvider extends AbstractProvider
             ]
         ];
 
-        $facebookClient = static::getClient($this->redirectUrl);
+        $facebookClient = $this->getClient($this->redirectUrl);
 
         return $facebookClient->getAuthorizationUrl($options);
     }
@@ -57,10 +59,12 @@ class FacebookProvider extends AbstractProvider
      * @return AccessToken
      * @throws IdentityProviderException
      * @throws GuzzleException
+     * @throws \UnexpectedValueException
+     * @throws InvalidArgumentException
      */
     public function getAccessTokenFromAuthCode(string $code): AccessToken
     {
-        $facebookClient = static::getClient($this->redirectUrl);
+        $facebookClient = $this->getClient($this->redirectUrl);
 
         /** @var AccessToken $token */
         $token = $facebookClient->getAccessToken('authorization_code', [
@@ -76,19 +80,21 @@ class FacebookProvider extends AbstractProvider
      * @return ProviderUser
      * @throws GuzzleException
      * @throws IdentityProviderException
+     * @throws \TypeError
+     * @throws InvalidArgumentException
      */
     public function getResourceOwner(AccessToken $token): ProviderUser
     {
-        $facebookClient = static::getClient($this->redirectUrl);
+        $facebookClient = $this->getClient($this->redirectUrl);
 
         $fetched = $facebookClient->getResourceOwner($token);
 
         $user = new ProviderUser();
-        $user->email = $fetched->getEmail();
-        $user->name = $fetched->getFirstName();
+        $user->email = $fetched->getEmail() ?? throw new \TypeError('Facebook OAuth: email is required');
+        $user->name = $fetched->getFirstName() ?? throw new \TypeError('Facebook OAuth: name is required');
         $user->lastName = $fetched->getLastName();
         $user->picture = $fetched->getPictureUrl();
-        $user->authToken = $token;
+        $user->authToken = (string) $token;
         $user->provider = self::PROVIDER_NAME;
 
         return $user;

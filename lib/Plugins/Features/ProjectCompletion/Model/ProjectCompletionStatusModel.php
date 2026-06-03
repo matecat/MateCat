@@ -15,6 +15,7 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterJobPasswordToReviewPasswordEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -29,19 +30,34 @@ class ProjectCompletionStatusModel
      */
     protected ProjectStruct $project;
 
+    /** @var array<string, mixed> */
     protected array $cachedStatus = [];
 
-    public function __construct(ProjectStruct $project)
-    {
+    private ChunkCompletionEventDao $chunkCompletionEventDao;
+    private FeatureSet $featureSet;
+
+    /**
+     * @throws Exception
+     */
+    public function __construct(
+        ProjectStruct $project,
+        ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
+        ?FeatureSet $featureSet = null,
+    ) {
         $this->project = $project;
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        $this->featureSet = $featureSet ?? new FeatureSet();
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws NotFoundException
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws ValidationError
      * @throws AuthenticationError
+     * @throws Exception
      */
     public function getStatus(): array
     {
@@ -59,6 +75,8 @@ class ProjectCompletionStatusModel
      * @throws ValidationError
      * @throws AuthenticationError
      * @throws Exception
+     *
+     * @return array<string, mixed>
      */
     private function populateStatus(): array
     {
@@ -74,14 +92,13 @@ class ProjectCompletionStatusModel
             $translate = $this->dataForChunkStatus($chunk, false);
             $revise = $this->dataForChunkStatus($chunk, true);
 
-            $featureSet = new FeatureSet();
-            $featureSet->loadForProject($this->project);
-
-            $revise['password'] = $featureSet->filter(
-                'filter_job_password_to_review_password',
-                $chunk->password,
-                $chunk->id
+            $this->featureSet->loadForProject($this->project);
+            $filterJobPasswordToReviewPasswordEvent = new FilterJobPasswordToReviewPasswordEvent(
+                $chunk->password ?? throw new \RuntimeException('Chunk password is required'),
+                $chunk->id ?? throw new \RuntimeException('Chunk id is required')
             );
+            $this->featureSet->dispatch($filterJobPasswordToReviewPasswordEvent);
+            $revise['password'] = $filterJobPasswordToReviewPasswordEvent->getPassword();
 
             $response['translate'][] = $translate;
             $response['revise'][] = $revise;
@@ -97,11 +114,13 @@ class ProjectCompletionStatusModel
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws Exception
      */
     private function dataForChunkStatus(JobStruct $chunk, bool $is_review): array
     {
-        $record = ChunkCompletionEventDao::lastCompletionRecord($chunk, [
+        $record = $this->chunkCompletionEventDao->lastCompletionRecord($chunk, [
             'is_review' => $is_review
         ]);
 

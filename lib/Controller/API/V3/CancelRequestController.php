@@ -18,8 +18,6 @@ use Klein\Response;
 use Model\Exceptions\NotFoundException;
 use Model\Segments\SegmentDisabledService;
 use Model\Translations\SegmentTranslationDao;
-use Model\Translations\SegmentTranslationStruct;
-use ReflectionException;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\Utils;
 
@@ -28,9 +26,14 @@ class CancelRequestController extends KleinController
     use RateLimiterTrait;
     use ChunkNotFoundHandlerTrait;
 
+    protected SegmentDisabledService $segmentDisabledService;
+    protected SegmentTranslationDao $segmentTranslationDao;
+
     protected function afterConstruct(): void
     {
         $this->appendValidator(new LoginValidator($this));
+        $this->segmentDisabledService = new SegmentDisabledService();
+        $this->segmentTranslationDao = new SegmentTranslationDao();
     }
 
     /**
@@ -56,10 +59,8 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        $service = new SegmentDisabledService();
-
-        if ($service->isDisabled($id_segment)) {
-            $service->enable($id_segment);
+        if ($this->segmentDisabledService->isDisabled($id_segment)) {
+            $this->segmentDisabledService->enable($id_segment);
         }
 
         $this->response->json([
@@ -90,10 +91,8 @@ class CancelRequestController extends KleinController
             return;
         }
 
-        $service = new SegmentDisabledService();
-
-        if (!$service->isDisabled($id_segment)) {
-            $service->disable($id_segment);
+        if (!$this->segmentDisabledService->isDisabled($id_segment)) {
+            $this->segmentDisabledService->disable($id_segment);
         }
 
         $this->response->json([
@@ -133,7 +132,7 @@ class CancelRequestController extends KleinController
         }
 
         // 3. check segment translation
-        $segmentTranslation = $this->findSegmentTranslation($id_segment, $id_job);
+        $segmentTranslation = $this->segmentTranslationDao->findBySegmentAndJob($id_segment, $id_job);
         if (null === $segmentTranslation) {
             throw new NotFoundException('Segment not found');
         }
@@ -156,15 +155,4 @@ class CancelRequestController extends KleinController
         }
     }
 
-    /**
-     * @param int $id_segment
-     * @param int $id_job
-     *
-     * @return ?SegmentTranslationStruct
-     * @throws ReflectionException
-     */
-    protected function findSegmentTranslation(int $id_segment, int $id_job): ?SegmentTranslationStruct
-    {
-        return SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
-    }
 }

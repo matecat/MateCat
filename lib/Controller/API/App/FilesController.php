@@ -26,12 +26,12 @@ class FilesController extends AbstractStatefulKleinController
     public function segments(): void
     {
         // `file_part_id` has the priority
-        if (isset($_POST['file_part_id'])) {
-            $filePartId = $_POST['file_part_id'];
+        if (isset($this->params['file_part_id'])) {
+            $filePartId = $this->params['file_part_id'];
             $this->validateInteger($filePartId);
             $this->getFirstAndLastSegmentFromFilePartId($filePartId);
-        } elseif (isset($_POST['file_id'])) {
-            $fileId = $_POST['file_id'];
+        } elseif (isset($this->params['file_id'])) {
+            $fileId = $this->params['file_id'];
             $this->validateInteger($fileId);
             $this->getFirstAndLastSegmentFromFileId($fileId);
         } else {
@@ -71,7 +71,7 @@ class FilesController extends AbstractStatefulKleinController
      */
     private function getFirstAndLastSegmentFromFileId(int $fileId): void
     {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
+        $fileInfo = (new JobDao())->getFilesInfoInJob($this->chunk, 60 * 5);
 
         if (empty($fileInfo)) {
             throw new NotFoundException('File id ' . $fileId . ' was not found');

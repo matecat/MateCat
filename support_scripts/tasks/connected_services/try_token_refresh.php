@@ -1,6 +1,9 @@
 <?php
 
 
+use Model\ConnectedServices\ConnectedServiceDao;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\DataAccess\Database;
 use Utils\Registry\AppConfig;
@@ -35,13 +38,13 @@ if ( !array_key_exists( 'id_service', $options ) ) {
 }
 
 
-$dao     = new \Model\ConnectedServices\ConnectedServiceDao();
-$service = $dao->findById( $options[ 'id_service' ] );
+$dao     = new ConnectedServiceDao();
+$service = $dao->fetchById( (int)$options[ 'id_service' ], ConnectedServiceStruct::class ) ?? throw new Exception( "service not found" );
 
 //FIX
-$client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
+$client = (new GoogleProvider)->getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
 
-$verifier = new \Model\ConnectedServices\GDrive\GDriveTokenVerifyModel( $service );
+$verifier = new GDriveTokenVerifyModel( $service );
 $verifier->validOrRefreshed( $client );
 var_dump( $verifier );
 

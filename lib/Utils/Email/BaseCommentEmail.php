@@ -15,6 +15,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
 
 class BaseCommentEmail extends AbstractEmail
 {
@@ -67,18 +68,22 @@ class BaseCommentEmail extends AbstractEmail
 
         $this->doSend(
             $recipient,
-            $this->title,
+            $this->title ?? '',
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
     /**
+     * @return array<string, mixed>
+     * @throws Exception
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     protected function _getTemplateVariables(): array
     {
-        $content = CommentDao::placeholdContent($this->comment->message);
+        $message = $this->comment->message ?? throw new RuntimeException('Comment message is required to build email content');
+        $content = (new CommentDao())->placeholdContent($message);
 
         return [
             'user' => $this->user->toArray(),

@@ -5,7 +5,7 @@ namespace Utils\Engines\Validators;
 use Exception;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class MMTGlossaryValidator extends AbstractValidator
 {
@@ -13,12 +13,13 @@ class MMTGlossaryValidator extends AbstractValidator
     /**
      * @param EngineValidatorObject $object
      *
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      * @throws Exception
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
-        $mmtGlossariesArray = json_decode($object->glossaryString, true);
+        $glossaryString = $object->glossaryString ?? throw new Exception('Glossary string required');
+        $mmtGlossariesArray = json_decode($glossaryString, true);
 
         if (!is_array($mmtGlossariesArray)) {
             throw new Exception("mmt_glossaries is not a valid JSON");

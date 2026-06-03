@@ -5,6 +5,7 @@ namespace Utils\Files;
 use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 
 class CSV
 {
@@ -14,6 +15,7 @@ class CSV
      *
      * @return false|string
      * @throws Exception
+     * @throws WriterException
      */
     public static function extract(UploadElement $file, string $prefix = ''): false|string
     {
@@ -38,22 +40,22 @@ class CSV
     }
 
     /**
-     * @param $filepath
-     *
-     * @return array
+     * @return list<string|null>|null
      */
-    public static function headers($filepath): array
+    public static function headers(string $filepath): ?array
     {
-        $csv = array_map("str_getcsv", file($filepath, FILE_SKIP_EMPTY_LINES));
+        $lines = file($filepath, FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return null;
+        }
+
+        $csv = array_map("str_getcsv", $lines);
 
         return array_shift($csv);
     }
 
     /**
-     * @param string $filepath
-     * @param string $delimiter
-     *
-     * @return array
+     * @return list<list<string|null>>
      */
     public static function parseToArray(string $filepath, string $delimiter = ','): array
     {
@@ -70,18 +72,19 @@ class CSV
     }
 
     /**
-     * @param string $filepath
-     * @param array $data
-     *
-     * @return bool
+     * @param list<list<string>> $data
      */
     public static function save(string $filepath, array $data = []): bool
     {
         File::create($filepath);
 
         $fp = fopen($filepath, 'w');
+        if ($fp === false) {
+            return false;
+        }
         foreach ($data as $fields) {
             if (!fputcsv($fp, $fields)) {
+                fclose($fp);
                 return false;
             }
         }

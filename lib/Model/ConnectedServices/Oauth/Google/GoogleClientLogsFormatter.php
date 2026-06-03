@@ -12,8 +12,6 @@ class GoogleClientLogsFormatter implements FormatterInterface
      * Formats a log record.
      *
      * @param LogRecord $record A record to format
-     *
-     * @return mixed The formatted record
      */
     public function format(LogRecord $record): string
     {
@@ -23,9 +21,9 @@ class GoogleClientLogsFormatter implements FormatterInterface
     /**
      * Formats a set of log records.
      *
-     * @param array $records A set of records to format
+     * @param array<int, LogRecord> $records A set of records to format
      *
-     * @return array The formatted set of records
+     * @return array<int, string> The formatted set of records
      */
     public function formatBatch(array $records): array
     {

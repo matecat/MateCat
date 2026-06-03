@@ -14,19 +14,20 @@ use Exception;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class IntentoEngineValidator extends AbstractValidator
 {
 
     /**
      * @param EngineValidatorObject $object
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      * @throws Exception
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
-        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
+        $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
         $config = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
@@ -34,12 +35,12 @@ class IntentoEngineValidator extends AbstractValidator
 
         $mt_result = $newTestCreatedMT->get($config);
 
-        if (isset($mt_result['error']['code'])) {
-            switch ($mt_result['error']['code']) {
+        if ($mt_result->error !== null) {
+            switch ($mt_result->error->code) {
                 // wrong provider credentials
                 case -2:
-                    $code = $mt_result['error']['http_code'] ?? 413;
-                    $message = $mt_result['error']['message'];
+                    $code = $mt_result->error->http_code ?? 413;
+                    $message = $mt_result->error->message;
                     break;
 
                 // not valid license
@@ -54,7 +55,7 @@ class IntentoEngineValidator extends AbstractValidator
                     break;
             }
 
-            throw new DomainException($message, $code);
+            throw new DomainException($message ?? 'Unknown error', (int)$code);
         }
 
         return null;

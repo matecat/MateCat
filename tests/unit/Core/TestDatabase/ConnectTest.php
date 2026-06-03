@@ -1,0 +1,151 @@
+<?php
+
+
+namespace Matecat\Core\TestDatabase;
+
+use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
+use PDO;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
+use ReflectionProperty;
+use Utils\Registry\AppConfig;
+
+
+/**
+ * @group  regression
+ * @covers \Model\DataAccess\Database::connect
+ * User: dinies
+ * Date: 11/04/16
+ * Time: 18.12
+ */
+#[Group('PersistenceNeeded')]
+class ConnectTest extends AbstractTest
+{
+    protected ReflectionClass $reflector;
+    protected ReflectionProperty $property;
+
+    /**
+     * @var IDatabase
+     */
+    protected IDatabase $databaseInstance;
+
+    /**
+     * @throws ReflectionException
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // get the singleton and close the connection
+        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->databaseInstance->close();
+
+        // reset the singleton static field instance
+        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->property = $this->reflector->getProperty('instance');
+
+        $this->property->setValue($this->databaseInstance, null);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    protected function checkInstanceReset()
+    {
+        // verify that the setup method has reset the connection
+        $connection = $this->reflector->getProperty('connection');
+
+        $current_value = $connection->getValue($this->databaseInstance);
+        $this->assertNull($current_value);
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+    }
+
+    /**
+     * It verifies that the variable connection in the database class is initialized
+     * after the call of the method 'connect'.
+     * @group  regression
+     * @covers Database::connect
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test_connect_connected()
+    {
+        // verify that the setup method has reset the connection
+        $this->checkInstanceReset();
+
+        // recreate the instance
+        $instance_after_reset = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_after_reset->connect();
+
+        $connection = $this->reflector->getProperty('connection');
+
+        $current_value = $connection->getValue($instance_after_reset);
+
+        $this->assertNotNull($current_value);
+        $this->assertTrue($current_value instanceof PDO);
+    }
+
+    /**
+     * It checks that the variable 'connection' of a newly created database instance is NULL without an explicit call to the 'connect' method.
+     * @group  regression
+     * @covers Database::connect
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test_connect_not_connected_without_explicit_call_to_connect()
+    {
+        // verify that the setup method has reset the connection
+        $this->checkInstanceReset();
+
+        $newDatabaseClassInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $connection = $this->reflector->getProperty('connection');
+
+        $current_value = $connection->getValue($newDatabaseClassInstance);
+        $this->assertNull($current_value);
+    }
+
+    /**
+     * This test checks the fact that two different newly created database connections are different objects
+     * despite the fact that they have the same initial values in their local variables.
+     * @group  regression
+     * @covers \Model\DataAccess\Database::connect
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function test_connect_different_hash_between_two_PDO_objects()
+    {
+        // verify that the setup method has reset the connection
+        $this->checkInstanceReset();
+
+        // ensure connection
+        $instance_after_first_reset = $this->databaseInstance->obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_after_first_reset->connect();
+
+        // get the PDO internal resource
+        $connection = $this->reflector->getProperty('connection');
+
+        $current_value_first_PDO = $connection->getValue($instance_after_first_reset);
+        $hash_first_PDO = spl_object_hash($current_value_first_PDO);
+
+        // close the PDO connection (set to null)
+        $instance_after_first_reset->close();
+
+        // get a fresh new connection
+        $instance_after_second_reset = $instance_after_first_reset->obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $instance_after_second_reset->connect();
+
+        // get the PDO internal resource
+        $current_value_second_PDO = $connection->getValue($instance_after_second_reset);
+        $hash_second_PDO = spl_object_hash($current_value_second_PDO);
+
+        $this->assertNotEquals($hash_first_PDO, $hash_second_PDO);
+    }
+
+}

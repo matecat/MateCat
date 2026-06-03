@@ -15,7 +15,11 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
-
+use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\HandleJsonNotesBeforeInsertEvent;
+use Model\FeaturesBase\Hook\Event\Run\BeforeProjectCreationEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostProjectCreateEvent;
+use Model\FeaturesBase\Hook\Event\Run\ValidateProjectCreationEvent;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -25,12 +29,14 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataMapper;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
@@ -157,6 +163,7 @@ class ProjectManager
             $this->filter,
             $this->features,
             $this->filesMetadataDao,
+            new SegmentMetadataMapper(),
             $this->logger,
         );
     }
@@ -265,6 +272,7 @@ class ProjectManager
     /**
      * Save features in project metadata
      * @throws ReflectionException
+     * @throws \PDOException
      */
     protected function saveFeaturesInMetadata(): void
     {
@@ -327,6 +335,7 @@ class ProjectManager
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
+     * @throws \PDOException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -343,9 +352,7 @@ class ProjectManager
             $teamData = $this->projectStructure->team instanceof TeamStruct
                 ? $this->projectStructure->team->getArrayCopy()
                 : (array)$this->projectStructure->team;
-            $this->projectStructure->team = new TeamStruct(
-                $this->features->filter('filter_team_for_project_creation', $teamData)
-            );
+            $this->projectStructure->team = new TeamStruct($teamData);
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
@@ -407,6 +414,7 @@ class ProjectManager
     /**
      * Initialize a Google Drive session if a UID is present in the session data.
      * @throws Exception
+     * @throws \TypeError
      */
     private function initGdriveSession(): void
     {
@@ -423,6 +431,8 @@ class ProjectManager
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
+     * @throws \PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -435,7 +445,7 @@ class ProjectManager
         $this->checkForProjectAssignment();
 
         SecondPassReview::loadAndValidateQualityFramework($this->projectStructure);
-        $this->features->run('validateProjectCreation', $this->projectStructure);
+        $this->features->dispatch(new ValidateProjectCreationEvent($this->projectStructure));
 
         if (count($this->projectStructure->result['errors']) > 0) {
             $this->log($this->projectStructure->result['errors']);
@@ -479,6 +489,9 @@ class ProjectManager
      * Validate and insert private TM keys. Aborts if validation errors occur.
      *
      * @throws EndQueueException
+     * @throws \DomainException
+     * @throws \TypeError
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function setPrivateTmKeysOrFail(string $firstTMXFileName): void
     {
@@ -495,6 +508,7 @@ class ProjectManager
      * Resolve the upload directory from config + upload token, and retrieve file hashes from storage.
      *
      * @return array<string, mixed> The link files structure with conversion hashes and zip hashes.
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function resolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
@@ -511,6 +525,7 @@ class ProjectManager
      * Push TMX files to MyMemory via TmKeyService.
      *
      * @throws EndQueueException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function pushTmxToMemory(): void
     {
@@ -528,6 +543,8 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \TypeError
      */
     private function handleZipFiles(array $linkFiles): void
     {
@@ -549,6 +566,8 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
+     * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function resolveFilesExtractSegmentsAndStoreData(
         AbstractFilesStorage $fs,
@@ -582,11 +601,13 @@ class ProjectManager
                 );
             }
 
-            $this->features->run("beforeProjectCreation", $this->projectStructure, [
+            $this->features->dispatch(new BeforeProjectCreationEvent(
+                $this->projectStructure,
+                [
                     'total_project_segments' => $this->total_segments,
-                    'files_raw_wc' => $this->files_word_count
+                    'files_raw_wc' => $this->files_word_count,
                 ]
-            );
+            ));
 
             $this->createProjectRecord();
             $this->saveFeaturesInMetadata();
@@ -631,6 +652,7 @@ class ProjectManager
      * @param array<int, array<string, mixed>> $totalFilesStructure
      *
      * @throws Exception
+     * @throws \TypeError
      */
     private function extractSegmentsFromFiles(array &$totalFilesStructure): void
     {
@@ -658,6 +680,9 @@ class ProjectManager
 
     /**
      * Map segment-extraction/project-creation error codes to user-friendly project errors.
+     *
+     * @throws RuntimeException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function mapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
     {
@@ -685,6 +710,8 @@ class ProjectManager
 
     /**
      * Determine project status and populate the result structure with success data.
+     *
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function determineStatusAndPopulateResult(): void
     {
@@ -748,11 +775,16 @@ class ProjectManager
             (new ProjectDao())->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
             (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
-            $this->features->run('postProjectCreate', $this->projectStructure);
+            $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 
-            ProjectDao::updateAnalysisStatus(
-                $this->projectStructure->id_project,
-                $this->projectStructure->status,
+            $projectId = $this->projectStructure->id_project
+                ?? throw new RuntimeException('Project id must be available before updating analysis status');
+            $status = $this->projectStructure->status
+                ?? throw new RuntimeException('Project status must be available before updating analysis status');
+
+            (new ProjectDao($this->dbHandler))->updateAnalysisStatus(
+                $projectId,
+                $status,
                 $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
             );
 
@@ -763,12 +795,12 @@ class ProjectManager
             $db->rollback();
             throw $e;
         }
-
-        $this->features->run('postProjectCommit', $this->projectStructure);
     }
 
     /**
      * Delete the upload directory via the storage abstraction.
+     *
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function cleanupUploadDirectory(AbstractFilesStorage $fs): void
     {
@@ -794,6 +826,7 @@ class ProjectManager
      * @param string $fileName
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function getSingleS3QueueFile(string $fileName): void
     {
@@ -811,6 +844,9 @@ class ProjectManager
         $client->downloadItem($params);
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     private function clearFailedProject(Throwable $e): void
     {
         $this->log($e->getMessage(), $e);
@@ -837,6 +873,7 @@ class ProjectManager
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     private function writeFastAnalysisData(): void
     {
@@ -867,7 +904,7 @@ class ProjectManager
         unset($segmentElement); // break the reference to the last array element to avoid accidental overwrites
 
         $fs = FilesStorageFactory::create();
-        $fs::storeFastAnalysisFile((string)$this->project->id, $this->projectStructure->segments_metadata);
+        $fs->storeFastAnalysisFile((string)$this->project->id, $this->projectStructure->segments_metadata);
 
         $this->logger->debug("Stored fast analysis data for project {$this->project->id} with " . count($this->projectStructure->segments_metadata) . " segments.");
 
@@ -875,6 +912,9 @@ class ProjectManager
         $this->projectStructure->segments_metadata = [];
     }
 
+    /**
+     * @throws \Psr\Log\InvalidArgumentException
+     */
     private function pushActivityLog(): void
     {
         $activity = new ActivityLogStruct();
@@ -924,6 +964,7 @@ class ProjectManager
      * @param array<string, mixed> $linkFiles
      *
      * @throws Exception
+     * @throws \TypeError
      */
     protected function zipFileHandling(array $linkFiles): void
     {
@@ -949,6 +990,7 @@ class ProjectManager
     /**
      * @return list<JobStruct>
      * @throws Exception
+     * @throws \TypeError
      */
     protected function createJobs(): array
     {
@@ -964,6 +1006,7 @@ class ProjectManager
      *
      * @param list<JobStruct> $jobs
      * @throws Exception
+     * @throws \TypeError
      */
     private function linkFilesAndInsertPreTranslations(array $jobs): void
     {
@@ -982,6 +1025,7 @@ class ProjectManager
      * @param array<string, mixed> $file_info
      *
      * @throws Exception
+     * @throws \TypeError
      */
     protected function extractSegments(int $fid, array $file_info): void
     {
@@ -1005,6 +1049,7 @@ class ProjectManager
      *
      * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws Exception
      * @throws NotFoundException
      * @throws ReQueueException
      * @throws ReflectionException
@@ -1012,7 +1057,9 @@ class ProjectManager
      */
     protected function insertInstructions(int $fid, array|string $value): void
     {
-        $value = $this->features->filter('decodeInstructions', $value);
+        $event = new DecodeInstructionsEvent($value);
+        $this->features->dispatch($event);
+        $value = $event->getValue();
 
         $this->filesMetadataDao->insert((int)$this->projectStructure->id_project, $fid, 'instructions', (string)$value);
     }
@@ -1020,6 +1067,7 @@ class ProjectManager
     /**
      * Store segments for a file — delegates to SegmentStorageService.
      * @throws Exception
+     * @throws \TypeError
      */
     protected function storeSegments(int $fid): void
     {
@@ -1033,21 +1081,18 @@ class ProjectManager
      */
     private function insertSegmentNotesForFile(): void
     {
-        $this->projectStructure = $this->features->filter('handleJsonNotesBeforeInsert', $this->projectStructure);
+        $event = new HandleJsonNotesBeforeInsertEvent($this->projectStructure);
+        $this->features->dispatch($event);
+        $this->projectStructure = $event->getProjectStructure();
         $this->getProjectManagerModel()->bulkInsertSegmentNotesAndMetadata($this->projectStructure->notes);
     }
 
     /**
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws Exception
+     * @throws \PDOException
+     * @throws \Psr\Log\InvalidArgumentException
      */
     private function insertContextsForFile(): void
     {
-        $this->features->filter('handleTUContextGroups', $this->projectStructure);
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
             (int)$this->projectStructure->id_project,
             $this->projectStructure->context_group,

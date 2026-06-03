@@ -31,6 +31,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      * @param App|null             $app
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(
         Request $request,
@@ -50,6 +51,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      *
      * @return void
      * @throws Exception
+     * @throws \TypeError
      */
     protected function initLogger(): void
     {
