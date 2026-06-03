@@ -7,8 +7,7 @@ const io = require('socket.io');
 const {setupWorker} = require('@socket.io/sticky');
 const {createAdapter} = require('@socket.io/redis-adapter');
 const {Reader} = require('./amq/AMQconnector');
-const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require(
-    './amq/MessageHandler');
+const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require('./amq/MessageHandler');
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
 const Redis = require('ioredis');
@@ -20,8 +19,7 @@ module.exports.Application = class {
 
     this.pubGlobalMessageClient = new Redis(this.options.redis);
 
-    this.logger.info(
-        ['Connecting redis for adapter started', this.options.redis]);
+    this.logger.info(['Connecting redis for adapter started', this.options.redis]);
     const pubClient = new Redis(this.options.redis);
 
     pubClient.on('error', (err) => {
@@ -79,9 +77,7 @@ module.exports.Application = class {
               return next(new Error('Authentication error invalid JWT'));
             }
             if (!Object.prototype.hasOwnProperty.call(decoded, decoded.iss)) {
-              this.logger.error(
-                  ['Authentication error invalid iss claim', decoded.iss],
-              );
+              this.logger.error(['Authentication error invalid iss claim', decoded.iss]);
               return next(new Error('Authentication error invalid iss claim'));
             }
             if (parseInt(auth['x-userid']) !== decoded[decoded.iss].uid) {
@@ -184,10 +180,12 @@ module.exports.Application = class {
    * Dispatch global messages
    */
   dispatchGlobalMessages = (uuid) => {
+
     const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
     const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
 
-    this.pubGlobalMessageClient.smembers(GLOBAL_MESSAGES_LIST_KEY,
+    this.pubGlobalMessageClient.smembers(
+        GLOBAL_MESSAGES_LIST_KEY,
         (err, ids) => {
 
           if (err || !ids) {
@@ -196,38 +194,42 @@ module.exports.Application = class {
           }
 
           ids.forEach((id) => {
-            this.pubGlobalMessageClient.get(GLOBAL_MESSAGES_ELEMENT_KEY + id,
+
+            this.pubGlobalMessageClient.get(
+                GLOBAL_MESSAGES_ELEMENT_KEY + id,
                 (err, element) => {
+
                   if (err) {
-                    this.logger.error('Failed to fetch global message element',
-                        err);
+                    this.logger.error('Failed to fetch global message element', err);
                     return;
                   }
+
                   if (element !== null) {
                     let parsed;
+
                     try {
                       parsed = JSON.parse(element);
                     } catch (parseErr) {
-                      this.logger.error(
-                          'Failed to parse global message element',
-                          {id, error: parseErr.message});
+                      this.logger.error('Failed to parse global message element', {id, error: parseErr.message});
                       return;
                     }
+
                     this.sendRoomNotifications(uuid, MESSAGE_NAME, {
                       data: {
                         _type: GLOBAL_MESSAGES,
                         message: parsed,
                       },
                     });
-                    this.logger.debug(
-                        'Dispatched global message to user: ' + uuid);
+
+                    this.logger.debug('Dispatched global message to user: ' + uuid);
                   } else {
-                    this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY,
-                        id);
+                    this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY, id);
                   }
-                });
+                },
+            );
           });
-        });
+        },
+    );
 
   };
 };
