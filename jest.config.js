@@ -11,7 +11,8 @@ module.exports = {
     '!<rootDir>/public/api/**',
     '!<rootDir>/public/**/*.min.js',
   ],
-  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/.github/'],
+  roots: ['<rootDir>/public/'],
+  testPathIgnorePatterns: ['/node_modules/'],
   transformIgnorePatterns: ['node_modules/(?!@bundled-es-modules)/', '.github/scripts/'],
   transform: {
     '^.+\\.js$': 'babel-jest',
