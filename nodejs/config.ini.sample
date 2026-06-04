@@ -1,19 +1,25 @@
 [server]
-address = localhost
+version = "v3.5.52"
+parallelization = 4
+address = 0.0.0.0
 port = 7788
 path = /channel/updates
 
+[redis]
+host = redis
+port = 6379
+db = 14
+
 [queue]
-name = /topic/matecat_sse_notifications
+name = /queue/matecat_socket_notifications
+port = 61614
 host = amq
-port = 61613
 login = login
 passcode = passcode
 
 [log]
-file = log/server.log
+file = ../log/server-%DATE%.log
 level = debug
 
 [cors]
-allowedOrigins[] = https://localhost
-allowedOrigins[] = http://localhost
+allowedOrigins[] = *
