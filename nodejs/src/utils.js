@@ -16,24 +16,36 @@ const enrichLogContext = winston.format((info) => {
   return info;
 });
 
-const ini = require("node-ini");
-const config = ini.parseSync(path.resolve(__dirname, '../config.ini'));
-const logger = winston.createLogger({
-  levels: winston.config.npm.levels,
-  transports: [
+const createLogger = (logConfig) => {
+  const transports = [
     new winston.transports.Console({
-      level: config.log.level,
+      level: logConfig.level,
       format: format.combine(enrichLogContext(), format.json()),
     }),
-    new winston.transports.DailyRotateFile({
-      filename: path.resolve(__dirname, config.log.file),
+  ];
+
+  if (logConfig.file) {
+    transports.push(new winston.transports.DailyRotateFile({
+      filename: path.resolve(__dirname, logConfig.file),
       zippedArchive: true,
       maxSize: '100m',
-      level: config.log.level,
+      level: logConfig.level,
       format: format.combine(enrichLogContext(), format.json()),
-    }),
-  ],
-});
+    }));
+  }
+
+  return winston.createLogger({
+    levels: winston.config.npm.levels,
+    transports,
+  });
+};
+
+const ini = require('node-ini');
+const config = ini.parseSync(path.resolve(__dirname, '../config.ini'));
+const logger = createLogger(config.log);
+
+exports.enrichLogContext = enrichLogContext;
+exports.createLogger = createLogger;
 exports.logger = logger;
 
 const parseHeaderRemoteAddress = (headersList) => {

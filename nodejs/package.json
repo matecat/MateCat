@@ -1,8 +1,8 @@
 {
     "name": "matecat-socket-server",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     },
     "private": true,
     "files": [
@@ -22,10 +22,11 @@
         "winston-daily-rotate-file": "^5.0.0"
     },
     "devDependencies": {
-        "jest": "^29.7.0"
+        "jest": "^30.4.2"
     },
     "scripts": {
         "start": "node --max-semi-space-size=256 server.js",
-        "test": "jest"
+        "test": "jest",
+        "coverage": "jest --collect-coverage"
     }
 }

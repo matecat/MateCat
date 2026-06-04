@@ -1,4 +1,9 @@
-const {parseHeaderRemoteAddress, getWebSocketClientAddress} = require('../src/utils');
+const {
+  parseHeaderRemoteAddress,
+  getWebSocketClientAddress,
+  enrichLogContext,
+  createLogger,
+} = require('../src/utils');
 
 describe('parseHeaderRemoteAddress', () => {
   test('returns first IP from x-forwarded-for chain', () => {
@@ -56,5 +61,56 @@ describe('getWebSocketClientAddress', () => {
       },
     };
     expect(getWebSocketClientAddress(socket)).toBe('::ffff:127.0.0.1');
+  });
+});
+
+describe('enrichLogContext', () => {
+  test('adds timestamp to log info', () => {
+    const transform = enrichLogContext();
+    const info = {level: 'info', message: 'test'};
+    const result = transform.transform(info);
+    expect(result.timestamp).toBeDefined();
+    expect(typeof result.timestamp).toBe('string');
+  });
+
+  test('adds worker_id from env', () => {
+    const original = process.env.worker_id;
+    process.env.worker_id = '5';
+    const transform = enrichLogContext();
+    const info = {level: 'info', message: 'test'};
+    const result = transform.transform(info);
+    expect(result.worker_id).toBe('5');
+    process.env.worker_id = original;
+  });
+
+  test('defaults worker_id to primary', () => {
+    const original = process.env.worker_id;
+    delete process.env.worker_id;
+    const transform = enrichLogContext();
+    const info = {level: 'info', message: 'test'};
+    const result = transform.transform(info);
+    expect(result.worker_id).toBe('primary');
+    if (original !== undefined) process.env.worker_id = original;
+  });
+});
+
+describe('createLogger', () => {
+  test('returns a winston logger with correct levels', () => {
+    const log = createLogger({level: 'info'});
+    expect(log).toBeDefined();
+    expect(typeof log.info).toBe('function');
+    expect(typeof log.error).toBe('function');
+    expect(typeof log.debug).toBe('function');
+  });
+
+  test('creates console-only logger when no file specified', () => {
+    const log = createLogger({level: 'warn'});
+    expect(log.transports).toHaveLength(1);
+    expect(log.transports[0].name).toBe('console');
+  });
+
+  test('creates console + file logger when file specified', () => {
+    const log = createLogger({level: 'info', file: '/tmp/test-matecat-%DATE%.log'});
+    expect(log.transports).toHaveLength(2);
   });
 });

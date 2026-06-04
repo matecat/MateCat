@@ -14,30 +14,34 @@ module.exports.Reader = class {
     this.client = new Client(connectOptions);
 
     this.subscribe = this.subscribe.bind(this);
-    this.client.onConnect = (frame) => {
-      logger.info('Connected details: ' + frame.body);
-      this.client.subscribe(
-          this.queue_name,
-          this.subscribe,
-          {ack: 'client-individual'},
-      );
-    };
-
-    this.client.onWebSocketError = (event) => {
-      logger.error('WebSocket error:', event);
-    };
-
-    this.client.onWebSocketClose = (event) => {
-      logger.error('WebSocket closed. Code:', event.code);
-    };
-
-    this.client.onStompError = (frame) => {
-      logger.error('Broker reported error: ' + frame.headers['message']);
-      logger.error('Additional details: ' + frame.body);
-    };
+    this.client.onConnect = this.onConnect.bind(this);
+    this.client.onWebSocketError = this.onWebSocketError.bind(this);
+    this.client.onWebSocketClose = this.onWebSocketClose.bind(this);
+    this.client.onStompError = this.onStompError.bind(this);
 
     this.client.activate();
+  }
 
+  onConnect(frame) {
+    logger.info('Connected details: ' + frame.body);
+    this.client.subscribe(
+        this.queue_name,
+        this.subscribe,
+        {ack: 'client-individual'},
+    );
+  }
+
+  onWebSocketError(event) {
+    logger.error('WebSocket error:', event);
+  }
+
+  onWebSocketClose(event) {
+    logger.error('WebSocket closed. Code:', event.code);
+  }
+
+  onStompError(frame) {
+    logger.error('Broker reported error: ' + frame.headers['message']);
+    logger.error('Additional details: ' + frame.body);
   }
 
   subscribe(message) {

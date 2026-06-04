@@ -84,6 +84,7 @@ jobs:
           CONTAINER_ID=$(docker compose -f docker/docker-compose-ci.yml ps -aq test-node | head -1)
           docker cp "$CONTAINER_ID":/var/www/matecat/coverage.xml ./php-coverage.xml
           docker cp "$CONTAINER_ID":/var/www/matecat/js-coverage/clover.xml ./js-coverage.xml
+          docker cp "$CONTAINER_ID":/var/www/matecat/nodejs/.coverage/clover.xml ./node-coverage.xml
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
@@ -92,6 +93,7 @@ jobs:
           path: |
             php-coverage.xml
             js-coverage.xml
+            node-coverage.xml
           retention-days: 7
   # ───────────────────────────────────────────────────────────────────────────
   # JOB 2 – deploy (only when should_deploy is true)
@@ -220,6 +222,7 @@ jobs:
           coverage-file: |
             php-coverage.xml
             js-coverage.xml
+            node-coverage.xml
           coverage-threshold: '80'
           exclude-patterns: '.github/**'
           ai-enabled: 'true'

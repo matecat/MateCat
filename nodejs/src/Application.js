@@ -11,16 +11,82 @@ const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require('./amq/MessageHa
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
 const Redis = require('ioredis');
+
+const createAuthMiddleware = (authSecretKey, log) => {
+  return (socket, next) => {
+    let auth = null;
+
+    if (
+        socket.handshake.headers &&
+        socket.handshake.headers['x-token'] &&
+        socket.handshake.headers['x-userid'] &&
+        socket.handshake.headers['x-uuid']
+    ) {
+      auth = socket.handshake.headers;
+    } else if (
+        socket.handshake.auth &&
+        socket.handshake.auth['x-token'] &&
+        socket.handshake.auth['x-userid'] &&
+        socket.handshake.auth['x-uuid']
+    ) {
+      auth = socket.handshake.auth;
+    } else {
+      return next(new Error('Authentication not provided'));
+    }
+
+    verify(
+        auth['x-token'],
+        authSecretKey,
+        {
+          algorithms: ['HS256'],
+        },
+        (err, decoded) => {
+          if (err) {
+            log.error(['Authentication error invalid JWT', err]);
+            return next(new Error('Authentication error invalid JWT'));
+          }
+          if (!Object.prototype.hasOwnProperty.call(decoded, decoded.iss)) {
+            log.error(['Authentication error invalid iss claim', decoded.iss]);
+            return next(new Error('Authentication error invalid iss claim'));
+          }
+          if (parseInt(auth['x-userid']) !== decoded[decoded.iss].uid) {
+            log.error([
+              'Authentication error invalid user id',
+              auth['x-userid'],
+              decoded[decoded.iss].uid,
+            ]);
+            return next(new Error('Authentication error invalid user id'));
+          }
+          socket.user_id = auth['x-userid'].toString();
+          socket.uuid = auth['x-uuid'].toString();
+          if (auth['x-jobid']) {
+            socket.jobId = auth['x-jobid'].toString();
+          }
+          next();
+        },
+    );
+  };
+};
+
+module.exports.createAuthMiddleware = createAuthMiddleware;
+
 module.exports.Application = class {
 
-  constructor(server, amqParameters, options) {
-    this.logger = logger;
+  constructor(server, amqParameters, options, deps = {}) {
+    const RedisClient = deps.Redis || Redis;
+    const socketIO = deps.io || io;
+    const socketSetupWorker = deps.setupWorker || setupWorker;
+    const ReaderClass = deps.Reader || Reader;
+    const MessageHandlerClass = deps.MessageHandler || MessageHandler;
+    const redisCreateAdapter = deps.createAdapter || createAdapter;
+
+    this.logger = deps.logger || logger;
     this.options = options;
 
-    this.pubGlobalMessageClient = new Redis(this.options.redis);
+    this.pubGlobalMessageClient = new RedisClient(this.options.redis);
 
     this.logger.info(['Connecting redis for adapter started', this.options.redis]);
-    const pubClient = new Redis(this.options.redis);
+    const pubClient = new RedisClient(this.options.redis);
 
     pubClient.on('error', (err) => {
       this.logger.error(err);
@@ -28,7 +94,7 @@ module.exports.Application = class {
 
     const subClient = pubClient.duplicate();
 
-    this._socketIOServer = io(server, {
+    this._socketIOServer = socketIO(server, {
       path: this.options.path,
       pingTimeout: 5000,
       cors: {
@@ -36,73 +102,19 @@ module.exports.Application = class {
         origin: this.options.allowedOrigins,
         credentials: true,
       },
-      adapter: createAdapter(pubClient, subClient),
+      adapter: redisCreateAdapter(pubClient, subClient),
     });
 
     // setup connection with the primary process
-    setupWorker(this._socketIOServer);
+    socketSetupWorker(this._socketIOServer);
     this.logger.info(['Worker started', this.options.workerId]);
 
-    this._socketIOServer.use((socket, next) => {
+    this._socketIOServer.use(createAuthMiddleware(this.options.authSecretKey, this.logger));
 
-      let auth = null;
-
-      if (
-          socket.handshake.headers &&
-          socket.handshake.headers['x-token'] &&
-          socket.handshake.headers['x-userid'] &&
-          socket.handshake.headers['x-uuid']
-      ) {
-        auth = socket.handshake.headers;
-      } else if (
-          socket.handshake.auth &&
-          socket.handshake.auth['x-token'] &&
-          socket.handshake.auth['x-userid'] &&
-          socket.handshake.auth['x-uuid']
-      ) {
-        auth = socket.handshake.auth;
-      } else {
-        return next(new Error('Authentication not provided'));
-      }
-
-      verify(
-          auth['x-token'],
-          this.options.authSecretKey,
-          {
-            algorithms: ['HS256'],
-          },
-          (err, decoded) => {
-            if (err) {
-              this.logger.error(['Authentication error invalid JWT', err]);
-              return next(new Error('Authentication error invalid JWT'));
-            }
-            if (!Object.prototype.hasOwnProperty.call(decoded, decoded.iss)) {
-              this.logger.error(['Authentication error invalid iss claim', decoded.iss]);
-              return next(new Error('Authentication error invalid iss claim'));
-            }
-            if (parseInt(auth['x-userid']) !== decoded[decoded.iss].uid) {
-              this.logger.error([
-                'Authentication error invalid user id',
-                auth['x-userid'],
-                decoded[decoded.iss].uid,
-              ]);
-              return next(new Error('Authentication error invalid user id'));
-            }
-            socket.user_id = auth['x-userid'].toString();
-            socket.uuid = auth['x-uuid'].toString();
-            if (auth['x-jobid']) {
-              socket.jobId = auth['x-jobid'].toString();
-            }
-            next();
-          },
-      );
-
-    });
-
-    this._Reader = new Reader(
+    this._Reader = new ReaderClass(
         amqParameters.read_queue,
         amqParameters.connectOptions,
-        (new MessageHandler(this)).onReceive,
+        (new MessageHandlerClass(this)).onReceive,
     );
   }
 

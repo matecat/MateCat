@@ -15,93 +15,114 @@ const path = require("path");
 const fs = require('node:fs');
 const {notifyUpgrade} = require("./src/amq/MessageHandler");
 
-const config = ini.parseSync(path.resolve(__dirname, './config.ini'));
-const SERVER_VERSION = config.server.version.replace(/['"]+/g, '');
-const allowedOrigins = config.cors.allowedOrigins;
-const auth_secret_key = fs.readFileSync(path.resolve(__dirname, '../inc/login_secret.dat'), 'utf8');
-const serverPath = config.server.path;
+const loadConfig = (configPath, secretPath) => {
+  const config = ini.parseSync(configPath);
+  const serverVersion = config.server.version.replace(/['"]+/g, '');
+  const authSecretKey = fs.readFileSync(secretPath, 'utf8');
 
-const amqParameters = {
-  read_queue: config.queue.name,
-  connectOptions: {
-    brokerURL: 'ws://' + config.queue.host + ':' + config.queue.port + '',
-    reconnectDelay: 5000,
-    heartbeatIncoming: 4000,
-    heartbeatOutgoing: 4000,
-  }
-}
+  return {
+    config,
+    serverVersion,
+    allowedOrigins: config.cors.allowedOrigins,
+    authSecretKey,
+    serverPath: config.server.path,
+    numCPUs: parseInt(config.server.parallelization, 10) || 1,
+    amqParameters: {
+      read_queue: config.queue.name,
+      connectOptions: {
+        brokerURL: 'ws://' + config.queue.host + ':' + config.queue.port + '',
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      },
+    },
+  };
+};
 
-const numCPUs = config.server.parallelization || 1;
+const startMaster = (appConfig, deps = {}) => {
+  const clusterMod = deps.cluster || cluster;
+  const httpMod = deps.http || http;
+  const log = deps.logger || logger;
 
-if (cluster.isPrimary) {
+  const server = httpMod.createServer();
 
-  /**
-   * We create an HTTP server listening to the address in config.path,
-   * and add new clients to the browserChannel
-   */
-  const server = http.createServer();
-
-  // setup sticky sessions
   setupMaster(server, {
     loadBalancingMethod: "least-connection",
   });
 
-  // setup connections between the workers
   setupPrimary();
 
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
+  for (let i = 0; i < appConfig.numCPUs; i++) {
+    clusterMod.fork();
   }
 
-  cluster.on('exit', (worker, code, signal) => {
-    logger.debug(`Worker ${worker.id} : ${worker.process.pid} died`);
+  clusterMod.on('exit', (worker, code, signal) => {
+    log.debug(`Worker ${worker.id} : ${worker.process.pid} died`);
     if (code !== null && code !== 0) {
-      logger.debug(`Starting a replacement: exit code ${signal || code}`);
-      cluster.fork(); // Restart worker
+      log.debug(`Starting a replacement: exit code ${signal || code}`);
+      clusterMod.fork();
     }
   });
 
-  // setMonitoring();
-  logger.info(['Server version ' + SERVER_VERSION]);
-  logger.info(['Listening on //' + config.server.address + ':' + config.server.port + '/' + serverPath]);
+  log.info(['Server version ' + appConfig.serverVersion]);
+  log.info(['Listening on //' + appConfig.config.server.address + ':' + appConfig.config.server.port + '/' + appConfig.serverPath]);
 
   ['SIGINT', 'SIGTERM'].forEach(
     signal => process.on(signal, (sig) => {
-      logger.info(['*** Master: ' + sig + ' received ***']);
+      log.info(['*** Master: ' + sig + ' received ***']);
       setTimeout(() => {
         process.exit(0);
       }, 3000);
     })
   );
 
-  server.listen(config.server.port, config.server.address, () => {
-    logger.info(['Master started'])
+  server.listen(appConfig.config.server.port, appConfig.config.server.address, () => {
+    log.info(['Master started']);
   });
 
-} else {
+  return server;
+};
 
-  process.env.worker_id = cluster.worker.id;
+const startWorker = (appConfig, deps = {}) => {
+  const clusterMod = deps.cluster || cluster;
+  const httpMod = deps.http || http;
+  const log = deps.logger || logger;
 
-  /**
-   * We create an HTTP server listening to the address in config.path,
-   * and add new clients to the browserChannel
-   */
-  const server = http.createServer();
+  process.env.worker_id = clusterMod.worker.id;
 
-  let app = new Application(server, amqParameters, {
-    path: serverPath,
-    workerId: cluster.worker.id,
-    serverVersion: SERVER_VERSION,
-    allowedOrigins: allowedOrigins,
-    authSecretKey: auth_secret_key,
-    redis: config.redis
+  const server = httpMod.createServer();
+
+  const app = new Application(server, appConfig.amqParameters, {
+    path: appConfig.serverPath,
+    workerId: clusterMod.worker.id,
+    serverVersion: appConfig.serverVersion,
+    allowedOrigins: appConfig.allowedOrigins,
+    authSecretKey: appConfig.authSecretKey,
+    redis: appConfig.config.redis,
   }).start();
 
   ['SIGINT', 'SIGTERM'].forEach(
     signal => process.on(signal, (sig) => {
-      logger.info([sig + ' received...']);
+      log.info([sig + ' received...']);
       notifyUpgrade(app, false);
     })
   );
 
+  return app;
+};
+
+// --- Main entry point ---
+if (require.main === module) {
+  const appConfig = loadConfig(
+      path.resolve(__dirname, './config.ini'),
+      path.resolve(__dirname, '../inc/login_secret.dat'),
+  );
+
+  if (cluster.isPrimary) {
+    startMaster(appConfig);
+  } else {
+    startWorker(appConfig);
+  }
 }
+
+module.exports = {loadConfig, startMaster, startWorker};
