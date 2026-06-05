@@ -481,7 +481,12 @@ class ProjectDao extends AbstractDao
         return $stmt->fetchAll();
     }
 
-    static function isGDriveProject($id_project): bool
+    /**
+     * @param int $id_project The ID of the project to check.
+     *
+     * @return bool Returns true if the project is a Google Drive project, otherwise false.
+     */
+    static function isGDriveProject(int $id_project): bool
     {
         $conn = Database::obtain()->getConnection();
 

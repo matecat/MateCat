@@ -1326,7 +1326,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         $this->assertNotNull($ps->session);
-        $this->assertSame('gdrive@test.com', $ps->session['service_account']);
+        $this->assertSame('gdrive@test.com', $ps->session['gdrive_session']['service_account']);
         // uid should be injected into the session
         $this->assertSame(42, $ps->session['uid']);
     }
