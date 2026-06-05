@@ -37,6 +37,7 @@ import matchTagStructure from './matchTag'
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
   if (text) {
+    let phIndex = 0
     try {
       for (let key in tagSignatures) {
         const {
@@ -47,6 +48,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           regex,
           styleRTL,
           selfClosing,
+          type,
         } = tagSignatures[key]
         if (placeholderRegex) {
           let globalRegex = new RegExp(
@@ -59,6 +61,21 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
               : selfClosing
                 ? text
                 : match
+            if (type === 'ph') {
+              phIndex++
+              return (
+                '<span contenteditable="false" class="tag small ' +
+                (isRtl && styleRTL ? styleRTL : style) +
+                '">' +
+                '<span class="index-counter">' +
+                phIndex +
+                '</span>' +
+                '<span data-text="true">' +
+                tagText +
+                '</span>' +
+                '</span>'
+              )
+            }
             return (
               '<span contenteditable="false" class="tag small ' +
               (isRtl && styleRTL ? styleRTL : style) +
