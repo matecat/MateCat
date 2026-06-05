@@ -62,7 +62,14 @@ SetEnvIfNoCase Request_URI \.(?:css|js|map)$ !no-gzip
     Header always append X-Frame-Options SAMEORIGIN
     Header always append X-Content-Type-Options nosniff
     Header always append X-XSS-Protection "1; mode=block"
+    Header always set Content-Security-Policy "frame-ancestors 'none';"
 </IfModule>
+
+<If "%{REQUEST_URI} =~ m#^/context-preview/#">
+    <IfModule mod_headers.c>
+        Header always unset Content-Security-Policy
+    </IfModule>
+</If>
 
 php_value display_errors 0
 php_value log_errors 1
