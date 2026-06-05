@@ -874,7 +874,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         // GDrive session
         if ($gdriveSession !== null) {
-            $projectStructure->session = $gdriveSession;
+            $projectStructure->session[Session::SESSION_KEY] = $gdriveSession;
             $projectStructure->session['uid'] = $user->uid;
             $projectStructure->session['user'] = $user;
         }
