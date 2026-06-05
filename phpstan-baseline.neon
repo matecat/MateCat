@@ -13969,12 +13969,6 @@ parameters:
 			path: lib/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Model\\Projects\\ProjectDao\:\:isGDriveProject\(\) has parameter \$id_project with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Model/Projects/ProjectDao.php
-
-		-
 			message: '#^Method Model\\Projects\\ProjectDao\:\:isGDriveProject\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
