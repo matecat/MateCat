@@ -1,0 +1,22 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "context_url"
+    ],
+    "properties": {
+        "id_segment": {
+            "type": ["integer", "null"],
+            "minimum": 1
+        },
+        "id_file": {
+            "type": ["integer", "null"],
+            "minimum": 1
+        },
+        "context_url": {
+            "type": "string",
+            "nullable": false,
+            "format": "uri"
+        }
+    }
+}

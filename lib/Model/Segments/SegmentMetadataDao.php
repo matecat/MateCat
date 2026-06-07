@@ -2,7 +2,10 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
+use PDOException;
+use ReflectionException;
 
 class SegmentMetadataDao extends AbstractDao
 {
@@ -12,8 +15,8 @@ class SegmentMetadataDao extends AbstractDao
     const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
 
 /**
-     * @throws \ReflectionException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function getAll(int $id_segment, int $ttl = 86400): SegmentMetadataCollection
     {
@@ -31,23 +34,24 @@ class SegmentMetadataDao extends AbstractDao
     /**
      * @param int[] $ids
      * @return SegmentMetadataStruct[]
-     * @throws \ReflectionException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
     {
-        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN (" . implode(', ', $ids) . ") and meta_key = ? ");
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN ($placeholders) and meta_key = ? ");
 
         return $this->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
-            [$key]
+            [...array_values($ids), $key]
         );
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function get(int $id_segment, string $key, int $ttl = 604800): ?SegmentMetadataStruct
     {
@@ -63,7 +67,7 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function delete(int $id_segment, string $key): void
     {
@@ -72,9 +76,9 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function save(SegmentMetadataStruct $metadataStruct): void
     {
@@ -96,9 +100,9 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function upsert(int $id_segment, string $key, string $value): void
     {
@@ -121,8 +125,8 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \PDOException
+     * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyGetAllCache(int $id_segment): bool
     {
@@ -132,8 +136,8 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \PDOException
+     * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroyGetCache(int $id_segment, string $key): bool
     {
@@ -143,8 +147,8 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws \ReflectionException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function destroyGetBySegmentIdsCache(string $key): bool
     {
@@ -155,8 +159,8 @@ class SegmentMetadataDao extends AbstractDao
 
     /**
      * @return array<int, SegmentMetadataCollection>
-     * @throws \ReflectionException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function getAllInRange(int $startSid, int $stopSid, int $ttl = 86400): array
     {
