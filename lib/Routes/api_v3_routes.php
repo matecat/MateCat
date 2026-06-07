@@ -135,10 +135,11 @@ $klein->with('/api/v3/filters-config-template', function () {
 });
 
 // CONTEXT URL
-$klein->with('/api/v3/context-url/[i:id_project]/[:password]', function () {
-    route('/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
-    route('/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
-    route('/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);
+$klein->with('/api/v3/context-url', function () {
+    route('/schema', 'GET', ['Controller\API\App\ContextUrlSchemaController', 'schema']);
+    route('/[i:id_project]/[:password]/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
+    route('/[i:id_project]/[:password]/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
+    route('/[i:id_project]/[:password]/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);
 });
 
 /**
