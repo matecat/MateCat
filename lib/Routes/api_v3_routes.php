@@ -135,7 +135,7 @@ $klein->with('/api/v3/filters-config-template', function () {
 });
 
 // CONTEXT URL
-$klein->with('/api/v3/context-url', function () {
+$klein->with('/api/v3/context-url/[i:id_project]/[:password]', function () {
     route('/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
     route('/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
     route('/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);

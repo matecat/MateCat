@@ -7,6 +7,7 @@ use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
 use Controller\Traits\TimeLoggerTrait;
 use Exception;
+use InvalidArgumentException;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
@@ -119,6 +120,8 @@ abstract class KleinController implements IController
         $this->params = array_merge($this->params, $paramsGet, $paramsNamed, $paramsPut);
         $this->featureSet = new FeatureSet();
         $this->identifyUser($this->useSession);
+        $this->initDependencies();
+        $this->registerValidators();
         $this->afterConstruct();
 
         $this->logger = LoggerFactory::getLogger();
@@ -198,13 +201,24 @@ abstract class KleinController implements IController
         return $this;
     }
 
+    protected function initDependencies(): void
+    {
+    }
+
+    protected function registerValidators(): void
+    {
+    }
+
+    /**
+     * @deprecated Use registerValidators() and initDependencies() instead
+     */
     protected function afterConstruct(): void
     {
     }
 
     /**
      * @throws \Psr\Log\InvalidArgumentException
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function _logWithTime(): void
     {
