@@ -88,7 +88,7 @@ $klein->with('/api/v3/mmt/[i:engineId]', function () {
     route('/import-status/[:uuid]', 'GET', ['\Controller\API\V3\ModernMTController', 'importStatus']);
     route('/memory/create', 'POST', ['\Controller\API\V3\ModernMTController', 'createMemory']);
     route('/memory/update/[:memoryId]', 'POST', ['\Controller\API\V3\ModernMTController', 'updateMemory']);
-    route('/memory/delete/[:memoryId]', 'GET', ['\Controller\API\V3\ModernMTController', 'deleteMemory']);
+    route('/memory/delete/[:memoryId]', 'DELETE', ['\Controller\API\V3\ModernMTController', 'deleteMemory']);
 
     route('/glossary/create-memory-and-import', 'POST', ['\Controller\API\V3\ModernMTController', 'createMemoryAndImportGlossary']);
     route('/glossary/import-status/[:uuid]', 'GET', ['\Controller\API\V3\ModernMTController', 'importStatus']);
