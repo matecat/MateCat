@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\ContextUrlSchemaController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Users\UserStruct;
@@ -66,7 +67,8 @@ class ContextUrlSchemaControllerTest extends AbstractTest
 
         $responseMock->expects(self::once())
             ->method('json')
-            ->with(self::equalTo($expected));
+            ->with(self::equalTo($expected))
+            ->willReturnSelf();
 
         $this->controller->schema();
     }
@@ -99,5 +101,6 @@ class ContextUrlSchemaControllerTest extends AbstractTest
 
         $validators = $ref->getProperty('validators')->getValue($controller);
         $this->assertCount(1, $validators);
+        $this->assertInstanceOf(LoginValidator::class, $validators[0]);
     }
 }
