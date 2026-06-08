@@ -40,17 +40,78 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
     <link rel="icon" type="image/png" sizes="16x16" href="/public/img/meta/favicon-16x16.svg"/>
 
     <script nonce="<?= $csp_nonce ?>">
-        /*<![CDATA[*/
-        config = {};
-        config.swagger_host = '<?php echo $_SERVER['HTTP_HOST'] ?>';
-        /*]]>*/
+      /*<![CDATA[*/
+      config = {};
+      config.swagger_host = '<?php echo $_SERVER['HTTP_HOST'] ?>';
+      /*]]>*/
     </script>
 
     <script src='/public/api/dist/lib/jquery-3.7.1.min.js' type='text/javascript'></script>
     <script src="/public/api/dist/lib/swagger-ui-bundle.js"></script>
     <script src="/public/api/dist/lib/swagger-ui-standalone-preset.js"></script>
+    <style>
+        .markdown > h2 {
+            font-size: 30px;
+        }
+        #swagger-ui-container span > small > pre {
+            line-height: normal;
+            font-size: 10px;
+        }
+        .markdown > div {
+            background: rgba(97, 175, 254, .1);
+            margin: 0 0 15px;
+            border: 1px solid #61affe;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .19);
+            box-shadow: 0 0 3px rgba(0, 0, 0, .19);
+        }
+        .markdown > div > div {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            padding: 5px;
+            cursor: pointer;
+            border-color: #61affe;
+        }
+        table.parameters {
+            table-layout: unset;
+        }
+        .swagger-ui .response-col_description, .swagger-ui .parameters-col_description {
+            width: 90%;
+        }
+        .swagger-ui .response-col_description__inner div.markdown {
+            font-size: 12px;
+            font-style: italic;
+            display: block;
+            margin: 0;
+            padding: 10px;
+            border-radius: 4px;
+            background: rgb(51, 51, 51);
+            font-family: Source Code Pro, monospace;
+            font-weight: 600;
+            color: #fff;
+        }
+        code.language-json, code.language-bash {
+            background-color: rgb(51, 51, 51);
+            color: white;
+        }
+        #contentBox > div.colsx > h1 {
+            font-size: 40px;
+        }
+        .auth-container form div {
+            min-width: unset;
+            max-width: unset;
+            width: auto;
+        }
+        .swagger-ui .dialog-ux .modal-ux-content {
+            overflow-y: unset;
+        }
 
-    <script src='/public/api/swagger-source.js' type='text/javascript'></script>
+    </style>
+
     <?php
 
     $reflect = new ReflectionClass(CustomPageView::class);
@@ -64,107 +125,98 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
     ?>
     <script nonce="<?= $csp_nonce ?>" type="application/javascript">
-        /*<![CDATA[*/
+      /*<![CDATA[*/
 
-        // add active class to menu
-        function setActivesMenuLink(element) {
-            if (!$(element).hasClass('active')) {
-                location.hash = element.hash;
-                $(".menu a").removeClass('active');
-                $(element).addClass('active');
-            }
+      // add active class to menu
+      function setActivesMenuLink(element) {
+        if (!$(element).hasClass('active')) {
+          location.hash = element.hash;
+          $('.menu a').removeClass('active');
+          $(element).addClass('active');
         }
+      }
 
-        function hideSwaggerElements() {
-            var swaggerElements = $(".is-open");
-            swaggerElements.each(function () {
-                //close tags
-                $(this).children('h4').click();
-            });
-        }
+      function hideSwaggerElements() {
+        $('.opblock-tag-section.is-open').each(function() {
+          $(this).children('h3.opblock-tag').trigger('click');
+        });
+      }
 
-        function generateSwaggerMenu() {
+      function generateSwaggerMenu() {
+        var tags = $('h3.opblock-tag');
+        var elements = $();
+        tags.each(function() {
+          var id = $(this).closest('.opblock-tag-section').attr('id')
+              || $(this).attr('id')
+              || '';
+          var name = id.replace('operations-tag-', '');
+          if (name) {
+            elements = elements.add('<li><a id="' + name + '" href="#' + name + '">' + name.replace(/_/g, ' ') + '</a></li>');
+          }
+        });
+        $('#menuElements').prepend(elements);
+      }
 
-            var tags = $('.opblock-tag');
-            var elements = $();
-            tags.each(function () {
-                var name = $(this).prop('id').replace('operations-tag-', '');
-                elements = elements.add('<li><a id="' + name + '" href="#' + name + '">' + name.replace('_', ' ') + '</a></li>');
-            });
+      function bindMenuEvents(hash) {
+        $('#menuElements li a').click(function() {
+          var anchorName = this.hash.slice(1);
+          var domAnchorList = $('[name="' + anchorName + '"]');
+          var swaggerTagSection = $('#operations-tag-' + anchorName);
 
-            $('#menuElements').prepend(elements);
+          hideSwaggerElements();
 
-        }
+          var target = null;
+          if (domAnchorList.length) {
+            target = domAnchorList;
+          } else if (swaggerTagSection.length) {
+            target = swaggerTagSection;
+            target.trigger('click');
+          }
 
-        $(document).ready(function () {
+          if (target && target.length) {
+            setActivesMenuLink(this);
+            $('html,body').animate({
+              scrollTop: target.offset().top,
+            }, 500);
+          }
 
-            var hash = location.hash;
-
-            // Build a system
-            window.swaggerUi = SwaggerUIBundle({
-                url: spec,
-                spec: spec,
-                dom_id: '#swagger-ui-container',
-                supportedSubmitMethods: [
-                    'get',
-                    'post',
-                    'put',
-                    'delete'
-                ],
-                docExpansion: 'none',
-                deepLinking: true,
-                presets: [
-                    SwaggerUIBundle.presets.apis,
-                    SwaggerUIStandalonePreset
-                ],
-                plugins: [
-                    SwaggerUIBundle.plugins.DownloadUrl
-                ],
-                //layout: "StandaloneLayout"
-
-            });
-
-            generateSwaggerMenu();
-
-            // smooth scrolling for normal links
-            $('#menuElements li a').click(function () {
-
-                //menu href
-                var anchorName = this.hash.slice(1);
-
-                //exists an element with anchor in the page?
-                var domAnchorList = $('[name="' + anchorName + '"]');
-
-                //exist a swagger tag element?
-                var swaggerTagList = $("#operations-tag-" + anchorName);
-
-                hideSwaggerElements();
-
-                var target = null;
-                if (domAnchorList.length) {
-                    target = domAnchorList;
-                } else if (swaggerTagList.length) {
-                    target = swaggerTagList;
-                    //open Swagger Menu
-                    $(target[0]).trigger('click');
-                }
-
-                setActivesMenuLink(this);
-                $('html,body').animate({
-                    scrollTop: target.offset().top
-                }, 500);
-
-                return false;
-
-            });
-            $('#menuElements li a[href="' + hash.replace('/', '') + '"]').trigger('click');
+          return false;
         });
 
-        /*]]>*/
+        if (hash) {
+          $('#menuElements li a[href="' + hash.replace('/', '') + '"]').trigger('click');
+        }
+      }
+
+      $(document).ready(function() {
+        var hash = location.hash;
+
+        window.onload = () => {
+          window.ui = SwaggerUIBundle({
+            url: '/public/api/swagger-source.json',
+            dom_id: '#swagger-ui-container',
+            supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+            docExpansion: 'none',
+            deepLinking: true,
+            presets: [
+              SwaggerUIBundle.presets.apis,
+              SwaggerUIStandalonePreset,
+            ],
+            plugins: [
+              SwaggerUIBundle.plugins.DownloadUrl,
+            ],
+            onComplete: function() {
+              generateSwaggerMenu();
+              bindMenuEvents(hash);
+            },
+          });
+        };
+      });
+
+      /*]]>*/
     </script>
 </head>
 <body class="api swagger-section">
-
 
 <header>
     <div class="wrapper ">

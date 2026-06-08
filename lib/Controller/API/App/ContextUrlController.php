@@ -107,7 +107,7 @@ class ContextUrlController extends KleinController
 
         foreach ($identifiers as $identifier) {
             $response = $this->rateLimiterService->checkAndIncrement(
-                $this->response, $identifier, $route, 10
+                $this->response, $identifier, $route, 5
             );
             if ($response instanceof Response) {
                 $this->response = $response;
