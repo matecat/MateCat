@@ -3,7 +3,7 @@ import {
   SUBTEMPLATE_MODIFIERS,
   SubTemplatesContext,
   isStandardSubTemplate,
-} from './SubTemplate'
+} from './SubTemplateContext'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
