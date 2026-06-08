@@ -4,11 +4,11 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
   getQualityFrameworkTemplateDefault,
   getQualityFrameworkTemplates,
-} from '../../../../api/getQualityFrameworkTemplates/getQualityFrameworkTemplates'
+} from '../../../../api/getQualityFrameworkTemplates'
 import {EptThreshold} from './EptThreshold'
-import {createQualityFrameworkTemplate} from '../../../../api/createQualityFrameworkTemplate/createQualityFrameworkTemplate'
-import {updateQualityFrameworkTemplate} from '../../../../api/updateQualityFrameworkTemplate/updateQualityFrameworkTemplate'
-import {deleteQualityFrameworkTemplate} from '../../../../api/deleteQualityFrameworkTemplate/deleteQualityFrameworkTemplate'
+import {createQualityFrameworkTemplate} from '../../../../api/createQualityFrameworkTemplate'
+import {updateQualityFrameworkTemplate} from '../../../../api/updateQualityFrameworkTemplate'
+import {deleteQualityFrameworkTemplate} from '../../../../api/deleteQualityFrameworkTemplate'
 import {CategoriesSeveritiesTable} from './CategoriesSeveritiesTable'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import CatToolActions from '../../../../actions/CatToolActions'
