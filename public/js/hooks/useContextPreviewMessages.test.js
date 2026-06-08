@@ -273,6 +273,175 @@ describe('highlight message', () => {
 })
 
 // ---------------------------------------------------------------------------
+// currentSid tracking
+// ---------------------------------------------------------------------------
+
+describe('currentSid tracking', () => {
+  it('is null before any highlight message', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    expect(result.current.currentSid).toBeNull()
+  })
+
+  it('stays null after a segments message arrives without a highlight', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({
+      type: 'segments',
+      segments: [
+        {sid: 1, source: 'S', target: 'T', context_url: null, screenshot: 'a.png'},
+        {sid: 2, source: 'S', target: 'T', context_url: null, screenshot: 'b.png'},
+      ],
+    })
+
+    expect(result.current.currentSid).toBeNull()
+  })
+
+  it('is set to the numeric sid after a highlight message', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({
+      type: 'segments',
+      segments: [{sid: 4, source: 'S', target: 'T', context_url: null}],
+    })
+    dispatch({type: 'highlight', sid: '4'})
+
+    expect(result.current.currentSid).toBe(4)
+  })
+
+  it('is set even when the segment has null context_url (screenshot-only case)', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({
+      type: 'segments',
+      segments: [{sid: 8, source: 'S', target: 'T', screenshot: 'shot.png'}],
+    })
+    dispatch({type: 'highlight', sid: 8})
+
+    expect(result.current.currentSid).toBe(8)
+    expect(result.current.currentContextUrl).toBeNull()
+  })
+
+  it('is set even when the highlighted sid is not in segments yet', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({type: 'highlight', sid: 42})
+
+    expect(result.current.currentSid).toBe(42)
+  })
+
+  it('updates when a different sid is highlighted', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({
+      type: 'segments',
+      segments: [
+        {sid: 1, source: 'S', target: 'T', context_url: 'a.html'},
+        {sid: 2, source: 'S', target: 'T', context_url: 'b.html'},
+      ],
+    })
+    dispatch({type: 'highlight', sid: 1})
+    expect(result.current.currentSid).toBe(1)
+
+    dispatch({type: 'highlight', sid: 2})
+    expect(result.current.currentSid).toBe(2)
+  })
+
+  it('preserves identity when the same sid is highlighted twice', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({
+      type: 'segments',
+      segments: [{sid: 5, source: 'S', target: 'T', context_url: 'x.html'}],
+    })
+    dispatch({type: 'highlight', sid: 5})
+    const first = result.current.currentSid
+    dispatch({type: 'highlight', sid: '5'})
+
+    expect(result.current.currentSid).toBe(first)
+  })
+
+  it('is set after highlight even if segments arrive in a separate tick first', () => {
+    const {result} = renderHook(() =>
+      useContextPreviewMessages({
+        onHighlight: jest.fn(),
+        onTranslationUpdate: jest.fn(),
+        targetRef: nullRef(),
+        showNodeWarning: jest.fn(),
+        clearNodeWarning: jest.fn(),
+      }),
+    )
+
+    dispatch({
+      type: 'segments',
+      segments: [{sid: 9, source: 'S', target: 'T', context_url: 'doc.html'}],
+    })
+    expect(result.current.currentSid).toBeNull()
+    expect(result.current.currentContextUrl).toBeNull()
+
+    dispatch({type: 'highlight', sid: 9})
+    expect(result.current.currentSid).toBe(9)
+    expect(result.current.currentContextUrl).toBe('doc.html')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // updateTranslation message
 // ---------------------------------------------------------------------------
 

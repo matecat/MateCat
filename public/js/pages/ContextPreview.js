@@ -111,7 +111,7 @@ const ContextPreview = () => {
     // no additional action needed here; useContextPreviewMessages updates segments state
   }, [])
 
-  const {segments, currentContextUrl} = useContextPreviewMessages({
+  const {segments, currentContextUrl, currentSid} = useContextPreviewMessages({
     onHighlight,
     onTranslationUpdate,
     targetRef,
@@ -156,6 +156,11 @@ const ContextPreview = () => {
 
   const hasScreenshots = Object.keys(screenshotMap).length > 0
 
+  const currentSegmentHasScreenshot = useMemo(
+    () => currentSid != null && Boolean(screenshotMap[currentSid]),
+    [currentSid, screenshotMap],
+  )
+
   const currentHasScreenshot = useMemo(() => {
     if (highlight?.mode === 'segment' && highlight.sid != null) {
       return Boolean(screenshotMap[highlight.sid])
@@ -163,20 +168,36 @@ const ContextPreview = () => {
     if (highlight?.mode === 'node' && highlight.sids?.length) {
       return highlight.sids.some((sid) => Boolean(screenshotMap[sid]))
     }
+    if (currentSid != null) return Boolean(screenshotMap[currentSid])
     return hasScreenshots
-  }, [highlight, screenshotMap, hasScreenshots])
+  }, [highlight, currentSid, screenshotMap, hasScreenshots])
 
   const screenshotUrl = useMemo(() => {
     if (highlight?.sid) return screenshotMap[highlight.sid] ?? null
+    if (currentSid != null) return screenshotMap[currentSid] ?? null
     const firstWithScreenshot = segments.find((s) => s.screenshot)
     return firstWithScreenshot?.screenshot ?? null
-  }, [highlight, screenshotMap, segments])
+  }, [highlight, currentSid, screenshotMap, segments])
 
   useEffect(() => {
     if (!currentHasScreenshot && contentView === CONTENT_VIEWS.SCREENSHOT) {
       setContentView(CONTENT_VIEWS.LIVE_PREVIEW)
     }
   }, [currentHasScreenshot, contentView])
+
+  // Auto-switch to Screenshot when the current segment has no HTML context but has a screenshot.
+  // Gated on currentSid so we wait for the highlight message before deciding.
+  useEffect(() => {
+    if (currentSid == null) return
+    if (
+      contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
+      !currentContextUrl &&
+      currentSegmentHasScreenshot
+    ) {
+      setContentView(CONTENT_VIEWS.SCREENSHOT)
+      setViewMode(VIEW_MODES.SOURCE)
+    }
+  }, [contentView, currentContextUrl, currentSegmentHasScreenshot, currentSid])
 
   const segmentsRef = useRef([])
   useEffect(() => {
@@ -514,7 +535,7 @@ const ContextPreview = () => {
     )
   }
 
-  if (!currentContextUrl && !htmlContent) {
+  if (!currentContextUrl && !htmlContent && !hasScreenshots) {
     return (
       <div className="context-preview-container">
         <div className="context-preview-empty">
@@ -528,7 +549,7 @@ const ContextPreview = () => {
     <div className="context-preview-container">
       <div className="context-preview-toolbar">
         <div className="context-preview-toolbar__left">
-          {currentHasScreenshot && (
+          {currentHasScreenshot && currentContextUrl && (
             <SegmentedControl
               name="context-preview-content-view"
               className="context-preview-content-view"
@@ -553,7 +574,7 @@ const ContextPreview = () => {
         </div>
 
         <div className="context-preview-toolbar__right">
-          {highlightHidden && (
+          {contentView === CONTENT_VIEWS.LIVE_PREVIEW && highlightHidden && (
             <span className="context-preview-hidden-warning">
               Segment not found in preview
             </span>

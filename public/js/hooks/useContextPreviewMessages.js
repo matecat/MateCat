@@ -18,7 +18,7 @@ import {
  *   showNodeWarning: (el: HTMLElement) => void,
  *   clearNodeWarning: (el: HTMLElement) => void,
  * }} params
- * @returns {{segments: Array, setSegments: Function, currentContextUrl: string|null}}
+ * @returns {{segments: Array, setSegments: Function, currentContextUrl: string|null, currentSid: number|null}}
  */
 const useContextPreviewMessages = ({
   onHighlight,
@@ -29,7 +29,9 @@ const useContextPreviewMessages = ({
 }) => {
   const [segments, setSegments] = useState([])
   const [currentContextUrl, setCurrentContextUrl] = useState(null)
+  const [currentSid, setCurrentSid] = useState(null)
   const currentContextUrlRef = useRef(null)
+  const currentSidRef = useRef(null)
   const segmentsRef = useRef([])
 
   useEffect(() => {
@@ -47,6 +49,10 @@ const useContextPreviewMessages = ({
 
       if (message.type === 'highlight') {
         const numericSid = Number(message.sid)
+        if (numericSid !== currentSidRef.current) {
+          currentSidRef.current = numericSid
+          setCurrentSid(numericSid)
+        }
         const seg = segmentsRef.current.find((s) => Number(s.sid) === numericSid)
         const contextUrl = seg?.context_url ?? null
         if (contextUrl !== currentContextUrlRef.current) {
@@ -111,7 +117,7 @@ const useContextPreviewMessages = ({
     ContextPreviewChannel.sendMessage({type: 'requestSegments'})
   }, [])
 
-  return {segments, setSegments, currentContextUrl}
+  return {segments, setSegments, currentContextUrl, currentSid}
 }
 
 export default useContextPreviewMessages
