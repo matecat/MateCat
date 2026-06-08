@@ -74,19 +74,19 @@ body.cattool {
     }
   }
   #context-preview-wrapper:not(.context-preview-wrapper--collapsed) {
-    border: 1px solid colors.$grey4;
+    border: 1px solid colors.$grey100;
   }
   .context-preview__resize-handle {
     width: 100px;
     height: 6px;
     border-radius: 16px;
     cursor: row-resize;
-    background-color: colors.$grey6;
+    background-color: colors.$grey700;
     flex-shrink: 0;
     transition: background-color 0.15s;
     margin: 0 auto;
     &:hover {
-      background-color: colors.$grey1;
+      background-color: colors.$grey500;
     }
   }
   .context-preview__header {
@@ -97,7 +97,7 @@ body.cattool {
     padding: 4px 16px;
     flex-shrink: 0;
     user-select: none;
-    background-color: colors.$grey5
+    background-color: colors.$grey50
   }
   .context-preview__header-title {
     position: absolute;
@@ -107,7 +107,7 @@ body.cattool {
     font-size: 12px;
     font-weight: 700;
     line-height: 16px;
-    color: colors.$grey6;
+    color: colors.$grey700;
     pointer-events: none;
   }
   .context-preview__header-btn {
@@ -142,7 +142,7 @@ body.cattool {
     font-size: 12px;
     font-weight: 700;
     line-height: 16px;
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
   .context-preview__tab-icon {
     display: flex;
@@ -150,7 +150,7 @@ body.cattool {
     svg {
       width: 16px;
       height: 16px;
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
   }
   .context-preview__container {
