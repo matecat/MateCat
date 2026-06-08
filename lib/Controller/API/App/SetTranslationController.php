@@ -616,9 +616,10 @@ class SetTranslationController extends AbstractStatefulKleinController
         );
         $suggestion_array = filter_var(
             $this->request->param('suggestion_array'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['filter' => FILTER_UNSAFE_RAW, 'flags' => FILTER_FLAG_EMPTY_STRING_NULL | FILTER_NULL_ON_FAILURE]
+            FILTER_UNSAFE_RAW,
+            ['flags' => FILTER_NULL_ON_FAILURE]
         );
+        $suggestion_array = (is_string($suggestion_array) && $suggestion_array !== '' && json_decode($suggestion_array) === null) ? null : $suggestion_array;
         $status = filter_var($this->request->param('status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $splitStatuses = filter_var($this->request->param('splitStatuses'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $context_before = (string)filter_var($this->request->param('context_before'), FILTER_UNSAFE_RAW);
