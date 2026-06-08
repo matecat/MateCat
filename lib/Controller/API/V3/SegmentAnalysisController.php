@@ -346,6 +346,7 @@ class SegmentAnalysisController extends KleinController
             'target' => $segmentForAnalysis->translation,
             'source_lang' => $segmentForAnalysis->source,
             'target_lang' => $segmentForAnalysis->target,
+            'stored_source_raw_word_count' => $segmentForAnalysis->raw_word_count,
             'source_raw_word_count' => CatUtils::segment_raw_word_count($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
             'target_raw_word_count' => CatUtils::segment_raw_word_count($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
             'match_type' => $matchConstants::toExternalMatchTypeName($segmentForAnalysis->match_type ?? 'default'),
