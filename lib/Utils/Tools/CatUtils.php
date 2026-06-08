@@ -484,7 +484,7 @@ class CatUtils
         $tmpOrigFName = tempnam("/tmp", mt_rand(0, 1000000000) . uniqid("", true));
         file_put_contents($tmpOrigFName, $documentContent);
 
-        $cmd = "file -i $tmpOrigFName";
+        $cmd = "file --mime $tmpOrigFName";
         LoggerFactory::doJsonLog($cmd);
 
         $file_info = shell_exec($cmd);

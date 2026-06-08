@@ -8,7 +8,7 @@ use Klein\Response;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
-use TestHelpers\AbstractTest;
+use Matecat\TestHelpers\AbstractTest;
 
 /**
  * Testable subclass that exposes the suggestion_array filtering logic
