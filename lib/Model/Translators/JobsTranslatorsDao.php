@@ -10,8 +10,10 @@
 namespace Model\Translators;
 
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Jobs\JobStruct;
+use PDOException;
 use ReflectionException;
 
 class JobsTranslatorsDao extends AbstractDao
@@ -30,6 +32,8 @@ class JobsTranslatorsDao extends AbstractDao
      * @param JobStruct $jobStruct
      *
      * @return JobsTranslatorsStruct[]
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function findByJobsStruct(JobStruct $jobStruct): ?array
@@ -52,6 +56,7 @@ class JobsTranslatorsDao extends AbstractDao
     }
 
     /**
+     * @throws PDOException
      * @throws ReflectionException
      */
     public function destroyCacheByJobStruct(JobStruct $jobStruct): bool

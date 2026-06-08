@@ -37,7 +37,7 @@ interface XliffRuleInterface
 
     /**
      * @param int $raw_word_count
-     * @param array $payable_rates
+     * @param array<string, int|float> $payable_rates
      *
      * @return float
      * @throws Exception
@@ -46,7 +46,7 @@ interface XliffRuleInterface
 
     /**
      * @param int $raw_word_count
-     * @param array $payable_rates
+     * @param array<string, int|float> $payable_rates
      *
      * @return float
      * @throws Exception

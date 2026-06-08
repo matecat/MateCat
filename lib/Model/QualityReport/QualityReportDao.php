@@ -13,18 +13,21 @@ use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use PDO;
+use PDOException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class QualityReportDao extends AbstractDao
 {
 
-    protected function _buildResult(array $array_result)
-    {
-    }
-
-
-    public function getAverages(JobStruct $chunk)
+    /**
+     * @param JobStruct $chunk
+     *
+     * @return array<string, mixed>|false
+     *
+     * @throws PDOException
+     */
+    public function getAverages(JobStruct $chunk): array|false
     {
         $sql = <<<SQL
 
@@ -68,9 +71,10 @@ SQL;
     /**
      * @param JobStruct $chunk
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws PDOException
      */
-    public static function getSegmentsForQualityReport(JobStruct $chunk): array
+    public function getSegmentsForQualityReport(JobStruct $chunk): array
     {
         $sql = <<<SQL
 
@@ -159,7 +163,7 @@ ORDER BY f.id, s.id, issues.id, comments.id
 
 SQL;
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -174,12 +178,13 @@ SQL;
     }
 
     /**
-     * @param $segments_id array
-     * @param $job_id      integer
+     * @param array<int, int> $segments_id
+     * @param int $job_id
      *
-     * @return array
+     * @return array<int, ShapelessConcreteStruct>
+     * @throws PDOException
      */
-    public static function getIssuesBySegments(array $segments_id, int $job_id): array
+    public function getIssuesBySegments(array $segments_id, int $job_id): array
     {
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
 
@@ -219,7 +224,7 @@ JOIN (
 
   ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ShapelessConcreteStruct::class);
 
@@ -234,6 +239,7 @@ JOIN (
      * @param int|null $source_page
      *
      * @return ShapelessConcreteStruct[]
+     * @throws PDOException
      */
     public function getReviseIssuesByChunk(int $job_id, string $password, int $source_page = null): array
     {

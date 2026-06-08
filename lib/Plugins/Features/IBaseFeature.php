@@ -27,12 +27,12 @@ interface IBaseFeature
      * These are the dependencies we need to make to be enabled when a dependecy is
      * activated for a given project. These will fill the project metadata table.
      *
-     * @return array
+     * @return array<int, string>
      */
     public static function getDependencies(): array;
 
     /**
-     * @return array
+     * @return array<int, string>
      */
     public static function getConflictingDependencies(): array;
 

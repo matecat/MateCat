@@ -253,14 +253,15 @@ export function useFileUploadManager({
       if (totalFiles > config.maxNumberFiles) {
         const excessFiles = totalFiles - config.maxNumberFiles
         fileList.slice(-excessFiles).forEach((f) => {
-          f.error = 'File limit exceeded'
+          f.error =
+            'Too many files uploaded. Please remove this file to continue.'
         })
       }
 
       setFiles((prevFiles) => prevFiles.concat(fileList))
 
-      fileList.forEach(({file, name, ext}) => {
-        if (file.error) return
+      fileList.forEach(({file, name, ext, error}) => {
+        if (error) return
 
         const onProgress = (progress) => {
           setFiles((prevFiles) =>

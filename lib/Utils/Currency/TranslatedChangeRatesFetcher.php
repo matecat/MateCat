@@ -23,9 +23,16 @@ class TranslatedChangeRatesFetcher extends ChangeRatesFetcher
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5000);
 
-        $output = json_decode(curl_exec($ch), true);
+        $curlResult = curl_exec($ch);
 
         curl_close($ch);
+
+        if (!is_string($curlResult)) {
+            return;
+        }
+
+        /** @var array<string, mixed>|null $output */
+        $output = json_decode($curlResult, true);
 
         // SAMPLE OUTPUT
         //  {
@@ -37,9 +44,9 @@ class TranslatedChangeRatesFetcher extends ChangeRatesFetcher
         //      ..... etc .....
         //  }
         // if everything went fine (code=1), unset the "code" key before returning to the client
-        if ($output["code"] == 1) {
+        if (is_array($output) && isset($output["code"]) && $output["code"] == 1) {
             unset($output["code"]);
-            $this->changeRates = json_encode($output);
+            $this->changeRates = json_encode($output) ?: '';
         }
     }
 

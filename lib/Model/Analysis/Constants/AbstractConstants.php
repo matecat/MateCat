@@ -14,6 +14,7 @@ use RuntimeException;
 abstract class AbstractConstants implements ConstantsInterface
 {
 
+    /** @var array<string, string> */
     protected static array $forValue = [];
 
     /**
@@ -31,6 +32,9 @@ abstract class AbstractConstants implements ConstantsInterface
         return $name;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function forValue(): array
     {
         return static::$forValue;

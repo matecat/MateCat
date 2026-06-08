@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import IconClose from '../../../icons/IconClose'
 import Tooltip from '../../../common/Tooltip'

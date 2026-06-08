@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
-import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
+import {TEMPLATE_MODIFIERS} from './ProjectTemplateConstants'
 
 export const TemplateNameInput = () => {
   const {

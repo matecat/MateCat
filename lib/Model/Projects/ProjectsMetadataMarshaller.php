@@ -38,6 +38,7 @@ enum ProjectsMetadataMarshaller: string
     case MMT_GLOSSARIES = 'mmt_glossaries';
     case LARA_GLOSSARIES = 'lara_glossaries';
     case LARA_STYLE = 'lara_style';
+    case LARA_STYLE_GUIDELINE_ID = 'lara_style_guideline_id';
     case INTENTO_ROUTING = 'intento_routing';
     case INTENTO_PROVIDER = 'intento_provider';
     case DEEPL_FORMALITY = 'deepl_formality';
@@ -46,6 +47,7 @@ enum ProjectsMetadataMarshaller: string
 
     case SEGMENTATION_RULE = 'segmentation_rule';
     case WPML = 'WPML';
+    case CONTEXT_URL = 'context-url';
 
     public static function unMarshall(MetadataStruct $struct): mixed
     {
@@ -65,11 +67,13 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::MMT_GLOSSARIES->value,
             ProjectsMetadataMarshaller::SEGMENTATION_RULE->value,
             ProjectsMetadataMarshaller::LARA_STYLE->value,
+            ProjectsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID->value,
             ProjectsMetadataMarshaller::INTENTO_ROUTING->value,
             ProjectsMetadataMarshaller::INTENTO_PROVIDER->value,
             ProjectsMetadataMarshaller::DEEPL_FORMALITY->value,
             ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
-            ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value => fn() => (string)$struct->value,
+            ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value,
+            ProjectsMetadataMarshaller::CONTEXT_URL->value => fn() => (string)$struct->value,
             // backward compatibility, old projects could have JSON glossaries encoded as HTML entities
             ProjectsMetadataMarshaller::LARA_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,

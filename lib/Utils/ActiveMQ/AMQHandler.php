@@ -10,8 +10,10 @@
 namespace Utils\ActiveMQ;
 
 use Exception;
+use JsonException;
 use Predis;
 use ReflectionException;
+use RuntimeException;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
 use Stomp\Network\Connection;
@@ -59,10 +61,20 @@ class AMQHandler
     /**
      * Singleton implementation of StatefulStomp in a not static constructor
      *
+     * @param string|null $brokerUri
+     * @param bool $usePersistentConnection
+     * @param bool $sync
+     * @param StatefulStomp|null $preconfiguredStomp Test-only injection: bypasses all connection setup
+     *
      * @throws ConnectionException
      */
-    public function __construct($brokerUri = null, $usePersistentConnection = true)
+    public function __construct(?string $brokerUri = null, bool $usePersistentConnection = true, bool $sync = true, ?StatefulStomp $preconfiguredStomp = null)
     {
+        if ($preconfiguredStomp !== null) {
+            $this->statefulStomp = $preconfiguredStomp;
+            return;
+        }
+
         if ($usePersistentConnection) {
             if (!isset(self::$staticStompConnection)) {
                 if (!is_null($brokerUri)) {
@@ -81,12 +93,17 @@ class AMQHandler
 
         $connection->setReadTimeout(2, 500000);
 
-        $this->statefulStomp = new StatefulStomp(new Client($connection));
+        $client = new Client($connection);
+        $client->setSync($sync);
+        $this->statefulStomp = new StatefulStomp($client);
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public static function getNewInstanceForDaemons(): AMQHandler
     {
-        return new self(null, false);
+        return new self(null, false, false);
     }
 
     /**
@@ -122,6 +139,7 @@ class AMQHandler
      *
      * @return Predis\Client
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getRedisClient(): Predis\Client
     {
@@ -137,7 +155,7 @@ class AMQHandler
      * @param string $destination
      * @param ?string $selector
      * @param string $ack
-     * @param array $header
+     * @param array<string, mixed> $header
      *
      * @return int
      */
@@ -240,12 +258,12 @@ class AMQHandler
     /**
      * Called from web interface, manage the Exception
      *
-     * @param null $qid
+     * @param ?int $qid
      *
      * @return string|null
      * @throws Exception
      */
-    public function getActualForQID($qid = null): ?string
+    public function getActualForQID(?int $qid = null): ?string
     {
         if (empty($qid)) {
             throw new Exception('Can Not get values without a Queue ID. Use ' . AMQHandler::class . '::setQueueID  or pass a queue id to this method');
@@ -264,12 +282,14 @@ class AMQHandler
     }
 
     /**
-     * @param $queue_interface_url
+     * @param string $queue_interface_url
      *
      * @return mixed
+     * @throws JsonException
+     * @throws RuntimeException
      * @throws Exception
      */
-    public function callAmqJmx($queue_interface_url): mixed
+    public function callAmqJmx(string $queue_interface_url): mixed
     {
         $mHandler = new MultiCurlHandler();
 
@@ -287,6 +307,9 @@ class AMQHandler
         $mHandler->multiExec();
         $result = $mHandler->getSingleContent($resource);
         $mHandler->multiCurlCloseAll();
+        if (!is_string($result)) {
+            throw new Exception('Failed to get response from AMQ JMX');
+        }
         $result = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
 
         return $result['value'];

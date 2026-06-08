@@ -6,7 +6,9 @@ use Exception;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Registry\AppConfig;
 
@@ -34,22 +36,23 @@ trait AuthenticationTrait
      */
     protected ?string $api_secret = null;
 
+
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function identifyUser(?bool $useSession = true): void
+    protected function identifyUser(?bool $useSession = true, ?AuthenticationHelper $authHelper = null): void
     {
         $_session = [];
         if ($useSession) {
-            //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disable
+            //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disabled
             static::sessionStart();
             $_session =& $_SESSION;
         }
 
         $this->setAuthKeysIfExists();
 
-        $auth = AuthenticationHelper::getInstance($_session, $this->api_key, $this->api_secret);
+        $auth = $authHelper ?? new AuthenticationHelper($_session, $this->api_key, $this->api_secret);
         $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
         $this->api_record = $auth->getApiRecord();
@@ -58,14 +61,19 @@ trait AuthenticationTrait
     /**
      * @return void
      */
+    /**
+     * @return void
+     */
     protected function setAuthKeysIfExists(): void
     {
+        /** @var array<string, string> $headers */
         $headers = array_change_key_case(getallheaders());
 
-        $this->api_key = $headers['x-matecat-key'] ?? base64_decode(explode('Bearer ', $headers['authorization'] ?? '')[1] ?? '');
+        $decoded = base64_decode(explode('Bearer ', $headers['authorization'] ?? '')[1] ?? '');
+        $this->api_key = $headers['x-matecat-key'] ?? ($decoded !== false ? $decoded : null);
         $this->api_secret = $headers['x-matecat-secret'] ?? null;
 
-        if (str_contains($this->api_key, '-')) {
+        if ($this->api_key !== null && str_contains($this->api_key, '-')) {
             [$this->api_key, $this->api_secret] = explode('-', $this->api_key);
         }
     }
@@ -85,11 +93,14 @@ trait AuthenticationTrait
 
     /**
      * @throws ReflectionException
+     * @throws ConnectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    public function broadcastLogout(): void
+    public function broadcastLogout(?AMQHandler $amqHandler = null): void
     {
         $this->logout();
-        $queueHandler = new AMQHandler();
+        $queueHandler = $amqHandler ?? new AMQHandler();
         $message = json_encode([
             '_type' => 'logout',
             'data' => [
@@ -99,15 +110,22 @@ trait AuthenticationTrait
                 ]
             ]
         ]);
+
+        if ($message === false) {
+            return;
+        }
+
         $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    public function logout(): void
+    public function logout(?AuthenticationHelper $authHelper = null): void
     {
-        AuthenticationHelper::destroyAuthentication($_SESSION);
+        ($authHelper ?? new AuthenticationHelper($_SESSION))->destroyAuthentication();
     }
 
     public function getApiRecord(): ?ApiKeyStruct

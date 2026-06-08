@@ -67,7 +67,7 @@ class SetChunkCompletedController extends KleinController
             throw new InvalidArgumentException("Missing id password", -2);
         }
 
-        $job = JobDao::getByIdAndPassword($id_job, $password);
+        $job = (new JobDao())->getByIdAndPassword((int)$id_job, (string)$password);
 
         if (empty($job)) {
             throw new InvalidArgumentException("wrong password", -10);

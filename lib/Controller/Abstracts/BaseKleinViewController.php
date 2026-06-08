@@ -3,8 +3,10 @@
 namespace Controller\Abstracts;
 
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Klein\App;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
@@ -14,7 +16,10 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
+use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
@@ -59,7 +64,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
 
     /**
      * @param string $template_name
-     * @param array $params
+     * @param array<string, mixed> $params
      * @param int $code
      *
      * @return void
@@ -67,7 +72,8 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      */
     public function setView(string $template_name, array $params = [], int $code = 200): void
     {
-        $this->view = new PHPTALWithAppend(AppConfig::$TEMPLATE_ROOT . "/$template_name");
+        $templatePath = AppConfig::$TEMPLATE_ROOT . "/$template_name";
+        $this->view = new PHPTALWithAppend($templatePath);
         $this->httpCode = $code;
 
         $this->view->{'basepath'} = AppConfig::$BASEURL;
@@ -81,45 +87,63 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'flashMessages'} = FlashMessage::flush();
 
         if ($this->isLoggedIn()) {
-            // Load the feature set for the user (plus the autoloaded ones)
-            $this->featureSet->loadFromUserEmail($this->user->email);
+            $this->getFeatureSet()->loadFromUserEmail($this->user->email ?? '');
         }
 
-        $this->view->{'user_plugins'} = new PHPTalMap($this->featureSet->getCodes());
+        $this->view->{'user_plugins'} = new PHPTalMap($this->getFeatureSet()->getCodes());
         $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
-        $this->view->{'userMail'} = $this->getUser()->email;
-        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->filter("isAnInternalUser", $this->getUser()->email ?? ''));
+        $this->view->{'userMail'} = $this->getUser()->email ?? '';
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->getUser()->email ?? ''))->isInternal());
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];
-        $this->view->{'css_resources'} = [];
-
-        // init oauth clients
-        $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-        $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
-
-        $this->view->{'googleDriveEnabled'} = new PHPTalBoolean(AppConfig::isGDriveConfigured());
-        $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
-            GoogleProvider::PROVIDER_NAME,
-            AppConfig::$HTTPHOST . "/gdrive/oauth/response"
-        )->getAuthorizationUrl($_SESSION, 'drive') : "";
 
         /**
          * This is a unique ID generated at runtime.
          * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
          */
-        $this->view->{'x_nonce_unique_id'} = Utils::uuid4();
-        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url(AppConfig::$HTTPHOST)['host'] : null;
+        $nonce = Utils::uuid4();
+        $this->view->{'x_nonce_unique_id'} = $nonce;
+
+        // init oauth clients — graceful degradation on provider init failure
+        try {
+            $this->view->{'googleAuthURL'} = (AppConfig::$GOOGLE_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GoogleProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'githubAuthUrl'} = (AppConfig::$GITHUB_OAUTH_CLIENT_ID) ? OauthClient::getInstance(GithubProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'linkedInAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(LinkedInProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'microsoftAuthUrl'} = (AppConfig::$LINKEDIN_OAUTH_CLIENT_ID) ? OauthClient::getInstance(MicrosoftProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+            $this->view->{'facebookAuthUrl'} = (AppConfig::$FACEBOOK_OAUTH_CLIENT_ID) ? OauthClient::getInstance(FacebookProvider::PROVIDER_NAME)->getAuthorizationUrl($_SESSION) : "";
+        } catch (TypeError) {
+            $this->view->{'googleAuthURL'} = "";
+            $this->view->{'githubAuthUrl'} = "";
+            $this->view->{'linkedInAuthUrl'} = "";
+            $this->view->{'microsoftAuthUrl'} = "";
+            $this->view->{'facebookAuthUrl'} = "";
+        }
+
+        $this->view->{'googleDriveEnabled'} = new PHPTalBoolean(AppConfig::isGDriveConfigured());
+        try {
+            $this->view->{'gdriveAuthURL'} = ($this->isLoggedIn() && AppConfig::isGDriveConfigured()) ? OauthClient::getInstance(
+                GoogleProvider::PROVIDER_NAME,
+                AppConfig::$HTTPHOST . "/gdrive/oauth/response"
+            )->getAuthorizationUrl($_SESSION, 'drive') : "";
+        } catch (TypeError) {
+            $this->view->{'gdriveAuthURL'} = "";
+        }
+
+        $parsedHost = parse_url(AppConfig::$HTTPHOST);
+        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($parsedHost) && isset($parsedHost['host'])
+            ? " *.ajax." . $parsedHost['host']
+            : null;
 
         $this->addParamsToView($params);
-
         $this->view->setOutputMode(PHPTAL::HTML5);
+
+        $this->getFeatureSet()->dispatch(new DecorateViewEvent($this->view, $template_name, $nonce));
     }
 
     /**
+     * @param array<string, mixed> $params
+     *
      * @throws Exception
      */
     public function addParamsToView(array $params): void
@@ -145,14 +169,28 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      * @param int|null $code
      *
      * @return never
+     *
+     * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function render(?int $code = null): never
     {
         $this->response->noCache();
         $this->response->code($code ?? $this->httpCode);
-        $this->response->body($this->view->execute());
+
+        if (isset($this->view)) {
+            $this->response->body($this->view->execute());
+        }
+
         $this->response->send();
         $this->_logWithTime();
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
         die();
     }
 

@@ -1,14 +1,8 @@
-import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
-import SplitJobModal from '../components/modals/SplitJob'
-import {CreateTeam} from '../components/modals/CreateTeam'
-import {ModifyTeam} from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
 import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
-import PreferencesModal from '../components/modals/PreferencesModal'
-import SuccessModal from '../components/modals/SuccessModal'
-import OnBoarding, {ONBOARDING_STEP} from '../components/onBoarding/OnBoarding'
-import {DownloadAlertModal} from '../components/modals/DownloadAlertModal'
+import {MODAL_KEY} from '../constants/ModalKeys'
+import {ONBOARDING_STEP} from '../constants/OnBoardingConstants'
 
 let ModalsActions = {
   showModalComponent: (
@@ -35,7 +29,7 @@ let ModalsActions = {
   },
   openLoginModal: function () {
     ModalsActions.showModalComponent(
-      OnBoarding,
+      MODAL_KEY.ONBOARDING,
       {isCloseButtonEnabled: true},
       null,
       {maxWidth: 'unset', width: 'auto'},
@@ -46,7 +40,7 @@ let ModalsActions = {
   },
   openRegisterModal: () => {
     ModalsActions.showModalComponent(
-      OnBoarding,
+      MODAL_KEY.ONBOARDING,
       {
         step: ONBOARDING_STEP.REGISTER,
         isCloseButtonEnabled: true,
@@ -64,18 +58,18 @@ let ModalsActions = {
       maxWidth: '700px',
     }
     ModalsActions.showModalComponent(
-      PreferencesModal,
+      MODAL_KEY.PREFERENCES,
       {showGDriveMessage},
       'Profile',
       style,
     )
   },
   openSuccessModal: (props) => {
-    ModalsActions.showModalComponent(SuccessModal, props, props.title)
+    ModalsActions.showModalComponent(MODAL_KEY.SUCCESS, props, props.title)
   },
   openResetPassword: ({setNewPassword = false} = {}) => {
     ModalsActions.showModalComponent(
-      OnBoarding,
+      MODAL_KEY.ONBOARDING,
       {
         step: setNewPassword
           ? ONBOARDING_STEP.SET_NEW_PASSWORD
@@ -95,14 +89,14 @@ let ModalsActions = {
     })
   },
   openCreateTeamModal: function () {
-    this.showModalComponent(CreateTeam, {}, 'Create New Team')
+    this.showModalComponent(MODAL_KEY.CREATE_TEAM, {}, 'Create New Team')
   },
   openModifyTeamModal: function (team, hideChangeName) {
     const props = {
       team: team,
       hideChangeName: hideChangeName,
     }
-    this.showModalComponent(ModifyTeam, props, 'Manage Team')
+    this.showModalComponent(MODAL_KEY.MODIFY_TEAM, props, 'Manage Team')
   },
 
   openSplitJobModal: function (job, project, callback) {
@@ -112,7 +106,7 @@ let ModalsActions = {
       callback: callback,
     }
     const style = {width: '670px', maxWidth: '670px'}
-    this.showModalComponent(SplitJobModal, props, 'Split Job', style)
+    this.showModalComponent(MODAL_KEY.SPLIT_JOB, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {
     const props = {
@@ -133,7 +127,11 @@ let ModalsActions = {
         this.onCloseModal()
       },
     }
-    this.showModalComponent(ConfirmMessageModal, props, 'Confirmation required')
+    this.showModalComponent(
+      MODAL_KEY.CONFIRM_MESSAGE,
+      props,
+      'Confirmation required',
+    )
   },
 
   showDownloadWarningsModal: function (
@@ -142,7 +140,7 @@ let ModalsActions = {
     cancelCallback,
   ) {
     ModalsActions.showModalComponent(
-      DownloadAlertModal,
+      MODAL_KEY.DOWNLOAD_ALERT,
       {successCallback, successCallbackWithoutErrors, cancelCallback},
       'Unresolved Major Issues',
     )

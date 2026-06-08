@@ -18,6 +18,7 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmD
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
 import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
+import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -26,7 +27,7 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
-export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
+
 export const DEEPL_GLOSSARY_ROW_NONE = ''
 
 export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {

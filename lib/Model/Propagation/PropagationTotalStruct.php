@@ -11,22 +11,22 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
 {
 
     /**
-     * @var array
+     * @var array{total?: int, countSeg?: int, status?: string}
      */
     protected array $totals = [];
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected array $propagated_ids = [];
 
     /**
-     * @var array
+     * @var array<string, string>
      */
     protected array $propagated_ids_to_update_version = [];
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $segments_for_propagation = [
         'propagated' => [
@@ -40,7 +40,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     ];
 
     /**
-     * @return array
+     * @return array{total?: int, countSeg?: int, status?: string}
      */
     public function getTotals(): array
     {
@@ -48,7 +48,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @param array $params
+     * @param array{total: int, countSeg: int, status: string} $params
      */
     public function setTotals(array $params): void
     {
@@ -58,7 +58,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     public function getPropagatedIds(): array
     {
@@ -77,7 +77,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getPropagatedIdsToUpdateVersion(): array
     {
@@ -95,7 +95,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getSegmentsForPropagation(): array
     {
@@ -140,6 +140,9 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
         $this->segments_for_propagation['not_propagated']['not_ice']['object'][] = $segmentTranslation;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [
@@ -150,6 +153,9 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
         ];
     }
 
+    /**
+     * @return list<SegmentTranslationStruct>
+     */
     public function getAllToPropagate(): array
     {
         $aggregator = [];

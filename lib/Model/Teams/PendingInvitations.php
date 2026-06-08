@@ -10,25 +10,23 @@
 namespace Model\Teams;
 
 
-use Predis\Client;
+use Predis\ClientInterface;
 
 class PendingInvitations
 {
 
     const string REDIS_INVITATIONS_SET = 'teams_invites:%u';
 
-    /**
-     * @var Client
-     */
-    protected Client $redisClient;
+    protected ClientInterface $redisClient;
 
+    /** @var array{team_id: int, email: string} */
     protected array $payload;
 
     /**
-     * @param Client $redis
-     * @param array{team_id?: int, email?: string} $payload
+     * @param ClientInterface $redis
+     * @param array{team_id: int, email: string} $payload
      */
-    public function __construct(Client $redis, array $payload)
+    public function __construct(ClientInterface $redis, array $payload)
     {
         $this->redisClient = $redis;
         $this->payload = $payload;
@@ -36,7 +34,7 @@ class PendingInvitations
 
     public function set(): void
     {
-        $this->redisClient->sadd(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), $this->payload['email']);
+        $this->redisClient->sadd(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), [$this->payload['email']]);
         $this->redisClient->expire(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), 60 * 60 * 24 * 3); //3-day renew
 
     }
@@ -46,7 +44,10 @@ class PendingInvitations
         return $this->redisClient->srem(sprintf(self::REDIS_INVITATIONS_SET, $this->payload['team_id']), $this->payload['email']);
     }
 
-    public function hasPendingInvitation($id_team): array
+    /**
+     * @return array<string>
+     */
+    public function hasPendingInvitation(int $id_team): array
     {
         return $this->redisClient->smembers(sprintf(self::REDIS_INVITATIONS_SET, $id_team));
     }

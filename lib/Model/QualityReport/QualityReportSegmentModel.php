@@ -8,9 +8,12 @@
 
 namespace Model\QualityReport;
 
+use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
@@ -23,6 +26,9 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use ReflectionException;
+use RuntimeException;
+use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
@@ -30,28 +36,58 @@ use Utils\Tools\CatUtils;
 class QualityReportSegmentModel
 {
 
-    protected $chunk;
+    protected JobStruct $chunk;
 
-    protected $_chunkReviews;
+    /** @var ChunkReviewStruct[]|null */
+    protected ?array $_chunkReviews = null;
 
-    public function __construct(JobStruct $chunk)
-    {
+    private ChunkReviewDao $chunkReviewDao;
+    private SegmentDao $segmentDao;
+    private QualityReportDao $qualityReportDao;
+    private EntryCommentDao $entryCommentDao;
+    private CommentDao $commentDao;
+
+    public function __construct(
+        JobStruct $chunk,
+        ?ChunkReviewDao $chunkReviewDao = null,
+        ?SegmentDao $segmentDao = null,
+        ?QualityReportDao $qualityReportDao = null,
+        ?EntryCommentDao $entryCommentDao = null,
+        ?CommentDao $commentDao = null
+    ) {
         $this->chunk = $chunk;
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+        $this->segmentDao = $segmentDao ?? new SegmentDao();
+        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao();
+        $this->entryCommentDao = $entryCommentDao ?? new EntryCommentDao();
+        $this->commentDao = $commentDao ?? new CommentDao();
     }
 
     /**
      * @param int $step
-     * @param        $ref_segment
+     * @param int $ref_segment
      * @param string $where
-     * @param array $options
+     * @param array<string, mixed> $options
      *
-     * @return array
+     * @return array<int, int>
      * @throws Exception
      */
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
-        if (isset($options['filter']['issue_category'])) {
-            $options['filter']['issue_category'] = $this->issueCategoryIds($options['filter']['issue_category']);
+        if (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != 'all') {
+            $idQaModel = $this->chunk->getProject()->id_qa_model;
+            if ($idQaModel !== null) {
+                $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
+                    $idQaModel,
+                    $options['filter']['issue_category']
+                );
+
+                if (!empty($subCategories) > 0) {
+                    $options['filter']['issue_category'] = array_map(function (CategoryStruct $subcat) {
+                        return $subcat->id;
+                    }, $subCategories);
+                }
+            }
         }
 
         /**
@@ -69,8 +105,7 @@ class QualityReportSegmentModel
             }
         }
 
-        $segmentsDao = new SegmentDao();
-        $segments_id = $segmentsDao->getSegmentsIdForQR(
+        $segments_id = $this->segmentDao->getSegmentsIdForQR(
             $this->chunk,
             $step,
             $ref_segment,
@@ -82,48 +117,11 @@ class QualityReportSegmentModel
     }
 
     /**
-     * Processes a string of issue category IDs, converting them into an array of integers,
-     * and expands the list by including IDs of subcategories if applicable.
-     *
-     * @param string $issue_category A comma-separated string of issue category IDs.
-     *                                If it contains 'all', the method returns null.
-     *
-     * @return array|null Returns an array of category IDs, including subcategory IDs, or null if 'all' is present.
-     */
-    private function issueCategoryIds(string $issue_category): ?array
-    {
-        if (str_contains($issue_category, 'all')){
-            return null;
-        }
-
-        $issue_category = array_map('intval', explode(',', $issue_category));
-
-        foreach ($issue_category as $issue_category_id) {
-            $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
-                $this->chunk->getProject()->id_qa_model,
-                $issue_category_id
-            );
-
-            if (!empty($subCategories)) {
-                foreach ($subCategories as $subcat) {
-                    $issue_category[] = (int)$subcat->id;
-                }
-            }
-        }
-
-        return $issue_category;
-    }
-
-    /**
-     * @param QualityReportSegmentStruct $seg
-     * @param MateCatFilter $Filter
-     * @param \Model\FeaturesBase\FeatureSet $featureSet
-     * @param JobStruct $chunk
-     * @param bool $isForUI
-     *
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
-    protected function _commonSegmentAssignments(QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, $isForUI = false)
+    protected function _commonSegmentAssignments(QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, bool $isForUI = false): void
     {
         $seg->warnings = $seg->getLocalWarning($featureSet, $chunk);
         $seg->pee = $seg->getPEE();
@@ -139,11 +137,10 @@ class QualityReportSegmentModel
     }
 
     /**
-     * @param $seg
-     * @param $issues
-     * @param $issue_comments
+     * @param ShapelessConcreteStruct[] $issues
+     * @param array<int, array<int, mixed>> $issue_comments
      */
-    protected function _assignIssues($seg, $issues, $issue_comments)
+    protected function _assignIssues(QualityReportSegmentStruct $seg, array $issues, array $issue_comments): void
     {
         foreach ($issues as $issue) {
             $issue->revision_number = ReviewUtils::sourcePageToRevisionNumber($issue->source_page);
@@ -159,10 +156,12 @@ class QualityReportSegmentModel
     }
 
     /**
-     * @param                                     $seg
-     * @param \Model\Comments\BaseCommentStruct[] $comments
+     * @param BaseCommentStruct[] $comments
+     * @throws RuntimeException
+     * @throws ReflectionException
+     * @throws Exception
      */
-    protected function _assignComments($seg, array $comments)
+    protected function _assignComments(QualityReportSegmentStruct $seg, array $comments): void
     {
         foreach ($comments as $comment) {
             $comment->templateMessage();
@@ -176,42 +175,52 @@ class QualityReportSegmentModel
      * If the results are needed from UI return a layer2 presentation,
      * otherwise return just plain text (layer 0)
      *
-     * @param array $segment_ids
+     * @param list<int|string> $segment_ids
      * @param bool $isForUI
      *
      * @return QualityReportSegmentStruct[]
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     public function getSegmentsForQR(array $segment_ids, $isForUI = false)
     {
-        $segmentsDao = new SegmentDao;
-        $data = $segmentsDao->getSegmentsForQr($segment_ids, $this->chunk->id, $this->chunk->password);
+        if ($this->chunk->id === null || $this->chunk->password === null) {
+            return [];
+        }
+
+        $segmentIds = array_values(array_map('intval', $segment_ids));
+
+        $chunkId = $this->chunk->id;
+        $chunkPassword = $this->chunk->password;
+
+        $data = $this->segmentDao->getSegmentsForQr($segmentIds, $chunkId, $chunkPassword);
 
         $featureSet = new FeatureSet();
 
         $featureSet->loadForProject($this->chunk->getProject());
         $issue_comments = [];
 
-        $issues = QualityReportDao::getIssuesBySegments($segment_ids, $this->chunk->id);
-        if (!empty($issues)) {
-            $issue_comments = (new EntryCommentDao())->fetchCommentsGroupedByIssueIds(
-                array_map(function ($issue) {
-                    return $issue->issue_id;
-                }, $issues)
-            );
-        }
+         $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);
+         if (!empty($issues)) {
+             $issue_comments = $this->entryCommentDao->fetchCommentsGroupedByIssueIds(
+                 array_values(array_map(function ($issue): int {
+                     return (int)$issue->issue_id;
+                 }, $issues))
+             );
+         }
 
-        $commentsDao = new CommentDao;
-        $comments = $commentsDao->getThreadsBySegments($segment_ids, $this->chunk->id);
+        $comments = $this->commentDao->getThreadsBySegments($segmentIds, $chunkId);
 
         $translationVersionDao = new TranslationVersionDao;
-        $all_events = $translationVersionDao->getAllRelevantEvents($segment_ids, $this->chunk->id);
-        $history_events = $translationVersionDao->historyEvents($segment_ids, $this->chunk->id);
+        $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $chunkId);
+        $history_events = $translationVersionDao->historyEvents($segment_ids, $chunkId);
+
 
         $segments = [];
 
         foreach ($data as $index => $seg) {
-            $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
+            $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($seg->sid);
             $metadataDao = new MetadataDao();
 
             /** @var MateCatFilter $Filter */
@@ -220,13 +229,13 @@ class QualityReportSegmentModel
                 $this->chunk->source,
                 $this->chunk->target,
                 $dataRefMap,
-                $metadataDao->getSubfilteringCustomHandlers($this->chunk->id, $this->chunk->password)
+                $metadataDao->getSubfilteringCustomHandlers($chunkId, $chunkPassword)
             );
 
             $seg->dataRefMap = $dataRefMap;
 
             $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI);
-            $this->_assignIssues($seg, $issues ?? [], $issue_comments);
+            $this->_assignIssues($seg, $issues, $issue_comments);
             $this->_assignComments($seg, $comments);
             $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
             $this->_populateHistory($seg, $Filter, $history_events,$issues ?? [], $isForUI);
@@ -291,11 +300,12 @@ class QualityReportSegmentModel
 
     /**
      * @return ChunkReviewStruct[]
+     * @throws Exception
      */
-    protected function _getChunkReviews()
+    protected function _getChunkReviews(): array
     {
         if (is_null($this->_chunkReviews)) {
-            $this->_chunkReviews = (new ChunkReviewDao())->findChunkReviews($this->chunk);
+            $this->_chunkReviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
         }
 
         return $this->_chunkReviews;
@@ -308,6 +318,7 @@ class QualityReportSegmentModel
      * @param bool $isForUI
      *
      * @throws Exception
+     * @throws TypeError
      */
     protected function _populateLastTranslationAndRevision(
         QualityReportSegmentStruct $seg,
@@ -326,17 +337,17 @@ class QualityReportSegmentModel
                 case TranslationStatus::STATUS_APPROVED:
                     $seg->last_revisions[] = [
                         'revision_number' => 1,
-                        'translation' => ($isForUI) ? $Filter->fromLayer0ToLayer2($seg->translation) : $seg->translation
+                        'translation' => ($isForUI) ? $Filter->fromLayer0ToLayer2($seg->translation ?? '') : ($seg->translation ?? '')
                     ];
                     break;
                 case TranslationStatus::STATUS_APPROVED2:
                     $seg->last_revisions[] = [
                         'revision_number' => 2,
-                        'translation' => ($isForUI) ? $Filter->fromLayer0ToLayer2($seg->translation) : $seg->translation
+                        'translation' => ($isForUI) ? $Filter->fromLayer0ToLayer2($seg->translation ?? '') : ($seg->translation ?? '')
                     ];
                     break;
                 case TranslationStatus::STATUS_TRANSLATED:
-                    $seg->last_translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($seg->translation) : $seg->translation;
+                    $seg->last_translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($seg->translation ?? '') : ($seg->translation ?? '');
                     break;
                 default:
                     $seg->is_pre_translated = false; // unreachable condition

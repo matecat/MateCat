@@ -13,6 +13,16 @@
   user-select: none;
   border-radius: variables.$border-radius-default;
   background-color: colors.$grey50;
+
+  &--auto-width {
+    display: inline-flex;
+  }
+}
+
+.segmented-control__option {
+  .segmented-control--auto-width & {
+    flex: 0 0 auto;
+  }
 }
 
 .segmented-control__label {
@@ -28,6 +38,12 @@
   transition: color 0.3s cubic-bezier(0.77, 0, 0.175, 1);
   cursor: pointer;
   gap: 4px;
+
+  .segmented-control--auto-width & {
+    padding: 0 16px;
+    white-space: nowrap;
+  }
+
   .segmented-control--compact & {
     line-height: 40px;
   }
@@ -55,7 +71,8 @@
   left: 0;
   z-index: 1;
   padding: 4px;
-  transition: transform 0.2s ease-out;
+  box-sizing: border-box;
+  transition: transform 0.2s ease-out, width 0.2s ease-out;
 }
 .segmented-control__cursor:before {
   content: '';

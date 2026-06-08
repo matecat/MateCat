@@ -12,11 +12,12 @@ class CanonicalRoutes
 {
 
     /**
-     * @param array $requestInfo
-     * @param array $options
+     * @param array<string, mixed> $requestInfo
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
+     * @throws \TypeError
      */
     public static function inviteToTeamConfirm(array $requestInfo, array $options = []): string
     {
@@ -38,7 +39,7 @@ class CanonicalRoutes
 
     /**
      * @param string $confirmation_token
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -52,7 +53,7 @@ class CanonicalRoutes
 
     /**
      * @param string $confirmation_token
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -67,7 +68,7 @@ class CanonicalRoutes
     /**
      * @param int $id_job
      * @param string $password
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -84,7 +85,7 @@ class CanonicalRoutes
      * @param string $password
      * @param string|null $filename
      * @param string $download_type
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -109,7 +110,7 @@ class CanonicalRoutes
      * @param string $password
      * @param string|null $filename
      * @param string $download_type
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -135,7 +136,7 @@ class CanonicalRoutes
      * @param string $password
      * @param string $source
      * @param string $target
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -164,7 +165,7 @@ class CanonicalRoutes
      * @param string $password
      * @param string $source
      * @param string $target
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -177,8 +178,8 @@ class CanonicalRoutes
     }
 
     /**
-     * @param array $params
-     * @param array $options
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -209,7 +210,7 @@ class CanonicalRoutes
     }
 
     /**
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -228,7 +229,7 @@ class CanonicalRoutes
     }
 
     /**
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return string
      * @throws Exception
@@ -239,7 +240,7 @@ class CanonicalRoutes
     }
 
     /**
-     * @param array $params
+     * @param array<string, mixed> $params
      *
      * @return string
      * @throws Exception

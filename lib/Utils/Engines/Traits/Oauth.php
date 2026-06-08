@@ -14,12 +14,18 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use RuntimeException;
+use TypeError;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 
 trait Oauth
 {
 
     protected int $token_endlife = 0;
 
+    /**
+     * @return array<int, mixed>
+     */
     protected function getAuthParameters(): array
     {
         return [
@@ -34,18 +40,19 @@ trait Oauth
      *
      * @return void
      * @throws Exception
+     * @throws TypeError
      */
     protected function _authenticate(): void
     {
         $this->_auth_parameters['client_id'] = $this->client_id;
         $this->_auth_parameters['client_secret'] = $this->client_secret;
 
-        $url = $this->oauth_url;
+        $url = $this->oauth_url ?? throw new RuntimeException('OAuth URL not configured');
         $curl_opt = $this->getAuthParameters();
 
         $rawValue = $this->_call($url, $curl_opt);
 
-        if (json_validate($rawValue)) {
+        if (is_string($rawValue) && json_validate($rawValue)) {
             $objResponse = json_decode($rawValue, true);
         } else {
             $objResponse = $rawValue;
@@ -72,9 +79,7 @@ trait Oauth
         $engineDAO = new EngineDAO(Database::obtain());
 
         /**
-         * Use a generic EnginesFactory and not Engine_MicrosoftHubStruct
-         * because the EnginesFactory Factory Class built the query as generic engine
-         *
+         * Use a generic EnginesFactory because the Factory Class builds the query as generic engine
          */
         $engineStruct = $this->_getEngineStruct();
         $engineStruct->id = $record->id;
@@ -89,13 +94,14 @@ trait Oauth
     }
 
     /**
+     * @param array<string, mixed> $_config
+     *
+     * @return GetMemoryResponse
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config)
+    public function get(array $_config, int $cycle = 0): GetMemoryResponse
     {
-        $numArgs = func_num_args();
-        $cycle = $numArgs > 0 ? ((int)func_get_arg(1) ?? 0) : 0;
-
         if ($cycle == 10) {
             return $this->_formatRecursionError();
         }
@@ -106,7 +112,7 @@ trait Oauth
                 $this->_authenticate();
             }
         } catch (Exception) {
-            return $this->result;
+            return $this->_getResultAsGetMemoryResponse();
         }
 
         $parameters = $this->_fillCallParameters($_config);
@@ -120,7 +126,7 @@ trait Oauth
                 //Check for time to live and refresh cache and token info
                 $this->_authenticate();
             } catch (Exception) {
-                return $this->result;
+                return $this->_getResultAsGetMemoryResponse();
             }
 
             /**
@@ -131,10 +137,10 @@ trait Oauth
 
         }
 
-        return $this->result;
+        return $this->_getResultAsGetMemoryResponse();
     }
 
-    abstract protected function _formatRecursionError(): array;
+    abstract protected function _formatRecursionError(): GetMemoryResponse;
 
     abstract protected function _checkAuthFailure(): bool;
 

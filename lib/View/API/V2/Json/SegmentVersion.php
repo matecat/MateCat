@@ -4,19 +4,19 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\IDaoStruct;
-use Model\DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\LQA\EntryStruct;
+use RuntimeException;
 
 class SegmentVersion
 {
 
-    private ?FeatureSet $featureSet;
+    private FeatureSet $featureSet;
     /**
-     * @var IDaoStruct[]
+     * @var AbstractDaoObjectStruct[]
      */
     private array $data;
     private ?bool $with_issues;
@@ -26,20 +26,24 @@ class SegmentVersion
      */
     private JobStruct $chunk;
 
+    private ?MetadataDao $metadataDao;
+
     /**
      * SegmentVersionController constructor.
      *
      * @param JobStruct $chunk
-     * @param IDaoStruct[] $data
+     * @param AbstractDaoObjectStruct[] $data
      * @param bool $with_issues
      * @param FeatureSet|null $featureSet
-     *
+     * @param MetadataDao|null $metadataDao
+     * @throws Exception
      */
-    public function __construct(JobStruct $chunk, array $data, ?bool $with_issues = false, ?FeatureSet $featureSet = null)
+    public function __construct(JobStruct $chunk, array $data, ?bool $with_issues = false, ?FeatureSet $featureSet = null, ?MetadataDao $metadataDao = null)
     {
         $this->data = $data;
         $this->with_issues = $with_issues;
         $this->chunk = $chunk;
+        $this->metadataDao = $metadataDao;
 
         if ($featureSet == null) {
             $featureSet = new FeatureSet();
@@ -49,7 +53,7 @@ class SegmentVersion
     }
 
     /**
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws Exception
      */
     public function render(): array
@@ -62,6 +66,7 @@ class SegmentVersion
     }
 
     /**
+     * @return array<int, array<string, mixed>>
      * @throws Exception
      */
     protected function renderItemsWithIssues(): array
@@ -75,16 +80,17 @@ class SegmentVersion
         $issues_renderer = new SegmentTranslationIssue();
 
         foreach ($this->data as $record) {
-            /** @var ShapelessConcreteStruct $record */
             if (!is_null($versionId) && $versionId != $record->id) {
-                if (!empty($issuesSubset)) {
+                if ($version !== null && !empty($issuesSubset)) {
                     // attach issues to version
                     $version['issues'] = array_map(function ($item) use ($issues_renderer) {
                         return $issues_renderer->renderItem($item);
                     }, $issuesSubset);
                 }
 
-                $out[] = $version;
+                if ($version !== null) {
+                    $out[] = $version;
+                }
 
                 $issuesSubset = [];
             }
@@ -122,19 +128,21 @@ class SegmentVersion
             $versionId = $record->id;
         }
 
-        if (!empty($issuesSubset)) {
-            $version['issues'] = array_map(function ($item) use ($issues_renderer) {
-                return $issues_renderer->renderItem($item);
-            }, $issuesSubset);
-        }
+        if ($version !== null) {
+            if (!empty($issuesSubset)) {
+                $version['issues'] = array_map(function ($item) use ($issues_renderer) {
+                    return $issues_renderer->renderItem($item);
+                }, $issuesSubset);
+            }
 
-        $out[] = $version;
+            $out[] = $version;
+        }
 
         return $out;
     }
 
     /**
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws Exception
      */
     protected function renderItemsNormal(): array
@@ -148,23 +156,25 @@ class SegmentVersion
     }
 
     /**
-     * @param $version
+     * @param AbstractDaoObjectStruct $version
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
-    public function renderItem($version): array
+    public function renderItem(AbstractDaoObjectStruct $version): array
     {
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
-        /** @var MateCatFilter $Filter */
-        $metadataDao = new MetadataDao();
+        $this->metadataDao ??= new MetadataDao();
         $Filter = MateCatFilter::getInstance(
-            $featureSet,
+            $this->featureSet,
             $this->chunk->source,
             $this->chunk->target,
             [],
-            $metadataDao->getSubfilteringCustomHandlers($this->chunk->id, $this->chunk->password)
+            $this->metadataDao->getSubfilteringCustomHandlers((int)$this->chunk->id, (string)$this->chunk->password)
         );
+
+        if (!$Filter instanceof MateCatFilter) {
+            throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
+        }
 
         return [
             'id' => (int)$version->id,

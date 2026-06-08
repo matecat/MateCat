@@ -33,10 +33,23 @@ class JobsController extends KleinController
      */
     private ProjectStruct $project;
 
+    protected JobDao $jobDao;
+    protected SegmentTranslationDao $segmentTranslationDao;
+
+    /**
+     * @throws NotFoundException
+     */
+    protected function return404IfTheJobWasDeleted(): void
+    {
+        if ($this->chunk->isDeleted()) {
+            throw new NotFoundException('No job found.');
+        }
+    }
 
     /**
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function show(): void
     {
@@ -101,11 +114,9 @@ class JobsController extends KleinController
      */
     protected function changeStatus(string $status): void
     {
-        (new ProjectAccessValidator($this, $this->project))->validate();
-
-        JobDao::updateJobStatus($this->chunk, $status);
-        $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($this->chunk);
-        SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
+        $this->jobDao->updateJobStatus($this->chunk, $status);
+        $lastSegmentsList = $this->segmentTranslationDao->getMaxSegmentIdsFromJob($this->chunk);
+        $this->segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
         $this->response->json(['code' => 1, 'data' => "OK", 'status' => $status]);
     }
 
@@ -121,6 +132,9 @@ class JobsController extends KleinController
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject(60 * 10);
+            $this->jobDao = new JobDao();
+            $this->segmentTranslationDao = new SegmentTranslationDao();
+            $this->appendValidator(new ProjectAccessValidator($this, $this->project));
         });
         $this->appendValidator($Validator);
     }

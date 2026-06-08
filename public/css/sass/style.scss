@@ -197,8 +197,6 @@ section.opened .warnings {
     border-radius: 2px;
     font-size: 16px;
     background: colors.$blue500;
-    background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
-    background: linear-gradient(top, colors.$blue500, colors.$blue500);
     user-select: none;
     cursor: pointer;
     min-width: 95px;
@@ -312,16 +310,7 @@ section.opened .warnings {
     transparent 75%,
     transparent
   );
-  background-image: -moz-linear-gradient(
-    -45deg,
-    rgba(255, 255, 255, 0.2) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.2) 75%,
-    transparent 75%,
-    transparent
-  );
+
   background-image: -ms-linear-gradient(
     -45deg,
     rgba(255, 255, 255, 0.2) 25%,
@@ -2250,8 +2239,6 @@ section .segment-side-buttons {
     from(colors.$grey50),
     to(colors.$grey100)
   );
-  background: -moz-linear-gradient(top, colors.$grey50, colors.$grey100);
-  background: linear-gradient(top, colors.$grey50, colors.$grey100);
 }
 
 .edit-distance {

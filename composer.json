@@ -1,23 +1,23 @@
 {
     "require-dev": {
         "phpunit/phpunit": "^12",
-        "dg/bypass-finals": "^1",
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^2.1"
     },
     "require": {
         "php": ">=8.3",
+        "deeplcom/deepl-php": "^1.18",
         "defuse/php-encryption": "^2.4",
         "elasticsearch/elasticsearch": "8.*",
         "google/apiclient": "^2",
+        "google-gemini-php/client": "^2.7",
         "league/oauth2-facebook": "^2.2",
         "league/oauth2-github": "^3.1",
         "league/oauth2-linkedin": "^5.1",
         "matecat/cwh": "^3.1",
         "matecat/klein": "^3.2",
-        "matecat/lara-php": "^v2.0.0-beta.1",
         "matecat/simple-s3": "^v2.0.0",
-        "matecat/subfiltering": "~v3.0",
+        "matecat/subfiltering": "^4.1",
         "matecat/whole-text-finder": "^2.0",
         "matecat/xliff-parser": "~v3.0",
         "matecat/icu-intl": "^v1",
@@ -28,11 +28,13 @@
         "phptal/phptal": "^1.10.0",
         "predis/predis": "^v3",
         "psr/log": "^3.0",
-        "stevenmaguire/oauth2-microsoft": "^2.2",
+        "psr/event-dispatcher": "^1.0",
+        "untt/oauth2-microsoft": "^0.0.3",
         "stomp-php/stomp-php": "^5.0",
         "swaggest/json-schema": "^0.12.42",
         "symfony/cache": "~7.3.9",
         "symfony/console": "^5",
+        "translated/lara-sdk": "^1",
         "ext-curl": "*",
         "ext-pcntl": "*",
         "ext-libxml": "*",
@@ -49,18 +51,25 @@
         "ext-openssl": "*",
         "ext-simplexml": "*",
         "ext-intl": "*",
-        "ext-redis": "*",
-        "google-gemini-php/client": "^2.7"
+        "ext-redis": "*"
     },
     "config": {
         "use-include-path": true,
         "allow-plugins": {
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": { "CVE-2026-45073": "PdoAdapter unused; MateCat uses FilesystemAdapter only" }
         }
     },
     "autoload": {
         "psr-4": {
             "": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matecat\\": "tests/unit"
         }
     }
 }

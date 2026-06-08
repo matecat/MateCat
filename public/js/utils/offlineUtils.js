@@ -1,8 +1,20 @@
-import SegmentActions from '../actions/SegmentActions'
+import {
+  addClassToSegment,
+  removeClassToSegment,
+} from '../actions/segmentClassActions'
 import {checkConnectionPing} from '../api/checkConnectionPing'
-import CatToolActions from '../actions/CatToolActions'
+import {
+  addNotification,
+  removeAllNotifications,
+} from '../actions/notificationActions'
 import SegmentStore from '../stores/SegmentStore'
-import {execSetTranslationTail} from '../setTranslationUtil'
+
+// Async-loaded to break circular dependency for static analysis.
+let _SetTranslationUtil
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
+const getSetTranslationUtil = () => _SetTranslationUtil
 
 const OfflineUtils = {
   offline: false,
@@ -26,7 +38,7 @@ const OfflineUtils = {
             allowHtml: true,
             timer: 7000,
           }
-          CatToolActions.addNotification(notification)
+          addNotification(notification)
         })
         .catch(() => {
           this.offline = true
@@ -49,10 +61,10 @@ const OfflineUtils = {
         autoDismiss: true,
         timer: 10000,
         openCallback: () => {
-          CatToolActions.removeAllNotifications()
+          removeAllNotifications()
         },
       }
-      CatToolActions.addNotification(notification)
+      addNotification(notification)
 
       clearInterval(this.currentConnectionCountdown)
       clearInterval(this.checkingConnection)
@@ -67,7 +79,7 @@ const OfflineUtils = {
     checkConnectionPing()
       .then(() => {
         this.endOfflineMode()
-        execSetTranslationTail()
+        getSetTranslationUtil().execSetTranslationTail()
         //reset counter
         this.offlineCacheRemaining = this.offlineCacheSize
       })
@@ -97,7 +109,7 @@ const OfflineUtils = {
         allowHtml: true,
         timer: 7000,
       }
-      CatToolActions.addNotification(notification)
+      addNotification(notification)
     }
   },
   incrementOfflineCacheRemaining: function () {
@@ -107,13 +119,13 @@ const OfflineUtils = {
 
   changeStatusOffline: function (sid) {
     if (SegmentStore.getSegmentById(sid)) {
-      SegmentActions.removeClassToSegment(sid, 'status-draft')
-      SegmentActions.removeClassToSegment(sid, 'status-approved')
-      SegmentActions.removeClassToSegment(sid, 'status-new')
-      SegmentActions.removeClassToSegment(sid, 'status-rejected')
-      SegmentActions.removeClassToSegment(sid, 'status-fixed')
-      SegmentActions.removeClassToSegment(sid, 'status-rebutted')
-      SegmentActions.addClassToSegment(sid, 'status-translated')
+      removeClassToSegment(sid, 'status-draft')
+      removeClassToSegment(sid, 'status-approved')
+      removeClassToSegment(sid, 'status-new')
+      removeClassToSegment(sid, 'status-rejected')
+      removeClassToSegment(sid, 'status-fixed')
+      removeClassToSegment(sid, 'status-rebutted')
+      addClassToSegment(sid, 'status-translated')
     }
   },
 }

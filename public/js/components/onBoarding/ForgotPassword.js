@@ -9,7 +9,8 @@ import {
   Button,
 } from '../common/Button/Button'
 import {forgotPassword} from '../../api/forgotPassword'
-import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
+import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
+import {OnBoardingContext} from './OnBoardingContext'
 
 const ForgotPassword = () => {
   const {setStep} = useContext(OnBoardingContext)

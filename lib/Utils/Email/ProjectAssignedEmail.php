@@ -9,9 +9,11 @@
 namespace Utils\Email;
 
 
+use DivisionByZeroError;
+use DomainException;
 use Exception;
+use PDOException;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -31,6 +33,9 @@ class ProjectAssignedEmail extends AbstractEmail
      */
     private array $jobs;
 
+    /**
+     * @throws DomainException
+     */
     public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee)
     {
         $this->user = $user;
@@ -45,13 +50,19 @@ class ProjectAssignedEmail extends AbstractEmail
         $this->_setTemplate('Project/project_assigned_content.html');
     }
 
+    /**
+     * @return array<string, mixed>
+     * @throws DivisionByZeroError
+     * @throws PDOException
+     * @throws Exception
+     */
     protected function _getTemplateVariables(): array
     {
         $words_count = [];
         foreach ($this->jobs as $job) {
             $jStruct = new JobStruct($job->getArrayCopy());
             $jobStats = new WordCountStruct();
-            $jobStats->setIdJob($jStruct->id);
+            $jobStats->setIdJob((int)$jStruct->id);
             $jobStats->setJobPassword($jStruct->password);
             $jobStats->setDraftWords($jStruct->draft_words + $jStruct->new_words); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords($jStruct->rejected_words);
@@ -74,6 +85,9 @@ class ProjectAssignedEmail extends AbstractEmail
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function _getLayoutVariables($messageBody = null): array
     {
         $vars = parent::_getLayoutVariables();

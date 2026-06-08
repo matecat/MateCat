@@ -1,5 +1,5 @@
 import React, {Component, createRef} from 'react'
-import SegmentActions from '../../../actions/SegmentActions'
+import {highlightGlossaryTerm} from '../../../actions/segmentDispatchActions'
 import Tooltip from '../../common/Tooltip'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 import TEXT_UTILS from '../../../utils/textUtils'
@@ -100,7 +100,7 @@ class QaCheckGlossaryHighlight extends Component {
     const glossaryTerm = this.getTermDetails()
     //Call Segment footer Action
     if (glossaryTerm) {
-      SegmentActions.highlightGlossaryTerm({
+      highlightGlossaryTerm({
         sid,
         termId: glossaryTerm.term_id,
         type: 'check',

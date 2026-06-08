@@ -21,20 +21,24 @@ class Filters
     const string XLIFF_TO_TARGET_ENDPOINT = "/api/v2/xliff2translated";
 
     /**
-     * @param $dataGroups       array each value must be an associative array
+     * @param array<int|string, array<string, mixed>> $dataGroups each value must be an associative array
      *                          representing the fields of a POST request
-     * @param $endpoint         string use one of the two constants of this class
+     * @param string $endpoint use one of the two constants of this class
      *
-     * @return array
+     * @return array<int|string, array<string, mixed>>
+     *
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
-    private function sendToFilters(array $dataGroups, string $endpoint): array
+    protected function sendToFilters(array $dataGroups, string $endpoint): array
     {
         $logger = LoggerFactory::getLogger("conversion");
 
-        $multiCurl = new MultiCurlHandler();
+        $multiCurl = $this->createMultiCurlHandler();
 
         // Each group is a POST request
         foreach ($dataGroups as $id => $data) {
+            $idStr = (string) $id;
             // Add to POST fields the version forced using the config file
             if ($endpoint === self::SOURCE_TO_XLIFF_ENDPOINT
                 && !empty(AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION)) {
@@ -51,16 +55,17 @@ class Filters
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             ];
             if (!empty(AppConfig::$FILTERS_RAPIDAPI_KEY)) {
+                $parsedUrl = parse_url(AppConfig::$FILTERS_ADDRESS);
                 $options[CURLOPT_HTTPHEADER] = [
-                    'X-RapidAPI-Host: ' . parse_url(AppConfig::$FILTERS_ADDRESS)['host'],
+                    'X-RapidAPI-Host: ' . ($parsedUrl['host'] ?? ''),
                     'X-RapidAPI-Key: ' . AppConfig::$FILTERS_RAPIDAPI_KEY,
                 ];
             }
 
             $url = rtrim(AppConfig::$FILTERS_ADDRESS, '/') . $endpoint;
             $logger->debug("Calling: " . $url);
-            $multiCurl->createResource($url, $options, $id);
-            $multiCurl->setRequestHeader($id);
+            $multiCurl->createResource($url, $options, $idStr);
+            $multiCurl->setRequestHeader($idStr);
         }
 
         // Launch the multiCURL and get all the results
@@ -99,9 +104,12 @@ class Filters
             }
 
             // Compute headers
-            $instanceInfo = $this->extractInstanceInfoFromHeaders($headers[$id]);
-            if (isset($instanceInfo)) {
-                $response = array_merge($response, $instanceInfo);
+            $headerList = $headers[$id] ?? [];
+            if (is_array($headerList)) {
+                $instanceInfo = $this->extractInstanceInfoFromHeaders($headerList);
+                if (isset($instanceInfo)) {
+                    $response = array_merge($response, $instanceInfo);
+                }
             }
 
             // Add to response the CURL total time in milliseconds
@@ -116,7 +124,7 @@ class Filters
      *
      * @return string
      */
-    private function formatErrorMessage(string $error): string
+    protected function formatErrorMessage(string $error): string
     {
         // Error from Excel files
         return str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
@@ -125,12 +133,12 @@ class Filters
     /**
      * Looks for the Filters-Instance header and returns the information in it.
      *
-     * @param array $headers
+     * @param array<string> $headers
      *
-     * @return array|null an array with the address and version of the
-     *                    respondent instance; false if the header was not found
+     * @return array{instanceAddress: string, instanceVersion: string}|null an array with the address and version of the
+     *                    respondent instance; null if the header was not found
      */
-    private function extractInstanceInfoFromHeaders(array $headers): ?array
+    protected function extractInstanceInfoFromHeaders(array $headers): ?array
     {
         foreach ($headers as $header) {
             if (preg_match("|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches)) {
@@ -156,6 +164,9 @@ class Filters
      * @param bool|null $legacy_icu
      *
      * @return mixed
+     *
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function sourceToXliff(
         string $filePath,
@@ -166,8 +177,10 @@ class Filters
         bool $icu_enabled = false,
         ?bool $legacy_icu = false
     ): mixed {
-        $basename = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
-        $extension = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
+        $basenameResult = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
+        $extensionResult = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
+        $basename = is_string($basenameResult) ? $basenameResult : '';
+        $extension = is_string($extensionResult) ? $extensionResult : '';
         $filename = "$basename.$extension";
 
         $data = [
@@ -201,9 +214,12 @@ class Filters
     }
 
     /**
-     * @param array $xliffsData
+     * @param array<int|string, array{document_content: string}> $xliffsData
      *
-     * @return array
+     * @return array<int|string, array<string, mixed>>
+     *
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function xliffToTarget(array $xliffsData): array
     {
@@ -235,7 +251,7 @@ class Filters
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
      *
-     * @param array $response The response array returned by sendToFilters().
+     * @param array<string, mixed> $response The response array returned by sendToFilters().
      * @param string $sentFile Absolute path of the source file sent to Filters.
      * @param string $sourceLang Source language code.
      * @param string $targetLang Target language code.
@@ -253,10 +269,10 @@ class Filters
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
      *
-     * @param array $response The response array returned by sendToFilters().
+     * @param array<string, mixed> $response The response array returned by sendToFilters().
      * @param string $sentFile Absolute path of the XLIFF file sent to Filters.
      * @param JobStruct $jobData The job struct associated with this conversion.
-     * @param array $sourceFileData Metadata about the original source file.
+     * @param array<string, mixed> $sourceFileData Metadata about the original source file.
      *
      * @throws Exception
      */
@@ -270,26 +286,18 @@ class Filters
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
      *
-     * @param array $response The response array returned by sendToFilters().
+     * @param array<string, mixed> $response The response array returned by sendToFilters().
      * @param bool $toXliff True if the conversion was the source→XLIFF, false for XLIFF→target.
      * @param string $sentFile Absolute path of the file sent to Filters.
-     * @param array $jobData Job metadata (source, target, id, password, owner).
-     * @param array $sourceFileData Source file metadata (segmentation_rule, id_file, etc.).
+     * @param array<string, mixed> $jobData Job metadata (source, target, id, password, owner).
+     * @param array<string, mixed> $sourceFileData Source file metadata (segmentation_rule, id_file, etc.).
      *
      * @throws Exception
      */
     private function logConversion(array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData): void
     {
         try {
-            $conn = new PDO(
-                'mysql:dbname=matecat_conversions_log;host=' . AppConfig::$DB_SERVER,
-                AppConfig::$DB_USER, AppConfig::$DB_PASS, [
-                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::ATTR_ORACLE_NULLS => true,
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                ]
-            );
+            $conn = $this->createLogConnection();
         } catch (Exception $ex) {
             LoggerFactory::getLogger("conversion")->debug('Unable to connect to matecat_conversions_log database: ' . $ex->getMessage());
 
@@ -341,12 +349,42 @@ class Filters
     }
 
     /**
+     * Creates a PDO connection to the conversions log database.
+     *
+     * @return PDO
+     *
+     * @throws Exception
+     */
+    protected function createLogConnection(): PDO
+    {
+        return new PDO(
+            'mysql:dbname=matecat_conversions_log;host=' . AppConfig::$DB_SERVER,
+            AppConfig::$DB_USER, AppConfig::$DB_PASS, [
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_ORACLE_NULLS => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+    }
+
+    /**
+     * @return MultiCurlHandler
+     */
+    protected function createMultiCurlHandler(): MultiCurlHandler
+    {
+        return new MultiCurlHandler();
+    }
+
+    /**
      * Moves $sentFile to the backup folder, that is like
      *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
      *
      * @param string $sentFile
+     *
+     * @throws \Psr\Log\InvalidArgumentException
      */
-    private function backupFailedConversion(string &$sentFile): void
+    protected function backupFailedConversion(string &$sentFile): void
     {
         $backupDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR
             . 'conversion_errors' . DIRECTORY_SEPARATOR

@@ -13,9 +13,9 @@ namespace Utils\AsyncTasks\Workers;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
-use Model\ProjectCreation\ProjectStructure;
 use Model\Exceptions\ValidationError;
 use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
 use PDOException;
 use ReflectionException;
 use Throwable;
@@ -44,9 +44,10 @@ class ProjectCreationWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
         $this->_checkDatabaseConnection();
 
@@ -69,12 +70,12 @@ class ProjectCreationWorker extends AbstractWorker
          *
          * check for loop re-queuing
          */
-        if (isset($queueElement->reQueueNum) && $queueElement->reQueueNum >= 100) {
+        if ($queueElement->reQueueNum >= 100) {
             $msg = "\n\n Error Project Creation  \n\n " . var_export($queueElement, true);
             Utils::sendErrMailReport($msg);
             $this->_doLog("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.");
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END);
-        } elseif (isset($queueElement->reQueueNum)) {
+        } elseif ($queueElement->reQueueNum > 0) {
 //            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
@@ -98,12 +99,13 @@ class ProjectCreationWorker extends AbstractWorker
         }
 
         $this->projectStructure = new ProjectStructure($queueElement->params->toArray());
-        $projectManager = new ProjectManager($this->projectStructure);
+        $projectManager = $this->createProjectManager($this->projectStructure);
         $projectManager->createProject();
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _publishResults(): void
     {
@@ -112,9 +114,26 @@ class ProjectCreationWorker extends AbstractWorker
             return;
         }
 
-        ProjectQueue::publishResults($this->projectStructure);
+        $this->publishProjectResults($this->projectStructure);
         $this->_doLog("Project creation completed: " . $this->projectStructure->id_project);
         $this->projectStructure = new ProjectStructure();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createProjectManager(ProjectStructure $structure): ProjectManager
+    {
+        return new ProjectManager($structure);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function publishProjectResults(ProjectStructure $structure): void
+    {
+        ProjectQueue::publishResults($structure);
     }
 
 }

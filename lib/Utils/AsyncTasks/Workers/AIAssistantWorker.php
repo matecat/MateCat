@@ -3,17 +3,13 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\ChunkDao;
-use Model\Segments\SegmentOriginalDataDao;
-use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\AIClientFactory;
-use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
-use Utils\Engines\EnginesFactory;
-use Utils\Engines\MyMemory;
+use Utils\AIAssistant\AlternativeTranslationsClientInterface;
+use Utils\AIAssistant\ContextExplainerClientInterface;
+use Utils\AIAssistant\TranslationEvaluatorClientInterface;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -22,40 +18,59 @@ use Utils\Tools\Utils;
 
 class AIAssistantWorker extends AbstractWorker
 {
+
+    const array codeErrorsMap = [
+        'NO_ERROR' => 0,
+        'NO_ALTERNATIVE_TRANSLATIONS_FOUND' => 1,
+        'ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS' => 2,
+        'NO_ERROR_MESSAGE' => 3,
+        'OTHER_ERROR' => 4,
+    ];
+
     const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
     const string FEEDBACK_ACTION = 'feedback';
     const string ALTERNATIVE_TRANSLATIONS_ACTION = 'alternative_translations';
 
-    /**
-     * @var OpenAi
-     */
-    private OpenAi $openAi;
-
-    /**
-     * @var Client
-     */
     private Client $redis;
 
     /**
-     * AIAssistantWorker constructor.
-     *
-     * @param AMQHandler $queueHandler
-     *
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function __construct(AMQHandler $queueHandler)
+    public function __construct(AMQHandler $queueHandler, ?Client $redis = null)
     {
         parent::__construct($queueHandler);
+        $this->redis = $redis ?? $queueHandler->getRedisClient();
+    }
 
-        $timeOut = (AppConfig::$OPEN_AI_TIMEOUT) ?: 30;
-        $this->openAi = new OpenAi(AppConfig::$OPENAI_API_KEY);
-        $this->openAi->setTimeout($timeOut);
-        $this->redis = $queueHandler->getRedisClient();
+    /**
+     * @throws Exception
+     */
+    protected function createAlternativeTranslationsClient(): AlternativeTranslationsClientInterface
+    {
+        return AIClientFactory::createAlternativeTranslationsClient();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createTranslationEvaluator(): TranslationEvaluatorClientInterface
+    {
+        return AIClientFactory::createTranslationEvaluator();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createContextExplainer(): ContextExplainerClientInterface
+    {
+        return AIClientFactory::createContextExplainer();
     }
 
     /**
      * @inheritDoc
      * @throws EndQueueException
+     * @throws \PDOException
      */
     public function process(AbstractElement $queueElement): void
     {
@@ -83,7 +98,7 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * Manages the generation and processing of alternative translations for a given payload.
      *
-     * @param array $payload The input data required to generate alternative translations, including:
+     * @param array<string, mixed> $payload The input data required to generate alternative translations, including:
      *                       - localized_source: The localized source language code.
      *                       - localized_target: The localized target language code.
      *                       - source_sentence: The source sentence to translate.
@@ -93,12 +108,16 @@ class AIAssistantWorker extends AbstractWorker
      *                       - excerpt: The text excerpt to assist in translation.
      *                       - style_instructions: Guidelines for translation style.
      *                       - id_segment: The identifier for the segment, used for logging and messaging.
-     *                       - id_client*/
+     *                       - id_client
+     *
+     * @throws Exception
+     */
     private function alternative_translations(array $payload): void
     {
         try {
-            $gemini = AIClientFactory::create("gemini");
-            $alternativeTranslations = $gemini->manageAlternativeTranslations(
+            $errorCode = self::codeErrorsMap['NO_ERROR'];
+            $client = $this->createAlternativeTranslationsClient();
+            $alternativeTranslations = $client->manageAlternativeTranslations(
                 sourceLanguage: $payload['localized_source'],
                 targetLanguage:  $payload['localized_target'],
                 sourceSentence:  $payload['source_sentence'],
@@ -112,19 +131,25 @@ class AIAssistantWorker extends AbstractWorker
             $this->_doLog("Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations));
 
             if(empty($alternativeTranslations)){
-                throw new Exception("No alternative translations found.");
+                $errorCode = self::codeErrorsMap['NO_ALTERNATIVE_TRANSLATIONS_FOUND'];
+                throw new Exception("No alternative translations found");
             }
 
             $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
         } catch (Exception $exception){
-            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
+
+            if($errorCode === self::codeErrorsMap['NO_ERROR']){
+                $errorCode = self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
+            }
+
+            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload, $errorCode);
         }
     }
 
     /**
      * Processes feedback by evaluating translation and emitting relevant messages.
      *
-     * @param array $payload The data containing translation details, including:
+     * @param array<string, mixed> $payload The data containing translation details, including:
      *                       - localized_source: The source language.
      *                       - localized_target: The target language.
      *                       - text: The original text.
@@ -136,19 +161,21 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @return void
      *
-     * @throws Exception If an error occurs during the feedback processing.
+     * @throws Exception
      */
     private function feedback(array $payload): void
     {
         try {
-            $openAi = AIClientFactory::create("openai");
-            $message = $openAi->evaluateTranslation(
+            $evaluator = $this->createTranslationEvaluator();
+            $result = $evaluator->evaluateTranslation(
                 sourceLanguage: $payload['localized_source'],
                 targetLanguage: $payload['localized_target'],
                 text: $payload['text'],
                 translation: $payload['translation'],
                 style: $payload['style']
             );
+
+            $message = is_array($result) ? $result : null;
 
             $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
         } catch (Exception $e) {
@@ -157,15 +184,15 @@ class AIAssistantWorker extends AbstractWorker
     }
 
     /**
-     * @param array $payload
+     * @param array<string, mixed> $payload
      *
      * @throws Exception
      */
     private function explain_meaning(array $payload): void
     {
-        $phraseTrimLimit = ceil(AppConfig::$OPEN_AI_MAX_TOKENS / 2);
+        $phraseTrimLimit = ceil((int)AppConfig::$OPEN_AI_MAX_TOKENS / 2);
         $phrase = strip_tags(html_entity_decode($payload['phrase']));
-        $phrase = Utils::truncatePhrase($phrase, $phraseTrimLimit);
+        $phrase = Utils::truncatePhrase($phrase, (int)$phraseTrimLimit);
         $txt = "";
 
         $lockValue = $this->generateLockValue();
@@ -175,17 +202,16 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
-            $openAi = AIClientFactory::create("openai");
+            $explainer = $this->createContextExplainer();
 
             $buffer = '';
 
-            $openAi->findContextForAWord(
+            $explainer->findContextForAWord(
                 $payload['word'],
                 $phrase,
                 $payload['localized_target'],
                 function ($curl_info, $data) use (&$txt, &$buffer, $payload, $lockValue) {
 
-                    // Check lock
                     $currentLockValue = $this->getLockValue(
                         $payload['id_segment'],
                         $payload['id_job'],
@@ -194,26 +220,22 @@ class AIAssistantWorker extends AbstractWorker
 
                     if ($currentLockValue !== $lockValue) {
                         $this->_doLog("Lock invalid for id_segment " . $payload['id_segment']);
-                        return strlen($data); // do not stop curl
+                        return strlen($data);
                     }
 
-                    // Collect chunks
                     $buffer .= $data;
 
-                    // Processing of a completed event (SSE = separate from \n\n)
                     while (($pos = strpos($buffer, "\n\n")) !== false) {
 
                         $event = substr($buffer, 0, $pos);
                         $buffer = substr($buffer, $pos + 2);
 
-                        // every row should start with "data: "
                         if (!str_starts_with($event, 'data:')) {
                             continue;
                         }
 
-                        $json = trim(substr($event, 5)); // remove "data:"
+                        $json = trim(substr($event, 5));
 
-                        // End of stream
                         if ($json === '[DONE]') {
                             $this->_doLog("Stream completed for id_segment " . $payload['id_segment']);
 
@@ -235,7 +257,6 @@ class AIAssistantWorker extends AbstractWorker
                             return strlen($data);
                         }
 
-                        // Parse JSON
                         $arr = json_decode($json, true);
 
                         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -243,7 +264,6 @@ class AIAssistantWorker extends AbstractWorker
                             continue;
                         }
 
-                        // Content
                         if (isset($arr["choices"][0]["delta"]["content"])) {
                             $txt .= $arr["choices"][0]["delta"]["content"];
 
@@ -255,7 +275,6 @@ class AIAssistantWorker extends AbstractWorker
                             );
                         }
 
-                        // OpenAI errors
                         if (isset($arr['error']['message'])) {
                             $message = "OpenAI error: " . $arr['error']['message'];
 
@@ -269,11 +288,9 @@ class AIAssistantWorker extends AbstractWorker
                         }
                     }
 
-                    // ✅ Continua lo stream
                     return strlen($data);
                 }
             );
-
 
         } catch (Exception) {
         }
@@ -282,29 +299,32 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * @param string $type
      * @param string $message
-     * @param array $payload
+     * @param array<string, mixed> $payload
+     * @param int|null $errorCode
      *
      * @throws Exception
      */
-    private function emitErrorMessage(string $type, string $message, array $payload): void
+    private function emitErrorMessage(string $type, string $message, array $payload, ?int $errorCode = 4): void
     {
         $this->_doLog($message);
-        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true);
+        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true, true, $errorCode);
     }
 
     /**
      * @param string $type
      * @param string $idClient
      * @param string $idSegment
-     * @param string $message
+     * @param null|array<mixed>|string $message
      * @param bool $hasError
      * @param bool $completed
+     * @param int|null $errorCode
      *
      * @throws Exception
      */
-    private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false): void
+    private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false, ?int $errorCode = 0): void
     {
         if($message === null){
+            $errorCode = self::codeErrorsMap['NO_ERROR_MESSAGE'];
             $hasError = true;
         }
 
@@ -315,6 +335,7 @@ class AIAssistantWorker extends AbstractWorker
                 'payload' => [
                     'id_segment' => $idSegment,
                     'has_error' => $hasError,
+                    'error_code' => $errorCode ?? self::codeErrorsMap['NO_ERROR'],
                     'completed' => $completed,
                     'message' => is_string($message) ? trim($message) : $message
                 ],
@@ -327,13 +348,10 @@ class AIAssistantWorker extends AbstractWorker
      * @param int $idJob
      * @param string $password
      * @param string $value
-     *
-     * @return void
      */
     private function generateLock(string $idSegment, int $idJob, string $password, string $value): void
     {
         $key = $this->getLockKey($idSegment, $idJob, $password);
-
         $this->redis->set($key, $value);
     }
 
@@ -341,13 +359,10 @@ class AIAssistantWorker extends AbstractWorker
      * @param string $idSegment
      * @param int $idJob
      * @param string $password
-     *
-     * @return void
      */
     private function destroyLock(string $idSegment, int $idJob, string $password): void
     {
         $key = $this->getLockKey($idSegment, $idJob, $password);
-
         $this->redis->del([$key]);
     }
 
@@ -356,12 +371,11 @@ class AIAssistantWorker extends AbstractWorker
      * @param int $idJob
      * @param string $password
      *
-     * @return string
+     * @return string|null
      */
-    private function getLockValue(string $idSegment, int $idJob, string $password): string
+    private function getLockValue(string $idSegment, int $idJob, string $password): ?string
     {
         $key = $this->getLockKey($idSegment, $idJob, $password);
-
         return $this->redis->get($key);
     }
 
@@ -378,14 +392,12 @@ class AIAssistantWorker extends AbstractWorker
     }
 
     /**
-     *
      * @return string
      * @throws Exception
      */
     private function generateLockValue(): string
     {
         $bytes = random_bytes(20);
-
         return bin2hex($bytes);
     }
 }

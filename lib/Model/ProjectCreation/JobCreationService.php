@@ -2,20 +2,25 @@
 
 namespace Model\ProjectCreation;
 
+use DomainException;
 use Exception;
 use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterPayableRatesEvent;
+use Model\FeaturesBase\Hook\Event\Run\ValidateJobCreationEvent;
 use Model\Files\FileDao;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
+use PDOException;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -24,10 +29,14 @@ use View\API\Commons\Error;
 
 class JobCreationService
 {
+    private readonly CustomPayableRateDao $customPayableRateDao;
+
     public function __construct(
         private readonly FeatureSet $features,
         private readonly MatecatLogger $logger,
+        ?CustomPayableRateDao $customPayableRateDao = null,
     ) {
+        $this->customPayableRateDao = $customPayableRateDao ?? new CustomPayableRateDao();
     }
 
     /**
@@ -37,6 +46,7 @@ class JobCreationService
      *
      * @return array{0: string, 1: ?CustomPayableRateStruct} [$ratesJson, $template]
      * @throws Exception
+     * @throws TypeError
      */
     private function resolvePayableRates(ProjectStructure $projectStructure, string $target): array
     {
@@ -59,7 +69,7 @@ class JobCreationService
 
         // Branch 3: payable_rate_model_id — look up from DB
         if (!empty($projectStructure->payable_rate_model_id)) {
-            $template = CustomPayableRateDao::getById($projectStructure->payable_rate_model_id);
+            $template = $this->customPayableRateDao->findById($projectStructure->payable_rate_model_id);
             if ($template === null) {
                 throw new Exception("Payable rate model not found: $projectStructure->payable_rate_model_id");
             }
@@ -71,8 +81,11 @@ class JobCreationService
         // Branch 4: default — use static PayableRates with feature filtering
         $rates = PayableRates::getPayableRates((string)$projectStructure->source_language, $target);
 
+        $filterPayableRatesEvent = new FilterPayableRatesEvent($rates, (string)$projectStructure->source_language, $target);
+        $this->features->dispatch($filterPayableRatesEvent);
+
         return [
-            (string)json_encode($this->features->filter('filterPayableRates', $rates, $projectStructure->source_language, $target)),
+            (string)json_encode($filterPayableRatesEvent->getRates()),
             null,
         ];
     }
@@ -80,6 +93,10 @@ class JobCreationService
     /**
      * Build a JSON string of TM keys from the project's private_tm_key array.
      * Replaces the {{pid}} placeholder with the actual project ID.
+     *
+     * @throws DomainException
+     * @throws LogInvalidArgumentException
+     * @throws TypeError
      */
     private function buildTmKeysJson(ProjectStructure $projectStructure): string
     {
@@ -168,6 +185,7 @@ class JobCreationService
      * Moved from ProjectManager::saveJobsMetadata().
      *
      * @throws ReflectionException
+     * @throws PDOException
      */
     private function saveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
     {
@@ -194,7 +212,7 @@ class JobCreationService
             }
         }
 
-        if (!empty($projectStructure->subfiltering_handlers)) {
+        if (!empty($projectStructure->subfiltering_handlers) && $projectStructure->subfiltering_handlers !== '[]') {
             $metadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
 
@@ -212,6 +230,8 @@ class JobCreationService
     /**
      * Associate a payable rate model with a job if both model ID and template exist.
      * Wrapped in try-catch to preserve the original error handling behavior.
+     *
+     * @throws LogInvalidArgumentException
      */
     private function associatePayableRateModel(
         JobStruct $job,
@@ -223,7 +243,7 @@ class JobCreationService
         }
 
         try {
-            CustomPayableRateDao::assocModelToJob(
+            $this->customPayableRateDao->assocModelToJob(
                 $projectStructure->payable_rate_model_id,
                 (int)$job->id,
                 $template->version,
@@ -241,6 +261,7 @@ class JobCreationService
      * @param array<string, int> $minMaxSegmentsId
      * @return list<JobStruct>
      * @throws Exception
+     * @throws TypeError
      */
     public function createJobsForTargetLanguages(
         ProjectStructure $projectStructure,
@@ -261,7 +282,7 @@ class JobCreationService
             $tmKeysJson = $this->buildTmKeysJson($projectStructure);
             $job = $this->buildJobStruct($projectStructure, $target, $payableRates, $tmKeysJson, $minMaxSegmentsId, $filesWordCount);
 
-            $this->features->run('validateJobCreation', $job, $projectStructure);
+            $this->features->dispatch(new ValidateJobCreationEvent($job, $projectStructure));
             $job = $this->insertJob($job);
 
             $this->updateJobTracking($projectStructure, $job, $payableRates, $minMaxSegmentsId);
@@ -277,10 +298,11 @@ class JobCreationService
     /**
      * Insert a job into the database. Extracted for testability.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function insertJob(JobStruct $job): JobStruct
     {
-        return JobDao::createFromStruct($job);
+        return (new JobDao())->createFromStruct($job);
     }
 
     /**
@@ -289,19 +311,7 @@ class JobCreationService
      */
     protected function insertFilesJob(int $jobId, int $fid): void
     {
-        FileDao::insertFilesJob($jobId, $fid);
-    }
-
-    /**
-     * Look up job chunks by job ID.
-     * Protected so test subclasses can override to avoid DB access.
-     *
-     * @return JobStruct[]
-     * @throws ReflectionException
-     */
-    protected function getChunksByJobId(int $jobId): array
-    {
-        return ChunkDao::getByJobID($jobId);
+        (new FileDao())->insertFilesJob($jobId, $fid);
     }
 
     /**
@@ -309,6 +319,7 @@ class JobCreationService
      *
      * @param list<JobStruct> $jobs
      * @throws Exception
+     * @throws TypeError
      */
     public function linkFilesAndInsertPreTranslations(
         array $jobs,
@@ -326,6 +337,7 @@ class JobCreationService
     /**
      * Link all project files to a job and create GDrive remote copies if applicable.
      * @throws Exception
+     * @throws TypeError
      */
     private function linkFilesToJob(JobStruct $job, ProjectStructure $projectStructure, ?Session $gdriveSession): void
     {
@@ -333,15 +345,18 @@ class JobCreationService
             $this->insertFilesJob((int)$job->id, $fid);
 
             if ($gdriveSession && $gdriveSession->hasFiles()) {
-                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
+                $client = (new GoogleProvider)->getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
                 $gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$job->id, $client);
             }
         }
     }
 
     /**
-     * Insert pre-translations for a job. Errors are logged and recorded
-     * but do not halt project creation.
+     * Insert pre-translations for a job.
+     *
+     * Failures are logged and the exception is re-thrown so the caller
+     * can abort project creation cleanly.
+     *
      * @throws Exception
      */
     private function insertPreTranslations(
@@ -355,24 +370,15 @@ class JobCreationService
         }
 
         try {
-            $chunks = $this->getChunksByJobId((int)$job->id);
-
-            if (empty($chunks)) {
-                throw new Exception("No Job found!!! $job->id");
-            }
-
-            $chunk = $chunks[0];
-
-            $qaProcessor->process($projectStructure, $chunk->source, $chunk->target);
+            // Use the in-memory $job directly instead of re-querying via getChunksByJobId().
+            // The job was just created by createFromStruct() and already carries source/target.
+            // Re-querying through ProxySQL risks hitting a read replica that hasn't replicated
+            // the INSERT yet, causing a spurious "No Job found" error.
+            $qaProcessor->process($projectStructure, $job->source, $job->target);
             $segmentStorageService->insertPreTranslations($job, $projectStructure);
         } catch (Exception $e) {
-            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
-            Utils::sendErrMailReport($msg);
             $this->logger->debug("Pre-translation insertion failed for job $job->id", (new Error($e))->render(true));
-            $projectStructure->addError(
-                (int)$e->getCode(),
-                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
-            );
+            throw $e;
         }
     }
 }

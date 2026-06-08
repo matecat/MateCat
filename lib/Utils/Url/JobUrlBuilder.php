@@ -22,9 +22,10 @@ class JobUrlBuilder
      *
      * @param JobStruct $job
      * @param string $projectName
-     * @param array $options
+     * @param array<string, mixed> $options
      *
      * @return JobUrls
+     * @throws \PDOException
      */
     public static function createFromJobStructAndProjectName(JobStruct $job, string $projectName, array $options = []): JobUrls
     {
@@ -54,7 +55,7 @@ class JobUrlBuilder
         }
 
         return new JobUrls(
-            $job->id,
+            (int)$job->id,
             $projectName,
             $job->source,
             $job->target,
@@ -74,18 +75,19 @@ class JobUrlBuilder
      * Returns null in case of wrong parameters
      *
      * @param JobStruct $job
-     * @param array $options
+     * @param array<string, mixed> $options
      * @param ProjectStruct|null $project
      *
      * @return JobUrls|null
      * @throws ReflectionException
+     * @throws \Exception
      */
     public static function createFromJobStruct(JobStruct $job, array $options = [], ProjectStruct $project = null): ?JobUrls
     {
         // 1. if project is passed we gain a query
         if ($project == null) {
             // 2. find the correlated project, if not passed
-            $project = ProjectDao::findById($job->id_project, 60 * 10);
+            $project = (new ProjectDao())->findById($job->id_project, 60 * 10);
         }
 
         if (!$project) {

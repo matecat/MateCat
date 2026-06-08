@@ -12,6 +12,7 @@ namespace View\API\App\Json;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\ConnectedServiceStruct;
+use TypeError;
 use Utils\Tools\Utils;
 
 class ConnectedService
@@ -22,13 +23,20 @@ class ConnectedService
      */
     protected array $data;
 
-    public function __construct($data)
+    /**
+     * @param ConnectedServiceStruct[] $data
+     * @throws TypeError
+     */
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
 
     /**
+     * @return array<int, array<string, mixed>>
      * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     * @throws TypeError
      */
     public function render(): array
     {
@@ -43,8 +51,10 @@ class ConnectedService
     }
 
     /**
+     * @return array<string, mixed>
      * @throws EnvironmentIsBrokenException
      * @throws Exception
+     * @throws TypeError
      */
     public function renderItem(ConnectedServiceStruct $item): array
     {

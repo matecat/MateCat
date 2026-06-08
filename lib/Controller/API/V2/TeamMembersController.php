@@ -17,7 +17,9 @@ use Model\DataAccess\Database;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
+use Model\Teams\TeamStruct;
 use ReflectionException;
+use RuntimeException;
 use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Membership;
 
@@ -33,12 +35,13 @@ class TeamMembersController extends KleinController
     /**
      * Get the team members list
      * @throws ReflectionException
+     * @throws RuntimeException
      */
     public function index(): void
     {
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
 
-        $team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($this->request->param('id_team'));
+        $team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->fetchById($this->request->param('id_team'), TeamStruct::class);
         $teamModel = new TeamModel($team);
         $teamModel->updateMembersProjectsCount();
 
@@ -65,7 +68,7 @@ class TeamMembersController extends KleinController
         ]);
 
         $teamStruct = (new TeamDao())
-            ->findById($this->request->param('id_team'));
+            ->fetchById($this->request->param('id_team'), TeamStruct::class);
 
         $model = new TeamModel($teamStruct);
         $model->setUser($this->user);
@@ -92,7 +95,7 @@ class TeamMembersController extends KleinController
         Database::obtain()->begin();
 
         $teamStruct = (new TeamDao())
-            ->findById($this->request->param('id_team'));
+            ->fetchById($this->request->param('id_team'), TeamStruct::class);
 
         $model = new TeamModel($teamStruct);
         $model->removeMemberUids([$this->request->param('uid_member')]);

@@ -6,13 +6,25 @@ import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
-import SegmentActions from '../../../actions/SegmentActions'
+import {addClassToSegment} from '../../../actions/segmentClassActions'
+import {
+  replaceEditAreaTextContent,
+  setHeaderPercentage,
+  modifiedTranslation,
+  setSegmentContributions,
+  setChoosenSuggestion,
+} from '../../../actions/segmentDispatchActions'
+import {
+  getSegmentsQa,
+  startSegmentQACheck,
+} from '../../../actions/segmentQaActions'
+import {disableTPOnSegment} from '../../../actions/tagProjectionActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
-import {laraAuth} from '../../../api/laraAuth'
+import {laraAuthJob} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
 import {
@@ -28,24 +40,21 @@ let TranslationMatches = {
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentageClass(matchToUse)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
-      SegmentActions.setHeaderPercentage(
+      replaceEditAreaTextContent(segment.sid, translation)
+      setHeaderPercentage(
         segment.sid,
         segment.id_file,
         matchToUse,
         percentageClass,
         matchToUse.created_by,
       )
-      SegmentActions.startSegmentQACheck()
+      startSegmentQACheck()
       CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
       })
 
-      SegmentActions.modifiedTranslation(
-        segment.sid,
-        segment.translation !== '',
-      )
+      modifiedTranslation(segment.sid, segment.translation !== '')
     }
   },
 
@@ -54,15 +63,11 @@ let TranslationMatches = {
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
     if (isUndefined(segmentObj)) return
 
-    SegmentActions.setSegmentContributions(
-      segmentObj.sid,
-      data.matches,
-      data.errors,
-    )
+    setSegmentContributions(segmentObj.sid, data.matches, data.errors)
 
     this.useSuggestionInEditArea(sid)
 
-    SegmentActions.addClassToSegment(sid, 'loaded')
+    addClassToSegment(sid, 'loaded')
   },
   useSuggestionInEditArea: function (sid) {
     let segmentObj = SegmentStore.getSegmentByIdToJS(sid)
@@ -80,7 +85,7 @@ let TranslationMatches = {
       var translation = matches[0].translation
 
       if (editareaLength === 0) {
-        SegmentActions.setChoosenSuggestion(segmentObj.sid, 1)
+        setChoosenSuggestion(segmentObj.sid, 1)
 
         /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
          * the source with the text with tags, the segment is tagged
@@ -91,7 +96,7 @@ let TranslationMatches = {
           if (parseInt(match) !== 100) {
             translation = DraftMatecatUtils.removeTagsFromText(translation)
           } else {
-            SegmentActions.disableTPOnSegment(segmentObj)
+            disableTPOnSegment(segmentObj)
           }
         }
 
@@ -194,8 +199,8 @@ let TranslationMatches = {
     const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
     if (!currentSegment) return Promise.resolve()
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
-      SegmentActions.getSegmentsQa(currentSegment)
+      addClassToSegment(currentSegment.sid, 'loaded')
+      getSegmentsQa(currentSegment)
       return Promise.resolve()
     }
 
@@ -255,7 +260,7 @@ let TranslationMatches = {
 
     const isLaraEngine = config.active_engine?.engine_type === 'Lara'
 
-    const getContributionRequest = (translation = null) => {
+    const getContributionRequest = ({translation = null, laraModel} = {}) => {
       if (!translation) {
         console.log(
           'Call classic matches for segment:',
@@ -273,6 +278,8 @@ let TranslationMatches = {
           : [],
         contextListBefore,
         contextListAfter,
+        ...(laraModel && {laraModel}),
+        reasoning: laraModel === 'think',
       })
         .then(() => {
           // Remove from waiting list
@@ -296,26 +303,47 @@ let TranslationMatches = {
     }
 
     const jobLanguages = [config.source_code, config.target_code]
+
+    const jobMetadata = CatToolStore.getJobMetadata()
+
     // Keep only languages whose base code is 'en' or 'it'.
-    let allowed =
-      jobLanguages
-        .map((x) => x.split('-')[0])
-        .filter((x) => ['en', 'it'].includes(x))
-        .filter(
-          // Remove duplicates, then check we have exactly two distinct matches.
-          (value, index, array) => array.indexOf(value) === index,
-        ).length === 2
+    // const allowedLaraThink =
+    //   jobLanguages
+    //     .map((x) => x.split('-')[0])
+    //     .filter((x) => ['en', 'it'].includes(x))
+    //     .filter(
+    //       // Remove duplicates, then check we have exactly two distinct matches.
+    //       (value, index, array) => array.indexOf(value) === index,
+    //     ).length === 2
+    const allowedLaraThink = false //Temp disable Lara Think
+
+    const laraStyleGuide =
+      jobMetadata?.project?.mt_extra?.lara_style_guideline_id
+    const allowedLaraProsa =
+      typeof laraStyleGuide === 'string' && laraStyleGuide !== ''
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
     ) {
       return Promise.resolve()
     }
-    if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
-      this.segmentsWaitingForContributions.push(id_segment_original)
-      laraAuth({idJob: config.id_job, password: config.password})
+
+    this.segmentsWaitingForContributions.push(id_segment_original)
+
+    if (
+      isLaraEngine &&
+      (allowedLaraThink || allowedLaraProsa) &&
+      !fastFetch &&
+      !callNewContributions
+    ) {
+      const laraModel = allowedLaraProsa ? 'prosa' : 'think'
+
+      laraAuthJob({
+        idJob: config.id_job,
+        password: config.password,
+        reasoning: laraModel === 'think',
+      })
         .then((response) => {
-          const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
           const decodedSource = decodeTagsToUnicodeChar(currentSegment.segment)
@@ -331,14 +359,20 @@ let TranslationMatches = {
             sid: id_segment_original,
             jobId: config.id_job,
             glossaries,
+            ...(allowedLaraProsa && {
+              styleguideId: laraStyleGuide,
+            }),
+            reasoning: laraModel === 'think',
+            multiline: laraModel === 'prosa',
           })
             .then((response) => {
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
-              return getContributionRequest(
-                encodeTagsFromUnicodeChar(translation),
-              )
+              return getContributionRequest({
+                translation: encodeTagsFromUnicodeChar(translation),
+                laraModel,
+              })
             })
             .catch((e) => {
               return getContributionRequest()
@@ -348,7 +382,6 @@ let TranslationMatches = {
           return getContributionRequest()
         })
     } else {
-      this.segmentsWaitingForContributions.push(id_segment_original)
       return getContributionRequest()
     }
   },
@@ -368,7 +401,7 @@ let TranslationMatches = {
   },
 
   renderContributionErrors: function (errors, segmentId) {
-    SegmentActions.setSegmentContributions(segmentId, [], errors)
+    setSegmentContributions(segmentId, [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id, sid) {

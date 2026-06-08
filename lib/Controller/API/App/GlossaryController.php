@@ -18,7 +18,6 @@ use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
-use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -405,18 +404,23 @@ class GlossaryController extends KleinController
      * @param $json
      * @param $jsonSchema
      *
-     * @return JSONValidatorObject|null
+     * @return JSONValidatorObject
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonSchemaException
      * @throws JsonValidatorGenericException
      */
-    private function validateJson($json, $jsonSchema): ?ValidatorObject
+    private function validateJson($json, $jsonSchema): JSONValidatorObject
     {
         $validatorObject = new JSONValidatorObject($json);
         $validator = new JSONValidator('glossary/' . $jsonSchema, true);
+        $result = $validator->validate($validatorObject);
 
-        return $validator->validate($validatorObject);
+        if ($result === null) {
+            throw new JsonSchemaException('Invalid JSON');
+        }
+
+        return $result;
     }
 
     /**

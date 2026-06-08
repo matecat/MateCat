@@ -584,8 +584,6 @@ a {
     from(rgb(245, 245, 245)),
     to(rgb(211, 212, 213))
   );
-  background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
-  background: linear-gradient(top, colors.$blue500, colors.$blue500);
 }
 
 .translate-box h2 span.extra {

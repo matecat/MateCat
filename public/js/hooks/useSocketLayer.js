@@ -1,7 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {getSocketAuthToken} from '../api/loginUser'
-
-const {io} = require('socket.io-client')
+import {io} from 'socket.io-client'
 
 // Object to represent connection states
 export const ConnectionStates = {

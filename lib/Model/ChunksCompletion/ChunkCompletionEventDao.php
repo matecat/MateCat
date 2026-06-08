@@ -9,6 +9,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use PDO;
+use PDOException;
 use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao
@@ -17,7 +18,10 @@ class ChunkCompletionEventDao extends AbstractDao
     const string REVISE = 'revise';
     const string TRANSLATE = 'translate';
 
-    public static function validSources(): array
+    /**
+     * @return array<string, string>
+     */
+    public function validSources(): array
     {
         return [
             'user' => ChunkCompletionEventStruct::SOURCE_USER,
@@ -25,6 +29,9 @@ class ChunkCompletionEventDao extends AbstractDao
         ];
     }
 
+    /**
+     * @throws PDOException
+     */
     public function deleteEvent(ChunkCompletionEventStruct $event): int
     {
         $sql = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
@@ -35,7 +42,10 @@ class ChunkCompletionEventDao extends AbstractDao
         return $stmt->rowCount();
     }
 
-    public function getByIdAndChunk(int $id_event, JobStruct $chunk)
+    /**
+     * @throws PDOException
+     */
+    public function getByIdAndChunk(int $id_event, JobStruct $chunk): ChunkCompletionEventStruct|false
     {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
@@ -53,6 +63,9 @@ class ChunkCompletionEventDao extends AbstractDao
         return $stmt->fetch();
     }
 
+    /**
+     * @throws PDOException
+     */
     public function updatePassword(int $id_job, string $password, string $old_password): int
     {
         $sql = "UPDATE chunk_completion_events SET password = :new_password
@@ -74,10 +87,18 @@ class ChunkCompletionEventDao extends AbstractDao
      * @param CompletionEventStruct $params
      *
      * @return string
+     * @throws PDOException
      */
-    public static function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
+    /**
+     * @param JobStruct $chunk
+     * @param CompletionEventStruct $params
+     *
+     * @return string
+     * @throws PDOException
+     */
+    public function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
             "INSERT INTO chunk_completion_events " .
@@ -90,7 +111,7 @@ class ChunkCompletionEventDao extends AbstractDao
             " ); "
         );
 
-        $validSources = self::validSources();
+        $validSources = $this->validSources();
         $stmt->execute([
             'id_project' => $chunk->getProject()->id,
             'id_job' => $chunk->id,
@@ -104,7 +125,7 @@ class ChunkCompletionEventDao extends AbstractDao
             'is_review' => $params->is_review
         ]);
 
-        return $conn->lastInsertId();
+        return (string)$conn->lastInsertId();
     }
 
 
@@ -140,38 +161,40 @@ class ChunkCompletionEventDao extends AbstractDao
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk  JobStruct to examinate
-     * @param $params array of params for query: is_review
+     * @param JobStruct $chunk JobStruct to examinate
+     * @param array{is_review?: bool} $params array of params for query: is_review
      *
-     * @return array
+     * @return array<string, mixed>
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord(JobStruct $chunk, array $params = []): array
+    /**
+     * @param JobStruct $chunk
+     * @param array{is_review?: bool} $params
+     *
+     * @return array<string, mixed>
+     *
+     * @throws Exception
+     */
+    public function lastCompletionRecord(JobStruct $chunk, array $params = []): array
     {
         $params = Utils::ensure_keys($params, ['is_review']);
         $is_review = $params['is_review'];
 
-        /**
-         * This query takes into account the fact that completion records are never deleted.
-         * We order by event.create_date DESC and then group by id_job, password, is_review
-         * so to only get the most recent event record that matches the condition.
-         *
-         */
         $sql = "
             SELECT events.id AS id_event, events.id_job, events.password, events.is_review, events.create_date
-            FROM chunk_completion_events events 
-            LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job 
-            AND  events.password = updates.password and events.is_review = updates.is_review 
-            WHERE events.create_date IS NOT NULL  
-            AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL ) 
-            AND events.is_review = :is_review 
-            AND events.id_job = :id_job AND events.password = :password 
-            ORDER BY events.create_date DESC 
+            FROM chunk_completion_events events
+            LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job
+            AND  events.password = updates.password and events.is_review = updates.is_review
+            WHERE events.create_date IS NOT NULL
+            AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL )
+            AND events.is_review = :is_review
+            AND events.id_job = :id_job AND events.password = :password
+            ORDER BY events.create_date DESC
             LIMIT 1
             ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
                 'id_job' => $chunk->id,
@@ -183,7 +206,4 @@ class ChunkCompletionEventDao extends AbstractDao
         return $stmt->fetch() ?: [];
     }
 
-    protected function _buildResult(array $array_result)
-    {
-    }
 }

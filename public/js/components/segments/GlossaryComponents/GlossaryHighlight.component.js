@@ -1,5 +1,5 @@
 import React, {Component, createRef} from 'react'
-import SegmentActions from '../../../actions/SegmentActions'
+import {highlightGlossaryTerm} from '../../../actions/segmentDispatchActions'
 import Tooltip from '../../common/Tooltip'
 import TEXT_UTILS from '../../../utils/textUtils'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
@@ -101,7 +101,7 @@ class GlossaryHighlight extends Component {
     const {sid} = this.props
     const glossaryTerm = this.getTermDetails()
     //Call Segment footer Action
-    SegmentActions.highlightGlossaryTerm({
+    highlightGlossaryTerm({
       sid,
       termId: glossaryTerm.term_id,
       type: 'glossary',

@@ -55,12 +55,11 @@ class DeepLGlossaryController extends KleinController
     {
         $this->validateCreateGlossaryPayload();
 
-        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
+        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
 
         $uploadManager = new Upload();
-        $uploadedFiles = $uploadManager->uploadFiles($_FILES);
+        $uploadedFiles = $uploadManager->uploadFiles($this->request->files()->all());
 
-        /** @noinspection PhpUndefinedFieldInspection */
         $glossary = CSVParser::extract($uploadedFiles->glossary, "DEEPL_EXCEL_GLOSS_");
 
         // validate
@@ -99,11 +98,11 @@ class DeepLGlossaryController extends KleinController
      */
     private function validateCreateGlossaryPayload(): void
     {
-        if (!isset($_FILES['glossary'])) {
+        if (!$this->request->files()->exists('glossary')) {
             throw new Exception('Missing `glossary`', 400);
         }
 
-        if (!isset($_POST['name'])) {
+        if (!isset($this->params['name'])) {
             throw new Exception('Missing `name`', 400);
         }
     }

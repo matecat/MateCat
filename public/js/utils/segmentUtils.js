@@ -198,7 +198,7 @@ const SegmentUtils = {
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
 
-    const suggetionArray = segment.contributions.matches.filter(
+    const suggetionArray = segment.contributions?.matches.filter(
       (match, index) =>
         index <
         (segment.choosenSuggestionIndex > 3
@@ -236,6 +236,7 @@ const SegmentUtils = {
       suggestion_array:
         segment.contributions &&
         !config.isReview &&
+        Array.isArray(suggetionArray) &&
         segment.choosenSuggestionIndex
           ? JSON.stringify(suggetionArray)
           : undefined,
@@ -263,7 +264,13 @@ const SegmentUtils = {
       config.project_completion_feature_enabled &&
       !config.isReview &&
       config.job_completion_current_phase === 'revise'
-    return projectCompletionCheck || segment.readonly
+
+    const isTranslationDisabled = segment?.metadata?.some(
+      ({meta_key, meta_value}) =>
+        meta_key === 'translation_disabled' && meta_value === '1',
+    )
+
+    return projectCompletionCheck || segment.readonly || isTranslationDisabled
   },
   getRelativeTransUnitCharactersCounter: ({
     sid,

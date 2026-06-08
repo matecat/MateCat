@@ -34,10 +34,14 @@ module.exports.MessageHandler = class {
 
   constructor(application) {
     this.application = application;
-    this.onReceive = this.onReceive.bind(this);
   }
 
   onReceive = (message) => {
+
+    if (!message?.data?.payload) {
+      logger.error('Malformed AMQ message: missing data.payload', {message});
+      return;
+    }
 
     let room;
     message.data.payload._type = message._type;
@@ -51,8 +55,6 @@ module.exports.MessageHandler = class {
         room = message.data.uid.toString();
         break;
       case ENGINE_QUOTA_EXCEEDED:
-        room = message.data.id_job.toString();
-        break;
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
         break;
@@ -64,6 +66,10 @@ module.exports.MessageHandler = class {
 
         return;
       default:
+        if (!message.data.id_client) {
+          logger.error('Missing id_client in AMQ message', {type: message._type, data: message.data});
+          return;
+        }
         room = message.data.id_client;
         break;
     }
@@ -83,7 +89,7 @@ module.exports.MessageHandler = class {
   }
 }
 
-module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true) => {
+const notifyUpgrade = (application, isRebooting = true) => {
 
   const disconnectMessage = {
     payload: {
@@ -112,3 +118,5 @@ module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true)
   }
 
 }
+
+module.exports.notifyUpgrade = notifyUpgrade;

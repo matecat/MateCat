@@ -119,8 +119,8 @@ abstract class AbstractController extends BaseKleinViewController
 
         $this->data_key_content = $__getInput[$this->dataKeyName];
 
-        $this->logger->debug($_GET);
-        $this->logger->debug($_SERVER['QUERY_STRING']);
+        $this->logger->debug($this->request->paramsGet()->all());
+        $this->logger->debug($this->request->server()->get('QUERY_STRING'));
     }
 
     protected function afterConstruct(): void

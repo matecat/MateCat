@@ -9,6 +9,8 @@ use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use RuntimeException;
+use TypeError;
 use Utils\Registry\AppConfig;
 
 class GoogleProvider extends AbstractProvider
@@ -17,7 +19,7 @@ class GoogleProvider extends AbstractProvider
     const string PROVIDER_NAME = 'google';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected static array $OAUTH_SCOPES = [
         'https://www.googleapis.com/auth/userinfo.email',
@@ -37,15 +39,16 @@ class GoogleProvider extends AbstractProvider
      *
      * @return Google_Client
      * @throws Exception
+     * @throws RuntimeException
      */
-    public static function getClient(?string $redirectUrl = null): Google_Client
+    public function getClient(?string $redirectUrl = null): Google_Client
     {
         $client = new Google_Client();
 
-        $client->setApplicationName(AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME);
-        $client->setClientId(AppConfig::$GOOGLE_OAUTH_CLIENT_ID);
-        $client->setClientSecret(AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET);
-        $client->setRedirectUri($redirectUrl ?? AppConfig::$GOOGLE_OAUTH_REDIRECT_URL);
+        $client->setApplicationName(AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME ?? throw new RuntimeException('GOOGLE_OAUTH_CLIENT_APP_NAME not configured'));
+        $client->setClientId(AppConfig::$GOOGLE_OAUTH_CLIENT_ID ?? throw new RuntimeException('GOOGLE_OAUTH_CLIENT_ID not configured'));
+        $client->setClientSecret(AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET ?? throw new RuntimeException('GOOGLE_OAUTH_CLIENT_SECRET not configured'));
+        $client->setRedirectUri($redirectUrl ?? AppConfig::$GOOGLE_OAUTH_REDIRECT_URL ?? throw new RuntimeException('GOOGLE_OAUTH_REDIRECT_URL not configured'));
         $client->setScopes(static::$OAUTH_SCOPES);
         $client->setAccessType("offline");
         $client->setApprovalPrompt('force');
@@ -85,7 +88,7 @@ class GoogleProvider extends AbstractProvider
      */
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
-        $googleClient = static::getClient($this->redirectUrl);
+        $googleClient = $this->getClient($this->redirectUrl);
         $googleClient->setState($csrfTokenState);
 
         return $googleClient->createAuthUrl();
@@ -99,7 +102,7 @@ class GoogleProvider extends AbstractProvider
      */
     public function getAccessTokenFromAuthCode(string $code): AccessToken
     {
-        $googleClient = static::getClient();
+        $googleClient = $this->getClient();
 
         return new AccessToken($googleClient->fetchAccessTokenWithAuthCode($code));
     }
@@ -110,10 +113,12 @@ class GoogleProvider extends AbstractProvider
      * @return ProviderUser
      * @throws \Google\Service\Exception
      * @throws Exception
+     * @throws TypeError
+     * @throws RuntimeException
      */
     public function getResourceOwner(\League\OAuth2\Client\Token\AccessToken $token): ProviderUser
     {
-        $googleClient = self::getClient($this->redirectUrl);
+        $googleClient = $this->getClient($this->redirectUrl);
         $googleClient->setAccessType("offline");
         $googleClient->setAccessToken($token->__toArray()); // __toArray defined in ConnectedServices\Google\AccessToken
 
@@ -121,11 +126,11 @@ class GoogleProvider extends AbstractProvider
         $fetched = $plus->userinfo->get();
 
         $user = new ProviderUser();
-        $user->email = $fetched->getEmail();
-        $user->name = $fetched->getName();
+        $user->email = $fetched->getEmail() ?? throw new TypeError('Google OAuth: email is required');
+        $user->name = $fetched->getName() ?? throw new TypeError('Google OAuth: name is required');
         $user->lastName = $fetched->getFamilyName();
         $user->picture = $fetched->getPicture();
-        $user->authToken = $token;
+        $user->authToken = (string)$token;
         $user->provider = self::PROVIDER_NAME;
 
         return $user;

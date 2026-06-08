@@ -2,11 +2,8 @@ import React from 'react'
 import Cookies from 'js-cookie'
 import $ from 'jquery'
 import OfflineUtils from './offlineUtils'
-import SegmentActions from '../actions/SegmentActions'
-import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
-import {isTranslationTailEmpty} from '../setTranslationUtil'
 import FileTypeText from '../../img/icons/FileTypeText'
 import FileTypePresentation from '../../img/icons/FileTypePresentation'
 import FileTypeHtml from '../../img/icons/FileTypeHtml'
@@ -19,6 +16,32 @@ import FileTypeCode from '../../img/icons/FileTypeCode'
 import FileTypeImage from '../../img/icons/FileTypeImage'
 import FileTypeSub from '../../img/icons/FileTypeSub'
 import FileTypePub from '../../img/icons/FileTypePub'
+import SegmentStore from '../stores/SegmentStore'
+import {
+  getLastSegmentFromLocalStorage,
+  setLastSegmentFromLocalStorage,
+} from './segmentLocalStorage'
+
+// Async-loaded to break circular dependency for static analysis.
+// In Vite/ESM, the module resolves before any user interaction triggers these getters.
+let _SegmentActions
+import('../actions/SegmentActions').then((m) => {
+  _SegmentActions = m.default
+})
+const getSegmentActions = () => {
+  if (!_SegmentActions)
+    throw new Error('[commonUtils] SegmentActions not loaded yet')
+  return _SegmentActions
+}
+
+let _SetTranslationUtil
+import('../setTranslationUtil').then((m) => {
+  _SetTranslationUtil = m
+})
+const checkTranslationTailEmpty = () => {
+  if (!_SetTranslationUtil) return false // safe default: assume not empty → show onbeforeunload warning
+  return _SetTranslationUtil.isTranslationTailEmpty()
+}
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -130,12 +153,23 @@ const CommonUtils = {
   },
 
   setBrowserHistoryBehavior() {
-    let updateAppByPopState = () => {
-      var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
-      var currentSegment = SegmentStore.getCurrentSegment()
-      if (segment && currentSegment?.sid === segment.sid) return
-      if (segment && !segment.opened) {
-        SegmentActions.openSegment(this.parsedHash.segmentId, true)
+    const updateAppByPopState = () => {
+      try {
+        const segment = SegmentStore.getSegmentByIdToJS(
+          this.parsedHash.segmentId,
+        )
+        const currentSegment = SegmentStore.getCurrentSegment()
+        if (segment && currentSegment?.sid === segment.sid) return
+        if (segment && !segment.opened) {
+          getSegmentActions().openSegment(this.parsedHash.segmentId, true)
+        }
+      } catch (e) {
+        console.error(
+          '[commonUtils] updateAppByPopState failed for segment',
+          this.parsedHash.segmentId,
+          '- navigation may be incomplete:',
+          e,
+        )
       }
     }
 
@@ -182,7 +216,7 @@ const CommonUtils = {
     }
 
     if (OfflineUtils.offline) {
-      if (!isTranslationTailEmpty()) {
+      if (!checkTranslationTailEmpty()) {
         return say_goodbye(
           'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
             'Do you want to proceed with the refresh ?',
@@ -322,21 +356,8 @@ const CommonUtils = {
     navigator.userAgent.search('Safari') >= 0 &&
     navigator.userAgent.search('Chrome') < 0 &&
     !CommonUtils.isLocalStorageNameSupported(),
-  getLastSegmentFromLocalStorage: function () {
-    let localStorageCurrentSegmentId =
-      'currentSegmentId-' + config.id_job + config.password
-    return localStorage.getItem(localStorageCurrentSegmentId)
-  },
-  setLastSegmentFromLocalStorage: function (segmentId) {
-    let localStorageCurrentSegmentId =
-      'currentSegmentId-' + config.id_job + config.password
-    try {
-      localStorage.setItem(localStorageCurrentSegmentId, segmentId)
-    } catch (e) {
-      this.clearStorage('currentSegmentId')
-      localStorage.setItem(localStorageCurrentSegmentId, segmentId)
-    }
-  },
+  getLastSegmentFromLocalStorage,
+  setLastSegmentFromLocalStorage,
   clearStorage: function (what) {
     $.each(localStorage, function (k) {
       if (k.substring(0, what.length) === what) {

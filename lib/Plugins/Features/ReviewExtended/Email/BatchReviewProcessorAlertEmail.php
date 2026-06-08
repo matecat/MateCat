@@ -41,7 +41,7 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     protected function _getTemplateVariables(): array
     {

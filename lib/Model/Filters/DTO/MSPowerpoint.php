@@ -2,42 +2,32 @@
 
 namespace Model\Filters\DTO;
 
-use JsonSerializable;
-
-class MSPowerpoint implements IDto, JsonSerializable
+class MSPowerpoint implements IDto
 {
 
     private bool $extract_doc_properties = false;
     private bool $extract_hidden_slides = false;
     private bool $extract_notes = true;
+    /** @var list<string> */
     private array $translate_slides = [];
 
-    /**
-     * @param bool|null $extract_doc_properties
-     */
     public function setExtractDocProperties(bool $extract_doc_properties): void
     {
         $this->extract_doc_properties = $extract_doc_properties;
     }
 
-    /**
-     * @param bool|null $extract_hidden_slides
-     */
     public function setExtractHiddenSlides(bool $extract_hidden_slides): void
     {
         $this->extract_hidden_slides = $extract_hidden_slides;
     }
 
-    /**
-     * @param bool|null $extract_notes
-     */
     public function setExtractNotes(bool $extract_notes): void
     {
         $this->extract_notes = $extract_notes;
     }
 
     /**
-     * @param array $translate_slides
+     * @param list<string> $translate_slides
      */
     public function setTranslateSlides(array $translate_slides): void
     {
@@ -45,7 +35,7 @@ class MSPowerpoint implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function fromArray(array $data): void
     {
@@ -67,7 +57,7 @@ class MSPowerpoint implements IDto, JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

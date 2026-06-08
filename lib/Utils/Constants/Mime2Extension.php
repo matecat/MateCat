@@ -5,6 +5,7 @@ namespace Utils\Constants;
 class Mime2Extension
 {
 
+    /** @var array<string, list<string>> */
     protected static array $reference = [
         'application/andrew-inset' =>
             [
@@ -3392,7 +3393,7 @@ class Mime2Extension
     /**
      * Returns an array of mime types and their associated file extensions.
      *
-     * @return array
+     * @return array<string, list<string>>
      */
     public static function getMimeTypes(): array
     {

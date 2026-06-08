@@ -11,7 +11,6 @@ namespace Model\WordCount;
 
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use Utils\Logger\LoggerFactory;
@@ -20,21 +19,11 @@ class WordCounterDao extends AbstractDao
 {
 
     /**
-     * Update the word count for the job
-     *
-     * We perform an update in join with the `jobs` table
-     * because we want to update the word count only for the current chunk
-     *
-     * Update the status of segment_translation is needed to avoid duplicated calls
-     * (The second call fails for status condition)
-     *
-     * @param WordCountStruct $wStruct
-     *
-     * @return int
+     * @throws PDOException
      */
-    public static function updateWordCount(WordCountStruct $wStruct)
+    public function updateWordCount(WordCountStruct $wStruct): int
     {
-        $db = Database::obtain();
+        $db = $this->database;
 
         //Update in Transaction
         $query = "UPDATE jobs AS j SET
@@ -82,9 +71,9 @@ class WordCounterDao extends AbstractDao
         return $stmt->rowCount();
     }
 
-    public function initializeWordCount(WordCountStruct $wStruct)
+    public function initializeWordCount(WordCountStruct $wStruct): int
     {
-        $db = Database::obtain();
+        $db = $this->database;
 
         $data = [];
         $data['new_words'] = $wStruct->getNewWords();
@@ -127,7 +116,8 @@ class WordCounterDao extends AbstractDao
      * @param int|null $id_file
      * @param string|null $jPassword
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws PDOException
      */
     public function getStatsForJob(int $id_job, ?int $id_file = null, ?string $jPassword = null): array
     {
@@ -184,7 +174,7 @@ class WordCounterDao extends AbstractDao
  			    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			";
 
-        $db = Database::obtain();
+        $db = $this->database;
 
         $bind_values = ['id_job' => $id_job];
 

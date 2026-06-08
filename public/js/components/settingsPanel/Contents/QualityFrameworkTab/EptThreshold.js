@@ -1,5 +1,5 @@
 import React, {useContext, useRef} from 'react'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 
 export const EptThreshold = () => {
   const {currentTemplate, templates, modifyingCurrentTemplate} = useContext(

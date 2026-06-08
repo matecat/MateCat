@@ -1,6 +1,6 @@
 import React, {useContext, useRef} from 'react'
 import {Select} from '../../../common/Select'
-import {SubTemplatesContext} from './SubTemplate'
+import {SubTemplatesContext} from './SubTemplateContext'
 import HelpCircle from '../../../../../img/icons/HelpCircle'
 import Tooltip from '../../../common/Tooltip'
 

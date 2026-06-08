@@ -8,7 +8,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Segments\SegmentDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
@@ -39,7 +39,7 @@ class SetCurrentSegmentController extends KleinController
         $split_num = $request['split_num'];
 
         //get Job Info, we need only a row of jobs (split)
-        ChunkDao::getByIdAndPassword($id_job, $password);
+        (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
 
         if (empty($id_segment)) {
             throw new InvalidArgumentException("missing segment id", -1);
@@ -74,7 +74,7 @@ class SetCurrentSegmentController extends KleinController
          * End Split check control
          */
         if (!$isASplittedSegment or $isLastSegmentChunk) {
-            $segmentList = SegmentDao::getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
+            $segmentList = (new SegmentDao())->getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
 
             if (!$revision_number) {
                 $nextSegmentId = CatUtils::fetchStatus($id_segment, $segmentList);

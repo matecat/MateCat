@@ -1,5 +1,5 @@
 import React, {useContext} from 'react'
-import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplate'
+import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplateContext'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import IconClose from '../../../icons/IconClose'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../../common/Button/Button'

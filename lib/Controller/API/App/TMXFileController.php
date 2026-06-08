@@ -30,7 +30,7 @@ class TMXFileController extends KleinController
     {
         $request = $this->validateTheRequest();
         $TMService = new TMSService();
-        $file = $TMService->uploadFile($request['disable_upload_limit']);
+        $file = $TMService->uploadFile($this->request->files()->all(), $request['disable_upload_limit']);
 
         $uuids = [];
 

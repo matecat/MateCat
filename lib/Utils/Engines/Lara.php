@@ -12,7 +12,6 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
-use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -24,6 +23,7 @@ use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
+use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara\Headers;
@@ -31,6 +31,7 @@ use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -52,6 +53,11 @@ class Lara extends AbstractEngine
         'faithful',
         'fluid',
         'creative',
+    ];
+
+    private const array ALLOWED_MODELS = [
+        'prosa',
+        'think',
     ];
 
     /**
@@ -80,6 +86,7 @@ class Lara extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct($engineRecord)
     {
@@ -151,7 +158,7 @@ class Lara extends AbstractEngine
     /**
      * Get the available languages in MMT
      *
-     * @return array
+     * @return array<int, string>
      * @throws LaraException
      * @throws ReflectionException
      * @throws Exception
@@ -163,7 +170,10 @@ class Lara extends AbstractEngine
         $value = [];
 
         try {
-            $value = unserialize($cache->get("lara_languages"));
+            $cached = $cache->get("lara_languages");
+            if (is_string($cached)) {
+                $value = unserialize($cached);
+            }
         } catch (Throwable) {
         }
 
@@ -195,8 +205,8 @@ class Lara extends AbstractEngine
     }
 
     /**
-     * @param array $config
-     * @return array
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
      */
     private function configureContribution(array $config = []): array
     {
@@ -214,26 +224,29 @@ class Lara extends AbstractEngine
     /**
      * @inheritDoc
      *
-     * @param array $_config
+     * @param array<string, mixed> $_config
      *
-     * @return array
+     * @return GetMemoryResponse
      * @throws ReflectionException
      * @throws LaraException
      * @throws Exception
+     * @throws TypeError
      */
-    public function get(array $_config): array
+    public function get(array $_config): GetMemoryResponse
     {
         // temporary disable ur-Latn-PK
         if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
-            return [];
+            return new GetMemoryResponse(null);
         }
 
         if ($this->_isAnalysis && $this->_skipAnalysis) {
-            return [];
+            return new GetMemoryResponse(null);
         }
 
         $metadataDao = new MetadataDao();
         $laraStyle = $_config['lara_style'] ?? null;
+        $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
+        $laraModel = $_config['lara_model'] ?? '';
 
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
@@ -261,18 +274,21 @@ class Lara extends AbstractEngine
                 }
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
-                $laraGlossariesArray = [];
 
                 if (!empty($_config['id_project'])) {
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
-                        $translateOptions->setGlossaries($laraGlossariesArray);
+                        $translateOptions->setGlossaries($laraGlossaries->value);
                     }
                 }
 
                 if ($laraStyle !== null) {
                     $translateOptions->setStyle($laraStyle);
+                }
+
+                if($laraStyleGuidelineId !== null){
+                    $translateOptions->setStyleguideId($laraStyleGuidelineId);
                 }
 
                 $request_translation = [];
@@ -299,10 +315,12 @@ class Lara extends AbstractEngine
 
                 $translation = "";
                 $tList = $translationResponse->getTranslation();
-                foreach ($tList as $t) {
-                    if ($t->isTranslatable()) {
-                        $translation = $t->getText();
-                        break;
+                if (is_array($tList)) {
+                    foreach ($tList as $t) {
+                        if ($t instanceof TextBlock && $t->isTranslatable()) {
+                            $translation = $t->getText();
+                            break;
+                        }
                     }
                 }
 
@@ -326,7 +344,9 @@ class Lara extends AbstractEngine
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
                     'style' => $laraStyle,
-                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
+                    'style_guideline_id' => $laraStyleGuidelineId,
+                    'model' => $laraModel,
+                    'glossaries' => isset($laraGlossaries) ? implode(",", $laraGlossaries->value) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
@@ -348,13 +368,17 @@ class Lara extends AbstractEngine
                         ]
                     ]);
 
+                    if ($message === false) {
+                        return new GetMemoryResponse(null);
+                    }
+
                     $queueHandler = AMQHandler::getNewInstanceForDaemons();
                     $queueHandler->publishToNodeJsClients(
                         AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME,
                         new Message($message)
                     );
 
-                    return [];
+                    return new GetMemoryResponse(null);
                 } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
                     $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
                     throw new LaraException(
@@ -393,26 +417,28 @@ class Lara extends AbstractEngine
                 'score' => $score ?? null,
                 'reasoning' => $reasoning,
                 'style' => $laraStyle ?? null,
+                'style_guideline_id' => $laraStyleGuidelineId,
+                'model' => $laraModel,
             ]);
         }
 
-        return (new Matches([
+        $match = new Matches([
             'style' => $laraStyle ?? null,
             'source' => $_config['source'],
             'target' => $_config['target'],
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning ? ' Think' : '')),
+            'created-by' => $this->getMTName($this->engineRecord->name . ($laraModel === 'think' ? ' Think' : ($laraModel === 'prosa' ? ' Prosa' : ''))),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
-        ]))->getMatches(
-            1,
-            [],
-            $_config['source'],
-            $_config['target'],
-            $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null
-        );
+        ]);
+        $match->featureSet($this->featureSet);
+
+        $response = new GetMemoryResponse(null);
+        $response->matches = [$match];
+
+        return $response;
     }
 
     /**
@@ -423,6 +449,8 @@ class Lara extends AbstractEngine
      * @param string $mt_qe_engine_id
      *
      * @return float|null
+     * @throws \Psr\Log\InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function getQualityEstimation(
         string $source,
@@ -463,6 +491,8 @@ class Lara extends AbstractEngine
 
     /**
      * @inheritDoc
+     *
+     * @param mixed $_config
      */
     public function set($_config)
     {
@@ -470,6 +500,8 @@ class Lara extends AbstractEngine
 
     /**
      * @inheritDoc
+     *
+     * @param array<string, mixed> $_config
      * @throws Exception
      */
     public function update($_config)
@@ -491,6 +523,11 @@ class Lara extends AbstractEngine
         // Send the selected memory IDs to Lara via a custom request header.
         $laraClient = $client->getHttpClient();
         $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_keys));
+
+        // Send the translation origin to Lara via a custom request header.
+        if (!empty($_config['draft_translation'])) {
+            $laraClient->setExtraHeader(Headers::LARA_DRAFT_TRANSLATION_HEADER, $_config['draft_translation']);
+        }
 
         try {
             $time_start = microtime(true);
@@ -535,14 +572,14 @@ class Lara extends AbstractEngine
     /**
      * @param MemoryKeyStruct $memoryKey
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      * @throws LaraException
      * @throws Exception
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
     {
         $clientMemories = $this->_getClient()->memories;
-        $memory = $clientMemories->get('ext_my_' . trim($memoryKey->tm_key->key));
+        $memory = $clientMemories->get('ext_my_' . trim($memoryKey->tm_key->key ?? ''));
         return $memory?->jsonSerialize();
     }
 
@@ -588,6 +625,7 @@ class Lara extends AbstractEngine
      * In 'Lara', there is no need to check the ownership of the memory because if a memory exists within an account, it definitely ALSO belongs to me and can be safely deleted (unlinked from my account).
      * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
      * @throws LaraException
+     * @throws Exception
      */
     public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array
     {
@@ -634,17 +672,25 @@ class Lara extends AbstractEngine
     }
 
     /**
-     * @param array $projectRow
-     * @param array|null $segments
+     * @param array<string, mixed> $projectRow
+     * @param array<int, array<string, mixed>>|null $segments
      *
      * @return void
+     * @throws \Psr\Log\InvalidArgumentException
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {
         try {
             // get jobs keys
-            $project = ProjectDao::findById($projectRow['id']);
+            $project = (new ProjectDao())->findById($projectRow['id']);
+            if ($project === null) {
+                return;
+            }
+
             $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            if ($user === null) {
+                return;
+            }
 
             foreach ($project->getJobs() as $job) {
                 $keyIds = [];
@@ -653,7 +699,9 @@ class Lara extends AbstractEngine
                 $jobKeyList = array_merge($jobKeyListRead, $jobKeyListWrite);
 
                 foreach ($jobKeyList as $memKey) {
-                    $keyIds[] = $memKey->key;
+                    if ($memKey->key !== null) {
+                        $keyIds[] = $memKey->key;
+                    }
                 }
 
                 $keyIds = $this->reMapKeyList(array_values(array_unique($keyIds)));
@@ -669,15 +717,18 @@ class Lara extends AbstractEngine
 
     /**
      * @inheritDoc
+     *
+     * @param mixed $_config
      */
-    public function delete($_config)
+    public function delete($_config): bool
     {
+        return true;
     }
 
     /**
-     * @param array $_keys
+     * @param array<string> $_keys
      *
-     * @return array
+     * @return array<string>
      */
     public function reMapKeyList(array $_keys = []): array
     {
@@ -711,6 +762,7 @@ class Lara extends AbstractEngine
         return [
             'enable_mt_analysis',
             'lara_style',
+            'lara_style_guideline_id',
             'lara_glossaries',
         ];
     }
@@ -718,13 +770,31 @@ class Lara extends AbstractEngine
     /**
      * @param string $lara_style
      * @return string
+     * @throws InvalidArgumentException
      */
     public static function validateLaraStyle(string $lara_style): string
     {
-        if (!in_array($lara_style, self::ALLOWED_STYLES)) {
-            throw new InvalidArgumentException("Invalid lara style.", -1);
+        if (!in_array($lara_style, self::ALLOWED_STYLES, true)) {
+            throw new InvalidArgumentException("Invalid Lara style.", -1);
         }
 
         return $lara_style;
+    }
+
+    /**
+     * Validates the given Lara model against a predefined list of allowed models.
+     * If the model is not within the allowed list, an exception is thrown.
+     *
+     * @param string $model The Lara model to validate.
+     * @return string The validated model.
+     * @throws InvalidArgumentException If the provided model is not allowed.
+     */
+    public static function validateLaraModel(string $model): string
+    {
+        if (!in_array($model, self::ALLOWED_MODELS, true)) {
+            throw new InvalidArgumentException("Invalid Lara model.", -1);
+        }
+
+        return $model;
     }
 }

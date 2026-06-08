@@ -188,6 +188,7 @@ export const SegmentFooterTabAiAlternatives = ({
   const editorLiteRefs = []
 
   const requestingParams = useRef()
+  const selectedTextRef = useRef('')
 
   const getEditorLiteRef = (index) => {
     if (!editorLiteRefs[index]) {
@@ -197,17 +198,13 @@ export const SegmentFooterTabAiAlternatives = ({
   }
 
   useEffect(() => {
-    let selectedText = ''
-
     const requestAlternatives = ({text}) => {
       if (requestingParams.current) return
 
-      selectedText = DraftMatecatUtils.excludeSomeTagsFromText(text, [
-        'g',
-        'bx',
-        'ex',
-        'x',
-      ])
+      selectedTextRef.current = DraftMatecatUtils.excludeSomeTagsFromText(
+        text,
+        ['g', 'bx', 'ex', 'x'],
+      )
 
       setAlternatives()
 
@@ -270,7 +267,7 @@ export const SegmentFooterTabAiAlternatives = ({
           enrichedAlternatives.map(({context, highlighted}, index) => ({
             ...(index === 0 && {
               selectedText: DraftMatecatUtils.transformTagsToHtml(
-                `“${selectedText}”`,
+                `“${selectedTextRef.current}”`,
                 config.isTargetRTL,
               ),
             }),
@@ -290,14 +287,26 @@ export const SegmentFooterTabAiAlternatives = ({
         )
       } else {
         setAlternatives({
-          error: 'Something went wrong. Please try again in a moment.',
-          retryCallback: () => requestAlternatives({text: selectedText}),
+          ...(data.error_code === 1
+            ? {
+                error: (
+                  <>
+                    <span>No alternative translations found for:</span>
+                    <p>&quot;{selectedTextRef.current}&quot;</p>
+                  </>
+                ),
+              }
+            : {
+                error: 'Something went wrong. Please try again in a moment.',
+                retryCallback: () =>
+                  requestAlternatives({text: selectedTextRef.current}),
+              }),
         })
         //Track Event
         const message = {
           sid: segment.sid,
           segment: segment.decodedSource,
-          request: selectedText,
+          request: selectedTextRef.current,
           source: config.source_code,
           target: config.target_code,
           error: data.message,
@@ -381,8 +390,8 @@ export const SegmentFooterTabAiAlternatives = ({
       ) : alternatives?.error ? (
         <div className="ai-feature-content">
           <div className="content">
-            <p>{alternatives.error}</p>
-            {alternatives.error !== 'No alternative translations found.' && (
+            <div className="ai-feature-content-error">{alternatives.error}</div>
+            {typeof alternatives.retryCallback === 'function' && (
               <Button
                 className="ai-feature-button-retry"
                 type={BUTTON_TYPE.DEFAULT}

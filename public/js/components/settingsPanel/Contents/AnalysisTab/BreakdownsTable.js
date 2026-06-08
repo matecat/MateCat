@@ -1,6 +1,6 @@
 import React, {useContext} from 'react'
 import {InputPercentage} from './InputPercentage'
-import {ANALYSIS_BREAKDOWNS} from './AnalysisTab'
+import {ANALYSIS_BREAKDOWNS} from './AnalysisTabConstants'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 
 export const BreakdownsTable = ({saveValue}) => {

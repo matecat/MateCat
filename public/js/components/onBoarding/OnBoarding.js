@@ -1,4 +1,4 @@
-import React, {createContext, useState} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import Login from './Login'
 import Register from './Register'
@@ -10,22 +10,9 @@ import ChevronDown from '../../../img/icons/ChevronDown'
 import ModalsActions from '../../actions/ModalsActions'
 import CommonUtils from '../../utils/commonUtils'
 
-export const ONBOARDING_STEP = {
-  LOGIN: 'login',
-  REGISTER: 'register',
-  PASSWORD_RESET: 'passwordReset',
-  FORGOT_PASSWORD: 'forgotPassword',
-  SET_NEW_PASSWORD: 'setNewPassword',
-}
+import {ONBOARDING_STEP} from '../../constants/OnBoardingConstants'
 
-export const OnBoardingContext = createContext({})
-export const socialUrls = {
-  googleUrl: config.googleAuthURL,
-  github: config.githubAuthUrl,
-  microsoft: config.microsoftAuthUrl,
-  linkedIn: config.linkedInAuthUrl,
-  meta: config.facebookAuthUrl,
-}
+import {OnBoardingContext} from './OnBoardingContext'
 const OnBoarding = ({
   step = ONBOARDING_STEP.LOGIN,
   isCloseButtonEnabled = false,

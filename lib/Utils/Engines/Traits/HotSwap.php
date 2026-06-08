@@ -13,8 +13,8 @@ namespace Utils\Engines\Traits;
 use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Predis\Client;
 use ReflectionException;
+use TypeError;
 use Utils\Redis\RedisHandler;
 
 trait HotSwap
@@ -29,16 +29,12 @@ trait HotSwap
      *     }
      *</code>
      *
-     * @param Client $redisConn
-     * @param JobStruct $jobStruct
-     *
-     * @param int $newMT
-     *
-     * @param int $newTM
-     *
+     * @throws ReflectionException
+     * @throws Exception
      */
-    protected function swapOn(Client $redisConn, JobStruct $jobStruct, int $newMT = 1, int $newTM = 1): void
+    protected function swapOn(RedisHandler $redisHandler, JobStruct $jobStruct, int $newMT = 1, int $newTM = 1): void
     { // 1 == MyMemory
+        $redisConn = $redisHandler->getConnection();
 
         if ($redisConn->setnx("_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, $jobStruct->id_mt_engine)) {
             $redisConn->expire("_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, 60 * 60 * 24);
@@ -64,26 +60,27 @@ trait HotSwap
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    protected function swapOff(int $project_id): void
+    protected function swapOff(int $project_id, ?JobDao $jobDao = null, ?RedisHandler $redisHandler = null): void
     {
         //There should be more than one job per project, to be generic use a foreach
-        $jobDao = new JobDao();
-        $jobStructs = $jobDao->getByProjectId($project_id, 60);
+        $jobDao = $jobDao ?? new JobDao();
+        $jobStructs = $jobDao->getNotDeletedByProjectId($project_id, 60);
 
-        $redisConn = (new RedisHandler())->getConnection();
+        $redisConn = ($redisHandler ?? new RedisHandler())->getConnection();
         foreach ($jobStructs as $jobStruct) {
             $update = false;
 
-            $old_mt_engine = $redisConn->get("_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password); //Get the old mt engine value
-            if ($redisConn->del("_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password)) { //avoid race conditions from plugins ( delete is atomic )
-                $jobStruct->id_mt_engine = $old_mt_engine;
+            $old_mt_engine = $redisConn->get("_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password);
+            if ($redisConn->del("_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password)) {
+                $jobStruct->id_mt_engine = (int) $old_mt_engine;
                 $update = true;
             }
 
-            $old_tms_engine = $redisConn->get("_old_tms_engine:" . $jobStruct->id_project . ":" . $jobStruct->password); //Get the old tms engine value
-            if ($redisConn->del("_old_tms_engine:" . $jobStruct->id_project . ":" . $jobStruct->password)) { //avoid race conditions from plugins ( delete is atomic )
-                $jobStruct->id_tms = $old_tms_engine;
+            $old_tms_engine = $redisConn->get("_old_tms_engine:" . $jobStruct->id_project . ":" . $jobStruct->password);
+            if ($redisConn->del("_old_tms_engine:" . $jobStruct->id_project . ":" . $jobStruct->password)) {
+                $jobStruct->id_tms = (int) $old_tms_engine;
                 $update = true;
             }
 

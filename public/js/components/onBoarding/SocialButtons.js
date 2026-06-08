@@ -1,6 +1,6 @@
 import React, {useContext} from 'react'
 import {Button, BUTTON_SIZE} from '../common/Button/Button'
-import {OnBoardingContext, socialUrls} from './OnBoarding'
+import {OnBoardingContext, socialUrls} from './OnBoardingContext'
 const SocialButtons = () => {
   const {socialLogin} = useContext(OnBoardingContext)
 

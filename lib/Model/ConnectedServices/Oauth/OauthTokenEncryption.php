@@ -13,17 +13,12 @@ use Utils\Registry\AppConfig;
 class OauthTokenEncryption extends DefuseEncryption
 {
 
-    /**
-     * @var OauthTokenEncryption|null
-     */
     private static ?OauthTokenEncryption $instance = null;
 
     /**
-     * Singleton method to create a new instance of OauthTokenEncryption with the token key file.
-     * @return null|OauthTokenEncryption
      * @throws Exception
      */
-    public static function getInstance(): ?OauthTokenEncryption
+    public static function getInstance(): OauthTokenEncryption
     {
         if (self::$instance === null) {
             self::$instance = new OauthTokenEncryption(

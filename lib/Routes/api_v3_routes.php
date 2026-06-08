@@ -34,6 +34,9 @@ $klein->with('/api/v3/jobs/[i:id_job]/[:password]', function () {
     route('/cancel', 'POST', ['Controller\API\V2\JobsController', 'cancel']);
     route('/archive', 'POST', ['Controller\API\V2\JobsController', 'archive']);
     route('/active', 'POST', ['Controller\API\V2\JobsController', 'active']);
+
+    route('/segment/disable/[i:id_segment]', 'POST', ['\Controller\API\V3\CancelRequestController', 'cancelRequest']);
+    route('/segment/enable/[i:id_segment]', 'POST', ['\Controller\API\V3\CancelRequestController', 'enableRequest']);
 });
 
 $klein->with('/api/v3/teams', function () {
@@ -129,6 +132,13 @@ $klein->with('/api/v3/filters-config-template', function () {
     route('/[i:id]', 'DELETE', ['\Controller\API\V3\FiltersConfigTemplateController', 'delete']);
     route('/[i:id]', 'PUT', ['\Controller\API\V3\FiltersConfigTemplateController', 'update']);
     route('/[i:id]', 'GET', ['\Controller\API\V3\FiltersConfigTemplateController', 'get']);
+});
+
+// CONTEXT URL
+$klein->with('/api/v3/context-url/[i:id_project]/[:password]', function () {
+    route('/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
+    route('/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
+    route('/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);
 });
 
 /**

@@ -98,8 +98,6 @@ class QA
     public const string WARNING = ErrorManager::WARNING;
     public const string INFO = ErrorManager::INFO;
 
-    public const string SIZE_RESTRICTION = SizeRestrictionChecker::SIZE_RESTRICTION;
-
     // ========== Component Instances ==========
 
     /** @var ErrorManager Manages error codes, messages, and exception lists */
@@ -203,13 +201,13 @@ class QA
      *
      * @param string|null $source_seg The source segment to check (may contain XML/XLIFF tags)
      * @param string|null $target_seg The target segment to check (may contain XML/XLIFF tags)
-     * @param MessagePatternComparator|null $icuPluralsValidator Optional ICU message pattern validator
+     * @param MessagePatternComparator|null $icuComparator Optional ICU message pattern comparator
      * @param bool $string_contains_icu Whether the source contains ICU message patterns
      */
     public function __construct(
         ?string $source_seg = null,
         ?string $target_seg = null,
-        ?MessagePatternComparator $icuPluralsValidator = null,
+        ?MessagePatternComparator $icuComparator = null,
         bool $string_contains_icu = false
     ) {
         // Set UTF-8 encoding for multibyte string functions
@@ -236,7 +234,7 @@ class QA
         $this->domHandler->loadDoms($this->source_seg, $this->target_seg);
 
         // Configure ICU checker for plural form validation
-        $this->icuChecker->setIcuPatternComparator($icuPluralsValidator);
+        $this->icuChecker->setIcuPatternComparator($icuComparator);
         $this->icuChecker->setSourceContainsIcu($string_contains_icu);
     }
 
@@ -369,7 +367,7 @@ class QA
      * When XML parsing fails, this returns the tags that differ
      * between source and target segments.
      *
-     * @return array{source: array, target: array} Tags present in source but not target and vice versa
+     * @return array{source: list<string>, target: list<string>} Tags present in source but not target and vice versa
      */
     public function getMalformedXmlStructs(): array
     {
@@ -379,7 +377,7 @@ class QA
     /**
      * Gets the tags that have position errors.
      *
-     * @return array List of tag strings with position mismatches
+     * @return list<string> List of tag strings with position mismatches
      */
     public function getTargetTagPositionError(): array
     {
@@ -419,7 +417,13 @@ class QA
      */
     public function getExceptionList(): array
     {
-        return $this->errorManager->getExceptionList();
+        $exceptionList = $this->errorManager->getExceptionList();
+
+        return [
+            self::ERROR => $exceptionList[self::ERROR] ?? [],
+            self::WARNING => $exceptionList[self::WARNING] ?? [],
+            self::INFO => $exceptionList[self::INFO] ?? [],
+        ];
     }
 
     /**
@@ -520,7 +524,13 @@ class QA
      */
     public static function JSONtoExceptionList(string $jsonString): array
     {
-        return ErrorManager::JSONtoExceptionList($jsonString);
+        $exceptionList = ErrorManager::JSONtoExceptionList($jsonString);
+
+        return [
+            self::ERROR => $exceptionList[self::ERROR] ?? [],
+            self::WARNING => $exceptionList[self::WARNING] ?? [],
+            self::INFO => $exceptionList[self::INFO] ?? [],
+        ];
     }
 
     // ========== Main Check Methods ==========
@@ -658,6 +668,7 @@ class QA
      *
      * @return void
      * @throws DOMException If DOM structure preparation fails
+     * @throws Exception
      */
     public function prepareDOMStructures(): void
     {
@@ -678,8 +689,13 @@ class QA
     {
         if (!$this->thereAreErrors()) {
             $normalizedTrgDOM = $this->domHandler->getNormalizedTrgDOM();
+            if ($normalizedTrgDOM === null) {
+                throw new LogicException(__METHOD__ . " call when normalized target DOM is null.");
+            }
+
             // Extract content from root wrapper element
-            preg_match('/<root>(.*)<\/root>/us', $normalizedTrgDOM->saveXML($normalizedTrgDOM->documentElement), $matches);
+            $normalizedXml = $normalizedTrgDOM->saveXML($normalizedTrgDOM->documentElement) ?: '';
+            preg_match('/<root>(.*)<\/root>/us', $normalizedXml, $matches);
             return $this->preprocessor->cleanOutputContent($matches[1] ?? '');
         }
 

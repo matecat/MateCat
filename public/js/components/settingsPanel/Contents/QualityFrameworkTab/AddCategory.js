@@ -10,14 +10,14 @@ import {
   BUTTON_TYPE,
   Button,
 } from '../../../common/Button/Button'
-import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import IconAdd from '../../../icons/IconAdd'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {
   getCodeFromLabel,
   formatCategoryDescription,
   getCategoryLabelAndDescription,
-} from './CategoriesSeveritiesTable'
+} from './CategoriesSeveritiesTableUtils'
 import {TOOLTIP_POSITION} from '../../../common/Tooltip'
 
 const MAX_ENTRY = 50

@@ -39,9 +39,9 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
-     * @return null|MembershipStruct[]
+     * @return MembershipStruct[]
      */
-    public function getMembers(): ?array
+    public function getMembers(): array
     {
         return $this->members;
     }

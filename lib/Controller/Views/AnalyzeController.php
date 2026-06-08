@@ -16,7 +16,7 @@ use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
-use Model\Jobs\ChunkDao;
+use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Utils\AsyncTasks\Workers\Analysis\Health;
@@ -27,6 +27,13 @@ use Utils\Tools\Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController
 {
+
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao();
+    }
 
     protected function afterConstruct(): void
     {
@@ -75,7 +82,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
         $jid = $postInput['jid'];
         $pass = $postInput['password'];
 
-        $projectStruct = ProjectDao::findById($pid, 60 * 60);
+        $projectStruct = $this->getProjectDao()->findById($pid, 60 * 60);
 
         if (empty($projectStruct)) {
             $this->setView("project_not_found.html", [], 404);
@@ -84,7 +91,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
 
         if (!empty($jid)) {
             // we are looking for a chunk
-            $chunkStruct = JobDao::getByIdAndPassword($jid, $pass);
+            $chunkStruct = (new JobDao())->getByIdAndPassword($jid, $pass);
             if (empty($chunkStruct) || $chunkStruct->isDeleted()) {
                 $this->setView("job_not_found.html", [], 404);
                 $this->render();
@@ -96,7 +103,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
                 'project_access_token' => sha1($projectStruct->id . $projectStruct->password),
             ]);
         } else {
-            $chunks = (new ChunkDao)->getByProjectID($projectStruct->id);
+            $chunks = (new JobDao())->getNotDeletedByProjectId((int)$projectStruct->id);
 
             $notDeleted = array_filter($chunks, function ($element) {
                 return !$element->isDeleted(); //retain only jobs which are not deleted
@@ -116,17 +123,20 @@ class AnalyzeController extends BaseKleinViewController implements IController
             $this->featureSet->loadForProject($projectStruct);
         }
 
-        $projectData = ProjectDao::getProjectAndJobData($pid);
+        $projectData = $this->getProjectDao()->getProjectAndJobData($pid);
         $analysisStatus = new Status($projectData, $this->featureSet, $this->user);
 
         $model = $analysisStatus->fetchData()->getResult();
+
+        $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
+        $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
 
         $this->addParamsToView([
             'pid' => $projectStruct->id,
             'project_status' => $projectStruct->status_analysis,
             'outsource_service_login' => $this->_outsource_login_API,
             'showModalBoxLogin' => new PHPTalBoolean(!$this->isLoggedIn()),
-            'project_plugins' => new PHPTalMap($this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes()) ?? []),
+            'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes() ?? []),
             'num_segments' => $model->getSummary()->getTotalSegments(),
             'num_segments_analyzed' => $model->getSummary()->getSegmentsAnalyzed(),
             'daemon_misconfiguration' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),

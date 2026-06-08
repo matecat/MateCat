@@ -53,7 +53,7 @@ const getFilteredSchemaToCompare = (template) => {
   /* eslint-enable no-unused-vars */
 }
 
-export const XliffSettingsContext = createContext({})
+import {XliffSettingsContext} from './XliffSettingsContext'
 
 export const XliffSettings = () => {
   const {

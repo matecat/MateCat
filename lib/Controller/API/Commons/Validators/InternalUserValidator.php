@@ -12,6 +12,7 @@ namespace Controller\API\Commons\Validators;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 
 class InternalUserValidator extends LoginValidator
 {
@@ -24,10 +25,8 @@ class InternalUserValidator extends LoginValidator
     public function _validate(): void
     {
         parent::_validate();
-        $this->controller->getFeatureSet()->filter(
-            "isAnInternalUser",
-            $this->controller->getUser()->email
-        ) ?: throw new AuthorizationError('Forbidden, please contact support for generating a valid API key');
+        $event = $this->controller->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->controller->getUser()->email));
+        $event->isInternal() ?: throw new AuthorizationError('Forbidden, please contact support for generating a valid API key');
     }
 
 

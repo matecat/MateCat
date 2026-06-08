@@ -7,7 +7,8 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-export const COPY_SOURCE_COOKIE = 'source_copied_to_target'
+import {COPY_SOURCE_COOKIE} from '../../constants/ModalKeys'
+
 class CopySourceModal extends React.Component {
   constructor(props) {
     super(props)

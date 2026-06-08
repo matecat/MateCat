@@ -5,3 +5,35 @@ parameters:
     level: 8
     paths:
         - lib
+        - plugins
+    # Vendor type stubs — correct wrong/missing types in third-party libraries
+    # OpenAi::chat() declares $stream as null but accepts callable at runtime
+    stubFiles:
+        - phpstan-stubs/OpenAi.stub
+    scanFiles:
+        - router.php
+    excludePaths:
+        - lib/View/APIDoc.php (?)
+        - lib/View/templates/_APIDoc.php
+        - vendor
+        - tests
+        - plugins/airbnb/tests
+        - plugins/translated/tests
+        - plugins/uber/tests
+        - plugins/vite/tests
+    universalObjectCratesClasses:
+        - Model\DataAccess\ShapelessConcreteStruct
+    # Flag @throws \Exception on public/protected methods when only
+    # a narrower exception (e.g. \InvalidArgumentException) is thrown
+    checkTooWideThrowTypesInProtectedAndPublicMethods: true
+    exceptions:
+        uncheckedExceptionClasses:
+            - 'Model\DataAccess\UnknownPropertyException'
+        check:
+            # Report when code throws an exception that has no
+            # matching @throws tag in the method's PHPDoc
+            missingCheckedExceptionInThrows: true
+            # Report when @throws declares a broader type than
+            # what is actually thrown (applies to all methods)
+            tooWideThrowType: true
+    treatPhpDocTypesAsCertain: false

@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import useOptions from '../useOptions'
@@ -6,6 +6,8 @@ import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {LaraGlossary} from '../LaraGlossary/LaraGlossary'
 import {Select} from '../../../../common/Select'
+import {laraStyleguides} from '../../../../../api/laraStyleguides/laraStyleguides'
+import {laraAuth} from '../../../../../api/laraAuth'
 
 export const LARA_STYLES = {
   FAITHFUL: 'faithful',
@@ -49,6 +51,8 @@ export const LARA_STYLES_OPTIONS = [
 export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
+  const [styleGuidesOptions, setStyleGuidesOptions] = useState([])
+
   const {control, setValue} = useOptions()
 
   const setGlossaries = useCallback(
@@ -63,6 +67,16 @@ export const LaraOptions = ({isCattoolPage}) => {
     )
       setValue('lara_style', LARA_STYLES.FAITHFUL)
   }, [currentProjectTemplate?.mt?.extra, setValue])
+
+  useEffect(() => {
+    if (config.isAnInternalUser) {
+      laraAuth().then((response) => {
+        laraStyleguides(response)
+          .then((data) => setStyleGuidesOptions(data))
+          .catch((error) => console.log(error))
+      })
+    }
+  }, [])
 
   return (
     <div className="options-container-content">
@@ -129,6 +143,45 @@ export const LaraOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
+      {config.isAnInternalUser && (
+        <div className="mt-params-option">
+          <div>
+            <h3>Style guide</h3>
+            <p>
+              Select a style guide to be applied to Lara's translations
+              (activates Lara Prose for the project).
+            </p>
+          </div>
+          <Controller
+            control={control}
+            name="lara_style_guideline_id"
+            disabled={isCattoolPage || styleGuidesOptions.length === 0}
+            render={({field: {onChange, value, name, disabled}}) => (
+              <Select
+                name={name}
+                placeholder="Select a style guide"
+                isPortalDropdown={true}
+                dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
+                options={styleGuidesOptions.map((option) => ({
+                  ...option,
+                  name: (
+                    <div className="option-dropdown-with-descrition-select-content">
+                      {option.name}
+                      <p>{option.description}</p>
+                    </div>
+                  ),
+                }))}
+                activeOption={styleGuidesOptions.find(({id}) => id === value)}
+                checkSpaceToReverse={true}
+                onSelect={(option) => onChange(option.id)}
+                isDisabled={disabled}
+                maxHeightDroplist={300}
+              />
+            )}
+          />
+        </div>
+      )}
+      <h2>Glossaries</h2>
       <LaraGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}

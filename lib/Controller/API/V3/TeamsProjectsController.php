@@ -26,6 +26,13 @@ class TeamsProjectsController extends KleinController
     /** @var TeamStruct */
     protected TeamStruct $team;
 
+    private ?ProjectDao $projectDao = null;
+
+    private function getProjectDao(): ProjectDao
+    {
+        return $this->projectDao ??= new ProjectDao();
+    }
+
     protected function afterConstruct(): void
     {
         parent::afterConstruct();
@@ -57,10 +64,10 @@ class TeamsProjectsController extends KleinController
         $this->featureSet->loadFromUserEmail($this->user->email);
 
         /** @var ProjectStruct[] $projectsList */
-        $projectsList = ProjectDao::findByTeamId($id_team, $filter);
+        $projectsList = $this->getProjectDao()->findByTeamId($id_team, $filter);
         $projectsList = (new Project($projectsList))->render();
 
-        $totals = ProjectDao::getTotalCountByTeamId($id_team, $filter, 60 * 5);
+        $totals = $this->getProjectDao()->getTotalCountByTeamId($id_team, $filter, 60 * 5);
         $total_pages = $this->getTotalPages($step, $totals);
 
         if ($totals == 0) {

@@ -20,8 +20,9 @@ class XliffToTargetConverterController extends KleinController
 
     public function convert(): void
     {
-        $file_path = $_FILES['xliff']['tmp_name'] . '.xlf';
-        move_uploaded_file($_FILES['xliff']['tmp_name'], $file_path);
+        $xliff     = $this->request->files()->get('xliff');
+        $file_path = $xliff['tmp_name'] . '.xlf';
+        move_uploaded_file($xliff['tmp_name'], $file_path);
 
         $filters = (new Filters());
         $conversion = $filters->xliffToTarget([

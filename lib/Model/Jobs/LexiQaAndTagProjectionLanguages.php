@@ -4,6 +4,7 @@ namespace Model\Jobs;
 
 class LexiQaAndTagProjectionLanguages
 {
+    /** @var array<int, string> */
     public static array $lexiQaAllowedLanguages = [
         'af-ZA',
         'sq-AL',
@@ -94,6 +95,7 @@ class LexiQaAndTagProjectionLanguages
 
     ];
 
+    /** @var array<string, string> */
     public static array $tagProjectionAllowedLanguages = [
         'en-de' => 'English - German',
         'en-es' => 'English - Spanish',

@@ -1,9 +1,14 @@
 @use '../commons/colors';
-
+.stats-foo {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
 .footer-body {
   display: flex;
   height: 64px;
   padding: 0 10px;
+  background-color: colors.$white;
 
   .container-left,
   .container-center,

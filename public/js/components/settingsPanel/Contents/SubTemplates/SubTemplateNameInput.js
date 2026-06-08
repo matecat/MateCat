@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef} from 'react'
-import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplate'
+import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplateContext'
 
 export const SubTemplateNameInput = () => {
   const {

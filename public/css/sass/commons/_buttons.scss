@@ -23,8 +23,6 @@
       from(colors.$blue500),
       to(colors.$blue500)
     );
-    background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
-    background: linear-gradient(top, colors.$blue500, colors.$blue500);
     color: colors.$white;
     border: 1px solid colors.$grey500;
     text-decoration: none;
@@ -48,9 +46,8 @@
       from(colors.$grey50),
       to(colors.$grey100)
     );
-    background: -moz-linear-gradient(top, colors.$grey50, colors.$grey100);
-    background: linear-gradient(top, colors.$grey50, colors.$grey100);
     border: 1px solid colors.$grey500;
+    border: 1px solid #848689;
     text-decoration: none;
     border-radius: 2px;
   }
@@ -63,8 +60,6 @@
       from(colors.$orange700),
       to(colors.$orange900)
     );
-    background: -moz-linear-gradient(top, colors.$orange700, colors.$orange900);
-    background: linear-gradient(top, colors.$orange700, colors.$orange900);
     color: colors.$white;
     border: 1px solid colors.$grey500;
     text-decoration: none;

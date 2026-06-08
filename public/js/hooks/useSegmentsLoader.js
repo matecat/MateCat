@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import {getSegments} from '../api/getSegments'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
-import CommonUtils from '../utils/commonUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 
 const INIT_NUM_SEGMENTS = 40

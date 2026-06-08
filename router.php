@@ -3,6 +3,7 @@
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\UnprocessableException;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -27,7 +28,7 @@ $isView = false;
 /**
  * @param string $path
  * @param string $method
- * @param array  $callback
+ * @param array{0: class-string<KleinController>, 1: string} $callback
  *
  * @return void
  */
@@ -54,6 +55,7 @@ function route(string $path, string $method, array $callback): void
  * @param int $code The HTTP error code.
  */
 $klein->onHttpError(function (int $code, Klein $klein) use (&$isView) {
+    /** @var bool $isView */
     // Check if the error code is 404 (page not found)
     if ($code == 404) {
         if ($isView) {
@@ -67,6 +69,7 @@ $klein->onHttpError(function (int $code, Klein $klein) use (&$isView) {
 });
 
 $klein->onError(function (Klein $klein, $err_msg, $err_type, Throwable $exception) use (&$isView) {
+    /** @var bool $isView */
     if (!$isView) {
         $klein->response()->noCache();
         $logger = LoggerFactory::getLogger('exception_handler', 'fatal_errors.txt');
@@ -99,6 +102,12 @@ $klein->onError(function (Klein $klein, $err_msg, $err_type, Throwable $exceptio
                 $logger->debug('Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ]);
                 $logger->debug((new Error($exception))->render(true));
                 $klein->response()->code(404);
+                $klein->response()->json((new Error($exception))->render());
+                break;
+            case ConflictError::class:
+                $logger->debug('Conflict error for URI: ' . $_SERVER[ 'REQUEST_URI' ]);
+                $logger->debug((new Error($exception))->render(true));
+                $klein->response()->code(409);
                 $klein->response()->json((new Error($exception))->render());
                 break;
             case UnprocessableException::class:

@@ -8,7 +8,7 @@ use Model\DataAccess\IDaoStruct;
 class SegmentMetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?string $id_segment = null;
+    public int $id_segment;
     public string $meta_key;
     public string $meta_value;
 }

@@ -45,10 +45,12 @@ export const SegmentTargetToolbar = ({
   }, [width])
 
   const getIconButton = (props) => {
-    const {children, ...rest} = props
+    const {children, key, ...rest} = props
 
     return (
       <Button
+        key={key}
+        className="segment-target-toolbar-icon"
         size={BUTTON_SIZE.ICON_SMALL}
         mode={BUTTON_MODE.OUTLINE}
         {...rest}
@@ -95,7 +97,10 @@ export const SegmentTargetToolbar = ({
             group: 0,
             component: (
               <AiAlternatives
-                {...{key: 'aialternatives', sid, segment, editArea}}
+                key="aialternatives"
+                sid={sid}
+                segment={segment}
+                editArea={editArea}
               />
             ),
           },
@@ -271,9 +276,9 @@ export const SegmentTargetToolbar = ({
 
   return (
     <div ref={ref} className="segment-target-toolbar">
-      {buttons.map((button) => {
-        if (button.dropdownGroup) return button.dropdownGroup
-        return button.component
+      {buttons.map((button, index) => {
+        if (button.dropdownGroup) return <React.Fragment key={`group-${index}`}>{button.dropdownGroup}</React.Fragment>
+        return <React.Fragment key={`btn-${index}`}>{button.component}</React.Fragment>
       })}
     </div>
   )

@@ -12,7 +12,7 @@ import {SettingsPanelTable} from '../../SettingsPanelTable'
 import {MTRow} from './MTRow'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {deleteMTEngine} from '../../../../api/deleteMTEngine'
-import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
+import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanelConstants'
 
 import {DeepL} from './MtEngines/DeepL'
 import CreateProjectActions from '../../../../actions/CreateProjectActions'

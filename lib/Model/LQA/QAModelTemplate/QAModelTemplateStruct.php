@@ -7,6 +7,7 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\LQA\QAModelInterface;
+use TypeError;
 use Utils\Date\DateTimeUtil;
 
 class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable, QAModelInterface
@@ -34,8 +35,9 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      *
      * @return QAModelTemplateStruct
      * @throws Exception
+     * @throws TypeError
      */
-    public function hydrateFromJSON($json): QAModelTemplateStruct
+    public function hydrateFromJSON(string $json): QAModelTemplateStruct
     {
         $json = json_decode($json);
 
@@ -69,7 +71,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         // QAModelTemplateCategoryStruct[]
         foreach ($jsonModel->categories as $index => $category) {
             $QAModelTemplateCategoryStruct = new QAModelTemplateCategoryStruct();
-            $QAModelTemplateCategoryStruct->id_template = (isset($QAModelTemplateStruct->id)) ? $QAModelTemplateStruct->id : null;
+            $QAModelTemplateCategoryStruct->id_template = ($QAModelTemplateStruct->id !== 0) ? $QAModelTemplateStruct->id : null;
             $QAModelTemplateCategoryStruct->id_parent = (isset($jsonModel->id_parent)) ? $jsonModel->id_parent : null;
             $QAModelTemplateCategoryStruct->category_label = $category->label;
             $QAModelTemplateCategoryStruct->code = $category->code;
@@ -99,14 +101,16 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
+     * @throws \RuntimeException
      */
     public function getDecodedModel(): array
     {
         $categoriesArray = [];
         $limitsArray = [];
 
-        foreach ($this->passfail->thresholds as $threshold) {
+        $passfail = $this->passfail ?? throw new \RuntimeException('Passfail must be set before calling getDecodedModel');
+        foreach ($passfail->thresholds as $threshold) {
             if ($threshold->passfail_label === 'T') {
                 $index = 0;
             } elseif ($threshold->passfail_label === 'R1') {
@@ -149,7 +153,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
                 "label" => $this->label,
                 "categories" => $categoriesArray,
                 "passfail" => [
-                    'type' => $this->passfail->passfail_type,
+                    'type' => $passfail->passfail_type,
                     'options' => [
                         'limit' => $limitsArray
                     ]
@@ -159,7 +163,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function jsonSerialize(): array

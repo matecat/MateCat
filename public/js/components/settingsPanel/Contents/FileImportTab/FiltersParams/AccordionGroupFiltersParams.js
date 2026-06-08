@@ -7,7 +7,7 @@ import {MsWord} from './MsWord'
 import {MsPowerpoint} from './MsPowerpoint'
 import {MsExcel} from './MsExcel'
 import {Dita} from './Dita'
-import {FiltersParamsContext} from './FiltersParams'
+import {FiltersParamsContext} from './FiltersParamsContext'
 import {isEqual} from 'lodash'
 
 const ACCORDION_GROUP = {

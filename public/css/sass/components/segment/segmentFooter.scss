@@ -130,6 +130,15 @@
     .ai-feature-button-retry {
       width: 100px;
     }
+
+    .ai-feature-content-error {
+      color: colors.$grey6;
+
+      > span {
+        font-weight: bold;
+        color: colors.$black;
+      }
+    }
   }
 
   &.ai-feedback {

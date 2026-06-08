@@ -1,6 +1,6 @@
 import React, {useRef, useState, forwardRef, useContext} from 'react'
 import PropTypes from 'prop-types'
-import {SettingsPanelTableContext} from './SettingsPanelTable'
+import {SettingsPanelTableContext} from './SettingsPanelTableContext'
 
 const ROW_HEIGHT = 50
 

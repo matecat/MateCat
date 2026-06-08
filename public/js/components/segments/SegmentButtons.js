@@ -193,7 +193,8 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         title="Revise and go to next translated"
         tooltip={`${isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
       >
-        A+&gt;&gt;
+        {' '}
+        {'A+>>'}
       </Button>
     ) : null
     currentButton = getReviewButton()
@@ -282,7 +283,8 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           tooltip={`{isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
           title="Translate and go to next untranslated"
         >
-          T+&gt;&gt;
+          {' '}
+          {'T+>>'}
         </Button>
       ) : null
       currentButton = getTranslateButton()
@@ -301,7 +303,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
             onClick={(e) => goToNextRepetition(e, 'translated')}
             title="Translate and go to next repetition"
           >
-            REP &gt;
+            {'REP >'}
           </Button>,
         )
         nextButton.push(
@@ -311,7 +313,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
             onClick={(e) => goToNextRepetitionGroup(e, 'translated')}
             title="Translate and go to next repetition group"
           >
-            REP &gt;&gt;
+            {'REP >>'}
           </Button>,
         )
       }

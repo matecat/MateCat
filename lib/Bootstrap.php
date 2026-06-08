@@ -2,9 +2,11 @@
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Exceptions\RenderTerminatedException;
 use Controller\Views\CustomPageView;
+use Exceptions\BootstrapTerminatedException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\DataAccess\Database;
-use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\LoggerFactory;
@@ -21,17 +23,19 @@ class Bootstrap
 {
 
     private static string $_INI_VERSION;
+
+    /** @var array<string, mixed> */
     private static array $CONFIG = [];
+
+    /** @var array<string, mixed> */
     private static array $TASK_RUNNER_CONFIG = [];
+
     private static string $_ROOT;
 
     /**
-     * @var FeatureSet
-     */
-    private FeatureSet $autoLoadedFeatureSet;
-
-    /**
      * @throws Exception
+     * @throws RuntimeException
+     * @throws TypeError
      */
     public static function start(SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null): void
     {
@@ -40,11 +44,17 @@ class Bootstrap
 
     /**
      * @throws Exception
+     * @throws RuntimeException
+     * @throws TypeError
      */
     private function __construct(SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null)
     {
         ini_set('display_errors', false);
-        self::$_ROOT = realpath(dirname(__FILE__) . '/../');
+        $root = realpath(dirname(__FILE__) . '/../');
+        if ($root === false) {
+            throw new RuntimeException('Cannot resolve project root path');
+        }
+        self::$_ROOT = $root;
         include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
         //get the environment configuration
@@ -66,9 +76,6 @@ class Bootstrap
 
         $this->installApplicationSingletons();
 
-
-        $this->initMandatoryPlugins();
-        $this->notifyBootCompleted();
         $this->unsetVariables();
     }
 
@@ -99,6 +106,7 @@ class Bootstrap
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function installApplicationSingletons(): void
     {
@@ -128,7 +136,11 @@ class Bootstrap
 
         // Check if the main configuration file exists and parse it
         if ($config_file->isFile()) {
-            self::$CONFIG = parse_ini_file($config_file->getRealPath(), true);
+            $parsed = parse_ini_file($config_file->getRealPath(), true);
+            if ($parsed === false) {
+                throw new RuntimeException("Failed to parse configuration file: " . $config_file->getPathname());
+            }
+            self::$CONFIG = $parsed;
         } else {
             throw new RuntimeException("Configuration file not found: " . $config_file->getPathname());
         }
@@ -138,7 +150,11 @@ class Bootstrap
 
         // Check if the task runner configuration file exists and parse it
         if ($task_runner_config_file->isFile()) {
-            self::$TASK_RUNNER_CONFIG = parse_ini_file($task_runner_config_file->getRealPath(), true);
+            $parsed = parse_ini_file($task_runner_config_file->getRealPath(), true);
+            if ($parsed === false) {
+                throw new RuntimeException("Failed to parse task manager configuration file: " . $task_runner_config_file->getPathname());
+            }
+            self::$TASK_RUNNER_CONFIG = $parsed;
         } else {
             throw new RuntimeException("Task Manager Configuration file not found: " . $task_runner_config_file->getPathname());
         }
@@ -147,20 +163,13 @@ class Bootstrap
         $matecatVersionFile = new SplFileInfo(self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/version.ini');
         if ($matecatVersionFile->isFile()) {
             $mv = parse_ini_file($matecatVersionFile->getRealPath());
+            if ($mv === false) {
+                throw new RuntimeException("Failed to parse version file: " . $matecatVersionFile->getPathname());
+            }
         } else {
             throw new RuntimeException("MateCat version file not found: " . $matecatVersionFile->getPathname());
         }
         self::$_INI_VERSION = $mv['version'];
-    }
-
-    private function initMandatoryPlugins(): void
-    {
-        $this->autoLoadedFeatureSet = new FeatureSet();
-    }
-
-    private function notifyBootCompleted(): void
-    {
-        $this->autoLoadedFeatureSet->run('bootstrapCompleted');
     }
 
     /**
@@ -193,6 +202,10 @@ class Bootstrap
                 $code = 403;
                 $logger->debug(["error" => 'Access not allowed error for URI: ' . $_SERVER['REQUEST_URI'] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace()]);
                 break;
+            case Controller\API\Commons\Exceptions\ConflictError::class:
+                $code = 409;
+                $logger->debug(["error" => 'Conflict error for URI: ' . $_SERVER['REQUEST_URI'] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace()]);
+                break;
             case PDOException::class:
                 $code = 503;
                 $logger->debug((new View\API\Commons\Error($exception))->render(true));
@@ -204,10 +217,21 @@ class Bootstrap
         }
 
         self::formatOutputExceptions($code, $exception);
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new BootstrapTerminatedException($code);
+        }
+
         die(); // do not complete the response and set the header
 
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     */
     private static function formatOutputExceptions(int $httpStatusCode, Throwable $exception): void
     {
         if (stripos(PHP_SAPI, 'cli') === false) {
@@ -236,20 +260,31 @@ class Bootstrap
      */
     public static function shutdownFunctionHandler(): never
     {
+        self::handleFatalError(error_get_last());
+        die();
+    }
 
+    /**
+     * @param array{type: int, message: string, file: string, line: int}|null $error
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws BootstrapTerminatedException
+     * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     */
+    public static function handleFatalError(?array $error): void
+    {
+        /** @var array<int, string> $errorType */
         $errorType = [
             E_CORE_ERROR => 'E_CORE_ERROR',
             E_COMPILE_ERROR => 'E_COMPILE_ERROR',
             E_ERROR => 'E_ERROR',
             E_USER_ERROR => 'E_USER_ERROR',
             E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-            E_DEPRECATED => 'DEPRECATION_NOTICE', //From PHP 5.3
+            E_DEPRECATED => 'DEPRECATION_NOTICE',
         ];
 
-        # Getting the last error
-        $error = error_get_last();
-
-        # Checking if the last error is a fatal error
         if (isset($error['type'])) {
             switch ($error['type']) {
                 case E_CORE_ERROR:
@@ -271,11 +306,14 @@ class Bootstrap
 
                     $logger->debug($exception->getTrace());
                     self::formatOutputExceptions(500, $exception);
+
+                    if (AppConfig::$ENV === 'testing') {
+                        throw new BootstrapTerminatedException(500);
+                    }
+
                     break;
             }
         }
-
-        die();
     }
 
     public static function sessionClose(): void
@@ -284,11 +322,9 @@ class Bootstrap
     }
 
     /**
-     * Returns an array of configuration params as parsed from the config.ini file.
-     * The returned array only returns entries that match the current environment.
-     *
+     * @return array<string, mixed>
      */
-    private function getConfigurationForEnvironment()
+    private function getConfigurationForEnvironment(): array
     {
         if (getenv('ENV') !== false) {
             self::$CONFIG['ENV'] = getenv('ENV');
@@ -311,6 +347,9 @@ class Bootstrap
      * This function initializes the configuration performing all required checks to be sure
      * that configuration is safe.
      *
+     */
+    /**
+     * @throws RuntimeException
      */
     private function initRegistryClass(): void
     {
@@ -340,7 +379,7 @@ class Bootstrap
         ];
 
         foreach ($directories as $directory) {
-            if (!is_dir($directory)) {
+            if ($directory !== null && !is_dir($directory)) {
                 mkdir($directory, 0755, true);
             }
         }
@@ -348,7 +387,7 @@ class Bootstrap
 
     private function setErrorReporting(): void
     {
-        if (AppConfig::$PRINT_ERRORS || stripos(AppConfig::$ENV, 'develop') !== false) {
+        if (AppConfig::$PRINT_ERRORS || (AppConfig::$ENV !== null && stripos(AppConfig::$ENV, 'develop') !== false)) {
             ini_set('error_log', AppConfig::$STORAGE_DIR . "/log_archive/php_errors.txt");
             ini_set('error_reporting', E_ALL);
         }

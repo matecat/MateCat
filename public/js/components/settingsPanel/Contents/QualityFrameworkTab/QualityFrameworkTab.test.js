@@ -15,7 +15,9 @@ import {
 } from '@testing-library/react'
 import useTemplates from '../../../../hooks/useTemplates'
 import userEvent from '@testing-library/user-event'
-import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
+import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTableUtils'
+// Initializes window.eventHandler (required by Popover component)
+import '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -89,7 +91,7 @@ test('Render properly and change ept thresholds', async () => {
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
 
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const R1Input = screen.getByTestId('threshold-R1')
@@ -132,7 +134,7 @@ test('Change template', async () => {
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
 
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   await user.click(screen.getByText('Default'))
@@ -196,7 +198,7 @@ test('QF template id not exits and select Standard template', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   expect(screen.getByText('Default')).toBeInTheDocument()
@@ -222,7 +224,7 @@ test('Add category', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const addCategory = screen.getByTestId('qf-add-category')
@@ -275,7 +277,7 @@ test('Category rename', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const categoryRow = within(screen.getByTestId('qf-category-row-2'))
@@ -332,7 +334,7 @@ test('Category moveup and movedown', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   let categoryRow = within(screen.getByTestId('qf-category-row-2'))
@@ -397,7 +399,7 @@ test('Category delete', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const categoryRow = within(screen.getByTestId('qf-category-row-2'))
@@ -434,7 +436,7 @@ test('Add severity', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const addSeverity = screen.getByTestId('qf-add-severity')
@@ -479,7 +481,7 @@ test('Edit severity', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const severityCurrentValue =
@@ -518,7 +520,7 @@ test('Severity column rename', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const severityColumn = within(screen.getByTestId('qf-severity-column-1'))
@@ -567,7 +569,7 @@ test('Severity column move left and right', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   let severityColumn = within(screen.getByTestId('qf-severity-column-1'))
@@ -626,7 +628,7 @@ test('Severity delete', async () => {
     contextProps.qualityFrameworkTemplates = result.current
     rerender(<WrapperComponent {...{...contextProps}} />)
   }
-  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  await waitFor(() => expect(result.current.templates.length).toBeGreaterThan(0))
   refresh()
 
   const severityColumn = within(screen.getByTestId('qf-severity-column-1'))

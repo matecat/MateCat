@@ -4,7 +4,11 @@ import {merge} from 'lodash/object'
 import {isUndefined} from 'lodash'
 import $ from 'jquery'
 
-import SegmentActions from '../actions/SegmentActions'
+import {
+  qaComponentsetLxqIssues,
+  addLexiqaHighlight,
+} from '../actions/segmentDispatchActions'
+import {getSegmentsQa} from '../actions/segmentQaActions'
 import {toggleTagLexica} from '../api/toggleTagLexica'
 import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarnings'
 import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
@@ -149,14 +153,14 @@ const LXQ = {
       if (!LXQ.initialized) {
         LXQ.init()
       } else {
-        SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+        qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
       }
-      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
+      getSegmentsQa(SegmentStore.getCurrentSegment())
     })
   },
   disable: function () {
     toggleTagLexica({enabled: false}).then(() => {
-      SegmentActions.qaComponentsetLxqIssues([])
+      qaComponentsetLxqIssues([])
     })
   },
   checkCanActivate: function () {
@@ -264,7 +268,7 @@ const LXQ = {
             LXQ.lexiqaData.segments.push(id_segment)
             LXQ.updateWarningsUI()
           }
-          SegmentActions.addLexiqaHighlight(id_segment, highlights)
+          addLexiqaHighlight(id_segment, highlights)
 
           if (!(LXQ.getVisibleWarningsCountForSegment(id_segment) > 0)) {
             noVisibleErrorsFound = true
@@ -284,7 +288,7 @@ const LXQ = {
       })
   },
   lxqRemoveSegmentFromWarningList: function (id_segment) {
-    SegmentActions.addLexiqaHighlight(id_segment, {})
+    addLexiqaHighlight(id_segment, {})
     LXQ.removeSegmentWarning(id_segment)
   },
   getLexiqaWarnings: function (callback) {
@@ -345,7 +349,7 @@ const LXQ = {
           if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
             LXQ.removeSegmentWarning(element.segid)
           }
-          SegmentActions.addLexiqaHighlight(element.segid, highlights)
+          addLexiqaHighlight(element.segid, highlights)
         })
 
         LXQ.updateWarningsUI()
@@ -364,7 +368,7 @@ const LXQ = {
     const segments = LXQ.lexiqaData.segments.filter(function (id_segment) {
       return Object.hasOwn(LXQ.lexiqaData.lexiqaWarnings, id_segment)
     })
-    SegmentActions.qaComponentsetLxqIssues(segments)
+    qaComponentsetLxqIssues(segments)
   },
   removeSegmentWarning: function (idSegment) {
     let ind = LXQ.lexiqaData.segments.indexOf(idSegment)
@@ -677,7 +681,7 @@ const LXQ = {
           highlights.target[qadata.category].push(qadata)
         }
     })
-    SegmentActions.addLexiqaHighlight(segmentId, highlights)
+    addLexiqaHighlight(segmentId, highlights)
   },
   postIgnoreError: function (errorid) {
     lexiqaIgnoreError({errorId: errorid})
