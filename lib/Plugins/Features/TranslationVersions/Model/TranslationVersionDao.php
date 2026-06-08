@@ -250,21 +250,13 @@ class TranslationVersionDao extends AbstractDao
     }
 
     /**
-     * @param $id_job
-     * @param $id_segment
-     *
-     * @return TranslationVersionStruct[]
+     * @param array<int> $segments_id
+     * @param int $job_id
+     * @return array<HistoryElementStruct>
      */
-    public function getVersionsForTranslationBySegment($id_job, $id_segment)
+    public function historyEvents(array $segments_id, int $job_id): array
     {
-        $sql = "SELECT * FROM segment_translation_versions " .
-            " WHERE id_job = :id_job AND id_segment = :id_segment " .
-            " ORDER BY creation_date DESC ";
-    }
-    public function historyEvents(array $segments_id, int $job_id)
-    {
-        $db = Database::obtain()->getConnection();
-
+        $conn = $this->database->getConnection();
         $prepare_str_segments_id = implode(', ', array_fill(0, count($segments_id), '?'));
 
         $query = "SELECT 
@@ -292,7 +284,7 @@ class TranslationVersionDao extends AbstractDao
           
             WHERE ste.id_segment IN ( $prepare_str_segments_id ) GROUP BY version_number, source_page;";
 
-        $stmt = $db->prepare($query);
+        $stmt = $conn->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, HistoryElementStruct::class);
         $stmt->execute(array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], $segments_id));
 

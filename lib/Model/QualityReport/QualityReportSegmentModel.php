@@ -216,7 +216,6 @@ class QualityReportSegmentModel
         $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $chunkId);
         $history_events = $translationVersionDao->historyEvents($segment_ids, $chunkId);
 
-
         $segments = [];
 
         foreach ($data as $index => $seg) {
