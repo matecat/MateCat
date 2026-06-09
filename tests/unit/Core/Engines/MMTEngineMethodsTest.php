@@ -644,11 +644,11 @@ class MMTEngineMethodsTest extends AbstractTest
     #[Test]
     public function getContextThrowsWhenGzopenFails(): void
     {
-        $dir = sys_get_temp_dir() . '/mmt-ro-' . uniqid();
-        mkdir($dir, 0755);
-        $path = $dir . '/context.txt';
+        $path = tempnam(sys_get_temp_dir(), 'mmt-gz-');
+        self::assertIsString($path);
         file_put_contents($path, "test\n");
-        chmod($dir, 0555);
+        @unlink("$path.gz");
+        mkdir("$path.gz");
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $file = new SplFileObject($path, 'r');
@@ -659,9 +659,8 @@ class MMTEngineMethodsTest extends AbstractTest
             $this->invokeGetContext($engine, $file, 'en-US', ['it-IT']);
         } finally {
             restore_error_handler();
-            chmod($dir, 0755);
+            @rmdir("$path.gz");
             @unlink($path);
-            @rmdir($dir);
         }
     }
 
