@@ -22,7 +22,7 @@ class ContextUrlSchemaController extends KleinController
     {
         $schema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/segment_context_url.json');
         if ($schema === false) {
-            throw new RuntimeException('Schema file not found');
+            throw new RuntimeException('Failed to read segment_context_url.json schema');
         }
 
         return $this->response->json(json_decode($schema));
