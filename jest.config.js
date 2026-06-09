@@ -3,8 +3,8 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: [''],
   },
-  maxWorkers: 4,
-  workerIdleMemoryLimit: '512MB',
+  maxWorkers: '50%',
+  workerIdleMemoryLimit: '256MB',
   forceExit: true,
   setupFiles: ['<rootDir>/setupFiles.jest.js', '<rootDir>/jest.polyfills.js'],
   setupFilesAfterEnv: ['<rootDir>/setupFilesAfterEnv.jest.js'],

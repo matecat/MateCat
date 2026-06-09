@@ -18,7 +18,6 @@ export function useGDrivePicker({setIsGDriveEnabled, onFilesPicked}) {
         gapi.load('picker', {callback: setPickerApiLoaded(true)})
       }
     } catch (e) {
-      console.error('Google API not loaded')
       setIsGDriveEnabled(false)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -58,7 +57,6 @@ export function useGDrivePicker({setIsGDriveEnabled, onFilesPicked}) {
 
   const openPicker = useCallback(() => {
     if (!gdriveInitComplete()) {
-      console.log('gdriveInitComplete not complete')
       return
     }
 
