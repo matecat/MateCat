@@ -27,7 +27,7 @@ RewriteRule ^ - [E=CONTEXT_PREVIEW:1]
 
 # Route all through the router
 RewriteRule ^$ router.php [QSA,L]
-RewriteRule !.(css|fonts|gif|jpe?g?|png|ico|js|svg|woff|ttf|map)$ router.php [QSA,L]
+RewriteRule !.(css|fonts|gif|jpe?g?|png|ico|js|svg|woff|ttf|map|json)$ router.php [QSA,L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor
