@@ -101,7 +101,6 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
     try {
       ast = parse(text)
     } catch (err) {
-      console.error('Error parsing ICU:', err.message)
       return {hasPlural: false, hasSelectOrdinal: false}
     }
 

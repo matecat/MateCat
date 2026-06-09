@@ -8,6 +8,8 @@ import userMock from '../../mocks/userMock'
 import React from 'react'
 import {QualityReport} from './QualityReport'
 
+jest.mock('../sse/SocketListener', () => () => null)
+
 jest.setTimeout(30000)
 global.config = {
   basepath: 'http://localhost/',

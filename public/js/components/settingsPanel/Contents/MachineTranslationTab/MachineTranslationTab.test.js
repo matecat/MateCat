@@ -31,6 +31,11 @@ beforeEach(() => {
       return HttpResponse.json()
     }),
   )
+  mswServer.use(
+    http.post(`${config.basepath}api/app/disable-engine`, () => {
+      return HttpResponse.json({})
+    }),
+  )
 })
 afterEach(() => jest.clearAllMocks())
 

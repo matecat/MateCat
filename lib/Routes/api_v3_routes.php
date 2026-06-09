@@ -88,7 +88,7 @@ $klein->with('/api/v3/mmt/[i:engineId]', function () {
     route('/import-status/[:uuid]', 'GET', ['\Controller\API\V3\ModernMTController', 'importStatus']);
     route('/memory/create', 'POST', ['\Controller\API\V3\ModernMTController', 'createMemory']);
     route('/memory/update/[:memoryId]', 'POST', ['\Controller\API\V3\ModernMTController', 'updateMemory']);
-    route('/memory/delete/[:memoryId]', 'GET', ['\Controller\API\V3\ModernMTController', 'deleteMemory']);
+    route('/memory/delete/[:memoryId]', 'DELETE', ['\Controller\API\V3\ModernMTController', 'deleteMemory']);
 
     route('/glossary/create-memory-and-import', 'POST', ['\Controller\API\V3\ModernMTController', 'createMemoryAndImportGlossary']);
     route('/glossary/import-status/[:uuid]', 'GET', ['\Controller\API\V3\ModernMTController', 'importStatus']);
@@ -135,10 +135,11 @@ $klein->with('/api/v3/filters-config-template', function () {
 });
 
 // CONTEXT URL
-$klein->with('/api/v3/context-url/[i:id_project]/[:password]', function () {
-    route('/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
-    route('/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
-    route('/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);
+$klein->with('/api/v3/context-url', function () {
+    route('/schema', 'GET', ['Controller\API\App\ContextUrlSchemaController', 'schema']);
+    route('/[i:id_project]/[:password]/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
+    route('/[i:id_project]/[:password]/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
+    route('/[i:id_project]/[:password]/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);
 });
 
 /**
