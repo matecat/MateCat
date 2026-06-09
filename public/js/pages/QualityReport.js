@@ -49,6 +49,7 @@ export const QualityReport = () => {
   const [lastSegment, setLastSegment] = useState()
   const [jobInfo, setJobInfo] = useState()
   const [moreSegments, setMoreSegments] = useState(true)
+  const [loadingMoreSegments, setLoadingMoreSegments] = useState(false)
   const [revisionToShow, setRevisionToShow] = useState(() =>
     getReviseUrlParameter(),
   )
@@ -71,7 +72,8 @@ export const QualityReport = () => {
       setSegmentsFiles(segmentsFiles)
       setFiles(files)
       setLastSegment(lastSegment)
-      setMoreSegments(true)
+      setMoreSegments(!!lastSegment)
+      setLoadingMoreSegments(false)
     }
     const renderJobInfo = (jobInfo) => {
       setJobInfo(jobInfo)
@@ -81,7 +83,11 @@ export const QualityReport = () => {
         }),
       )
     }
-    const noMoreSegments = () => setMoreSegments(false)
+    const noMoreSegments = () => {
+      setMoreSegments(false)
+      setLoadingMoreSegments(false)
+    }
+    const loadingMoreSegments = () => setLoadingMoreSegments(true)
 
     QualityReportStore.addListener(
       QualityReportConstants.RENDER_SEGMENTS_QR,
@@ -94,6 +100,10 @@ export const QualityReport = () => {
     QualityReportStore.addListener(
       QualityReportConstants.NO_MORE_SEGMENTS,
       noMoreSegments,
+    )
+    QualityReportStore.addListener(
+      QualityReportConstants.LOADING_MORE_SEGMENTS,
+      loadingMoreSegments,
     )
 
     return () => {
@@ -108,6 +118,10 @@ export const QualityReport = () => {
       QualityReportStore.removeListener(
         QualityReportConstants.NO_MORE_SEGMENTS,
         noMoreSegments,
+      )
+      QualityReportStore.removeListener(
+        QualityReportConstants.LOADING_MORE_SEGMENTS,
+        loadingMoreSegments,
       )
     }
   }, [])
@@ -206,6 +220,7 @@ export const QualityReport = () => {
                   urls={jobInfo.get('urls')}
                   categories={qualitySummary.get('categories')}
                   moreSegments={moreSegments}
+                  loadingMoreSegments={loadingMoreSegments}
                   secondPassReviewEnabled={secondPassReviewEnabled}
                 />
               </div>

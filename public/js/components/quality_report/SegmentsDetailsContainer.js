@@ -97,10 +97,7 @@ function SegmentsDetails(props) {
           getFiles()
         )}
 
-        {props.moreSegments &&
-        props.files &&
-        props.files.size !== 0 &&
-        totalSegments >= 20 ? (
+        {props.loadingMoreSegments ? (
           <div className="ui one column grid">
             <div className="one column spinner" style={{height: '100px'}}>
               <SpinnerLoader

@@ -6,4 +6,5 @@ export default keyMirror({
   ADD_SEGMENTS_QR: null,
   RENDER_REPORT: null,
   NO_MORE_SEGMENTS: null,
+  LOADING_MORE_SEGMENTS: null,
 })
