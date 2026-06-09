@@ -193,6 +193,7 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
         window.onload = () => {
           window.ui = SwaggerUIBundle({
+            spec: location.host,
             url: '/public/api/swagger-source.json',
             dom_id: '#swagger-ui-container',
             supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
