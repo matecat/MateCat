@@ -5,7 +5,6 @@
     "description": "<p>We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.</p>\n      <h2>How to authenticate</h2>\n      <div class=\"opblock opblock-get\">\n        <div class=\"opblock-summary opblock-summary-get\">\n            In order to authenticate, add the x-matecat-key header to the API call and populate it with your complete API credentials in this format: <code>{APIkey}-{APIsecret}</code>\n        </div>\n      </div>\n      ",
     "version": "3.0.0"
   },
-  "host": "dev.matecat.com",
   "schemes": [
     "https"
   ],
