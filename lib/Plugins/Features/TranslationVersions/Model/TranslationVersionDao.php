@@ -250,9 +250,10 @@ class TranslationVersionDao extends AbstractDao
     }
 
     /**
-     * @param array<int> $segments_id
+     * @param array<int|string> $segments_id
      * @param int $job_id
      * @return array<HistoryElementStruct>
+     * @throws PDOException
      */
     public function historyEvents(array $segments_id, int $job_id): array
     {

@@ -237,7 +237,7 @@ class QualityReportSegmentModel
             $this->_assignIssues($seg, $issues, $issue_comments);
             $this->_assignComments($seg, $comments);
             $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
-            $this->_populateHistory($seg, $Filter, $history_events,$issues ?? [], $isForUI);
+            $this->_populateHistory($seg, $Filter, $history_events, $issues, $isForUI);
 
             $seg->pee_translation_revise = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
@@ -253,9 +253,11 @@ class QualityReportSegmentModel
      *
      * @param QualityReportSegmentStruct $seg The segment structure where the history will be populated.
      * @param MateCatFilter $Filter The filter used to process translations for UI rendering.
-     * @param array $events An array of SegmentEventsStruct objects representing the events related to the segment.
-     * @param array $issues An array of issue objects to associate with the events, filtered by segment and version.
+     * @param HistoryElementStruct[] $events An array of SegmentEventsStruct objects representing the events related to the segment.
+     * @param ShapelessConcreteStruct[] $issues An array of issue objects to associate with the events, filtered by segment and version.
      * @param bool $isForUI Indicates whether the translation should be processed for UI display purposes.
+     *
+     * @throws Exception
      *
      * @return void
      */
@@ -265,7 +267,7 @@ class QualityReportSegmentModel
         array $events = [],
         array $issues = [],
         bool $isForUI = false
-    )
+    ): void
     {
         $elements = [];
 
