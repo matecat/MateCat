@@ -783,7 +783,7 @@ class SegmentExtractor
             $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
             $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
         } catch (Exception $exception) {
-            throw new Exception($exception->getMessage(), ProjectCreationError::NO_TRANSLATABLE_TEXT->value, $exception);
+            $projectStructure->addError($exception->getCode(), $exception->getMessage());
         }
     }
 
