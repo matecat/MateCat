@@ -929,6 +929,7 @@ class SegmentDao extends AbstractDao
                 j.source,
                 j.target,
                 s.segment,
+                s.raw_word_count,
                 st.translation,
                 st.status,
                 s.raw_word_count,
@@ -1026,6 +1027,7 @@ class SegmentDao extends AbstractDao
                 j.source,
                 j.target,
                 s.segment,
+                s.raw_word_count
                 st.translation,
                 st.status,
                 s.raw_word_count,
