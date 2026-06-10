@@ -14,7 +14,7 @@ header {
   text-align: left;
   width: 100%;
   position: fixed;
-  z-index: 999999999;
+  z-index: var(--z-sticky);
   /*border-bottom: 1px solid #5F5F5F;
     padding: 4px 0 5px 0;*/
   height: 77px; /* was 38px for previous header*/
@@ -455,7 +455,7 @@ td[data-vote='Fail'] {
   position: relative;
   color: black;
   font-size: 24px;
-  z-index: 100000000;
+  z-index: var(--z-overlay);
   font-weight: bold;
   text-align: center;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
@@ -478,7 +478,7 @@ td[data-vote='Fail'] {
   font-weight: bold;
   text-shadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
   padding: 50px 5px 10px;
-  z-index: 100000000;
+  z-index: var(--z-overlay);
   border-radius: 4px;
   border: 1px solid colors.$grey100;
   box-shadow: 1px 1px 0px colors.$grey100;

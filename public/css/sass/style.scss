@@ -1,3 +1,15 @@
+// ============================================================================
+// FROZEN FILE — DO NOT ADD NEW STYLES HERE
+// ============================================================================
+// This file is legacy quarantine. All new styles belong in:
+//   - Component-level .module.scss files (co-located with the component)
+//   - public/css/sass/tokens/ (design tokens only)
+//   - public/css/sass/components/ (existing component files)
+//
+// Existing code will be extracted incrementally as components are touched.
+// See CSS-ARCHITECTURE.md for the migration guide.
+// ============================================================================
+
 @use 'commons/colors';
 @use 'commons/variables';
 body {
@@ -2004,7 +2016,7 @@ section.editor .toolbar {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 99999999999999;
+  z-index: var(--z-overlay);
 }
 
 .reConnection {
@@ -2019,7 +2031,7 @@ section.editor .toolbar {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 99999999999999;
+  z-index: var(--z-overlay);
 }
 
 @keyframes fadeout {

@@ -4,7 +4,7 @@
   right: 0px;
   height: auto;
   min-height: 21px;
-  z-index: 2147483647;
+  z-index: var(--z-tooltip);
   background: rgb(0, 0, 0);
   color: rgb(221, 221, 221);
   line-height: 21px;

@@ -1,0 +1,30 @@
+// ============================================================================
+// Design Tokens — Z-Index
+// ============================================================================
+// Named stacking context scale. Use ONLY these values in new code.
+// Raw z-index numbers are banned — use var(--z-*) or the SCSS $z-* aliases.
+//
+// Scale rationale:
+//   - 7 tiers cover all UI needs without collisions
+//   - Gaps between tiers allow inserting sub-layers if needed
+//   - Maximum value is 60 — browsers handle this fine, no need for millions
+// ============================================================================
+
+:root {
+  --z-content: 1;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 60;
+}
+
+// SCSS aliases for use in legacy code
+$z-content: 1;
+$z-dropdown: 10;
+$z-sticky: 20;
+$z-overlay: 30;
+$z-modal: 40;
+$z-toast: 50;
+$z-tooltip: 60;
