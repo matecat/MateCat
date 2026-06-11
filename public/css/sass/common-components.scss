@@ -2,15 +2,10 @@
 @use 'components/common/Dropdown';
 @use 'components/common/CookieConsent';
 @use 'components/common/Switch';
-@use 'components/common/Tooltip';
-@use 'components/common/Button';
 @use 'components/common/Popover';
 @use 'components/common/UserDisconnectedBox';
 @use 'components/common/UserMenu';
 @use 'components/common/Input';
-@use 'components/common/EmailsBadge';
-@use 'components/common/DropdownMenu';
-@use 'components/common/LabelWithTooltip';
 @use 'components/common/Checkbox';
 @use 'components/common/NumericStepper';
 @use 'components/common/SegmentedControl';
@@ -19,4 +14,3 @@
 @use 'components/common/OnBoardingTooltip';
 @use 'components/common/ProgressBar';
 @use 'components/common/Badge';
-@use 'components/common/SpinnerLoader';

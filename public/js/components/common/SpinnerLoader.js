@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import styles from './SpinnerLoader.module.scss'
 
 export const SPINNER_LOADER_SIZE = {
   SMALL: 'small',
@@ -14,7 +15,7 @@ export const SpinnerLoader = ({
 }) => {
   return (
     <div
-      className={`spinner-loader spinner-loader-size-${size} ${className ? className : ''}`}
+      className={[styles['spinner-loader'], styles[`spinner-loader-size-${size}`], className].filter(Boolean).join(' ')}
     >
       <span>{label ?? 'Loading'}</span>
     </div>

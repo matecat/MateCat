@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {TOOLTIP_POSITION} from '../Tooltip'
+import styles from './Button.module.scss'
 
 const mergeClassNames = (...args) => {
   return (
@@ -79,15 +80,14 @@ export const Button = React.forwardRef(
     },
     ref,
   ) => {
-    const defaultClassName = `button-component-container ${type} ${mode} ${size}`
-    const fullWidthClassName = fullWidth ? 'fullWidth' : ''
-    const activeClassName = active ? 'button--active' : ''
-    const waitingClassName = waiting ? 'waiting' : ''
     const buttonClassName = mergeClassNames(
-      defaultClassName,
-      fullWidthClassName,
-      activeClassName,
-      waitingClassName,
+      styles['button-component-container'],
+      styles[type],
+      styles[mode],
+      typeof size === 'string' ? styles[size] : null,
+      fullWidth && styles.fullWidth,
+      active && styles['button--active'],
+      waiting && styles.waiting,
       className,
     )
     const style = {}

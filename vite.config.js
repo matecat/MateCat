@@ -271,6 +271,7 @@ export default defineConfig(({mode, command}) => {
     preprocessorOptions: {
       scss: {
         quietDeps: true,
+        loadPaths: [resolve('public/css/sass')],
       },
     },
   },
