@@ -4,10 +4,12 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use DivisionByZeroError;
 use Exception;
 use Klein\Response;
 use Model\Filters\FiltersConfigTemplateDao;
 use PDOException;
+use TypeError;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
@@ -19,24 +21,37 @@ class FiltersConfigTemplateController extends KleinController
 {
     private ?FiltersConfigTemplateDao $filtersConfigTemplateDao = null;
 
-    private function getFiltersConfigTemplateDao(): FiltersConfigTemplateDao
+    protected function getFiltersConfigTemplateDao(): FiltersConfigTemplateDao
     {
         return $this->filtersConfigTemplateDao ??= new FiltersConfigTemplateDao();
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
-     * @param $json
+     * @throws Exception
+     */
+    private function getUserId(): int
+    {
+        $uid = $this->getUser()->uid;
+        if ($uid === null) {
+            throw new Exception('User not authenticated', 401);
+        }
+
+        return $uid;
+    }
+
+    /**
+     * @param string $json
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws Exception
      */
-    private function validateJSON($json): void
+    private function validateJSON(string $json): void
     {
         $validatorObject = new JSONValidatorObject($json);
         $validator = new JSONValidator('filters_extraction_parameters.json', true);
@@ -45,6 +60,9 @@ class FiltersConfigTemplateController extends KleinController
 
     /**
      * Get all entries
+     *
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     public function all(): Response
     {
@@ -56,7 +74,7 @@ class FiltersConfigTemplateController extends KleinController
                 $pagination = 200;
             }
 
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUserId();
 
             $this->response->status()->setCode(200);
 
@@ -73,13 +91,15 @@ class FiltersConfigTemplateController extends KleinController
 
     /**
      * Get a single entry
+     *
+     * @throws TypeError
      */
     public function get(): Response
     {
         try {
             $id = (int)$this->request->param('id');
 
-            $model = $this->getFiltersConfigTemplateDao()->getByIdAndUser($id, $this->getUser()->uid);
+            $model = $this->getFiltersConfigTemplateDao()->getByIdAndUser($id, $this->getUserId());
 
             if (empty($model)) {
                 throw new Exception('Model not found', 404);
@@ -102,6 +122,7 @@ class FiltersConfigTemplateController extends KleinController
      * Create new entry
      *
      * @return Response
+     * @throws TypeError
      */
     public function create(): Response
     {
@@ -113,8 +134,11 @@ class FiltersConfigTemplateController extends KleinController
             }
 
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Missing request body', 400);
+            }
             $this->validateJSON($json);
-            $struct = $this->getFiltersConfigTemplateDao()->createFromJSON($json, $this->getUser()->uid);
+            $struct = $this->getFiltersConfigTemplateDao()->createFromJSON($json, $this->getUserId());
 
             $this->response->code(201);
 
@@ -156,6 +180,7 @@ class FiltersConfigTemplateController extends KleinController
      *
      * @return Response
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): Response
     {
@@ -166,7 +191,7 @@ class FiltersConfigTemplateController extends KleinController
             }
 
             $id = (int)$this->request->param('id');
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUserId();
 
 
             $model = $this->getFiltersConfigTemplateDao()->getByIdAndUser($id, $uid);
@@ -176,6 +201,9 @@ class FiltersConfigTemplateController extends KleinController
             }
 
             $json = $this->request->body();
+            if ($json === null) {
+                throw new Exception('Missing request body', 400);
+            }
             $this->validateJSON($json);
 
             $struct = $this->getFiltersConfigTemplateDao()->editFromJSON($model, $json, $uid);
@@ -209,7 +237,7 @@ class FiltersConfigTemplateController extends KleinController
     {
         try {
             $id = (int)$this->request->paramsNamed()->get('id');
-            $uid = $this->getUser()->uid;
+            $uid = $this->getUserId();
 
             $count = $this->getFiltersConfigTemplateDao()->remove($id, $uid);
 
@@ -243,6 +271,8 @@ class FiltersConfigTemplateController extends KleinController
      */
     private function getModelSchema(): object
     {
-        return json_decode(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json'));
+        $schema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json') ?: '';
+
+        return json_decode($schema);
     }
 }
