@@ -10,12 +10,22 @@ use Utils\Engines\DeepL;
 use Utils\Engines\DeepL\DeepLApiException;
 use Utils\Engines\EnginesFactory;
 use Utils\Files\CSV as CSVParser;
+use TypeError;
 
 class DeepLGlossaryController extends KleinController
 {
-    protected function afterConstruct(): void
+    protected Upload $upload;
+
+    /**
+     * @throws Exception
+     */
+    protected function initDependencies(): void
     {
-        parent::afterConstruct();
+        $this->upload = new Upload();
+    }
+
+    protected function registerValidators(): void
+    {
         $this->appendValidator(new LoginValidator($this));
     }
 
@@ -23,14 +33,11 @@ class DeepLGlossaryController extends KleinController
      * Get all glossaries
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function all(): void
     {
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $deepLClient = $this->getDeepLClient($engineId);
-
-        $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
-        $deepLClient->setApiKey($deepLApiKey);
+        $deepLClient = $this->getDeepLClient((int)$this->request->param('engineId'));
 
         $this->response->status()->setCode(200);
         $this->response->json($deepLClient->glossaries());
@@ -50,6 +57,7 @@ class DeepLGlossaryController extends KleinController
      * }
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -57,17 +65,19 @@ class DeepLGlossaryController extends KleinController
 
         $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
 
-        $uploadManager = new Upload();
-        $uploadedFiles = $uploadManager->uploadFiles($this->request->files()->all());
+        $uploadedFiles = $this->upload->uploadFiles($this->request->files()->all());
 
         $glossary = CSVParser::extract($uploadedFiles->glossary, "DEEPL_EXCEL_GLOSS_");
+        if ($glossary === false) {
+            throw new Exception("Unable to read the uploaded glossary file", 400);
+        }
 
         // validate
         $allCSV = CSVParser::parseToArray($glossary);
         $csvHeaders = array_shift($allCSV);
         $csv = $allCSV;
 
-        if (count($csvHeaders) !== 2) {
+        if (!is_array($csvHeaders) || count($csvHeaders) !== 2) {
             throw new Exception("Glossary has more or less than 2 columns. Only bilingual files are supported", 400);
         }
 
@@ -83,11 +93,7 @@ class DeepLGlossaryController extends KleinController
             "entries_format" => "csv",
         ];
 
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $deepLClient = $this->getDeepLClient($engineId);
-
-        $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
-        $deepLClient->setApiKey($deepLApiKey);
+        $deepLClient = $this->getDeepLClient((int)$this->request->param('engineId'));
 
         $this->response->status()->setCode(200);
         $this->response->json($deepLClient->createGlossary($data));
@@ -111,15 +117,12 @@ class DeepLGlossaryController extends KleinController
      * Delete a single glossary item
      * @throws DeepLApiException
      * @throws Exception
+     * @throws TypeError
      */
     public function delete(): void
     {
-        $id = filter_var($this->request->id, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $deepLClient = $this->getDeepLClient($engineId);
-
-        $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
-        $deepLClient->setApiKey($deepLApiKey);
+        $id = (string)filter_var($this->request->param('id'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW);
+        $deepLClient = $this->getDeepLClient((int)$this->request->param('engineId'));
 
         $this->response->status()->setCode(200);
         $deepLClient->deleteGlossary($id);
@@ -131,15 +134,12 @@ class DeepLGlossaryController extends KleinController
     /**
      * Get a single glossary item
      * @throws Exception
+     * @throws TypeError
      */
     public function get(): void
     {
-        $id = filter_var($this->request->id, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $deepLClient = $this->getDeepLClient($engineId);
-
-        $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
-        $deepLClient->setApiKey($deepLApiKey);
+        $id = (string)filter_var($this->request->param('id'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW);
+        $deepLClient = $this->getDeepLClient((int)$this->request->param('engineId'));
 
         $this->response->status()->setCode(200);
         $this->response->json($deepLClient->getGlossary($id));
@@ -148,34 +148,37 @@ class DeepLGlossaryController extends KleinController
     /**
      * Get a single glossary item entries
      * @throws Exception
+     * @throws TypeError
      */
     public function getEntries(): void
     {
-        $id = filter_var($this->request->id, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW);
-        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $deepLClient = $this->getDeepLClient($engineId);
-
-        $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
-        $deepLClient->setApiKey($deepLApiKey);
+        $id = (string)filter_var($this->request->param('id'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW);
+        $deepLClient = $this->getDeepLClient((int)$this->request->param('engineId'));
 
         $this->response->status()->setCode(200);
         $this->response->json($deepLClient->getGlossaryEntries($id));
     }
 
     /**
-     * @param $engineId
+     * Resolve the DeepL engine for the current user and configure its API key.
+     *
+     * @param int $engineId
      *
      * @return DeepL
      * @throws Exception
      */
-    private function getDeepLClient($engineId): DeepL
+    protected function getDeepLClient(int $engineId): DeepL
     {
-        $engine = EnginesFactory::getInstanceByIdAndUser($engineId, $this->user->uid, DeepL::class);
-        $extraParams = $engine->getEngineRecord()->extra_parameters;
+        $uid = $this->user->uid ?? throw new Exception('User not authenticated', 401);
 
-        if (!isset($extraParams['DeepL-Auth-Key'])) {
+        $engine = EnginesFactory::getInstanceByIdAndUser($engineId, $uid, DeepL::class);
+        $extraParams = $engine->getEngineRecord()->getExtraParamsAsArray();
+
+        if (!is_array($extraParams) || !isset($extraParams['DeepL-Auth-Key'])) {
             throw new Exception('`DeepL-Auth-Key` is not set');
         }
+
+        $engine->setApiKey((string)$extraParams['DeepL-Auth-Key']);
 
         return $engine;
     }
