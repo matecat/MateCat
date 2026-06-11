@@ -55,7 +55,7 @@
     }
   }
 
-  .button-component-container:disabled {
+  button:disabled {
     color: colors.$grey400 !important;
   }
 }

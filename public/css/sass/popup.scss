@@ -15,7 +15,7 @@
     position: fixed;
     left: 46%;
     max-width: 400px;
-    z-index: 999999999;
+    z-index: var(--z-toast);
   }
 
   .popup p.text-container-top {

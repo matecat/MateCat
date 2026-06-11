@@ -27,3 +27,6 @@
 [submodule "plugins/vite"]
 	path = plugins/vite
 	url = git@github.com:matecat/vite_plugin.git
+[submodule "MateCat-docs"]
+	path = MateCat-docs
+	url = git@github.com:matecat/MateCat-docs.git
