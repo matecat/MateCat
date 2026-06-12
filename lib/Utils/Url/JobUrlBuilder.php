@@ -2,6 +2,7 @@
 
 namespace Utils\Url;
 
+use Exception;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -26,6 +27,7 @@ class JobUrlBuilder
      *
      * @return JobUrls
      * @throws \PDOException
+     * @throws Exception
      */
     public static function createFromJobStructAndProjectName(JobStruct $job, string $projectName, array $options = []): JobUrls
     {
@@ -38,7 +40,7 @@ class JobUrlBuilder
         ];
 
         foreach ($sourcePages as $label => $sourcePage) {
-            $passwords[$label] = CatUtils::getJobPassword($job, $sourcePage);
+            $passwords[$label] = (new CatUtils())->getJobPassword($job, $sourcePage);
         }
 
         // 4. httpHost
