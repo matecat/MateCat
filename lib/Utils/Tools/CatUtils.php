@@ -59,6 +59,36 @@ class CatUtils
     /** @var array<string, float> */
     public static array $cj = ['zh' => 1.8, 'ja' => 2.5];
 
+    private ChunkReviewDao $chunkReviewDao;
+    private JobDao $jobDao;
+    private SegmentTranslationDao $segmentTranslationDao;
+    private FeatureSet $featureSet;
+    /** @var array<string, mixed> */
+    private array $server;
+
+    /**
+     * @param ChunkReviewDao|null $chunkReviewDao
+     * @param JobDao|null $jobDao
+     * @param SegmentTranslationDao|null $segmentTranslationDao
+     * @param FeatureSet|null $featureSet
+     * @param array<string, mixed>|null $server
+     *
+     * @throws Exception
+     */
+    public function __construct(
+        ?ChunkReviewDao $chunkReviewDao = null,
+        ?JobDao $jobDao = null,
+        ?SegmentTranslationDao $segmentTranslationDao = null,
+        ?FeatureSet $featureSet = null,
+        ?array $server = null
+    ) {
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
+        $this->jobDao = $jobDao ?? new JobDao();
+        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
+        $this->featureSet = $featureSet ?? new FeatureSet();
+        $this->server = $server ?? $_SERVER;
+    }
+
     /**
      * @param string $langCode
      *
@@ -144,7 +174,7 @@ class CatUtils
      * @return array{string, list<int>} Returns [$reconstructed_segment, $chunk_positions] where chunk_positions is an array of cumulative character lengths
      * @throws Exception
      */
-    public static function parseSegmentSplit(string $segment, string $separateWithChar, MateCatFilter $Filter): array
+    public function parseSegmentSplit(string $segment, string $separateWithChar, MateCatFilter $Filter): array
     {
         // Split the segment by the placeholder marker (e.g., "text1##$_SPLIT$##text2" -> ["text1", "text2"])
         $split_chunks = explode(self::splitPlaceHolder, $segment);
@@ -223,9 +253,9 @@ class CatUtils
      * @return void
      * @throws Exception
      */
-    public static function addSegmentTranslation(SegmentTranslationStruct $translation, bool $is_revision): void
+    public function addSegmentTranslation(SegmentTranslationStruct $translation, bool $is_revision): void
     {
-        (new SegmentTranslationDao())->addTranslation($translation, $is_revision);
+        $this->segmentTranslationDao->addTranslation($translation, $is_revision);
     }
 
     /**
@@ -238,15 +268,14 @@ class CatUtils
      * @throws PDOException
      * @throws DivisionByZeroError
      */
-    protected static function _performanceEstimationTime(array $job_stats, int $id_job): array
+    protected function _performanceEstimationTime(array $job_stats, int $id_job): array
     {
-        $segmentTranslationDao = new SegmentTranslationDao();
-        $last_10_worked_ids = $segmentTranslationDao->getLast10TranslatedSegmentIDsInLastHour($id_job);
+        $last_10_worked_ids = $this->segmentTranslationDao->getLast10TranslatedSegmentIDsInLastHour($id_job);
         if (!empty($last_10_worked_ids) and count($last_10_worked_ids) === 10) {
             // Calculating words per hour and estimated completion
             /** @var list<int> $last10WorkedIds */
             $last10WorkedIds = array_values(array_map('intval', $last_10_worked_ids));
-            $estimation_temp = $segmentTranslationDao->getWordsPerSecond($id_job, $last10WorkedIds);
+            $estimation_temp = $this->segmentTranslationDao->getWordsPerSecond($id_job, $last10WorkedIds);
             $words_per_second = (!empty($estimation_temp[0]['words_per_second']) ? $estimation_temp[0]['words_per_second'] : 1); // avoid division by zero
 
             $totalWordsToDo = $job_stats['raw']['new'] + $job_stats['raw']['draft'] + ($job_stats['raw']['rejected'] ?? 0);
@@ -277,14 +306,14 @@ class CatUtils
      * @throws PDOException
      * @throws DivisionByZeroError
      */
-    public static function getFastStatsForJob(WordCountStruct $wCount, bool $performanceEstimation = true): array
+    public function getFastStatsForJob(WordCountStruct $wCount, bool $performanceEstimation = true): array
     {
         $job_stats = $wCount->jsonSerialize();
         if (!$performanceEstimation) {
             return $job_stats;
         }
 
-        return self::_performanceEstimationTime($job_stats, $wCount->getIdJob());
+        return $this->_performanceEstimationTime($job_stats, $wCount->getIdJob());
     }
 
     /**
@@ -297,7 +326,7 @@ class CatUtils
      * @return string
      * @throws Exception
      */
-    public static function clean_raw_string_4_word_count(string $string, string $source_lang = 'en-US', MateCatFilter $Filter = null): string
+    public function clean_raw_string_4_word_count(string $string, string $source_lang = 'en-US', MateCatFilter $Filter = null): string
     {
         //return empty on string composed only by spaces
         //do nothing
@@ -309,7 +338,7 @@ class CatUtils
         $source_lang_two_letter = explode("-", $source_lang)[0];
 
         if ($Filter === null) {
-            $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang);
+            $Filter = MateCatFilter::getInstance($this->featureSet, $source_lang);
         }
 
         /**
@@ -439,7 +468,26 @@ class CatUtils
      * @return int
      * @throws Exception
      */
+    /**
+     * @deprecated retained for plugins/aligner submodule; remove when aligner migrates
+     * @throws Exception
+     */
     public static function segment_raw_word_count(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
+    {
+        return (new self())->countSegmentWords($string, $source_lang, $filter);
+    }
+
+    /**
+     * Count words in a string (instance implementation)
+     *
+     * @param string|null $string
+     * @param string $source_lang
+     * @param MateCatFilter|null $filter
+     *
+     * @return int
+     * @throws Exception
+     */
+    public function countSegmentWords(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
     {
         if ($string === null || $string === '' || trim($string) === '') {
             return 0;
@@ -448,7 +496,7 @@ class CatUtils
         //first two letter of code lang
         $source_lang_two_letter = explode("-", $source_lang)[0];
 
-        $string = self::clean_raw_string_4_word_count($string, $source_lang, $filter);
+        $string = $this->clean_raw_string_4_word_count($string, $source_lang, $filter);
 
         if (array_key_exists($source_lang_two_letter, self::$cjk)) {
             $res = mb_strlen($string, 'UTF-8');
@@ -615,14 +663,14 @@ class CatUtils
      * @throws Exception
      * @throws TypeError
      */
-    public static function getWStructFromJobArray(JobStruct $job, ProjectStruct $projectStruct): WordCountStruct
+    public function getWStructFromJobArray(JobStruct $job, ProjectStruct $projectStruct, ?CounterModel $counter = null): WordCountStruct
     {
         $wStruct = WordCountStruct::loadFromJob($job);
 
         // For projects created with No tm analysis enabled
         if ($wStruct->getTotal() == 0 && ($projectStruct['status_analysis'] == ProjectStatus::STATUS_DONE || $projectStruct['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
-            $wCounter = new CounterModel();
-            $wStruct = $wCounter->initializeJobWordCount($job['id'], $job['password']);
+            $counter ??= new CounterModel();
+            $wStruct = $counter->initializeJobWordCount($job['id'], $job['password']);
             LoggerFactory::doJsonLog("BackWard compatibility set Counter.");
 
             return $wStruct;
@@ -642,9 +690,9 @@ class CatUtils
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function getQualityOverallFromJobStruct(JobStruct $job, array $chunkReviews = []): ?string
+    public function getQualityOverallFromJobStruct(JobStruct $job, array $chunkReviews = []): ?string
     {
-        $values = self::getChunkReviewStructFromJobStruct($job, $chunkReviews);
+        $values = $this->getChunkReviewStructFromJobStruct($job, $chunkReviews);
 
         if (!isset($values)) {
             return null;
@@ -671,9 +719,9 @@ class CatUtils
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function getChunkReviewStructFromJobStruct(JobStruct $job, array $chunkReviews = []): ?ChunkReviewStruct
+    public function getChunkReviewStructFromJobStruct(JobStruct $job, array $chunkReviews = []): ?ChunkReviewStruct
     {
-        return (!empty($chunkReviews)) ? $chunkReviews[0] : (new ChunkReviewDao())->findChunkReviews($job)[0] ?? null;
+        return (!empty($chunkReviews)) ? $chunkReviews[0] : $this->chunkReviewDao->findChunkReviews($job)[0] ?? null;
     }
 
     /**
@@ -731,12 +779,12 @@ class CatUtils
      *
      * @return bool
      */
-    public static function isRevisionFromIdJobAndPassword(int $jid, string $password): bool
+    public function isRevisionFromIdJobAndPassword(int $jid, string $password, ?IsJobRevisionValidator $validator = null): bool
     {
-        $jobValidator = new IsJobRevisionValidator();
+        $validator ??= new IsJobRevisionValidator();
 
         try {
-            return $jobValidator->validate(
+            return $validator->validate(
                     ValidatorObject::fromArray(
                         [
                             'jid' => $jid,
@@ -752,13 +800,13 @@ class CatUtils
     /**
      * @return bool
      */
-    public static function getIsRevisionFromRequestUri(): bool
+    public function getIsRevisionFromRequestUri(): bool
     {
-        if (!isset($_SERVER['REQUEST_URI'])) {
+        if (!isset($this->server['REQUEST_URI'])) {
             return false;
         }
 
-        $_from_url = parse_url($_SERVER['REQUEST_URI']);
+        $_from_url = parse_url($this->server['REQUEST_URI']);
 
         if ($_from_url === false || !isset($_from_url['path'])) {
             return false;
@@ -775,15 +823,15 @@ class CatUtils
      *
      * @return bool Returns `true` if the referer path is a "revise" path, otherwise `false`.
      */
-    public static function getIsRevisionFromReferer(): bool
+    public function getIsRevisionFromReferer(): bool
     {
         // Check if the HTTP_REFERER server variable is set
-        if (!isset($_SERVER['HTTP_REFERER'])) {
+        if (!isset($this->server['HTTP_REFERER'])) {
             return false;
         }
 
         // Parse the referer URL to extract its components
-        $_from_url = parse_url($_SERVER['HTTP_REFERER']);
+        $_from_url = parse_url($this->server['HTTP_REFERER']);
 
         if ($_from_url === false || !isset($_from_url['path'])) {
             return false;
@@ -813,12 +861,12 @@ class CatUtils
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function getJobFromIdAndAnyPassword(int $jobId, string $jobPassword): ?JobStruct
+    public function getJobFromIdAndAnyPassword(int $jobId, string $jobPassword): ?JobStruct
     {
-        $job = (new JobDao())->getByIdAndPassword($jobId, $jobPassword);
+        $job = $this->jobDao->getByIdAndPassword($jobId, $jobPassword);
 
         if (!$job) {
-            $chunkReview = (new ChunkReviewDao())->findByReviewPasswordAndJobId($jobPassword, $jobId);
+            $chunkReview = $this->chunkReviewDao->findByReviewPasswordAndJobId($jobPassword, $jobId);
             $job = $chunkReview?->getChunk();
         }
 
@@ -839,7 +887,7 @@ class CatUtils
      * @return string|null
      * @throws PDOException
      */
-    public static function getJobPassword(JobStruct $job, int $sourcePage = 1): ?string
+    public function getJobPassword(JobStruct $job, int $sourcePage = 1): ?string
     {
         if ($sourcePage <= 1) {
             return $job->password;
@@ -849,7 +897,7 @@ class CatUtils
             return null;
         }
 
-        $qa = (new ChunkReviewDao())->findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
+        $qa = $this->chunkReviewDao->findByIdJobAndPasswordAndSourcePage($job->id, $job->password, $sourcePage);
 
         return $qa?->review_password;
     }
@@ -874,7 +922,7 @@ class CatUtils
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function getSegmentTranslationsCount(ProjectStruct $projectStruct): ?int
+    public function getSegmentTranslationsCount(ProjectStruct $projectStruct): ?int
     {
         $idJobs = [];
 
@@ -886,7 +934,7 @@ class CatUtils
         /** @var array<int, int> $idJobs */
         $idJobs = array_values(array_filter($idJobs, fn ($value) => $value !== null));
 
-        return (new JobDao())->getSegmentTranslationsCount($idJobs);
+        return $this->jobDao->getSegmentTranslationsCount($idJobs);
     }
 
     /**
@@ -918,12 +966,13 @@ class CatUtils
      * @throws Exception
      * @throws TypeError
      */
-    public static function deleteSha(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0): void
+    public function deleteSha(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0, ?FiltersConfigTemplateDao $filtersDao = null): void
     {
         $extraction_parameters = null;
 
         if ($filtersTemplateId > 0) {
-            $filtersTemplateStruct = (new FiltersConfigTemplateDao())->getById($filtersTemplateId);
+            $filtersDao ??= new FiltersConfigTemplateDao();
+            $filtersTemplateStruct = $filtersDao->getById($filtersTemplateId);
 
             if ($filtersTemplateStruct !== null) {
                 $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);
@@ -1071,6 +1120,130 @@ class CatUtils
         }
 
         return $params;
+    }
+
+    // =========================================================================
+    // Backward-compat static shims — call (new CatUtils())->method() instead
+    // =========================================================================
+
+    /**
+     * @deprecated use (new CatUtils())->addSegmentTranslation()
+     * @throws Exception
+     */
+    public static function addSegmentTranslation_static(SegmentTranslationStruct $translation, bool $is_revision): void
+    {
+        (new self())->addSegmentTranslation($translation, $is_revision);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getFastStatsForJob()
+     * @return array<string, mixed>
+     * @throws PDOException
+     * @throws DivisionByZeroError
+     * @throws Exception
+     */
+    public static function getFastStatsForJob_static(WordCountStruct $wCount, bool $performanceEstimation = true): array
+    {
+        return (new self())->getFastStatsForJob($wCount, $performanceEstimation);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getQualityOverallFromJobStruct()
+     * @param array<ChunkReviewStruct> $chunkReviews
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public static function getQualityOverallFromJobStruct_static(JobStruct $job, array $chunkReviews = []): ?string
+    {
+        return (new self())->getQualityOverallFromJobStruct($job, $chunkReviews);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->isRevisionFromIdJobAndPassword()
+     * @throws Exception
+     */
+    public static function isRevisionFromIdJobAndPassword_static(int $jid, string $password): bool
+    {
+        return (new self())->isRevisionFromIdJobAndPassword($jid, $password);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getJobFromIdAndAnyPassword()
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public static function getJobFromIdAndAnyPassword_static(int $jobId, string $jobPassword): ?JobStruct
+    {
+        return (new self())->getJobFromIdAndAnyPassword($jobId, $jobPassword);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getJobPassword()
+     * @throws PDOException
+     * @throws Exception
+     */
+    public static function getJobPassword_static(JobStruct $job, int $sourcePage = 1): ?string
+    {
+        return (new self())->getJobPassword($job, $sourcePage);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getSegmentTranslationsCount()
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public static function getSegmentTranslationsCount_static(ProjectStruct $projectStruct): ?int
+    {
+        return (new self())->getSegmentTranslationsCount($projectStruct);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getWStructFromJobArray()
+     * @throws Exception
+     * @throws TypeError
+     */
+    public static function getWStructFromJobArray_static(JobStruct $job, ProjectStruct $projectStruct): WordCountStruct
+    {
+        return (new self())->getWStructFromJobArray($job, $projectStruct);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->deleteSha()
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    public static function deleteSha_static(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0): void
+    {
+        (new self())->deleteSha($file_path, $source, $segmentationRule, $filtersTemplateId);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->parseSegmentSplit()
+     * @return array{string, list<int>}
+     * @throws Exception
+     */
+    public static function parseSegmentSplit_static(string $segment, string $separateWithChar, MateCatFilter $Filter): array
+    {
+        return (new self())->parseSegmentSplit($segment, $separateWithChar, $Filter);
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getIsRevisionFromRequestUri()
+     * @throws Exception
+     */
+    public static function getIsRevisionFromRequestUri_static(): bool
+    {
+        return (new self())->getIsRevisionFromRequestUri();
+    }
+
+    /**
+     * @deprecated use (new CatUtils())->getIsRevisionFromReferer()
+     * @throws Exception
+     */
+    public static function getIsRevisionFromReferer_static(): bool
+    {
+        return (new self())->getIsRevisionFromReferer();
     }
 
     /**

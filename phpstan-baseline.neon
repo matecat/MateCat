@@ -529,7 +529,7 @@ parameters:
 			path: lib/Controller/API/App/SplitSegmentController.php
 
 		-
-			message: '#^Parameter \#3 \$Filter of static method Utils\\Tools\\CatUtils\:\:parseSegmentSplit\(\) expects Matecat\\SubFiltering\\MateCatFilter, Matecat\\SubFiltering\\AbstractFilter given\.$#'
+			message: '#^Parameter \#3 \$Filter of method Utils\\Tools\\CatUtils\:\:parseSegmentSplit\(\) expects Matecat\\SubFiltering\\MateCatFilter, Matecat\\SubFiltering\\AbstractFilter given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/App/SplitSegmentController.php
