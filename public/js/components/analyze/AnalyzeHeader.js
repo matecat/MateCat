@@ -56,6 +56,38 @@ const AnalyzeHeader = ({data, project}) => {
     })
   }, [project])
 
+  const getProgressBar = useCallback(() => {
+    if (showProgressBarRef.current) {
+      const progress =
+        (data.get('segments_analyzed') / data.get('total_segments')) * 100
+      return (
+        <div className="analysis-create">
+          <ProgressBar
+            total={100}
+            progress={progress}
+            size={PROGRESS_BAR_SIZE.SMALL}
+            showProgress={true}
+            label={
+              <div>
+                Searching for TM Matches
+                <span className="initial-segments">
+                  {' '}
+                  ({data.get('segments_analyzed')} of{' '}
+                </span>
+                <span className="total-segments">
+                  {' '}
+                  {data.get('total_segments')})
+                </span>
+              </div>
+            }
+            className={'analysis-progressbar'}
+          />
+        </div>
+      )
+    }
+    return null
+  }, [data])
+
   let getAnalysisStateHtml
   getAnalysisStateHtml = useCallback(() => {
     showProgressBarRef.current = false
@@ -266,38 +298,6 @@ const AnalyzeHeader = ({data, project}) => {
       </div>
     )
   }, [data, getSavingWorkCount])
-
-  const getProgressBar = useCallback(() => {
-    if (showProgressBarRef.current) {
-      const progress =
-        (data.get('segments_analyzed') / data.get('total_segments')) * 100
-      return (
-        <div className="analysis-create">
-          <ProgressBar
-            total={100}
-            progress={progress}
-            size={PROGRESS_BAR_SIZE.SMALL}
-            showProgress={true}
-            label={
-              <div>
-                Searching for TM Matches
-                <span className="initial-segments">
-                  {' '}
-                  ({data.get('segments_analyzed')} of{' '}
-                </span>
-                <span className="total-segments">
-                  {' '}
-                  {data.get('total_segments')})
-                </span>
-              </div>
-            }
-            className={'analysis-progressbar'}
-          />
-        </div>
-      )
-    }
-    return null
-  }, [data])
 
   const analysisStateHtml = getAnalysisStateHtml()
   const wordsCountHtml = getWordscount()
