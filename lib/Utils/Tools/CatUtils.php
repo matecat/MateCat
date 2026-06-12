@@ -64,14 +64,14 @@ class CatUtils
     private SegmentTranslationDao $segmentTranslationDao;
     private FeatureSet $featureSet;
     /** @var array<string, mixed> */
-    private array $server;
+    private array $serverGlobalVars;
 
     /**
      * @param ChunkReviewDao|null $chunkReviewDao
      * @param JobDao|null $jobDao
      * @param SegmentTranslationDao|null $segmentTranslationDao
      * @param FeatureSet|null $featureSet
-     * @param array<string, mixed>|null $server
+     * @param array<string, mixed>|null $serverGlobalVars
      *
      * @throws Exception
      */
@@ -80,13 +80,13 @@ class CatUtils
         ?JobDao $jobDao = null,
         ?SegmentTranslationDao $segmentTranslationDao = null,
         ?FeatureSet $featureSet = null,
-        ?array $server = null
+        ?array $serverGlobalVars = null
     ) {
+        $this->serverGlobalVars = $serverGlobalVars ?? $_SERVER;
         $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
         $this->jobDao = $jobDao ?? new JobDao();
         $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
         $this->featureSet = $featureSet ?? new FeatureSet();
-        $this->server = $server ?? $_SERVER;
     }
 
     /**
@@ -802,11 +802,11 @@ class CatUtils
      */
     public function getIsRevisionFromRequestUri(): bool
     {
-        if (!isset($this->server['REQUEST_URI'])) {
+        if (!isset($this->serverGlobalVars['REQUEST_URI'])) {
             return false;
         }
 
-        $_from_url = parse_url($this->server['REQUEST_URI']);
+        $_from_url = parse_url($this->serverGlobalVars['REQUEST_URI']);
 
         if ($_from_url === false || !isset($_from_url['path'])) {
             return false;
@@ -826,12 +826,12 @@ class CatUtils
     public function getIsRevisionFromReferer(): bool
     {
         // Check if the HTTP_REFERER server variable is set
-        if (!isset($this->server['HTTP_REFERER'])) {
+        if (!isset($this->serverGlobalVars['HTTP_REFERER'])) {
             return false;
         }
 
         // Parse the referer URL to extract its components
-        $_from_url = parse_url($this->server['HTTP_REFERER']);
+        $_from_url = parse_url($this->serverGlobalVars['HTTP_REFERER']);
 
         if ($_from_url === false || !isset($_from_url['path'])) {
             return false;
@@ -1120,130 +1120,6 @@ class CatUtils
         }
 
         return $params;
-    }
-
-    // =========================================================================
-    // Backward-compat static shims — call (new CatUtils())->method() instead
-    // =========================================================================
-
-    /**
-     * @deprecated use (new CatUtils())->addSegmentTranslation()
-     * @throws Exception
-     */
-    public static function addSegmentTranslation_static(SegmentTranslationStruct $translation, bool $is_revision): void
-    {
-        (new self())->addSegmentTranslation($translation, $is_revision);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getFastStatsForJob()
-     * @return array<string, mixed>
-     * @throws PDOException
-     * @throws DivisionByZeroError
-     * @throws Exception
-     */
-    public static function getFastStatsForJob_static(WordCountStruct $wCount, bool $performanceEstimation = true): array
-    {
-        return (new self())->getFastStatsForJob($wCount, $performanceEstimation);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getQualityOverallFromJobStruct()
-     * @param array<ChunkReviewStruct> $chunkReviews
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public static function getQualityOverallFromJobStruct_static(JobStruct $job, array $chunkReviews = []): ?string
-    {
-        return (new self())->getQualityOverallFromJobStruct($job, $chunkReviews);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->isRevisionFromIdJobAndPassword()
-     * @throws Exception
-     */
-    public static function isRevisionFromIdJobAndPassword_static(int $jid, string $password): bool
-    {
-        return (new self())->isRevisionFromIdJobAndPassword($jid, $password);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getJobFromIdAndAnyPassword()
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public static function getJobFromIdAndAnyPassword_static(int $jobId, string $jobPassword): ?JobStruct
-    {
-        return (new self())->getJobFromIdAndAnyPassword($jobId, $jobPassword);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getJobPassword()
-     * @throws PDOException
-     * @throws Exception
-     */
-    public static function getJobPassword_static(JobStruct $job, int $sourcePage = 1): ?string
-    {
-        return (new self())->getJobPassword($job, $sourcePage);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getSegmentTranslationsCount()
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public static function getSegmentTranslationsCount_static(ProjectStruct $projectStruct): ?int
-    {
-        return (new self())->getSegmentTranslationsCount($projectStruct);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getWStructFromJobArray()
-     * @throws Exception
-     * @throws TypeError
-     */
-    public static function getWStructFromJobArray_static(JobStruct $job, ProjectStruct $projectStruct): WordCountStruct
-    {
-        return (new self())->getWStructFromJobArray($job, $projectStruct);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->deleteSha()
-     * @throws ReflectionException
-     * @throws Exception
-     * @throws TypeError
-     */
-    public static function deleteSha_static(string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0): void
-    {
-        (new self())->deleteSha($file_path, $source, $segmentationRule, $filtersTemplateId);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->parseSegmentSplit()
-     * @return array{string, list<int>}
-     * @throws Exception
-     */
-    public static function parseSegmentSplit_static(string $segment, string $separateWithChar, MateCatFilter $Filter): array
-    {
-        return (new self())->parseSegmentSplit($segment, $separateWithChar, $Filter);
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getIsRevisionFromRequestUri()
-     * @throws Exception
-     */
-    public static function getIsRevisionFromRequestUri_static(): bool
-    {
-        return (new self())->getIsRevisionFromRequestUri();
-    }
-
-    /**
-     * @deprecated use (new CatUtils())->getIsRevisionFromReferer()
-     * @throws Exception
-     */
-    public static function getIsRevisionFromReferer_static(): bool
-    {
-        return (new self())->getIsRevisionFromReferer();
     }
 
     /**

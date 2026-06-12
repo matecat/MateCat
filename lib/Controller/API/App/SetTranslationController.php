@@ -991,6 +991,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      *
      * @throws PDOException
      * @throws DomainException
+     * @throws Exception
      * @throws RuntimeException
      * @throws TypeError
      * @throws LogicException

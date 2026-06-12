@@ -429,17 +429,11 @@ parameters:
 		-
 			message: '#^Method Controller\\API\\App\\SetChunkCompletedController\:\:complete\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 3
 			path: lib/Controller/API/App/SetChunkCompletedController.php
 
 		-
 			message: '#^Method Controller\\API\\App\\SetChunkCompletedController\:\:complete\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/SetChunkCompletedController.php
-
-		-
-			message: '#^Method Controller\\API\\App\\SetChunkCompletedController\:\:complete\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/App/SetChunkCompletedController.php
@@ -1526,12 +1520,6 @@ parameters:
 
 		-
 			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/StatsController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/API/V2/StatsController.php
@@ -8607,5 +8595,17 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OauthResponseHandlerController.php
+
+		-
+			message: '#^Trait Utils\\Engines\\Traits\\HotSwap is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: lib/Utils/Engines/Traits/HotSwap.php
+
+		-
+			message: '#^Method Swaggest\\JsonSchema\\RemoteRefProvider@anonymous/lib/Utils/Validator/JSONSchema/JSONValidator\.php:51::getSchemaData\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: lib/Utils/Validator/JSONSchema/JSONValidator.php
 
 

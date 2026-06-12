@@ -9,6 +9,7 @@
 
 namespace Controller\Traits;
 
+use Exception;
 use LogicException;
 use Utils\Tools\CatUtils;
 
@@ -20,6 +21,7 @@ trait APISourcePageGuesserTrait
 
     /**
      * @return bool|null
+     * @throws Exception
      * @throws LogicException
      */
     protected function isRevision(): ?bool
