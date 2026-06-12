@@ -1,36 +1,33 @@
-@use '../../commons/_colors';
-
+@use '../../commons/colors';
+@use '../../commons/variables';
 .job-analyze-header {
-  background-color: colors.$grey2;
   display: flex;
-  height: 32px;
+  height: 40px;
   align-items: center;
-  width: 100%;
-  justify-content: space-between;
-  font-size: 16px;
-  .job-analyze-header_left {
+  align-self: stretch;
+  background: colors.$grey100;
+  font: variables.$font-style-small;
+  padding: 0 24px;
+  gap: 4px;
+  .job-analyze-header__id {
+    color: colors.$grey700;
+    font: variables.$font-style-xsmall;
+    min-width: 80px;
+  }
+  .job-analyze-header__languages {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 4px;
+    font-weight: 700;
   }
-  .job-analyze-languages,
-  .job-analyze-header_right {
-    span {
-      font-weight: 700;
-      line-height: 16px;
-    }
-  }
-  .job-analyze-languages {
-    display: flex;
-    align-items: center;
-    gap: 2px;
+  .job-analyze-header__words {
+    color: colors.$blue500;
+    margin-left: auto;
+    font-weight: 700;
   }
 }
 
 .chunks-analyze {
-  padding: 0 0 16px 0;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
   width: 100%;
   background-color: colors.$white;
 }
@@ -41,10 +38,9 @@
       80px,
       100px
     );
-  grid-template-rows: 125px;
-  padding: 0 !important;
-  border-bottom: 1px solid colors.$grey3;
-  background-color: colors.$grey4;
+  grid-template-rows: 68px;
+  background-color: colors.$grey50;
+  font: variables.$font-style-xsmall;
   &.mtqe {
     grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
   }
@@ -53,9 +49,8 @@
     flex-direction: column;
     height: 100%;
     text-align: right;
-    border-left: 1px solid colors.$grey3;
     min-width: 46px;
-    font-size: 16px;
+    color: colors.$grey400;
     &:first-child {
       border-left: none;
       > div {
@@ -64,8 +59,7 @@
     }
     :first-child {
       height: 85px;
-      border-bottom: 1px solid colors.$grey3;
-      font-weight: bold;
+      color: colors.$black;
     }
     > div {
       height: 32px;
@@ -82,13 +76,13 @@
     flex-direction: column;
     height: 100%;
     text-align: right;
-    color: colors.$grey;
-    background-color: colors.$grey5;
+    color: colors.$grey400;
     padding-right: 6px;
-    font-size: 16px;
-    :first-child {
+    border-right: 1px solid colors.$grey100;
+     :first-child {
       height: 85px;
       font-weight: normal;
+       color: colors.$grey400;
     }
     > div {
       height: 32px;
@@ -99,8 +93,9 @@
     display: flex;
     justify-content: flex-end;
     font-weight: 700;
-    font-size: 20px;
-    text-align: center;
+    text-align: right;
+    align-items: flex-end;
+    padding-right: 2px;
     > div {
       justify-content: center;
       border-bottom: none;
@@ -112,23 +107,22 @@
 .chunk-analyze-container {
   width: 100%;
   padding: 0 !important;
+  font: variables.$font-style-xsmall;
   .chunk-analyze-info {
     display: grid;
     grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
         80px,
         100px
       );
-    padding-top: 16px;
     background-color: colors.$white;
     position: relative;
-    font-size: 16px;
     &.mtqe {
       grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
     }
     .chunk-analyze-info-background {
       position: absolute;
       width: 86%;
-      background: colors.$grey;
+      background: colors.$grey600;
       height: 24px;
       right: 10px;
       top: 40px;
@@ -136,8 +130,7 @@
       border-radius: 4px 4px 0 0;
     }
     .chunk-analyze-info-header {
-      height: 48px;
-      background-color: #f5f6f7;
+      height: 56px;
       border-radius: 4px;
       display: flex;
       flex-direction: column;
@@ -148,57 +141,53 @@
       }
       .chunk-analyze-info-index {
         color: colors.$black !important;
-        font-weight: 700;
-        font-size: 14px;
+        font-weight: 700 !important;
       }
       .chunk-analyze-info-files {
-        color: colors.$black !important;
+        color: colors.$blue500 !important;
         display: flex;
         align-items: center;
         gap: 4px;
         text-decoration: underline;
         cursor: pointer;
+        svg {
+          color: colors.$blue500 !important;
+        }
       }
 
       :first-child {
-        color: colors.$grey;
-        font-size: 14px;
+        color: colors.$grey600;
       }
       > div {
-        height: 24px;
+        height: 28px;
         width: 100%;
         color: colors.$black;
         justify-content: space-between;
         display: flex;
         padding: 2px 8px;
-        font-size: 16px;
+        font-weight: 700;
+        align-items: center;
       }
     }
     .chunk-analyze-info-total {
-      > div {
-        justify-content: center !important;
-      }
+      background-color: colors.$grey50;
       :last-child {
-        font-size: 16px !important;
         font-weight: 700;
       }
     }
     > div {
-      border-right: 1px solid colors.$grey3;
-      &:last-child,
-      &:first-child {
-        border-right: none;
-      }
       > div:not(.chunk-analyze-info-header) {
-        height: 24px;
+        height: 28px;
         justify-content: right;
         display: flex;
         padding-right: 6px;
         line-height: 24px;
+        font-weight: 700;
+        align-items: center;
       }
       :first-child {
-        font-size: 14px;
-        color: colors.$grey;
+        font-weight: 400 !important;
+        color: colors.$grey600;
       }
     }
   }
@@ -212,19 +201,18 @@
   grid-template-rows: 24px;
   display: grid;
   padding: 0;
-  color: colors.$grey;
+  color: colors.$grey600;
   position: relative;
   &.mtqe {
     grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
   }
   .chunk-file-detail-background {
     position: absolute;
-    width: 86%;
-    background: colors.$grey;
+    width: 100%;
+    background: colors.$grey50;
     height: 24px;
-    right: 10px;
     top: 0px;
-    opacity: 0.1;
+    z-index: 1;
     &.last {
       border-radius: 0 0 4px 4px;
     }
@@ -234,15 +222,15 @@
     justify-content: left;
   }
   > div {
-    border-right: 1px solid colors.$grey3;
     justify-content: right;
     display: flex;
     padding-right: 6px;
     line-height: 24px;
+    z-index: 2;
   }
   .chunk-file-detail-filename {
-    background-color: colors.$white;
-    padding-right: 0;
+    justify-content: space-between;
+    padding: 0 12px;
     svg {
       margin-top: 5px;
     }
@@ -251,25 +239,17 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 12px;
-      width: 100px;
-      line-height: 24px;
+      max-width: 100px;
+      text-align: right;
     }
     > div {
-      display: flex;
       align-items: flex-start;
-      margin: 0 6px;
-      padding: 0 6px;
       width: 100%;
       gap: 4px;
-      background-color: colors.$grey4;
       cursor: default;
     }
   }
-  .chunk-file-detail-total {
-    justify-content: center;
-    border-right: none;
-  }
+
 }
 .analyze-page .more-columns {
   grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(80px,100px) !important;

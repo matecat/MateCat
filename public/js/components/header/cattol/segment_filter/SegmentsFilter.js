@@ -10,6 +10,9 @@ import {SEGMENTS_STATUS} from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import Switch from '../../../common/Switch'
 import {DataSampleDropdown} from './DataSampleDropdown'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
+import ChevronLeft from '../../../../../img/icons/ChevronLeft'
+import ChevronRight from '../../../../../img/icons/ChevronRight'
 
 class SegmentsFilter extends React.Component {
   constructor(props) {
@@ -472,18 +475,20 @@ class SegmentsFilter extends React.Component {
                     <div className="label-filters labl">
                       <b>{this.state.filteredCount}</b> Filtered segments
                     </div>
-                    <button
-                      className="filter-move-up ui basic button"
+                    <Button
+                      size={BUTTON_SIZE.ICON_STANDARD}
+                      mode={BUTTON_MODE.OUTLINE}
                       onClick={this.moveUp.bind(this)}
                     >
-                      <i className="icon-chevron-left" />
-                    </button>
-                    <button
-                      className="filter-move-up ui basic button"
+                      <ChevronLeft />
+                    </Button>
+                    <Button
                       onClick={this.moveDown.bind(this)}
+                      mode={BUTTON_MODE.OUTLINE}
+                      size={BUTTON_SIZE.ICON_STANDARD}
                     >
-                      <i className="icon-chevron-right" />
-                    </button>
+                      <ChevronRight />
+                    </Button>
                   </div>
                 ) : null}
                 {this.state.filtering &&

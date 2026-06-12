@@ -8,6 +8,9 @@ export const BADGE_TYPE = {
   YELLOW: 'yellow',
   BLUE: 'blue',
   RED: 'red',
+  PURPLE: 'purple',
+  ORANGE: 'orange',
+  GREY: 'grey',
 }
 export const BADGE_MODE = {
   DEFAULT: 'default',

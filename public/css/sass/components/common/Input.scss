@@ -24,8 +24,8 @@
   input {
     width: 100%;
     height: 40px;
-    color: colors.$grey6;
-    border: 1px solid colors.$grey4;
+    color: colors.$grey700;
+    border: 1px solid colors.$grey100;
     padding: 12px;
     box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.0784313725) inset;
     font-size: 16px;
@@ -40,7 +40,7 @@
       border: none !important;
     }
     &::placeholder {
-      color: colors.$grey7;
+      color: colors.$grey400;
       opacity: 1;
     }
     &:hover {
@@ -65,16 +65,16 @@
     &.hasError,
     &.hasError:hover,
     &.hasError:focus {
-      box-shadow: inset 0 0 0 2px colors.$redDefault !important;
+      box-shadow: inset 0 0 0 2px colors.$red500 !important;
     }
     &:disabled {
-      background-color: colors.$grey9;
+      background-color: colors.$grey75;
       box-shadow: none;
-      color: colors.$grey8;
+      color: colors.$grey200;
       cursor: not-allowed;
 
       &::placeholder {
-        color: colors.$grey8;
+        color: colors.$grey200;
       }
     }
   }
@@ -89,7 +89,7 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    color: colors.$grey8;
+    color: colors.$grey200;
     cursor: pointer;
     pointer-events: none;
   }
@@ -98,7 +98,7 @@
     left: 10px;
   }
   input:disabled + svg {
-    color: colors.$grey8 !important;
+    color: colors.$grey200 !important;
   }
 }
 
@@ -120,7 +120,7 @@
 
 .input-component-errorMessage {
   font-size: 12px;
-  color: colors.$redDefault;
+  color: colors.$red500;
   text-align: left;
   padding-left: 2px;
 }

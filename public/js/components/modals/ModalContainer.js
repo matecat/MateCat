@@ -1,4 +1,11 @@
 import React, {useEffect, useRef} from 'react'
+import Close from '../../../img/icons/Close'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 
 export const ModalContainer = ({
   title,
@@ -72,13 +79,15 @@ export const ModalContainer = ({
               <h2>{title}</h2>
             </div>
             {!isCloseButtonDisabled && (
-              <div>
-                <span
-                  className="close-matecat-modal x-popup"
-                  data-testid="close-button"
-                  onClick={handleClose}
-                />
-              </div>
+              <Button
+                type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                mode={BUTTON_MODE.GHOST}
+                onClick={handleClose}
+                data-testid="close-button"
+              >
+                <Close size={20} />
+              </Button>
             )}
           </div>
         )}

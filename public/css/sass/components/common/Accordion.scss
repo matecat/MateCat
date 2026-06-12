@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .accordion-component {
   overflow: hidden;
@@ -10,12 +11,13 @@
   align-items: center;
   padding: 14px 24px;
   font: 12px;
-  background-color: colors.$grey3;
-  border-radius: 8px;
+  background-color: colors.$grey150;
+  border-radius: variables.$border-radius-default;
   cursor: pointer;
 
   &.accordion-expanded {
-    border-radius: 8px 8px 0 0;
+    border-radius: variables.$border-radius-default
+      variables.$border-radius-default 0 0;
   }
 
   > svg {
@@ -36,6 +38,7 @@
   transition-timing-function: 'ease-in-out';
   transform-origin: top center;
   padding: 0 24px;
-  border-radius: 0 0 8px 8px;
-  background-color: colors.$grey4;
+  border-radius: 0 0 variables.$border-radius-default
+    variables.$border-radius-default;
+  background-color: colors.$grey100;
 }

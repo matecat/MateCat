@@ -52,17 +52,11 @@ class JobMetadataModal extends React.Component {
 
       const title = (
         <div className="title">
-          <span
-            title={file.file_name}
-            className={
-              'fileFormat ' +
-              CommonUtils.getIconClass(
-                file.file_name.split('.')[file.file_name.split('.').length - 1],
-              )
-            }
-          >
-            {file.file_name}
-          </span>
+          {CommonUtils.getFileIcon(
+            file.file_name.split('.')[file.file_name.split('.').length - 1],
+          )}
+
+          {file.file_name}
         </div>
       )
 

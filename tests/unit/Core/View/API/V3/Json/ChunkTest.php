@@ -268,7 +268,6 @@ class ChunkTest extends AbstractTest
         $this->assertSame('general', $result['subject']);
         $this->assertSame('General', $result['subject_printable']);
         $this->assertSame('owner@test.com', $result['owner']);
-        $this->assertSame(5000, $result['total_time_to_edit']);
         $this->assertSame(75.0, $result['avg_post_editing_effort']);
         $this->assertSame(3, $result['open_threads_count']);
         $this->assertSame(42.5, $result['pee']);

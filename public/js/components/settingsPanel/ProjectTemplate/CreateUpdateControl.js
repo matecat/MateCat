@@ -18,7 +18,7 @@ export const CreateUpdateControl = () => {
       <Button
         testId="create-update-template"
         type={BUTTON_TYPE.PRIMARY}
-        size={BUTTON_SIZE.MEDIUM}
+        size={BUTTON_SIZE.STANDARD}
         disabled={templateName === ''}
         onClick={
           templateModifier === TEMPLATE_MODIFIERS.CREATE ? create : updateName

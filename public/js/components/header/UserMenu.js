@@ -31,20 +31,21 @@ export const UserMenu = () => {
 
     return (
       <Popover
+        className="user-menu-popover"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.GHOST,
           size: BUTTON_SIZE.ICON_STANDARD,
           children: avatarImg ? (
             <img
-              className="user-menu-popover-avatar"
+              className="user-menu-popover-avatar user-menu-popover"
               src={`${avatarImg}`}
               title="Personal settings"
               alt="Profile picture"
             />
           ) : (
             <div
-              className="ui user circular image ui-user-top-image"
+              className="ui user circular image ui-user-top-image user-menu-popover"
               data-testid="user-menu-metadata"
               title="Personal settings"
             >
@@ -54,6 +55,7 @@ export const UserMenu = () => {
         }}
         align={POPOVER_ALIGN.RIGHT}
         verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
+        buttonContainerClassName={'user-menu-popover'}
       >
         <div className="user-menu-popover-content">
           <div className="user-info">
@@ -106,7 +108,6 @@ export const UserMenu = () => {
         <Button
           className={'header-button-signin'}
           mode={BUTTON_MODE.OUTLINE}
-          size={BUTTON_SIZE.MEDIUM}
           onClick={ModalsActions.openLoginModal}
         >
           Sign In
@@ -114,7 +115,6 @@ export const UserMenu = () => {
         <Button
           className={'header-button-signup'}
           onClick={ModalsActions.openRegisterModal}
-          size={BUTTON_SIZE.MEDIUM}
         >
           Sign Up
         </Button>

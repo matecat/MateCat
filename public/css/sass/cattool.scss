@@ -1,5 +1,6 @@
 @use 'commons/mixins';
 @use 'commons/_colors';
+@use 'commons/variables';
 @use 'components/segment/IcuHighlight';
 body.cattool {
   //display: flex;
@@ -7,7 +8,7 @@ body.cattool {
   //flex-direction: column;
   overflow-y: hidden !important;
   padding: unset;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
 
   .page-content {
     display: flex;
@@ -73,19 +74,19 @@ body.cattool {
     }
   }
   #context-preview-wrapper:not(.context-preview-wrapper--collapsed) {
-    border: 1px solid colors.$grey4;
+    border: 1px solid colors.$grey100;
   }
   .context-preview__resize-handle {
     width: 100px;
     height: 6px;
     border-radius: 16px;
     cursor: row-resize;
-    background-color: colors.$grey6;
+    background-color: colors.$grey700;
     flex-shrink: 0;
     transition: background-color 0.15s;
     margin: 0 auto;
     &:hover {
-      background-color: colors.$grey1;
+      background-color: colors.$grey500;
     }
   }
   .context-preview__header {
@@ -96,7 +97,7 @@ body.cattool {
     padding: 4px 16px;
     flex-shrink: 0;
     user-select: none;
-    background-color: colors.$grey5
+    background-color: colors.$grey50
   }
   .context-preview__header-title {
     position: absolute;
@@ -106,7 +107,7 @@ body.cattool {
     font-size: 12px;
     font-weight: 700;
     line-height: 16px;
-    color: colors.$grey6;
+    color: colors.$grey700;
     pointer-events: none;
   }
   .context-preview__header-btn {
@@ -141,7 +142,7 @@ body.cattool {
     font-size: 12px;
     font-weight: 700;
     line-height: 16px;
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
   .context-preview__tab-icon {
     display: flex;
@@ -149,7 +150,7 @@ body.cattool {
     svg {
       width: 16px;
       height: 16px;
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
   }
   .context-preview__container {
@@ -165,7 +166,7 @@ body.cattool {
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: colors.$darkBlue url('/public/img/icons/arrow-up.svg') no-repeat
+    background: colors.$blue900 url('/public/img/icons/arrow-up.svg') no-repeat
       center center;
     background-size: 24px;
     border-radius: 50%;
@@ -176,7 +177,7 @@ body.cattool {
     bottom: 8px;
     cursor: pointer;
     &:hover {
-      background-color: colors.$darkBlueHover;
+      background-color: colors.$blue950;
     }
   }
 }
@@ -200,8 +201,8 @@ body.cattool {
     height: 24px;
   }
   .icon-warning-sign.qa-icon {
-    background-color: colors.$red800;
-    color: #fff;
+    background-color: colors.$red400;
+    color: colors.$white;
     display: flex;
     padding: 3px;
     justify-content: center;
@@ -209,7 +210,7 @@ body.cattool {
     gap: 6px;
     align-self: stretch;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
     width: 18px;
     height: 18px;
     margin-left: 8px;
@@ -230,7 +231,7 @@ body.cattool {
     line-height: 12px;
     &.badge-red {
       color: colors.$white;
-      background-color: colors.$red800;
+      background-color: colors.$red400;
     }
     &.badge-orange {
       color: colors.$black;
@@ -238,7 +239,7 @@ body.cattool {
     }
     &.badge-blue {
       color: colors.$white;
-      background-color: colors.$blue800;
+      background-color: colors.$blue400;
     }
   }
 }
@@ -256,33 +257,37 @@ body.cattool {
   }
 }
 
-.segment-target-toolbar {
+.segment-actions-container {
   display: flex;
+  justify-content: end;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-left: -11px;
   margin-top: 8px;
 }
 
-.segment-target-toolbar-icon {
-  width: 32px !important;
-  height: 32px !important;
-  padding: 0 !important;
+.segment-target-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-grow: 1;
+  margin-left: -11px;
 
-  &:disabled {
-    color: colors.$grey8 !important;
-    box-shadow: inset 0 0 0 1px colors.$grey8 !important;
+  .last-ai-feature-button:not(:last-child) {
+    margin-right: 15px;
 
-    svg {
-      color: colors.$grey8 !important;
+    &::after {
+      position: absolute;
+      content: '';
+      left: 43px;
+      width: 1px;
+      height: 100%;
+      background-color: colors.$grey150;
     }
   }
 }
 
-.segment-target-toolbar-dropdown-trigger {
-  height: 32px !important;
-  padding: 0 16px !important;
-  font-weight: bold;
-  font-size: 14px !important;
+.segment-target-toolbar-icon-bundled {
+  padding: 0 !important;
+  font-weight: normal !important;
 }
 
 .lara-styles-dropdown {
@@ -290,7 +295,7 @@ body.cattool {
 
   .lara-styles-dropdown-item {
     font-size: 14px;
-    color: colors.$grey7;
+    color: colors.$grey400;
     padding: 12px;
     border-radius: 6px;
     text-wrap: auto;
@@ -303,10 +308,10 @@ body.cattool {
 
     &.lara-styles-dropdown-item-active,
     &:hover {
-      background-color: rgba(#0588f9, 0.16);
-      color: #0099cc;
+      background-color: rgba(colors.$blue400, 0.16);
+      color: colors.$blue500;
       > span {
-        color: #017cac;
+        color: colors.$blue600;
       }
     }
   }

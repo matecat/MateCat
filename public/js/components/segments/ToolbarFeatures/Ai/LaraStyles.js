@@ -6,8 +6,9 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CatToolStore from '../../../../stores/CatToolStore'
 import CommonUtils from '../../../../utils/commonUtils'
+import PropTypes from 'prop-types'
 
-export const LaraStyles = ({sid, segment}) => {
+export const LaraStyles = ({sid, segment, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
   const contributions = segment?.contributions
@@ -45,9 +46,9 @@ export const LaraStyles = ({sid, segment}) => {
   return (
     !config.isReview && (
       <Button
-        className="segment-target-toolbar-icon"
-        size={BUTTON_SIZE.ICON_SMALL}
-        mode={BUTTON_MODE.OUTLINE}
+        className={isIconsBundled ? 'segment-target-toolbar-icon-bundled' : ''}
+        size={isIconsBundled ? BUTTON_SIZE.SMALL : BUTTON_SIZE.ICON_SMALL}
+        mode={isIconsBundled ? BUTTON_MODE.GHOST : BUTTON_MODE.OUTLINE}
         title={
           isDisabled
             ? 'Lara styles - Available for unconfirmed segments only'
@@ -56,8 +57,14 @@ export const LaraStyles = ({sid, segment}) => {
         onClick={openTab}
         disabled={isDisabled}
       >
-        <Palette size={16} />
+        <Palette size={isIconsBundled ? 18 : 16} />
+        {isIconsBundled && 'Lara styles'}
       </Button>
     )
   )
+}
+
+LaraStyles.propTypes = {
+  sid: PropTypes.string.isRequired,
+  isIconsBundled: PropTypes.bool,
 }

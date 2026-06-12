@@ -110,7 +110,6 @@ class Chunk extends \View\API\V2\Json\Chunk
             'subject_printable' => $subjectsHashMap[$chunk->subject],
             'owner' => $chunk->owner,
             'time_to_edit' => $this->getTimeToEditArray((int)$chunk->id),
-            'total_time_to_edit' => $chunk->total_time_to_edit,
             'avg_post_editing_effort' => (float)$chunk->avg_post_editing_effort,
             'open_threads_count' => (int)$chunk->getOpenThreadsCount(),
             'created_at' => Utils::api_timestamp($chunk->create_date),

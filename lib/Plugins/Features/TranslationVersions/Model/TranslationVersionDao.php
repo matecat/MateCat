@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
+use Model\QualityReport\HistoryElementStruct;
 use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -249,6 +250,49 @@ class TranslationVersionDao extends AbstractDao
     }
 
     /**
+     * @param array<int|string> $segments_id
+     * @param int $job_id
+     * @return array<HistoryElementStruct>
+     * @throws PDOException
+     */
+    public function historyEvents(array $segments_id, int $job_id): array
+    {
+        $conn = $this->database->getConnection();
+        $prepare_str_segments_id = implode(', ', array_fill(0, count($segments_id), '?'));
+
+        $query = "SELECT 
+            id_segment,
+            first_sv.version_number, 
+            null as source_page,
+            null as status,
+            null as create_date,
+            first_sv.creation_date, 
+            first_sv.translation
+            FROM segment_translation_versions first_sv WHERE id_segment IN ( $prepare_str_segments_id ) AND id_job = ? AND version_number = 0
+            UNION
+            SELECT ste.id_segment, ste.version_number, ste.source_page, ste.status, ste.create_date, stv.creation_date, stv.translation FROM segment_translation_events ste 
+            INNER JOIN (
+            SELECT creation_date, id_segment, translation, version_number, id_job
+                 FROM segment_translation_versions
+                 WHERE id_segment IN ( $prepare_str_segments_id )
+                   AND id_job = ?
+                 UNION
+                 SELECT null as creation_date, id_segment, translation, version_number, id_job
+                 FROM segment_translations
+                 WHERE id_segment IN ( $prepare_str_segments_id )
+                   AND id_job = ?
+            ) AS stv ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment
+          
+            WHERE ste.id_segment IN ( $prepare_str_segments_id ) GROUP BY version_number, source_page;";
+
+        $stmt = $conn->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, HistoryElementStruct::class);
+        $stmt->execute(array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], $segments_id));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param list<int> $segments_id
      *
      * @return list<SegmentEventsStruct>
@@ -278,7 +322,7 @@ class TranslationVersionDao extends AbstractDao
                    AND id_job = ?
             ) AS stv
             JOIN (
-                   SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
+                   SELECT MAX(version_number) AS version_number, ste.id, ste.id_segment, ste.source_page
                    FROM segment_translation_events ste
                    WHERE id_segment IN ( $prepare_str_segments_id )
                      AND ste.id_job = ?

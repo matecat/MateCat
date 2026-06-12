@@ -1,70 +1,43 @@
-import React from 'react'
-import {debounce} from 'lodash'
-import $ from 'jquery'
+import React, {useEffect} from 'react'
+import {Input} from '../../common/Input/Input'
+import IconSearch from '../../icons/IconSearch'
 
-class SearchInput extends React.Component {
-  constructor(props) {
-    super(props)
-    this.onKeyPressEvent = this.onKeyPressEvent.bind(this)
-    let self = this
-    this.filterByNameDebounce = debounce(function (e) {
-      self.filterByName(e)
+const SearchInput = ({onChange}) => {
+  const [searchFilter, setSearchFilter] = React.useState('')
+
+  useEffect(() => {
+    const tmOut = setTimeout(() => {
+      onChange(searchFilter)
     }, 500)
+
+    return () => clearTimeout(tmOut)
+  }, [searchFilter, onChange])
+
+  const closeSearch = () => {
+    setSearchFilter('')
+    onChange('')
   }
 
-  filterByName(e) {
-    if ($(this.textInput).val().length) {
-      $(this.closeIcon).show()
-    } else {
-      $(this.closeIcon).hide()
-    }
-
-    this.props.onChange($(this.textInput).val())
-
-    return false
-  }
-
-  closeSearch() {
-    $(this.textInput).val('')
-    $(this.closeIcon).hide()
-    this.props.onChange($(this.textInput).val())
-  }
-
-  onKeyPressEvent(e) {
+  const onKeyPressEvent = (e) => {
     if (e.which == 27) {
-      this.closeSearch()
-    } else {
-      if (e.which == 13 || e.keyCode == 13) {
-        e.preventDefault()
-        return false
-      }
+      closeSearch()
+    } else if (e.which == 13 || e.keyCode == 13) {
+      e.preventDefault()
+      return false
     }
   }
 
-  render() {
-    return (
-      <input
-        className="search-projects"
-        type="text"
-        placeholder="Search by project name"
-        ref={(input) => (this.textInput = input)}
-        onChange={this.filterByNameDebounce.bind(this)}
-        onKeyPress={this.onKeyPressEvent.bind(this)}
-        data-testid="input-search-projects"
-      />
-
-      /*<div className="input-field">
-                    <div className="ui fluid icon input">
-                        <input id="search" type="search" required="required"
-                               placeholder="Search by project name"
-                               ref={(input) => this.textInput = input}
-                               onChange={this.filterByNameDebounce.bind(this)}
-                               onKeyPress={this.onKeyPressEvent.bind(this)}/>
-                        {/!*<i className="search icon"/>*!/}
-                    </div>
-                </div>*/
-    )
-  }
+  return (
+    <Input
+      name="searchByProjectName"
+      placeholder="Search by project name"
+      value={searchFilter}
+      onChange={(e) => setSearchFilter(e.target.value)}
+      onKeyPress={onKeyPressEvent}
+      icon={<IconSearch />}
+      data-testid="input-search-projects"
+    />
+  )
 }
 
 export default SearchInput

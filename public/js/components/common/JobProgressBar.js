@@ -2,81 +2,107 @@ import React, {useRef} from 'react'
 import Tooltip from './Tooltip'
 import {isUndefined} from 'lodash'
 
-const JobProgressBar = ({
-  stats = {},
-  onClickFn = () => {},
-  showPercent = false,
-}) => {
-  const approved2ndPassTooltip = useRef()
-  // const rejectedTooltip = useRef()
-  const approvedTooltip = useRef()
-  const translatedTooltip = useRef()
-  const draftTooltip = useRef()
+const JobProgressBar = ({stats = {}, showPercent = true}) => {
+  const progressTooltipRef = useRef()
+
+
   const {raw} = stats
+
   const newWords = raw ? raw.new : undefined
-  const {total, translated, approved, approved2, draft} = raw || {}
+
+  const {total, draft, new: newRaw, translated, approved, approved2} = raw || {}
+
+  const unconfirmedPerc = ((draft + newRaw) * 100) / total
   const translatedPerc = (translated * 100) / total
   const approvedPerc = (approved * 100) / total
   const approved2Perc = (approved2 * 100) / total
-  const draftPerc = ((draft + newWords) * 100) / total
-  const totalPerc = ((total - draft - newWords) * 100) / total
+
+  const translatedPercBar = (translated * 100) / total
+  const approvedPercBar = ((translated + approved) * 100) / total
+  const approved2PercBar = ((translated + approved + approved2) * 100) / total
+
+  const totalPerc = Math.round(((total - draft - newWords) * 100) / total)
+
   const analysisComplete = !isUndefined(stats.analysis_complete)
     ? stats.analysis_complete
     : true
+
   return (
-    <div className="progress-bar" data-testid="progress-bar">
-      <div className="progr">
-        <div className="meter" onClick={onClickFn}>
-          {!stats || !analysisComplete ? (
-            <div className="bg-loader" />
-          ) : (
+    <div className="job-progress-container" data-testid="progress-bar">
+      <Tooltip
+        content={
+          (unconfirmedPerc > 0 ||
+            translatedPerc > 0 ||
+            approvedPerc > 0 ||
+            approved2Perc > 0) && (
+            <div className="job-progress-bar-tooltip">
+              {unconfirmedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-unconfirmed-quad" />
+                    Unconfirmed
+                  </span>
+                  <span>{unconfirmedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {translatedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-translated-quad" />
+                    Translated
+                  </span>
+                  <span>{translatedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {approvedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-approved-quad" />
+                    Revise
+                  </span>
+                  <span>{approvedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {approved2Perc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-approved2-quad" />
+                    Revise 2
+                  </span>
+                  <span>{approved2Perc.toFixed(1)}%</span>
+                </div>
+              )}
+            </div>
+          )
+        }
+      >
+        <div className="job-progress-bar" ref={progressTooltipRef}>
+          {(stats || !analysisComplete) && (
             <>
-              <Tooltip content={'Approved ' + approved2Perc.toFixed(1) + '%'}>
-                <a
-                  className="approved-bar-2nd-pass"
-                  style={{width: approved2Perc + '%'}}
-                  ref={approved2ndPassTooltip}
-                />
-              </Tooltip>
-              <Tooltip content={'Approved ' + approvedPerc.toFixed(1) + '%'}>
-                <a
-                  className="approved-bar"
-                  style={{width: approvedPerc + '%'}}
-                  ref={approvedTooltip}
-                />
-              </Tooltip>
-              <Tooltip
-                content={'Translated ' + translatedPerc.toFixed(1) + '%'}
-              >
-                <a
-                  className="translated-bar"
-                  style={{
-                    width: translatedPerc + '%',
-                  }}
-                  ref={translatedTooltip}
-                />
-              </Tooltip>
-              <Tooltip content={'Draft ' + draftPerc.toFixed(1) + '%'}>
-                <a
-                  className="draft-bar"
-                  style={{
-                    width: draftPerc + '%',
-                  }}
-                  ref={draftTooltip}
-                />
-              </Tooltip>
+              <span
+                className="bar translated-bar"
+                style={{
+                  width: translatedPercBar + '%',
+                }}
+              />
+              <span
+                className="bar approved-bar"
+                style={{width: approvedPercBar + '%'}}
+              />
+              <span
+                className="bar approved-bar-2nd-pass"
+                style={{width: approved2PercBar + '%'}}
+              />
             </>
           )}
         </div>
-        {showPercent && (
-          <div className="percent">
-            <span id="stat-progress" data-testid="progress-bar-amount">
-              {totalPerc ? Math.round(totalPerc) : '-'}
-            </span>
-            %
-          </div>
-        )}
-      </div>
+      </Tooltip>
+
+      {showPercent && (
+        <span data-testid="progress-bar-amount">
+          {!isNaN(totalPerc) && isFinite(totalPerc) ? `${totalPerc}%` : '-'}
+        </span>
+      )}
     </div>
   )
 }

@@ -4,7 +4,7 @@
   float: left;
   width: 100%;
   font-size: 12px;
-  background: #ffffff;
+  background: colors.$white;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
   .block.buttons {
     margin-top: -6px !important;
@@ -24,17 +24,16 @@
     margin: 4px 0px 3px 10px;
     padding: 2px 10px;
     height: 28px;
-    background: #eeeeef;
+    background: colors.$grey100;
     cursor: pointer;
     font-size: 14px;
     width: fit-content;
     text-transform: uppercase;
     &:disabled {
       cursor: not-allowed;
-      background: #ffffff;
-      color: #d0d0d0;
-      color: #d0d0d0;
-      border: 1px solid #d0d0d0;
+      background: colors.$white;
+      color: colors.$grey200;
+      border: 1px solid colors.$grey200;
       font-weight: 100;
     }
   }
@@ -47,20 +46,20 @@
     font-size: 12px !important;
     height: 23px;
     padding: 0 5px;
-    border: 1px solid #abadb3;
+    border: 1px solid colors.$grey400;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
   }
 
   .search-input:hover {
-    -moz-box-shadow: inset 0 1px 1px #e6e7e8;
-    -webkit-box-shadow: inset 0 1px 1px #e6e7e8;
+    -moz-box-shadow: inset 0 1px 1px colors.$grey100;
+    -webkit-box-shadow: inset 0 1px 1px colors.$grey100;
   }
 
   .search-input:focus {
-    -moz-box-shadow: inset 0 1px 2px #ccc;
-    -webkit-box-shadow: inset 0 1px 2px #ccc;
-    color: #000;
+    -moz-box-shadow: inset 0 1px 2px colors.$grey200;
+    -webkit-box-shadow: inset 0 1px 2px colors.$grey200;
+    color: colors.$black;
   }
 
   @media only screen and (max-width: 1200px) {
@@ -140,12 +139,12 @@ button#exec-replace {
       input:not(.input--invisible), {
         border-radius: 2px !important;
         border: 1px solid rgba(34, 36, 38, 0.15) !important;
-        box-shadow: inset 0 1px 3px #ddd !important;
+        box-shadow: inset 0 1px 3px colors.$grey200 !important;
         font-size: 1.2em !important;
         padding: 8px 16px 7px !important;
 
         &::-webkit-input-placeholder {
-          color: #929292;
+          color: colors.$grey400;
         }
 
         &:hover {
@@ -153,21 +152,21 @@ button#exec-replace {
         }
 
         &:focus {
-          border-color: #85b7d9 !important;
-          background: #ffffff !important;
+          border-color: colors.$blue300 !important;
+          background: colors.$white !important;
           color: rgba(0, 0, 0, 0.8) !important;
           /*outline: none;*/
         }
       }
     }
     .find-container {
-      background-color: #fff;
+      background-color: colors.$white;
       padding: 10px 0 0;
       margin-bottom: 0;
-      box-shadow: 0 1px 3px #666;
+      box-shadow: 0 1px 3px colors.$grey700;
       border-radius: 0 0 0 0;
       display: block;
-      color: #4d4d4d;
+      color: colors.$grey700;
       .find-container-inside {
         height: 100%;
         padding: 0 6.5% 0 5%;
@@ -200,17 +199,17 @@ button#exec-replace {
               }
               .ui.cancel.label {
                 padding: 4px;
-                background-color: #d6d6d6;
+                background-color: colors.$grey200;
                 border-radius: 15px;
                 top: 8px;
                 line-height: 0px;
                 right: 0px;
                 &:hover {
-                  background-color: #cccccc !important;
+                  background-color: colors.$grey200 !important;
                 }
               }
               .ui.input input {
-                box-shadow: inset 0 1px 3px #ddd;
+                box-shadow: inset 0 1px 3px colors.$grey200;
               }
 
               &.not-filtered {
@@ -236,22 +235,22 @@ button#exec-replace {
               .circular.label {
                 &.new-color {
                   box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-                  background: #ffffff;
+                  background: colors.$white;
                 }
                 &.draft-color {
-                  background: #e8e8e8;
+                  background: colors.$grey100;
                 }
                 &.translated-color {
-                  background: colors.$translatedBlue;
+                  background: colors.$blue500;
                 }
                 &.approved-color {
-                  background: colors.$approvedGreen;
+                  background: colors.$green800;
                 }
                 &.approved-2ndpass-color {
-                  background: colors.$approved2Green;
+                  background: colors.$purple500;
                 }
                 &.rejected-color {
-                  background: #dc2e34;
+                  background: colors.$red400;
                 }
               }
             }
@@ -296,7 +295,7 @@ button#exec-replace {
 
           .find-clear {
             margin-left: 13px;
-            border-left: 1px solid #d6d6d7;
+            border-left: 1px solid colors.$grey200;
             padding-left: 15px;
             position: relative;
             top: 9px;
@@ -326,23 +325,7 @@ button#exec-replace {
           display: flex;
           justify-content: flex-end;
           align-items: flex-start;
-          margin-top: 4px;
-          button {
-            border-radius: 2px;
-            &:hover,
-            &.active {
-              box-shadow: 0 0 0 1px #0055b8 inset;
-              color: #0055b8 !important;
-              background: #fff !important;
-            }
-
-            &:last-child {
-              width: max-content;
-            }
-            &.disabled {
-              box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
-            }
-          }
+          gap: 8px;
         }
         .find-option {
           display: flex;
@@ -359,7 +342,7 @@ button#exec-replace {
         font-size: 1.2em;
         padding: 15px 6.5% 15px 5%;
         text-align: left;
-        background: #f2f4f7;
+        background: colors.$grey50;
         .found {
           margin: 0;
           margin-right: 20px;
@@ -376,6 +359,9 @@ button#exec-replace {
         }
         .search-result-buttons {
           display: flex;
+          justify-content: center;
+          gap: 8px;
+          align-items: center;
           p {
             padding: 8px 5px;
             margin-bottom: 0;
@@ -391,7 +377,7 @@ button#exec-replace {
             span {
               position: absolute;
               font-size: 12px;
-              color: #878788;
+              color: colors.$grey400;
               -webkit-transition: all 100ms ease-in;
               -moz-transition: all 100ms ease-in;
               visibility: hidden;
@@ -426,7 +412,7 @@ button#exec-replace {
   }
 
   .custom-dropdown.select__dropdown {
-    background-color: #fff;
+    background-color: colors.$white;
   }
 
   ul.dropdown__list {

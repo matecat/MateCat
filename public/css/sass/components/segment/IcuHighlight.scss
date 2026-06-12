@@ -4,9 +4,9 @@
 .icuItem {
   display: inline-block;
   position: relative;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
   &.icuItem-error {
-    color: colors.$redDefault;
+    color: colors.$red500;
     cursor: pointer;
   }
 }

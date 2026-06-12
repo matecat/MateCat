@@ -1,4 +1,5 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
+@use '../../commons/variables';
 .segment-footer-icu-container.open {
   h3 {
     margin: 0;
@@ -11,7 +12,8 @@
     padding: 24px;
     gap: 60px;
   }
-  .segment-footer-icu-plurals, .segment-footer-icu-editor {
+  .segment-footer-icu-plurals,
+  .segment-footer-icu-editor {
     width: 50%;
   }
   .segment-footer-icu-plurals {
@@ -45,8 +47,8 @@
       font-weight: 700;
       font-size: 14px;
     }
-    .rule  {
-      color: colors.$grey7;
+    .rule {
+      color: colors.$grey400;
       font-size: 14px;
       width: 100%;
       max-width: 120px;
@@ -74,8 +76,8 @@
     grid-column: 1 / span 1;
     justify-self: stretch;
     border-radius: 16px;
-    border: 1px solid colors.$grey3;
-    background: colors.$grey5;
+    border: 1px solid colors.$grey150;
+    background: colors.$grey50;
     width: 184px;
     height: 50px;
     justify-content: space-between;
@@ -94,9 +96,9 @@
       div {
         text-transform: capitalize;
         span {
-            color: colors.$grey7;
-            font-weight: 400;
-            margin-left: 4px;
+          color: colors.$grey400;
+          font-weight: 400;
+          margin-left: 4px;
         }
       }
     }
@@ -123,8 +125,8 @@
       justify-content: flex-start;
       gap: 8px;
       align-self: stretch;
-      border-radius: 8px;
-      background: colors.$grey5;
+      border-radius: variables.$border-radius-default;
+      background: colors.$grey50;
       align-content: flex-start;
       text-align: left;
       &.rtl {

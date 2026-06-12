@@ -94,7 +94,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.ICON_SMALL,
+          size: BUTTON_SIZE.ICON_XSMALL,
           testId: 'add-severity-button',
           disabled: isDisabled,
           ...(isDisabled && {
@@ -110,7 +110,6 @@ export const AddSeverity = ({numbersOfColumns}) => {
         confirmButtonProps={{
           ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
-          size: BUTTON_SIZE.MEDIUM,
           disabled: !name || typeof error === 'string',
           children: (
             <>
@@ -122,7 +121,6 @@ export const AddSeverity = ({numbersOfColumns}) => {
         }}
         cancelButtonProps={{
           mode: BUTTON_MODE.OUTLINE,
-          size: BUTTON_SIZE.MEDIUM,
           children: 'Cancel',
         }}
         align={POPOVER_ALIGN.RIGHT}

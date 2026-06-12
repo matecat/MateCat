@@ -9,8 +9,9 @@ import CattolConstants from '../../../constants/CatToolConstants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {deleteCompletionEvents} from '../../../api/deleteCompletionEvents'
 import ModalsActions from '../../../actions/ModalsActions'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
+import Check from '../../../../img/icons/Check'
 export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
-  const button = useRef()
   const [markedAsComplete, setMarkedAsComplete] = useState(
     config.job_marked_complete,
   )
@@ -207,19 +208,14 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
     <>
       {/*Mark as complete*/}
       {featureEnabled && (
-        <button
-          ref={button}
-          className={`action-submenu ui floating dropdown ${
-            markedAsComplete
-              ? 'isMarkedComplete'
-              : buttonEnabled
-                ? 'isMarkableAsComplete'
-                : 'notMarkedComplete'
-          }`}
-          id="markAsCompleteButton"
-          disabled={!buttonEnabled}
+        <Button
+          mode={markedAsComplete ? BUTTON_MODE.OUTLINE_BG : BUTTON_MODE.GHOST}
+          type={markedAsComplete ? BUTTON_TYPE.SUCCESS : BUTTON_TYPE.DEFAULT}
+          className="markAsCompleteButton"
           onClick={clickMarkAsComplete}
-        />
+        >
+          <Check size={24} />
+        </Button>
       )}
     </>
   )

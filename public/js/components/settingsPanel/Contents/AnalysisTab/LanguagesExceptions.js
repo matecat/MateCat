@@ -12,7 +12,6 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
-import AddWide from '../../../../../img/icons/AddWide'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {Select} from '../../../common/Select'
 import {InputPercentage} from './InputPercentage'
@@ -177,7 +176,6 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
       <Button
         className="add-button"
         type={BUTTON_TYPE.PRIMARY}
-        size={BUTTON_SIZE.MEDIUM}
         onClick={() =>
           setPendingExceptionsId((prevState) => [...prevState, uuidV4()])
         }
@@ -303,9 +301,7 @@ const LanguageException = ({
         <div className="analysis-tab-buttons">
           <Button
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             disabled={source && target && value ? false : true}
-            className={'confirm-button'}
             onClick={() => {
               addException({source, target, value})
               setModified(false)
@@ -316,7 +312,6 @@ const LanguageException = ({
           </Button>
           <Button
             type={BUTTON_TYPE.WARNING}
-            size={BUTTON_SIZE.MEDIUM}
             className="close-button"
             onClick={removeException}
           >

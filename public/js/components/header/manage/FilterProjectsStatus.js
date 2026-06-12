@@ -27,25 +27,23 @@ const FilterProjectsStatus = ({filterFunction}) => {
   }))
 
   return (
-    <div data-testid="status-filter">
-      <DropdownMenu
-        dropdownClassName="filter-project-status-dropdown"
-        align={DROPDOWN_MENU_ALIGN.RIGHT}
-        toggleButtonProps={{
-          mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.STANDARD,
-          className: 'filter-project-status-dropdown-trigger',
-          testId: 'status-filter-trigger',
-          children: (
-            <>
-              <IconFilter width={36} height={36} color={'#002b5c'} />
-              {STATES.find(({value}) => value === currentState)?.label}
-            </>
-          ),
-        }}
-        items={items}
-      />
-    </div>
+    <DropdownMenu
+      dropdownClassName="filter-project-status-dropdown"
+      align={DROPDOWN_MENU_ALIGN.RIGHT}
+      toggleButtonProps={{
+        mode: BUTTON_MODE.BASIC,
+        size: BUTTON_SIZE.STANDARD,
+        className: 'filter-project-status-dropdown-trigger',
+        testId: 'status-filter-trigger',
+        children: (
+          <>
+            <IconFilter width={36} height={36} color={'#002b5c'} />
+            {STATES.find(({value}) => value === currentState)?.label}
+          </>
+        ),
+      }}
+      items={items}
+    />
   )
 }
 

@@ -1,32 +1,28 @@
-h1,
-h2,
-h3,
-h4,
-h5 {
-  line-height: 1.28571429em;
-  font-weight: bold;
-  padding: 0em;
-}
+@use './variables';
 
 h1 {
-  min-height: 1rem;
-  font-size: 2rem;
+  margin: 0;
+  font: variables.$font-style-heading1;
 }
-
 h2 {
-  font-size: 1.71428571rem;
+  margin: 0;
+  font: variables.$font-style-heading2;
 }
-
 h3 {
-  font-size: 1.28571429rem;
+  margin: 0;
+  font: variables.$font-style-heading3;
 }
-
 h4 {
-  font-size: 1.07142857rem;
+  margin: 0;
+  font: variables.$font-style-heading4;
 }
-
 h5 {
-  font-size: 1rem;
+  margin: 0;
+  font: variables.$font-style-heading5;
+}
+h6 {
+  margin: 0;
+  font: variables.$font-style-heading6;
 }
 
 h1:first-child,
@@ -34,7 +30,7 @@ h2:first-child,
 h3:first-child,
 h4:first-child,
 h5:first-child {
-  margin-top: 0em;
+  margin-top: 0;
 }
 
 h1:last-child,
@@ -42,14 +38,14 @@ h2:last-child,
 h3:last-child,
 h4:last-child,
 h5:last-child {
-  margin-bottom: 0em;
+  margin-bottom: 0;
 }
 
 p {
   margin: 0 0 16px 0;
-  line-height: 1.4285em;
+  line-height: 23px;
   &:last-child {
-    margin-bottom: 0em;
+    margin-bottom: 0;
   }
 }
 
@@ -63,7 +59,7 @@ body ::-webkit-scrollbar {
 
 body ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
-  border-radius: 0px;
+  border-radius: 0;
 }
 
 body ::-webkit-scrollbar-thumb {

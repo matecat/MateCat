@@ -2,6 +2,7 @@ import React from 'react'
 
 import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
@@ -83,34 +84,31 @@ class RevisionFeedbackModal extends React.Component {
           </div>
         </div>
         <div className="matecat-modal-bottom">
-          <div className="ui one column grid right aligned">
-            <div className="column">
-              <div
-                className="ui button cancel-button"
-                onClick={() => ModalsActions.onCloseModal()}
-              >
-                {this.props.feedback ? 'Close' : "I'll do it later"}
-              </div>
+          <div className="modal-buttons">
+            <Button
+              type={BUTTON_TYPE.DEFAULT}
+              onClick={() => ModalsActions.onCloseModal()}
+            >
+              {this.props.feedback ? 'Close' : "I'll do it later"}
+            </Button>
 
-              {this.state.sending ? (
-                <div className=" ui primary button  disabled">
-                  <span
-                    className="button-loader show"
-                    style={{left: '280px'}}
-                  />
-                  {sendLabel}
-                </div>
-              ) : !this.state.buttonEnabled ? (
-                <div className="ui primary button disabled">{sendLabel}</div>
-              ) : (
-                <div
-                  className="ui primary button"
-                  onClick={() => this.sendFeedback()}
-                >
-                  {sendLabel}
-                </div>
-              )}
-            </div>
+            {this.state.sending ? (
+              <Button type={BUTTON_TYPE.PRIMARY} disabled={true}>
+                <span className="button-loader show" style={{left: '280px'}} />
+                {sendLabel}
+              </Button>
+            ) : !this.state.buttonEnabled ? (
+              <Button type={BUTTON_TYPE.PRIMARY} disabled={true}>
+                {sendLabel}
+              </Button>
+            ) : (
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                onClick={() => this.sendFeedback()}
+              >
+                {sendLabel}
+              </Button>
+            )}
           </div>
         </div>
       </div>

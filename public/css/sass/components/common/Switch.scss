@@ -8,10 +8,10 @@
   .switch-container-active,
   .switch-container-inactive {
     font-size: 14px;
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
   .switch-container-active {
-    color: colors.$linkBlue;
+    color: colors.$blue700;
   }
 }
 .switch-container {
@@ -35,7 +35,7 @@
     right: 0;
     bottom: 0;
     border-radius: 12px;
-    background-color: colors.$grey7;
+    background-color: colors.$grey400;
     transition: background-color 0.2s ease-out;
 
     &::before {
@@ -52,7 +52,7 @@
   }
 
   input:checked + span {
-    background-color: colors.$linkBlue;
+    background-color: colors.$blue700;
   }
 
   input:checked + span::before {

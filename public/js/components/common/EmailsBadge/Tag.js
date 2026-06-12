@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Close from '../../../../img/icons/Close'
 import IconClose from '../../icons/IconClose'
+import styles from './EmailsBadge.module.scss'
 
 export const TAG_STATUS = {
   DEFAULT: 'default',
@@ -21,9 +22,9 @@ export const Tag = ({
   }
 
   return (
-    <div className={`email-badge-tag ${[status]}`}>
+    <div className={[styles['email-badge-tag'], styles[status]].filter(Boolean).join(' ')}>
       {children}
-      <div className="email-badge-tag-button-close" onClick={handleCLick}>
+      <div className={styles['email-badge-tag-button-close']} onClick={handleCLick}>
         <IconClose size={8} />
       </div>
     </div>

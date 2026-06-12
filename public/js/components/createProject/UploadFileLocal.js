@@ -138,7 +138,7 @@ function FileItem({file: f, onDelete}) {
   return (
     <div className={`file-item ${f.zipFolder ? 'zip-folder' : ''}`}>
       <div className="file-item-name">
-        <span className={`file-icon ${CommonUtils.getIconClass(f.ext)}`} />
+        {CommonUtils.getFileIcon(f.ext)}
         {f.name}
       </div>
       {f.error && (

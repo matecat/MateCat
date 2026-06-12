@@ -99,7 +99,7 @@ export const CattoolFooter = ({
               <Button
                 ref={goToAnalysisRef}
                 className="button-icon"
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 mode={BUTTON_MODE.GHOST}
                 onClick={onClickOpenJobAnalysis}
               >
@@ -144,7 +144,7 @@ export const CattoolFooter = ({
             <Button
               ref={openToDoRef}
               className="button-icon"
-              size={BUTTON_SIZE.ICON_SMALL}
+              size={BUTTON_SIZE.ICON_XSMALL}
               mode={BUTTON_MODE.GHOST}
               onClick={onClickTodo}
             >

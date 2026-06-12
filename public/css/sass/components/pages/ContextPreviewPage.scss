@@ -23,7 +23,7 @@
   align-items: center;
   gap: 8px;
   padding: 4px;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   border: 1px solid rgba(13, 13, 28, 0.07);
   border-radius: 12px;
 
@@ -68,7 +68,7 @@
     line-height: 18px;
     height: 22px;
     &:hover:not(:disabled) {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
     }
   }
 
@@ -89,7 +89,7 @@
   justify-content: space-between;
   gap: 8px;
   padding: 16px;
-  border-bottom: 1px solid colors.$grey4;
+  border-bottom: 1px solid colors.$grey100;
   flex-shrink: 0;
   position: sticky;
   top: 0;
@@ -105,7 +105,7 @@
 
   .custom-segmented-control {
     .segmented-control {
-      background-color: colors.$grey8;
+      background-color: colors.$grey200;
     }
     .segmented-control__label {
       line-height: 28px;
@@ -149,7 +149,7 @@
 
 .context-preview-divider {
   width: 1px;
-  background-color: colors.$grey4;
+  background-color: colors.$grey100;
   flex-shrink: 0;
 }
 
@@ -194,7 +194,7 @@
     font-size: 14px;
     text-transform: none;
     line-height: 20px;
-    color:  colors.$grey7;
+    color:  colors.$grey400;
     padding: 2px 12px;
   }
   .segmented-control__cursor:before {
@@ -212,7 +212,7 @@
   justify-content: center;
   min-height: 300px;
   font-size: 16px;
-  color: colors.$grey1;
+  color: colors.$grey500;
 }
 
 .context-preview-empty {
@@ -221,7 +221,7 @@
   justify-content: center;
   flex: 1;
   font-size: 14px;
-  color: colors.$grey1;
+  color: colors.$grey500;
 }
 
 .context-preview-error {
@@ -233,13 +233,13 @@
   text-align: center;
 
   h2 {
-    color: colors.$red800;
+    color: colors.$red400;
     margin-bottom: 12px;
     font-size: 20px;
   }
 
   p {
-    color: colors.$grey1;
+    color: colors.$grey500;
     font-size: 14px;
   }
 }
@@ -250,7 +250,7 @@
   align-items: center;
   gap: 8px;
   padding: 4px;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   border: 1px solid rgba(13, 13, 28, 0.07);
   border-radius: 12px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -266,7 +266,7 @@
   border: none;
   border-radius: 8px;
   background-color: transparent;
-  color: colors.$grey6;
+  color: colors.$grey700;
   cursor: pointer;
   transition:
     background-color 0.15s ease,
@@ -278,7 +278,7 @@
   }
 
   &:active {
-    background-color: colors.$grey4;
+    background-color: colors.$grey100;
   }
 }
 
@@ -340,14 +340,14 @@
   img {
     display: block;
     max-width: none;
-    border: 1px solid colors.$grey4;
+    border: 1px solid colors.$grey100;
     box-shadow: 0 2px 8px rgba(colors.$black, 0.1);
   }
 }
 
 .context-preview-screenshot-placeholder {
   padding: 2rem;
-  color: colors.$grey1;
+  color: colors.$grey500;
   text-align: center;
   font-size: 14px;
 }
