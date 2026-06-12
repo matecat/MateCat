@@ -63,6 +63,9 @@ class PayloadTestableGlossaryController extends GlossaryController
 {
     public string $jsonString = '';
     public ?JobStruct $job = null;
+    public ?string $lastQueue = null;
+    /** @var array<string, mixed>|null */
+    public ?array $lastParams = null;
 
     public function __construct()
     {
@@ -92,6 +95,8 @@ class PayloadTestableGlossaryController extends GlossaryController
 
     protected function enqueueWorker(string $queue, array $params): void
     {
+        $this->lastQueue  = $queue;
+        $this->lastParams = $params;
     }
 }
 
@@ -379,6 +384,11 @@ class GlossaryControllerTest extends AbstractTest
         self::assertSame(false, $controller->isLoggedIn());
     }
 
+    /**
+     * @throws \Exception
+     * @throws \TypeError
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     */
     #[Test]
     public function createThePayloadForWorker_validates_term_languages(): void
     {
@@ -391,7 +401,12 @@ class GlossaryControllerTest extends AbstractTest
 
         $controller->set();
 
-        self::assertSame('set', 'set');
+        // The real createThePayloadForWorker validated the term source/target languages
+        // (no ValidationError thrown) and the set action enqueued a GLOSSARY_WRITE worker.
+        self::assertSame(GlossaryController::GLOSSARY_WRITE, $controller->lastQueue);
+        self::assertSame('set', $controller->lastParams['action']);
+        self::assertSame('en-US', $controller->lastParams['payload']['term']['source_language']);
+        self::assertSame('it-IT', $controller->lastParams['payload']['term']['target_language']);
     }
 
     #[Test]
@@ -419,6 +434,28 @@ class GlossaryControllerTest extends AbstractTest
         $this->expectException(DomainException::class);
 
         $controller->get();
+    }
+
+    // ── getJobFromIdAndAnyPassword (real DB seam) ────────────────────────
+
+    /**
+     * @throws \Exception
+     * @throws \ReflectionException
+     * @throws \PHPUnit\Framework\ExpectationFailedException
+     */
+    #[Test]
+    public function getJobFromIdAndAnyPassword_returns_null_for_unknown_job(): void
+    {
+        // Exercise the real seam body (CatUtils::getJobFromIdAndAnyPassword).
+        // A non-existent id_job/password combination resolves to null without raising.
+        $controller = new TestableGlossaryController();
+
+        /** @var ?JobStruct $job */
+        $job = $this->reflector
+            ->getMethod('getJobFromIdAndAnyPassword')
+            ->invoke($controller, 0, '__no_such_password__');
+
+        self::assertNull($job);
     }
 
     // ── validateJson (real schema) ───────────────────────────────────────

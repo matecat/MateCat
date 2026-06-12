@@ -338,6 +338,29 @@ class PayableRateControllerTest extends AbstractTest
         $this->controller->validate();
     }
 
+    /**
+     * @throws \TypeError
+     */
+    #[Test]
+    public function validate_surfaces_non_json_validator_errors(): void
+    {
+        // Malformed JSON makes the validator collect a JsonValidatorGenericException
+        // (not a JSONValidatorException); it must still be surfaced, not dropped.
+        $this->setRequest([], '{invalid', 'application/json');
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(static function (array $data): bool {
+                return isset($data['errors'])
+                    && count($data['errors']) === 1
+                    && isset($data['errors'][0]['error'])
+                    && $data['errors'][0]['error'] !== '';
+            }));
+
+        $this->controller->validate();
+    }
+
     // ── registerValidators ───────────────────────────────────────────────
 
     #[Test]

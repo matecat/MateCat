@@ -9,6 +9,7 @@ use Exception;
 use Klein\Response;
 use Model\Filters\FiltersConfigTemplateDao;
 use PDOException;
+use RuntimeException;
 use TypeError;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Registry\AppConfig;
@@ -260,6 +261,7 @@ class FiltersConfigTemplateController extends KleinController
 
     /**
      * @return Response
+     * @throws RuntimeException
      */
     public function schema(): Response
     {
@@ -268,11 +270,18 @@ class FiltersConfigTemplateController extends KleinController
 
     /**
      * @return object
+     * @throws RuntimeException
      */
     private function getModelSchema(): object
     {
         $schema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json') ?: '';
 
-        return json_decode($schema);
+        $decoded = json_decode($schema);
+
+        if (!is_object($decoded)) {
+            throw new RuntimeException('Unable to load the filters extraction parameters schema');
+        }
+
+        return $decoded;
     }
 }

@@ -351,6 +351,9 @@ class FiltersConfigTemplateControllerTest extends AbstractTest
 
     // ── schema ───────────────────────────────────────────────────────────
 
+    /**
+     * @throws \RuntimeException
+     */
     #[Test]
     public function schema_returns_decoded_schema(): void
     {
@@ -360,6 +363,35 @@ class FiltersConfigTemplateControllerTest extends AbstractTest
         $response->expects(self::once())->method('json');
 
         $this->controller->schema();
+    }
+
+    /**
+     * @throws \RuntimeException
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws \ReflectionException
+     */
+    #[Test]
+    public function schema_throws_runtime_exception_when_schema_unreadable(): void
+    {
+        $this->setRequest();
+        $response = $this->createStub(Response::class);
+        $this->reflector->getProperty('response')->setValue($this->controller, $response);
+
+        $originalRoot = AppConfig::$ROOT;
+        // Point ROOT at a directory that does not contain the schema asset, so
+        // file_get_contents fails, json_decode('') yields null and the guard fires.
+        AppConfig::$ROOT = sys_get_temp_dir() . '/matecat-missing-schema-' . uniqid();
+
+        // The missing-file read intentionally emits a warning; swallow only that.
+        set_error_handler(static fn(): bool => true, E_WARNING);
+
+        try {
+            $this->expectException(\RuntimeException::class);
+            $this->controller->schema();
+        } finally {
+            restore_error_handler();
+            AppConfig::$ROOT = $originalRoot;
+        }
     }
 
     // ── registerValidators ───────────────────────────────────────────────

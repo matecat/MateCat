@@ -406,6 +406,43 @@ class DownloadQRControllerTest extends AbstractTest
         }
     }
 
+    // ── initDependencies (real parent body) ──────────────────────────────
+
+    #[Test]
+    public function initDependencies_assigns_job_dao(): void
+    {
+        // The TestableDownloadQRController overrides initDependencies() to a no-op,
+        // so invoke the real parent body to cover the JobDao assignment.
+        $fresh  = new TestableDownloadQRController();
+        $method = (new ReflectionClass(DownloadQRController::class))->getMethod('initDependencies');
+        $method->invoke($fresh);
+
+        self::assertInstanceOf(
+            JobDao::class,
+            (new ReflectionClass(DownloadQRController::class))
+                ->getProperty('jobDao')
+                ->getValue($fresh)
+        );
+    }
+
+    // ── downloadFile (missing file → empty output, terminates) ───────────
+
+    #[Test]
+    public function downloadFile_handles_unreadable_file_and_terminates(): void
+    {
+        // A non-existent path makes file_get_contents() return false, exercising
+        // the `$outputContent = ''` guard, then the testing-env termination branch.
+        $missing = sys_get_temp_dir() . '/qr_does_not_exist_' . uniqid() . '.csv';
+
+        ob_start();
+        try {
+            $this->expectException(RenderTerminatedException::class);
+            @$this->invoke('downloadFile', ['text/csv', 'out.csv', $missing]);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
     private function makeSegmentStruct(): QualityReportSegmentStruct
     {
         $s                            = new QualityReportSegmentStruct();

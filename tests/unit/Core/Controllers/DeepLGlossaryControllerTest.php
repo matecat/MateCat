@@ -13,6 +13,7 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
@@ -63,6 +64,9 @@ class DeepLGlossaryControllerTest extends AbstractTest
     private TestableDeepLGlossaryController $controller;
     private Stub&DeepL $deepLStub;
 
+    /** @var list<string> temp files created during tests, removed in tearDown */
+    private array $tempFiles = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -81,7 +85,34 @@ class DeepLGlossaryControllerTest extends AbstractTest
     protected function tearDown(): void
     {
         AppConfig::$SKIP_SQL_CACHE = false;
+
+        // remove any temp CSV files created by the tests
+        foreach ($this->tempFiles as $path) {
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+        }
+        $this->tempFiles = [];
+
+        // CSV::extract() copies the uploaded file into a fresh tempnam("/tmp", "DEEPL_EXCEL_GLOSS_")
+        // file; clean those up so no temp junk leaks out of the test run.
+        foreach (glob(sys_get_temp_dir() . '/DEEPL_EXCEL_GLOSS_*') ?: [] as $leaked) {
+            @unlink($leaked);
+        }
+
         parent::tearDown();
+    }
+
+    /**
+     * Create a temp CSV file with the given contents, tracked for cleanup.
+     */
+    private function makeCsv(string $contents): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'glosstest') . '.csv';
+        file_put_contents($path, $contents);
+        $this->tempFiles[] = $path;
+
+        return $path;
     }
 
     /**
@@ -206,8 +237,7 @@ class DeepLGlossaryControllerTest extends AbstractTest
     public function create_parses_csv_and_returns_created_glossary(): void
     {
         // real 2-column CSV the production code parses end-to-end
-        $csvPath = tempnam(sys_get_temp_dir(), 'glosstest') . '.csv';
-        file_put_contents($csvPath, "source,target\nHello,Ciao\n");
+        $csvPath = $this->makeCsv("source,target\nHello,Ciao\n");
 
         $innerFile = new UploadElement();
         $innerFile->file_path = $csvPath;
@@ -236,6 +266,129 @@ class DeepLGlossaryControllerTest extends AbstractTest
             ->with(['glossary_id' => 'new-id']);
 
         $this->controller->create();
+    }
+
+    #[Test]
+    public function create_throws_when_glossary_file_unreadable(): void
+    {
+        // UploadElement without a file_path -> CSV::extract() returns false
+        $uploaded = new UploadElement();
+        $uploaded->glossary = new UploadElement();
+
+        $upload = $this->createStub(Upload::class);
+        $upload->method('uploadFiles')->willReturn($uploaded);
+        $this->reflector->getProperty('upload')->setValue($this->controller, $upload);
+
+        $files = $this->createStub(DataCollection::class);
+        $files->method('exists')->willReturn(true);
+        $files->method('all')->willReturn([]);
+
+        $request = $this->createStub(Request::class);
+        $request->method('files')->willReturn($files);
+        $request->method('param')->willReturn('7');
+        $this->reflector->getProperty('request')->setValue($this->controller, $request);
+        $this->reflector->getProperty('params')->setValue($this->controller, ['name' => 'My Glossary']);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unable to read the uploaded glossary file');
+
+        $this->controller->create();
+    }
+
+    #[Test]
+    public function create_throws_when_csv_not_two_columns(): void
+    {
+        // 3-column CSV -> header count !== 2
+        $csvPath = $this->makeCsv("a,b,c\n1,2,3\n");
+
+        $innerFile = new UploadElement();
+        $innerFile->file_path = $csvPath;
+        $uploaded = new UploadElement();
+        $uploaded->glossary = $innerFile;
+
+        $upload = $this->createStub(Upload::class);
+        $upload->method('uploadFiles')->willReturn($uploaded);
+        $this->reflector->getProperty('upload')->setValue($this->controller, $upload);
+
+        $files = $this->createStub(DataCollection::class);
+        $files->method('exists')->willReturn(true);
+        $files->method('all')->willReturn([]);
+
+        $request = $this->createStub(Request::class);
+        $request->method('files')->willReturn($files);
+        $request->method('param')->willReturn('7');
+        $this->reflector->getProperty('request')->setValue($this->controller, $request);
+        $this->reflector->getProperty('params')->setValue($this->controller, ['name' => 'My Glossary']);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Glossary has more or less than 2 columns');
+
+        $this->controller->create();
+    }
+
+    #[Test]
+    public function create_throws_when_csv_is_empty(): void
+    {
+        // header row only -> $csv body empty
+        $csvPath = $this->makeCsv("source,target\n");
+
+        $innerFile = new UploadElement();
+        $innerFile->file_path = $csvPath;
+        $uploaded = new UploadElement();
+        $uploaded->glossary = $innerFile;
+
+        $upload = $this->createStub(Upload::class);
+        $upload->method('uploadFiles')->willReturn($uploaded);
+        $this->reflector->getProperty('upload')->setValue($this->controller, $upload);
+
+        $files = $this->createStub(DataCollection::class);
+        $files->method('exists')->willReturn(true);
+        $files->method('all')->willReturn([]);
+
+        $request = $this->createStub(Request::class);
+        $request->method('files')->willReturn($files);
+        $request->method('param')->willReturn('7');
+        $this->reflector->getProperty('request')->setValue($this->controller, $request);
+        $this->reflector->getProperty('params')->setValue($this->controller, ['name' => 'My Glossary']);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Glossary is empty');
+
+        $this->controller->create();
+    }
+
+    // ── initDependencies ─────────────────────────────────────────────────
+
+    #[Test]
+    public function initDependencies_creates_upload_instance(): void
+    {
+        // exercise the real initDependencies() body (the test subclass overrides it)
+        $controller = new ValidatorTestableDeepLGlossaryController();
+        $ref        = new ReflectionClass(DeepLGlossaryController::class);
+
+        $ref->getMethod('initDependencies')->invoke($controller);
+
+        self::assertInstanceOf(Upload::class, $ref->getProperty('upload')->getValue($controller));
+    }
+
+    // ── getDeepLClient ───────────────────────────────────────────────────
+
+    #[Test]
+    public function getDeepLClient_throws_when_user_not_authenticated(): void
+    {
+        // exercise the real getDeepLClient() seam (the test subclass overrides it);
+        // with no authenticated user the uid guard throws before any DB access.
+        $controller = new ValidatorTestableDeepLGlossaryController();
+        $ref        = new ReflectionClass(DeepLGlossaryController::class);
+
+        $ref->getProperty('user')->setValue($controller, new UserStruct());
+
+        $method = $ref->getMethod('getDeepLClient');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('User not authenticated');
+
+        $method->invoke($controller, 7);
     }
 
     // ── registerValidators ───────────────────────────────────────────────

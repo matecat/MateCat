@@ -259,6 +259,8 @@ class PayableRateController extends KleinController
             foreach ($errors as $error) {
                 if ($error instanceof JSONValidatorException) {
                     $formattedErrors[] = $error->getFormattedError("payable_rate");
+                } else {
+                    $formattedErrors[] = ['error' => $error->getMessage()];
                 }
             }
 

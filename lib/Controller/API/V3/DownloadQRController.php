@@ -322,19 +322,25 @@ class DownloadQRController extends KleinController
         }
 
         $tmpFilePath = tempnam("/tmp", '');
+        // @codeCoverageIgnoreStart - tempnam failure is not reproducible in a unit test
         if ($tmpFilePath === false) {
             return false;
         }
+        // @codeCoverageIgnoreEnd
 
         $fp = fopen($tmpFilePath, 'w');
+        // @codeCoverageIgnoreStart - fopen failure is not reproducible in a unit test
         if ($fp === false) {
             return false;
         }
+        // @codeCoverageIgnoreEnd
 
         foreach ($csvData as $fields) {
             if (!fputcsv($fp, $fields)) {
+                // @codeCoverageIgnoreStart - fputcsv failure is not reproducible in a unit test
                 fclose($fp);
                 return false;
+                // @codeCoverageIgnoreEnd
             }
         }
         fclose($fp);
@@ -533,6 +539,7 @@ class DownloadQRController extends KleinController
         ob_get_clean();
         ob_start("ob_gzhandler");
         if (!headers_sent()) {
+            // @codeCoverageIgnoreStart - HTTP header emission is unreachable under CLI/PHPUnit (headers already sent)
             header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
             header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
             header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -543,6 +550,7 @@ class DownloadQRController extends KleinController
             header("Expires: 0");
             header("Connection: close");
             header("Content-Length: " . strlen($outputContent));
+            // @codeCoverageIgnoreEnd
         }
         echo $outputContent;
         unlink($filePath);
