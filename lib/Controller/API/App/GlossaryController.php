@@ -326,7 +326,7 @@ class GlossaryController extends KleinController
         if ($this->isLoggedIn()) {
             if ($this->user->email == $job->status_owner) {
                 $userRole = Filter::OWNER;
-            } elseif (CatUtils::isRevisionFromIdJobAndPassword($json['id_job'], $json['password'])) {
+            } elseif ((new CatUtils())->isRevisionFromIdJobAndPassword($json['id_job'], $json['password'])) {
                 $userRole = Filter::ROLE_REVISOR;
             } else {
                 $userRole = Filter::ROLE_TRANSLATOR;
@@ -346,7 +346,7 @@ class GlossaryController extends KleinController
      */
     protected function getJobFromIdAndAnyPassword(int $idJob, string $jobPassword): ?JobStruct
     {
-        return CatUtils::getJobFromIdAndAnyPassword($idJob, $jobPassword);
+        return (new CatUtils())->getJobFromIdAndAnyPassword($idJob, $jobPassword);
     }
 
     /**

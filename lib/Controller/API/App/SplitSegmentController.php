@@ -46,7 +46,7 @@ class SplitSegmentController extends KleinController
             [],
             $metadata->getSubfilteringCustomHandlers($request['jobStruct']->id, $request['jobStruct']->password)
         );
-        [, $translationStruct->source_chunk_lengths] = CatUtils::parseSegmentSplit($request['segment'], '', $Filter);
+        [, $translationStruct->source_chunk_lengths] = (new CatUtils())->parseSegmentSplit($request['segment'], '', $Filter);
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces = (count($translationStruct->source_chunk_lengths) > 1 ? count($translationStruct->source_chunk_lengths) - 1 : 1);

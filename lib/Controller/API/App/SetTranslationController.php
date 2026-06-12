@@ -360,7 +360,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         /**
          * Translation is inserted here.
          */
-        CatUtils::addSegmentTranslation($newTranslation, (bool)$this->isRevision());
+        (new CatUtils())->addSegmentTranslation($newTranslation, (bool)$this->isRevision());
 
         /**
          * @see ProjectCompletion
@@ -465,7 +465,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     ): array {
         $newTotals = WordCountStruct::loadFromJob($this->data['chunk']);
 
-        $job_stats = CatUtils::getFastStatsForJob($newTotals);
+        $job_stats = (new CatUtils())->getFastStatsForJob($newTotals);
         $job_stats['analysis_complete'] = (
             $this->data['project']['status_analysis'] == ProjectStatus::STATUS_DONE or
             $this->data['project']['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE
@@ -756,7 +756,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected function checkSegmentSplitData(): void
     {
-        [$__translation, $this->data['split_chunk_lengths']] = CatUtils::parseSegmentSplit($this->data['translation'], '', $this->filter);
+        [$__translation, $this->data['split_chunk_lengths']] = (new CatUtils())->parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
             $this->logger->debug("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true));
@@ -941,7 +941,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $translation->translation_date = date("Y-m-d H:i:s");
 
             try {
-                CatUtils::addSegmentTranslation($translation, (bool)$this->isRevision());
+                (new CatUtils())->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
                 Database::obtain()->rollback();
                 throw new RuntimeException($e->getMessage());
