@@ -6,14 +6,22 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use Model\Filters\DTO\IDto;
+use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
+use Utils\Validator\IsJobRevisionValidator;
 
 class CatUtilsTest extends AbstractTest
 {
@@ -604,7 +612,7 @@ class CatUtilsTest extends AbstractTest
         $review = new ChunkReviewStruct();
         $review->is_pass = true;
 
-        $result = CatUtils::getQualityOverallFromJobStruct($job, [$review]);
+        $result = (new CatUtils())->getQualityOverallFromJobStruct($job, [$review]);
         $this->assertEquals('excellent', $result);
     }
 
@@ -615,7 +623,7 @@ class CatUtilsTest extends AbstractTest
         $review = new ChunkReviewStruct();
         $review->is_pass = false;
 
-        $result = CatUtils::getQualityOverallFromJobStruct($job, [$review]);
+        $result = (new CatUtils())->getQualityOverallFromJobStruct($job, [$review]);
         $this->assertEquals('fail', $result);
     }
 
@@ -626,7 +634,7 @@ class CatUtilsTest extends AbstractTest
         $review = new ChunkReviewStruct();
         // is_pass defaults to null
 
-        $result = CatUtils::getQualityOverallFromJobStruct($job, [$review]);
+        $result = (new CatUtils())->getQualityOverallFromJobStruct($job, [$review]);
         $this->assertNull($result);
     }
 
@@ -641,7 +649,7 @@ class CatUtilsTest extends AbstractTest
         $review = new ChunkReviewStruct();
         $review->is_pass = true;
 
-        $result = CatUtils::getChunkReviewStructFromJobStruct($job, [$review]);
+        $result = (new CatUtils())->getChunkReviewStructFromJobStruct($job, [$review]);
         $this->assertSame($review, $result);
     }
 
@@ -669,7 +677,7 @@ class CatUtilsTest extends AbstractTest
             'rejected_raw_words' => 0.0,
         ]);
         $wCount = WordCountStruct::loadFromJob($job);
-        $result = CatUtils::getFastStatsForJob($wCount, false);
+        $result = (new CatUtils())->getFastStatsForJob($wCount, false);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('equivalent', $result);
@@ -686,7 +694,7 @@ class CatUtilsTest extends AbstractTest
     public function testGetJobPasswordWithSourcePageOneReturnsPasswordL(): void
     {
         $job = new JobStruct(['id' => 1, 'password' => 'mypassword']);
-        $result = CatUtils::getJobPassword($job, 1);
+        $result = (new CatUtils())->getJobPassword($job, 1);
         $this->assertEquals('mypassword', $result);
     }
 
@@ -694,7 +702,7 @@ class CatUtilsTest extends AbstractTest
     public function testGetJobPasswordWithSourcePageZeroReturnsPasswordL(): void
     {
         $job = new JobStruct(['id' => 1, 'password' => 'mypassword']);
-        $result = CatUtils::getJobPassword($job, 0);
+        $result = (new CatUtils())->getJobPassword($job, 0);
         $this->assertEquals('mypassword', $result);
     }
 
@@ -705,26 +713,22 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testGetIsRevisionFromRequestUriNotSetReturnsFalseL(): void
     {
-        unset($_SERVER['REQUEST_URI']);
-        $this->assertFalse(CatUtils::getIsRevisionFromRequestUri());
+        $cat = new CatUtils(null, null, null, null, []);
+        $this->assertFalse($cat->getIsRevisionFromRequestUri());
     }
 
     #[Test]
     public function testGetIsRevisionFromRequestUriWithRevisePathReturnsTrueL(): void
     {
-        $_SERVER['REQUEST_URI'] = '/revise/1/abc/2';
-        $result = CatUtils::getIsRevisionFromRequestUri();
-        unset($_SERVER['REQUEST_URI']);
-        $this->assertTrue($result);
+        $cat = new CatUtils(null, null, null, null, ['REQUEST_URI' => '/revise/1/abc/2']);
+        $this->assertTrue($cat->getIsRevisionFromRequestUri());
     }
 
     #[Test]
     public function testGetIsRevisionFromRequestUriWithTranslatePathReturnsFalseL(): void
     {
-        $_SERVER['REQUEST_URI'] = '/translate/1/abc/2';
-        $result = CatUtils::getIsRevisionFromRequestUri();
-        unset($_SERVER['REQUEST_URI']);
-        $this->assertFalse($result);
+        $cat = new CatUtils(null, null, null, null, ['REQUEST_URI' => '/translate/1/abc/2']);
+        $this->assertFalse($cat->getIsRevisionFromRequestUri());
     }
 
     // -------------------------------------------------------------------------
@@ -734,26 +738,22 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testGetIsRevisionFromRefererNotSetReturnsFalseL(): void
     {
-        unset($_SERVER['HTTP_REFERER']);
-        $this->assertFalse(CatUtils::getIsRevisionFromReferer());
+        $cat = new CatUtils(null, null, null, null, []);
+        $this->assertFalse($cat->getIsRevisionFromReferer());
     }
 
     #[Test]
     public function testGetIsRevisionFromRefererWithRevisePathReturnsTrueL(): void
     {
-        $_SERVER['HTTP_REFERER'] = 'http://example.com/revise/1/abc/2';
-        $result = CatUtils::getIsRevisionFromReferer();
-        unset($_SERVER['HTTP_REFERER']);
-        $this->assertTrue($result);
+        $cat = new CatUtils(null, null, null, null, ['HTTP_REFERER' => 'http://example.com/revise/1/abc/2']);
+        $this->assertTrue($cat->getIsRevisionFromReferer());
     }
 
     #[Test]
     public function testGetIsRevisionFromRefererWithTranslatePathReturnsFalseL(): void
     {
-        $_SERVER['HTTP_REFERER'] = 'http://example.com/translate/1/abc/2';
-        $result = CatUtils::getIsRevisionFromReferer();
-        unset($_SERVER['HTTP_REFERER']);
-        $this->assertFalse($result);
+        $cat = new CatUtils(null, null, null, null, ['HTTP_REFERER' => 'http://example.com/translate/1/abc/2']);
+        $this->assertFalse($cat->getIsRevisionFromReferer());
     }
 
     // -------------------------------------------------------------------------
@@ -822,7 +822,7 @@ class CatUtilsTest extends AbstractTest
     public function testParseSegmentSplitWithNoPlaceholderReturnsUnchangedL(): void
     {
         $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
-        [$segment, $positions] = CatUtils::parseSegmentSplit('hello world', ' ', $filter);
+        [$segment, $positions] = (new CatUtils())->parseSegmentSplit('hello world', ' ', $filter);
         $this->assertEquals('hello world', $segment);
         $this->assertEquals([], $positions);
     }
@@ -832,7 +832,7 @@ class CatUtilsTest extends AbstractTest
     {
         $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
         $input = 'hello' . CatUtils::splitPlaceHolder . 'world';
-        [$segment, $positions] = CatUtils::parseSegmentSplit($input, ' ', $filter);
+        [$segment, $positions] = (new CatUtils())->parseSegmentSplit($input, ' ', $filter);
         $this->assertNotEmpty($positions);
         $this->assertStringContainsString('hello', $segment);
     }
@@ -844,35 +844,35 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountEmptyStringL(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('   ');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('   ');
         $this->assertEquals('', $result);
     }
 
     #[Test]
     public function testCleanRawStringForWordCountPlainEnglishL(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('hello world');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('hello world');
         $this->assertNotEmpty($result);
     }
 
     #[Test]
     public function testCleanRawStringForWordCountCjkL(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('你好世界', 'zh-CN');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('你好世界', 'zh-CN');
         $this->assertNotEmpty($result);
     }
 
     #[Test]
     public function testCleanRawStringForWordCountWithLinkL(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('Visit http://example.com for info', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('Visit http://example.com for info', 'en-US');
         $this->assertNotEmpty($result);
     }
 
     #[Test]
     public function testCleanRawStringForWordCountWithNumberL(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('I have 42 items', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('I have 42 items', 'en-US');
         $this->assertNotEmpty($result);
     }
 
@@ -901,7 +901,7 @@ class CatUtilsTest extends AbstractTest
         $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
         // Segment starts with placeholder → first chunk is ''
         $input = CatUtils::splitPlaceHolder . 'world';
-        [$segment, $positions] = CatUtils::parseSegmentSplit($input, ' ', $filter);
+        [$segment, $positions] = (new CatUtils())->parseSegmentSplit($input, ' ', $filter);
         // Empty first chunk causes break; segment stays empty, positions = [0]
         $this->assertIsArray($positions);
     }
@@ -916,7 +916,7 @@ class CatUtilsTest extends AbstractTest
         $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
         // "hello " ends with space (separator), so separator is removed to avoid double space
         $input = 'hello ' . CatUtils::splitPlaceHolder . 'world';
-        [$segment, $positions] = CatUtils::parseSegmentSplit($input, ' ', $filter);
+        [$segment, $positions] = (new CatUtils())->parseSegmentSplit($input, ' ', $filter);
         $this->assertNotEmpty($positions);
         // No double space between chunks
         $this->assertStringNotContainsString('  ', $segment);
@@ -929,7 +929,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountPunctuationOnlyReturnsEmptyL(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('...', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('...', 'en-US');
         $this->assertEquals('', $result);
     }
 
@@ -953,7 +953,7 @@ class CatUtilsTest extends AbstractTest
     {
         $job = new JobStruct(['id' => 1, 'password' => 'abc']);
         // [null] is non-empty, so getChunkReviewStructFromJobStruct returns null (chunkReviews[0])
-        $result = CatUtils::getQualityOverallFromJobStruct($job, [null]);
+        $result = (new CatUtils())->getQualityOverallFromJobStruct($job, [null]);
         $this->assertNull($result);
     }
 
@@ -981,10 +981,8 @@ class CatUtilsTest extends AbstractTest
     public function testGetIsRevisionFromRequestUriWithUrlWithoutPathL(): void
     {
         // 'http://host' → parse_url returns ['scheme'=>'http','host'=>'host'] — no 'path' key
-        $_SERVER['REQUEST_URI'] = 'http://host';
-        $result = CatUtils::getIsRevisionFromRequestUri();
-        unset($_SERVER['REQUEST_URI']);
-        $this->assertFalse($result);
+        $cat = new CatUtils(null, null, null, null, ['REQUEST_URI' => 'http://host']);
+        $this->assertFalse($cat->getIsRevisionFromRequestUri());
     }
 
     /**
@@ -994,10 +992,8 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testGetIsRevisionFromRefererWithUrlWithoutPathL(): void
     {
-        $_SERVER['HTTP_REFERER'] = 'http://host';
-        $result = CatUtils::getIsRevisionFromReferer();
-        unset($_SERVER['HTTP_REFERER']);
-        $this->assertFalse($result);
+        $cat = new CatUtils(null, null, null, null, ['HTTP_REFERER' => 'http://host']);
+        $this->assertFalse($cat->getIsRevisionFromReferer());
     }
 
     /**
@@ -1026,7 +1022,7 @@ class CatUtilsTest extends AbstractTest
         ]);
         // status_analysis = 'ANALYZING' is neither STATUS_DONE nor STATUS_NOT_TO_ANALYZE
         $project = new ProjectStruct(['status_analysis' => 'ANALYZING']);
-        $result = CatUtils::getWStructFromJobArray($job, $project);
+        $result = (new CatUtils())->getWStructFromJobArray($job, $project);
         $this->assertInstanceOf(WordCountStruct::class, $result);
     }
 
@@ -1039,7 +1035,7 @@ class CatUtilsTest extends AbstractTest
     {
         // sha1_file on a non-existent file generates a PHP warning; suppress it
         // The function should return early without throwing
-        @CatUtils::deleteSha('/tmp/nonexistent_file_' . uniqid() . '.txt', 'en-US', null, 0);
+        @(new CatUtils())->deleteSha('/tmp/nonexistent_file_' . uniqid() . '.txt', 'en-US', null, 0);
         $this->assertTrue(true); // If we reach here, no exception was thrown
     }
 
@@ -1051,7 +1047,7 @@ class CatUtilsTest extends AbstractTest
     public function testCleanRawStringForWordCountWithHtmlTagL(): void
     {
         // <br> should be processed by the filter
-        $result = CatUtils::clean_raw_string_4_word_count('Hello <br> World', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('Hello <br> World', 'en-US');
         $this->assertIsString($result);
     }
 
@@ -1073,7 +1069,7 @@ class CatUtilsTest extends AbstractTest
     public function testCleanRawStringForWordCountWithDashesOnlyL(): void
     {
         // Dashes are punctuation → removed → empty
-        $result = CatUtils::clean_raw_string_4_word_count('--- --- ---', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('--- --- ---', 'en-US');
         $this->assertIsString($result);
     }
 
@@ -1085,7 +1081,7 @@ class CatUtilsTest extends AbstractTest
     public function testGetJobPasswordWithNullJobIdReturnsNullL(): void
     {
         $job = new JobStruct(['id' => null, 'password' => null]);
-        $result = CatUtils::getJobPassword($job, 2);
+        $result = (new CatUtils())->getJobPassword($job, 2);
         $this->assertNull($result);
     }
 
@@ -1118,7 +1114,7 @@ class CatUtilsTest extends AbstractTest
         file_put_contents($hashFilePath, $fileName . "\n");
 
         try {
-            CatUtils::deleteSha($filePath, $source, null, 0);
+            (new CatUtils())->deleteSha($filePath, $source, null, 0);
 
             // Hash file should be deleted (was the only entry)
             $this->assertFileDoesNotExist($hashFilePath);
@@ -1153,7 +1149,7 @@ class CatUtilsTest extends AbstractTest
         file_put_contents($hashFilePath, $fileName . "\n" . $otherFile . "\n");
 
         try {
-            CatUtils::deleteSha($filePath, $source, null, 0);
+            (new CatUtils())->deleteSha($filePath, $source, null, 0);
 
             // Hash file should still exist (other entry remains)
             $this->assertFileExists($hashFilePath);
@@ -1179,7 +1175,7 @@ class CatUtilsTest extends AbstractTest
 
         try {
             // No hash file created → should just return without error
-            CatUtils::deleteSha($filePath, 'en-US', null, 0);
+            (new CatUtils())->deleteSha($filePath, 'en-US', null, 0);
             $this->assertTrue(true);
         } finally {
             @unlink($filePath);
@@ -1210,7 +1206,7 @@ class CatUtilsTest extends AbstractTest
         file_put_contents($hashFilePath, '');
 
         try {
-            CatUtils::deleteSha($filePath, $source, null, 0);
+            (new CatUtils())->deleteSha($filePath, $source, null, 0);
 
             // Empty hash file should be deleted
             $this->assertFileDoesNotExist($hashFilePath);
@@ -1244,7 +1240,7 @@ class CatUtilsTest extends AbstractTest
         file_put_contents($hashFilePath, $fileName . "\n");
 
         try {
-            CatUtils::deleteSha($filePath, $source, $segRule, 0);
+            (new CatUtils())->deleteSha($filePath, $source, $segRule, 0);
 
             $this->assertFileDoesNotExist($hashFilePath);
         } finally {
@@ -1315,7 +1311,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountCjkLanguage(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('你好世界', 'zh-CN');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('你好世界', 'zh-CN');
         $this->assertNotEmpty($result);
     }
 
@@ -1338,7 +1334,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountEnglishPossessive(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count("the cat's hat", 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count("the cat's hat", 'en-US');
         $this->assertNotEmpty($result);
     }
 
@@ -1349,7 +1345,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountHyphenatedWords(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('well-known state-of-the-art solution', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('well-known state-of-the-art solution', 'en-US');
         $this->assertNotEmpty($result);
     }
 
@@ -1360,7 +1356,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountProtocolLink(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count(
+        $result = (new CatUtils())->clean_raw_string_4_word_count(
             'Read php://filter/read=string.strip_tags/resource=php://input then continue',
             'en-US'
         );
@@ -1374,7 +1370,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountHtmlEntities(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count('foo &amp;nbsp; bar', 'en-US');
+        $result = (new CatUtils())->clean_raw_string_4_word_count('foo &amp;nbsp; bar', 'en-US');
         $this->assertNotEmpty($result);
     }
 
@@ -1385,7 +1381,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCleanRawStringForWordCountComplexUrl(): void
     {
-        $result = CatUtils::clean_raw_string_4_word_count(
+        $result = (new CatUtils())->clean_raw_string_4_word_count(
             'Go to www.example.com.br/path#anchor and read',
             'en-US'
         );
@@ -1404,7 +1400,7 @@ class CatUtilsTest extends AbstractTest
         $project = new ProjectStruct(['id' => 999999]);
         // getJobs() returns empty → idJobs is empty → SQL IN() with no values → PDOException
         $this->expectException(\PDOException::class);
-        CatUtils::getSegmentTranslationsCount($project);
+        (new CatUtils())->getSegmentTranslationsCount($project);
     }
 
     // =========================================================================
@@ -1564,10 +1560,248 @@ class CatUtilsTest extends AbstractTest
         try {
             // filtersTemplateId=999999 → triggers DB lookup, returns null (no matching row)
             // This should complete without error since the table exists but the row does not
-            CatUtils::deleteSha($filePath, 'en-US', null, 999999);
+            (new CatUtils())->deleteSha($filePath, 'en-US', null, 999999);
             $this->assertTrue(true, 'deleteSha completed without error when filtersTemplateId not found');
         } finally {
             @unlink($filePath);
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // DI seam tests — constructor deps
+    // -------------------------------------------------------------------------
+
+    /**
+     * ChunkReviewDao seam: injected fake returns sentinel review_password.
+     * getJobPassword() calls $this->chunkReviewDao->findByIdJobAndPasswordAndSourcePage()
+     * when sourcePage > 1.
+     */
+    #[Test]
+    public function testGetJobPasswordUsesInjectedChunkReviewDao(): void
+    {
+        $sentinelReviewPassword = 'fake_review_pw_sentinel';
+
+        $fakeReview = new ChunkReviewStruct();
+        $fakeReview->review_password = $sentinelReviewPassword;
+
+        [$dbStub] = $this->createDatabaseMock();
+
+        $fakeDao = new class($dbStub, $fakeReview) extends ChunkReviewDao {
+            public function __construct(\Model\DataAccess\IDatabase $db, private readonly ChunkReviewStruct $stub)
+            {
+                parent::__construct($db);
+            }
+            public function findByIdJobAndPasswordAndSourcePage(int $id_job, string $password, ?int $source_page): ?ChunkReviewStruct
+            {
+                return $this->stub;
+            }
+        };
+
+        $job = new JobStruct();
+        $job->id = 42;
+        $job->password = 'somepassword';
+
+        $cat = new CatUtils($fakeDao);
+        $result = $cat->getJobPassword($job, 2);
+
+        $this->assertSame($sentinelReviewPassword, $result);
+    }
+
+    /**
+     * JobDao seam: injected fake returns sentinel count.
+     * getSegmentTranslationsCount() calls $this->jobDao->getSegmentTranslationsCount().
+     */
+    #[Test]
+    public function testGetSegmentTranslationsCountUsesInjectedJobDao(): void
+    {
+        $sentinelCount = 999;
+
+        [$dbStub] = $this->createDatabaseMock();
+
+        $fakeJobDao = new class($dbStub, $sentinelCount) extends JobDao {
+            public function __construct(\Model\DataAccess\IDatabase $db, private readonly int $count)
+            {
+                parent::__construct($db);
+            }
+            public function getSegmentTranslationsCount(array $idJobs, int $ttl = 0): ?int
+            {
+                return $this->count;
+            }
+        };
+
+        // ProjectStruct::getJobs() hits DB; override with anonymous subclass.
+        $fakeProject = new class extends ProjectStruct {
+            /** @return JobStruct[] */
+            public function getJobs(int $ttl = 0): array
+            {
+                $job = new JobStruct();
+                $job->id = 1;
+                return [$job];
+            }
+        };
+
+        $cat = new CatUtils(null, $fakeJobDao);
+        $result = $cat->getSegmentTranslationsCount($fakeProject);
+
+        $this->assertSame($sentinelCount, $result);
+    }
+
+    /**
+     * SegmentTranslationDao seam: injected fake records the addTranslation call.
+     * addSegmentTranslation() delegates to $this->segmentTranslationDao->addTranslation().
+     */
+    #[Test]
+    public function testAddSegmentTranslationUsesInjectedSegmentTranslationDao(): void
+    {
+        [$dbStub] = $this->createDatabaseMock();
+
+        $fakeSegDao = new class($dbStub) extends SegmentTranslationDao {
+            public bool $wasCalled = false;
+            public function __construct(\Model\DataAccess\IDatabase $db)
+            {
+                parent::__construct($db);
+            }
+            public function addTranslation(SegmentTranslationStruct $translation_struct, bool $is_revision): int
+            {
+                $this->wasCalled = true;
+                return 1;
+            }
+        };
+
+        $translation = new SegmentTranslationStruct();
+
+        $cat = new CatUtils(null, null, $fakeSegDao);
+        $cat->addSegmentTranslation($translation, false);
+
+        $this->assertTrue($fakeSegDao->wasCalled, 'addTranslation was not called on the injected SegmentTranslationDao');
+    }
+
+    /**
+     * FeatureSet seam: injected FeatureSet is used when building the MateCatFilter
+     * inside countSegmentWords() (called via segment_raw_word_count shim).
+     * Passing an empty FeatureSet (no loadFromMandatory) proves the seam is wired
+     * without hitting the DB.
+     */
+    #[Test]
+    public function testCountSegmentWordsUsesInjectedFeatureSet(): void
+    {
+        $fakeFeatureSet = new FeatureSet([]);
+
+        $cat = new CatUtils(null, null, null, $fakeFeatureSet);
+        // Should return a positive word count using the injected FeatureSet (no DB hit)
+        $result = $cat->countSegmentWords('Hello world', 'en-US');
+
+        $this->assertGreaterThan(0, $result);
+    }
+
+    /**
+     * server seam: injected $server array drives getIsRevisionFromRequestUri().
+     * Already covered in the adapted tests above; this duplicate confirms the
+     * constructor seam is the only path (no global $_SERVER fallback when injected).
+     */
+    #[Test]
+    public function testGetIsRevisionFromRequestUriUsesInjectedServer(): void
+    {
+        $catRevise = new CatUtils(null, null, null, null, ['REQUEST_URI' => '/revise/1/abc/2']);
+        $catTranslate = new CatUtils(null, null, null, null, ['REQUEST_URI' => '/translate/1/abc/2']);
+
+        $this->assertTrue($catRevise->getIsRevisionFromRequestUri());
+        $this->assertFalse($catTranslate->getIsRevisionFromRequestUri());
+    }
+
+    // -------------------------------------------------------------------------
+    // DI seam tests — method-param deps
+    // -------------------------------------------------------------------------
+
+    /**
+     * FiltersConfigTemplateDao seam (method param): injected fake getById returns
+     * a sentinel struct, proving deleteSha uses it when filtersTemplateId > 0.
+     */
+    #[Test]
+    public function testDeleteShaUsesInjectedFiltersConfigTemplateDao(): void
+    {
+        $sentinelStruct = new FiltersConfigTemplateStruct();
+        $sentinelStruct->filters_extraction_parameters = null;
+
+        [$dbStub] = $this->createDatabaseMock();
+
+        $fakeFiltersDao = new class($dbStub, $sentinelStruct) extends FiltersConfigTemplateDao {
+            public bool $wasCalled = false;
+            public function __construct(\Model\DataAccess\IDatabase $db, private readonly FiltersConfigTemplateStruct $stub)
+            {
+                parent::__construct($db);
+            }
+            public function getById(int $id, int $ttl = 60): ?FiltersConfigTemplateStruct
+            {
+                $this->wasCalled = true;
+                return $this->stub;
+            }
+        };
+
+        // Need a real file on disk so deleteSha doesn't bail at sha1_file() == false
+        $filePath = sys_get_temp_dir() . '/catutils_seam_test_' . uniqid() . '.txt';
+        file_put_contents($filePath, 'seam test content');
+
+        try {
+            (new CatUtils())->deleteSha($filePath, 'en-US', null, 1, $fakeFiltersDao);
+        } finally {
+            @unlink($filePath);
+        }
+
+        $this->assertTrue($fakeFiltersDao->wasCalled, 'getById was not called on the injected FiltersConfigTemplateDao');
+    }
+
+    /**
+     * CounterModel seam (method param): injected fake initializeJobWordCount returns
+     * a sentinel WordCountStruct when total == 0 and project status is STATUS_DONE.
+     */
+    #[Test]
+    public function testGetWStructFromJobArrayUsesInjectedCounterModel(): void
+    {
+        // Build a sentinel struct with new_words set so getTotal() returns > 0
+        $sentinelStruct = new WordCountStruct();
+        $sentinelStruct->setNewWords(42.0);
+
+        $fakeCounter = new class($sentinelStruct) extends CounterModel {
+            public function __construct(private readonly WordCountStruct $stub) {}
+            public function initializeJobWordCount(int $id_job, string $jPassword, mixed $wordCounterDao = null): WordCountStruct
+            {
+                return $this->stub;
+            }
+        };
+
+        $job = new JobStruct();
+        $job->id = 1;
+        $job->password = 'abc';
+
+        // Force the total==0 + STATUS_DONE branch (job loaded from JobStruct has total=0)
+        $project = new ProjectStruct();
+        $project['status_analysis'] = ProjectStatus::STATUS_DONE;
+
+        $result = (new CatUtils())->getWStructFromJobArray($job, $project, $fakeCounter);
+
+        // The sentinel struct is returned; getNewWords() proves the fake was used
+        $this->assertSame(42.0, $result->getNewWords());
+    }
+
+    /**
+     * IsJobRevisionValidator seam (method param): injected fake validate() returns
+     * a non-null object, so isRevisionFromIdJobAndPassword() returns true without
+     * hitting the DB.
+     */
+    #[Test]
+    public function testIsRevisionFromIdJobAndPasswordUsesInjectedValidator(): void
+    {
+        $fakeValidator = new class extends IsJobRevisionValidator {
+            public function validate(\Utils\Validator\Contracts\ValidatorObjectInterface $object): ?\Utils\Validator\Contracts\ValidatorObjectInterface
+            {
+                return $object; // non-null → method returns true
+            }
+        };
+
+        $cat = new CatUtils();
+        $result = $cat->isRevisionFromIdJobAndPassword(1, 'any_password', $fakeValidator);
+
+        $this->assertTrue($result);
     }
 }
