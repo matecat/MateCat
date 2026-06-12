@@ -194,8 +194,10 @@ body.cattool {
   right: -7%;
   width: 7%;
   top: 0;
-  height: 100%;
-  gap: 6px;
+  height: calc(100% - 8px);
+  gap: 4px;
+  margin-top: 8px;
+
   > div {
     height: 24px;
   }
