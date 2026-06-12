@@ -51,7 +51,7 @@ class CountWordController extends KleinController
     public function rawWords(): void
     {
         $this->featureSet->loadFromUserEmail($this->user->email);
-        $words_count = CatUtils::segment_raw_word_count($this->request->param('text'), $this->language);
+        $words_count = (new CatUtils())->segment_raw_word_count($this->request->param('text'), $this->language);
         $filter = MateCatFilter::getInstance($this->featureSet);
         /** @var $filter MateCatFilter */
         $size_restriction = new SizeRestriction($filter->fromLayer0ToLayer2($this->request->param('text')), $this->featureSet);

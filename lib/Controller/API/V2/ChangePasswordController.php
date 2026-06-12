@@ -105,7 +105,7 @@ class ChangePasswordController extends KleinController
 
             if ($revision_number) { // change job revision password
 
-                $jStruct = CatUtils::getJobFromIdAndAnyPassword($id, $actual_pwd);
+                $jStruct = (new CatUtils())->getJobFromIdAndAnyPassword($id, $actual_pwd);
 
                 if ($jStruct === null) {
                     throw new Exception('Job not found');

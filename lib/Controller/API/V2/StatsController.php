@@ -6,6 +6,7 @@ namespace Controller\API\V2;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
 use Model\Jobs\JobStruct;
 use Model\WordCount\WordCountStruct;
 use Utils\Tools\CatUtils;
@@ -20,11 +21,12 @@ class StatsController extends KleinController
 
     /**
      * @return void
+     * @throws Exception
      */
     public function stats(): void
     {
         $wStruct = WordCountStruct::loadFromJob($this->chunk);
-        $job_stats = CatUtils::getFastStatsForJob($wStruct);
+        $job_stats = (new CatUtils())->getFastStatsForJob($wStruct);
         $job_stats['analysis_complete'] = $this->chunk->getProject()->analysisComplete();
 
         $this->response->json($job_stats);

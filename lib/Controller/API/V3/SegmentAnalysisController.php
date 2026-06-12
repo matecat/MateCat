@@ -168,7 +168,7 @@ class SegmentAnalysisController extends KleinController
         $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
         $mt_qe_workflow_enabled = !empty($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
-        $segmentsCount = CatUtils::getSegmentTranslationsCount($this->project) ?? 0;
+        $segmentsCount = (new CatUtils())->getSegmentTranslationsCount($this->project) ?? 0;
         $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount, $matchClass));
     }
 
@@ -346,8 +346,8 @@ class SegmentAnalysisController extends KleinController
             'target' => $segmentForAnalysis->translation,
             'source_lang' => $segmentForAnalysis->source,
             'target_lang' => $segmentForAnalysis->target,
-            'source_raw_word_count' => CatUtils::segment_raw_word_count($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
-            'target_raw_word_count' => CatUtils::segment_raw_word_count($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
+            'source_raw_word_count' => (new CatUtils())->segment_raw_word_count($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
+            'target_raw_word_count' => (new CatUtils())->segment_raw_word_count($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
             'match_type' => $matchConstants::toExternalMatchTypeName($segmentForAnalysis->match_type ?? 'default'),
             'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
             'issues' => $issues,
