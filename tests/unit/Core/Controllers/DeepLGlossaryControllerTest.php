@@ -13,6 +13,7 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
+use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
@@ -55,6 +56,32 @@ class ValidatorTestableDeepLGlossaryController extends DeepLGlossaryController
 
     protected function initDependencies(): void
     {
+    }
+}
+
+class EngineSeamTestableDeepLGlossaryController extends DeepLGlossaryController
+{
+    public DeepL $stubEngine;
+
+    public function __construct()
+    {
+    }
+
+    protected function afterConstruct(): void
+    {
+    }
+
+    protected function initDependencies(): void
+    {
+    }
+
+    protected function registerValidators(): void
+    {
+    }
+
+    protected function resolveDeepLEngine(int $engineId, int $uid): DeepL
+    {
+        return $this->stubEngine;
     }
 }
 
@@ -389,6 +416,48 @@ class DeepLGlossaryControllerTest extends AbstractTest
         $this->expectExceptionMessage('User not authenticated');
 
         $method->invoke($controller, 7);
+    }
+
+    private function engineSeamController(mixed $extraParams): EngineSeamTestableDeepLGlossaryController
+    {
+        $record = $this->createStub(EngineStruct::class);
+        $record->method('getExtraParamsAsArray')->willReturn($extraParams);
+
+        $engine = $this->createStub(DeepL::class);
+        $engine->method('getEngineRecord')->willReturn($record);
+
+        $controller = new EngineSeamTestableDeepLGlossaryController();
+        $controller->stubEngine = $engine;
+
+        $ref  = new ReflectionClass(DeepLGlossaryController::class);
+        $user = new UserStruct();
+        $user->uid = 7;
+        $ref->getProperty('user')->setValue($controller, $user);
+
+        return $controller;
+    }
+
+    #[Test]
+    public function getDeepLClient_configures_and_returns_engine(): void
+    {
+        $controller = $this->engineSeamController(['DeepL-Auth-Key' => 'secret-key']);
+        $ref        = new ReflectionClass(DeepLGlossaryController::class);
+
+        $client = $ref->getMethod('getDeepLClient')->invoke($controller, 3);
+
+        self::assertSame($controller->stubEngine, $client);
+    }
+
+    #[Test]
+    public function getDeepLClient_throws_when_auth_key_missing(): void
+    {
+        $controller = $this->engineSeamController([]);
+        $ref        = new ReflectionClass(DeepLGlossaryController::class);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('`DeepL-Auth-Key` is not set');
+
+        $ref->getMethod('getDeepLClient')->invoke($controller, 3);
     }
 
     // ── registerValidators ───────────────────────────────────────────────

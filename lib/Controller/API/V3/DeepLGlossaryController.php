@@ -171,8 +171,7 @@ class DeepLGlossaryController extends KleinController
     {
         $uid = $this->user->uid ?? throw new Exception('User not authenticated', 401);
 
-        // @codeCoverageIgnoreStart - resolving a live DeepL engine requires the engine registry/DB, not unit-testable
-        $engine = EnginesFactory::getInstanceByIdAndUser($engineId, $uid, DeepL::class);
+        $engine = $this->resolveDeepLEngine($engineId, $uid);
         $extraParams = $engine->getEngineRecord()->getExtraParamsAsArray();
 
         if (!is_array($extraParams) || !isset($extraParams['DeepL-Auth-Key'])) {
@@ -182,6 +181,16 @@ class DeepLGlossaryController extends KleinController
         $engine->setApiKey((string)$extraParams['DeepL-Auth-Key']);
 
         return $engine;
-        // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Resolve the DeepL engine instance from the engine registry. Isolated as a seam so
+     * {@see getDeepLClient()} can be unit-tested without the live registry/DB.
+     *
+     * @throws Exception
+     */
+    protected function resolveDeepLEngine(int $engineId, int $uid): DeepL
+    {
+        return EnginesFactory::getInstanceByIdAndUser($engineId, $uid, DeepL::class);
     }
 }
