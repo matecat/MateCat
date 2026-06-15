@@ -75,11 +75,11 @@ class ChangeProjectNameController extends KleinController
      */
     private function changeProjectName($id, $password, $name): void
     {
-        $pStruct = (new ProjectDao())->findByIdAndPassword($id, $password);
+        $pStruct = (new ProjectDao($this->db()))->findByIdAndPassword($id, $password);
 
         $this->checkUserPermissions($pStruct, $this->getUser());
 
-        $pDao = new ProjectDao();
+        $pDao = new ProjectDao($this->db());
         $pDao->changeName($pStruct, $name);
         $pDao->destroyFetchByIdCache($id, ProjectStruct::class);
         $projectId = $pStruct->id ?? throw new Exception('Project not found');
@@ -98,7 +98,7 @@ class ChangeProjectNameController extends KleinController
     {
         // check if user is belongs to the project team
         $team = $project->getTeam();
-        $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
+        $check = (new MembershipDao($this->db()))->findTeamByIdAndUser($team->id, $user);
 
         if ($check === null) {
             throw new Exception('The logged user does not belong to the right team', 403);

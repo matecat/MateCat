@@ -92,7 +92,7 @@ class JobsTranslatorsController extends KleinController
             ]
         ]);
 
-        $confDao = new ConfirmationDao();
+        $confDao = new ConfirmationDao($this->db());
         $confirmationStruct = $confDao->setCacheTTL(60 * 60)->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {

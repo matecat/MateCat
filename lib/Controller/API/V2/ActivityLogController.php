@@ -30,7 +30,7 @@ class ActivityLogController extends KleinController
         $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->db());
         $rawContent = $activityLogDao->getAllForProject($validator->getIdProject());
 
         $formatted = new Activity($rawContent);
@@ -45,7 +45,7 @@ class ActivityLogController extends KleinController
         $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->db());
         $rawContent = $activityLogDao->getLastActionInProject($validator->getIdProject());
 
         $formatted = new Activity($rawContent);
@@ -61,7 +61,7 @@ class ActivityLogController extends KleinController
         $validator = new ChunkPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->db());
         $activityLogDao->whereConditions = ' id_job = :id_job ';
         $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
         $rawLogContent = $activityLogDao->read(

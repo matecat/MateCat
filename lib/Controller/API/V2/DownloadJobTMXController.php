@@ -76,7 +76,7 @@ class DownloadJobTMXController extends AbstractDownloadController
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = (new JobDao())->getByIdAndPasswordOrFail($this->jobID, $jobPass);
+        $jobData = $this->jobInfo = (new JobDao($this->db()))->getByIdAndPasswordOrFail($this->jobID, $jobPass);
         $this->featureSet->loadForProject($this->jobInfo->getProject());
 
         $projectData = $this->jobInfo->getProject();

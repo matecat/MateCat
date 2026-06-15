@@ -51,11 +51,11 @@ class DownloadOriginalController extends AbstractDownloadController
         $this->password = (string)($__postInput['password'] ?? '');
 
         // get Job Info, we need only a row of jobs ( split )
-        $jobData = (new JobDao())->getByIdAndPassword((int)$this->id_job, $this->password);
+        $jobData = (new JobDao($this->db()))->getByIdAndPassword((int)$this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
-            $chunkReviewStruct = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
+            $chunkReviewStruct = (new ChunkReviewDao($this->db()))->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
             if (empty($chunkReviewStruct)) {
                 $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
@@ -79,7 +79,7 @@ class DownloadOriginalController extends AbstractDownloadController
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[0]['id_project'];
 
-        $this->project = (new ProjectDao())->findById($id_project) ?? throw new Exception("Project not found");
+        $this->project = (new ProjectDao($this->db()))->findById($id_project) ?? throw new Exception("Project not found");
 
         $output_content = [];
 
