@@ -26,6 +26,7 @@ class StatusController extends KleinController
      * @throws NotFoundException
      * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
+     * @throws \TypeError
      */
     public function index(): void
     {

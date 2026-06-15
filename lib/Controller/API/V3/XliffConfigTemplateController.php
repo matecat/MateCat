@@ -35,6 +35,7 @@ class XliffConfigTemplateController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws \Swaggest\JsonSchema\Exception
+     * @throws Exception
      */
     protected function validateJSON(string $json): void
     {

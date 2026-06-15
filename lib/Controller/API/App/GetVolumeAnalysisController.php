@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
+use TypeError;
 use Model\Analysis\Status;
 use Model\Projects\ProjectDao;
 
@@ -16,6 +17,7 @@ class GetVolumeAnalysisController extends KleinController
 {
 
     /**
+     * @throws InvalidArgumentException
      */
     protected function afterConstruct(): void
     {
@@ -32,6 +34,7 @@ class GetVolumeAnalysisController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function analysis(): Response
     {
@@ -44,6 +47,7 @@ class GetVolumeAnalysisController extends KleinController
 
     /**
      * @return void
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): void
     {

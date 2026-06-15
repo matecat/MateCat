@@ -39,6 +39,11 @@ class ActivityLogController extends BaseKleinViewController implements IControll
     {
         $request = $this->validateTheRequest();
 
+        if (!is_array($request)) {
+            $this->setView("project_not_found.html", [], 404);
+            $this->render();
+        }
+
         $activityLogDao = new ActivityLogDao($this->db());
         $activityLogDao->epilogueString = " LIMIT 1;";
         $rawLogContent = $activityLogDao->read(
@@ -61,6 +66,9 @@ class ActivityLogController extends BaseKleinViewController implements IControll
         $this->render();
     }
 
+    /**
+     * @return array<string, mixed>|false|null
+     */
     protected function validateTheRequest(): false|array|null
     {
         $filterArgs = [

@@ -14,6 +14,7 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\JobStatus;
 use Utils\Constants\Teams;
 
@@ -28,10 +29,11 @@ class GetProjectsController extends KleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function fetch(): void
     {
-        $this->featureSet->loadFromUserEmail($this->user->email);
+        $this->featureSet->loadFromUserEmail($this->user->email ?? '');
         $request = $this->validateTheRequest();
 
         $page = $request['page'];
@@ -92,7 +94,7 @@ class GetProjectsController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -143,6 +145,7 @@ class GetProjectsController extends KleinController
      * @throws NotFoundException
      * @throws ReflectionException
      * @throws RuntimeException
+     * @throws Exception
      */
     private function filterAssignee(TeamStruct $team, ?int $id_assignee): ?UserStruct
     {
@@ -151,11 +154,9 @@ class GetProjectsController extends KleinController
         }
 
         $dao = new MembershipDao($this->db());
-        $memberships = $dao->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($team->id);
+        $memberships = $dao->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId((int)$team->id);
 
-        /**
-         * @var $users MembershipStruct[]
-         */
+        /** @var MembershipStruct[] $users */
         $users = array_values(array_filter($memberships, function (MembershipStruct $membership) use ($id_assignee) {
             return $membership->getUser()->uid == $id_assignee;
         }));
@@ -168,15 +169,15 @@ class GetProjectsController extends KleinController
     }
 
     /**
-     * @param $id_team
+     * @param int|string $id_team
      *
-     * @return TeamStruct|null
+     * @return TeamStruct
      * @throws Exception
      */
-    private function filterTeam($id_team): ?TeamStruct
+    private function filterTeam(int|string $id_team): TeamStruct
     {
         $dao = new MembershipDao($this->db());
-        $team = $dao->findTeamByIdAndUser($id_team, $this->user);
+        $team = $dao->findTeamByIdAndUser((int)$id_team, $this->user);
 
         if (!$team) {
             throw  new NotFoundException('Team not found in user memberships', 404);

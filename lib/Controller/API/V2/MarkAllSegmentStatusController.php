@@ -99,18 +99,22 @@ class MarkAllSegmentStatusController extends KleinController
         }
     }
 
-    protected function sanitizeSegmentIDs($segment_list): array
+    /**
+     * @param array<mixed> $segment_list
+     * @return array<int, int>
+     */
+    protected function sanitizeSegmentIDs(array $segment_list): array
     {
-        foreach ($segment_list as $pos => $integer) {
+        /** @var array<int, int> $filtered */
+        $filtered = [];
+        foreach ($segment_list as $integer) {
             $result = (int)$integer;
-            if (empty($result)) {
-                unset($segment_list[$pos]);
-                continue;
+            if (!empty($result)) {
+                $filtered[] = $result;
             }
-            $segment_list[$pos] = $result;
         }
 
-        return array_unique($segment_list);
+        return array_values(array_unique($filtered));
     }
 
 }

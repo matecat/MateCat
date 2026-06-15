@@ -14,19 +14,23 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\Projects\ProjectStruct;
+use TypeError;
 
 
 class JobMergeController extends KleinController
 {
 
     private ProjectStruct $project;
+    /** @var JobStruct[] */
     private array $jobList = [];
 
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function merge(): void
     {
@@ -64,7 +68,7 @@ class JobMergeController extends KleinController
         // Define the success callback for the password validator.
         $validator->onSuccess(function () use ($validator) {
             // Assign the validated project to the $project property.
-            $this->project = $validator->getProject();
+            $this->project = $validator->getProject() ?? throw new NotFoundException();
 
             // Retrieve the job list associated with the project.
             $this->jobList = (new JobDao($this->db()))->getNotDeletedById((int)$this->request->param('id_job'));

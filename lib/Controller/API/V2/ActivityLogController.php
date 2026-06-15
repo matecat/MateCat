@@ -64,6 +64,7 @@ class ActivityLogController extends KleinController
         $activityLogDao = new ActivityLogDao($this->db());
         $activityLogDao->whereConditions = ' id_job = :id_job ';
         $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
+        /** @var ActivityLogStruct[] $rawLogContent */
         $rawLogContent = $activityLogDao->read(
             new ActivityLogStruct(),
             ['id_job' => $validator->getJobId()]

@@ -5,6 +5,7 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DomainException;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
@@ -16,6 +17,8 @@ class IssueCheckController extends KleinController
     /**
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws DomainException
+     * @throws \Exception
      */
     public function segments(): void
     {
@@ -26,8 +29,8 @@ class IssueCheckController extends KleinController
         ];
 
         // params
-        $id_job = $this->request->param('id_job');
-        $password = $this->request->param('password');
+        $id_job = (int)$this->request->param('id_job');
+        $password = (string)$this->request->param('password');
         $source_page = $this->request->param('source_page', 2);
 
         // find a job
@@ -42,7 +45,11 @@ class IssueCheckController extends KleinController
 
         $modifiedSegments = (new SegmentTranslationDao($this->db()))
             ->setCacheTTL(60 * 5)
-            ->getSegmentTranslationsModifiedByRevisorWithIssueCount($id_job, $job->password, $source_page);
+            ->getSegmentTranslationsModifiedByRevisorWithIssueCount(
+                $job->id ?? throw new DomainException('Job ID must not be null'),
+                $job->password ?? throw new DomainException('Job password must not be null'),
+                (int)$source_page
+            );
 
         $result['modified_segments_count'] = count($modifiedSegments);
 

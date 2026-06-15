@@ -13,7 +13,9 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
 use Model\Users\MetadataDao;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -31,6 +33,7 @@ class UserKeysController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function delete(): void
     {
@@ -38,7 +41,7 @@ class UserKeysController extends KleinController
         $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
         $mkDao = $this->getMkDao();
         $userMemoryKeys = $mkDao->disable($memoryKeyToUpdate);
-        $this->removeKeyFromEngines($userMemoryKeys, $request['remove_from']);
+        $this->removeKeyFromEngines($memoryKeyToUpdate, $request['remove_from']);
 
         $this->response->json([
             'errors' => [],
@@ -49,6 +52,7 @@ class UserKeysController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): void
     {
@@ -66,6 +70,7 @@ class UserKeysController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function newKey(): void
     {
@@ -84,6 +89,7 @@ class UserKeysController extends KleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     public function info(): void
     {
@@ -98,6 +104,7 @@ class UserKeysController extends KleinController
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function share(): void
     {
@@ -108,8 +115,7 @@ class UserKeysController extends KleinController
 
         $userMemoryKeys = $mkDao->read($memoryKeyToUpdate) ?: throw new NotFoundException("No user memory keys found");
 
-
-        (new TmKeyManager())->shareKey($emailList, $userMemoryKeys[0], $this->user);
+        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user);
 
         $this->response->json([
             'errors' => [],
@@ -119,9 +125,9 @@ class UserKeysController extends KleinController
     }
 
     /**
-     * @param array $userMemoryKeys
+     * @param array<int, MemoryKeyStruct> $userMemoryKeys
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function getKeyUsersInfo(array $userMemoryKeys): array
     {
@@ -134,7 +140,10 @@ class UserKeysController extends KleinController
         }
 
         $_userStructs = [];
-        foreach ($userMemoryKeys[0]->tm_key->getInUsers() as $userStruct) {
+        $tmKey = $userMemoryKeys[0]->tm_key;
+        // in_users is a dynamic property set on TmKeyStruct (extends stdClass) by MemoryKeyDao::_buildResult()
+        $inUsers = ($tmKey !== null && property_exists($tmKey, 'in_users')) ? $tmKey->in_users : [];
+        foreach ($inUsers as $userStruct) {
             $_userStructs[] = new ClientUserFacade($userStruct);
         }
 
@@ -146,7 +155,7 @@ class UserKeysController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -187,13 +196,14 @@ class UserKeysController extends KleinController
     }
 
     /**
-     * @param      $key
-     * @param null $description
+     * @param string $key
+     * @param string|null $description
      *
      * @return MemoryKeyStruct
      * @throws Exception
+     * @throws TypeError
      */
-    private function getMemoryToUpdate($key, $description = null): MemoryKeyStruct
+    private function getMemoryToUpdate(string $key, ?string $description = null): MemoryKeyStruct
     {
         $tmService = new TMSService();
 
@@ -207,7 +217,7 @@ class UserKeysController extends KleinController
         $tmKeyStruct->glos = true;
 
         $memoryKeyToUpdate = new MemoryKeyStruct();
-        $memoryKeyToUpdate->uid = $this->user->uid;
+        $memoryKeyToUpdate->uid = (int)$this->user->uid;
         $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 
         return $memoryKeyToUpdate;
@@ -231,7 +241,7 @@ class UserKeysController extends KleinController
         $uid = $this->getUser()->uid ?? throw new Exception('User not authenticated');
 
         // Convert the CSV string into an array of engine names, filtering out empty values.
-        $deleteFrom = array_filter(explode(",", $enginesListCsv));
+        $deleteFrom = array_filter(explode(",", $enginesListCsv ?? ''));
 
         // Iterate over each engine name in the list.
         foreach ($deleteFrom as $engineName) {
@@ -250,8 +260,8 @@ class UserKeysController extends KleinController
                          ->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load'));
 
                     // If metadata exists, attempt to delete the memory key from the engine.
-                    if (!empty($ownerMmtEngineMetaData)) {
-                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
+                    if (!empty($ownerMmtEngineMetaData) && is_int($ownerMmtEngineMetaData->value)) {
+                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value, AbstractEngine::class);
                         $engineKey = $engine->getMemoryIfMine($memoryKey);
                         if ($engineKey) {
                             $engine->deleteMemory($engineKey);

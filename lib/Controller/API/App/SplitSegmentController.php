@@ -12,6 +12,7 @@ use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
 
@@ -25,26 +26,29 @@ class SplitSegmentController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function split(): void
     {
         $request = $this->validateTheRequest();
 
         $translationStruct = SegmentSplitStruct::getStruct();
-        $translationStruct->id_segment = $request['id_segment'];
-        $translationStruct->id_job = $request['id_job'];
+        $translationStruct->id_segment = (int)$request['id_segment'];
+        $translationStruct->id_job = (int)$request['id_job'];
 
         $featureSet = $this->getFeatureSet();
 
-        /** @var MateCatFilter $Filter */
         $metadata = new MetadataDao($this->db());
         $Filter = MateCatFilter::getInstance(
             $featureSet,
             $request['jobStruct']->source,
             $request['jobStruct']->target,
             [],
-            $metadata->getSubfilteringCustomHandlers($request['jobStruct']->id, $request['jobStruct']->password)
+            $metadata->getSubfilteringCustomHandlers((int)$request['jobStruct']->id, (string)$request['jobStruct']->password)
         );
+        if (!$Filter instanceof MateCatFilter) {
+            throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
+        }
         [, $translationStruct->source_chunk_lengths] = (new CatUtils())->parseSegmentSplit($request['segment'], '', $Filter);
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
@@ -70,7 +74,7 @@ class SplitSegmentController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{id_job: string|false, id_segment: string|false, job_pass: string|false, segment: mixed, target: mixed, jobStruct: \Model\Jobs\JobStruct}
      * @throws Exception
      */
     private function validateTheRequest(): array

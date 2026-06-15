@@ -38,20 +38,26 @@ class GetTranslationMismatchesController extends KleinController
     {
         $id_segment = (string) filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
 
-        $this->featureSet->loadForProject((new ProjectDao($this->db()))->findByJobId($this->params['id_job'], 60 * 60));
+        $project = (new ProjectDao($this->db()))->findByJobId($this->params['id_job'], 60 * 60);
+        if ($project !== null) {
+            $this->featureSet->loadForProject($project);
+        }
         $parsedIdSegment = $this->parseIdSegment($id_segment);
 
         if ($parsedIdSegment['id_segment'] == '') {
-            $parsedIdSegment['id_segment'] = 0;
+            $parsedIdSegment['id_segment'] = '0';
         }
 
         $sDao = new SegmentDao($this->db());
-        $Translation_mismatches = $sDao->setCacheTTL(60 /* 1 minutes cache */)->getTranslationsMismatches($this->params['id_job'], $this->params['password'], $parsedIdSegment['id_segment']);
+        $Translation_mismatches = $sDao->setCacheTTL(60 /* 1 minutes cache */)->getTranslationsMismatches($this->params['id_job'], $this->params['password'], (int)$parsedIdSegment['id_segment']);
+
+        // @phpstan-ignore argument.type (getTranslationsMismatches returns ShapelessConcreteStruct[] which implements ArrayAccess<string,mixed> and is consumed as array<string,mixed> by the view)
+        $mismatchesView = new SegmentTranslationMismatches($Translation_mismatches, $this->chunk, count($Translation_mismatches), $this->featureSet);
 
         $this->response->json([
             'errors' => [],
             'code' => 1,
-            'data' => (new SegmentTranslationMismatches($Translation_mismatches, $this->chunk, count($Translation_mismatches), $this->featureSet))->render()
+            'data' => $mismatchesView->render()
         ]);
     }
 

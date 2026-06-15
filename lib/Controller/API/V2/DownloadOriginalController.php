@@ -64,14 +64,6 @@ class DownloadOriginalController extends AbstractDownloadController
             $jobData = $chunkReviewStruct->getChunk();
         }
 
-        // check for Password correctness
-        if (empty($jobData)) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
-            $this->logger->debug($msg);
-
-            return;
-        }
-
         //get storage object
         $fs = FilesStorageFactory::create();
         $files_job = $fs->getFilesForJob($this->id_job, false);
@@ -119,8 +111,8 @@ class DownloadOriginalController extends AbstractDownloadController
                 throw new Exception("pathinfo_fix returned non-array value");
             }
 
-            if ($pathInfo['extension'] != 'zip') {
-                $this->setFilename($pathInfo['basename'] . ".zip");
+            if (($pathInfo['extension'] ?? '') !== 'zip') {
+                $this->setFilename(($pathInfo['basename'] ?? $this->_filename) . ".zip");
             }
 
             $this->outputContent = self::composeZip($output_content, null, true); //add zip archive content here;

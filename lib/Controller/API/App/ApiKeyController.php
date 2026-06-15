@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
+use PDOException;
 use Throwable;
 use Utils\Tools\Utils;
 
@@ -62,6 +63,7 @@ class ApiKeyController extends KleinController
      *
      * There is no need to protect this route
      * @throws NotFoundException
+     * @throws PDOException
      */
     public function show(): void
     {

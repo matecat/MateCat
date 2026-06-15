@@ -51,12 +51,13 @@ class ChangeProjectNameController extends KleinController
             throw new InvalidArgumentException('Missing required parameters [`id `, `password`]');
         }
 
-        $name = CatUtils::sanitizeOrFallbackProjectName($name ?? '');
+        $name = CatUtils::sanitizeOrFallbackProjectName(is_string($name) ? $name : '');
 
-        (new ProjectAccessValidator($this, $this->project))->validate();
-        $ownerEmail = $this->project->id_customer;
+        $project = $this->project ?? throw new \RuntimeException('Project not loaded');
+        (new ProjectAccessValidator($this, $project))->validate();
+        $ownerEmail = $project->id_customer;
 
-        $this->changeProjectName($id, $password, $name);
+        $this->changeProjectName((int)$id, (string)$password, $name);
         $this->featureSet->dispatch(new FilterProjectNameModifiedEvent((int)$id, $name, $password, $ownerEmail));
 
         $this->response->status()->setCode(200);
@@ -67,13 +68,13 @@ class ChangeProjectNameController extends KleinController
     }
 
     /**
-     * @param $id
-     * @param $password
-     * @param $name
+     * @param int $id
+     * @param string $password
+     * @param string $name
      *
      * @throws Exception
      */
-    private function changeProjectName($id, $password, $name): void
+    private function changeProjectName(int $id, string $password, string $name): void
     {
         $pStruct = (new ProjectDao($this->db()))->findByIdAndPassword($id, $password);
 
@@ -98,7 +99,11 @@ class ChangeProjectNameController extends KleinController
     {
         // check if user is belongs to the project team
         $team = $project->getTeam();
-        $check = (new MembershipDao($this->db()))->findTeamByIdAndUser($team->id, $user);
+        if ($team === null) {
+            throw new Exception('Project has no team', 403);
+        }
+        $teamId = $team->id ?? throw new Exception('Project has no team', 403);
+        $check = (new MembershipDao($this->db()))->findTeamByIdAndUser($teamId, $user);
 
         if ($check === null) {
             throw new Exception('The logged user does not belong to the right team', 403);

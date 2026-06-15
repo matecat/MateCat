@@ -37,6 +37,7 @@ class ProjectsController extends KleinController
      * @return void
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function get(): void
     {
@@ -53,6 +54,8 @@ class ProjectsController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function setDueDate(): void
     {
@@ -61,6 +64,10 @@ class ProjectsController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws \DomainException
+     * @throws \PDOException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function updateDueDate(): void
     {
@@ -71,7 +78,7 @@ class ProjectsController extends KleinController
             &&
             $this->params['due_date'] > time()
         ) {
-            $due_date = Utils::mysqlTimestamp($this->params['due_date']);
+            $due_date = Utils::mysqlTimestamp((int)$this->params['due_date']);
             $project_dao = new ProjectDao($this->db());
             $project_dao->updateField($this->project, "due_date", $due_date);
         }
@@ -84,6 +91,10 @@ class ProjectsController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws \DomainException
+     * @throws \PDOException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function deleteDueDate(): void
     {
@@ -134,7 +145,7 @@ class ProjectsController extends KleinController
      * @throws Exception
      * @throws Throwable
      */
-    protected function changeStatus($status): void
+    protected function changeStatus(string $status): void
     {
         (new ProjectAccessValidator($this, $this->project))->validate();
 
@@ -178,7 +189,7 @@ class ProjectsController extends KleinController
 
         // Define the success callback for the password validator.
         $projectValidator->onSuccess(function () use ($projectValidator) {
-            $this->project = $projectValidator->getProject();
+            $this->project = $projectValidator->getProject() ?? throw new \RuntimeException('Project not found');
         })
             // Define the failure callback for the password validator.
             ->onFailure(function (Throwable $exception) {
@@ -186,7 +197,7 @@ class ProjectsController extends KleinController
                     // If the project is not found, attempt validation using an access token.
                     $projectByTokenValidator = new ProjectAccessTokenValidator($this);
                     $projectByTokenValidator->onSuccess(function () use ($projectByTokenValidator) {
-                        $this->project = $projectByTokenValidator->getProject();
+                        $this->project = $projectByTokenValidator->getProject() ?? throw new \RuntimeException('Project not found');
                     })->validate();
                 } else {
                     // Rethrow the exception for other validation failures.

@@ -32,7 +32,7 @@ class ChangeJobsStatusController extends KleinController
 
         if ($request['res_type'] == "prj") {
             try {
-                $project = (new ProjectDao($this->db()))->findByIdAndPassword($request['res_id'], $request['password']);
+                $project = (new ProjectDao($this->db()))->findByIdAndPassword((int)$request['res_id'], (string)$request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
@@ -53,7 +53,7 @@ class ChangeJobsStatusController extends KleinController
             }
         } else {
             try {
-                $firstChunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail($request['res_id'], $request['password']);
+                $firstChunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$request['res_id'], (string)$request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
                 $this->logger->debug($msg);
@@ -76,7 +76,7 @@ class ChangeJobsStatusController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{pn: string|false, res_type: string|false, res_id: int|false, password: string|false, new_status: string}
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -87,7 +87,7 @@ class ChangeJobsStatusController extends KleinController
         $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $new_status = filter_var($this->request->param('new_status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
 
-        if (!JobStatus::isAllowedStatus($new_status)) {
+        if ($new_status === false || !JobStatus::isAllowedStatus($new_status)) {
             throw new Exception("Invalid Status");
         }
 

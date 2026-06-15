@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Exception;
 use InvalidArgumentException;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
@@ -22,6 +23,8 @@ class FilesController extends AbstractStatefulKleinController
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function segments(): void
     {
@@ -47,13 +50,14 @@ class FilesController extends AbstractStatefulKleinController
      *
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
      */
     private function getFirstAndLastSegmentFromFilePartId(int $filePartId): void
     {
         $filePartsDao = new FilesPartsDao($this->db());
         $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment($filePartId);
 
-        if (null === $firstAndLastSegment->first_segment) {
+        if ($firstAndLastSegment === null || $firstAndLastSegment->first_segment === null) {
             throw new NotFoundException('File part id ' . $filePartId . ' was not found');
         }
 
@@ -68,6 +72,7 @@ class FilesController extends AbstractStatefulKleinController
      *
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws Exception
      */
     private function getFirstAndLastSegmentFromFileId(int $fileId): void
     {
@@ -89,6 +94,8 @@ class FilesController extends AbstractStatefulKleinController
 
     /**
      * @param mixed $value
+     *
+     * @throws InvalidArgumentException
      */
     private function validateInteger(mixed $value): void
     {

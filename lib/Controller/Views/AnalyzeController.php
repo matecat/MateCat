@@ -57,6 +57,9 @@ class AnalyzeController extends BaseKleinViewController implements IController
      */
     protected string $_outsource_login_API = '//signin.translated.net/';
 
+    /**
+     * @return array<string, mixed>
+     */
     private function validateTheRequest(): array
     {
         $filterArgs = [
@@ -73,8 +76,9 @@ class AnalyzeController extends BaseKleinViewController implements IController
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
-    public function renderView()
+    public function renderView(): void
     {
         $postInput = $this->validateTheRequest();
 
@@ -119,9 +123,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
             ]);
         }
 
-        if ($projectStruct) {
-            $this->featureSet->loadForProject($projectStruct);
-        }
+        $this->featureSet->loadForProject($projectStruct);
 
         $projectData = $this->getProjectDao()->getProjectAndJobData($pid);
         $analysisStatus = new Status($projectData, $this->featureSet, $this->user);
@@ -136,7 +138,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
             'project_status' => $projectStruct->status_analysis,
             'outsource_service_login' => $this->_outsource_login_API,
             'showModalBoxLogin' => new PHPTalBoolean(!$this->isLoggedIn()),
-            'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes() ?? []),
+            'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes()),
             'num_segments' => $model->getSummary()->getTotalSegments(),
             'num_segments_analyzed' => $model->getSummary()->getSegmentsAnalyzed(),
             'daemon_misconfiguration' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),

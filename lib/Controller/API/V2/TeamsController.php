@@ -41,6 +41,7 @@ class TeamsController extends KleinController
     /**
      * @throws ReflectionException
      * @throws Exception
+     * @throws \TypeError
      */
     public function create(): void
     {
@@ -81,8 +82,11 @@ class TeamsController extends KleinController
         ]);
 
         $model = new TeamModel($teamStruct);
-        foreach ($params['members'] as $email) {
-            $model->addMemberEmail($email);
+        $memberEmails = is_array($params['members']) ? $params['members'] : [];
+        foreach ($memberEmails as $email) {
+            if (is_string($email)) {
+                $model->addMemberEmail($email);
+            }
         }
         $model->setUser($this->user);
 
@@ -115,8 +119,10 @@ class TeamsController extends KleinController
             ],
         ]);
 
+        $teamId = is_int($params['id_team']) ? $params['id_team'] : throw new InvalidArgumentException("Wrong parameter: id_team is invalid", 400);
+
         $org = new TeamStruct();
-        $org->id = $params['id_team'];
+        $org->id = $teamId;
         $org->name = trim($params['name']);
 
         if (empty($org->name)) {
@@ -124,7 +130,7 @@ class TeamsController extends KleinController
         }
 
         $membershipDao = new MembershipDao($this->db());
-        $org = $membershipDao->findTeamByIdAndUser($org->id, $this->user);
+        $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
             throw new AuthorizationError("Not Authorized", 401);
@@ -135,7 +141,8 @@ class TeamsController extends KleinController
         $teamDao = new TeamDao($this->db());
 
         $teamDao->updateTeamName($org);
-        $memberList = (new MembershipDao($this->db()))->getMemberListByTeamId($org->id);
+        $orgId = $org->id ?? throw new \RuntimeException('Team has no id');
+        $memberList = (new MembershipDao($this->db()))->getMemberListByTeamId($orgId);
 
         foreach ($memberList as $user) {
             (new MembershipDao($this->db()))->destroyCacheUserTeams($user->getUser()); // clean the cache for all team users to see the changes
@@ -150,6 +157,8 @@ class TeamsController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function getTeamList(): void
     {

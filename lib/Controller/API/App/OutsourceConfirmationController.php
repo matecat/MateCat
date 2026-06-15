@@ -39,7 +39,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         ]);
 
         $payload = SimpleJWT::getValidatedInstanceFromString(
-            $params['payload'],
+            (string)$params['payload'],
             AppConfig::$AUTHSECRET
         )->getPayload();
 
@@ -47,7 +47,10 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
             throw new AuthorizationError("Invalid Job");
         }
 
-        $jStruct = ((new JobDao($this->db()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']));
+        $jStruct = (new JobDao($this->db()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']);
+        if ($jStruct === null) {
+            throw new AuthorizationError("Job not found");
+        }
         $translatorModel = new TranslatorsModel($jStruct, 0);
         $jTranslatorStruct = $translatorModel->getTranslator();
 

@@ -14,6 +14,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use ReflectionException;
+use TypeError;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -37,6 +38,7 @@ class UpdateJobKeysController extends KleinController
      * @throws ReflectionException
      * @throws AuthenticationError
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): void
     {
@@ -128,7 +130,7 @@ class UpdateJobKeysController extends KleinController
         $tm_keys = json_encode($tm_keys);
 
 
-        $totalTmKeys = TmKeyManager::mergeJsonKeys($tm_keys, $request['jobData']['tm_keys'], $userRole, $this->user->uid);
+        $totalTmKeys = TmKeyManager::mergeJsonKeys((string)$tm_keys, $request['jobData']['tm_keys'], $userRole, $this->user->uid);
 
         $this->logger->debug('Before: ' . $request['jobData']['tm_keys']);
         $this->logger->debug('After: ' . json_encode($totalTmKeys));
@@ -162,9 +164,13 @@ class UpdateJobKeysController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws InvalidArgumentException
+     * @throws DomainException
+     * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -188,17 +194,17 @@ class UpdateJobKeysController extends KleinController
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$job_id, $job_pass);
+        $jobData = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$job_id, (string)$job_pass);
 
         // validate $tm_keys
         try {
-            $this->validateTMKeysArray($tm_keys);
+            $this->validateTMKeysArray((string)$tm_keys);
         } catch (Exception $exception) {
             throw new DomainException($exception->getMessage());
         }
 
-        $this->id_job = $job_id;
-        $this->request_password = $current_password;
+        $this->id_job = (int)$job_id;
+        $this->request_password = (string)$current_password;
 
         return [
             'job_id' => $job_id,
@@ -213,11 +219,11 @@ class UpdateJobKeysController extends KleinController
     }
 
     /**
-     * @param $owner
+     * @param string|null $owner
      *
      * @return bool
      */
-    private function jobOwnerIsMe($owner): bool
+    private function jobOwnerIsMe(?string $owner): bool
     {
         return $this->userIsLogged && $owner == $this->user->email;
     }
@@ -227,6 +233,7 @@ class UpdateJobKeysController extends KleinController
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws Exception
      */
     private function validateTMKeysArray(string $tm_keys): void
     {

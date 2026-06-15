@@ -20,6 +20,7 @@ use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
+use TypeError;
 use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController
@@ -60,7 +61,7 @@ class JobsTranslatorsController extends KleinController
         $TranslatorsModel = new TranslatorsModel($this->jStruct);
         $TranslatorsModel
             ->setUserInvite($this->user)
-            ->setDeliveryDate($this->params['delivery_date'])
+            ->setDeliveryDate((string)($this->params['delivery_date'] ?? ''))
             ->setJobOwnerTimezone((float)$this->params['timezone'])
             ->setEmail($this->params['email']);
 
@@ -81,6 +82,7 @@ class JobsTranslatorsController extends KleinController
      * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function get(): void
     {

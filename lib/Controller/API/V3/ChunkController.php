@@ -35,6 +35,7 @@ class ChunkController extends KleinController
     /**
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function show(): void
     {

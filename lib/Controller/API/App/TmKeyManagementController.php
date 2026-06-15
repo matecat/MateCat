@@ -12,6 +12,7 @@ use Model\TmKeyManagement\UserKeysModel;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
@@ -190,7 +191,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                         if (!is_numeric($engineId)) {
                             continue;
                         }
-                        $engine = EnginesFactory::getInstance((int)$engineId);
+                        $engine = EnginesFactory::getInstance((int)$engineId, AbstractEngine::class);
                         if ($engine->getMemoryIfMine($memoryKey)) {
                             $engineType = $engine->getEngineRecord()->getEngineType();
                             if ($engineType !== null) {

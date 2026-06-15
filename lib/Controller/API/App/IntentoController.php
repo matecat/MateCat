@@ -15,6 +15,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use TypeError;
 use UnexpectedValueException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Intento;
@@ -29,6 +30,7 @@ class IntentoController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function routingList(): void
     {

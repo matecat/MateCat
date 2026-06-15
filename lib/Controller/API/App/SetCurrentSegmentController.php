@@ -12,6 +12,7 @@ use Model\Segments\SegmentDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
 
@@ -27,14 +28,15 @@ class SetCurrentSegmentController extends KleinController
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function set(): void
     {
         $request = $this->validateTheRequest();
         $revision_number = $request['revision_number'];
         $id_segment = $request['id_segment'];
-        $id_job = $request['id_job'];
-        $password = $request['password'];
+        $id_job = (int)$request['id_job'];
+        $password = (string)$request['password'];
         $split_num = $request['split_num'];
 
         //get Job Info, we need only a row of jobs (split)
@@ -62,25 +64,28 @@ class SetCurrentSegmentController extends KleinController
             $currSegmentInfo = array_shift($currSegmentInfo);
 
             //get the chunk number and check whether it is the last one or not
-            $isLastSegmentChunk = ($split_num == count($currSegmentInfo->source_chunk_lengths) - 1);
+            $sourceChunkLengths = ($currSegmentInfo !== null && is_array($currSegmentInfo->source_chunk_lengths)) ? $currSegmentInfo->source_chunk_lengths : [];
+            $isLastSegmentChunk = ($split_num == count($sourceChunkLengths) - 1);
 
             if (!$isLastSegmentChunk) {
-                $nextSegmentId = $id_segment . "-" . ($split_num + 1);
+                $nextSegmentId = $id_segment . "-" . ((int)$split_num + 1);
             }
         }
+
+        $id_segment_int = (int)$id_segment;
 
         /**
          * End Split check control
          */
         if (!$isASplittedSegment or $isLastSegmentChunk) {
-            $segmentList = (new SegmentDao($this->db()))->getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
+            $segmentList = (new SegmentDao($this->db()))->getNextSegment($id_segment_int, $id_job, $password, (bool)$revision_number);
 
             if (!$revision_number) {
-                $nextSegmentId = CatUtils::fetchStatus($id_segment, $segmentList);
+                $nextSegmentId = CatUtils::fetchStatus($id_segment_int, $segmentList);
             } else {
-                $nextSegmentId = CatUtils::fetchStatus($id_segment, $segmentList, TranslationStatus::STATUS_TRANSLATED);
+                $nextSegmentId = CatUtils::fetchStatus($id_segment_int, $segmentList, TranslationStatus::STATUS_TRANSLATED);
                 if (!$nextSegmentId) {
-                    $nextSegmentId = CatUtils::fetchStatus($id_segment, $segmentList, TranslationStatus::STATUS_APPROVED);
+                    $nextSegmentId = CatUtils::fetchStatus($id_segment_int, $segmentList, TranslationStatus::STATUS_APPROVED);
                 }
             }
         }
@@ -94,7 +99,8 @@ class SetCurrentSegmentController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{revision_number: string|false, id_segment: string, id_job: string|false, password: string|false, split_num: string|null}
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {

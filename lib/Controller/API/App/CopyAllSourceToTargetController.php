@@ -10,13 +10,13 @@ use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
-use Model\WordCount\CounterModel;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController
@@ -29,6 +29,7 @@ class CopyAllSourceToTargetController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function copy(): void
     {
@@ -41,7 +42,7 @@ class CopyAllSourceToTargetController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws InvalidArgumentException
      * @throws Exception
      */
@@ -78,8 +79,9 @@ class CopyAllSourceToTargetController extends KleinController
      * @param JobStruct $chunk
      * @param int $revision_number
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     private function saveEventsAndUpdateTranslations(JobStruct $chunk, int $revision_number): array
@@ -138,11 +140,6 @@ class CopyAllSourceToTargetController extends KleinController
 
         // save all events
         $batchEventCreator->save(new BatchReviewProcessor());
-
-        if (!empty($params['segment_ids'])) {
-            $counter = new CounterModel();
-            $counter->initializeJobWordCount($chunk->id, $chunk->password);
-        }
 
         $data = [
             'code' => 1,

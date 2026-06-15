@@ -315,6 +315,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @return array<string, mixed>
      * @throws Exception
      * @throws TypeError
+     * @throws DivisionByZeroError
      */
     private function persistTranslation(
         SegmentTranslationStruct $newTranslation,
@@ -898,6 +899,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
     /**
      * init VersionHandler
+     * @throws RuntimeException
      */
     private function initVersionHandler(): void
     {
@@ -994,6 +996,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws RuntimeException
      * @throws TypeError
      * @throws LogicException
+     * @throws DivisionByZeroError
      */
     private function updateJobPEE(array $old_translation, array $new_translation): void
     {

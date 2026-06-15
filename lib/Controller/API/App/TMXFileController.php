@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
@@ -24,6 +25,7 @@ class TMXFileController extends KleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function import(): void
     {
@@ -33,7 +35,7 @@ class TMXFileController extends KleinController
 
         $uuids = [];
 
-        foreach ($file as $fileInfo) {
+        foreach (get_object_vars($file) as $fileInfo) {
             if (AbstractFilesStorage::pathinfo_fix(strtolower($fileInfo->name), PATHINFO_EXTENSION) !== 'tmx') {
                 throw new Exception("Please upload a TMX.", -8);
             }
@@ -61,11 +63,11 @@ class TMXFileController extends KleinController
                 $key = new TmKeyStruct();
                 $key->key = $request['tm_key'];
 
-                $searchMemoryKey->uid = $this->user->uid;
+                $searchMemoryKey->uid = $this->user->uid ?? throw new TypeError('User not authenticated');
                 $searchMemoryKey->tm_key = $key;
                 $userMemoryKey = $mkDao->read($searchMemoryKey);
 
-                if (empty($userMemoryKey[0]->tm_key->name) && !empty($userMemoryKey)) {
+                if (!empty($userMemoryKey) && isset($userMemoryKey[0]->tm_key) && empty($userMemoryKey[0]->tm_key->name)) {
                     $userMemoryKey[0]->tm_key->name = $fileInfo->name;
                     $mkDao->atomicUpdate($userMemoryKey[0]);
                 }
@@ -87,7 +89,7 @@ class TMXFileController extends KleinController
     {
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $TMService = new TMSService();
-        $status = $TMService->tmxUploadStatus($uuid);
+        $status = $TMService->tmxUploadStatus($uuid !== false ? $uuid : '');
 
         $this->response->json([
             'errors' => [],
@@ -96,7 +98,7 @@ class TMXFileController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array

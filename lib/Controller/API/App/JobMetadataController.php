@@ -31,13 +31,13 @@ class JobMetadataController extends KleinController
         $params = $this->sanitizeRequestParams();
         $dao = new MetadataDao($this->db());
 
-        $struct = $dao->get($params['id_job'], $params['password'], $params['key']);
+        $struct = $dao->get((int)$params['id_job'], (string)$params['password'], (string)$params['key']);
 
         if (empty($struct)) {
             throw new NotFoundException('Metadata not found', 404);
         }
 
-        $dao->delete($params['id_job'], $params['password'], $params['key']);
+        $dao->delete((int)$params['id_job'], (string)$params['password'], (string)$params['key']);
         $this->response->json([
             'id' => $struct->id
         ]);
@@ -65,8 +65,8 @@ class JobMetadataController extends KleinController
         $return = [];
         foreach ($jsonValidatorObject->getValue(true) as $item) {
             $struct = $dao->set(
-                $params['id_job'],
-                $params['password'],
+                (int)$params['id_job'],
+                (string)$params['password'],
                 $item['key'],
                 is_array($item['value']) ? json_encode($item['value']) : $item['value'] ?? 'null'
             );
@@ -77,7 +77,7 @@ class JobMetadataController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{id_job: string|false|null, password: string|false|null, key: string|false|null}
      */
     private function sanitizeRequestParams(): array
     {

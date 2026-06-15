@@ -66,7 +66,8 @@ class ChangePasswordController extends KleinController
         }
 
         $user = $this->getUser();
-        $this->changeThePassword($user, $res, $id, $actual_pwd, $new_pwd, $revision_number);
+        $revisionNumberInt = ($revision_number !== false && $revision_number !== '') ? (int)$revision_number : null;
+        $this->changeThePassword($user, (string)$res, (int)$id, (string)$actual_pwd, (string)$new_pwd, $revisionNumberInt);
 
         $this->response->status()->setCode(200);
         $this->response->json([
@@ -78,15 +79,15 @@ class ChangePasswordController extends KleinController
 
     /**
      * @param UserStruct $user
-     * @param                  $res
-     * @param                  $id
-     * @param                  $actual_pwd
-     * @param                  $new_password
-     * @param null $revision_number
+     * @param string $res
+     * @param int $id
+     * @param string $actual_pwd
+     * @param string $new_password
+     * @param int|null $revision_number
      *
      * @throws Exception
      */
-    private function changeThePassword(UserStruct $user, $res, $id, $actual_pwd, $new_password, $revision_number = null): void
+    private function changeThePassword(UserStruct $user, string $res, int $id, string $actual_pwd, string $new_password, ?int $revision_number = null): void
     {
         // change project password
         if ($res == "prj") {
@@ -117,11 +118,15 @@ class ChangePasswordController extends KleinController
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
                 $jStruct->getProject()
-                    ->getFeaturesSet()->dispatch(new ReviewPasswordChangedEvent((int)$id, $actual_pwd, $new_password, (int)$revision_number));
+                    ->getFeaturesSet()->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
 
             } else { // change job password
                 $jDao = new JobDao($this->db());
                 $jStruct = $jDao->getByIdAndPassword($id, $actual_pwd);
+
+                if ($jStruct === null) {
+                    throw new Exception('Job not found');
+                }
 
                 $this->checkUserPermissions($jStruct->getProject(), $user);
 
@@ -131,10 +136,8 @@ class ChangePasswordController extends KleinController
             }
 
             // invalidate ChunkReviewDao cache for the job
-            if ($jStruct instanceof JobStruct) {
-                $chunkReviewDao = new ChunkReviewDao($this->db());
-                $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct);
-            }
+            $chunkReviewDao = new ChunkReviewDao($this->db());
+            $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct);
 
             // invalidate cache for ProjectData
             $pDao = new ProjectDao($this->db());
@@ -158,7 +161,11 @@ class ChangePasswordController extends KleinController
     {
         // check if user is belongs to the project team
         $team = $project->getTeam();
-        $check = (new MembershipDao($this->db()))->findTeamByIdAndUser($team->id, $user);
+        if ($team === null) {
+            throw new Exception('Project has no team', 403);
+        }
+        $teamId = $team->id ?? throw new Exception('Project has no team', 403);
+        $check = (new MembershipDao($this->db()))->findTeamByIdAndUser($teamId, $user);
 
         if ($check === null) {
             throw new Exception('The logged user does not belong to the right team', 403);
