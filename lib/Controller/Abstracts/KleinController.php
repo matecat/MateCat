@@ -44,8 +44,6 @@ abstract class KleinController implements IController
     protected ?App $app = null;
     protected IDatabase $database;
 
-    private const DB_SERVICE = 'getDatabase';
-
     /**
      * @var Base[]
      */
@@ -138,15 +136,14 @@ abstract class KleinController implements IController
         $this->afterConstruct();
     }
 
-    private function resolveDatabase(): ?IDatabase
-    {
-        $db = $this->app?->{self::DB_SERVICE}();
-        return $db instanceof IDatabase ? $db : null;
-    }
-
     protected function db(): IDatabase
     {
-        return $this->database ??= ($this->resolveDatabase() ?? Database::obtain());
+        if (!isset($this->database)) {
+            $injected = $this->app?->getDatabase();
+            $this->database = $injected instanceof IDatabase ? $injected : Database::obtain();
+        }
+
+        return $this->database;
     }
 
     public function getDatabase(): IDatabase
