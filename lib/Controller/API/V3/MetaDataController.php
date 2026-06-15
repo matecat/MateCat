@@ -98,7 +98,7 @@ class MetaDataController extends KleinController
     private function getJobMetaData(JobStruct $job): object
     {
         $metadata = new stdClass();
-        $jobMetaDataDao = new MetadataDao();
+        $jobMetaDataDao = new MetadataDao($this->db());
 
         foreach ($jobMetaDataDao->getByJobIdAndPassword($job->id, $job->password, 60 * 5) as $metadatum) {
             $metadata->{$metadatum->key} = $metadatum->value;
@@ -121,7 +121,7 @@ class MetaDataController extends KleinController
     private function getJobFilesMetaData(JobStruct $job): array
     {
         $metadata = [];
-        $filesMetaDataDao = new FileMetadataDao();
+        $filesMetaDataDao = new FileMetadataDao($this->db());
 
         foreach ($job->getFiles() as $file) {
             $metadatum = new stdClass();

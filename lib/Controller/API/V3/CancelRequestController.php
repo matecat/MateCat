@@ -33,7 +33,7 @@ class CancelRequestController extends KleinController
     {
         $this->appendValidator(new LoginValidator($this));
         $this->segmentDisabledService = new SegmentDisabledService();
-        $this->segmentTranslationDao = new SegmentTranslationDao();
+        $this->segmentTranslationDao = new SegmentTranslationDao($this->db());
     }
 
     /**

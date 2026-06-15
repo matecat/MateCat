@@ -116,7 +116,7 @@ class MyMemoryController extends KleinController
         $tmKeyStruct->tm = true;
         $tmKeyStruct->glos = true;
 
-        $mkDao = new MemoryKeyDao();
+        $mkDao = new MemoryKeyDao($this->db());
 
         $newMemoryKey = new MemoryKeyStruct();
         $newMemoryKey->uid = $this->user->uid;

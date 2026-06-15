@@ -32,7 +32,7 @@ class ProjectTemplateController extends KleinController
     {
         parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
-        $this->projectTemplateDao = new ProjectTemplateDao();
+        $this->projectTemplateDao = new ProjectTemplateDao($this->db());
     }
 
     /**

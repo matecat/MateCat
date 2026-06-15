@@ -40,7 +40,7 @@ class IssueCheckController extends KleinController
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $modifiedSegments = (new SegmentTranslationDao())
+        $modifiedSegments = (new SegmentTranslationDao($this->db()))
             ->setCacheTTL(60 * 5)
             ->getSegmentTranslationsModifiedByRevisorWithIssueCount($id_job, $job->password, $source_page);
 
