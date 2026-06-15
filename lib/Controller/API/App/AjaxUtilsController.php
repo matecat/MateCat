@@ -7,7 +7,6 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
-use Model\DataAccess\Database;
 use Utils\TMS\TMSService;
 
 class AjaxUtilsController extends KleinController
@@ -20,8 +19,7 @@ class AjaxUtilsController extends KleinController
 
     public function ping(): void
     {
-        $db = Database::obtain();
-        $stmt = $db->getConnection()->prepare("SELECT 1");
+        $stmt = $this->db()->getConnection()->prepare("SELECT 1");
         $stmt->execute();
 
         $this->response->json([

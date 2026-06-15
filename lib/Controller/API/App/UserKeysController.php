@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -184,7 +183,7 @@ class UserKeysController extends KleinController
      */
     private function getMkDao(): MemoryKeyDao
     {
-        return new MemoryKeyDao(Database::obtain());
+        return new MemoryKeyDao($this->db());
     }
 
     /**
@@ -246,7 +245,7 @@ class UserKeysController extends KleinController
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
-                     $ownerMmtEngineMetaData = (new MetadataDao())
+                     $ownerMmtEngineMetaData = (new MetadataDao($this->db()))
                          ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
                          ->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load'));
 

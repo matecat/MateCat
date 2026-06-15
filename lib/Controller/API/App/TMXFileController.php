@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -57,7 +56,7 @@ class TMXFileController extends KleinController
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao = new MemoryKeyDao(Database::obtain());
+                $mkDao = new MemoryKeyDao($this->db());
                 $searchMemoryKey = new MemoryKeyStruct();
                 $key = new TmKeyStruct();
                 $key->key = $request['tm_key'];

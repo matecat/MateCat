@@ -13,7 +13,6 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use UnexpectedValueException;
@@ -37,7 +36,7 @@ class IntentoController extends KleinController
         $engine = new EngineStruct();
         $engine->id = $engineId;
 
-        $engineDAO = new EngineDAO(Database::obtain());
+        $engineDAO = new EngineDAO($this->db());
         $engineStruct = $engineDAO->setCacheTTL(60 * 60 * 5)->read($engine)[0] ?: throw new UnexpectedValueException('Engine ID is not valid');
         $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
 

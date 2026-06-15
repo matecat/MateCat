@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Segments\SegmentDao;
@@ -39,7 +38,7 @@ class SetCurrentSegmentController extends KleinController
         $split_num = $request['split_num'];
 
         //get Job Info, we need only a row of jobs (split)
-        (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
+        (new JobDao($this->db()))->getByIdAndPasswordOrFail($id_job, $password);
 
         if (empty($id_segment)) {
             throw new InvalidArgumentException("missing segment id", -1);
@@ -49,7 +48,7 @@ class SetCurrentSegmentController extends KleinController
         $segmentStruct->id_segment = (int)$id_segment;
         $segmentStruct->id_job = $id_job;
 
-        $translationDao = new SplitDAO(Database::obtain());
+        $translationDao = new SplitDAO($this->db());
         $currSegmentInfo = $translationDao->read($segmentStruct);
 
         /**
@@ -74,7 +73,7 @@ class SetCurrentSegmentController extends KleinController
          * End Split check control
          */
         if (!$isASplittedSegment or $isLastSegmentChunk) {
-            $segmentList = (new SegmentDao())->getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
+            $segmentList = (new SegmentDao($this->db()))->getNextSegment($id_segment, $id_job, $password, (bool)$revision_number);
 
             if (!$revision_number) {
                 $nextSegmentId = CatUtils::fetchStatus($id_segment, $segmentList);

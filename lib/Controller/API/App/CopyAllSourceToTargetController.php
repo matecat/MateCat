@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -61,7 +60,7 @@ class CopyAllSourceToTargetController extends KleinController
             throw new InvalidArgumentException("Empty job password", -2);
         }
 
-        $job_data = (new JobDao())->getByIdAndPassword((int)$id_job, (string)$pass);
+        $job_data = (new JobDao($this->db()))->getByIdAndPassword((int)$id_job, (string)$pass);
 
         if (empty($job_data)) {
             throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
@@ -86,7 +85,7 @@ class CopyAllSourceToTargetController extends KleinController
     private function saveEventsAndUpdateTranslations(JobStruct $chunk, int $revision_number): array
     {
         // BEGIN TRANSACTION
-        $database = Database::obtain();
+        $database = $this->db();
         $database->begin();
 
         $features = $chunk->getProject()->getFeaturesSet();
@@ -104,7 +103,7 @@ class CopyAllSourceToTargetController extends KleinController
             $segment_id = $segment->id;
             $chunk_id = (int)$chunk->id;
 
-            $segmentTranslationDao = new SegmentTranslationDao();
+            $segmentTranslationDao = new SegmentTranslationDao($this->db());
             $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
 
             if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {

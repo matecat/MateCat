@@ -9,7 +9,6 @@ use Controller\Traits\APISourcePageGuesserTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -146,11 +145,11 @@ class UpdateJobKeysController extends KleinController
         $request['jobData']->tm_keys = json_encode($totalTmKeys);
         $request['jobData']->last_update = date("Y-m-d H:i:s");
 
-        $jobDao = new JobDao(Database::obtain());
+        $jobDao = new JobDao($this->db());
         $jobDao->updateStruct($request['jobData'], ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
         $jobDao->destroyCacheByIdAndPassword($request['jobData']);
 
-        $jobsMetadataDao = new MetadataDao();
+        $jobsMetadataDao = new MetadataDao($this->db());
 
         // update character_counter_mode job metadata
         if ($request['public_tm_penalty'] !== null) {
@@ -189,7 +188,7 @@ class UpdateJobKeysController extends KleinController
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = (new JobDao())->getByIdAndPasswordOrFail((int)$job_id, $job_pass);
+        $jobData = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$job_id, $job_pass);
 
         // validate $tm_keys
         try {

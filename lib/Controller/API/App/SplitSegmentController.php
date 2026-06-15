@@ -7,7 +7,6 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
@@ -38,7 +37,7 @@ class SplitSegmentController extends KleinController
         $featureSet = $this->getFeatureSet();
 
         /** @var MateCatFilter $Filter */
-        $metadata = new MetadataDao();
+        $metadata = new MetadataDao($this->db());
         $Filter = MateCatFilter::getInstance(
             $featureSet,
             $request['jobStruct']->source,
@@ -55,7 +54,7 @@ class SplitSegmentController extends KleinController
             'statuses' => array_fill(0, $pieces, TranslationStatus::STATUS_DRAFT)
         ];
 
-        $translationDao = new SplitDAO(Database::obtain());
+        $translationDao = new SplitDAO($this->db());
         $result = $translationDao->atomicUpdate($translationStruct);
 
         if (!$result) {
@@ -100,7 +99,7 @@ class SplitSegmentController extends KleinController
         }
 
         // check Job password
-        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail((int)$id_job, $password);
+        $jobStruct = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$id_job, $password);
 
         $this->featureSet->loadForProject($jobStruct->getProject());
 
