@@ -63,7 +63,7 @@ class GDriveController extends AbstractStatefulKleinController
                 $this->filters_extraction_parameters = $filtersTemplate;
             } elseif (!empty($filtersTemplateId)) {
                 $uid = $this->getUser()->uid ?? throw new \TypeError('User uid is required');
-                $filtersTemplate = (new FiltersConfigTemplateDao())->getByIdAndUser($filtersTemplateId, $uid);
+                $filtersTemplate = (new FiltersConfigTemplateDao($this->db()))->getByIdAndUser($filtersTemplateId, $uid);
 
                 if (empty($filtersTemplate)) {
                     throw new Exception("filters_extraction_parameters_template_id not valid");
@@ -377,7 +377,7 @@ class GDriveController extends AbstractStatefulKleinController
                 $filtersExtractionParameters->hydrateFromJSON(html_entity_decode($newFiltersExtractionTemplate));
             } elseif (!empty($newFiltersExtractionTemplateId)) {
                 $uid = $this->getUser()->uid ?? throw new \TypeError('User uid is required');
-                $filtersExtractionParameters = (new FiltersConfigTemplateDao())->getByIdAndUser($newFiltersExtractionTemplateId, $uid);
+                $filtersExtractionParameters = (new FiltersConfigTemplateDao($this->db()))->getByIdAndUser($newFiltersExtractionTemplateId, $uid);
 
                 if ($filtersExtractionParameters === null) {
                     throw new Exception("filters_extraction_parameters_template_id not valid");

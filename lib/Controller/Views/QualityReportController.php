@@ -39,7 +39,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
     {
         $request = $this->validateTheRequest();
 
-        $jobStruct = (new JobDao())->getByIdAndPassword($request['jid'], $request['password']);
+        $jobStruct = (new JobDao($this->db()))->getByIdAndPassword($request['jid'], $request['password']);
 
         if (empty($jobStruct)) {
             $this->setView("project_not_found.html", [], 404);

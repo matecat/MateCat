@@ -39,7 +39,7 @@ class ActivityLogController extends BaseKleinViewController implements IControll
     {
         $request = $this->validateTheRequest();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->db());
         $activityLogDao->epilogueString = " LIMIT 1;";
         $rawLogContent = $activityLogDao->read(
             new ActivityLogStruct(),
