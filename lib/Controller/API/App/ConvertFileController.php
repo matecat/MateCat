@@ -200,7 +200,7 @@ class ConvertFileController extends KleinController
             return null;
         }
 
-        $filtersTemplate = (new FiltersConfigTemplateDao())->getByIdAndUser($filters_extraction_parameters_template_id, $this->getUser()->uid);
+        $filtersTemplate = (new FiltersConfigTemplateDao($this->db()))->getByIdAndUser($filters_extraction_parameters_template_id, $this->getUser()->uid);
 
         if ($filtersTemplate === null) {
             throw new Exception("filters_extraction_parameters_template_id not valid");

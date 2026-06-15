@@ -69,11 +69,11 @@ class ContextUrlController extends KleinController
      */
     protected function initDependencies(): void
     {
-        $this->projectsMetadataDao = new ProjectsMetadataDao();
-        $this->filesMetadataDao = new FilesMetadataDao();
-        $this->segmentMetadataDao = new SegmentMetadataDao();
-        $this->fileDao = new FileDao();
-        $this->segmentDao = new SegmentDao();
+        $this->projectsMetadataDao = new ProjectsMetadataDao($this->db());
+        $this->filesMetadataDao = new FilesMetadataDao($this->db());
+        $this->segmentMetadataDao = new SegmentMetadataDao($this->db());
+        $this->fileDao = new FileDao($this->db());
+        $this->segmentDao = new SegmentDao($this->db());
         $this->rateLimiterService = new RateLimiterService();
     }
 

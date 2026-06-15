@@ -74,7 +74,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
             $service->disabled_at = null;
         }
 
-        (new ConnectedServiceDao())->updateStruct($service, ['fields' => ['disabled_at']]);
+        (new ConnectedServiceDao($this->db()))->updateStruct($service, ['fields' => ['disabled_at']]);
 
         $this->refreshClientSessionIfNotApi();
 
@@ -111,7 +111,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
      */
     private function __validateOwnership(): void
     {
-        $serviceDao = new ConnectedServiceDao();
+        $serviceDao = new ConnectedServiceDao($this->db());
         $this->connectedServiceStruct = $serviceDao->findServiceByUserAndId($this->user, $this->request->param('id_service'));
 
         if (!$this->connectedServiceStruct) {

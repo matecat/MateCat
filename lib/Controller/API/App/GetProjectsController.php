@@ -150,7 +150,7 @@ class GetProjectsController extends KleinController
             return null;
         }
 
-        $dao = new MembershipDao();
+        $dao = new MembershipDao($this->db());
         $memberships = $dao->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($team->id);
 
         /**
@@ -175,7 +175,7 @@ class GetProjectsController extends KleinController
      */
     private function filterTeam($id_team): ?TeamStruct
     {
-        $dao = new MembershipDao();
+        $dao = new MembershipDao($this->db());
         $team = $dao->findTeamByIdAndUser($id_team, $this->user);
 
         if (!$team) {
