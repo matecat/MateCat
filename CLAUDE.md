@@ -167,3 +167,13 @@ Follow the project `.github/prompts/conventional-commit.prompt.md` for commit me
 - Tests mirror source structure: `lib/Utils/Foo/Bar.php` → `tests/unit/Utils/Foo/BarTest.php`
 - Plugin tests: `plugins/*/tests/`
 - Predis `Client` uses `__call` magic for Redis commands — cannot be mocked with PHPUnit `createMock()`. Extend `Client` or mock `RedisHandler` instead
+
+# Creating worktrees
+
+When creating worktrees, those commands MUST be used:
+
+- `git checkout -b <branch-name>`
+- `git worktree add ../matecat-<branch-name> <branch-name>`
+- `cp composer.phar ../matecat-<branch-name>/composer.phar`
+- `cd ../matecat-<branch-name>/ && php composer.phar install`
+- `git submodule update --init --recursive`

@@ -7,6 +7,7 @@ use Controller\Views\CustomPageView;
 use Exceptions\BootstrapTerminatedException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\LoggerFactory;
@@ -31,6 +32,8 @@ class Bootstrap
     private static array $TASK_RUNNER_CONFIG = [];
 
     private static string $_ROOT;
+
+    private static IDatabase $database;
 
     /**
      * @throws Exception
@@ -111,7 +114,12 @@ class Bootstrap
     private function installApplicationSingletons(): void
     {
         WorkerClient::init();
-        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        self::$database = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+    }
+
+    public static function getDatabase(): IDatabase
+    {
+        return self::$database;
     }
 
     /**

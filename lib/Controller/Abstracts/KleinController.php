@@ -13,9 +13,12 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 
@@ -39,6 +42,7 @@ abstract class KleinController implements IController
     protected Response $response;
     protected ?ServiceProvider $service = null;
     protected ?App $app = null;
+    protected IDatabase $database;
 
     /**
      * @var Base[]
@@ -100,11 +104,16 @@ abstract class KleinController implements IController
      * @param Response $response
      * @param ?ServiceProvider $service
      * @param ?App $app
-     *
+     * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
-    {
+    public function __construct(
+        Request $request,
+        Response $response,
+        ?ServiceProvider $service = null,
+        ?App $app = null
+    ) {
         $this->startTimer();
         $this->timingLogFileName = 'api_calls_time.log';
 
@@ -125,6 +134,12 @@ abstract class KleinController implements IController
         $this->afterConstruct();
 
         $this->logger = LoggerFactory::getLogger();
+        $this->database = $this->app?->getDatabase() ?? Database::obtain();
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        return $this->database;
     }
 
     /**

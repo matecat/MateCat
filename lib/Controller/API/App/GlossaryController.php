@@ -12,9 +12,9 @@ use Matecat\Locales\Languages;
 use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
-use TypeError;
 use Swaggest\JsonSchema\Exception as JsonSchemaException;
 use Swaggest\JsonSchema\InvalidValue;
+use TypeError;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
@@ -326,7 +326,7 @@ class GlossaryController extends KleinController
         if ($this->isLoggedIn()) {
             if ($this->user->email == $job->status_owner) {
                 $userRole = Filter::OWNER;
-            } elseif ((new CatUtils())->isRevisionFromIdJobAndPassword($json['id_job'], $json['password'])) {
+            } elseif ($this->isRevisionFromIdJobAndPassword($json['id_job'], $json['password'])) {
                 $userRole = Filter::ROLE_REVISOR;
             } else {
                 $userRole = Filter::ROLE_TRANSLATOR;
@@ -347,6 +347,14 @@ class GlossaryController extends KleinController
     protected function getJobFromIdAndAnyPassword(int $idJob, string $jobPassword): ?JobStruct
     {
         return (new CatUtils())->getJobFromIdAndAnyPassword($idJob, $jobPassword);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function isRevisionFromIdJobAndPassword(int $idJob, string $jobPassword): bool
+    {
+        return (new CatUtils())->isRevisionFromIdJobAndPassword($idJob, $jobPassword);
     }
 
     /**

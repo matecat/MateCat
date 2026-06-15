@@ -1,0 +1,28 @@
+<?php
+
+namespace Klein;
+
+use Model\DataAccess\IDatabase;
+
+/**
+ * Dynamically registered in router.php via
+ * $app->register('getDatabase', fn() => Bootstrap::getDatabase());
+ *
+ * @method IDatabase getDatabase()
+ */
+class App
+{
+    /**
+     * @var array<string, callable> $services
+     */
+    protected array $services = [];
+
+    public function __get(string $name): mixed {}
+
+    /**
+     * @param mixed[] $args
+     */
+    public function __call(string $method, array $args): mixed {}
+
+    public function register(string $name, callable $closure): void {}
+}

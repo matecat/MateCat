@@ -9,6 +9,7 @@ use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
+use Exception;
 use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
@@ -16,8 +17,11 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
+use ReflectionException;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
@@ -63,6 +67,7 @@ class PayloadTestableGlossaryController extends GlossaryController
 {
     public string $jsonString = '';
     public ?JobStruct $job = null;
+    public bool $isRevision = false;
     public ?string $lastQueue = null;
     /** @var array<string, mixed>|null */
     public ?array $lastParams = null;
@@ -91,6 +96,11 @@ class PayloadTestableGlossaryController extends GlossaryController
     protected function getJobFromIdAndAnyPassword(int $idJob, string $jobPassword): ?JobStruct
     {
         return $this->job;
+    }
+
+    protected function isRevisionFromIdJobAndPassword(int $idJob, string $jobPassword): bool
+    {
+        return $this->isRevision;
     }
 
     protected function enqueueWorker(string $queue, array $params): void
@@ -369,6 +379,94 @@ class GlossaryControllerTest extends AbstractTest
         return $controller;
     }
 
+    private function loggedInPayloadController(
+        string $jsonString,
+        JobStruct $job,
+        string $email,
+        bool $isRevision
+    ): PayloadTestableGlossaryController {
+        $controller = new PayloadTestableGlossaryController();
+        $controller->jsonString = $jsonString;
+        $controller->job = $job;
+        $controller->isRevision = $isRevision;
+
+        $ref = new ReflectionClass(GlossaryController::class);
+        $ref->getProperty('logger')->setValue($controller, $this->createStub(MatecatLogger::class));
+        $ref->getProperty('request')->setValue($controller, $this->createStub(Request::class));
+        $ref->getProperty('userIsLogged')->setValue($controller, true);
+
+        $user = new UserStruct();
+        $user->uid = 7;
+        $user->email = $email;
+        $ref->getProperty('user')->setValue($controller, $user);
+
+        $response = $this->createStub(Response::class);
+        $response->method('json')->willReturnSelf();
+        $ref->getProperty('response')->setValue($controller, $response);
+
+        return $controller;
+    }
+
+    #[Test]
+    public function createThePayloadForWorker_resolves_owner_role(): void
+    {
+        $job = new JobStruct();
+        $job->tm_keys = '[]';
+        $job->status_owner = 'owner@example.org';
+
+        $controller = $this->loggedInPayloadController(
+            '{"id_job":1,"password":"p","term":{"source_language":"en-US","target_language":"it-IT","metadata":{"keys":[]}}}',
+            $job,
+            'owner@example.org',
+            false
+        );
+
+        $controller->set();
+
+        self::assertSame(GlossaryController::GLOSSARY_WRITE, $controller->lastQueue);
+        self::assertSame([], $controller->lastParams['payload']['userKeys']);
+    }
+
+    #[Test]
+    public function createThePayloadForWorker_resolves_revisor_role(): void
+    {
+        $job = new JobStruct();
+        $job->tm_keys = '[]';
+        $job->status_owner = 'owner@example.org';
+
+        $controller = $this->loggedInPayloadController(
+            '{"id_job":1,"password":"p","term":{"source_language":"en-US","target_language":"it-IT","metadata":{"keys":[]}}}',
+            $job,
+            'someone-else@example.org',
+            true
+        );
+
+        $controller->set();
+
+        self::assertSame(GlossaryController::GLOSSARY_WRITE, $controller->lastQueue);
+        self::assertSame([], $controller->lastParams['payload']['userKeys']);
+    }
+
+    #[Test]
+    public function createThePayloadForWorker_resolves_translator_role(): void
+    {
+        $job = new JobStruct();
+        $job->tm_keys = '[]';
+        $job->status_owner = 'owner@example.org';
+
+        $controller = $this->loggedInPayloadController(
+            '{"id_job":1,"password":"p","term":{"source_language":"en-US","target_language":"it-IT","metadata":{"keys":[]}}}',
+            $job,
+            'someone-else@example.org',
+            false
+        );
+
+        $controller->set();
+
+        self::assertSame(GlossaryController::GLOSSARY_WRITE, $controller->lastQueue);
+        self::assertSame([], $controller->lastParams['payload']['userKeys']);
+    }
+
     #[Test]
     public function createThePayloadForWorker_builds_payload_with_languages_and_job(): void
     {
@@ -385,9 +483,9 @@ class GlossaryControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Exception
-     * @throws \TypeError
-     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws Exception
+     * @throws TypeError
+     * @throws ExpectationFailedException
      */
     #[Test]
     public function createThePayloadForWorker_validates_term_languages(): void
@@ -439,9 +537,9 @@ class GlossaryControllerTest extends AbstractTest
     // ── getJobFromIdAndAnyPassword (real DB seam) ────────────────────────
 
     /**
-     * @throws \Exception
-     * @throws \ReflectionException
-     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws ExpectationFailedException
      */
     #[Test]
     public function getJobFromIdAndAnyPassword_returns_null_for_unknown_job(): void
@@ -456,6 +554,27 @@ class GlossaryControllerTest extends AbstractTest
             ->invoke($controller, 0, '__no_such_password__');
 
         self::assertNull($job);
+    }
+
+    // ── isRevisionFromIdJobAndPassword (real seam) ───────────────────────
+
+    /**
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws ExpectationFailedException
+     */
+    #[Test]
+    public function isRevisionFromIdJobAndPassword_returns_false_for_unknown_job(): void
+    {
+        // Exercise the real seam body (CatUtils::isRevisionFromIdJobAndPassword).
+        // A non-existent id_job/password combination resolves to false without raising.
+        $controller = new TestableGlossaryController();
+
+        $isRevision = $this->reflector
+            ->getMethod('isRevisionFromIdJobAndPassword')
+            ->invoke($controller, 0, '__no_such_password__');
+
+        self::assertFalse($isRevision);
     }
 
     // ── validateJson (real schema) ───────────────────────────────────────
