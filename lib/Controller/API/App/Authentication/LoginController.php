@@ -111,7 +111,7 @@ class LoginController extends AbstractStatefulKleinController
 
     protected function createUserDao(): UserDao
     {
-        return new UserDao();
+        return new UserDao($this->db());
     }
 
     /**
