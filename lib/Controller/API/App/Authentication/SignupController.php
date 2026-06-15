@@ -97,6 +97,7 @@ class SignupController extends AbstractStatefulKleinController
      * @throws RenderTerminatedException
      * @throws InvalidArgumentException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     protected function renderErrorPage(): void
     {

@@ -793,11 +793,6 @@ parameters:
 			count: 1
 			path: lib/Controller/API/V3/CountWordController.php
 
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$filter MateCatFilter\)\: Unexpected token "\$filter", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
 
 		-
 			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
@@ -886,11 +881,6 @@ parameters:
 
 
 
-		-
-			message: '#^Method Controller\\Abstracts\\IController\:\:getFeatureSet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Abstracts/IController.php
 
 
 

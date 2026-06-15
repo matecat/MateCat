@@ -52,7 +52,7 @@ class JSONValidator extends AbstractValidator
                     /**
                      * @param string $url
                      *
-                     * @throws \RuntimeException
+                     * @throws RuntimeException
                      */
                     public function getSchemaData($url): object
                     {
