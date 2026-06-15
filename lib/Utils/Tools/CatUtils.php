@@ -326,7 +326,7 @@ class CatUtils
      * @return string
      * @throws Exception
      */
-    public function clean_raw_string_4_word_count(string $string, string $source_lang = 'en-US', MateCatFilter $Filter = null): string
+    public function clean_raw_string_4_word_count(string $string, string $source_lang = 'en-US', ?MateCatFilter $Filter = null): string
     {
         //return empty on string composed only by spaces
         //do nothing
@@ -468,7 +468,7 @@ class CatUtils
      * @return int
      * @throws Exception
      */
-    public function countSegmentRawWords(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
+    public function countSegmentRawWords(?string $string = null, string $source_lang = 'en-US', ?MateCatFilter $filter = null): int
     {
         if ($string === null || $string === '' || trim($string) === '') {
             return 0;
