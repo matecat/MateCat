@@ -4,8 +4,16 @@ namespace Matecat\Core\Utils\Tools;
 
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\Filters\DTO\Dita;
 use Model\Filters\DTO\IDto;
+use Model\Filters\DTO\Json;
+use Model\Filters\DTO\MSExcel;
+use Model\Filters\DTO\MSPowerpoint;
+use Model\Filters\DTO\MSWord;
+use Model\Filters\DTO\Xml;
+use Model\Filters\DTO\Yaml;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Jobs\JobDao;
@@ -17,10 +25,14 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
+use ReflectionMethod;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 use Utils\Validator\IsJobRevisionValidator;
 
 class CatUtilsTest extends AbstractTest
@@ -763,38 +775,38 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testSegmentRawWordCountWithNullReturnsZeroL(): void
     {
-        $this->assertEquals(0, CatUtils::segment_raw_word_count(null));
+        $this->assertEquals(0, (new CatUtils())->countSegmentRawWords(null));
     }
 
     #[Test]
     public function testSegmentRawWordCountWithEmptyStringReturnsZeroL(): void
     {
-        $this->assertEquals(0, CatUtils::segment_raw_word_count(''));
+        $this->assertEquals(0, (new CatUtils())->countSegmentRawWords(''));
     }
 
     #[Test]
     public function testSegmentRawWordCountWithWhitespaceOnlyReturnsZeroL(): void
     {
-        $this->assertEquals(0, CatUtils::segment_raw_word_count('   '));
+        $this->assertEquals(0, (new CatUtils())->countSegmentRawWords('   '));
     }
 
     #[Test]
     public function testSegmentRawWordCountWithTwoWordsReturnsTwo(): void
     {
-        $this->assertEquals(2, CatUtils::segment_raw_word_count('hello world'));
+        $this->assertEquals(2, (new CatUtils())->countSegmentRawWords('hello world'));
     }
 
     #[Test]
     public function testSegmentRawWordCountWithOneWordReturnsOne(): void
     {
-        $this->assertEquals(1, CatUtils::segment_raw_word_count('hello'));
+        $this->assertEquals(1, (new CatUtils())->countSegmentRawWords('hello'));
     }
 
     #[Test]
     public function testSegmentRawWordCountWithNumbersL(): void
     {
         // "123 456" -> numbers replaced with N placeholders -> 2 words
-        $result = CatUtils::segment_raw_word_count('123 456');
+        $result = (new CatUtils())->countSegmentRawWords('123 456');
         $this->assertGreaterThanOrEqual(1, $result);
     }
 
@@ -802,7 +814,7 @@ class CatUtilsTest extends AbstractTest
     public function testSegmentRawWordCountCjkLanguageL(): void
     {
         // CJK uses character count
-        $result = CatUtils::segment_raw_word_count('你好世界', 'zh-CN');
+        $result = (new CatUtils())->countSegmentRawWords('你好世界', 'zh-CN');
         $this->assertGreaterThan(0, $result);
     }
 
@@ -810,7 +822,7 @@ class CatUtilsTest extends AbstractTest
     public function testSegmentRawWordCountWithEnglishPossessiveL(): void
     {
         // English: "John's" loses the " s " possessive
-        $result = CatUtils::segment_raw_word_count("John's dog", 'en-US');
+        $result = (new CatUtils())->countSegmentRawWords("John's dog", 'en-US');
         $this->assertGreaterThan(0, $result);
     }
 
@@ -940,7 +952,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testSegmentRawWordCountPunctuationOnlyReturnsZeroL(): void
     {
-        $result = CatUtils::segment_raw_word_count('...');
+        $result = (new CatUtils())->countSegmentRawWords('...');
         $this->assertEquals(0, $result);
     }
 
@@ -1057,7 +1069,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testSegmentRawWordCountWithHtmlTagL(): void
     {
-        $result = CatUtils::segment_raw_word_count('Hello <br> World');
+        $result = (new CatUtils())->countSegmentRawWords('Hello <br> World');
         $this->assertGreaterThanOrEqual(0, $result);
     }
 
@@ -1322,7 +1334,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testSegmentRawWordCountCjkLanguageReturnsMbStrlen(): void
     {
-        $count = CatUtils::segment_raw_word_count('你好世界', 'zh-CN');
+        $count = (new CatUtils())->countSegmentRawWords('你好世界', 'zh-CN');
         // Each CJK char counted individually
         $this->assertGreaterThan(0, $count);
     }
@@ -1399,7 +1411,7 @@ class CatUtilsTest extends AbstractTest
     {
         $project = new ProjectStruct(['id' => 999999]);
         // getJobs() returns empty → idJobs is empty → SQL IN() with no values → PDOException
-        $this->expectException(\PDOException::class);
+        $this->expectException(PDOException::class);
         (new CatUtils())->getSegmentTranslationsCount($project);
     }
 
@@ -1411,11 +1423,11 @@ class CatUtilsTest extends AbstractTest
      * @param string $filePath
      * @param FiltersConfigTemplateStruct $struct
      * @return IDto|null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function invokeGetRightExtractionParameter(string $filePath, FiltersConfigTemplateStruct $struct): ?IDto
     {
-        $method = new \ReflectionMethod(CatUtils::class, 'getRightExtractionParameter');
+        $method = new ReflectionMethod(CatUtils::class, 'getRightExtractionParameter');
 
         return $method->invoke(null, $filePath, $struct);
     }
@@ -1424,108 +1436,108 @@ class CatUtilsTest extends AbstractTest
     public function testGetRightExtractionParameterJson(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->json = new \Model\Filters\DTO\Json();
+        $struct->json = new Json();
         $result = $this->invokeGetRightExtractionParameter('file.json', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\Json::class, $result);
+        $this->assertInstanceOf(Json::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterXml(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->xml = new \Model\Filters\DTO\Xml();
+        $struct->xml = new Xml();
         $result = $this->invokeGetRightExtractionParameter('file.xml', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\Xml::class, $result);
+        $this->assertInstanceOf(Xml::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterYaml(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->yaml = new \Model\Filters\DTO\Yaml();
+        $struct->yaml = new Yaml();
         $result = $this->invokeGetRightExtractionParameter('file.yaml', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\Yaml::class, $result);
+        $this->assertInstanceOf(Yaml::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterYml(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->yaml = new \Model\Filters\DTO\Yaml();
+        $struct->yaml = new Yaml();
         $result = $this->invokeGetRightExtractionParameter('file.yml', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\Yaml::class, $result);
+        $this->assertInstanceOf(Yaml::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterDocx(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->ms_word = new \Model\Filters\DTO\MSWord();
+        $struct->ms_word = new MSWord();
         $result = $this->invokeGetRightExtractionParameter('file.docx', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\MSWord::class, $result);
+        $this->assertInstanceOf(MSWord::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterDoc(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->ms_word = new \Model\Filters\DTO\MSWord();
+        $struct->ms_word = new MSWord();
         $result = $this->invokeGetRightExtractionParameter('file.doc', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\MSWord::class, $result);
+        $this->assertInstanceOf(MSWord::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterXlsx(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->ms_excel = new \Model\Filters\DTO\MSExcel();
+        $struct->ms_excel = new MSExcel();
         $result = $this->invokeGetRightExtractionParameter('file.xlsx', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\MSExcel::class, $result);
+        $this->assertInstanceOf(MSExcel::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterXls(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->ms_excel = new \Model\Filters\DTO\MSExcel();
+        $struct->ms_excel = new MSExcel();
         $result = $this->invokeGetRightExtractionParameter('file.xls', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\MSExcel::class, $result);
+        $this->assertInstanceOf(MSExcel::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterPptx(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->ms_powerpoint = new \Model\Filters\DTO\MSPowerpoint();
+        $struct->ms_powerpoint = new MSPowerpoint();
         $result = $this->invokeGetRightExtractionParameter('file.pptx', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\MSPowerpoint::class, $result);
+        $this->assertInstanceOf(MSPowerpoint::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterPpt(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->ms_powerpoint = new \Model\Filters\DTO\MSPowerpoint();
+        $struct->ms_powerpoint = new MSPowerpoint();
         $result = $this->invokeGetRightExtractionParameter('file.ppt', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\MSPowerpoint::class, $result);
+        $this->assertInstanceOf(MSPowerpoint::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterDita(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->dita = new \Model\Filters\DTO\Dita();
+        $struct->dita = new Dita();
         $result = $this->invokeGetRightExtractionParameter('file.dita', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\Dita::class, $result);
+        $this->assertInstanceOf(Dita::class, $result);
     }
 
     #[Test]
     public function testGetRightExtractionParameterDitamap(): void
     {
         $struct = new FiltersConfigTemplateStruct();
-        $struct->dita = new \Model\Filters\DTO\Dita();
+        $struct->dita = new Dita();
         $result = $this->invokeGetRightExtractionParameter('file.ditamap', $struct);
-        $this->assertInstanceOf(\Model\Filters\DTO\Dita::class, $result);
+        $this->assertInstanceOf(Dita::class, $result);
     }
 
     #[Test]
@@ -1587,7 +1599,7 @@ class CatUtilsTest extends AbstractTest
         [$dbStub] = $this->createDatabaseMock();
 
         $fakeDao = new class($dbStub, $fakeReview) extends ChunkReviewDao {
-            public function __construct(\Model\DataAccess\IDatabase $db, private readonly ChunkReviewStruct $stub)
+            public function __construct(IDatabase $db, private readonly ChunkReviewStruct $stub)
             {
                 parent::__construct($db);
             }
@@ -1619,7 +1631,7 @@ class CatUtilsTest extends AbstractTest
         [$dbStub] = $this->createDatabaseMock();
 
         $fakeJobDao = new class($dbStub, $sentinelCount) extends JobDao {
-            public function __construct(\Model\DataAccess\IDatabase $db, private readonly int $count)
+            public function __construct(IDatabase $db, private readonly int $count)
             {
                 parent::__construct($db);
             }
@@ -1657,7 +1669,7 @@ class CatUtilsTest extends AbstractTest
 
         $fakeSegDao = new class($dbStub) extends SegmentTranslationDao {
             public bool $wasCalled = false;
-            public function __construct(\Model\DataAccess\IDatabase $db)
+            public function __construct(IDatabase $db)
             {
                 parent::__construct($db);
             }
@@ -1689,7 +1701,7 @@ class CatUtilsTest extends AbstractTest
 
         $cat = new CatUtils(null, null, null, $fakeFeatureSet);
         // Should return a positive word count using the injected FeatureSet (no DB hit)
-        $result = $cat->countSegmentWords('Hello world', 'en-US');
+        $result = $cat->countSegmentRawWords('Hello world', 'en-US');
 
         $this->assertGreaterThan(0, $result);
     }
@@ -1727,7 +1739,7 @@ class CatUtilsTest extends AbstractTest
 
         $fakeFiltersDao = new class($dbStub, $sentinelStruct) extends FiltersConfigTemplateDao {
             public bool $wasCalled = false;
-            public function __construct(\Model\DataAccess\IDatabase $db, private readonly FiltersConfigTemplateStruct $stub)
+            public function __construct(IDatabase $db, private readonly FiltersConfigTemplateStruct $stub)
             {
                 parent::__construct($db);
             }
@@ -1793,7 +1805,7 @@ class CatUtilsTest extends AbstractTest
     public function testIsRevisionFromIdJobAndPasswordUsesInjectedValidator(): void
     {
         $fakeValidator = new class extends IsJobRevisionValidator {
-            public function validate(\Utils\Validator\Contracts\ValidatorObjectInterface $object): ?\Utils\Validator\Contracts\ValidatorObjectInterface
+            public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
             {
                 return $object; // non-null → method returns true
             }

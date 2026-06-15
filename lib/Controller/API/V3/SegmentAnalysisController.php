@@ -21,6 +21,7 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentDisabledService;
 use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentNoteDao;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -234,7 +235,7 @@ class SegmentAnalysisController extends KleinController
 
     /**
      * @param ShapelessConcreteStruct[] $segmentsForAnalysis
-     * @return array{notesAggregate: array<int, list<string|null>>, issuesAggregate: array<int, array<int, list<array<string, mixed>>>>, idRequestsAggregate: array<int, \Model\Segments\SegmentMetadataStruct>}
+     * @return array{notesAggregate: array<int, list<string|null>>, issuesAggregate: array<int, array<int, list<array<string, mixed>>>>, idRequestsAggregate: array<int, SegmentMetadataStruct>}
      * @throws ReflectionException
      * @throws Exception
      * @throws PDOException
@@ -286,7 +287,7 @@ class SegmentAnalysisController extends KleinController
      * @param array<int, array<string, mixed>> $projectPasswordsMap
      * @param array<int, list<string|null>> $notesAggregate
      * @param array<int, array<int, list<array<string, mixed>>>> $issuesAggregate
-     * @param array<int, \Model\Segments\SegmentMetadataStruct> $idRequestsAggregate
+     * @param array<int, SegmentMetadataStruct> $idRequestsAggregate
      * @return array<string, mixed>
      * @throws Exception
      */
@@ -346,8 +347,8 @@ class SegmentAnalysisController extends KleinController
             'target' => $segmentForAnalysis->translation,
             'source_lang' => $segmentForAnalysis->source,
             'target_lang' => $segmentForAnalysis->target,
-            'source_raw_word_count' => (new CatUtils())->segment_raw_word_count($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
-            'target_raw_word_count' => (new CatUtils())->segment_raw_word_count($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
+            'source_raw_word_count' => (new CatUtils())->countSegmentRawWords($segmentForAnalysis->segment, $segmentForAnalysis->source, $filter),
+            'target_raw_word_count' => (new CatUtils())->countSegmentRawWords($segmentForAnalysis->translation, $segmentForAnalysis->target, $filter),
             'match_type' => $matchConstants::toExternalMatchTypeName($segmentForAnalysis->match_type ?? 'default'),
             'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
             'issues' => $issues,

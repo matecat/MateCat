@@ -25,9 +25,11 @@ use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
@@ -112,7 +114,7 @@ class SegmentExtractor
      * @param ProjectStructure $projectStructure
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function extract(int $fid, array $file_info, ProjectStructure $projectStructure): void
     {
@@ -184,8 +186,8 @@ class SegmentExtractor
      * @return int Number of segments marked as show-in-cattool in this file element
      * @throws ReflectionException
      * @throws Exception
-     * @throws \PDOException
-     * @throws \TypeError
+     * @throws PDOException
+     * @throws TypeError
      */
     private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
     {
@@ -252,9 +254,9 @@ class SegmentExtractor
      *
      * @return int|null The file-parts ID if an 'original' attribute was found, null otherwise
      * @throws ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
      */
     private function persistXliffFileAttributes(array $xliff_file, int $fid): ?int
     {
@@ -329,7 +331,7 @@ class SegmentExtractor
             // mrk in the list will not be too!!!
             $show_in_cattool = 1;
 
-            $wordCount = (new CatUtils())->segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
+            $wordCount = (new CatUtils())->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCountEvent = new WordCountEvent($wordCount);
             $this->features->dispatch($wordCountEvent);
             $wordCount = $wordCountEvent->getWordCount();
@@ -409,7 +411,7 @@ class SegmentExtractor
     ): int {
         $show_in_cattool = 1;
 
-        $wordCount = (new CatUtils())->segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
+        $wordCount = (new CatUtils())->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
         $sourceLayer0 = $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']);
 

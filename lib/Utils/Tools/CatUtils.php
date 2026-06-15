@@ -459,25 +459,6 @@ class CatUtils
     }
 
     /**
-     * Count words in a string
-     *
-     * @param string|null $string $string
-     * @param string $source_lang
-     * @param MateCatFilter|null $filter
-     *
-     * @return int
-     * @throws Exception
-     */
-    /**
-     * @deprecated retained for plugins/aligner submodule; remove when aligner migrates
-     * @throws Exception
-     */
-    public static function segment_raw_word_count(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
-    {
-        return (new self())->countSegmentWords($string, $source_lang, $filter);
-    }
-
-    /**
      * Count words in a string (instance implementation)
      *
      * @param string|null $string
@@ -487,7 +468,7 @@ class CatUtils
      * @return int
      * @throws Exception
      */
-    public function countSegmentWords(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
+    public function countSegmentRawWords(?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null): int
     {
         if ($string === null || $string === '' || trim($string) === '') {
             return 0;
