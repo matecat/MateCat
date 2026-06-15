@@ -7477,3 +7477,8 @@ parameters:
 			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 
+		-
+			message: '#^Method Features\\Aligner\:\:homeRoute\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner.php
