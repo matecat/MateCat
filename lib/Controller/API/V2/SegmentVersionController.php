@@ -38,12 +38,12 @@ class SegmentVersionController extends KleinController
      */
     public function index(): void
     {
-        $results = (new TranslationVersionDao())->getVersionsForTranslation(
+        $results = (new TranslationVersionDao($this->db()))->getVersionsForTranslation(
             $this->request->param('id_job'),
             $this->request->param('id_segment')
         );
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -62,13 +62,13 @@ class SegmentVersionController extends KleinController
      */
     public function detail(): void
     {
-        $results = (new TranslationVersionDao())->getVersionsForTranslation(
+        $results = (new TranslationVersionDao($this->db()))->getVersionsForTranslation(
             $this->request->param('id_job'),
             $this->request->param('id_segment'),
             $this->request->param('version_number')
         );
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();

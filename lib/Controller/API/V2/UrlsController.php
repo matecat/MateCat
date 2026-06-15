@@ -49,7 +49,7 @@ class UrlsController extends KleinController
             exit();
         }
 
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
+        $projectData = (new ProjectDao($this->db()))->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
 
         $formatted = new ProjectUrls($projectData);
 

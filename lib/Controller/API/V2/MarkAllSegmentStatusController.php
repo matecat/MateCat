@@ -53,7 +53,7 @@ class MarkAllSegmentStatusController extends KleinController
         $source_page = null;
 
         if ($this->request->param('revision_number')) {
-            $validRevisions = (new ReviewUtils(new ChunkReviewDao()))->validRevisionNumbers($this->chunk);
+            $validRevisions = (new ReviewUtils(new ChunkReviewDao($this->db())))->validRevisionNumbers($this->chunk);
             if (!in_array($this->request->param('revision_number'), $validRevisions)) {
                 throw new InvalidArgumentException('Invalid revision number');
             }
@@ -65,7 +65,7 @@ class MarkAllSegmentStatusController extends KleinController
             TranslationStatus::STATUS_APPROVED,
             TranslationStatus::STATUS_APPROVED2
         ])) {
-            $unchangeable_segments = (new SegmentTranslationDao())->getUnchangeableStatus(
+            $unchangeable_segments = (new SegmentTranslationDao($this->db()))->getUnchangeableStatus(
                 $this->chunk,
                 $segments_id,
                 $status,

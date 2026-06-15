@@ -33,7 +33,7 @@ class MemoryKeysController extends KleinController
         $keyQuery = new MemoryKeyStruct();
         $keyQuery->uid = $this->user->uid;
 
-        $memoryKeyDao = new MemoryKeyDao();
+        $memoryKeyDao = new MemoryKeyDao($this->db());
         $keyList = $memoryKeyDao->read($keyQuery);
 
         $formatter = new MemoryKeys($keyList);

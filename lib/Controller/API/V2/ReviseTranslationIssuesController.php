@@ -45,12 +45,12 @@ class ReviseTranslationIssuesController extends KleinController
      */
     public function index(): void
     {
-        $records = (new TranslationVersionDao())->setCacheTTL(0)->getVersionsForRevision(
+        $records = (new TranslationVersionDao($this->db()))->setCacheTTL(0)->getVersionsForRevision(
             $this->request->param('id_job'),
             $this->request->param('id_segment')
         );
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
+        $chunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
