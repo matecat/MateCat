@@ -44,6 +44,8 @@ abstract class KleinController implements IController
     protected ?App $app = null;
     protected IDatabase $database;
 
+    private const DB_SERVICE = 'getDatabase';
+
     /**
      * @var Base[]
      */
@@ -122,6 +124,8 @@ abstract class KleinController implements IController
         $this->service = $service;
         $this->app = $app;
 
+        $this->logger = LoggerFactory::getLogger();
+
         $paramsPut = $this->getPutParams() ?: [];
         $paramsGet = $this->request->paramsGet()->getIterator()->getArrayCopy();
         $paramsNamed = $this->request->paramsNamed()->getIterator()->getArrayCopy();
@@ -132,14 +136,22 @@ abstract class KleinController implements IController
         $this->initDependencies();
         $this->registerValidators();
         $this->afterConstruct();
+    }
 
-        $this->logger = LoggerFactory::getLogger();
-        $this->database = $this->app?->getDatabase() ?? Database::obtain();
+    private function resolveDatabase(): ?IDatabase
+    {
+        $db = $this->app?->{self::DB_SERVICE}();
+        return $db instanceof IDatabase ? $db : null;
+    }
+
+    protected function db(): IDatabase
+    {
+        return $this->database ??= ($this->resolveDatabase() ?? Database::obtain());
     }
 
     public function getDatabase(): IDatabase
     {
-        return $this->database;
+        return $this->db();
     }
 
     /**
