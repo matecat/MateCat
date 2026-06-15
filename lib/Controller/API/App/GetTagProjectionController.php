@@ -33,7 +33,7 @@ class GetTagProjectionController extends KleinController
     public function call(): void
     {
         $request = $this->validateTheRequest();
-        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
+        $jobStruct = (new JobDao($this->db()))->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
         /**
@@ -42,7 +42,7 @@ class GetTagProjectionController extends KleinController
         $engine = EnginesFactory::getInstance(1);
         $engine->setFeatureSet($this->featureSet);
 
-        $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($request['id_segment']);
+        $dataRefMap = (new SegmentOriginalDataDao($this->db()))->getSegmentDataRefMap($request['id_segment']);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($this->getFeatureSet(), $request['source_lang'], $request['target_lang'], $dataRefMap);
 

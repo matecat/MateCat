@@ -38,14 +38,14 @@ class GetTranslationMismatchesController extends KleinController
     {
         $id_segment = (string) filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
 
-        $this->featureSet->loadForProject((new ProjectDao())->findByJobId($this->params['id_job'], 60 * 60));
+        $this->featureSet->loadForProject((new ProjectDao($this->db()))->findByJobId($this->params['id_job'], 60 * 60));
         $parsedIdSegment = $this->parseIdSegment($id_segment);
 
         if ($parsedIdSegment['id_segment'] == '') {
             $parsedIdSegment['id_segment'] = 0;
         }
 
-        $sDao = new SegmentDao();
+        $sDao = new SegmentDao($this->db());
         $Translation_mismatches = $sDao->setCacheTTL(60 /* 1 minutes cache */)->getTranslationsMismatches($this->params['id_job'], $this->params['password'], $parsedIdSegment['id_segment']);
 
         $this->response->json([

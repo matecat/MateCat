@@ -36,7 +36,7 @@ class QualityFrameworkController extends KleinController
     {
         $idProject = $this->request->param('id_project');
         $password = $this->request->param('password');
-        $project = (new ProjectDao())->findByIdAndPassword($idProject, $password);
+        $project = (new ProjectDao($this->db()))->findByIdAndPassword($idProject, $password);
 
         $this->response->json($this->renderQualityFramework($project));
     }
@@ -59,7 +59,7 @@ class QualityFrameworkController extends KleinController
             throw new NotFoundException('QAModel not found');
         }
 
-        $qaModel = (new ModelDao())->fetchById($idQaModel, ModelStruct::class);
+        $qaModel = (new ModelDao($this->db()))->fetchById($idQaModel, ModelStruct::class);
 
         if ($qaModel === null) {
             throw new NotFoundException('QAModel not found');
