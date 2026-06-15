@@ -726,7 +726,7 @@ class Editarea extends React.Component {
     let readonly = false
 
     if (this.props.segment) {
-      lang = config.target_rfc.toLowerCase()
+      lang = config.target_rfc.toLowerCase().split('-')[0]
       readonly =
         this.context.readonly ||
         this.context.locked ||
@@ -756,6 +756,8 @@ class Editarea extends React.Component {
         onDrop={onDragEnd}
         onFocus={onFocus}
         onKeyUp={onKeyUpEvent}
+        lang={lang}
+        spellCheck={true}
       >
         <Editor
           lang={lang}
