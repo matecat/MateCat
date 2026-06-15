@@ -9,7 +9,6 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Jobs\JobDao;
@@ -75,7 +74,7 @@ class GetSearchController extends AbstractStatefulKleinController
 
         // and then hydrate the $search_results array
         foreach ($res['sid_list'] as $segmentId) {
-            $segmentTranslation = (new SegmentTranslationDao())->findBySegmentAndJob($segmentId, $request['queryParams']['job']);
+            $segmentTranslation = (new SegmentTranslationDao($this->db()))->findBySegmentAndJob($segmentId, $request['queryParams']['job']);
             if ($segmentTranslation === null) {
                 continue;
             }
@@ -236,7 +235,7 @@ class GetSearchController extends AbstractStatefulKleinController
      */
     private function getJobData(int $job_id, string $password): JobStruct
     {
-        return (new JobDao())->getByIdAndPasswordOrFail($job_id, $password);
+        return (new JobDao($this->db()))->getByIdAndPasswordOrFail($job_id, $password);
     }
 
     /**
@@ -260,7 +259,7 @@ class GetSearchController extends AbstractStatefulKleinController
      */
     private function getSearchModel(SearchQueryParamsStruct $queryParams, JobStruct $jobStruct): SearchModel
     {
-        $metadata = new MetadataDao();
+        $metadata = new MetadataDao($this->db());
 
         if ($jobStruct->id === null || $jobStruct->password === null) {
             throw new RuntimeException("Job struct has null id or password");
@@ -386,10 +385,10 @@ class GetSearchController extends AbstractStatefulKleinController
      */
     private function updateSegments(array $search_results, int $id_job, string $password, SearchQueryParamsStruct $queryParams, ?string $id_segment = null, ?int $revisionNumber = null): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
 
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail($id_job, $password);
-        $project = (new ProjectDao())->findByJobId($id_job);
+        $chunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail($id_job, $password);
+        $project = (new ProjectDao($this->db()))->findByJobId($id_job);
 
         if ($project === null) {
             throw new NotFoundException("Project not found for job $id_job");
@@ -402,9 +401,9 @@ class GetSearchController extends AbstractStatefulKleinController
             // start the transaction
             $db->begin();
 
-            $segmentTranslationDao = new SegmentTranslationDao();
+            $segmentTranslationDao = new SegmentTranslationDao($this->db());
             $old_translation = $segmentTranslationDao->findBySegmentAndJob((int)$tRow['id_segment'], (int)$tRow['id_job']);
-            $segment = (new SegmentDao())->fetchById((int)$tRow['id_segment'], SegmentStruct::class);
+            $segment = (new SegmentDao($this->db()))->fetchById((int)$tRow['id_segment'], SegmentStruct::class);
 
             if ($old_translation === null || $segment === null) {
                 $db->rollback();

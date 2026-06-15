@@ -315,7 +315,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new SegmentNoteDao())->getAggregatedBySegmentIdInInterval($start, $stop);
+            return (new SegmentNoteDao($this->db()))->getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
         return [];
@@ -336,7 +336,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new ContextGroupDao())->getBySIDRange($start, $stop);
+            return (new ContextGroupDao($this->db()))->getBySIDRange($start, $stop);
         }
 
         return [];
@@ -349,31 +349,31 @@ class GetSegmentsController extends KleinController
      */
     protected function findJob(int $jid, string $password): \Model\Jobs\JobStruct
     {
-        return (new JobDao())->getByIdAndPasswordOrFail($jid, $password);
+        return (new JobDao($this->db()))->getByIdAndPasswordOrFail($jid, $password);
     }
 
     protected function createSegmentDao(): SegmentDao
     {
-        return new SegmentDao();
+        return new SegmentDao($this->db());
     }
 
     protected function createProjectMetadataDao(): ProjectMetadataDao
     {
-        return new ProjectMetadataDao();
+        return new ProjectMetadataDao($this->db());
     }
 
     protected function createFilesMetadataDao(): FilesMetadataDao
     {
-        return new FilesMetadataDao();
+        return new FilesMetadataDao($this->db());
     }
 
     protected function createJobMetadataDao(): MetadataDao
     {
-        return new MetadataDao();
+        return new MetadataDao($this->db());
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
     {
-        return new SegmentMetadataDao();
+        return new SegmentMetadataDao($this->db());
     }
 }
