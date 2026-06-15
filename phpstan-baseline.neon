@@ -2777,7 +2777,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:split\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 7
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -3059,7 +3059,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMerge\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 7
+			count: 10
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -3083,7 +3083,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMergeAndAlign\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 14
+			count: 17
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -3249,13 +3249,13 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
-			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\CatUtils\:\:segment_raw_word_count\(\) expects string\|null, array\<string, mixed\> given\.$#'
+			message: '#^Parameter \#1 \$string of method Utils\\Tools\\CatUtils\:\:countSegmentRawWords\(\) expects string\|null, array\<string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
-			message: '#^Parameter \#1 \$string of static method Utils\\Tools\\CatUtils\:\:segment_raw_word_count\(\) expects string\|null, array\<string, mixed\>\|null given\.$#'
+			message: '#^Parameter \#1 \$string of method Utils\\Tools\\CatUtils\:\:countSegmentRawWords\(\) expects string\|null, array\<string, mixed\>\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
@@ -8330,7 +8330,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 
 		-
-			message: '#^PHPDoc tag @var has invalid value \(\$engineRecord \\Model\\Engines\\Structs\\EngineStruct\)\: Unexpected token "\$engineRecord", expected type at offset 20 on line 2$#'
+			message: '#^PHPDoc tag @var has invalid value \(\$engineRecord EngineStruct\)\: Unexpected token "\$engineRecord", expected type at offset 20 on line 2$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
@@ -8595,17 +8595,5 @@ parameters:
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Trait Utils\\Engines\\Traits\\HotSwap is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: lib/Utils/Engines/Traits/HotSwap.php
-
-		-
-			message: '#^Method Swaggest\\JsonSchema\\RemoteRefProvider@anonymous/lib/Utils/Validator/JSONSchema/JSONValidator\.php:51::getSchemaData\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Utils/Validator/JSONSchema/JSONValidator.php
 
 
