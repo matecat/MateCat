@@ -13,7 +13,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
-use Model\DataAccess\Database;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
@@ -41,7 +40,7 @@ class TeamMembersController extends KleinController
     {
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
 
-        $team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->fetchById($this->request->param('id_team'), TeamStruct::class);
+        $team = (new TeamDao($this->db()))->setCacheTTL(60 * 60 * 24)->fetchById($this->request->param('id_team'), TeamStruct::class);
         $teamModel = new TeamModel($team);
         $teamModel->updateMembersProjectsCount();
 
@@ -67,7 +66,7 @@ class TeamMembersController extends KleinController
             ]
         ]);
 
-        $teamStruct = (new TeamDao())
+        $teamStruct = (new TeamDao($this->db()))
             ->fetchById($this->request->param('id_team'), TeamStruct::class);
 
         $model = new TeamModel($teamStruct);
@@ -92,9 +91,9 @@ class TeamMembersController extends KleinController
      */
     public function delete(): void
     {
-        Database::obtain()->begin();
+        $this->db()->begin();
 
-        $teamStruct = (new TeamDao())
+        $teamStruct = (new TeamDao($this->db()))
             ->fetchById($this->request->param('id_team'), TeamStruct::class);
 
         $model = new TeamModel($teamStruct);
