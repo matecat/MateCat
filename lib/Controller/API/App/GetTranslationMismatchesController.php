@@ -16,9 +16,7 @@ class GetTranslationMismatchesController extends KleinController
 {
     private JobStruct $chunk;
 
-    /**
-     */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 

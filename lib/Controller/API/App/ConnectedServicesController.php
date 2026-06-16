@@ -34,7 +34,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     /**
      * @return void
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

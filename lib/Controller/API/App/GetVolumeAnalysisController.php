@@ -19,7 +19,7 @@ class GetVolumeAnalysisController extends KleinController
     /**
      * @throws InvalidArgumentException
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
