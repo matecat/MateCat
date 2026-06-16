@@ -36,7 +36,7 @@ class ChunkTranslationIssueController extends KleinController
         $this->response->json(['issues' => $rendered]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
