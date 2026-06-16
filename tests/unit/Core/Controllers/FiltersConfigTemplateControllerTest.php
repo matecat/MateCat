@@ -31,10 +31,6 @@ class TestableFiltersConfigTemplateController extends FiltersConfigTemplateContr
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }

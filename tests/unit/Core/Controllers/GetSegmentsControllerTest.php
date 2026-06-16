@@ -38,10 +38,6 @@ class TestableGetSegmentsController extends GetSegmentsController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public function callValidateTheRequest(): array
     {
         return $this->validateTheRequest();
@@ -88,9 +84,6 @@ class DirectGetSegmentsController extends GetSegmentsController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class GetSegmentsControllerTest extends AbstractTest

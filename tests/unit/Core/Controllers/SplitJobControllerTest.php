@@ -25,10 +25,6 @@ class TestableSplitJobController extends SplitJobController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
         if ($this->fakeProjectData === null) {

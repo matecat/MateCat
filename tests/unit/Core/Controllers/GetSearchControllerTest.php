@@ -27,9 +27,6 @@ class TestableGetSearchController extends GetSearchController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]

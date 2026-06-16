@@ -26,10 +26,6 @@ class TestableModernMTController extends ModernMTController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function getModernMTClient(int $engineId): MMT
     {
         if ($this->fakeMMTClient === null) {

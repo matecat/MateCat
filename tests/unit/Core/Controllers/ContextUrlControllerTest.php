@@ -35,10 +35,6 @@ class TestableContextUrlController extends ContextUrlController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }
@@ -160,7 +156,6 @@ class ContextUrlControllerTest extends AbstractTest
         return $segment;
     }
 
-
     // ── Rate Limiting ────────────────────────────────────────────────────
 
     #[Test]
@@ -211,7 +206,6 @@ class ContextUrlControllerTest extends AbstractTest
         $this->controller->setForSegment();
     }
 
-
     // ── Authorization ────────────────────────────────────────────────────
 
     #[Test]
@@ -257,7 +251,6 @@ class ContextUrlControllerTest extends AbstractTest
         $this->controller->setForProject();
     }
 
-
     #[Test]
     public function setForProject_throws_when_javascript_uri(): void
     {
@@ -277,7 +270,6 @@ class ContextUrlControllerTest extends AbstractTest
 
         $this->controller->setForProject();
     }
-
 
     // ── Missing Body / Params ────────────────────────────────────────────
 
@@ -336,7 +328,6 @@ class ContextUrlControllerTest extends AbstractTest
         $this->controller->setForSegment();
     }
 
-
     // ── Entity Existence ─────────────────────────────────────────────────
 
     #[Test]
@@ -360,7 +351,6 @@ class ContextUrlControllerTest extends AbstractTest
 
         $this->controller->setForSegment();
     }
-
 
     // ── Domain Validation ────────────────────────────────────────────────
 
@@ -388,7 +378,6 @@ class ContextUrlControllerTest extends AbstractTest
 
         $this->controller->setForSegment();
     }
-
 
     // ── Happy Path ───────────────────────────────────────────────────────
 
@@ -492,7 +481,6 @@ class ContextUrlControllerTest extends AbstractTest
 
         $this->controller->setForSegment();
     }
-
 
     // ── Validator Chain Coverage ──────────────────────────────────────────
 
