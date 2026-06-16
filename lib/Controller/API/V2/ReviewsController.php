@@ -72,7 +72,7 @@ class ReviewsController extends KleinController
         );
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $Validator = new ProjectPasswordValidator($this);
 
