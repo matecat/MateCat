@@ -1,236 +1,261 @@
 @use "../../commons/colors";
-section {
-  .issues-container {
-    display: none;
-  }
+
+section .issues-container {
+  display: none;
 }
+
 section.readonly .issues-container {
   display: none;
 }
 
-.editor {
-  &.loaded {
-    .issues-container {
-      display: inline-block !important;
-      width: 100%;
-      main-bottom: 0px;
-      border-bottom: 1px solid colors.$white;
-      position: relative;
-      z-index: 3;
-      top: 0px;
-      border-top: 1px solid colors.$grey200;
-      background: colors.$white !important;
-      .border-box-issue {
-        width: 50%;
-        display: inline-block;
-        vertical-align: top;
-        .creation-issue-container {
-          padding: 1em;
-          box-sizing: border-box;
-          .field {
-            margin: 1em 0em 1em;
-            display: inline-block;
-            width: 50%;
-            .ui.dropdown {
-              border: 1px solid colors.$grey400;
-              border-radius: 2px !important;
-              &:hover {
-                border: 1px solid colors.$grey300;
-              }
-              .text {
-                background: none;
-                font-weight: 700;
-              }
-            }
-          }
-          .select-category {
-            .category {
-              padding: 8px 15px 4px 17px;
-              .ellipsis-messages {
-                max-width: 95%;
-                min-width: 30px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                background: yellow;
-                &.other-class {
-                  max-width: 100%;
-                }
-                &.example-class {
-                  max-width: 50%;
-                }
-              }
-              i {
-                float: right;
-                font-size: 12px;
-              }
-              .sub-category {
-                width: 100%;
-                box-sizing: content-box;
-                margin-left: -1px;
-                margin-top: -1px;
-                border-top: 0 !important;
-                border-radius: 0 0 2px 2px;
-                &.visible {
-                  border: 1px solid colors.$grey300;
-                  box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
-                }
-                .item {
-                  padding: 15px 10px 15px 15px !important;
-                  i {
-                    margin-left: 2em;
-                  }
-                }
-              }
-            }
-          }
-          .select-severity {
-            .item:first-child {
-              display: none;
-            }
-          }
-        }
-        .issues-list {
-          display: inline-block;
-          width: 100%;
-          margin-top: 15px;
-          margin-bottom: 0px;
-          text-align: left;
-          .issue-item {
-            display: inline-block;
-            width: 47.3%;
-            min-width: 250px;
-            margin: 0 5px 10px;
-            vertical-align: top;
-            transition: 0.3s ease;
-            .issue {
-              background: colors.$white;
-              padding: 5px 5px 5px 10px;
-              box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
-                0 2px 4px rgba(0, 0, 0, 0.24) !important;
-              .issue-head,
-              .issue-activity-icon {
-                display: inline-block;
-                vertical-align: top;
-              }
-              .issue-head {
-                width: 75%;
-                .type_issue_name,
-                .sub_type_issue_name,
-                .severity_issue_name {
-                  display: inline-block;
-                  vertical-align: top;
-                  position: relative;
-                  top: 3px;
-                  font-weight: 700;
-                  margin-right: 4px;
-                }
-                .type_issue_name {
-                }
-                .sub_type_issue_name {
-                  max-width: 65%;
-                  min-width: 30px;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  font-weight: 100;
-                }
-                .severity_issue_name {
-                }
-              }
-              .issue-activity-icon {
-                width: 25%;
-                text-align: right;
-                button {
-                  padding: 3px;
-                  text-align: center;
-                  margin-right: 5px;
-                  background: transparent;
-                  box-shadow: 0 0 0 1px colors.$grey300 inset;
-                  border: none;
-                  outline: none;
-                  &:hover {
-                    box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.35) inset;
-                    i {
-                      color: colors.$grey1300;
-                    }
-                  }
-                  &:active {
-                    background: colors.$grey100;
-                  }
-                  &:focus {
-                    box-shadow: 0 0 0 1px colors.$grey300 inset;
-                  }
-                  &:last-child {
-                    margin-right: 0;
-                  }
-                  i {
-                    margin-right: 0;
-                    color: grey;
-                    position: relative;
-                    top: 1px;
-                  }
-                }
-              }
-            }
-            .comments-view {
-              .re-add-comment,
-              .re-comment-list {
-                padding: 5px 10px;
-                font-size: 18px;
-                background: colors.$grey75;
-                color: colors.$grey600;
-                box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
-                  0 2px 4px rgba(0, 0, 0, 0.24) !important;
-              }
-              .re-add-comment {
-                input {
-                  height: 30px;
-                  border-radius: 30px;
-                  box-sizing: border-box;
-                }
-              }
-              .re-comment-list {
-                font-size: 14px;
-                background: colors.$white;
-                .re-comment {
-                  margin-bottom: 0;
-                  .re-revisor {
-                    color: colors.$green800;
-                  }
-                  .re-revisor2 {
-                    color: colors.$purple500;
-                  }
-                  .re-translator {
-                    color: colors.$blue500;
-                  }
-                  .re-selected-text {
-                    color: colors.$black;
-                  }
-                  .re-comment-date {
-                    font-size: 13px;
-                  }
-                }
-              }
-            }
-          }
-          @media only screen and (max-width: 1180px) {
-            .issue-item {
-              width: 95%;
-              .sub_type_issue_name {
-                max-width: 57% !important;
-              }
-            }
-          }
-        }
-      }
-      &.add-issue-segment {
-        .category,
-        .category-selected .severity {
-          border: 1px solid colors.$green800 !important;
-          box-shadow: inset 0 0 3px colors.$green800;
-        }
-      }
-    }
+.editor.loaded .issues-container {
+  display: inline-block !important;
+  width: 100%;
+  main-bottom: 0px;
+  border-bottom: 1px solid colors.$white;
+  position: relative;
+  z-index: 3;
+  top: 0px;
+  border-top: 1px solid colors.$grey200;
+  background: colors.$white !important;
+}
+
+.editor.loaded .issues-container .border-box-issue {
+  width: 50%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container {
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .field {
+  margin: 1em 0em 1em;
+  display: inline-block;
+  width: 50%;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .field .ui.dropdown {
+  border: 1px solid colors.$grey400;
+  border-radius: 2px !important;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .field .ui.dropdown:hover {
+  border: 1px solid colors.$grey300;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .field .ui.dropdown .text {
+  background: none;
+  font-weight: 700;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category {
+  padding: 8px 15px 4px 17px;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .ellipsis-messages {
+  max-width: 95%;
+  min-width: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: yellow;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .ellipsis-messages.other-class {
+  max-width: 100%;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .ellipsis-messages.example-class {
+  max-width: 50%;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category i {
+  float: right;
+  font-size: 12px;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .sub-category {
+  width: 100%;
+  box-sizing: content-box;
+  margin-left: -1px;
+  margin-top: -1px;
+  border-top: 0 !important;
+  border-radius: 0 0 2px 2px;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .sub-category.visible {
+  border: 1px solid colors.$grey300;
+  box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .sub-category .item {
+  padding: 15px 10px 15px 15px !important;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-category .category .sub-category .item i {
+  margin-left: 2em;
+}
+
+.editor.loaded .issues-container .border-box-issue .creation-issue-container .select-severity .item:first-child {
+  display: none;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list {
+  display: inline-block;
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 0px;
+  text-align: left;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item {
+  display: inline-block;
+  width: 47.3%;
+  min-width: 250px;
+  margin: 0 5px 10px;
+  vertical-align: top;
+  transition: 0.3s ease;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue {
+  background: colors.$white;
+  padding: 5px 5px 5px 10px;
+  box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-head,
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-head {
+  width: 75%;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-head .type_issue_name,
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-head .sub_type_issue_name,
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-head .severity_issue_name {
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  top: 3px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-head .sub_type_issue_name {
+  max-width: 65%;
+  min-width: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 100;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon {
+  width: 25%;
+  text-align: right;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button {
+  padding: 3px;
+  text-align: center;
+  margin-right: 5px;
+  background: transparent;
+  box-shadow: 0 0 0 1px colors.$grey300 inset;
+  border: none;
+  outline: none;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button:hover {
+  box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.35) inset;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button:hover i {
+  color: colors.$grey1300;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button:active {
+  background: colors.$grey100;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button:focus {
+  box-shadow: 0 0 0 1px colors.$grey300 inset;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button:last-child {
+  margin-right: 0;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .issue .issue-activity-icon button i {
+  margin-right: 0;
+  color: grey;
+  position: relative;
+  top: 1px;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-add-comment,
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list {
+  padding: 5px 10px;
+  font-size: 18px;
+  background: colors.$grey75;
+  color: colors.$grey600;
+  box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-add-comment input {
+  height: 30px;
+  border-radius: 30px;
+  box-sizing: border-box;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list {
+  font-size: 14px;
+  background: colors.$white;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list .re-comment {
+  margin-bottom: 0;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list .re-comment .re-revisor {
+  color: colors.$green800;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list .re-comment .re-revisor2 {
+  color: colors.$purple500;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list .re-comment .re-translator {
+  color: colors.$blue500;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list .re-comment .re-selected-text {
+  color: colors.$black;
+}
+
+.editor.loaded .issues-container .border-box-issue .issues-list .issue-item .comments-view .re-comment-list .re-comment .re-comment-date {
+  font-size: 13px;
+}
+
+@media only screen and (max-width: 1180px) {
+  .editor.loaded .issues-container .border-box-issue .issues-list .issue-item {
+    width: 95%;
   }
+
+  .editor.loaded .issues-container .border-box-issue .issues-list .issue-item .sub_type_issue_name {
+    max-width: 57% !important;
+  }
+}
+
+.editor.loaded .issues-container.add-issue-segment .category,
+.editor.loaded .issues-container.add-issue-segment .category-selected .severity {
+  border: 1px solid colors.$green800 !important;
+  box-shadow: inset 0 0 3px colors.$green800;
 }
