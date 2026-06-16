@@ -2,11 +2,13 @@
 
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
+use ReflectionParameter;
 use ReflectionProperty;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
@@ -21,6 +23,8 @@ use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\NotSupportedMTException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Test double: overrides buildEngineConfig() (now protected) to return a fixed array,
@@ -140,7 +144,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $ref      = new ReflectionClass(TMAnalysisWorker::class);
         $required = array_values(array_filter(
             $ref->getConstructor()->getParameters(),
-            static fn(\ReflectionParameter $p): bool => !$p->isOptional()
+            static fn(ReflectionParameter $p): bool => !$p->isOptional()
         ));
 
         $this->assertCount(1, $required);
@@ -278,7 +282,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
 
         $this->stubLockLoserInit($redis);
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater);
 
@@ -301,7 +305,7 @@ class TMAnalysisWorkerTest extends AbstractTest
             ->method('initializeProjectCounters')
             ->with(100, 10, 0);
 
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
 
         $worker = $this->buildWorker(redis: $redis, completion: $completion, updater: $updater);
 
@@ -327,7 +331,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $redis->expects($this->never())
             ->method('initializeProjectCounters');
 
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater);
 
@@ -791,11 +795,11 @@ class TMAnalysisWorkerTest extends AbstractTest
         $this->stubLockLoserInit($redis);
         $this->stubMatchPipeline($engine, $processor, $redis);
 
-        $updater->method('setAnalysisValue')->willThrowException(new \Exception('DB error'));
+        $updater->method('setAnalysisValue')->willThrowException(new Exception('DB error'));
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater, engine: $engine, processor: $processor);
 
-        $this->expectException(\Utils\TaskRunner\Exceptions\ReQueueException::class);
+        $this->expectException(ReQueueException::class);
         $worker->process($this->makeQueueElement());
     }
 
@@ -812,12 +816,12 @@ class TMAnalysisWorkerTest extends AbstractTest
 
         // getTMMatches throws NotSupportedMTException → caught, tmMatches = []
         $engine->method('getTMMatches')
-            ->willThrowException(new \Utils\TaskRunner\Exceptions\NotSupportedMTException('not supported'));
+            ->willThrowException(new NotSupportedMTException('not supported'));
         $engine->method('getMTTranslation')->willReturn([]);
 
         // No matches at all → EmptyElementException
         $processor->method('sortMatches')->willReturn([]);
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater, engine: $engine, processor: $processor);
 
@@ -908,7 +912,29 @@ class TMAnalysisWorkerTest extends AbstractTest
         $redis->method('getWorkingProjects')->willReturn([]);
 
         // forceSetSegmentAnalyzed returns true → triggers increment + close
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(true);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(1);
+
+        $redis->expects($this->atLeastOnce())->method('incrementAnalyzedCount');
+        $completion->expects($this->atLeastOnce())->method('tryCloseProject');
+
+        $worker = $this->buildWorker(redis: $redis, updater: $updater, completion: $completion);
+
+        $this->expectException(EmptyElementException::class);
+        $worker->process($this->makeQueueElement(['raw_word_count' => 0]));
+    }
+
+    #[Test]
+    public function process_forceSetSegmentAnalyzed_Skipped_increments_and_closes(): void
+    {
+        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+
+        $this->stubLockLoserInit($redis);
+        $redis->method('getWorkingProjects')->willReturn([]);
+
+        // forceSetSegmentAnalyzed returns -1 (SKIPPED pre-translation) → triggers increment + close
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(-1);
 
         $redis->expects($this->atLeastOnce())->method('incrementAnalyzedCount');
         $completion->expects($this->atLeastOnce())->method('tryCloseProject');
@@ -1011,7 +1037,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $engine->method('getTMMatches')->willReturn([]);
         $engine->method('getMTTranslation')->willReturn([]);
         $processor->method('sortMatches')->willReturn([]);
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(false);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater, engine: $engine, processor: $processor);
 
@@ -1027,7 +1053,7 @@ class TMAnalysisWorkerTest extends AbstractTest
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
-        $updater->method('forceSetSegmentAnalyzed')->willReturn(true);
+        $updater->method('forceSetSegmentAnalyzed')->willReturn(1);
 
         $worker = $this->buildWorker(redis: $redis, updater: $updater);
 
