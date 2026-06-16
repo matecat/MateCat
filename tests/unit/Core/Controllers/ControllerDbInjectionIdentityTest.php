@@ -34,10 +34,6 @@ class IdentityTestableCommentController extends CommentController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     /**
      * Mirrors the production seam `new CommentDao($this->db())`.
      */
@@ -63,10 +59,6 @@ class IdentityTestableCommentController extends CommentController
 class IdentityTestableGetSegmentsController extends GetSegmentsController
 {
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 

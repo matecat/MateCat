@@ -26,9 +26,6 @@ class TestableSegmentAnalysisController extends SegmentAnalysisController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class SegmentAnalysisControllerTest extends AbstractTest

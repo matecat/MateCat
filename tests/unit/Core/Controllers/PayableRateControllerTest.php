@@ -29,10 +29,6 @@ class TestablePayableRateController extends PayableRateController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }

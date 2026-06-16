@@ -30,18 +30,11 @@ class TestableQualityReportControllerAPI extends QualityReportControllerAPI
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class TestableShowQualityReportControllerAPI extends QualityReportControllerAPI
 {
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 
@@ -60,10 +53,6 @@ class TestableShowQualityReportControllerAPI extends QualityReportControllerAPI
 class TestableSegmentsQualityReportControllerAPI extends QualityReportControllerAPI
 {
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 

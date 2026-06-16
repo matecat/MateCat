@@ -23,10 +23,6 @@ class TestableCountWordController extends CountWordController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }
@@ -46,10 +42,6 @@ class RawWordsTestableCountWordController extends CountWordController
     public SizeRestriction $stubbedSizeRestriction;
 
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 

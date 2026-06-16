@@ -22,9 +22,6 @@ class TestableQualityFrameworkController extends QualityFrameworkController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]
@@ -153,7 +150,7 @@ class QualityFrameworkControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstructAppendsLoginValidator(): void
+    public function registerValidatorsAppendsLoginValidator(): void
     {
         $realReflector = new ReflectionClass(QualityFrameworkController::class);
         /** @var QualityFrameworkController $realController */
@@ -165,8 +162,8 @@ class QualityFrameworkControllerTest extends AbstractTest
         $realReflector->getProperty('request')->setValue($realController, $request);
         $realReflector->getProperty('response')->setValue($realController, $response);
 
-        $afterConstruct = $realReflector->getMethod('afterConstruct');
-        $afterConstruct->invoke($realController);
+        $registerValidators = $realReflector->getMethod('registerValidators');
+        $registerValidators->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);

@@ -30,10 +30,6 @@ class TestableDeepLGlossaryController extends DeepLGlossaryController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }
@@ -64,10 +60,6 @@ class EngineSeamTestableDeepLGlossaryController extends DeepLGlossaryController
     public DeepL $stubEngine;
 
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 

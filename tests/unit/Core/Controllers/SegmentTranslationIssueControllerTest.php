@@ -30,10 +30,6 @@ class TestableSegmentTranslationIssueController extends SegmentTranslationIssueC
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function _getSegmentTranslationIssueModel(int $id_job, string $password, EntryStruct $issue): TranslationIssueModel
     {
         if ($this->mockModel !== null) {
@@ -675,10 +671,10 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
         $this->controller->update();
     }
 
-    // ─── afterConstruct() ────────────────────────────────────────
+    // ─── registerValidators() ────────────────────────────────────────
 
     #[Test]
-    public function afterConstructAppendsValidators(): void
+    public function registerValidatorsAppendsValidators(): void
     {
         $realReflector = new ReflectionClass(SegmentTranslationIssueController::class);
         /** @var SegmentTranslationIssueController $realController */
@@ -702,8 +698,8 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
             'password' => self::JOB_PASSWORD,
         ]);
 
-        $afterConstruct = $realReflector->getMethod('afterConstruct');
-        $afterConstruct->invoke($realController);
+        $registerValidators = $realReflector->getMethod('registerValidators');
+        $registerValidators->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $baseReflector->getProperty('validators')->getValue($realController);
