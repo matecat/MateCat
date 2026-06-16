@@ -8,6 +8,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 
 trait ChunkNotFoundHandlerTrait
 {
@@ -54,7 +55,16 @@ trait ChunkNotFoundHandlerTrait
                     'message' => 'No job found.'
                 ]
             ]);
-            throw new RenderTerminatedException();
+
+            // Production terminates the request after the 404 has been sent.
+            // Under tests a throwable is raised instead so the PHPUnit worker
+            // survives and the branch is assertable (matches BaseKleinViewController
+            // and DownloadQRController). RenderTerminatedException is unchecked.
+            if (AppConfig::$ENV === 'testing') {
+                throw new RenderTerminatedException();
+            }
+
+            exit();
         }
     }
 }
