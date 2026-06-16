@@ -51,7 +51,6 @@ class GetTranslationMismatchesController extends KleinController
         $sDao = new SegmentDao($this->db());
         $Translation_mismatches = $sDao->setCacheTTL(60 /* 1 minutes cache */)->getTranslationsMismatches($this->params['id_job'], $this->params['password'], (int)$parsedIdSegment['id_segment']);
 
-        // @phpstan-ignore argument.type (getTranslationsMismatches returns ShapelessConcreteStruct[] which implements ArrayAccess<string,mixed> and is consumed as array<string,mixed> by the view)
         $mismatchesView = new SegmentTranslationMismatches($Translation_mismatches, $this->chunk, count($Translation_mismatches), $this->featureSet);
 
         $this->response->json([
