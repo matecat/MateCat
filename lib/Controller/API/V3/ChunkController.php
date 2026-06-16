@@ -49,7 +49,7 @@ class ChunkController extends KleinController
         $this->response->json($format->renderOne($this->chunk));
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
