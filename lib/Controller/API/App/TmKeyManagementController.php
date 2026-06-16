@@ -50,7 +50,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                     'The job was not found'
                 ]
             ]);
-            exit();
+            return;
         }
 
         $job_keyList = json_decode($chunk->tm_keys, true);
@@ -70,7 +70,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             $this->response->json([
                 'tm_keys' => $tmKeys
             ]);
-            exit();
+            return;
         }
 
         if ($this->getUser()->email == $chunk->status_owner) {

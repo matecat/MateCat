@@ -70,7 +70,7 @@ class DownloadJobTMXController extends AbstractDownloadController
             $this->response->status()->setCode(500);
             $this->response->json($this->errors);
 
-            exit();
+            return;
         }
 
         //get job language and data

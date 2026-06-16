@@ -32,7 +32,6 @@ class TmKeyManagementController extends KleinController
             }
 
             $this->response->json($list);
-            exit();
         } catch (Exception $exception) {
             $this->response->status()->setCode(500);
             $this->response->json([
@@ -40,7 +39,6 @@ class TmKeyManagementController extends KleinController
                     $exception->getMessage()
                 ]
             ]);
-            exit();
         }
     }
 
