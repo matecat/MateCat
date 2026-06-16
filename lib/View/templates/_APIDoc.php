@@ -50,6 +50,10 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
     <script src="/public/api/dist/lib/swagger-ui-bundle.js"></script>
     <script src="/public/api/dist/lib/swagger-ui-standalone-preset.js"></script>
     <style>
+        body {
+            width: auto;
+            overflow-x: hidden;
+        }
         .markdown > h2 {
             font-size: 30px;
         }
@@ -69,12 +73,17 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
             display: -webkit-box;
             display: -ms-flexbox;
             display: flex;
+            flex-wrap: wrap;
             -webkit-box-align: center;
             -ms-flex-align: center;
             align-items: center;
             padding: 5px;
             cursor: pointer;
             border-color: #61affe;
+        }
+
+        .swagger-ui .markdown code {
+            margin-top: 9px;
         }
         table.parameters {
             table-layout: unset;
