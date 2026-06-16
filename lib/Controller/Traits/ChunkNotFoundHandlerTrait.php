@@ -2,6 +2,7 @@
 
 namespace Controller\Traits;
 
+use Controller\Exceptions\RenderTerminatedException;
 use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -40,6 +41,8 @@ trait ChunkNotFoundHandlerTrait
 
     /**
      * Return 404 if chunk was deleted
+     *
+     * @throws RenderTerminatedException
      */
     protected function return404IfTheJobWasDeleted(): void
     {
@@ -51,7 +54,7 @@ trait ChunkNotFoundHandlerTrait
                     'message' => 'No job found.'
                 ]
             ]);
-            exit();
+            throw new RenderTerminatedException();
         }
     }
 }

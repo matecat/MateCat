@@ -48,7 +48,7 @@ class UrlsController extends KleinController
                     'message' => 'No project found.'
                 ]
             ]);
-            exit();
+            return;
         }
 
         $projectData = (new ProjectDao($this->db()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));

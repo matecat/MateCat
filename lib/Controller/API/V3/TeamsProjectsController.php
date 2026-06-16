@@ -77,7 +77,7 @@ class TeamsProjectsController extends KleinController
                 '_links' => $this->_getPaginationLinks($page, $totals, $step, $search),
                 'projects' => []
             ]);
-            exit();
+            return;
         }
 
         if ($page > $total_pages) {

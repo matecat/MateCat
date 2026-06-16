@@ -55,7 +55,6 @@ class MyMemoryController extends KleinController
             $this->response->json([
                 'key' => $newKey
             ]);
-            exit();
         } catch (Exception $exception) {
             $this->response->status()->setCode($exception->getCode());
             $this->response->json([
@@ -64,7 +63,6 @@ class MyMemoryController extends KleinController
                     'message' => $exception->getMessage()
                 ]
             ]);
-            exit();
         }
     }
 
