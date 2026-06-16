@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!-- Controller-scoped coverage config for the controller-coverage-afterconstruct plan.
+     Source include limited to lib/Controller so coverage runs are fast and the
+     aggregate-coverage gate is computed over the in-scope set. Committed artifact
+     (stable path, unlike a job-ephemeral tmp dir). Paths relative to repo root. -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.4/phpunit.xsd"
+         bootstrap="tests/test_helper.php"
+         colors="false"
+         processIsolation="false"
+         stopOnError="false"
+         stopOnFailure="false"
+         beStrictAboutTestsThatDoNotTestAnything="false">
+
+    <source ignoreIndirectDeprecations="true" restrictNotices="false" restrictWarnings="false">
+        <include>
+            <directory suffix=".php">./lib/Controller</directory>
+        </include>
+    </source>
+    <coverage pathCoverage="false" ignoreDeprecatedCodeUnits="true"/>
+
+    <php>
+        <includePath>tests/unit/TestHelpers</includePath>
+    </php>
+    <testsuites>
+        <testsuite name="Matecat Unit tests">
+            <directory>tests/unit</directory>
+            <exclude>tests/unit/TestHelpers</exclude>
+        </testsuite>
+    </testsuites>
+</phpunit>
