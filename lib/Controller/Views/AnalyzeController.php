@@ -35,7 +35,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
         return $this->projectDao ??= new ProjectDao($this->db());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
     }

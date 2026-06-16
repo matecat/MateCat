@@ -21,7 +21,7 @@ use View\API\V2\Json\MemoryKeys;
 class MemoryKeysController extends KleinController
 {
 
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
