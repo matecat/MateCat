@@ -70,7 +70,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         return $this->data;
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

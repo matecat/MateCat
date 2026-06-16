@@ -335,7 +335,7 @@ class QualityReportControllerAPI extends KleinController
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
