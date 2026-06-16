@@ -21,7 +21,7 @@ class ChangeProjectNameController extends KleinController
 
     private ?ProjectStruct $project;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
