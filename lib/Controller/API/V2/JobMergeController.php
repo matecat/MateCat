@@ -46,8 +46,7 @@ class JobMergeController extends KleinController
     }
 
     /**
-     * Handles the initialization process after object construction by setting up
-     * project validation and appending the necessary validators.
+     * Registers the validators required to authorize and resolve the merge request.
      *
      * This method performs the following steps:
      * - Creates a `ProjectPasswordValidator` instance to validate the project password.
@@ -60,7 +59,7 @@ class JobMergeController extends KleinController
      *
      * @return void
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         // Initialize the project password validator.
         $validator = new ProjectPasswordValidator($this);

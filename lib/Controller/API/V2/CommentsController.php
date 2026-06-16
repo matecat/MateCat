@@ -33,7 +33,7 @@ class CommentsController extends KleinController
         $this->response->json(['comments' => $comments]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

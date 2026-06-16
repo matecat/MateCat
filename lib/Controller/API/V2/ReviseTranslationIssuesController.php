@@ -24,9 +24,7 @@ class ReviseTranslationIssuesController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
-    /**
-     */
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new JobPasswordValidator($this);

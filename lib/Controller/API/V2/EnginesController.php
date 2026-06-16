@@ -20,7 +20,7 @@ use View\API\V2\Json\Engine;
 class EnginesController extends KleinController
 {
 
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
