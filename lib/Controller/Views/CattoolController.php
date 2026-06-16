@@ -50,7 +50,7 @@ use Utils\Tools\Utils;
 class CattoolController extends BaseKleinViewController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
     }
