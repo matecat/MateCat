@@ -5,7 +5,7 @@
     "postversion": "git add ./inc/version.ini && git commit --amend --no-edit && git tag -d v${npm_package_version} && git tag -a v${npm_package_version} -m'v${npm_package_version}'",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
-    "lint:css": "node --experimental-vm-modules node_modules/stylelint/bin/stylelint.mjs \"public/css/sass/**/*.scss\" --ignore-pattern \"**/vendor_mc/**\" --max-warnings 1016",
+    "lint:css": "node --experimental-vm-modules node_modules/stylelint/bin/stylelint.mjs \"public/css/sass/**/*.scss\" --ignore-pattern \"**/vendor_mc/**\" --max-warnings 1005",
     "test": "jest --watchAll",
     "coverage": "jest --silent --coverage",
     "watch": "vite",
