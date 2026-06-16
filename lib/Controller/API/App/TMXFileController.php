@@ -18,7 +18,7 @@ use Utils\TMS\TMSService;
 class TMXFileController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

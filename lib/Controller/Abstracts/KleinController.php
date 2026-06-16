@@ -225,10 +225,18 @@ abstract class KleinController implements IController
         return $this;
     }
 
+    /**
+     * Override this method to inject dependencies, DB, Dao, etc.
+     * @return void
+     */
     protected function initDependencies(): void
     {
     }
 
+    /**
+     * Override this method to register validators.
+     * @return void
+     */
     protected function registerValidators(): void
     {
     }
