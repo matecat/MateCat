@@ -620,86 +620,6 @@ parameters:
 
 
 
-		-
-			message: '#^Argument of an invalid type Model\\Conversion\\UploadElement supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 3
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\GlossaryFilesController\:\:afterConstruct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\GlossaryFilesController\:\:extractCSV\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\GlossaryFilesController\:\:extractCSV\(\) has parameter \$stdResult with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\GlossaryFilesController\:\:setSuccessResponse\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Method Controller\\API\\V2\\GlossaryFilesController\:\:validateCSVFile\(\) has parameter \$file with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Parameter \#3 \$userEmail of method Utils\\TMS\\TMSService\:\:glossaryExport\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\GlossaryFilesController\:\:\$downloadToken \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\GlossaryFilesController\:\:\$name \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\GlossaryFilesController\:\:\$tm_key \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/GlossaryFilesController.php
-
-
-
-
-
-
-
-
-
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: lib/Controller/API/V2/ProjectCompletionStatus.php
-
-		-
-			message: '#^Property Controller\\API\\V2\\ProjectCompletionStatus\:\:\$project \(Model\\Projects\\ProjectStruct\) does not accept Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/V2/ProjectCompletionStatus.php
 
 
 
@@ -717,29 +637,16 @@ parameters:
 
 
 
-		-
-			message: '#^Cannot call method getProject\(\) on Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/V2/StatsController.php
 
-		-
-			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/StatsController.php
 
-		-
-			message: '#^Method Controller\\API\\V2\\StatsController\:\:stats\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V2/StatsController.php
 
-		-
-			message: '#^Parameter \#1 \$jobOrChunk of static method Model\\WordCount\\WordCountStruct\:\:loadFromJob\(\) expects Model\\Jobs\\JobStruct, Model\\Jobs\\JobStruct\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V2/StatsController.php
+
+
+
+
+
+
+
 
 		-
 			message: '#^Method Controller\\API\\V2\\SupportedFilesController\:\:getFileList\(\) return type has no value type specified in iterable type array\.$#'
@@ -787,11 +694,6 @@ parameters:
 			count: 1
 			path: lib/Controller/API/V3/CountWordController.php
 
-		-
-			message: '#^Method Controller\\API\\V3\\CountWordController\:\:afterConstruct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
 
 
 		-
@@ -963,7 +865,7 @@ parameters:
 			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:afterConstruct\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:initDependencies\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: lib/Controller/Views/OutsourceTo/AbstractController.php
@@ -2405,11 +2307,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/SegmentsController.php
 
-		-
-			message: '#^Argument of an invalid type Model\\Conversion\\UploadElement supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
 		-
 			message: '#^Call to an undefined method Features\\Aligner\\Utils\\TMSService\:\:setTmKey\(\)\.$#'
@@ -2514,16 +2411,17 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
 		-
+			message: '#^Method Features\\Aligner\\Controller\\TmController\:\:__uploadTMX\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
+
+		-
 			message: '#^Unable to resolve the template type T in call to static method Utils\\Engines\\EnginesFactory\:\:getInstance\(\)$#'
 			identifier: argument.templateType
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
-		-
-			message: '#^Argument of an invalid type Model\\Conversion\\UploadElement supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 
 		-
 			message: '#^Parameter \#1 \$message of class RuntimeException constructor expects string, array\<string, int\|string\|null\> given\.$#'
