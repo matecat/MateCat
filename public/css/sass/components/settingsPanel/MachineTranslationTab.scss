@@ -571,11 +571,11 @@
     margin: 0;
   }
 
-  .numeric-stepper-component {
+  div[class*="numeric-stepper-component"] {
     max-width: 72px;
     height: 32px;
 
-    .container-controls button {
+    div[class*="container-controls"] button {
       height: 16px !important;
     }
   }

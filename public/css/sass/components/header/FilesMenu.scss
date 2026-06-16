@@ -6,7 +6,7 @@
   &:hover {
     text-decoration: none !important;
   }
-  .filename-label .name {
+  span[class*="filename-label"] span[class*="name"] {
     max-width: 200px;
   }
 }

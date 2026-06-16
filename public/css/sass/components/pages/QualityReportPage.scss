@@ -727,7 +727,7 @@ header {
                             padding: 0 3px;
                             font-size: 16px;
                             width: 100%;
-                            .badge-container {
+                            span[class*="badge-container"] {
                               width: 100%;
                             }
                           }
@@ -838,7 +838,7 @@ header {
                             font-weight: 400;
                           }
                         }
-                        .badge-container {
+                        span[class*="badge-container"] {
                           cursor: pointer;
                         }
                       }
