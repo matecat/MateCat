@@ -67,7 +67,7 @@ class UrlsController extends KleinController
         $this->validator->validate();
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->validator = new ProjectPasswordValidator($this);
         $this->appendValidator(new LoginValidator($this));

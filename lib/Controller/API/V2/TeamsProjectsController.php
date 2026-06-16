@@ -70,9 +70,8 @@ class TeamsProjectsController extends KleinController
         $this->response->json(['project' => $formatted->renderItem($updatedStruct)]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new TeamAccessValidator($this));
     }

@@ -74,7 +74,7 @@ class ActivityLogController extends KleinController
         $this->response->json(['activity' => $formatted->render()]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

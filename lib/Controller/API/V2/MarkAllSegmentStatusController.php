@@ -27,7 +27,7 @@ class MarkAllSegmentStatusController extends KleinController
     use ChunkNotFoundHandlerTrait;
 
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $chunkValidator = new ChunkPasswordValidator($this);
