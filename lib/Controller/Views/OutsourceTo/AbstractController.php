@@ -123,7 +123,7 @@ abstract class AbstractController extends BaseKleinViewController
         $this->logger->debug($this->request->server()->get('QUERY_STRING'));
     }
 
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
         $this->validateTheRequest();
     }

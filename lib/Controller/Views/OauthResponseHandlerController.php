@@ -46,10 +46,9 @@ class OauthResponseHandlerController extends BaseKleinViewController
     }
 
     /**
-     * @return void
      * @throws Exception
      */
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
         $this->setView('oauth_response_handler.html', ['wanted_url' => $_SESSION['wanted_url'] ?? null]); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
     }

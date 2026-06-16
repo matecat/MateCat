@@ -10,7 +10,7 @@ use Exception;
 class ContextReviewController extends BaseKleinViewController implements IController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
     }

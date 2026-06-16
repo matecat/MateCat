@@ -289,7 +289,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         );
     }
 
-    protected function afterConstruct(): void {
+    protected function registerValidators(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {

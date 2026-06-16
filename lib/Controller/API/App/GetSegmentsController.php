@@ -44,7 +44,7 @@ class GetSegmentsController extends KleinController
     const int DEFAULT_PER_PAGE = 40;
     const int MAX_PER_PAGE = 200;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

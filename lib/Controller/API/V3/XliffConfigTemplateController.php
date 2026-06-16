@@ -23,9 +23,8 @@ class XliffConfigTemplateController extends KleinController
         return $this->xliffConfigTemplateDao ??= new XliffConfigTemplateDao($this->db());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
     }
 

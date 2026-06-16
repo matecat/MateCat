@@ -14,10 +14,8 @@ class LaraController extends KleinController
 
     protected Lara $laraEngine;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
-
         $loginValidator = new LoginValidator($this);
         $engineOwnerValidator = new EngineOwnershipValidator($this, (int)filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT), Lara::class);
 

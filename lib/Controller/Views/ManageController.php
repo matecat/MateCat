@@ -23,7 +23,7 @@ class ManageController extends BaseKleinViewController implements IController
 
     protected string $_outsource_login_API = '//signin.translated.net/';
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
     }
