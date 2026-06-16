@@ -127,7 +127,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected ?VersionHandlerInterface $VersionsHandler = null;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

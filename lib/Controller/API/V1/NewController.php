@@ -80,7 +80,7 @@ class NewController extends KleinController
 
     const int MAX_NUM_KEYS = 15;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

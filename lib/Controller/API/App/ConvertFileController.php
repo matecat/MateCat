@@ -25,7 +25,7 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 class ConvertFileController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

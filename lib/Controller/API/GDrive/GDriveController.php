@@ -444,7 +444,7 @@ class GDriveController extends AbstractStatefulKleinController
      * @throws Exception
      * @throws \TypeError
      */
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
         $this->initSessionService();
     }
