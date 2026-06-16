@@ -358,7 +358,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
         $struct = $event->event;
-        $review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0];
+        $review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
+            ?? throw new ValidationError('chunk review not found');
 
         $undo_data = $review->getUndoData();
 

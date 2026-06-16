@@ -245,18 +245,6 @@ parameters:
 			path: lib/Controller/API/Commons/Exceptions/ExternalServiceException.php
 
 		-
-			message: '#^Method Controller\\API\\Commons\\Exceptions\\NotFoundException\:\:__construct\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Exceptions/NotFoundException.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Exceptions\\NotFoundException\:\:__construct\(\) has parameter \$message with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Exceptions/NotFoundException.php
-
-		-
 			message: '#^Method Controller\\API\\Commons\\Exceptions\\UnprocessableException\:\:__construct\(\) has parameter \$code with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
