@@ -33,9 +33,8 @@ class TeamsProjectsController extends KleinController
         return $this->projectDao ??= new ProjectDao($this->db());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new TeamAccessValidator($this));
     }

@@ -15,7 +15,7 @@ use Utils\TMS\TMSService;
 
 class MyMemoryController extends KleinController
 {
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
