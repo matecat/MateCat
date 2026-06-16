@@ -15,7 +15,7 @@ use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController
 {
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new JSONRequestValidator($this));

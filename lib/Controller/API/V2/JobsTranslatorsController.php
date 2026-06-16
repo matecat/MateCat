@@ -28,7 +28,7 @@ class JobsTranslatorsController extends KleinController
 
     /**
      * @var JobStruct
-     * @see JobsTranslatorsController::afterConstruct method
+     * @see JobsTranslatorsController::registerValidators method
      */
     protected JobStruct $jStruct;
 
@@ -123,9 +123,7 @@ class JobsTranslatorsController extends KleinController
         );
     }
 
-    /**
-     */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new JobPasswordValidator($this);

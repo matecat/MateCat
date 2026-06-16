@@ -27,7 +27,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
         return $this->projectDao ??= new ProjectDao($this->db());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new ProjectPasswordValidator($this));
