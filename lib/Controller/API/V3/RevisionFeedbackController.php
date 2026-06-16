@@ -38,7 +38,7 @@ class RevisionFeedbackController extends KleinController
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new ChunkPasswordValidator($this);

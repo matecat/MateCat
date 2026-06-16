@@ -59,7 +59,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
         $this->logger = LoggerFactory::getLogger($loggerName, $loggerName);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

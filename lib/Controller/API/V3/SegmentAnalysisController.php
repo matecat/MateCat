@@ -49,7 +49,7 @@ class SegmentAnalysisController extends KleinController
      */
     private SegmentDisabledService $segmentDisabledService;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

@@ -28,11 +28,14 @@ class ProjectTemplateController extends KleinController
 {
     private ProjectTemplateDao $projectTemplateDao;
 
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
-        parent::afterConstruct();
-        $this->appendValidator(new LoginValidator($this));
         $this->projectTemplateDao = new ProjectTemplateDao($this->db());
+    }
+
+    protected function registerValidators(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**

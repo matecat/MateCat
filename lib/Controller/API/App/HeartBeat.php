@@ -19,7 +19,7 @@ use View\API\App\Json\Ping;
 class HeartBeat extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new WhitelistAccessValidator($this));
     }

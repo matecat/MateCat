@@ -26,9 +26,8 @@ class QAModelTemplateController extends KleinController
         return $this->qaModelTemplateDao ??= new QAModelTemplateDao();
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
     }
 

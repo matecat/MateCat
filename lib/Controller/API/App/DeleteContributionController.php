@@ -24,7 +24,7 @@ class DeleteContributionController extends KleinController
 
     use APISourcePageGuesserTrait;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

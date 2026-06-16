@@ -34,7 +34,7 @@ class GetWarningController extends KleinController
 
     use ICUSourceSegmentChecker;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

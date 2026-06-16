@@ -25,8 +25,9 @@ class CountWordController extends KleinController
 
     /**
      * @throws ValidationError
+     * @throws \TypeError
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->language = $this->request->param('language') ?: 'en-US';
 
