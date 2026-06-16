@@ -353,12 +353,6 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
 
 		-
-			message: '#^Parameter \#2 \$uid of static method Utils\\Engines\\EnginesFactory\:\:getInstanceByIdAndUser\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/EngineOwnershipValidator.php
-
-		-
 			message: '#^Parameter \#1 \$email of class Model\\FeaturesBase\\Hook\\Event\\Filter\\IsAnInternalUserEvent constructor expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -503,12 +497,6 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
 
 		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\SegmentTranslation\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentTranslation.php
-
-		-
 			message: '#^Cannot access property \$source_page on Model\\LQA\\EntryStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -539,34 +527,10 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
 
 		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\SegmentValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentValidator.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type void\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentValidator.php
-
-		-
 			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: lib/Controller/API/Commons/Validators/WhitelistAccessValidator.php
-
-		-
-			message: '#^Call to an undefined method Controller\\Abstracts\\KleinController\:\:redirectToWantedUrl\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php
-
-		-
-			message: '#^PHPDoc tag @var has invalid value \(\$controller BaseKleinViewController\)\: Unexpected token "\$controller", expected type at offset 9 on line 1$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php
 
 		-
 			message: '#^Call to method Controller\\API\\GDrive\\OAuthController\:\:__handleError\(\) on a separate line has no effect\.$#'

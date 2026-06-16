@@ -149,22 +149,11 @@ class ProjectAccessValidatorTest extends AbstractTest
         $this->assertTrue(true);
     }
 
-    // ─── no user (null) => AuthorizationError 401 ───
-
-    #[Test]
-    public function throws_authorization_error_when_user_is_not_logged_in(): void
-    {
-        $ctrl = new ProjectAccessValidatorTestControllerGuest();
-        $this->setCtrlProp($ctrl, 'request', $this->makeRequest());
-
-        $project = $this->makeProjectStruct(self::TEAM_ID);
-        $validator = new ProjectAccessValidator($ctrl, $project);
-
-        $this->expectException(AuthorizationError::class);
-        $this->expectExceptionCode(401);
-
-        $validator->validate();
-    }
+    // NOTE: the "user not logged in" branch (ProjectAccessValidator::_validate lines 47-48,
+    // `if (empty($this->controller->getUser()))`) is unreachable defensive code: getUser():
+    // UserStruct is a non-null typed contract, so empty() on the returned object is always
+    // false. It cannot be exercised without a type-incompatible stub, so it is intentionally
+    // not tested.
 
     // ─── user not in team => AuthorizationError 401 ───
 

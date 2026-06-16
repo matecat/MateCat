@@ -2,9 +2,11 @@
 
 namespace Controller\API\Commons\Validators;
 
+use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
+use PDOException;
 use ReflectionException;
 
 class SegmentTranslation extends Base
@@ -17,7 +19,9 @@ class SegmentTranslation extends Base
 
     /**
      * @return void
+     * @throws Exception
      * @throws NotFoundException
+     * @throws PDOException
      * @throws ReflectionException
      */
     protected function _validate(): void

@@ -33,7 +33,7 @@ class ViewLoginRedirectValidator extends Base
             exit;
         } elseif (isset($_SESSION['wanted_url'])) {
             // handle redirect after login
-            /** @var $controller BaseKleinViewController */
+            /** @var BaseKleinViewController $controller */
             $controller = $this->controller;
             $controller->redirectToWantedUrl();
         }
