@@ -415,7 +415,7 @@ header {
     margin-left: 14px;
   }
 
-  .popover-component-container {
+  div[class*="popover-component-container"] {
     margin-left: 15px;
   }
 }

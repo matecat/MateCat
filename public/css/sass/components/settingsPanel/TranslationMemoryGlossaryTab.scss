@@ -459,7 +459,7 @@
     }
   }
 
-  .switch-container-outer {
+  div[class*="switch-container-outer"] {
     width: 150px;
   }
 }

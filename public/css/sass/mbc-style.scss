@@ -547,7 +547,7 @@ section:hover .mbc-comment-icon-button,
   justify-content: space-between;
   align-items: center;
   padding: 8px 4px;
-  .input-checkbox > span {
+  div[class*="input-checkbox"] > span {
     color: colors.$grey400;
     font-size: 14px;
   }

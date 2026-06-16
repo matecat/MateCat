@@ -251,7 +251,7 @@
 }
 
 .quality-framework-add-category {
-  .popover-component-top {
+  div[class*="popover-component-top"] {
     bottom: 0;
     margin-bottom: 0;
   }

@@ -1,6 +1,7 @@
 import React, {useRef, useEffect} from 'react'
 
 import PropTypes from 'prop-types'
+import styles from './Checkbox.module.scss'
 
 export const CHECKBOX_STATE = {
   CHECKED: 'checked',
@@ -54,9 +55,7 @@ export const Checkbox = ({
   return (
     <>
       <div
-        className={`input-checkbox ${disabled ? 'isDisabled' : ''} ${
-          value !== CHECKBOX_STATE.UNCHECKED ? 'checked' : ''
-        } ${className}`}
+        className={[styles['input-checkbox'], disabled && styles.isDisabled, value !== CHECKBOX_STATE.UNCHECKED && styles.checked, className].filter(Boolean).join(' ')}
         onClick={handleLabelClick}
       >
         <input
@@ -90,7 +89,7 @@ export const Checkbox = ({
         </svg>
         {label && <span>{label}</span>}
       </div>
-      {error && <span className={'errorMessage'}>{error}</span>}
+      {error && <span className={styles.errorMessage}>{error}</span>}
     </>
   )
 }

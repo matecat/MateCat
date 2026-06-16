@@ -147,7 +147,7 @@
       background-color: unset !important;
     }
 
-    .input-component {
+    div[class*="input-component"] {
       width: 100%;
 
       input {

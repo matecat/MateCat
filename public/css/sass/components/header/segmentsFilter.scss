@@ -212,10 +212,10 @@ section.muted .segment-side-buttons {
               background-color: colors.$white;
               min-width: 120px;
             }
-            .switch-container-outer {
+            div[class*="switch-container-outer"] {
               padding: 0 10px;
             }
-            .switch-container input:checked + span {
+            div[class*="switch-container"] input:checked + span {
               background-color: colors.$grey400;
             }
             &:nth-child(2) {
