@@ -32,6 +32,7 @@ class ErrorManagerTest extends AbstractTest
         $this->assertEquals(1300, ErrorManager::ERR_EX_BX_NESTED_IN_G);
         $this->assertEquals(2000, ErrorManager::SMART_COUNT_PLURAL_MISMATCH);
         $this->assertEquals(3000, ErrorManager::ERR_SIZE_RESTRICTION);
+        $this->assertEquals(4000, ErrorManager::ERR_FUZZY_UNCHANGED);
     }
 
     #[Test]
@@ -198,6 +199,32 @@ class ErrorManagerTest extends AbstractTest
 
         $this->assertFalse($this->errorManager->thereAreErrors());
         $this->assertTrue($this->errorManager->thereAreWarnings());
+    }
+
+    #[Test]
+    public function addErrorFuzzyUnchanged(): void
+    {
+        $this->errorManager->addError(ErrorManager::ERR_FUZZY_UNCHANGED);
+
+        // Behaves like a tag order mismatch: WARNING level, not an ERROR.
+        $this->assertFalse($this->errorManager->thereAreErrors());
+        $this->assertTrue($this->errorManager->thereAreWarnings());
+
+        $warnings = $this->errorManager->getWarnings();
+        $this->assertEquals(ErrorManager::ERR_FUZZY_UNCHANGED, $warnings[0]->outcome);
+        $this->assertEquals('Fuzzy match confirmed without changes', $warnings[0]->debug);
+    }
+
+    #[Test]
+    public function fuzzyUnchangedIsSerializedAsWarning(): void
+    {
+        $this->errorManager->addError(ErrorManager::ERR_FUZZY_UNCHANGED);
+
+        $json = $this->errorManager->getWarningsJSON();
+        $decoded = json_decode($json, true);
+
+        $this->assertIsArray($decoded);
+        $this->assertEquals(ErrorManager::ERR_FUZZY_UNCHANGED, $decoded[0]['outcome']);
     }
 
     // ========== Add Error Tests - Info Level ==========

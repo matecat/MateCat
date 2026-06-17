@@ -959,6 +959,7 @@ class QATest extends AbstractTest
         $this->assertEquals(ErrorManager::ERR_TAG_ORDER, QA::ERR_TAG_ORDER);
         $this->assertEquals(ErrorManager::ERR_WS_HEAD, QA::ERR_WS_HEAD);
         $this->assertEquals(ErrorManager::ERR_SIZE_RESTRICTION, QA::ERR_SIZE_RESTRICTION);
+        $this->assertEquals(ErrorManager::ERR_FUZZY_UNCHANGED, QA::ERR_FUZZY_UNCHANGED);
     }
 
     #[Test]

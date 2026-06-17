@@ -77,6 +77,9 @@ class ErrorManager
     public const int SMART_COUNT_MISMATCH = 2001;
     public const int ERR_SIZE_RESTRICTION = 3000;
 
+    /** @var int Fuzzy TM match confirmed without any modification */
+    public const int ERR_FUZZY_UNCHANGED = 4000;
+
     public const string ERROR = 'ERROR';
     public const string WARNING = 'WARNING';
     public const string INFO = 'INFO';
@@ -128,6 +131,7 @@ class ErrorManager
         2000 => 'Smart count plural forms mismatch',
         2001 => '%smartcount tag count mismatch',
         3000 => 'Characters limit exceeded',
+        4000 => 'Fuzzy match confirmed without changes',
     ];
 
     /** @var array<int, string|null> */
@@ -135,6 +139,7 @@ class ErrorManager
         29 => "Should be < g ... > ... < /g >",
         1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
         3000 => 'Maximum characters limit exceeded.',
+        4000 => 'A fuzzy TM match was confirmed without any edit. Please review it before confirming.',
     ];
 
     /** @var array{ERROR: list<ErrObject>, WARNING: list<ErrObject>, INFO: list<ErrObject>} */
