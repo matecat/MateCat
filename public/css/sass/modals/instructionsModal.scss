@@ -78,139 +78,35 @@
 }
 
 .instructions-accordion {
-  .accordion-component-title {
-    border-radius: unset !important;
-  }
+  // Default: no rounding — middle items in a stacked group are flat
+  --accordion-title-br: 0;
+  --accordion-title-expanded-br: 0;
+  --accordion-content-br: 0;
 
   &:not(:first-child) {
-    .accordion-component-title {
-      border-top: solid 1px colors.$grey300;
-    }
-
-    &:has(.accordion-expanded) {
-      .accordion-component-title {
-        border-radius: unset !important;
-      }
-    }
-  }
-
-  &:not(:last-child) {
-    .accordion-component-content {
-      border-radius: unset !important;
-    }
+    --accordion-title-border-top: solid 1px #{colors.$grey300};
   }
 
   &:first-child {
-    .accordion-component-title {
-      border-radius: variables.$border-radius-default
-        variables.$border-radius-default 0 0 !important;
-    }
+    --accordion-title-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+    --accordion-title-expanded-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
   }
 
   &:last-child {
-    .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 0 0 variables.$border-radius-default
-        variables.$border-radius-default !important;
+    --accordion-content-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+
+    &:not(:has([data-expanded])) {
+      --accordion-title-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
     }
   }
 
-  &:has(.accordion-expanded) {
-    .accordion-component-title > :first-child {
-      color: black;
-    }
-  }
-}
-
-.instructions-accordion {
-  .accordion-component-title {
-    border-radius: unset !important;
+  // Single accordion (only child): full rounding when collapsed
+  &:first-child:nth-last-child(1):not(:has([data-expanded])) {
+    --accordion-title-br: #{variables.$border-radius-default};
+    --accordion-content-br: 0;
   }
 
-  &:not(:first-child) {
-    .accordion-component-title {
-      border-top: solid 1px colors.$grey300;
-    }
-
-    &:has(.accordion-expanded) {
-      .accordion-component-title {
-        border-radius: unset !important;
-      }
-    }
-  }
-
-  &:not(:last-child) {
-    .accordion-component-content {
-      border-radius: unset !important;
-    }
-  }
-
-  &:first-child {
-    .accordion-component-title {
-      border-radius: variables.$border-radius-default
-        variables.$border-radius-default 0 0 !important;
-    }
-  }
-
-  &:last-child {
-    .accordion-component-title {
-      border-radius: 0 0 variables.$border-radius-default
-        variables.$border-radius-default !important;
-    }
-  }
-
-  &:has(.accordion-expanded) {
-    .accordion-component-title > :first-child {
-      color: black;
-    }
-  }
-}
-
-.instructions-accordion {
-  .accordion-component-title {
-    border-radius: unset !important;
-  }
-
-  &:not(:first-child) {
-    .accordion-component-title {
-      border-top: solid 1px colors.$grey300;
-    }
-
-    &:has(.accordion-expanded) {
-      .accordion-component-title {
-        border-radius: unset !important;
-      }
-    }
-  }
-
-  &:not(:last-child) {
-    .accordion-component-content {
-      border-radius: unset !important;
-    }
-  }
-
-  &:first-child {
-    .accordion-component-title {
-      border-radius: variables.$border-radius-default
-        variables.$border-radius-default 0 0 !important;
-    }
-  }
-
-  &:last-child {
-    .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 0 0 variables.$border-radius-default
-        variables.$border-radius-default !important;
-    }
-  }
-
-  &:has(.accordion-expanded) {
-    .accordion-component-title > :first-child {
-      color: black;
-    }
-  }
-
-  &:first-child:nth-last-child(1) {
-    .accordion-component-title:not(.accordion-expanded) {
-      border-radius: variables.$border-radius-default !important;
-    }
+  [data-expanded] > :first-child {
+    color: #{colors.$black};
   }
 }

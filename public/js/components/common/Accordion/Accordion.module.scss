@@ -1,0 +1,67 @@
+@use 'commons/colors';
+@use 'commons/variables';
+
+// CSS variable API — override from consumer context:
+// --accordion-title-bg             background of title bar
+// --accordion-title-br             border-radius when collapsed
+// --accordion-title-expanded-br    border-radius when expanded
+// --accordion-title-border-top     top border (for grouped stacks)
+// --accordion-title-font-size
+// --accordion-title-font-weight
+// --accordion-content-bg           background of content panel
+// --accordion-content-br           border-radius of content panel
+// --accordion-content-overflow     overflow of content panel
+
+.component {
+  overflow: hidden;
+}
+
+.title {
+  --accordion-title-bg: #{colors.$grey150};
+  --accordion-title-br: #{variables.$border-radius-default};
+  --accordion-title-expanded-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+  --accordion-title-border-top: none;
+  --accordion-title-font-size: 12px;
+  --accordion-title-font-weight: normal;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background-color: var(--accordion-title-bg);
+  border-radius: var(--accordion-title-br);
+  border-top: var(--accordion-title-border-top);
+  font-size: var(--accordion-title-font-size);
+  font-weight: var(--accordion-title-font-weight);
+  cursor: pointer;
+
+  > svg {
+    transition-property: transform;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+  }
+
+  &--expanded {
+    border-radius: var(--accordion-title-expanded-br);
+
+    > svg {
+      transform: rotateZ(180deg);
+    }
+  }
+}
+
+.content {
+  --accordion-content-bg: #{colors.$grey100};
+  --accordion-content-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+  --accordion-content-overflow: hidden;
+
+  max-height: 0;
+  transition-property: max-height;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+  transform-origin: top center;
+  padding: 0 24px;
+  border-radius: var(--accordion-content-br);
+  background-color: var(--accordion-content-bg);
+  overflow: var(--accordion-content-overflow);
+}

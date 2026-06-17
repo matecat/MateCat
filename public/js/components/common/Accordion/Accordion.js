@@ -3,6 +3,7 @@ import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import ChevronDown from '../../../../img/icons/ChevronDown'
 import useResizeObserver from '../../../hooks/useResizeObserver'
+import styles from './Accordion.module.scss'
 
 export const Accordion = ({
   children,
@@ -54,15 +55,23 @@ export const Accordion = ({
     else if (!expanded) panelRef.current.style.maxHeight = 0
   }, [expanded, contentHeight])
 
+  const titleClassName = [
+    styles.title,
+    expanded && styles['title--expanded'],
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className={`accordion-component ${className}`}>
+    <div className={`${styles.component} ${className}`.trim()}>
       <div
-        className={`accordion-component-title ${expanded ? 'accordion-expanded' : ''}`}
+        className={titleClassName}
+        data-expanded={expanded || undefined}
         onClick={handleClick}
       >
         {title} <ChevronDown size={10} />
       </div>
-      <div ref={panelRef} className="accordion-component-content">
+      <div ref={panelRef} className={styles.content}>
         <div ref={contentRef}>{isRenderingContent && children}</div>
       </div>
     </div>

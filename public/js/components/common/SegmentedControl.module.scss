@@ -1,0 +1,129 @@
+@use 'commons/colors';
+@use 'commons/variables';
+
+// CSS variable API — override from consumer context:
+// --sc-bg                     background-color of the control track
+// --sc-cursor-bg               background-color of the cursor ::before
+// --sc-checked-color           label color when checked
+// --sc-label-line-height       default label line-height
+// --sc-compact-line-height     label line-height in compact mode
+// --sc-cursor-padding          padding of the cursor element
+// --sc-label-font-size
+// --sc-label-color             unchecked label color
+// --sc-label-padding           label padding (overrides auto-width padding)
+// --sc-label-text-transform
+// --sc-height                  explicit height override for the control track
+// --sc-padding                 explicit padding override for the control track
+// --sc-cursor-height           height of the cursor (default: 100%)
+// --sc-cursor-margin-top
+// --sc-cursor-before-width     width of ::before (default: 100%)
+// --sc-cursor-before-margin-left
+
+.wrapper {
+  --sc-bg: #{colors.$grey50};
+  --sc-cursor-bg: #{colors.$blue500};
+  --sc-checked-color: white;
+  --sc-label-line-height: 48px;
+  --sc-compact-line-height: 40px;
+  --sc-cursor-padding: 4px;
+  --sc-label-font-size: 16px;
+  --sc-label-color: #{colors.$grey500};
+  --sc-label-padding: 0;
+  --sc-label-text-transform: none;
+  --sc-height: auto;
+  --sc-padding: 0;
+  --sc-cursor-height: 100%;
+  --sc-cursor-margin-top: 0;
+  --sc-cursor-before-width: 100%;
+  --sc-cursor-before-margin-left: 0;
+
+  > label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: default;
+  }
+}
+
+.control {
+  position: relative;
+  display: flex;
+  user-select: none;
+  border-radius: variables.$border-radius-default;
+  background-color: var(--sc-bg);
+  height: var(--sc-height);
+  padding: var(--sc-padding);
+
+  &--auto-width {
+    display: inline-flex;
+  }
+}
+
+.option {
+  .control--auto-width & {
+    flex: 0 0 auto;
+  }
+}
+
+.label {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: var(--sc-label-font-size);
+  line-height: var(--sc-label-line-height);
+  color: var(--sc-label-color);
+  text-transform: var(--sc-label-text-transform);
+  transition: color 0.3s cubic-bezier(0.77, 0, 0.175, 1);
+  cursor: pointer;
+  gap: 4px;
+
+  .control--auto-width & {
+    padding: var(--sc-label-padding, 0 16px);
+    white-space: nowrap;
+  }
+
+  .control--compact & {
+    line-height: var(--sc-compact-line-height);
+  }
+
+  .control--single & {
+    cursor: default;
+  }
+
+  &:hover {
+    color: colors.$grey700;
+  }
+}
+
+.input {
+  display: none;
+
+  &:checked + .label {
+    color: var(--sc-checked-color);
+  }
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  padding: var(--sc-cursor-padding);
+  height: var(--sc-cursor-height);
+  margin-top: var(--sc-cursor-margin-top);
+  box-sizing: border-box;
+  transition: transform 0.2s ease-out, width 0.2s ease-out;
+
+  &::before {
+    content: '';
+    display: block;
+    height: 100%;
+    width: var(--sc-cursor-before-width);
+    margin-left: var(--sc-cursor-before-margin-left);
+    border-radius: variables.$border-radius-default;
+    background-color: var(--sc-cursor-bg);
+  }
+}

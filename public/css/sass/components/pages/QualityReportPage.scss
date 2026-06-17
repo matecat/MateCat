@@ -979,21 +979,11 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   width: 200px;
 }
 
-.qr-reviewType-control .segmented-control {
-  background-color: colors.$black100;
-}
-
-.qr-reviewType-control .segmented-control__cursor:before {
-  background-color: colors.$white;
-  border-radius: variables.$border-radius-default;
-}
-
-.qr-reviewType-control .segmented-control input:checked + .segmented-control__label {
-  color: colors.$black;
-}
-
-.qr-reviewType-control .segmented-control__label {
-  line-height: 40px;
+.qr-reviewType-control {
+  --sc-bg: #{colors.$black100};
+  --sc-cursor-bg: #{colors.$white};
+  --sc-checked-color: #{colors.$black};
+  --sc-label-line-height: 40px;
 }
 
 .qr-reviewType-dropdown .circular.label.new-color, .filter-reviewType .circular.label.new-color {

@@ -600,24 +600,15 @@ span {
   background-color: colors.$grey100;
 }
 
-.tab.glossary .segmented-control {
-  background-color: colors.$grey150;
-}
-
-.tab.glossary .segmented-control .segmented-control__cursor {
-  padding: unset;
-  height: 74%;
-  margin-top: 4px;
-}
-
-.tab.glossary .segmented-control .segmented-control__cursor::before {
-  width: 88%;
-  margin-left: 4px;
-}
-
-.tab.glossary .segmented-control .segmented-control__label {
-  line-height: 32px;
-  padding: 0 14px 0 14px;
+.tab.glossary .search-type {
+  --sc-bg: #{colors.$grey150};
+  --sc-cursor-padding: 0;
+  --sc-cursor-height: 74%;
+  --sc-cursor-margin-top: 4px;
+  --sc-cursor-before-width: 88%;
+  --sc-cursor-before-margin-left: 4px;
+  --sc-label-line-height: 32px;
+  --sc-label-padding: 0 14px;
 }
 
 .tab.glossary .search-type {

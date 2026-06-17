@@ -43,10 +43,8 @@
 
 .filters-params-accordion,
 .xliff-settings-container {
-  .accordion-component-title {
-    font-size: 18px !important;
-    font-weight: bold;
-  }
+  --accordion-title-font-size: 18px;
+  --accordion-title-font-weight: bold;
 }
 
 .filters-params-accordion-content {
@@ -73,21 +71,11 @@
   }
 
   .custom-segmented-control {
-    .segmented-control {
-      background-color: colors.$grey200;
-    }
-    .segmented-control__label {
-      line-height: 28px;
-    }
-    .segmented-control__cursor {
-      padding: 2px;
-    }
-    .segmented-control__cursor:before {
-      background-color: white;
-    }
-    .segmented-control input:checked + .segmented-control__label {
-      color: black;
-    }
+    --sc-bg: #{colors.$grey200};
+    --sc-label-line-height: 28px;
+    --sc-cursor-padding: 2px;
+    --sc-cursor-bg: #{colors.$white};
+    --sc-checked-color: #{colors.$black};
   }
 
   .container-segmented-control {
@@ -98,13 +86,7 @@
 }
 
 .xliff-settings-container {
-  .accordion-component {
-    overflow: visible;
-
-    .accordion-component-content {
-      overflow: visible;
-    }
-  }
+  --accordion-content-overflow: visible;
 
   .unsaved {
     color: colors.$blue500;
