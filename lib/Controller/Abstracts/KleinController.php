@@ -2,7 +2,7 @@
 
 namespace Controller\Abstracts;
 
-use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
 use Controller\Traits\TimeLoggerTrait;
@@ -154,7 +154,7 @@ abstract class KleinController implements IController
     {
         if (empty($this->api_key)) {
             static::sessionStart();
-            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
         }
     }
 
