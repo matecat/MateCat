@@ -10,7 +10,7 @@ namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
-use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
@@ -101,7 +101,7 @@ class LoginController extends AbstractStatefulKleinController
             $project->tryToRedeem();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase());
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
 
             $this->response->code(200);
         } else {

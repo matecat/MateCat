@@ -3,7 +3,7 @@
 namespace Model\Users\Authentication;
 
 use Controller\Abstracts\Authentication\AuthCookie;
-use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Abstracts\FlashMessage;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
@@ -196,9 +196,9 @@ class OAuthSignInModel
         $this->buildAuthHelper();
     }
 
-    protected function buildAuthHelper(): AuthenticationHelperRefactored
+    protected function buildAuthHelper(): AuthenticationHelper
     {
-        return AuthenticationHelperRefactored::fromRequest($this->session, $this->teamDao->getDatabaseHandler());
+        return AuthenticationHelper::fromRequest($this->session, $this->teamDao->getDatabaseHandler());
     }
 
     /**

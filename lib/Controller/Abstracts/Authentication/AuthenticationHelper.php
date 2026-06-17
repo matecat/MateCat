@@ -27,7 +27,7 @@ use Utils\Logger\LoggerFactory;
  * The original class is intentionally kept in place; this lives beside it for
  * the verification phase.
  */
-class AuthenticationHelperRefactored
+class AuthenticationHelper
 {
     private UserStruct $user;
     private bool $logged = false;
