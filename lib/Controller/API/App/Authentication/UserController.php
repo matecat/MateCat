@@ -91,7 +91,7 @@ class UserController extends AbstractStatefulKleinController
         return new ChangePasswordModel($this->user);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $loginValidator = new LoginValidator($this);
         $this->appendValidator($loginValidator);

@@ -29,10 +29,6 @@ class TestableFileInfoController extends FileInfoController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }

@@ -39,7 +39,7 @@ class DownloadQRController extends KleinController
 
     protected function initDependencies(): void
     {
-        $this->jobDao = new JobDao();
+        $this->jobDao = new JobDao($this->getDatabase());
     }
 
     /**

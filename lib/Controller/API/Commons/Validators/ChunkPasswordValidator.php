@@ -87,11 +87,11 @@ class ChunkPasswordValidator extends Base
      */
     protected function getChunkFromRevisePassword(): void
     {
-        $this->chunkReview = (new ChunkReviewDao())->findByReviewPasswordAndJobId($this->request->param('password'), $this->request->param('id_job'), $this->ttl);
+        $this->chunkReview = (new ChunkReviewDao($this->controller->getDatabase()))->findByReviewPasswordAndJobId($this->request->param('password'), $this->request->param('id_job'), $this->ttl);
         if (empty($this->chunkReview)) {
             throw new NotFoundException('Not found.');
         }
-        $this->chunk = (new JobDao())->getByIdAndPasswordOrFail($this->chunkReview->id_job, $this->chunkReview->password, $this->ttl);
+        $this->chunk = (new JobDao($this->controller->getDatabase()))->getByIdAndPasswordOrFail($this->chunkReview->id_job, $this->chunkReview->password, $this->ttl);
         $this->chunk->setIsReview(true);
         $this->chunk->setSourcePage($this->chunkReview->source_page);
     }
@@ -101,9 +101,9 @@ class ChunkPasswordValidator extends Base
      */
     protected function getChunkFromTranslatePassword(): void
     {
-        $this->chunk = (new JobDao())->getByIdAndPassword($this->request->param('id_job'), $this->request->param('password'), $this->ttl);
+        $this->chunk = (new JobDao($this->controller->getDatabase()))->getByIdAndPassword($this->request->param('id_job'), $this->request->param('password'), $this->ttl);
         if (!empty($this->chunk)) {
-            $this->chunkReview = (new ChunkReviewDao())->findChunkReviews($this->chunk, $this->ttl)[0] ?? null;
+            $this->chunkReview = (new ChunkReviewDao($this->controller->getDatabase()))->findChunkReviews($this->chunk, $this->ttl)[0] ?? null;
         }
     }
 

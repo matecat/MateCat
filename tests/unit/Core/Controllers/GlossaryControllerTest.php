@@ -39,10 +39,6 @@ class TestableGlossaryController extends GlossaryController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }
@@ -73,10 +69,6 @@ class PayloadTestableGlossaryController extends GlossaryController
     public ?array $lastParams = null;
 
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 

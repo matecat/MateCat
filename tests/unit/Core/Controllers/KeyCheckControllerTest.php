@@ -28,10 +28,6 @@ class TestableKeyCheckController extends KeyCheckController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public function setRateLimitEmailResponse(?Response $response): void
     {
         $this->rateLimitEmailResponse = $response;

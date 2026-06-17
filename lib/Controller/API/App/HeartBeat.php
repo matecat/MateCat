@@ -19,14 +19,14 @@ use View\API\App\Json\Ping;
 class HeartBeat extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new WhitelistAccessValidator($this));
     }
 
     public function ping(): void
     {
-        $this->database->ping();
+        $this->getDatabase()->ping();
         if (!touch(AppConfig::$ROOT . DIRECTORY_SEPARATOR . "touch")) {
             throw new RuntimeException("Storage unavailable.");
         }

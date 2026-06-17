@@ -70,7 +70,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         return $this->data;
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -135,7 +135,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence
-        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->id_project = $this->getDatabase()->nextSequence(Database::SEQ_ID_PROJECT)[0];
         $projectStructure->ppassword = Utils::randomString();
 
         $fs->moveFileFromUploadSessionToQueuePath($this->data['upload_token']);
@@ -646,7 +646,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             return $QAModelTemplateStruct;
         } elseif (!empty($qa_model_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $qaModelTemplate = (new QAModelTemplateDao())->get([
+            $qaModelTemplate = (new QAModelTemplateDao($this->getDatabase()))->get([
                 'id' => $qa_model_template_id,
                 'uid' => $uid
             ]);
@@ -689,7 +689,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $payableRateModelTemplate->hydrateFromJSON($json);
             $payableRateModelTemplate->uid = $userId;
         } elseif (!empty($payable_rate_template_id)) {
-            $payableRateModelTemplate = (new CustomPayableRateDao())->getByIdAndUser($payable_rate_template_id, $userId);
+            $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser($payable_rate_template_id, $userId);
             $payableRateModelTemplate?->getBreakdownsArray();
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');
@@ -741,7 +741,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $xliffConfigTemplate->hydrateFromJSON($json);
             $xliff_parameters = $xliffConfigTemplate->rules?->getArrayCopy() ?? [];
         } elseif (!empty($xliff_parameters_template_id)) {
-            $xliffConfigTemplate = (new XliffConfigTemplateDao())->getByIdAndUser(
+            $xliffConfigTemplate = (new XliffConfigTemplateDao($this->getDatabase()))->getByIdAndUser(
                 $xliff_parameters_template_id,
                 $this->getUser()->uid ?? throw new TypeError('User not authenticated')
             );
@@ -805,7 +805,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         }
 
         // check for the team to be allowed
-        $dao = new MembershipDao();
+        $dao = new MembershipDao($this->getDatabase());
         $team = $dao->findTeamByIdAndUser((int)$id_team, $this->user);
 
         if (!$team) {

@@ -13,6 +13,7 @@ use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\Constants;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -24,13 +25,14 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 class ConvertFileController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function handle(): void
     {
@@ -43,7 +45,7 @@ class ConvertFileController extends KleinController
             throw new RuntimeException("Invalid Upload Token.");
         }
 
-        $this->featureSet->loadFromUserEmail($this->user->email);
+        $this->featureSet->loadFromUserEmail($this->user->email ?? '');
 
         $converter = new FilesConverter(
             [$data['file_name']],
@@ -81,8 +83,9 @@ class ConvertFileController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -129,7 +132,10 @@ class ConvertFileController extends KleinController
         }
 
         $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule);
-        $filters_extraction_parameters = $this->validateFiltersExtractionParametersTemplateId($filters_extraction_parameters_template, $filters_extraction_parameters_template_id);
+        $filters_extraction_parameters = $this->validateFiltersExtractionParametersTemplateId(
+            $filters_extraction_parameters_template !== false ? $filters_extraction_parameters_template : null,
+            $filters_extraction_parameters_template_id !== false ? $filters_extraction_parameters_template_id : null
+        );
         $source_lang = $this->validateSourceLang($source_lang);
         $target_lang = $this->validateTargetLangs($target_lang);
 
@@ -179,6 +185,7 @@ class ConvertFileController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     private function validateFiltersExtractionParametersTemplateId(
@@ -200,7 +207,7 @@ class ConvertFileController extends KleinController
             return null;
         }
 
-        $filtersTemplate = (new FiltersConfigTemplateDao())->getByIdAndUser($filters_extraction_parameters_template_id, $this->getUser()->uid);
+        $filtersTemplate = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser($filters_extraction_parameters_template_id, $this->getUser()->uid ?? throw new TypeError('User not authenticated'));
 
         if ($filtersTemplate === null) {
             throw new Exception("filters_extraction_parameters_template_id not valid");

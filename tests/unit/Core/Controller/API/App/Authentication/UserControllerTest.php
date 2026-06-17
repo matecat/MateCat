@@ -245,12 +245,12 @@ class UserControllerTest extends AbstractTest
         $this->controller->changePasswordAsLoggedUser();
     }
 
-    // ─── afterConstruct ──────────────────────────────────────────────
+    // ─── registerValidators ──────────────────────────────────────────
 
     #[Test]
     public function afterConstruct_appends_login_validator(): void
     {
-        $ref = new ReflectionMethod($this->controller, 'afterConstruct');
+        $ref = new ReflectionMethod($this->controller, 'registerValidators');
         $ref->invoke($this->controller);
 
         $validatorsProp = new ReflectionProperty(KleinController::class, 'validators');

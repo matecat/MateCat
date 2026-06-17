@@ -2,7 +2,6 @@
 
 namespace Matecat\Core\Model\Users\Authentication;
 
-use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Teams\TeamDao;
 use Model\Users\Authentication\OAuthSignInModel;
@@ -19,7 +18,7 @@ class TestableOAuthSignInModel extends OAuthSignInModel
 {
     public bool $welcomeEmailSent = false;
 
-    protected function _authenticateUser(?AuthenticationHelper $authHelper = null): void
+    protected function _authenticateUser(): void
     {
         // no-op: avoid AuthCookie + session dependencies
     }

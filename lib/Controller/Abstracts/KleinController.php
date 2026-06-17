@@ -2,7 +2,7 @@
 
 namespace Controller\Abstracts;
 
-use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
 use Controller\Traits\TimeLoggerTrait;
@@ -122,6 +122,8 @@ abstract class KleinController implements IController
         $this->service = $service;
         $this->app = $app;
 
+        $this->logger = LoggerFactory::getLogger();
+
         $paramsPut = $this->getPutParams() ?: [];
         $paramsGet = $this->request->paramsGet()->getIterator()->getArrayCopy();
         $paramsNamed = $this->request->paramsNamed()->getIterator()->getArrayCopy();
@@ -132,13 +134,15 @@ abstract class KleinController implements IController
         $this->initDependencies();
         $this->registerValidators();
         $this->afterConstruct();
-
-        $this->logger = LoggerFactory::getLogger();
-        $this->database = $this->app?->getDatabase() ?? Database::obtain();
     }
 
     public function getDatabase(): IDatabase
     {
+        if (!isset($this->database)) {
+            $injected = $this->app?->getDatabase();
+            $this->database = $injected instanceof IDatabase ? $injected : Database::obtain();
+        }
+
         return $this->database;
     }
 
@@ -150,7 +154,7 @@ abstract class KleinController implements IController
     {
         if (empty($this->api_key)) {
             static::sessionStart();
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
         }
     }
 
@@ -216,10 +220,18 @@ abstract class KleinController implements IController
         return $this;
     }
 
+    /**
+     * Override this method to inject dependencies, DB, Dao, etc.
+     * @return void
+     */
     protected function initDependencies(): void
     {
     }
 
+    /**
+     * Override this method to register validators.
+     * @return void
+     */
     protected function registerValidators(): void
     {
     }

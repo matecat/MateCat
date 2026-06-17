@@ -53,7 +53,7 @@ class TestableLoginController extends LoginController
         return $this->mockUserDao ?? parent::createUserDao();
     }
 
-    public function logout(?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
+    public function logout(): void
     {
         $this->logoutCalled = true;
     }

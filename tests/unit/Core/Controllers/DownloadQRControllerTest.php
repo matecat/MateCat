@@ -29,10 +29,6 @@ class TestableDownloadQRController extends DownloadQRController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function initDependencies(): void
     {
     }

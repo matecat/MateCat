@@ -5,7 +5,6 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Model\DataAccess\Database;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -13,6 +12,7 @@ use Model\TmKeyManagement\UserKeysModel;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
@@ -23,7 +23,7 @@ use Utils\Tools\CatUtils;
 class TmKeyManagementController extends AbstractStatefulKleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -50,7 +50,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                     'The job was not found'
                 ]
             ]);
-            exit();
+            return;
         }
 
         $job_keyList = json_decode($chunk->tm_keys, true);
@@ -70,7 +70,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             $this->response->json([
                 'tm_keys' => $tmKeys
             ]);
-            exit();
+            return;
         }
 
         if ($this->getUser()->email == $chunk->status_owner) {
@@ -142,7 +142,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      */
     public function getByUserAndKey(): void
     {
-        $_keyDao = new MemoryKeyDao(Database::obtain());
+        $_keyDao = new MemoryKeyDao($this->getDatabase());
         $dh = new MemoryKeyStruct([
             'uid' => $this->getUser()->uid,
             'tm_key' => new TmKeyStruct([
@@ -185,13 +185,13 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
                 if ($engine->isAdaptiveMT()) {
                      //retrieve OWNER EnginesFactory License
-                     $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
+                     $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
                         $engineId = $ownerMmtEngineMetaData->value;
                         if (!is_numeric($engineId)) {
                             continue;
                         }
-                        $engine = EnginesFactory::getInstance((int)$engineId);
+                        $engine = EnginesFactory::getInstance((int)$engineId, AbstractEngine::class);
                         if ($engine->getMemoryIfMine($memoryKey)) {
                             $engineType = $engine->getEngineRecord()->getEngineType();
                             if ($engineType !== null) {

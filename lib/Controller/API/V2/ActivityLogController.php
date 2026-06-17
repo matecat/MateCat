@@ -30,7 +30,7 @@ class ActivityLogController extends KleinController
         $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
         $rawContent = $activityLogDao->getAllForProject($validator->getIdProject());
 
         $formatted = new Activity($rawContent);
@@ -45,7 +45,7 @@ class ActivityLogController extends KleinController
         $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
         $rawContent = $activityLogDao->getLastActionInProject($validator->getIdProject());
 
         $formatted = new Activity($rawContent);
@@ -61,9 +61,10 @@ class ActivityLogController extends KleinController
         $validator = new ChunkPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
         $activityLogDao->whereConditions = ' id_job = :id_job ';
         $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
+        /** @var ActivityLogStruct[] $rawLogContent */
         $rawLogContent = $activityLogDao->read(
             new ActivityLogStruct(),
             ['id_job' => $validator->getJobId()]
@@ -73,7 +74,7 @@ class ActivityLogController extends KleinController
         $this->response->json(['activity' => $formatted->render()]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

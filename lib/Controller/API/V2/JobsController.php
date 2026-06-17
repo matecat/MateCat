@@ -121,19 +121,17 @@ class JobsController extends KleinController
     }
 
     /**
-     * Perform actions after constructing an instance of the class.
-     * This method sets up the necessary validators and performs further actions.
-     *
+     * Register the validators for this controller.
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject(60 * 10);
-            $this->jobDao = new JobDao();
-            $this->segmentTranslationDao = new SegmentTranslationDao();
+            $this->jobDao = new JobDao($this->getDatabase());
+            $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
             $this->appendValidator(new ProjectAccessValidator($this, $this->project));
         });
         $this->appendValidator($Validator);

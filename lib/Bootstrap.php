@@ -182,6 +182,7 @@ class Bootstrap
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public static function exceptionHandler(Throwable $exception): never
     {
@@ -239,6 +240,7 @@ class Bootstrap
      * @throws InvalidArgumentException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     private static function formatOutputExceptions(int $httpStatusCode, Throwable $exception): void
     {
@@ -265,6 +267,7 @@ class Bootstrap
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public static function shutdownFunctionHandler(): never
     {
@@ -280,6 +283,7 @@ class Bootstrap
      * @throws BootstrapTerminatedException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public static function handleFatalError(?array $error): void
     {

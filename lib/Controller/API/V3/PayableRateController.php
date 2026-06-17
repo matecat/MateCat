@@ -23,7 +23,7 @@ class PayableRateController extends KleinController
 
     protected function getCustomPayableRateDao(): CustomPayableRateDao
     {
-        return $this->customPayableRateDao ??= new CustomPayableRateDao();
+        return $this->customPayableRateDao ??= new CustomPayableRateDao($this->getDatabase());
     }
 
     protected function registerValidators(): void

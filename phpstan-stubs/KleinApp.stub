@@ -2,13 +2,14 @@
 
 namespace Klein;
 
-use Model\DataAccess\IDatabase;
-
 /**
- * Dynamically registered in router.php via
+ * `getDatabase` is registered dynamically in router.php via
  * $app->register('getDatabase', fn() => Bootstrap::getDatabase());
+ * Typed as `object` (not the project IDatabase, which a stub file cannot
+ * resolve); callers narrow with `instanceof IDatabase`
+ * (see KleinController::resolveDatabase()).
  *
- * @method IDatabase getDatabase()
+ * @method object getDatabase()
  */
 class App
 {

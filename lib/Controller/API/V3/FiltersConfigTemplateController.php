@@ -24,7 +24,7 @@ class FiltersConfigTemplateController extends KleinController
 
     protected function getFiltersConfigTemplateDao(): FiltersConfigTemplateDao
     {
-        return $this->filtersConfigTemplateDao ??= new FiltersConfigTemplateDao();
+        return $this->filtersConfigTemplateDao ??= new FiltersConfigTemplateDao($this->getDatabase());
     }
 
     protected function registerValidators(): void

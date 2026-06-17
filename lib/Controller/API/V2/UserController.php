@@ -3,7 +3,7 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
-use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -15,7 +15,7 @@ use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController
 {
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new JSONRequestValidator($this));
@@ -64,11 +64,11 @@ class UserController extends AbstractStatefulKleinController
             $user->last_name = $data['last_name'];
             $uid = $user->uid ?? throw new Exception('User not authenticated');
 
-            $userDao = new UserDao();
+            $userDao = new UserDao($this->getDatabase());
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($uid);
 
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -130,14 +130,14 @@ class UserController extends AbstractStatefulKleinController
         $uid = $this->user->uid ?? throw new InvalidArgumentException('User not authenticated', 403);
 
         try {
-            $userMetaDao = new MetadataDao();
+            $userMetaDao = new MetadataDao($this->getDatabase());
             $metadata = $userMetaDao->set(
                 $uid,
                 $filtered['key'],
                 $filtered['value']
             );
 
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json($metadata);
         } catch (Exception $exception) {

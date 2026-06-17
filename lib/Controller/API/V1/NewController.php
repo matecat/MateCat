@@ -80,7 +80,7 @@ class NewController extends KleinController
 
     const int MAX_NUM_KEYS = 15;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -167,7 +167,7 @@ class NewController extends KleinController
         $fs->moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
 
         //reserve a project id from the sequence
-        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->id_project = $this->getDatabase()->nextSequence(Database::SEQ_ID_PROJECT)[0];
         $projectStructure->ppassword = Utils::randomString();
 
         // flag to mark the project "from API"
@@ -945,7 +945,7 @@ class NewController extends KleinController
                  * Get the key description/name from the user keyring
                  */
                 if ($uid) {
-                    $mkDao = new MemoryKeyDao();
+                    $mkDao = new MemoryKeyDao($this->getDatabase());
 
                     $keyRing = $mkDao->read(
                         (new MemoryKeyStruct([
@@ -1001,7 +1001,7 @@ class NewController extends KleinController
     private function validateTeam(string|false|null $id_team = null): TeamStruct
     {
         if (!empty($id_team)) {
-            $dao = new MembershipDao();
+            $dao = new MembershipDao($this->getDatabase());
             $org = $dao->findTeamByIdAndUser((int)$id_team, $this->user);
 
             if (!$org) {
@@ -1025,7 +1025,7 @@ class NewController extends KleinController
     {
         if (!empty($id_qa_model_template)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $qaModelTemplate = (new QAModelTemplateDao())->get([
+            $qaModelTemplate = (new QAModelTemplateDao($this->getDatabase()))->get([
                 'id' => (int)$id_qa_model_template,
                 'uid' => $uid
             ]);
@@ -1071,7 +1071,7 @@ class NewController extends KleinController
 
         if (!empty($payable_rate_template_name) and !empty($payable_rate_template_id)) {
             $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $payableRateModelTemplate = (new CustomPayableRateDao())->getByIdAndUser((int)$payable_rate_template_id, $userId);
+            $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser((int)$payable_rate_template_id, $userId);
 
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');
@@ -1096,7 +1096,7 @@ class NewController extends KleinController
     private function validateQaModel(string|false|null $id_qa_model = null): ?ModelStruct
     {
         if (!empty($id_qa_model)) {
-            $qaModel = (new ModelDao())->fetchById((int)$id_qa_model, ModelStruct::class);
+            $qaModel = (new ModelDao($this->getDatabase()))->fetchById((int)$id_qa_model, ModelStruct::class);
 
             // check if qa_model exists
             if (null === $qaModel) {
@@ -1199,7 +1199,7 @@ class NewController extends KleinController
 
         if (!empty($filters_extraction_parameters_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $filtersTemplate = (new FiltersConfigTemplateDao())->getByIdAndUser(
+            $filtersTemplate = (new FiltersConfigTemplateDao($this->getDatabase()))->getByIdAndUser(
                 (int)$filters_extraction_parameters_template_id,
                 $uid
             );
@@ -1240,7 +1240,7 @@ class NewController extends KleinController
             return new MTQEWorkflowParams((array)($jsonObject->decode()));
         } elseif (!empty($mt_qe_workflow_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $mtQeWorkflowTemplate = (new MTQEWorkflowTemplateDao())->getByIdAndUser(
+            $mtQeWorkflowTemplate = (new MTQEWorkflowTemplateDao($this->getDatabase()))->getByIdAndUser(
                 $mt_qe_workflow_template_id,
                 $uid
             );
@@ -1266,7 +1266,7 @@ class NewController extends KleinController
     ): MTQEPayableRateBreakdowns {
         if (!empty($mt_qe_workflow_payable_rate_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $mtQeWorkflowTemplate = (new MTQEPayableRateTemplateDao())->getByIdAndUser(
+            $mtQeWorkflowTemplate = (new MTQEPayableRateTemplateDao($this->getDatabase()))->getByIdAndUser(
                 $mt_qe_workflow_payable_rate_template_id,
                 $uid
             );
@@ -1306,7 +1306,7 @@ class NewController extends KleinController
 
         if (!empty($xliff_parameters_template_id)) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $xliffConfigTemplate = (new XliffConfigTemplateDao())->getByIdAndUser(
+            $xliffConfigTemplate = (new XliffConfigTemplateDao($this->getDatabase()))->getByIdAndUser(
                 (int)$xliff_parameters_template_id,
                 $uid
             );

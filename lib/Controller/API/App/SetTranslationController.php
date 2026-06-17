@@ -16,7 +16,6 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
@@ -128,7 +127,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected ?VersionHandlerInterface $VersionsHandler = null;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -148,7 +147,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     public function translate(): void
     {
-        $db = Database::obtain();
+        $db = $this->getDatabase();
 
         try {
             $prepared    = $this->prepareTranslation();
@@ -316,6 +315,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @return array<string, mixed>
      * @throws Exception
      * @throws TypeError
+     * @throws DivisionByZeroError
      */
     private function persistTranslation(
         SegmentTranslationStruct $newTranslation,
@@ -411,7 +411,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 'statuses' => $this->data['split_statuses']
             ];
 
-            $translationDao = new SplitDAO(Database::obtain());
+            $translationDao = new SplitDAO($this->getDatabase());
             $translationDao->atomicUpdate($translationStruct);
         }
 
@@ -549,7 +549,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $redisHandler->getConnection()->setex('job_completeness:' . $this->data['id_job'], 60 * 60 * 24 * 15, true); //15 days
 
             try {
-                (new JobDao())->setJobComplete($this->data['chunk']);
+                (new JobDao($this->getDatabase()))->setJobComplete($this->data['chunk']);
             } catch (Exception) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export($this->request->paramsPost()->all(), true);
                 $redisHandler->getConnection()->del('job_completeness:' . $this->data['id_job']);
@@ -652,7 +652,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         }
 
         //to get Job Info, we need only a row of jobs (split)
-        $chunk = (new JobDao())->getByIdAndPasswordOrFail((int)$id_job, $password);
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
         $this->chunk = $chunk;
 
         //add check for job status archived.
@@ -662,7 +662,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         //check tag mismatch
         //get the original source segment, first
-        $dao = new SegmentDao(Database::obtain());
+        $dao = new SegmentDao($this->getDatabase());
         $this->segment = $dao->fetchById((int)$id_segment, SegmentStruct::class); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         $this->id_job = (int)$id_job;
@@ -790,12 +790,12 @@ class SetTranslationController extends AbstractStatefulKleinController
         $featureSet = $this->getFeatureSet();
         $featureSet->loadForProject($projectStruct);
 
-        $metadata = new JobsMetadataDao();
+        $metadata = new JobsMetadataDao($this->getDatabase());
         $filter = MateCatFilter::getInstance(
             $featureSet,
             $this->data['chunk']->source,
             $this->data['chunk']->target,
-            (new SegmentOriginalDataDao())->getSegmentDataRefMap((int)$this->data['id_segment']),
+            (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password ?? ''),
             $this->sourceContainsIcu
         );
@@ -838,7 +838,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
             $check->setCharactersCount(
                 (int)$this->data['characters_counter'],
-                (new SegmentMetadataDao())->get((int)$this->data['id_segment'], SegmentMetadataMarshaller::SIZE_RESTRICTION->value)
+                (new SegmentMetadataDao($this->getDatabase()))->get((int)$this->data['id_segment'], SegmentMetadataMarshaller::SIZE_RESTRICTION->value)
             );
         }
 
@@ -876,7 +876,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     private function getContexts(): void
     {
         //Get contexts
-        $segmentsList = (new SegmentDao)->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
+        $segmentsList = (new SegmentDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
             [
                 'id_before' => (int)$this->data['id_before'],
                 'id_segment' => (int)$this->data['id_segment'],
@@ -899,6 +899,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
     /**
      * init VersionHandler
+     * @throws RuntimeException
      */
     private function initVersionHandler(): void
     {
@@ -912,7 +913,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      */
     protected function getOldTranslation(): SegmentTranslationStruct
     {
-        $old_translation = (new SegmentTranslationDao())->findBySegmentAndJob((int)$this->data['id_segment'], (int)$this->data['id_job']);
+        $old_translation = (new SegmentTranslationDao($this->getDatabase()))->findBySegmentAndJob((int)$this->data['id_segment'], (int)$this->data['id_job']);
 
         if (empty($old_translation)) {
             $old_translation = new SegmentTranslationStruct();
@@ -943,7 +944,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             try {
                 (new CatUtils())->addSegmentTranslation($translation, (bool)$this->isRevision());
             } catch (Exception $e) {
-                Database::obtain()->rollback();
+                $this->getDatabase()->rollback();
                 throw new RuntimeException($e->getMessage());
             }
 
@@ -995,6 +996,7 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @throws RuntimeException
      * @throws TypeError
      * @throws LogicException
+     * @throws DivisionByZeroError
      */
     private function updateJobPEE(array $old_translation, array $new_translation): void
     {
@@ -1038,7 +1040,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $newTotalJobPee = ($this->chunk['avg_post_editing_effort'] - $oldPee_weighted + $newPee_weighted);
             }
 
-            (new JobDao())->updateFields(
+            (new JobDao($this->getDatabase()))->updateFields(
 
                 ['avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
@@ -1050,7 +1052,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         elseif ($oldSegmentStatus->isValidForEditLog()) {
             $newTotalJobPee = ($this->chunk['avg_post_editing_effort'] - $oldPee_weighted);
 
-            (new JobDao())->updateFields(
+            (new JobDao($this->getDatabase()))->updateFields(
                 ['avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
                     'id' => $this->id_job,
@@ -1058,7 +1060,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 ]
             );
         } elseif ($jobTotalTTEForTranslation != 0) {
-            (new JobDao())->updateFields(
+            (new JobDao($this->getDatabase()))->updateFields(
                 ['total_time_to_edit' => $jobTotalTTEForTranslation],
                 [
                     'id' => $this->id_job,
@@ -1110,8 +1112,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             return;
         }
 
-        $ownerUid = (new JobDao())->getOwnerUid((int)$this->data['id_job'], $this->data['password']);
-        $filesParts = (new FilesPartsDao())->getBySegmentId((int)$this->data['id_segment']); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
+        $ownerUid = (new JobDao($this->getDatabase()))->getOwnerUid((int)$this->data['id_job'], $this->data['password']);
+        $filesParts = (new FilesPartsDao($this->getDatabase()))->getBySegmentId((int)$this->data['id_segment']); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         if ($this->data['segment'] === null) {
             throw new RuntimeException('Segment must not be null in evalSetContribution');

@@ -9,7 +9,10 @@ use DomainException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
@@ -19,6 +22,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Logger\MatecatLogger;
 
 class TestableQualityReportControllerAPI extends QualityReportControllerAPI
 {
@@ -26,18 +30,11 @@ class TestableQualityReportControllerAPI extends QualityReportControllerAPI
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class TestableShowQualityReportControllerAPI extends QualityReportControllerAPI
 {
     public function __construct()
-    {
-    }
-
-    protected function afterConstruct(): void
     {
     }
 
@@ -59,10 +56,6 @@ class TestableSegmentsQualityReportControllerAPI extends QualityReportController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public bool $renderCalled = false;
     public bool $receivedIsForUi = false;
 
@@ -76,6 +69,11 @@ class TestableSegmentsQualityReportControllerAPI extends QualityReportController
 #[AllowMockObjectsWithoutExpectations]
 class QualityReportControllerAPITest extends AbstractTest
 {
+    use ControllerSeedFragments;
+
+    /** Reserved ID block 9028000 (base+1 project, +2 job, +3 segment, +4 file); owner ctrltest_9028000@example.org (§4). */
+    private const int BASE = 9028000;
+
     private ReflectionClass $reflector;
     private TestableQualityReportControllerAPI $controller;
     private Request $requestStub;
@@ -100,6 +98,65 @@ class QualityReportControllerAPITest extends AbstractTest
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
     }
 
+    protected function tearDown(): void
+    {
+        $this->seedConnection()->exec('DELETE FROM files_job WHERE id_job = ' . $this->jobId(self::BASE));
+        $this->cleanFragments(self::BASE);
+        parent::tearDown();
+    }
+
+    /**
+     * Seed a full project/file/job/segment/translation graph and return the
+     * persisted JobStruct (the chunk the validators would otherwise resolve).
+     *
+     * @throws \Exception
+     */
+    private function seedAndLoadChunk(): JobStruct
+    {
+        $this->cleanFragments(self::BASE);
+        $this->seedProject(self::BASE, $this->ownerEmail(self::BASE));
+        $this->seedFile(self::BASE);
+        $this->seedJob(self::BASE, $this->ownerEmail(self::BASE));
+        $this->seedSegment(self::BASE);
+        $this->seedSegmentTranslation(self::BASE);
+
+        // files_job link is required by SegmentDao::getSegmentsForQr (RIGHT JOIN files_job).
+        $this->seedConnection()->exec(
+            'INSERT IGNORE INTO files_job (id_job, id_file) VALUES (' . $this->jobId(self::BASE) . ', ' . $this->fileId(self::BASE) . ')'
+        );
+
+        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $this->assertInstanceOf(JobStruct::class, $job);
+
+        return $job;
+    }
+
+    /**
+     * Build a real-DB controller (no stubbed renderSegments) with the props the
+     * action path reads (§7: request, response, logger, featureSet, chunk).
+     *
+     * @return array{0: QualityReportControllerAPI, 1: ReflectionClass, 2: Response&MockObject}
+     * @throws ReflectionException
+     */
+    private function buildRealDbController(JobStruct $chunk, array $requestParams = []): array
+    {
+        $reflector  = new ReflectionClass(TestableQualityReportControllerAPI::class);
+        $controller = $reflector->newInstanceWithoutConstructor();
+
+        $serverParams = ['REQUEST_URI' => '/api/v3/quality-report', 'REQUEST_METHOD' => 'GET'];
+        $request      = new Request($requestParams, [], [], $serverParams);
+        $response     = $this->createMock(Response::class);
+        $response->method('code')->willReturnSelf();
+
+        $reflector->getProperty('request')->setValue($controller, $request);
+        $reflector->getProperty('response')->setValue($controller, $response);
+        $reflector->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
+        $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet());
+        $reflector->getProperty('chunk')->setValue($controller, $chunk);
+
+        return [$controller, $reflector, $response];
+    }
+
     /** @throws ReflectionException */
     private function invokePrivate(string $name, array $args = []): mixed
     {
@@ -107,7 +164,7 @@ class QualityReportControllerAPITest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstruct_appends_login_and_chunk_password_validators(): void
+    public function registerValidators_appends_login_and_chunk_password_validators(): void
     {
         $realReflector = new ReflectionClass(QualityReportControllerAPI::class);
         /** @var QualityReportControllerAPI $realController */
@@ -125,7 +182,7 @@ class QualityReportControllerAPITest extends AbstractTest
             'password' => 'abc123',
         ];
 
-        $realReflector->getMethod('afterConstruct')->invoke($realController);
+        $realReflector->getMethod('registerValidators')->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);
@@ -431,5 +488,154 @@ class QualityReportControllerAPITest extends AbstractTest
         $this->assertSame(0, $first['time_to_edit_revise_2']);
         $this->assertEquals(2.0, $first['secs_per_word']);
         $this->assertSame(1, $first['revision_number']);
+    }
+
+    // ─── real-DB: renderSegments() full body (ID block 9028000) ───
+
+    #[Test]
+    public function renderSegments_emits_empty_segments_when_no_segment_ids_match(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        // ref_segment far beyond the seeded segment id → getSegmentsIdForQR returns []
+        [$controller, $reflector, $response] = $this->buildRealDbController(
+            $chunk,
+            ['ref_segment' => (string) ($this->segmentId(self::BASE) + 100000), 'where' => 'after', 'step' => '20']
+        );
+
+        $response->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('segments', $data);
+                $this->assertSame([], $data['segments']);
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $reflector->getMethod('renderSegments')->invoke($controller, false);
+    }
+
+    #[Test]
+    public function renderSegments_emits_populated_payload_for_seeded_segment(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        [$controller, $reflector, $response] = $this->buildRealDbController(
+            $chunk,
+            ['ref_segment' => '0', 'where' => 'after', 'step' => '20']
+        );
+
+        $segmentId = $this->segmentId(self::BASE);
+        $response->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data) use ($segmentId): bool {
+                $this->assertArrayHasKey('workflow_type', $data);
+                $this->assertArrayHasKey('segments', $data);
+                $this->assertArrayHasKey('_params', $data);
+                $this->assertArrayHasKey('_links', $data);
+                $this->assertNotEmpty($data['segments']);
+                $this->assertSame($segmentId, $data['segments'][0]['id']);
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $reflector->getMethod('renderSegments')->invoke($controller, false);
+    }
+
+    #[Test]
+    public function renderSegments_caps_step_at_max_per_page(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        [$controller, $reflector, $response] = $this->buildRealDbController(
+            $chunk,
+            ['ref_segment' => '0', 'where' => 'after', 'step' => '10000']
+        );
+
+        $response->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                // _params.step normalises against MAX_PER_PAGE (200) when capped
+                $this->assertArrayHasKey('_links', $data);
+                $this->assertSame(200, $data['_links']['items_per_page']);
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $reflector->getMethod('renderSegments')->invoke($controller, true);
+    }
+
+    #[Test]
+    public function renderSegments_applies_default_where_and_step_when_params_absent(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        // No 'where' / 'step' params → controller defaults ('after' / DEFAULT_PER_PAGE).
+        [$controller, $reflector, $response] = $this->buildRealDbController($chunk, ['ref_segment' => '0']);
+
+        $response->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('_links', $data);
+                $this->assertSame(QualityReportControllerAPI::DEFAULT_PER_PAGE, $data['_links']['items_per_page']);
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $reflector->getMethod('renderSegments')->invoke($controller, false);
+    }
+
+    #[Test]
+    public function getPaginationLinks_throws_on_invalid_request_uri(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        [$controller, $reflector] = $this->buildRealDbController($chunk);
+
+        $original                = $_SERVER['REQUEST_URI'] ?? null;
+        $_SERVER['REQUEST_URI']  = '///:';
+
+        try {
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessage('Invalid request URI');
+            $reflector->getMethod('_getPaginationLinks')->invoke($controller, [$this->segmentId(self::BASE)], 20, []);
+        } finally {
+            if ($original !== null) {
+                $_SERVER['REQUEST_URI'] = $original;
+            }
+        }
+    }
+
+    #[Test]
+    public function show_emits_quality_report_structure_with_real_model(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        [$controller, $reflector, $response] = $this->buildRealDbController($chunk);
+
+        $response->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('quality-report', $data);
+                $this->assertIsArray($data['quality-report']);
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $reflector->getMethod('show')->invoke($controller);
+    }
+
+    #[Test]
+    public function segments_invokes_real_renderSegments_and_emits_payload(): void
+    {
+        $chunk = $this->seedAndLoadChunk();
+        [$controller, $reflector, $response] = $this->buildRealDbController(
+            $chunk,
+            ['ref_segment' => '0', 'where' => 'after', 'step' => '20']
+        );
+
+        $response->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertArrayHasKey('segments', $data);
+                return true;
+            }))
+            ->willReturnSelf();
+
+        $reflector->getMethod('segments')->invoke($controller, false);
     }
 }

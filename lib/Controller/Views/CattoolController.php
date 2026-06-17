@@ -50,7 +50,7 @@ use Utils\Tools\Utils;
 class CattoolController extends BaseKleinViewController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new ViewLoginRedirectValidator($this));
     }
@@ -102,7 +102,7 @@ class CattoolController extends BaseKleinViewController
         ];
 
         if ($isRevision) {
-            $chunkReviewStruct = (new ChunkReviewDao())->findByJobIdReviewPasswordAndSourcePage($job_id, $password, $sourcePage);
+            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByJobIdReviewPasswordAndSourcePage($job_id, $password, $sourcePage);
 
             if (!$chunkReviewStruct) {
                 throw new NotFoundException('Review record was not found');
@@ -111,7 +111,7 @@ class CattoolController extends BaseKleinViewController
             $result['chunk'] = $chunkReviewStruct->getChunk();
             $result['chunkReviewStruct'] = $chunkReviewStruct;
         } else {
-            $result['chunk'] = (new JobDao())->getByIdAndPasswordOrFail($job_id, $password);
+            $result['chunk'] = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($job_id, $password);
         }
 
         return (object)$result;
@@ -164,7 +164,7 @@ class CattoolController extends BaseKleinViewController
         }
 
         $model = $chunkStruct->getProject()->getLqaModel();
-        $jobsMetadataDao = new MetadataDao();
+        $jobsMetadataDao = new MetadataDao($this->getDatabase());
         $public_tm_penalty = $jobsMetadataDao->get($chunkId, $chunkPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
 
         $this->setView("index.html", [
@@ -179,7 +179,7 @@ class CattoolController extends BaseKleinViewController
             'id_project' => $projectId,
             'id_team' => $chunkStruct->getProject()->id_team,
             'isCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->source)),
-            'isGDriveProject' => new PHPTalBoolean((new ProjectDao())->isGDriveProject($chunkStruct->id_project)),
+            'isGDriveProject' => new PHPTalBoolean((new ProjectDao($this->getDatabase()))->isGDriveProject($chunkStruct->id_project)),
             'isOpenAiEnabled' => new PHPTalBoolean(!empty(AppConfig::$OPENAI_API_KEY)),
             'isReview' => new PHPTalBoolean($isRevision),
             'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->source)),
@@ -199,7 +199,7 @@ class CattoolController extends BaseKleinViewController
             'project_name' => Utils::friendlySlug($chunkStruct->getProject()->name),
             'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkId-$chunkPassword",
             'review_extended' => new PHPTalBoolean(true),
-            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao())->findChunkReviewsForSourcePage(
+            'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
                 $chunkStruct,
                 Utils::getSourcePage() + 1
             )[0]->review_password,
@@ -208,7 +208,7 @@ class CattoolController extends BaseKleinViewController
             'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
             'secondRevisionsCount' => count(
                 array_filter(
-                    (new ChunkReviewDao())->findByProjectId($projectId),
+                    (new ChunkReviewDao($this->getDatabase()))->findByProjectId($projectId),
                     function (ChunkReviewStruct $chunkReviewStruct) use ($chunkStruct) {
                         return $chunkReviewStruct->id_job == $chunkStruct->id && $chunkReviewStruct->source_page > SourcePages::SOURCE_PAGE_REVISION;
                     }
@@ -303,7 +303,7 @@ class CattoolController extends BaseKleinViewController
      */
     protected function getActiveEngine(int $mt_engine_id): array
     {
-        $engine = new EngineDAO();
+        $engine = new EngineDAO($this->getDatabase());
         $engineQuery = new EngineStruct();
         $engineQuery->id = $mt_engine_id;
         $active_mt_engine = $engine->setCacheTTL(60 * 10)->read($engineQuery);
@@ -382,7 +382,7 @@ class CattoolController extends BaseKleinViewController
                 }
             } else {
                 $idAssignee = $project->id_assignee ?? 0;
-                $assignee = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUid((int)$idAssignee);
+                $assignee = (new UserDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getByUid((int)$idAssignee);
 
                 if ($assignee) {
                     $ownerMail = $assignee->getEmail() ?? AppConfig::$SUPPORT_MAIL;
