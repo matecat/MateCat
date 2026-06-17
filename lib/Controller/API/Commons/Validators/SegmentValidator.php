@@ -36,7 +36,7 @@ class SegmentValidator extends Base
         // }
 
         // Ensure chunk is in project
-        $dao = new SegmentDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentDao($this->controller->getDatabase());
 
         $segment = $dao->getByChunkIdAndSegmentId(
             $this->controller->getParams()['id_job'],
