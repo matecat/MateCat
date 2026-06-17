@@ -35,7 +35,7 @@ class MemoryKeysController extends KleinController
         $keyQuery = new MemoryKeyStruct();
         $keyQuery->uid = $this->user->uid ?? throw new \InvalidArgumentException('User not authenticated');
 
-        $memoryKeyDao = new MemoryKeyDao($this->db());
+        $memoryKeyDao = new MemoryKeyDao($this->getDatabase());
         $keyList = $memoryKeyDao->read($keyQuery);
 
         $formatter = new MemoryKeys($keyList);

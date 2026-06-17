@@ -30,7 +30,7 @@ class TeamPublicMembersController extends KleinController
      */
     public function publicList(): void
     {
-        $memberships = (new MembershipDao($this->db()))->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($this->request->param('id_team'));
+        $memberships = (new MembershipDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($this->request->param('id_team'));
         $formatter = new Membership($memberships);
         $this->response->json($formatter->renderPublic());
     }

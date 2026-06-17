@@ -192,7 +192,7 @@ class UserKeysController extends KleinController
      */
     private function getMkDao(): MemoryKeyDao
     {
-        return new MemoryKeyDao($this->db());
+        return new MemoryKeyDao($this->getDatabase());
     }
 
     /**
@@ -255,7 +255,7 @@ class UserKeysController extends KleinController
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
-                     $ownerMmtEngineMetaData = (new MetadataDao($this->db()))
+                     $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))
                          ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
                          ->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load'));
 

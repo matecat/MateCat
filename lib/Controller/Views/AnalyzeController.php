@@ -32,7 +32,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao($this->db());
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
     }
 
     protected function registerValidators(): void
@@ -95,7 +95,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
 
         if (!empty($jid)) {
             // we are looking for a chunk
-            $chunkStruct = (new JobDao($this->db()))->getByIdAndPassword($jid, $pass);
+            $chunkStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword($jid, $pass);
             if (empty($chunkStruct) || $chunkStruct->isDeleted()) {
                 $this->setView("job_not_found.html", [], 404);
                 $this->render();
@@ -107,7 +107,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
                 'project_access_token' => sha1($projectStruct->id . $projectStruct->password),
             ]);
         } else {
-            $chunks = (new JobDao($this->db()))->getNotDeletedByProjectId((int)$projectStruct->id);
+            $chunks = (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int)$projectStruct->id);
 
             $notDeleted = array_filter($chunks, function ($element) {
                 return !$element->isDeleted(); //retain only jobs which are not deleted

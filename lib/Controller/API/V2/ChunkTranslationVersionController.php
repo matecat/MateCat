@@ -28,7 +28,7 @@ class ChunkTranslationVersionController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $results = (new TranslationVersionDao($this->db()))->getVersionsForChunk($this->chunk);
+        $results = (new TranslationVersionDao($this->getDatabase()))->getVersionsForChunk($this->chunk);
 
         $this->featureSet->loadForProject($this->chunk->getProject());
 

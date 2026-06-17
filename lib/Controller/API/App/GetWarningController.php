@@ -55,8 +55,8 @@ class GetWarningController extends KleinController
 
         try {
             $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
-            $warnings = (new WarningDao($this->db()))->getWarningsByJobIdAndPassword((int) $id_job, $password);
-            $tMismatch = (new SegmentDao($this->db()))->setCacheTTL(10 * 60 /* 10-minute cache */)->getTranslationsMismatches((int) $id_job, $password);
+            $warnings = (new WarningDao($this->getDatabase()))->getWarningsByJobIdAndPassword((int) $id_job, $password);
+            $tMismatch = (new SegmentDao($this->getDatabase()))->setCacheTTL(10 * 60 /* 10-minute cache */)->getTranslationsMismatches((int) $id_job, $password);
 
             $qa = new QAGlobalWarning($warnings, $tMismatch);
 
@@ -117,8 +117,8 @@ class GetWarningController extends KleinController
 
         $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
         $featureSet = $this->getFeatureSet();
-        $metadata = new MetadataDao($this->db());
-        $dataRefMap = (!empty($id)) ? (new SegmentOriginalDataDao($this->db()))->getSegmentDataRefMap($id) : [];
+        $metadata = new MetadataDao($this->getDatabase());
+        $dataRefMap = (!empty($id)) ? (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id) : [];
 
         // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
         // Detect if the translation content contains ICU MessageFormat syntax
@@ -161,7 +161,7 @@ class GetWarningController extends KleinController
         $QA->setTargetSegLang($chunk->target);
 
         if (!$this->sourceContainsIcu && isset($characters_counter)) {
-            $QA->setCharactersCount((int) $characters_counter, (new SegmentMetadataDao($this->db()))->get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
+            $QA->setCharactersCount((int) $characters_counter, (new SegmentMetadataDao($this->getDatabase()))->get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
         }
 
         $QA->performConsistencyCheck();
@@ -237,7 +237,7 @@ class GetWarningController extends KleinController
      */
     private function getChunkAndLoadProjectFeatures(string $id_job, string $password): JobStruct
     {
-        $chunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int) $id_job, $password);
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int) $id_job, $password);
         $this->featureSet->loadForProject($chunk->getProject());
 
         return $chunk;

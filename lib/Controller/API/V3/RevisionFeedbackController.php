@@ -51,6 +51,6 @@ class RevisionFeedbackController extends KleinController
 
     protected function createFeedbackDao(): FeedbackDAO
     {
-        return new FeedbackDAO($this->db());
+        return new FeedbackDAO($this->getDatabase());
     }
 }

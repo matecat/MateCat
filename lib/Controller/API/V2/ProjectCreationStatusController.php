@@ -45,7 +45,7 @@ class ProjectCreationStatusController extends KleinController
         } else {
             // project is created, verify password authorization
             try {
-                (new ProjectDao($this->db()))->findByIdAndPassword($idProject, $this->request->param('password'));
+                (new ProjectDao($this->getDatabase()))->findByIdAndPassword($idProject, $this->request->param('password'));
             } catch (NotFoundException) {
                 throw new AuthorizationError('Not Authorized.');
             }

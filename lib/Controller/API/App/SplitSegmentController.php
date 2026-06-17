@@ -38,7 +38,7 @@ class SplitSegmentController extends KleinController
 
         $featureSet = $this->getFeatureSet();
 
-        $metadata = new MetadataDao($this->db());
+        $metadata = new MetadataDao($this->getDatabase());
         $Filter = MateCatFilter::getInstance(
             $featureSet,
             $request['jobStruct']->source,
@@ -58,7 +58,7 @@ class SplitSegmentController extends KleinController
             'statuses' => array_fill(0, $pieces, TranslationStatus::STATUS_DRAFT)
         ];
 
-        $translationDao = new SplitDAO($this->db());
+        $translationDao = new SplitDAO($this->getDatabase());
         $result = $translationDao->atomicUpdate($translationStruct);
 
         if (!$result) {
@@ -103,7 +103,7 @@ class SplitSegmentController extends KleinController
         }
 
         // check Job password
-        $jobStruct = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$id_job, $password);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
 
         $this->featureSet->loadForProject($jobStruct->getProject());
 

@@ -24,7 +24,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao($this->db());
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
     }
 
     protected function registerValidators(): void

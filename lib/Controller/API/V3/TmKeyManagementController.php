@@ -22,7 +22,7 @@ class TmKeyManagementController extends KleinController
     public function getByUser(): void
     {
         try {
-            $_keyDao = new MemoryKeyDao($this->db());
+            $_keyDao = new MemoryKeyDao($this->getDatabase());
             $dh = new MemoryKeyStruct(['uid' => $this->user->uid]);
             $keyList = $_keyDao->read($dh);
 

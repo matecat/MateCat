@@ -51,7 +51,7 @@ class UrlsController extends KleinController
             return;
         }
 
-        $projectData = (new ProjectDao($this->db()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
+        $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
         $formatted = new ProjectUrls($projectData);
 

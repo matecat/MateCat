@@ -215,14 +215,14 @@ class EngineController extends KleinController
         }
 
         $engineList = EngineConstants::getAvailableEnginesList();
-        $UserMetadataDao = new MetadataDao($this->db());
+        $UserMetadataDao = new MetadataDao($this->getDatabase());
         $engineEnabled = $UserMetadataDao->get($uid, $newEngineStruct->class_load ?? throw new \RuntimeException('Missing engine class_load'));
 
         if (!empty($engineEnabled)) {
             unset($engineList[$newEngineStruct->class_load]);
         }
 
-        $engineDAO = new EngineDAO($this->db());
+        $engineDAO = new EngineDAO($this->getDatabase());
         $newCreatedDbRowStruct = null;
 
         if (array_search($newEngineStruct->class_load, $engineList)) {
@@ -238,10 +238,10 @@ class EngineController extends KleinController
         }
 
         if ($newEngineStruct instanceof LaraStruct) {
-            $UserMetadataDao = new MetadataDao($this->db());
+            $UserMetadataDao = new MetadataDao($this->getDatabase());
             $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load ?? throw new RuntimeException('Missing class_load'), (string)$newCreatedDbRowStruct->id);
         } elseif ($newEngineStruct instanceof MMTStruct) {
-            $UserMetadataDao = new MetadataDao($this->db());
+            $UserMetadataDao = new MetadataDao($this->getDatabase());
             $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load ?? throw new RuntimeException('Missing class_load'), (string)$newCreatedDbRowStruct->id);
         }
 
@@ -271,7 +271,7 @@ class EngineController extends KleinController
         $engineToBeDeleted->id = (int)$id;
         $engineToBeDeleted->uid = $this->user->uid;
 
-        $engineDAO = new EngineDAO($this->db());
+        $engineDAO = new EngineDAO($this->getDatabase());
         $result = $engineDAO->disable($engineToBeDeleted);
         $this->destroyUserEnginesCache();
 
@@ -284,7 +284,7 @@ class EngineController extends KleinController
         if ($engine->isAdaptiveMT()) {
             $uid = $this->user->uid ?? throw new AuthorizationError('User not authenticated', 403);
             $engineType = $result->getEngineType() ?? throw new RuntimeException('Missing engine type');
-            (new MetadataDao($this->db()))->delete($uid, $engineType);
+            (new MetadataDao($this->getDatabase()))->delete($uid, $engineType);
         }
 
         $this->response->json([
@@ -320,7 +320,7 @@ class EngineController extends KleinController
      */
     private function destroyUserEnginesCache(): void
     {
-        $engineDAO = new EngineDAO($this->db());
+        $engineDAO = new EngineDAO($this->getDatabase());
         $engineStruct = EngineStruct::getStruct();
         $engineStruct->uid = $this->user->uid;
         $engineStruct->active = true;

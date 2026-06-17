@@ -178,7 +178,7 @@ class SplitJobController extends KleinController
     protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
     {
         $count_type = $split_raw_words ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
-        $project_struct = (new ProjectDao($this->db()))->findByIdAndPassword($project_id, $project_pass, 60 * 60);
+        $project_struct = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($project_id, $project_pass, 60 * 60);
 
         $pManager = new JobSplitMergeManager($project_struct);
 

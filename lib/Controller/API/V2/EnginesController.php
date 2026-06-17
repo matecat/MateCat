@@ -30,7 +30,7 @@ class EnginesController extends KleinController
      */
     public function listEngines(): void
     {
-        $engineDAO = new EngineDAO($this->db());
+        $engineDAO = new EngineDAO($this->getDatabase());
         $engineStruct = EngineStruct::getStruct();
         $engineStruct->uid = $this->user->uid;
         $engineStruct->active = true;

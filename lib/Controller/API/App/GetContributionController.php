@@ -55,8 +55,8 @@ class GetContributionController extends KleinController
         $id_segment = $request['id_segment'];
         $password = $request['password'];
 
-        $jobStruct = (new JobDao($this->db()))->getByIdAndPasswordOrFail($id_job, $password);
-        $dataRefMap = (new SegmentOriginalDataDao($this->db()))->getSegmentDataRefMap($id_segment);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
+        $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id_segment);
 
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject($projectStruct);
@@ -84,7 +84,7 @@ class GetContributionController extends KleinController
         $contributionRequest = new GetContributionRequest();
         $jobId = $jobStruct->id ?? throw new TypeError('Job ID must not be null');
         $jobPassword = $jobStruct->password ?? throw new TypeError('Job password must not be null');
-        $subfiltering_handlers = (new MetadataDao($this->db()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
+        $subfiltering_handlers = (new MetadataDao($this->getDatabase()))->getSubfilteringCustomHandlers($jobId, $jobPassword);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($this->featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers);
 
@@ -104,7 +104,7 @@ class GetContributionController extends KleinController
             $mtEvaluation = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value);
             if ($mtEvaluation === null) {
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                $mtEvaluation = (new MetadataDao($this->db()))->get(
+                $mtEvaluation = (new MetadataDao($this->getDatabase()))->get(
                     $jobId,
                     $received_password,
                     ProjectsMetadataMarshaller::MT_EVALUATION->value,
@@ -114,8 +114,8 @@ class GetContributionController extends KleinController
             $contributionRequest->mt_evaluation = (bool)$mtEvaluation;
         }
 
-        $file = (new FilesPartsDao($this->db()))->getBySegmentId($id_segment);
-        $owner = (new UserDao($this->db()))->getProjectOwner($id_job) ?? throw new TypeError('Project owner not found');
+        $file = (new FilesPartsDao($this->getDatabase()))->getBySegmentId($id_segment);
+        $owner = (new UserDao($this->getDatabase()))->getProjectOwner($id_job) ?? throw new TypeError('Project owner not found');
 
         $contributionRequest->id_file = $file?->id;
         $contributionRequest->id_job = $id_job;
@@ -155,7 +155,7 @@ class GetContributionController extends KleinController
             $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $jobsMetadataDao = new MetadataDao($this->db());
+        $jobsMetadataDao = new MetadataDao($this->getDatabase());
         $dialect_strict = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
         $mt_evaluation = $jobsMetadataDao->get($jobId, $jobPassword, 'mt_evaluation', 10 * 60);
         $public_tm_penalty = $jobsMetadataDao->get($jobId, $jobPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
@@ -355,7 +355,7 @@ class GetContributionController extends KleinController
     private function rewriteContributionContexts(array &$request, MateCatFilter $Filter): void
     {
         //Get contexts
-        $segmentsList = (new SegmentDao($this->db()))->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
+        $segmentsList = (new SegmentDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->getContextAndSegmentByIDs(
             [
                 'id_before' => $request['id_before'],
                 'id_segment' => $request['id_segment'],

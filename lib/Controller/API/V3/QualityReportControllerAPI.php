@@ -115,7 +115,7 @@ class QualityReportControllerAPI extends KleinController
                 throw new Exception('Job id is null');
             }
 
-            $segmentTranslationEventDao = new TranslationEventDao($this->db());
+            $segmentTranslationEventDao = new TranslationEventDao($this->getDatabase());
             $ttlArray = $segmentTranslationEventDao->setCacheTTL(60 * 5)->getTteForSegments($segments_ids, $this->chunk->id);
             $segments = $qrSegmentModel->getSegmentsForQR(array_values($segments_ids), $isForUI);
 

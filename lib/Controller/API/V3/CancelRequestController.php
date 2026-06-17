@@ -32,7 +32,7 @@ class CancelRequestController extends KleinController
     protected function initDependencies(): void
     {
         $this->segmentDisabledService = new SegmentDisabledService();
-        $this->segmentTranslationDao = new SegmentTranslationDao($this->db());
+        $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
     }
 
     protected function registerValidators(): void

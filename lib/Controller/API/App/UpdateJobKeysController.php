@@ -147,11 +147,11 @@ class UpdateJobKeysController extends KleinController
         $request['jobData']->tm_keys = json_encode($totalTmKeys);
         $request['jobData']->last_update = date("Y-m-d H:i:s");
 
-        $jobDao = new JobDao($this->db());
+        $jobDao = new JobDao($this->getDatabase());
         $jobDao->updateStruct($request['jobData'], ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
         $jobDao->destroyCacheByIdAndPassword($request['jobData']);
 
-        $jobsMetadataDao = new MetadataDao($this->db());
+        $jobsMetadataDao = new MetadataDao($this->getDatabase());
 
         // update character_counter_mode job metadata
         if ($request['public_tm_penalty'] !== null) {
@@ -194,7 +194,7 @@ class UpdateJobKeysController extends KleinController
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = (new JobDao($this->db()))->getByIdAndPasswordOrFail((int)$job_id, (string)$job_pass);
+        $jobData = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$job_id, (string)$job_pass);
 
         // validate $tm_keys
         try {

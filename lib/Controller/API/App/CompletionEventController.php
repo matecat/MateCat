@@ -41,7 +41,7 @@ class CompletionEventController extends KleinController
 
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $event = (new ChunkCompletionEventDao($this->db()))->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
+            $event = (new ChunkCompletionEventDao($this->getDatabase()))->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
 
             if (!$event) {
                 throw new NotFoundException("Event Not Found.", 404);
@@ -70,15 +70,15 @@ class CompletionEventController extends KleinController
      */
     private function __performUndo(): void
     {
-        $this->db()->begin();
+        $this->getDatabase()->begin();
 
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
         $this->featureSet->dispatch(new AlterChunkReviewStructEvent($this->event));
 
-        (new ChunkCompletionEventDao($this->db()))->deleteEvent($this->event);
-        $this->db()->commit();
+        (new ChunkCompletionEventDao($this->getDatabase()))->deleteEvent($this->event);
+        $this->getDatabase()->commit();
     }
 
 }

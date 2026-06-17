@@ -20,7 +20,7 @@ class XliffConfigTemplateController extends KleinController
 
     private function getXliffConfigTemplateDao(): XliffConfigTemplateDao
     {
-        return $this->xliffConfigTemplateDao ??= new XliffConfigTemplateDao($this->db());
+        return $this->xliffConfigTemplateDao ??= new XliffConfigTemplateDao($this->getDatabase());
     }
 
     protected function registerValidators(): void

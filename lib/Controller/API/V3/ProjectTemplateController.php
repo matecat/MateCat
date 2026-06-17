@@ -30,7 +30,7 @@ class ProjectTemplateController extends KleinController
 
     protected function initDependencies(): void
     {
-        $this->projectTemplateDao = new ProjectTemplateDao($this->db());
+        $this->projectTemplateDao = new ProjectTemplateDao($this->getDatabase());
     }
 
     protected function registerValidators(): void

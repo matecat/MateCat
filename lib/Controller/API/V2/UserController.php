@@ -64,7 +64,7 @@ class UserController extends AbstractStatefulKleinController
             $user->last_name = $data['last_name'];
             $uid = $user->uid ?? throw new Exception('User not authenticated');
 
-            $userDao = new UserDao($this->db());
+            $userDao = new UserDao($this->getDatabase());
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($uid);
 
@@ -130,7 +130,7 @@ class UserController extends AbstractStatefulKleinController
         $uid = $this->user->uid ?? throw new InvalidArgumentException('User not authenticated', 403);
 
         try {
-            $userMetaDao = new MetadataDao($this->db());
+            $userMetaDao = new MetadataDao($this->getDatabase());
             $metadata = $userMetaDao->set(
                 $uid,
                 $filtered['key'],

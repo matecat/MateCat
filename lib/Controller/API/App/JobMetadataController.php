@@ -29,7 +29,7 @@ class JobMetadataController extends KleinController
     public function delete(): void
     {
         $params = $this->sanitizeRequestParams();
-        $dao = new MetadataDao($this->db());
+        $dao = new MetadataDao($this->getDatabase());
 
         $struct = $dao->get((int)$params['id_job'], (string)$params['password'], (string)$params['key']);
 
@@ -49,7 +49,7 @@ class JobMetadataController extends KleinController
      */
     public function save(): void
     {
-        $dao = new MetadataDao($this->db());
+        $dao = new MetadataDao($this->getDatabase());
 
         // accept only JSON
         if (!$this->isJsonRequest()) {

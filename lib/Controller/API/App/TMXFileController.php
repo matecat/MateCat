@@ -58,7 +58,7 @@ class TMXFileController extends KleinController
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao = new MemoryKeyDao($this->db());
+                $mkDao = new MemoryKeyDao($this->getDatabase());
                 $searchMemoryKey = new MemoryKeyStruct();
                 $key = new TmKeyStruct();
                 $key->key = $request['tm_key'];
