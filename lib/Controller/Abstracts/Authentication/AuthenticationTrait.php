@@ -4,6 +4,7 @@ namespace Controller\Abstracts\Authentication;
 
 use Exception;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\IDatabase;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Exception\ConnectionException;
@@ -24,6 +25,11 @@ trait AuthenticationTrait
 
     use SessionStarter;
 
+    /**
+     * Provided by the host class (KleinController).
+     */
+    abstract public function getDatabase(): IDatabase;
+
     protected bool $userIsLogged;
     protected UserStruct $user;
 
@@ -38,10 +44,20 @@ trait AuthenticationTrait
 
 
     /**
+     * Build the authentication helper. Overridable seam for tests.
+     *
+     * @param array<string, mixed> $session
+     */
+    protected function buildAuthHelper(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelperRefactored
+    {
+        return AuthenticationHelperRefactored::fromRequest($session, $this->getDatabase(), $api_key, $api_secret);
+    }
+
+    /**
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function identifyUser(?bool $useSession = true, ?AuthenticationHelper $authHelper = null): void
+    protected function identifyUser(?bool $useSession = true): void
     {
         $_session = [];
         if ($useSession) {
@@ -52,7 +68,7 @@ trait AuthenticationTrait
 
         $this->setAuthKeysIfExists();
 
-        $auth = $authHelper ?? new AuthenticationHelper($_session, $this->api_key, $this->api_secret);
+        $auth = $this->buildAuthHelper($_session, $this->api_key, $this->api_secret);
         $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
         $this->api_record = $auth->getApiRecord();
@@ -123,9 +139,9 @@ trait AuthenticationTrait
      * @throws Exception
      * @throws TypeError
      */
-    public function logout(?AuthenticationHelper $authHelper = null): void
+    public function logout(): void
     {
-        ($authHelper ?? new AuthenticationHelper($_SESSION))->destroyAuthentication();
+        $this->buildAuthHelper($_SESSION)->destroyAuthentication();
     }
 
     public function getApiRecord(): ?ApiKeyStruct
