@@ -48,7 +48,7 @@ class ProjectAccessValidator extends Base
             throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
         }
 
-        $team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndUser(
+        $team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL(60 * 10)->findTeamByIdAndUser(
             $this->project->id_team,
             $this->controller->getUser()
         );

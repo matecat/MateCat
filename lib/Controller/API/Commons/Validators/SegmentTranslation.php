@@ -26,7 +26,7 @@ class SegmentTranslation extends Base
      */
     protected function _validate(): void
     {
-        $this->translation = (new SegmentTranslationDao())->findBySegmentAndJob($this->request->param('id_segment'), $this->request->param('id_job'));
+        $this->translation = (new SegmentTranslationDao($this->controller->getDatabase()))->findBySegmentAndJob($this->request->param('id_segment'), $this->request->param('id_job'));
         if (!$this->translation) {
             throw new NotFoundException('translation not found');
         }

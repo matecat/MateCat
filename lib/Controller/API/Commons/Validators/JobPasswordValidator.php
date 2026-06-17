@@ -39,7 +39,7 @@ class JobPasswordValidator extends Base
 
         $postInput = (object)filter_var_array($this->controller->params, $filterArgs);
 
-        $this->jStruct = (new JobDao())->getByIdAndPasswordOrFail((int)$postInput->id_job, (string)$postInput->password);
+        $this->jStruct = (new JobDao($this->controller->getDatabase()))->getByIdAndPasswordOrFail((int)$postInput->id_job, (string)$postInput->password);
 
         $this->controller->params['id_job'] = $postInput->id_job;
         $this->controller->params['password'] = $postInput->password;
