@@ -39,7 +39,7 @@ class IdentityTestableCommentController extends CommentController
      */
     public function makeDao(): CommentDao
     {
-        return new CommentDao($this->db());
+        return new CommentDao($this->getDatabase());
     }
 
     /**
@@ -47,7 +47,7 @@ class IdentityTestableCommentController extends CommentController
      */
     public function exposeDb(): IDatabase
     {
-        return $this->db();
+        return $this->getDatabase();
     }
 }
 
@@ -67,7 +67,7 @@ class IdentityTestableGetSegmentsController extends GetSegmentsController
      */
     public function makeDao(): SegmentDao
     {
-        return new SegmentDao($this->db());
+        return new SegmentDao($this->getDatabase());
     }
 
     /**
@@ -75,7 +75,7 @@ class IdentityTestableGetSegmentsController extends GetSegmentsController
      */
     public function exposeDb(): IDatabase
     {
-        return $this->db();
+        return $this->getDatabase();
     }
 }
 

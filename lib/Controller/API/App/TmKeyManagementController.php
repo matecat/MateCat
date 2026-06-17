@@ -142,7 +142,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      */
     public function getByUserAndKey(): void
     {
-        $_keyDao = new MemoryKeyDao($this->db());
+        $_keyDao = new MemoryKeyDao($this->getDatabase());
         $dh = new MemoryKeyStruct([
             'uid' => $this->getUser()->uid,
             'tm_key' => new TmKeyStruct([
@@ -185,7 +185,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
                 if ($engine->isAdaptiveMT()) {
                      //retrieve OWNER EnginesFactory License
-                     $ownerMmtEngineMetaData = (new MetadataDao($this->db()))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
+                     $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
                         $engineId = $ownerMmtEngineMetaData->value;
                         if (!is_numeric($engineId)) {

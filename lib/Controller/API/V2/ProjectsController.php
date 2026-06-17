@@ -79,7 +79,7 @@ class ProjectsController extends KleinController
             $this->params['due_date'] > time()
         ) {
             $due_date = Utils::mysqlTimestamp((int)$this->params['due_date']);
-            $project_dao = new ProjectDao($this->db());
+            $project_dao = new ProjectDao($this->getDatabase());
             $project_dao->updateField($this->project, "due_date", $due_date);
         }
 
@@ -98,7 +98,7 @@ class ProjectsController extends KleinController
      */
     public function deleteDueDate(): void
     {
-        $project_dao = new ProjectDao($this->db());
+        $project_dao = new ProjectDao($this->getDatabase());
         $project_dao->updateField($this->project, "due_date", null);
 
         $formatted = new Project();
@@ -154,9 +154,9 @@ class ProjectsController extends KleinController
         foreach ($chunks as $chunk) {
             // update a job only if it is NOT deleted
             if (!$chunk->isDeleted()) {
-                (new JobDao($this->db()))->updateJobStatus($chunk, $status);
+                (new JobDao($this->getDatabase()))->updateJobStatus($chunk, $status);
 
-                $segmentTranslationDao = new SegmentTranslationDao($this->db());
+                $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
                 $lastSegmentsList = $segmentTranslationDao->getMaxSegmentIdsFromJob($chunk);
                 $segmentTranslationDao->updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
             }

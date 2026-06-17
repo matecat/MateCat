@@ -101,7 +101,7 @@ class MetaDataController extends KleinController
     private function getJobMetaData(JobStruct $job): object
     {
         $metadata = new stdClass();
-        $jobMetaDataDao = new MetadataDao($this->db());
+        $jobMetaDataDao = new MetadataDao($this->getDatabase());
 
         foreach ($jobMetaDataDao->getByJobIdAndPassword(
             $job->id ?? throw new DomainException('Job ID must not be null'),
@@ -130,7 +130,7 @@ class MetaDataController extends KleinController
     private function getJobFilesMetaData(JobStruct $job): array
     {
         $metadata = [];
-        $filesMetaDataDao = new FileMetadataDao($this->db());
+        $filesMetaDataDao = new FileMetadataDao($this->getDatabase());
         $projectId = $job->getProject()->id ?? throw new DomainException('Project ID must not be null');
 
         foreach ($job->getFiles() as $file) {

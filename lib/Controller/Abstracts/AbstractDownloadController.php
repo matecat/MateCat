@@ -40,7 +40,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao($this->db());
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
     }
 
     /**
@@ -53,7 +53,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     public function getJob(int $ttl = 0): JobStruct
     {
         if (empty($this->job)) {
-            $this->job = (new JobDao($this->db()))->getNotDeletedById($this->id_job, $ttl)[0];
+            $this->job = (new JobDao($this->getDatabase()))->getNotDeletedById($this->id_job, $ttl)[0];
         }
 
         return $this->job;
@@ -223,7 +223,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      */
     public function getDefaultFileName(ProjectStruct $project): string
     {
-        $files = (new FileDao($this->db()))->getByProjectId((int)$project->id);
+        $files = (new FileDao($this->getDatabase()))->getByProjectId((int)$project->id);
 
         if (count($files) > 1) {
             return $this->project->name . ".zip";

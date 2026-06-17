@@ -47,7 +47,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
             throw new AuthorizationError("Invalid Job");
         }
 
-        $jStruct = (new JobDao($this->db()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']);
+        $jStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$params['id_job'], (string)$params['password']);
         if ($jStruct === null) {
             throw new AuthorizationError("Job not found");
         }
@@ -62,7 +62,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         }
 
         $confirmationStruct->create_date = date(DATE_ATOM, time());
-        $cDao = new ConfirmationDao($this->db());
+        $cDao = new ConfirmationDao($this->getDatabase());
         $cDao->insertStruct($confirmationStruct, ['ignore' => true, 'no_nulls' => true]);
         $cDao->destroyConfirmationCache($jStruct);
 

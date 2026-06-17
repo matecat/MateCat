@@ -54,11 +54,11 @@ class ReviewsController extends KleinController
 
         // destroy project data cache
         $projectId = $this->project->id ?? throw new Exception('Project not found');
-        (new ProjectDao($this->db()))->destroyCacheForProjectData((int)$projectId, $this->project->password);
+        (new ProjectDao($this->getDatabase()))->destroyCacheForProjectData((int)$projectId, $this->project->password);
 
         // destroy the 5 minutes chunk review cache
-        $chunk = (new JobDao($this->db()))->getByIdAndPasswordOrFail($records[0]->id_job, $records[0]->password);
-        $chunkReviewDao = new ChunkReviewDao($this->db());
+        $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($records[0]->id_job, $records[0]->password);
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
         $chunkReviewDao->destroyCacheForFindChunkReviews($chunk);
         $chunkReviewDao->destroyCacheByProjectId((int)$projectId);
 
@@ -113,7 +113,7 @@ class ReviewsController extends KleinController
         $password = $post['password'];
         $revision_number = 2;
 
-        $chunkReviewDao = new ChunkReviewDao($this->db());
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
 
         // check if the $revision_number exists
         if (false === $chunkReviewDao->exists($id_job, $password, $revision_number)) {

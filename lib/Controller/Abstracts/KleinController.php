@@ -136,7 +136,7 @@ abstract class KleinController implements IController
         $this->afterConstruct();
     }
 
-    protected function db(): IDatabase
+    public function getDatabase(): IDatabase
     {
         if (!isset($this->database)) {
             $injected = $this->app?->getDatabase();
@@ -144,11 +144,6 @@ abstract class KleinController implements IController
         }
 
         return $this->database;
-    }
-
-    public function getDatabase(): IDatabase
-    {
-        return $this->db();
     }
 
     /**

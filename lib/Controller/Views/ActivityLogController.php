@@ -44,7 +44,7 @@ class ActivityLogController extends BaseKleinViewController implements IControll
             $this->render();
         }
 
-        $activityLogDao = new ActivityLogDao($this->db());
+        $activityLogDao = new ActivityLogDao($this->getDatabase());
         $activityLogDao->epilogueString = " LIMIT 1;";
         $rawLogContent = $activityLogDao->read(
             new ActivityLogStruct(),

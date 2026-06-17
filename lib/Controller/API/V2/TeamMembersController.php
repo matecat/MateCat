@@ -41,7 +41,7 @@ class TeamMembersController extends KleinController
     public function index(): void
     {
         /** @var TeamStruct $team */
-        $team = (new TeamDao($this->db()))->setCacheTTL(60 * 60 * 24)->fetchById($this->request->param('id_team'), TeamStruct::class)
+        $team = (new TeamDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24)->fetchById($this->request->param('id_team'), TeamStruct::class)
             ?? throw new \RuntimeException('Team not found');
         $teamModel = new TeamModel($team);
         $teamModel->updateMembersProjectsCount();
@@ -71,7 +71,7 @@ class TeamMembersController extends KleinController
             ]
         ]);
 
-        $teamStruct = (new TeamDao($this->db()))
+        $teamStruct = (new TeamDao($this->getDatabase()))
                 ->fetchById($this->request->param('id_team'), TeamStruct::class)
             ?? throw new \RuntimeException('Team not found');
 
@@ -103,9 +103,9 @@ class TeamMembersController extends KleinController
      */
     public function delete(): void
     {
-        $this->db()->begin();
+        $this->getDatabase()->begin();
 
-        $teamStruct = (new TeamDao($this->db()))
+        $teamStruct = (new TeamDao($this->getDatabase()))
                 ->fetchById($this->request->param('id_team'), TeamStruct::class)
             ?? throw new \RuntimeException('Team not found');
 

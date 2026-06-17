@@ -129,7 +129,7 @@ class TeamsController extends KleinController
             throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
         }
 
-        $membershipDao = new MembershipDao($this->db());
+        $membershipDao = new MembershipDao($this->getDatabase());
         $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
@@ -138,14 +138,14 @@ class TeamsController extends KleinController
 
         $org->name = trim($params['name']);
 
-        $teamDao = new TeamDao($this->db());
+        $teamDao = new TeamDao($this->getDatabase());
 
         $teamDao->updateTeamName($org);
         $orgId = $org->id ?? throw new \RuntimeException('Team has no id');
-        $memberList = (new MembershipDao($this->db()))->getMemberListByTeamId($orgId);
+        $memberList = (new MembershipDao($this->getDatabase()))->getMemberListByTeamId($orgId);
 
         foreach ($memberList as $user) {
-            (new MembershipDao($this->db()))->destroyCacheUserTeams($user->getUser()); // clean the cache for all team users to see the changes
+            (new MembershipDao($this->getDatabase()))->destroyCacheUserTeams($user->getUser()); // clean the cache for all team users to see the changes
         }
 
         $formatted = new Team([$org]);
@@ -162,7 +162,7 @@ class TeamsController extends KleinController
      */
     public function getTeamList(): void
     {
-        $teamList = (new MembershipDao($this->db()))->findUserTeams($this->user);
+        $teamList = (new MembershipDao($this->getDatabase()))->findUserTeams($this->user);
         $formatted = new Team($teamList);
         $this->response->json(['teams' => $formatted->render()]);
     }

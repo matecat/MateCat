@@ -54,7 +54,7 @@ class FilesController extends AbstractStatefulKleinController
      */
     private function getFirstAndLastSegmentFromFilePartId(int $filePartId): void
     {
-        $filePartsDao = new FilesPartsDao($this->db());
+        $filePartsDao = new FilesPartsDao($this->getDatabase());
         $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment($filePartId);
 
         if ($firstAndLastSegment === null || $firstAndLastSegment->first_segment === null) {
@@ -76,7 +76,7 @@ class FilesController extends AbstractStatefulKleinController
      */
     private function getFirstAndLastSegmentFromFileId(int $fileId): void
     {
-        $fileInfo = (new JobDao($this->db()))->getFilesInfoInJob($this->chunk, 60 * 5);
+        $fileInfo = (new JobDao($this->getDatabase()))->getFilesInfoInJob($this->chunk, 60 * 5);
 
         if (empty($fileInfo)) {
             throw new NotFoundException('File id ' . $fileId . ' was not found');

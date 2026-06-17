@@ -51,7 +51,7 @@ class DeleteContributionController extends KleinController
 //        $received_password = $request[ 'received_password' ];
 
         //check Job password
-        $jobStruct = (new JobDao($this->db()))->getByIdAndPasswordOrFail($id_job, $password);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
         $tm_keys = $jobStruct['tm_keys'];
@@ -192,7 +192,7 @@ class DeleteContributionController extends KleinController
      */
     private function updateSuggestionsArray(mixed $id_segment, int $id_job, mixed $id_match): void
     {
-        $segmentTranslationDao = new SegmentTranslationDao($this->db());
+        $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
         $segmentTranslation = $segmentTranslationDao->findBySegmentAndJob($id_segment, $id_job);
 
         if ($segmentTranslation === null) {

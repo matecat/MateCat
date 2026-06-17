@@ -28,10 +28,10 @@ trait ChunkNotFoundHandlerTrait
      */
     protected function getJob(int $id_job, string $password): ?JobStruct
     {
-        $job = (new JobDao($this->db()))->getByIdAndPassword($id_job, $password);
+        $job = (new JobDao($this->getDatabase()))->getByIdAndPassword($id_job, $password);
 
         if (null === $job) {
-            $chunkReview = (new ChunkReviewDao($this->db()))->findByReviewPasswordAndJobId($password, $id_job);
+            $chunkReview = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($password, $id_job);
             if ($chunkReview) {
                 $job = $chunkReview->getChunk();
             }

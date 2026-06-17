@@ -120,7 +120,7 @@ class MyMemoryController extends KleinController
         $tmKeyStruct->tm = true;
         $tmKeyStruct->glos = true;
 
-        $mkDao = new MemoryKeyDao($this->db());
+        $mkDao = new MemoryKeyDao($this->getDatabase());
 
         $newMemoryKey = new MemoryKeyStruct();
         $newMemoryKey->uid = $this->user->uid ?? throw new \TypeError('User UID must not be null');

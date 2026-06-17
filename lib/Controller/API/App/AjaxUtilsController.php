@@ -25,7 +25,7 @@ class AjaxUtilsController extends KleinController
      */
     public function ping(): void
     {
-        $stmt = $this->db()->getConnection()->prepare("SELECT 1");
+        $stmt = $this->getDatabase()->getConnection()->prepare("SELECT 1");
         $stmt->execute();
 
         $this->response->json([

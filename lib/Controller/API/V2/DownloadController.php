@@ -80,7 +80,7 @@ class DownloadController extends AbstractDownloadController
 
     private function getRemoteFileDao(): RemoteFileDao
     {
-        return $this->remoteFileDao ??= new RemoteFileDao($this->db());
+        return $this->remoteFileDao ??= new RemoteFileDao($this->getDatabase());
     }
 
     /**
@@ -197,11 +197,11 @@ class DownloadController extends AbstractDownloadController
     private function processDownload(): void
     {
         // get Job Info, we need only a row of jobs (split)
-        $jobData = (new JobDao($this->db()))->getByIdAndPassword($this->id_job, $this->password);
+        $jobData = (new JobDao($this->getDatabase()))->getByIdAndPassword($this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
         if (empty($jobData)) {
-            $chunkReviewStruct = (new ChunkReviewDao($this->db()))->findByReviewPasswordAndJobId($this->password, $this->id_job);
+            $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->password, $this->id_job);
             if (empty($chunkReviewStruct)) {
                 throw new NotFoundException("Not found.");
             }
@@ -228,7 +228,7 @@ class DownloadController extends AbstractDownloadController
             4) The temporary file is passed to the converter, which generates an updated version of the original file.
             5) Finally, the temporary file is deleted.
          */
-        $sDao = new SegmentDao($this->db());
+        $sDao = new SegmentDao($this->getDatabase());
 
         //File array is chunked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk($files_job, self::FILES_CHUNK_SIZE);
@@ -697,7 +697,7 @@ class DownloadController extends AbstractDownloadController
             throw new Exception('Remote file not found');
         }
 
-        $dao = new ConnectedServiceDao($this->db());
+        $dao = new ConnectedServiceDao($this->getDatabase());
         $connectedService = $dao->fetchById($remoteFile->connected_service_id, ConnectedServiceStruct::class);
 
         if (!$connectedService || $connectedService->disabled_at) {
@@ -866,7 +866,7 @@ class DownloadController extends AbstractDownloadController
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {
-        $project = (new ProjectDao($this->db()))->findById($this->job['id_project']) ?? throw new Exception('Project not found');
+        $project = (new ProjectDao($this->getDatabase()))->findById($this->job['id_project']) ?? throw new Exception('Project not found');
 
         // this is the filesystem path
         $zipFile = (new FsFilesStorage())->getOriginalZipPath($project->create_date, $this->job['id_project'], $zipFileName);

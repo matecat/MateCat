@@ -58,7 +58,7 @@ class ChunkController extends KleinController
             $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject();
             $this->featureSet = $this->project->getFeaturesSet();
-            $this->chunk_reviews = (new ChunkReviewDao($this->db()))->findChunkReviews($Validator->getChunk());
+            $this->chunk_reviews = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews($Validator->getChunk());
         });
         $this->appendValidator($Validator);
     }

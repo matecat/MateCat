@@ -116,7 +116,7 @@ class LaraAuthStandaloneController extends AbstractStatefulKleinController
      */
     protected function getEngineDAO(): EngineDAO
     {
-        return new EngineDAO($this->db());
+        return new EngineDAO($this->getDatabase());
     }
 }
 
