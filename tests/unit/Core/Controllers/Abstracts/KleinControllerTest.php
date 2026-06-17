@@ -136,7 +136,7 @@ class KleinControllerTest extends AbstractTest
         $response = new Response();
         $controller = new class ($request, $response) extends KleinController {
             protected bool $useSession = false;
-            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void { $this->userIsLogged = false; }
+            protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
         };
 
         $result = (new ReflectionMethod($controller, 'isJsonRequest'))->invoke($controller);
@@ -151,7 +151,7 @@ class KleinControllerTest extends AbstractTest
         $response = new Response();
         $controller = new class ($request, $response) extends KleinController {
             protected bool $useSession = false;
-            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void { $this->userIsLogged = false; }
+            protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
         };
 
         $result = (new ReflectionMethod($controller, 'isJsonRequest'))->invoke($controller);
@@ -192,7 +192,7 @@ class KleinControllerTest extends AbstractTest
         return new class ($request, $response) extends KleinController {
             protected bool $useSession = false;
 
-            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
+            protected function identifyUser(?bool $useSession = true): void
             {
                 // Skip authentication in tests
                 $this->userIsLogged = false;

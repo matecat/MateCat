@@ -3,7 +3,7 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
-use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -68,7 +68,7 @@ class UserController extends AbstractStatefulKleinController
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($uid);
 
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json([
                 'uid' => $user->uid,
@@ -137,7 +137,7 @@ class UserController extends AbstractStatefulKleinController
                 $filtered['value']
             );
 
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
 
             $this->response->json($metadata);
         } catch (Exception $exception) {
