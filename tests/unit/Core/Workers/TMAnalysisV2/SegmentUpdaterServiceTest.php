@@ -5,7 +5,10 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PDO;
+use PDOException;
 use PHPUnit\Framework\Attributes\Test;
+use Throwable;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
 
@@ -45,7 +48,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
             'Expected PDOException catch block in forceSetSegmentAnalyzed().'
         );
 
-        $returnInCatchPos = strpos($source, 'return false;', $catchPos);
+        $returnInCatchPos = strpos($source, 'return 0;', $catchPos);
         $this->assertNotFalse(
             $returnInCatchPos,
             'Expected "return false;" inside PDOException catch block in forceSetSegmentAnalyzed().'
@@ -63,11 +66,11 @@ class SegmentUpdaterServiceTest extends AbstractTest
             'Expected "$affectedRows === 0" guard in forceSetSegmentAnalyzed().'
         );
 
-        $returnAfterGuardPos = strpos($source, 'return false;', $affectedRowsGuardPos);
-        $this->assertNotFalse(
-            $returnAfterGuardPos,
-            'Expected "return false;" after $affectedRows === 0 guard in forceSetSegmentAnalyzed().'
-        );
+        $returnOnZeroPos = strpos($source, 'isTranslationSkipped', $affectedRowsGuardPos);
+        $this->assertNotFalse($returnOnZeroPos, 'Expected isTranslationSkipped guard to prevent duplicate counter increment.');
+
+        $returnOnZeroPos = strpos($source, '? -1 : 0;', $returnOnZeroPos);
+        $this->assertNotFalse($returnOnZeroPos, 'Expected isTranslationSkipped guard to prevent duplicate counter increment.');
     }
 
     #[Test]
@@ -120,14 +123,18 @@ class SegmentUpdaterServiceTest extends AbstractTest
     private function seedTestSegmentTranslation(): void
     {
         $conn = Database::obtain()->getConnection();
-        $conn->exec("
+        $conn->exec(
+            "
             INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count, show_in_cattool)
             VALUES (" . self::TEST_SEGMENT_ID . ", 1, '1', 'Test segment', MD5('Test segment'), 2.0, 1)
-        ");
-        $conn->exec("
+        "
+        );
+        $conn->exec(
+            "
             INSERT IGNORE INTO segment_translations (id_segment, id_job, segment_hash, status, translation, tm_analysis_status, match_type, eq_word_count, standard_word_count, suggestion_match, suggestion_source, suggestion)
             VALUES (" . self::TEST_SEGMENT_ID . ", " . self::TEST_JOB_ID . ", MD5('Test segment'), 'NEW', '', 'UNDONE', 'NEW', NULL, NULL, NULL, NULL, '')
-        ");
+        "
+        );
     }
 
     private function cleanupTestSegmentTranslation(): void
@@ -146,15 +153,15 @@ class SegmentUpdaterServiceTest extends AbstractTest
             $service = new SegmentUpdaterService(Database::obtain());
 
             $affected = $service->setAnalysisValue([
-                'id_segment'          => self::TEST_SEGMENT_ID,
-                'id_job'              => self::TEST_JOB_ID,
-                'tm_analysis_status'  => 'DONE',
-                'match_type'          => '85%-94%',
-                'eq_word_count'       => 0.7,
+                'id_segment' => self::TEST_SEGMENT_ID,
+                'id_job' => self::TEST_JOB_ID,
+                'tm_analysis_status' => 'DONE',
+                'match_type' => '85%-94%',
+                'eq_word_count' => 0.7,
                 'standard_word_count' => 2.0,
-                'suggestion_match'    => 85,
-                'suggestion_source'   => 'TM',
-                'suggestion'          => 'Test translation',
+                'suggestion_match' => 85,
+                'suggestion_source' => 'TM',
+                'suggestion' => 'Test translation',
             ]);
 
             $this->assertEquals(1, $affected);
@@ -162,7 +169,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
             $conn = Database::obtain()->getConnection();
             $stmt = $conn->prepare("SELECT tm_analysis_status, match_type, suggestion_source FROM segment_translations WHERE id_segment = ? AND id_job = ?");
             $stmt->execute([self::TEST_SEGMENT_ID, self::TEST_JOB_ID]);
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $this->assertEquals('DONE', $row['tm_analysis_status']);
             $this->assertEquals('85%-94%', $row['match_type']);
@@ -184,11 +191,11 @@ class SegmentUpdaterServiceTest extends AbstractTest
             $service = new SegmentUpdaterService(Database::obtain());
 
             $affected = $service->setAnalysisValue([
-                'id_segment'         => self::TEST_SEGMENT_ID,
-                'id_job'             => self::TEST_JOB_ID,
+                'id_segment' => self::TEST_SEGMENT_ID,
+                'id_job' => self::TEST_JOB_ID,
                 'tm_analysis_status' => 'DONE',
-                'match_type'         => 'ICE',
-                'eq_word_count'      => 0.0,
+                'match_type' => 'ICE',
+                'eq_word_count' => 0.0,
             ]);
 
             $this->assertEquals(0, $affected);
@@ -207,12 +214,12 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
-            $this->assertTrue($result);
+            $this->assertEquals(1, $result);
 
             $conn = Database::obtain()->getConnection();
             $stmt = $conn->prepare("SELECT tm_analysis_status FROM segment_translations WHERE id_segment = ? AND id_job = ?");
             $stmt->execute([self::TEST_SEGMENT_ID, self::TEST_JOB_ID]);
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $this->assertEquals('DONE', $row['tm_analysis_status']);
         } finally {
@@ -227,7 +234,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
         $result = $service->forceSetSegmentAnalyzed(999999, 999999);
 
-        $this->assertFalse($result);
+        $this->assertEquals(0, $result);
     }
 
     // ── Unit tests (only for paths that need stubs — e.g., PDOException) ──
@@ -235,8 +242,8 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function forceSetSegmentAnalyzed_returns_false_on_pdo_exception(): void
     {
-        $pdo = $this->createStub(\PDO::class);
-        $pdo->method('prepare')->willThrowException(new \PDOException('Connection lost'));
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willThrowException(new PDOException('Connection lost'));
 
         $db = $this->createStub(IDatabase::class);
         $db->method('getConnection')->willReturn($pdo);
@@ -245,7 +252,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
         $result = $service->forceSetSegmentAnalyzed(1, 2);
 
-        $this->assertFalse($result);
+        $this->assertEquals(0, $result);
     }
 
     #[Test]
@@ -266,14 +273,14 @@ class SegmentUpdaterServiceTest extends AbstractTest
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
             // NOT IN ('DONE','SKIPPED') guard → 0 affected rows → false
-            $this->assertFalse($result);
+            $this->assertEquals(0, $result);
         } finally {
             $this->cleanupTestSegmentTranslation();
         }
     }
 
     #[Test]
-    public function forceSetSegmentAnalyzed_returns_false_for_skipped_segment(): void
+    public function forceSetSegmentAnalyzed_returns_minus_one_for_skipped_segment(): void
     {
         $this->seedTestSegmentTranslation();
 
@@ -289,7 +296,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
-            $this->assertFalse($result);
+            $this->assertEquals(-1, $result);
         } finally {
             $this->cleanupTestSegmentTranslation();
         }
@@ -322,11 +329,11 @@ class SegmentUpdaterServiceTest extends AbstractTest
             $service = new SegmentUpdaterService(Database::obtain());
 
             $result = $service->setAnalysisValue([
-                'id_segment'         => self::TEST_SEGMENT_ID,
-                'id_job'             => self::TEST_JOB_ID,
+                'id_segment' => self::TEST_SEGMENT_ID,
+                'id_job' => self::TEST_JOB_ID,
                 'tm_analysis_status' => 'DONE',
-                'match_type'         => 'ICE',
-                'eq_word_count'      => 0.0,
+                'match_type' => 'ICE',
+                'eq_word_count' => 0.0,
             ]);
 
             $this->assertEquals(-1, $result, 'setAnalysisValue must return -1 for SKIPPED segments');
@@ -340,13 +347,13 @@ class SegmentUpdaterServiceTest extends AbstractTest
     {
         $service = new SegmentUpdaterService(Database::obtain());
 
-        $this->expectException(\Throwable::class);
+        $this->expectException(Throwable::class);
 
         $service->setAnalysisValue([
-            'id_job'             => self::TEST_JOB_ID,
+            'id_job' => self::TEST_JOB_ID,
             'tm_analysis_status' => 'DONE',
-            'match_type'         => 'ICE',
-            'eq_word_count'      => 0.0,
+            'match_type' => 'ICE',
+            'eq_word_count' => 0.0,
         ]);
     }
 
@@ -355,13 +362,13 @@ class SegmentUpdaterServiceTest extends AbstractTest
     {
         $service = new SegmentUpdaterService(Database::obtain());
 
-        $this->expectException(\Throwable::class);
+        $this->expectException(Throwable::class);
 
         $service->setAnalysisValue([
-            'id_segment'         => self::TEST_SEGMENT_ID,
+            'id_segment' => self::TEST_SEGMENT_ID,
             'tm_analysis_status' => 'DONE',
-            'match_type'         => 'ICE',
-            'eq_word_count'      => 0.0,
+            'match_type' => 'ICE',
+            'eq_word_count' => 0.0,
         ]);
     }
 }
