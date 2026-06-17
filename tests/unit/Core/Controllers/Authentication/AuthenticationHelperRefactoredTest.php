@@ -3,7 +3,7 @@
 namespace Matecat\Core\Controllers\Authentication;
 
 use Controller\Abstracts\Authentication\AuthCookieStore;
-use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\UserProfileBuilder;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ApiKeys\ApiKeyDao;
@@ -21,7 +21,7 @@ use PHPUnit\Framework\MockObject\MockObject;
  * split/refactored implementation. The SAME observable behavior must hold.
  */
 #[AllowMockObjectsWithoutExpectations]
-#[CoversClass(AuthenticationHelperRefactored::class)]
+#[CoversClass(AuthenticationHelper::class)]
 class AuthenticationHelperRefactoredTest extends AbstractTest
 {
     /** @var ApiKeyDao&MockObject */
@@ -42,9 +42,9 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->cookieStoreMock    = $this->createMock(AuthCookieStore::class);
     }
 
-    private function createHelper(array &$session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelperRefactored
+    private function createHelper(array &$session, ?string $apiKey = null, ?string $apiSecret = null): TestableAuthenticationHelper
     {
-        return TestableAuthenticationHelperRefactored::create(
+        return TestableAuthenticationHelper::create(
             $session,
             $this->userDaoMock,
             $this->apiKeyDaoMock,
@@ -279,7 +279,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->cookieStoreMock->method('getCredentials')->willReturn(['user' => ['uid' => 8]]);
 
         $session = [];
-        $helper  = new AuthenticationHelperRefactored(
+        $helper  = new AuthenticationHelper(
             $session, $this->userDaoMock, $this->apiKeyDaoMock, $this->profileBuilderMock, $this->cookieStoreMock
         );
         $helper->authenticate(null, null);
@@ -322,7 +322,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     public function fromRequestBuildsLoggedOutHelperForEmptySession(): void
     {
         $session = [];
-        $helper  = AuthenticationHelperRefactored::fromRequest($session, Database::obtain());
+        $helper  = AuthenticationHelper::fromRequest($session, Database::obtain());
 
         $this->assertFalse($helper->isLogged());
         $this->assertInstanceOf(UserStruct::class, $helper->getUser());
@@ -373,7 +373,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     }
 }
 
-class TestableAuthenticationHelperRefactored extends AuthenticationHelperRefactored
+class TestableAuthenticationHelper extends AuthenticationHelper
 {
     public static function create(
         array &$session,

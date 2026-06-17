@@ -48,9 +48,9 @@ trait AuthenticationTrait
      *
      * @param array<string, mixed> $session
      */
-    protected function buildAuthHelper(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelperRefactored
+    protected function buildAuthHelper(array &$session, ?string $api_key = null, ?string $api_secret = null): AuthenticationHelper
     {
-        return AuthenticationHelperRefactored::fromRequest($session, $this->getDatabase(), $api_key, $api_secret);
+        return AuthenticationHelper::fromRequest($session, $this->getDatabase(), $api_key, $api_secret);
     }
 
     /**

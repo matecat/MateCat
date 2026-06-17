@@ -4,7 +4,7 @@ namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
-use Controller\Abstracts\Authentication\AuthenticationHelperRefactored;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
@@ -69,7 +69,7 @@ class SignupController extends AbstractStatefulKleinController
     protected function authenticateConfirmedUser(UserStruct $user): void
     {
         AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-        AuthenticationHelperRefactored::fromRequest($_SESSION, $this->getDatabase());
+        AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
     }
 
     /**
