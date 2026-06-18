@@ -6,6 +6,7 @@ use Matecat\TestHelpers\AbstractTest;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\MailWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -21,7 +22,7 @@ class MailWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(MailWorker::class)
-            ->setConstructorArgs([$amq])
+            ->setConstructorArgs([$amq, Database::obtain()])
             ->onlyMethods(['createMailer', '_checkDatabaseConnection', '_doLog'])
             ->getMock();
 

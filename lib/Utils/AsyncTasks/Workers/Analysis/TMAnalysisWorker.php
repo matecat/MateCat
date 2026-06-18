@@ -5,7 +5,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -66,28 +66,29 @@ class TMAnalysisWorker extends AbstractWorker
      */
     public function __construct(
         AMQHandler $queueHandler,
+        IDatabase $database,
         ?AnalysisRedisServiceInterface $redisService = null,
         ?SegmentUpdaterServiceInterface $segmentUpdater = null,
         ?ProjectCompletionServiceInterface $projectCompletion = null,
         ?EngineServiceInterface $engineService = null,
         ?MatchProcessorServiceInterface $matchProcessor = null,
     ) {
-        parent::__construct($queueHandler);
+        parent::__construct($queueHandler, $database);
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
-        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService(Database::obtain());
+        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database);
         $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
             $this->redisService,
             new ProjectCompletionRepository(
-                Database::obtain(),
-                new ProjectDao(),
-                new JobDao(),
-                new AnalysisDao(),
+                $this->database,
+                new ProjectDao($this->database),
+                new JobDao($this->database),
+                new AnalysisDao($this->database),
                 new CounterModel(),
             )
         );
-        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver());
-        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter());
+        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver(), $this->database);
+        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);
     }
 
     /**

@@ -8,6 +8,7 @@ use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
@@ -20,10 +21,12 @@ use Utils\LQA\PostProcess;
 class MatchProcessorService implements MatchProcessorServiceInterface
 {
     private MatchSorterInterface $matchSorter;
+    private IDatabase $database;
 
-    public function __construct(MatchSorterInterface $matchSorter)
+    public function __construct(MatchSorterInterface $matchSorter, IDatabase $database)
     {
         $this->matchSorter = $matchSorter;
+        $this->database = $database;
     }
 
     /**
@@ -117,7 +120,7 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     ): array {
         $suggestion = $match['translation'] ?? '';
 
-        $metadataDao = new ProjectsMetadataDao();
+        $metadataDao = new ProjectsMetadataDao($this->database);
         $filter = MateCatFilter::getInstance(
             $featureSet,
             $source,

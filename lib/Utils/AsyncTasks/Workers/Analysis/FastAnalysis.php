@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\TmAnalysisDisabledEvent;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -92,11 +93,23 @@ class FastAnalysis extends AbstractDaemon
      */
     protected AbstractFilesStorage $files_storage;
 
+    private ?IDatabase $db = null;
+
+    /**
+     * Composition root for the FastAnalysis daemon process: the single place
+     * the Database singleton is resolved, then threaded into the DAOs this
+     * daemon builds.
+     */
+    private function db(): IDatabase
+    {
+        return $this->db ??= Database::obtain();
+    }
+
     private ?ProjectDao $projectDao = null;
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao();
+        return $this->projectDao ??= new ProjectDao($this->db());
     }
 
     const int ERR_NO_SEGMENTS = 127;
@@ -351,10 +364,10 @@ class FastAnalysis extends AbstractDaemon
                 $fs = $this->files_storage;
                 $fs->deleteFastAnalysisFile((string)$pid);
 
-                (new JobDao())->destroyCacheByProjectId($pid);
-                (new ProjectDao())->destroyFetchByIdCache($pid, ProjectStruct::class);
+                (new JobDao($this->db()))->destroyCacheByProjectId($pid);
+                (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
                 $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
-                (new AnalysisDao())->destroyCacheByProjectId($pid);
+                (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
             }
         } while ($this->RUNNING);
 
@@ -751,7 +764,7 @@ class FastAnalysis extends AbstractDaemon
 
                         $cacheKey = "$id_job:$password";
                         if (!isset($metadataCache[$cacheKey])) {
-                            $jobsMetadataDao = new MetadataDao();
+                            $jobsMetadataDao = new MetadataDao($this->db());
                             $metadataCache[$cacheKey] = [
                                 'tm_prioritization' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60),
                                 'dialect_strict' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60),

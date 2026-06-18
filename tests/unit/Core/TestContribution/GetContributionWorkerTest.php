@@ -39,7 +39,8 @@ class GetContributionWorkerTest extends AbstractTest
     {
         parent::setUp();
         $this->worker = new GetContributionWorker(
-            self::getStubBuilder(AMQHandler::class)->getStub()
+            self::getStubBuilder(AMQHandler::class)->getStub(),
+            Database::obtain()
         );
 
         $this->cleanupDbFixtures();
@@ -362,7 +363,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function process_builds_request_and_calls_exec(): void
     {
-        $spyWorker = new ProcessSpyGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub());
+        $spyWorker = new ProcessSpyGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
 
         $queueElement = new QueueElement();
         $queueElement->classLoad = GetContributionWorker::class;
@@ -379,7 +380,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function test_publishPayload_formats_payload_and_rewrites_mt_created_by(): void
     {
-        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub());
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
         $request = $this->makeBaseRequest([
             'segmentId' => 42,
             'concordanceSearch' => false,
@@ -416,7 +417,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function test_publishPayload_uses_concordance_and_cross_language_types(): void
     {
-        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub());
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
         $featureSet = new FeatureSet();
 
         $concordanceRequest = $this->makeBaseRequest(['concordanceSearch' => true]);
@@ -577,7 +578,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function test_execGetContribution_publishes_primary_and_cross_language_payloads(): void
     {
-        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub());
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
         $worker->queueMatchResult([], [[
             'match' => '90%',
             'score' => 0.9,

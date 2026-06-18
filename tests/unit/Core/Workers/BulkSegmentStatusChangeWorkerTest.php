@@ -5,6 +5,7 @@ namespace Matecat\Core\Workers;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -75,7 +76,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $eventsHandler = $this->createStub(TranslationEventsHandler::class);
 
         $worker = $this->getMockBuilder(BulkSegmentStatusChangeWorker::class)
-            ->setConstructorArgs([$amq, $userDao, $dbMock])
+            ->setConstructorArgs([$amq, $dbMock, $userDao])
             ->onlyMethods([
                 '_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients',
                 'createJobStruct', 'createTranslationEventsHandler',
@@ -110,7 +111,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
     public function getLoggerNameReturnsExpected(): void
     {
         $amq = $this->createStub(AMQHandler::class);
-        $worker = new BulkSegmentStatusChangeWorker($amq);
+        $worker = new BulkSegmentStatusChangeWorker($amq, Database::obtain());
 
         $this->assertSame('bulk_segment_status_change.log', $worker->getLoggerName());
     }

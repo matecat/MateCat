@@ -11,6 +11,7 @@ namespace Utils\TaskRunner;
 
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use PDOException;
@@ -64,6 +65,15 @@ class Executor implements SplObserver
      * @var AMQHandler
      */
     protected AMQHandler $_queueHandler;
+
+    /**
+     * The single per-process database handle, injected into every worker this
+     * Executor spawns. The Executor is the composition root for the worker
+     * process — the one place the Database singleton is resolved.
+     *
+     * @var IDatabase
+     */
+    protected IDatabase $database;
 
     /**
      * Context of execution
@@ -140,6 +150,10 @@ class Executor implements SplObserver
     {
         $this->_executorPID = posix_getpid();
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
+
+        // Composition root: resolve the single per-process DB handle once, then
+        // inject it into every worker spawned by this Executor.
+        $this->database = Database::obtain();
 
         // Initialize the 'executor' logger using a specific filename from the context
         $this->logger = LoggerFactory::getLogger('executor', $_context->loggerName);
@@ -238,7 +252,7 @@ class Executor implements SplObserver
                     if (!$this->isAllowedWorkerClass($queueElement->classLoad)) {
                         throw new WorkerClassException("--- (Executor " . $this->_executor_instance_id . ") : class " . $queueElement->classLoad . " is not in an allowed namespace");
                     }
-                    $workerInstance = new $queueElement->classLoad($this->_queueHandler);
+                    $workerInstance = new $queueElement->classLoad($this->_queueHandler, $this->database);
                     if (!$workerInstance instanceof AbstractWorker) {
                         throw new WorkerClassException("--- (Executor " . $this->_executor_instance_id . ") : class " . $queueElement->classLoad . " is not an AbstractWorker");
                     }
@@ -362,7 +376,7 @@ class Executor implements SplObserver
      */
     public function cleanShutDown(): void
     {
-        Database::obtain()->close();
+        $this->database->close();
 
         $this->_queueHandler->getRedisClient()->srem(
             $this->_executionContext->pid_set_name,

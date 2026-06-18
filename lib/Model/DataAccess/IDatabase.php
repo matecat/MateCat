@@ -31,6 +31,13 @@ interface IDatabase
     public function connect(): void;
 
     /**
+     * Verify the connection is alive (e.g. SELECT 1).
+     *
+     * @throws PDOException
+     */
+    public function ping(): bool;
+
+    /**
      * Close the connection
      */
     public function close(): void;

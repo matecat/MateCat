@@ -4,6 +4,7 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
@@ -28,7 +29,7 @@ class EngineServiceUnitTest extends AbstractTest
             return $mtEngine ?? $tmEngine;
         });
 
-        return new EngineService($resolver);
+        return new EngineService($resolver, Database::obtain());
     }
 
     private function makeFeatureSet(): FeatureSet

@@ -12,6 +12,7 @@ namespace Utils\AsyncTasks\Workers;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
@@ -43,9 +44,9 @@ class GetContributionWorker extends AbstractWorker
 {
     private MatchSorterInterface $matchSorter;
 
-    public function __construct(AMQHandler $queueHandler, ?MatchSorterInterface $matchSorter = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?MatchSorterInterface $matchSorter = null)
     {
-        parent::__construct($queueHandler);
+        parent::__construct($queueHandler, $database);
         $this->matchSorter = $matchSorter ?? new MatchSorter();
     }
 
@@ -561,7 +562,7 @@ class GetContributionWorker extends AbstractWorker
             $contributionStruct->segmentId !== null and
             !empty($contributionStruct->getJobStruct()->id)
         ) {
-            $segmentTranslationDao = new SegmentTranslationDao();
+            $segmentTranslationDao = new SegmentTranslationDao($this->database);
             $segmentTranslation = $segmentTranslationDao->findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
             if ($segmentTranslation === null) {

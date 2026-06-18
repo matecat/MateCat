@@ -3,7 +3,6 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobStruct;
@@ -28,16 +27,14 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
     protected int $maxRequeueNum = 3;
 
     private UserDao $userDao;
-    private IDatabase $database;
 
     /**
      * @throws ReflectionException
      */
-    public function __construct(AMQHandler $queueHandler, ?UserDao $userDao = null, ?IDatabase $database = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?UserDao $userDao = null)
     {
-        parent::__construct($queueHandler);
-        $this->userDao = $userDao ?? new UserDao();
-        $this->database = $database ?? Database::obtain();
+        parent::__construct($queueHandler, $database);
+        $this->userDao = $userDao ?? new UserDao($this->database);
     }
 
     public function getLoggerName(): string

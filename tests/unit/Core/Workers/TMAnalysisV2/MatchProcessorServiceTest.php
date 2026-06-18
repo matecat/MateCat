@@ -4,6 +4,7 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
@@ -19,7 +20,7 @@ class MatchProcessorServiceTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new MatchProcessorService(new MatchSorter());
+        $this->service = new MatchProcessorService(new MatchSorter(), Database::obtain());
     }
 
     #[Test]

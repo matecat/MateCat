@@ -4,6 +4,7 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
@@ -47,6 +48,7 @@ class TMAnalysisWorkerTest extends AbstractTest
     ): TestableTMAnalysisWorker {
         $worker = new TestableTMAnalysisWorker(
             $this->createStub(AMQHandler::class),
+            Database::obtain(),
             $redis ?? $this->createStub(AnalysisRedisServiceInterface::class),
             $updater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
             $completion ?? $this->createStub(ProjectCompletionServiceInterface::class),
@@ -135,7 +137,7 @@ class TMAnalysisWorkerTest extends AbstractTest
     }
 
     #[Test]
-    public function constructor_has_exactly_one_required_parameter_amqhandler(): void
+    public function constructor_has_two_required_parameters_queueHandler_and_database(): void
     {
         $ref      = new ReflectionClass(TMAnalysisWorker::class);
         $required = array_values(array_filter(
@@ -143,8 +145,9 @@ class TMAnalysisWorkerTest extends AbstractTest
             static fn(\ReflectionParameter $p): bool => !$p->isOptional()
         ));
 
-        $this->assertCount(1, $required);
+        $this->assertCount(2, $required);
         $this->assertSame('queueHandler', $required[0]->getName());
+        $this->assertSame('database', $required[1]->getName());
     }
 
     #[Test]

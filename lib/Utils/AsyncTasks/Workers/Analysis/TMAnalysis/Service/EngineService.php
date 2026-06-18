@@ -4,6 +4,7 @@ namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -19,10 +20,12 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 class EngineService implements EngineServiceInterface
 {
     private EngineResolverInterface $engineResolver;
+    private IDatabase $database;
 
-    public function __construct(EngineResolverInterface $engineResolver)
+    public function __construct(EngineResolverInterface $engineResolver, IDatabase $database)
     {
         $this->engineResolver = $engineResolver;
+        $this->database = $database;
     }
 
     /**
@@ -86,7 +89,7 @@ class EngineService implements EngineServiceInterface
 
             $mtEngine->setAnalysis();
 
-            $metadataDao = new ProjectsMetadataDao();
+            $metadataDao = new ProjectsMetadataDao($this->database);
             $lara_style = $metadataDao->get($queueElement->params->pid, 'lara_style') ?? null;
             $enable_mt_analysis = $metadataDao->get($queueElement->params->pid, 'enable_mt_analysis');
             $mtEngine->setSkipAnalysis(!($enable_mt_analysis->value ?? false));

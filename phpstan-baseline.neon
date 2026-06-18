@@ -74,11 +74,6 @@ parameters:
 
 
 
-		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/App/HeartBeat.php
 
 		-
 			message: '#^Method Controller\\API\\App\\HeartBeat\:\:ping\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -7077,11 +7072,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 
-		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/TaskRunner/Commons/AbstractWorker.php
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkDatabaseConnection\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
