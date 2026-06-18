@@ -16,6 +16,7 @@ use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use ReflectionException;
+use TypeError;
 
 
 class EventModel
@@ -41,21 +42,21 @@ class EventModel
     public function __construct(
         JobStruct $chunk,
         CompletionEventStruct $eventStruct,
-        ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
-        ?ProjectDao $projectDao = null,
+        ChunkCompletionEventDao $chunkCompletionEventDao,
+        ProjectDao $projectDao,
         ?FeatureSet $featureSet = null,
     ) {
         $this->eventStruct = $eventStruct;
         $this->chunk = $chunk;
-        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
-        $this->projectDao = $projectDao ?? new ProjectDao();
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
+        $this->projectDao = $projectDao;
         $this->featureSet = $featureSet ?? new FeatureSet();
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function save(): void
     {
