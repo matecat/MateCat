@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use CURLFile;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\UnknownPropertyException;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
@@ -78,7 +79,7 @@ abstract class AbstractEngine implements EngineInterface
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct(EngineStruct $engineRecord)
+    public function __construct(EngineStruct $engineRecord, ?IDatabase $database = null)
     {
         $this->engineRecord = $engineRecord;
         $this->className = get_class($this);
@@ -92,7 +93,7 @@ abstract class AbstractEngine implements EngineInterface
             CURLOPT_SSL_VERIFYHOST => 2
         ];
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet(null, $database);
         /**
          * Set the initial value to a specific log file, if not already initialized by the Executor.
          * This is useful when engines are used outside the TaskRunner context

@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use TypeError;
@@ -33,9 +34,9 @@ class Altlang extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, ?IDatabase $database = null)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception(
                 "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}"

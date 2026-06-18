@@ -29,7 +29,8 @@ class EnginesFactory
      */
     public static function getInstance(int $id, ?string $engineClass = null): AbstractEngine
     {
-        $engineDAO = new EngineDAO(Database::obtain());
+        $db = Database::obtain();
+        $engineDAO = new EngineDAO($db);
         $engineStruct = EngineStruct::getStruct();
         $engineStruct->id = $id;
 
@@ -45,7 +46,7 @@ class EnginesFactory
         $className = self::getFullyQualifiedClassName($engineRecord->class_load ?? throw new Exception("Engine $id has no class_load"));
 
         /** @var T $engine */
-        $engine = new $className($engineRecord);
+        $engine = new $className($engineRecord, $db);
 
         if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
             throw new Exception("Engine Id " . $id . " is not the expected $engineClass engine instance");

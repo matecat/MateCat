@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Exception;
 use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
 use Lara\AccessKey;
 use Lara\Glossary;
 use Lara\Internal\HttpClient;
@@ -88,9 +89,9 @@ class Lara extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, ?IDatabase $database = null)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception(

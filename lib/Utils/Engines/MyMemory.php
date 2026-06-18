@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -89,9 +90,9 @@ class MyMemory extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, ?IDatabase $database = null)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::TM) {
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
