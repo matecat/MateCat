@@ -131,7 +131,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $gdriveSession,
         );
 
-        $projectManager = new ProjectManager($projectStructure);
+        $projectManager = new ProjectManager($projectStructure, $this->getDatabase());
         $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence

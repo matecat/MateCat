@@ -161,7 +161,7 @@ class NewController extends KleinController
             $engine,
         );
 
-        $projectManager = new ProjectManager($projectStructure);
+        $projectManager = new ProjectManager($projectStructure, $this->getDatabase());
         $projectManager->setTeam($request['team']);
 
         $fs->moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());

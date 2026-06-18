@@ -9,6 +9,7 @@ use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Concerns\LogsMessages;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -85,6 +86,7 @@ class SegmentExtractor
         private readonly FeatureSet $features,
         private readonly MetadataDao $filesMetadataDao,
         private readonly SegmentMetadataMapper $segmentMetadataMapper,
+        private readonly IDatabase $dbHandler,
         MatecatLogger $logger,
     ) {
         $this->logger = $logger;
@@ -283,7 +285,7 @@ class SegmentExtractor
             $filesPartsStruct->tag_key = 'original';
             $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
 
-            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
+            $filePartsId = (new FilesPartsDao($this->dbHandler))->insert($filesPartsStruct);
 
             // save `custom` meta data
             $customMetadata = $xliff_file['attr']['custom'] ?? null;

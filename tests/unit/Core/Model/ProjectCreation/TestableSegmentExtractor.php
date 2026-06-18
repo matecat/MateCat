@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\ProjectCreation\ProjectStructure;
@@ -25,7 +26,7 @@ class TestableSegmentExtractor extends SegmentExtractor
         MatecatLogger $logger,
         ?SegmentMetadataMapper $segmentMetadataMapper = null,
     ) {
-        parent::__construct($config, $filter, $features, $filesMetadataDao, $segmentMetadataMapper ?? new SegmentMetadataMapper(), $logger);
+        parent::__construct($config, $filter, $features, $filesMetadataDao, $segmentMetadataMapper ?? new SegmentMetadataMapper(), Database::obtain(), $logger);
     }
 
     /**
