@@ -400,7 +400,7 @@ export const stripSegmentTags = (text) => {
       ]).replace(/##\$_[^$]+\$##/g, ' '),
     ),
   )
-  return decoded.replace(/\s+/g, ' ').trim()
+  return decoded.replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim()
 }
 
 /**

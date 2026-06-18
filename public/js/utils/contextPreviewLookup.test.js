@@ -482,6 +482,18 @@ describe('AemContainerTextMatchStrategy', () => {
     expect(result).toBe(container.querySelector('[data-node-path]'))
   })
 
+  it('returns null when the container has more than one block descendant (page-level container)', () => {
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><p>A</p><p>B</p></div>'
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Target Text',
+      ),
+    ).toBeNull()
+  })
+
   it('returns null when path is empty', () => {
     container.innerHTML = '<p>Target Text</p>'
     expect(strategy.execute(container, '', 'Target Text')).toBeNull()
