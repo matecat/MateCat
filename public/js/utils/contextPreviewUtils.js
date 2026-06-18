@@ -740,14 +740,26 @@ export const isNodeHidden = (el) => {
 export const suppressClickTraps = (container) => {
   if (!container) return
   const CONTENT_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, td, th, article, section'
-  container.querySelectorAll('*').forEach((el) => {
-    if (el.getAttribute(SEGMENT_SIDS_ATTR)) return
-    const pos = getComputedStyle(el).position
-    if (pos !== 'fixed' && pos !== 'absolute') return
-    if (el.querySelector(CONTENT_SELECTOR)) return
-    if (el.textContent.trim()) return
-    el.style.pointerEvents = 'none'
-  })
+  // Defer the getComputedStyle scan so it doesn't block the main thread after
+  // stylesheets have loaded. Inline-style overlays are already handled by CSS
+  // rules in LivePreviewPanel.js (SHADOW_STYLES); this pass catches class-based
+  // positioning (e.g. .fxModalBox-spaceball { position: absolute }), which is
+  // less time-critical since those elements are rare and don't visually block content.
+  const run = () => {
+    container.querySelectorAll('*').forEach((el) => {
+      if (el.getAttribute(SEGMENT_SIDS_ATTR)) return
+      const pos = getComputedStyle(el).position
+      if (pos !== 'fixed' && pos !== 'absolute') return
+      if (el.querySelector(CONTENT_SELECTOR)) return
+      if (el.textContent.trim()) return
+      el.style.pointerEvents = 'none'
+    })
+  }
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(run, {timeout: 2000})
+  } else {
+    setTimeout(run, 0)
+  }
 }
 
 export const extractSegmentContextFields = (segment) => {
