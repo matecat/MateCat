@@ -15,6 +15,11 @@ use View\API\V2\Json\SegmentVersion;
 #[CoversClass(SegmentVersion::class)]
 class SegmentVersionTest extends AbstractTest
 {
+    private function featureSet(): FeatureSet
+    {
+        return new FeatureSet();
+    }
+
     private function makeJobStruct(int $id = 1, string $password = 'abc123', string $source = 'en-US', string $target = 'it-IT'): JobStruct
     {
         $job           = new JobStruct();
@@ -55,7 +60,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testConstructorAcceptsEmptyData(): void
     {
-        $view = new SegmentVersion($this->makeJobStruct(), []);
+        $view = new SegmentVersion($this->makeJobStruct(), [], false, $this->featureSet());
         $this->assertInstanceOf(SegmentVersion::class, $view);
     }
 
@@ -74,7 +79,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testRenderNormalReturnsEmptyArrayForEmptyData(): void
     {
-        $view   = new SegmentVersion($this->makeJobStruct(), [], false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [], false, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertSame([], $result);
@@ -85,7 +90,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testRenderWithIssuesReturnsEmptyArrayForEmptyData(): void
     {
-        $view   = new SegmentVersion($this->makeJobStruct(), [], true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [], true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertSame([], $result);
@@ -96,7 +101,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testRenderItemReturnsExpectedKeys(): void
     {
-        $view   = new SegmentVersion($this->makeJobStruct(), [], false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [], false, $this->featureSet(), $this->makeMetadataDao());
         $record = $this->makeRecord();
         $result = $view->renderItem($record);
 
@@ -114,7 +119,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testRenderItemCastsIdToInt(): void
     {
-        $view   = new SegmentVersion($this->makeJobStruct(), [], false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [], false, $this->featureSet(), $this->makeMetadataDao());
         $record = $this->makeRecord(['id' => '42', 'id_segment' => '100', 'id_job' => '1']);
         $result = $view->renderItem($record);
 
@@ -128,7 +133,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testRenderItemSetsCreationDate(): void
     {
-        $view   = new SegmentVersion($this->makeJobStruct(), [], false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [], false, $this->featureSet(), $this->makeMetadataDao());
         $record = $this->makeRecord(['creation_date' => '2024-06-01 12:00:00']);
         $result = $view->renderItem($record);
 
@@ -141,7 +146,7 @@ class SegmentVersionTest extends AbstractTest
     public function testRenderNormalReturnsSingleRecord(): void
     {
         $record = $this->makeRecord();
-        $view   = new SegmentVersion($this->makeJobStruct(), [$record], false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [$record], false, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result);
@@ -159,7 +164,7 @@ class SegmentVersionTest extends AbstractTest
             $this->makeRecord(['id' => 2, 'id_segment' => 10, 'version_number' => 2]),
         ];
 
-        $view   = new SegmentVersion($this->makeJobStruct(), $records, false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, false, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(2, $result);
@@ -178,7 +183,7 @@ class SegmentVersionTest extends AbstractTest
             $this->makeRecord(['id' => 2, 'id_segment' => 10, 'version_number' => 2, 'qa_id_segment' => null]),
         ];
 
-        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(2, $result);
@@ -193,7 +198,7 @@ class SegmentVersionTest extends AbstractTest
     public function testRenderWithIssuesSingleVersionHasIssuesKey(): void
     {
         $record = $this->makeRecord(['id' => 1, 'qa_id_segment' => null]);
-        $view   = new SegmentVersion($this->makeJobStruct(), [$record], true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [$record], true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result);
@@ -205,7 +210,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testRenderItemHandlesNullTranslation(): void
     {
-        $view   = new SegmentVersion($this->makeJobStruct(), [], false, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), [], false, $this->featureSet(), $this->makeMetadataDao());
         $record = $this->makeRecord(['translation' => null]);
         $result = $view->renderItem($record);
 
@@ -237,7 +242,7 @@ class SegmentVersionTest extends AbstractTest
             ]),
         ];
 
-        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(2, $result);
@@ -268,7 +273,7 @@ class SegmentVersionTest extends AbstractTest
             $this->makeRecord(array_merge($base, ['qa_id' => 101, 'qa_id_segment' => 10])),
         ];
 
-        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result);
@@ -288,7 +293,7 @@ class SegmentVersionTest extends AbstractTest
             ]),
         ];
 
-        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result);
@@ -308,7 +313,7 @@ class SegmentVersionTest extends AbstractTest
             ]),
         ];
 
-        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, null, $this->makeMetadataDao());
+        $view   = new SegmentVersion($this->makeJobStruct(), $records, true, $this->featureSet(), $this->makeMetadataDao());
         $result = $view->render();
 
         $this->assertCount(1, $result);

@@ -19,7 +19,7 @@ class SegmentVersion
      * @var AbstractDaoObjectStruct[]
      */
     private array $data;
-    private ?bool $with_issues;
+    private bool $with_issues;
 
     /**
      * @var JobStruct
@@ -34,17 +34,16 @@ class SegmentVersion
      * @param JobStruct $chunk
      * @param AbstractDaoObjectStruct[] $data
      * @param bool $with_issues
-     * @param FeatureSet|null $featureSet
+     * @param FeatureSet $featureSet
      * @param MetadataDao|null $metadataDao
-     * @throws Exception
      */
-    public function __construct(JobStruct $chunk, array $data, ?bool $with_issues = false, ?FeatureSet $featureSet = null, ?MetadataDao $metadataDao = null)
+    public function __construct(JobStruct $chunk, array $data, ?bool $with_issues, FeatureSet $featureSet, ?MetadataDao $metadataDao = null)
     {
         $this->data = $data;
-        $this->with_issues = $with_issues;
+        $this->with_issues = $with_issues ?? false;
         $this->chunk = $chunk;
         $this->metadataDao = $metadataDao;
-        $this->featureSet = $featureSet ?? new FeatureSet();
+        $this->featureSet = $featureSet;
     }
 
     /**
