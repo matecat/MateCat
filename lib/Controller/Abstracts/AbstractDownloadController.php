@@ -277,8 +277,13 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
         // Close and send to users
         $zip->close();
-        $zip_content = file_get_contents($outputFile);
-        unlink($outputFile);
+
+        // ZipArchive::close() removes the file when the archive has no entries,
+        // so guard against a missing file before reading/unlinking it.
+        $zip_content = is_file($outputFile) ? file_get_contents($outputFile) : false;
+        if (is_file($outputFile)) {
+            unlink($outputFile);
+        }
 
         if ($zip_content === false) {
             throw new Exception('Failed to read zip file: ' . $outputFile);

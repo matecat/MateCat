@@ -68,6 +68,10 @@ class DownloadOriginalController extends AbstractDownloadController
         $fs = FilesStorageFactory::create();
         $files_job = $fs->getFilesForJob($this->id_job, false);
 
+        if (empty($files_job)) {
+            throw new Exception("No files found for job {$this->id_job}");
+        }
+
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[0]['id_project'];
 

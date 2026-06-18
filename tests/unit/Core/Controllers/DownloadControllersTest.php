@@ -337,17 +337,17 @@ class DownloadControllersTest extends AbstractTest
         // A review_password ('revpw') that does NOT match the job password makes the
         // first getByIdAndPassword() return null, driving the ChunkReviewDao fallback
         // branch (getChunk() resolves the real job). With no files_job row seeded, the
-        // subsequent file-storage lookup yields no project id, so ProjectDao::findById()
-        // is invoked with null and raises a TypeError — exercising the fallback + storage
-        // resolution path (controller lines 64,68,69,72,74) before the filesystem/exit
-        // boundary.
+        // subsequent file-storage lookup yields no files, so the controller raises a
+        // clear Exception via the missing-files guard — exercising the fallback +
+        // storage resolution path (controller lines 64,68,69) before the boundary.
         $jobId = $this->jobId(self::ORIGINAL_BASE);
         $controller = $this->createOriginalController([
             'id_job'   => (string)$jobId,
             'password' => 'revpw',
         ]);
 
-        $this->expectException(TypeError::class);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('No files found for job');
 
         $controller->index();
     }
