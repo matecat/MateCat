@@ -78,7 +78,7 @@ class GetContributionWorker extends AbstractWorker
     {
         $jobStruct = $contributionStruct->getJobStruct();
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(null, $this->database);
         $featureSet->loadForProject($contributionStruct->getProjectStruct());
 
         [$mt_result, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $jobStruct->target, $featureSet);

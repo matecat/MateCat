@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\ProjectValidator;
 use Exception;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use RuntimeException;
@@ -49,7 +50,9 @@ class ProjectCompletionStatus extends KleinController
     public function status(): void
     {
         $model = new ProjectCompletionStatusModel(
-            $this->project ?? throw new RuntimeException('Project not found')
+            $this->project ?? throw new RuntimeException('Project not found'),
+            null,
+            new FeatureSet(null, $this->getDatabase()),
         );
         $this->response->json([
             'project_status' => $model->getStatus()

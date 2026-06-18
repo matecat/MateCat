@@ -6,6 +6,7 @@ use ArrayObject;
 use Exception;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -43,7 +44,7 @@ class JobSplitMergeManager
     /**
      * @throws Exception
      */
-    public function __construct(ProjectStruct $project)
+    public function __construct(ProjectStruct $project, IDatabase $database)
     {
         $this->logger  = LoggerFactory::getLogger('job_split_merge_manager');
         $this->project = $project;
@@ -53,7 +54,7 @@ class JobSplitMergeManager
             $project->id_customer,
         );
 
-        $this->features = new FeatureSet();
+        $this->features = new FeatureSet(null, $database);
         $this->features->loadForProject($this->project);
     }
 

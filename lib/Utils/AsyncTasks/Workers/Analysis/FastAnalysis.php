@@ -214,7 +214,7 @@ class FastAnalysis extends AbstractDaemon
 
             $this->logger->debug("Projects found", ['projects' => $projects_list]);
 
-            $featureSet = new FeatureSet();
+            $featureSet = new FeatureSet(null, $this->db());
 
             foreach ($projects_list as $project_row) {
                 $this->actual_project_row = $project_row;

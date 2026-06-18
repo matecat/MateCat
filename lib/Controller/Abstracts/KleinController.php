@@ -129,7 +129,7 @@ abstract class KleinController implements IController
         $paramsNamed = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
         $this->params = array_merge($this->params, $paramsGet, $paramsNamed, $paramsPut);
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet(null, $this->getDatabase());
         $this->identifyUser($this->useSession);
         $this->initDependencies();
         $this->registerValidators();

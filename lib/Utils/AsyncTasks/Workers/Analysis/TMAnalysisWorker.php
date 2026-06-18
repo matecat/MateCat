@@ -105,7 +105,7 @@ class TMAnalysisWorker extends AbstractWorker
 
         $params = $queueElement->params;
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet(null, $this->database);
         $this->featureSet->loadFromString($params->features);
 
         $this->_matches = null;

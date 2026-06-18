@@ -201,7 +201,7 @@ class QualityReportSegmentModel
 
         $data = $this->segmentDao->getSegmentsForQr($segmentIds, $chunkId, $chunkPassword);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(null, $this->database);
 
         $featureSet->loadForProject($this->chunk->getProject());
         $issue_comments = [];
