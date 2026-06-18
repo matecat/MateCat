@@ -5,6 +5,8 @@ namespace Plugins\Features;
 use Exception;
 use Klein\Klein;
 use LogicException;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -53,6 +55,19 @@ abstract class BaseFeature implements IBaseFeature
      * @var array<int, string>
      */
     protected static array $conflictingDependencies = [];
+
+    // Transitional: nullable until all FeatureSet callers pass a real handle.
+    protected ?IDatabase $database = null;
+
+    public function setDatabase(?IDatabase $database): void
+    {
+        $this->database = $database;
+    }
+
+    protected function getDatabase(): IDatabase
+    {
+        return $this->database ??= Database::obtain();
+    }
 
     /**
      * @return array<int, string>

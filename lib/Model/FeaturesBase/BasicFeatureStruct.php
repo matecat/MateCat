@@ -4,6 +4,7 @@ namespace Model\FeaturesBase;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\IDatabase;
 use Plugins\Features\BaseFeature;
 
 /**
@@ -35,13 +36,17 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
+     * @param ?IDatabase $db Caller's handle; null = transitional (BaseFeature falls back to obtain()).
+     *
      * @return BaseFeature
      * @throws \RuntimeException
      */
-    public function toNewObject(): BaseFeature
+    public function toNewObject(?IDatabase $db = null): BaseFeature
     {
         $name = PluginsLoader::getPluginClass($this->feature_code);
+        $obj  = new $name($this);
+        $obj->setDatabase($db);
 
-        return new $name($this);
+        return $obj;
     }
 }

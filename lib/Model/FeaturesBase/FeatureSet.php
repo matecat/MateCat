@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\FilterEvent;
@@ -27,22 +28,12 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * Class FeatureSet
+ * Manages the set of active features (plugins) for a request or task.
  *
- * Represents a set of features provided in the system. This class allows the
- * management of features, including loading, merging, filtering, and various
- * dependency-related operations for projects and users.
- *
- * Implements EventDispatcherInterface.
- *
- * NOTE: When called with no arguments (i.e. `new FeatureSet()`), the constructor
- * invokes `loadFromMandatory()` → `getAutoloadPlugins()` → `merge()`, which
- * iterates over {@see AppConfig::$AUTOLOAD_PLUGINS} and calls `toNewObject()`
- * on each {@see BasicFeatureStruct}, forcing PHP to autoload the plugin feature
- * classes. All state is stored in instance properties (`$this->features`) — there
- * is no static registry. {@see \Bootstrap::initMandatoryPlugins()} creates and
- * immediately discards a FeatureSet instance purely to trigger this early
- * autoloading of plugin classes during bootstrap.
+ * Every db-holding root (controller, worker, ProjectManager) SHOULD pass an
+ * IDatabase handle via the constructor so that features receive a real connection
+ * instead of calling Database::obtain(). The nullable param is transitional —
+ * target state is non-nullable after all callers are migrated.
  */
 class FeatureSet implements EventDispatcherInterface
 {
@@ -55,6 +46,8 @@ class FeatureSet implements EventDispatcherInterface
 
     private LoggerInterface $logger;
 
+    private ?IDatabase $database = null;
+
     /**
      * @return BasicFeatureStruct[]
      */
@@ -64,16 +57,15 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
-     * Otherwise, it is populated with mandatory features.
-     *
      * @param BasicFeatureStruct[]|null $features
+     * @param ?IDatabase $database Transitional: pass a real handle from db-holding roots.
      *
      * @throws Exception
      */
-    public function __construct(?array $features = null)
+    public function __construct(?array $features = null, ?IDatabase $database = null)
     {
-        $this->logger = LoggerFactory::getLogger('feature_set');
+        $this->logger   = LoggerFactory::getLogger('feature_set');
+        $this->database = $database;
 
         if (is_null($features)) {
             $this->loadFromMandatory();
@@ -207,7 +199,7 @@ class FeatureSet implements EventDispatcherInterface
     public function loadForceableProjectFeatures(): void
     {
         $returnable = array_filter($this->getAutoloadPlugins(), function (BasicFeatureStruct $feature) {
-            $concreteClass = $feature->toNewObject();
+            $concreteClass = $feature->toNewObject($this->database);
 
             return $concreteClass->isForceableOnProject();
         });
@@ -239,7 +231,7 @@ class FeatureSet implements EventDispatcherInterface
         $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
 
         $objs = array_map(function (BasicFeatureStruct $feature): BaseFeature {
-            return $feature->toNewObject();
+            return $feature->toNewObject($this->database);
         }, $features);
 
         $returnable = array_filter($objs, function (BaseFeature $obj): bool {
@@ -281,7 +273,7 @@ class FeatureSet implements EventDispatcherInterface
 
         foreach ($this->features as $feature) {
             try {
-                $obj = $feature->toNewObject();
+                $obj = $feature->toNewObject($this->database);
                 if (method_exists($obj, $hookName)) {
                     $obj->$hookName($event);
                 }
@@ -361,7 +353,7 @@ class FeatureSet implements EventDispatcherInterface
         }
 
         $firstInList = $featureStructsList[0];
-        $ObjectFeatureFirst = $firstInList->toNewObject();
+        $ObjectFeatureFirst = $firstInList->toNewObject($this->database);
 
         $leftBucket = $rightBucket = [];
 
@@ -384,7 +376,7 @@ class FeatureSet implements EventDispatcherInterface
     {
         $codes = $this->getCodes();
         foreach ($this->features as $feature) {
-            $baseFeature = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject($this->database);
             $missing_dependencies = array_diff($baseFeature::getDependencies(), $codes);
 
             if (!empty($missing_dependencies)) {
@@ -414,7 +406,7 @@ class FeatureSet implements EventDispatcherInterface
 
         foreach ($new_features as $feature) {
             // flat dependency management
-            $baseFeature = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject($this->database);
 
             $conflictingDeps[$feature->feature_code] = $baseFeature::getConflictingDependencies();
 
