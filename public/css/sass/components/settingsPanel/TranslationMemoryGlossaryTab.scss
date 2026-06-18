@@ -102,10 +102,9 @@
       > form {
         padding: 0 !important;
         background-color: unset;
-
-        > :last-child {
-          grid-column: 7;
-        }
+      }
+      > form > :last-child {
+        grid-column: 7;
       }
     }
   }
@@ -339,18 +338,16 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
-
-        .filename {
-          font-weight: bold;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 60%;
-        }
-
-        .filename-error {
-          color: colors.$red500;
-        }
+      }
+      > li .filename {
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60%;
+      }
+      > li .filename-error {
+        color: colors.$red500;
       }
 
       > li:nth-child(even) {

@@ -283,12 +283,11 @@
       height: 40px;
     }
 
+    .menu-button-wrapper > button svg {
+      color: white;
+    }
     .menu-button-wrapper {
       > button {
-        svg {
-          color: white;
-        }
-
         &:hover,
         &:focus {
           background-color: unset;

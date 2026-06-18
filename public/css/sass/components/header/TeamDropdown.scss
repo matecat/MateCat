@@ -28,38 +28,38 @@
       list-style: none;
       display: flex;
       flex-direction: column;
+    }
 
-      > li {
+    ul > li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 10px;
+
+      &:hover {
+        background-color: colors.$grey75;
+      }
+
+      &.active {
+        background-color: colors.$blue950;
+        color: colors.$white;
+      }
+
+      .container-icon-settings {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        padding: 10px;
-
-        &:hover {
-          background-color: colors.$grey75;
-
-          .container-icon-settings {
-            visibility: visible;
-            color: colors.$blue500;
-          }
-        }
-
-        &.active {
-          background-color: colors.$blue950;
-          color: colors.$white;
-
-          .container-icon-settings {
-            color: colors.$white;
-          }
-        }
-
-        .container-icon-settings {
-          display: flex;
-          align-items: center;
-          visibility: hidden;
-        }
+        visibility: hidden;
       }
+    }
+
+    ul > li:hover .container-icon-settings {
+      visibility: visible;
+      color: colors.$blue500;
+    }
+
+    ul > li.active .container-icon-settings {
+      color: colors.$white;
     }
   }
 

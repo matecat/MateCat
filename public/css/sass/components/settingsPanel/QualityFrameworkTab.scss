@@ -93,13 +93,12 @@
         flex-direction: column;
         justify-content: center;
         max-width: 230px;
-
-        > :first-child:not(textarea) {
-          font-weight: bold;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+      }
+      .label > :first-child:not(textarea) {
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .details {
@@ -154,23 +153,21 @@
         height: 32px;
         border: 1px solid colors.$grey150;
         padding: 0 10px;
-
-        .label {
-          display: inherit;
-          padding: 0 5px;
-
-          > :first-child {
-            display: block;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: bold;
-            border: none;
-            padding: 0;
-            line-height: 1.5;
-          }
-        }
+      }
+      .column .label {
+        display: inherit;
+        padding: 0 5px;
+      }
+      .column .label > :first-child {
+        display: block;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: bold;
+        border: none;
+        padding: 0;
+        line-height: 1.5;
       }
 
       .cell {
@@ -186,10 +183,8 @@
           border-right-width: 2px;
         }
       }
-      .cell-not-saved {
-        input {
-          color: colors.$blue500;
-        }
+      .cell-not-saved input {
+        color: colors.$blue500;
       }
 
       &:last-child {

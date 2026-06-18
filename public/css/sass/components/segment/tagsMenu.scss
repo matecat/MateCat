@@ -29,12 +29,12 @@
         pointer-events: none;
         display: flex;
         align-items: center;
-        .style-tag {
-          padding: 4px 7px;
-          margin: 0 5px;
-          &.mismatch {
-            color: colors.$red400;
-          }
+      }
+      .head-tag-list .style-tag {
+        padding: 4px 7px;
+        margin: 0 5px;
+        &.mismatch {
+          color: colors.$red400;
         }
       }
       .item {
@@ -66,15 +66,15 @@
             color: colors.$black !important;
           }
         }
-        mark {
-          background: colors.$orange200;
-        }
         &.no-results {
           cursor: default;
           pointer-events: none;
           height: 100%;
           padding: 13px !important;
         }
+      }
+      .item mark {
+        background: colors.$orange200;
       }
     }
   }

@@ -136,44 +136,40 @@ header {
         display: flex;
         flex-direction: column;
         gap: 4px;
-
-        .popover-comments-item {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          padding: 8px;
-          border-radius: variables.$border-radius-default;
-          background-color: #{rgba(colors.$grey75, 0.5)};
-          &.resolved {
-            background-color: #{rgba(colors.$green300, 0.15)};
-            &:hover {
-              background-color: #{rgba(colors.$green300, 0.25)};
-            }
-          }
+      }
+      .popover-comments-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        border-radius: variables.$border-radius-default;
+        background-color: #{rgba(colors.$grey75, 0.5)};
+        &.resolved {
+          background-color: #{rgba(colors.$green300, 0.15)};
           &:hover {
-            background-color: colors.$grey75;
-          }
-
-          .popover-comments-item-header {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: colors.$grey1300;
-
-            .popover-comments-item-name {
-              color: colors.$grey600;
-            }
-          }
-
-          .popover-comments-item-text {
-            padding: 4px;
+            background-color: #{rgba(colors.$green300, 0.25)};
           }
         }
+        &:hover {
+          background-color: colors.$grey75;
+        }
+      }
+      .popover-comments-item .popover-comments-item-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 4px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: colors.$grey1300;
+      }
+      .popover-comments-item-name {
+        color: colors.$grey600;
+      }
+      .popover-comments-item .popover-comments-item-text {
+        padding: 4px;
       }
     }
   }

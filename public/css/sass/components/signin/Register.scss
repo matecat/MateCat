@@ -18,22 +18,22 @@
     h2,
     ul {
       text-align: left;
+    }
 
-      > li {
-        display: flex;
-        gap: 10px;
-        font-size: 16px;
-        align-items: center;
-        padding: 5px 0;
+    ul > li {
+      display: flex;
+      gap: 10px;
+      font-size: 16px;
+      align-items: center;
+      padding: 5px 0;
 
-        &:first-child {
-          font-weight: bold;
-        }
+      &:first-child {
+        font-weight: bold;
+      }
 
-        svg {
-          flex-shrink: 0;
-          color: colors.$blue500;
-        }
+      svg {
+        flex-shrink: 0;
+        color: colors.$blue500;
       }
     }
   }
@@ -99,11 +99,10 @@
       .input-container {
         display: flex;
         gap: 10px;
-
-        > span {
-          display: flex;
-          color: colors.$grey400;
-        }
+      }
+      .input-container > span {
+        display: flex;
+        color: colors.$grey400;
       }
     }
 

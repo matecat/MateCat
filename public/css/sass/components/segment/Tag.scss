@@ -671,13 +671,11 @@
         &.tag-open {
           margin: 0 12px 0 0;
         }
-        &.tag-placeholder {
-          span:not(.index-counter) {
-            display: block;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-          }
+        &.tag-placeholder span:not(.index-counter) {
+          display: block;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
         }
       }
 

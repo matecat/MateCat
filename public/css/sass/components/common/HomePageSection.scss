@@ -51,21 +51,23 @@
         display: flex;
         gap: 16px;
         align-items: center;
-        h3 {
-          margin-top: 0;
-          font-size: 28px;
-          line-height: 32px;
-          color: colors.$grey1300;
-        }
-        img {
-          width: 64px;
-          height: 64px;
-        }
       }
       p {
         font-size: 18px;
         line-height: 24px;
         color: colors.$grey700;
+      }
+    }
+    .content-box .content-box_header {
+      h3 {
+        margin-top: 0;
+        font-size: 28px;
+        line-height: 32px;
+        color: colors.$grey1300;
+      }
+      img {
+        width: 64px;
+        height: 64px;
       }
     }
   }

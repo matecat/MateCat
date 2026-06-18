@@ -86,17 +86,15 @@
         border-radius: 4px;
         border: 1px solid rgba(34, 36, 38, 0.15);
         background-color: white;
-
-        .dropdown__search-bar-input {
-          width: 100%;
-          padding: 8px 8px;
-          background-color: unset;
-        }
-
-        .dropdown__search-bar-input--highlighted {
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-        }
+      }
+      .dropdown__search-bar .dropdown__search-bar-input {
+        width: 100%;
+        padding: 8px 8px;
+        background-color: unset;
+      }
+      .dropdown__search-bar .dropdown__search-bar-input--highlighted {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
       }
 
       .dropdown__option {

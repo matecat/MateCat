@@ -20,18 +20,16 @@
   .bulk-back-info {
     width: 50%;
     text-align: left;
-    .bulk-back {
-      .back-bulk {
-        background: transparent;
-        padding: 0;
-        margin-left: 6px;
-        position: relative;
-        top: 2px;
-        i {
-          position: relative;
-          top: 1px;
-        }
-      }
+    .bulk-back .back-bulk {
+      background: transparent;
+      padding: 0;
+      margin-left: 6px;
+      position: relative;
+      top: 2px;
+    }
+    .bulk-back .back-bulk i {
+      position: relative;
+      top: 1px;
     }
     .bulk-info {
       padding-left: 53px;

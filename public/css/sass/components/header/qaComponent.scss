@@ -60,40 +60,37 @@
       .icon-warning2 {
         color: colors.$orange600;
       }
-      .ui.basic.buttons {
-        button {
-          font-size: 16px !important;
-          padding: 10px;
-          color: colors.$black !important;
-          font-family: calibri;
-          display: flex;
-          gap: 4px;
-          &.error svg {
-            color: colors.$red400;
-          }
-          &.warning svg {
-            color: colors.$orange200;
-          }
-          &:hover {
-            background: colors.$grey50 !important;
-          }
-          &.mc-bg-gray {
-            background: colors.$grey50 !important;
-          }
-
-        }
-      }
       .qa-lexiqa-info {
         margin-left: 5px;
         font-weight: 700;
-        a {
-          margin: 0 3px;
-          font-weight: 700;
-          text-decoration: underline;
-          &:hover {
-            text-decoration: none;
-          }
+      }
+      .qa-lexiqa-info a {
+        margin: 0 3px;
+        font-weight: 700;
+        text-decoration: underline;
+        &:hover {
+          text-decoration: none;
         }
+      }
+    }
+    .qa-issues-list .ui.basic.buttons button {
+      font-size: 16px !important;
+      padding: 10px;
+      color: colors.$black !important;
+      font-family: calibri;
+      display: flex;
+      gap: 4px;
+      &.error svg {
+        color: colors.$red400;
+      }
+      &.warning svg {
+        color: colors.$orange200;
+      }
+      &:hover {
+        background: colors.$grey50 !important;
+      }
+      &.mc-bg-gray {
+        background: colors.$grey50 !important;
       }
     }
     .qa-issues-navigator {
@@ -105,18 +102,18 @@
         flex-direction: row;
         justify-content: flex-end;
         align-items: center;
-        .qa-arrows {
-          display: flex;
-          justify-content: center;
-          gap: 10px;
-        }
-        .info-navigation-issues {
-          display: flex;
-          align-items: center;
-          b {
-            margin-right: 2px;
-          }
-        }
+      }
+      .qa-actions .qa-arrows {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+    }
+    .qa-actions .info-navigation-issues {
+      display: flex;
+      align-items: center;
+      b {
+        margin-right: 2px;
       }
     }
   }

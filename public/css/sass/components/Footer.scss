@@ -31,10 +31,10 @@
         font-size: 12px;
         text-align: left;
         line-height: 14px;
-        .link {
-          color: colors.$blue500;
-          text-decoration: underline;
-        }
+      }
+      .description .link {
+        color: colors.$blue500;
+        text-decoration: underline;
       }
     }
   }

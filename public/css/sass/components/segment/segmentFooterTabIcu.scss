@@ -95,11 +95,11 @@
       gap: 4px;
       div {
         text-transform: capitalize;
-        span {
-          color: colors.$grey400;
-          font-weight: 400;
-          margin-left: 4px;
-        }
+      }
+      div span {
+        color: colors.$grey400;
+        font-weight: 400;
+        margin-left: 4px;
       }
     }
     .segment-footer-icu-inputs {

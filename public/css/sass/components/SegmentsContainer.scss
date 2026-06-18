@@ -47,11 +47,9 @@
       border-bottom-right-radius: variables.$border-radius-default;
 
       &.editor {
-        .footer {
-          .tab {
-            border-bottom-left-radius: variables.$border-radius-default;
-            border-bottom-right-radius: variables.$border-radius-default;
-          }
+        .footer .tab {
+          border-bottom-left-radius: variables.$border-radius-default;
+          border-bottom-right-radius: variables.$border-radius-default;
         }
       }
     }
