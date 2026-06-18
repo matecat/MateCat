@@ -41,7 +41,7 @@ class QualityReportControllerAPI extends KleinController
 
     protected function createQualityReportModel(): QualityReportModel
     {
-        return new QualityReportModel($this->chunk);
+        return new QualityReportModel($this->chunk, $this->getDatabase());
     }
 
     /**
@@ -106,7 +106,7 @@ class QualityReportControllerAPI extends KleinController
             $step = self::MAX_PER_PAGE;
         }
 
-        $qrSegmentModel = new QualityReportSegmentModel($this->chunk);
+        $qrSegmentModel = new QualityReportSegmentModel($this->chunk, $this->getDatabase());
         $options = ['filter' => $filter];
         $segments_ids = $qrSegmentModel->getSegmentsIdForQR($step, $ref_segment, $where, $options);
 

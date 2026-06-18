@@ -107,7 +107,7 @@ class DownloadQRController extends KleinController
     {
         $data = [];
 
-        $qrSegmentModel = $this->qrSegmentModel ?? new QualityReportSegmentModel($chunk);
+        $qrSegmentModel = $this->qrSegmentModel ?? new QualityReportSegmentModel($chunk, $this->getDatabase());
 
         // categories issues
         $project = $chunk->getProject();

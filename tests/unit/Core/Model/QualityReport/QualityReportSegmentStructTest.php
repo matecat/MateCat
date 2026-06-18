@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Matecat\Core\Model\QualityReport;
 
 use DivisionByZeroError;
+use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
-use Model\Jobs\MetadataDao;
 use Model\QualityReport\QualityReportSegmentStruct;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -319,7 +319,10 @@ class QualityReportSegmentStructTest extends AbstractTest
         $chunk->source = 'en-US';
         $chunk->target = 'it-IT';
 
-        $this->assertSame([], $struct->getLocalWarning($featureSet, $chunk));
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], []);
+
+        $this->assertSame([], $struct->getLocalWarning($featureSet, $chunk, $Filter));
     }
 
     #[Test]
@@ -334,7 +337,10 @@ class QualityReportSegmentStructTest extends AbstractTest
         $chunk->source = 'en-US';
         $chunk->target = 'it-IT';
 
-        $this->assertSame([], $struct->getLocalWarning($featureSet, $chunk));
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], []);
+
+        $this->assertSame([], $struct->getLocalWarning($featureSet, $chunk, $Filter));
     }
 
     #[Test]
@@ -349,16 +355,16 @@ class QualityReportSegmentStructTest extends AbstractTest
         $chunk->source = 'en-US';
         $chunk->target = 'it-IT';
 
-        $this->assertSame([], $struct->getLocalWarning($featureSet, $chunk));
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], []);
+
+        $this->assertSame([], $struct->getLocalWarning($featureSet, $chunk, $Filter));
     }
 
     #[Test]
-    public function GetLocalWarningExecutesFullPathWithInjectedMetadataDao(): void
+    public function GetLocalWarningExecutesFullPathWithInjectedFilter(): void
     {
-        $metadataDao = $this->createStub(MetadataDao::class);
-        $metadataDao->method('getSubfilteringCustomHandlers')->willReturn(null);
-
-        $struct = new QualityReportSegmentStruct([], $metadataDao);
+        $struct = new QualityReportSegmentStruct([]);
         $struct->sid = 1;
         $struct->segment = 'Hello world';
         $struct->translation = 'Ciao mondo';
@@ -372,7 +378,10 @@ class QualityReportSegmentStructTest extends AbstractTest
         $chunk->source = 'en-US';
         $chunk->target = 'it-IT';
 
-        $result = $struct->getLocalWarning($featureSet, $chunk);
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', [], []);
+
+        $result = $struct->getLocalWarning($featureSet, $chunk, $Filter);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('details', $result);
         $this->assertArrayHasKey('total', $result);

@@ -345,7 +345,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        $model = new QualityReportModel($event->chunk);
+        // Dispatch-boundary composition root: feature handlers are invoked reflectively by
+        // FeatureSet::dispatch() with only the event, and the feature object holds no IDatabase.
+        // Obtaining here is intentional until a FeatureSet DB-injection phase lets features carry one;
+        // the event stays a pure notification and must NOT carry an IDatabase handle.
+        $model = new QualityReportModel($event->chunk, Database::obtain());
         $model->resetScore($event->completionEventId);
     }
 

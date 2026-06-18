@@ -6,6 +6,7 @@ namespace Matecat\Core\Model\QualityReport;
 
 use DateMalformedStringException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -94,6 +95,7 @@ class QualityReportModelTest extends AbstractTest
 
         $model = new TestableQualityReportModel(
             $chunk,
+            Database::obtain(),
             $qualityReportDao ?? $this->qualityReportDao,
             $chunkReviewDao ?? $this->chunkReviewDao,
             $feedbackDao ?? $this->feedbackDao,
@@ -169,7 +171,7 @@ class QualityReportModelTest extends AbstractTest
     {
         $project = $this->createProjectStub();
         $chunk = $this->createChunkStub($project);
-        $model = new QualityReportModel($chunk);
+        $model = new QualityReportModel($chunk, Database::obtain());
 
         $this->assertSame($chunk, $model->getChunk());
         $this->assertSame($project, $model->getProject());

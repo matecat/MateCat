@@ -14,7 +14,7 @@ use DateTime;
 use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -36,6 +36,8 @@ class QualityReportModel
      * @var JobStruct
      */
     protected JobStruct $chunk;
+
+    private IDatabase $database;
 
     /** @var array<string, mixed> */
     protected array $quality_report_structure = [];
@@ -67,14 +69,16 @@ class QualityReportModel
 
     public function __construct(
         JobStruct $chunk,
+        IDatabase $database,
         ?QualityReportDao $qualityReportDao = null,
         ?ChunkReviewDao $chunkReviewDao = null,
         ?FeedbackDAO $feedbackDao = null,
     ) {
         $this->chunk = $chunk;
-        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao();
-        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
-        $this->feedbackDao = $feedbackDao ?? new FeedbackDAO();
+        $this->database = $database;
+        $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao($database);
+        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao($database);
+        $this->feedbackDao = $feedbackDao ?? new FeedbackDAO($database);
     }
 
     public function getChunk(): JobStruct
@@ -173,7 +177,7 @@ class QualityReportModel
      */
     protected function getSegmentsForQualityReport(): array
     {
-        return (new QualityReportDao())->getSegmentsForQualityReport($this->chunk);
+        return (new QualityReportDao($this->database))->getSegmentsForQualityReport($this->chunk);
     }
 
     /**
@@ -192,7 +196,7 @@ class QualityReportModel
      */
     protected function updateChunkReview(ChunkReviewStruct $chunkReview, array $options): void
     {
-        (new ChunkReviewDao())->updateStruct($chunkReview, $options);
+        (new ChunkReviewDao($this->database))->updateStruct($chunkReview, $options);
     }
 
     /**
@@ -288,14 +292,14 @@ class QualityReportModel
      */
     protected function getReviewerName(): string
     {
-        $completion_event = (new ChunkCompletionEventDao())->lastCompletionRecord(
+        $completion_event = (new ChunkCompletionEventDao($this->database))->lastCompletionRecord(
             $this->chunk,
             ['is_review' => true]
         );
         $name = '';
 
         if (!empty($completion_event) && isset($completion_event['uid'])) {
-            $userDao = new UserDao(Database::obtain());
+            $userDao = new UserDao($this->database);
             $user = $userDao->getByUid($completion_event['uid']);
             $name = $user?->fullName() ?? '';
         }
