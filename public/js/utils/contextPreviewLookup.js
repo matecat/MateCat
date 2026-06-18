@@ -123,6 +123,11 @@ export class ClientNodepathRegistry {
   }
 }
 
+// Selector for block-level elements that can independently host a segment.
+// Mirrors the set used in contextPreviewUtils.js BLOCK_SELECTOR.
+const BLOCK_SELECTOR =
+  'p, h1, h2, h3, h4, h5, h6, li, td, th, div, title'
+
 export class AemContainerTextMatchStrategy {
   execute(rootContainer, path, normSource) {
     if (!path || !normSource) return null
@@ -132,7 +137,15 @@ export class AemContainerTextMatchStrategy {
       'x-attribute_name_value',
     )
     if (!aemContainer) return null
-    return findElementByTextMatch(aemContainer, normSource)
+    const match = findElementByTextMatch(aemContainer, normSource)
+    if (match) return match
+    // Fall back to the container itself only when it is a leaf-like node
+    // (at most one block descendant). A container with many block children
+    // is a page-level layout node — tagging it causes highlightBySid to wrap
+    // every text node in the subtree in <mark> elements, breaking the preview.
+    // In that case return null so the segment is shown as "not found".
+    if (aemContainer.querySelectorAll(BLOCK_SELECTOR).length > 1) return null
+    return aemContainer
   }
 }
 

@@ -37,6 +37,25 @@ const SHADOW_STYLES = `
     color: #e05c00;
     pointer-events: none;
   }
+  /* Failsafe: suppress any phantom overlay that survives DOM cleanup.
+     Covers two cases:
+     1. role="dialog" skeletons with no translatable text (lightbox/modal templates).
+     2. Fixed/absolute-positioned elements with no content (backdrops, sticky clones,
+        cookie banners) whose position comes from an external stylesheet rather than
+        an inline style — those can't be removed at parse time.
+     :has() is supported in all modern browsers (Chrome 105+, Firefox 121+, Safari 15.4+). */
+  [role="dialog"]:not(:has(p, h1, h2, h3, h4, h5, h6, li, td, th, article, section)),
+  [role="alertdialog"]:not(:has(p, h1, h2, h3, h4, h5, h6, li, td, th, article, section)) {
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+  /* Inline-style overlays that survive the parse-time filter (e.g. position comes from
+     a CSS class) — suppress pointer-events so they never block clicks on content. */
+  [style*="position: fixed"]:not(:has(p, h1, h2, h3, h4, h5, h6, li, td, th, article, section)),
+  [style*="position:fixed"]:not(:has(p, h1, h2, h3, h4, h5, h6, li, td, th, article, section)) {
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
 `
 
 export const LivePreviewPanel = ({panelRef, scrollRef, title, zoomLevel, languageLabel, ...props}) => {

@@ -9,5 +9,5 @@ interface SegmentUpdaterServiceInterface
      */
     public function setAnalysisValue(array $tmData): int;
 
-    public function forceSetSegmentAnalyzed(int $idSegment, int $idJob): bool;
+    public function forceSetSegmentAnalyzed(int $idSegment, int $idJob): int;
 }
