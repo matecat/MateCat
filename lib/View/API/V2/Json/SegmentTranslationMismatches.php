@@ -23,7 +23,7 @@ class SegmentTranslationMismatches
     /** @var array<int, ShapelessConcreteStruct|array<string, mixed>> */
     protected array $data;
     protected int $thereArePropagations;
-    protected ?FeatureSet $featureSet;
+    protected FeatureSet $featureSet;
     private JobStruct $jobStruct;
     private ?MetadataDao $metadataDao;
 
@@ -34,17 +34,13 @@ class SegmentTranslationMismatches
      * @param array<int, ShapelessConcreteStruct|array<string, mixed>> $Translation_mismatches
      * @param JobStruct $jobStruct
      * @param int $thereArePropagations
-     * @param FeatureSet|null $featureSet
+     * @param FeatureSet $featureSet
      * @param MetadataDao|null $metadataDao
-     * @throws Exception
      */
-    public function __construct(array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet = null, MetadataDao $metadataDao = null)
+    public function __construct(array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet, ?MetadataDao $metadataDao = null)
     {
         $this->data = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
-        if ($featureSet == null) {
-            $featureSet = new FeatureSet();
-        }
         $this->featureSet = $featureSet;
         $this->jobStruct = $jobStruct;
         $this->metadataDao = $metadataDao;
@@ -62,7 +58,7 @@ class SegmentTranslationMismatches
             'prop_available' => $this->thereArePropagations
         ];
 
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
+        $featureSet = $this->featureSet;
         $metadataDao = $this->metadataDao ?? new MetadataDao();
 
         $jobId = $this->jobStruct->id ?? throw new RuntimeException('JobStruct::$id must not be null');
