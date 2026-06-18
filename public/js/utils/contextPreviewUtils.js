@@ -360,7 +360,7 @@ export const findSegmentSidsByClick = (
   const matchingSids = []
   const seenSids = new Set()
   for (const seg of segments) {
-    const segText = seg[field]
+    const segText = stripSegmentTags(seg[field])
     if (!segText) continue
     const numSid = Number(seg.sid)
     if (seenSids.has(numSid)) continue
@@ -387,7 +387,7 @@ export const findSegmentSidsByClick = (
  */
 export const stripSegmentTags = (text) => {
   if (!text) return ''
-  return decodeHtmlEntities(
+  const decoded = decodeHtmlEntities(
     removeTagsFromText(
       excludeSomeTagsTransformToText(text, [
         'g',
@@ -397,12 +397,10 @@ export const stripSegmentTags = (text) => {
         'ex',
         'x',
         'ph',
-      ])
-        .replace(/##\$_[^$]+\$##/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim(),
+      ]).replace(/##\$_[^$]+\$##/g, ' '),
     ),
   )
+  return decoded.replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim()
 }
 
 /**
@@ -490,7 +488,7 @@ export const findElementByTextMatch = (container, searchText) => {
 export const tagSegments = (
   container,
   segments,
-  {replaceWithTarget = false, metadataMap = {}} = {},
+  {replaceWithTarget = false, metadataMap = {}, targetDir = null} = {},
 ) => {
   if (!container || !segments || !segments.length) return
 
@@ -692,8 +690,12 @@ export const tagSegments = (
     const map = getSegmentNodeMap(container)
     if (map) {
       map.nodes.forEach((el) => {
-        updateNodeTranslation(el, segments)
+        const result = updateNodeTranslation(el, segments)
         // mismatch silently ignored here — shown via the updateTranslation message handler
+        if (targetDir) {
+          if (result === 'ok') el.dir = targetDir
+          else el.removeAttribute('dir')
+        }
       })
     }
   }
@@ -726,6 +728,40 @@ export const isNodeHidden = (el) => {
  * @param {{metadata?: Array<{meta_key: string, meta_value: string}>, context_url?: string|null}} segment
  * @returns {{context_url: string|null, resname: string|null, restype: string|null, screenshot: string|null}}
  */
+/**
+ * Scans a container for positioned elements (fixed or absolute via any CSS source)
+ * that have no translatable text content and suppresses their pointer-events.
+ *
+ * Must be called AFTER external stylesheets have loaded so that getComputedStyle
+ * reflects class-based positioning (e.g. `.fxModalBox-spaceball { position: absolute }`).
+ *
+ * @param {HTMLElement} container
+ */
+export const suppressClickTraps = (container) => {
+  if (!container) return
+  const CONTENT_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, td, th, article, section'
+  // Defer the getComputedStyle scan so it doesn't block the main thread after
+  // stylesheets have loaded. Inline-style overlays are already handled by CSS
+  // rules in LivePreviewPanel.js (SHADOW_STYLES); this pass catches class-based
+  // positioning (e.g. .fxModalBox-spaceball { position: absolute }), which is
+  // less time-critical since those elements are rare and don't visually block content.
+  const run = () => {
+    container.querySelectorAll('*').forEach((el) => {
+      if (el.getAttribute(SEGMENT_SIDS_ATTR)) return
+      const pos = getComputedStyle(el).position
+      if (pos !== 'fixed' && pos !== 'absolute') return
+      if (el.querySelector(CONTENT_SELECTOR)) return
+      if (el.textContent.trim()) return
+      el.style.pointerEvents = 'none'
+    })
+  }
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(run, {timeout: 2000})
+  } else {
+    setTimeout(run, 0)
+  }
+}
+
 export const extractSegmentContextFields = (segment) => {
   const meta = segment.metadata ?? []
   const find = (key) => meta.find((m) => m.meta_key === key)?.meta_value ?? null

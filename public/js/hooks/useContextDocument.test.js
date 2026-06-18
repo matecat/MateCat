@@ -75,9 +75,7 @@ const parseHtmlContent = (rawHtml, sourceUrl) => {
   doc.querySelectorAll('head link[rel="stylesheet"]').forEach((el) => {
     headHtml += el.outerHTML
   })
-  doc.querySelectorAll('head script[src]').forEach((el) => {
-    headHtml += el.outerHTML
-  })
+  doc.querySelectorAll('script').forEach((el) => el.remove())
   const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
   return headHtml + bodyHtml
 }
@@ -301,22 +299,23 @@ describe('parseHtmlContent', () => {
     expect(result).toContain('<p>Content</p>')
   })
 
-  test('extracts head script[src]', () => {
+  test('strips all script tags', () => {
     const html = `
       <html>
         <head>
           <script src="app.js"></script>
+          <script>console.log('inline')</script>
         </head>
         <body>
           <p>Content</p>
+          <script>document.write('body script')</script>
         </body>
       </html>
     `
 
     const result = parseHtmlContent(html, sourceUrl)
 
-    expect(result).toContain('<script')
-    expect(result).toContain('src=')
+    expect(result).not.toContain('<script')
     expect(result).toContain('<p>Content</p>')
   })
 
@@ -336,7 +335,7 @@ describe('parseHtmlContent', () => {
     const result = parseHtmlContent(html, sourceUrl)
 
     expect(result).toContain('https://example.com/style.css')
-    expect(result).toContain('https://example.com/app.js')
+    expect(result).not.toContain('app.js')
     expect(result).toContain('https://example.com/image.png')
   })
 
@@ -368,7 +367,7 @@ describe('parseHtmlContent', () => {
     expect(result).toContain('<style>body { color: red; }</style>')
   })
 
-  test('ignores script tags without src attribute', () => {
+  test('strips both inline and external script tags', () => {
     const html = `
       <html>
         <head>
@@ -383,9 +382,9 @@ describe('parseHtmlContent', () => {
 
     const result = parseHtmlContent(html, sourceUrl)
 
-    // Only script[src] should be extracted
-    expect(result).toContain('https://example.com/app.js')
     expect(result).not.toContain("console.log('inline');")
+    expect(result).not.toContain('app.js')
+    expect(result).toContain('<p>Content</p>')
   })
 
   test('ignores link tags without rel="stylesheet"', () => {
@@ -452,13 +451,13 @@ describe('parseHtmlContent', () => {
 
     const result = parseHtmlContent(html, sourceUrl)
 
-    // All head resources should be present
+    // Styles and stylesheets are extracted; scripts are stripped
     expect(result).toContain('<style>body { margin: 0; }</style>')
     expect(result).toContain('<style>p { color: blue; }</style>')
     expect(result).toContain('https://example.com/reset.css')
     expect(result).toContain('https://example.com/theme.css')
-    expect(result).toContain('https://example.com/vendor.js')
-    expect(result).toContain('https://example.com/app.js')
+    expect(result).not.toContain('vendor.js')
+    expect(result).not.toContain('app.js')
 
     // Body content should be present
     expect(result).toContain('<h1>Page</h1>')

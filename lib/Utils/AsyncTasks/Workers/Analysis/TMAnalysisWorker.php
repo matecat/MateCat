@@ -32,6 +32,7 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -62,7 +63,7 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct(
         AMQHandler $queueHandler,
@@ -135,7 +136,7 @@ class TMAnalysisWorker extends AbstractWorker
             $matches = $this->matchProcessor->sortMatches($mtResult, $tmMatches);
 
             if (empty($matches)) {
-                $this->_doLog("--- (Worker $this->_workerPid) : No contribution found for this segment.");
+                $this->_doLog("--- (Worker $this->_workerPid) : No contribution found for this segment: " . $params->id_segment);
                 $this->_forceSetSegmentAnalyzed($queueElement);
                 throw new EmptyElementException("--- (Worker $this->_workerPid) : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT);
             }
@@ -288,8 +289,11 @@ class TMAnalysisWorker extends AbstractWorker
             (int)$queueElement->params->id_job
         );
 
-        if (!$segmentSet) {
+        if ($segmentSet === 0) {
+            LoggerFactory::doJsonLog("Segment {$queueElement->params->id_segment} already DONE, skipping force-set side-effects.");
             return;
+        } elseif ($segmentSet === -1) {
+            LoggerFactory::doJsonLog("Segment {$queueElement->params->id_segment} not updated (SKIPPED) pre-translation");
         }
 
         // POINT OF NO RETURN — DB committed
@@ -454,7 +458,7 @@ class TMAnalysisWorker extends AbstractWorker
     ): void {
         // 1. Retry loop for the critical counter increment
         $maxRetries = 5;
-        $delayMs    = 500;
+        $delayMs = 500;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {

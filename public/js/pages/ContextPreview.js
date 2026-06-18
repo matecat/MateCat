@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import {mountPage} from './mountPage'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
-import {findSegmentSidsByClick, tagSegments} from '../utils/contextPreviewUtils'
+import {findSegmentSidsByClick, tagSegments, suppressClickTraps} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconChevronLeft from '../components/icons/IconChevronLeft'
 import IconChevronRight from '../components/icons/IconChevronRight'
@@ -34,6 +34,21 @@ const CONTENT_VIEW_OPTIONS = [
   {id: CONTENT_VIEWS.LIVE_PREVIEW, name: 'HTML'},
   {id: CONTENT_VIEWS.SCREENSHOT, name: 'Screenshot'},
 ]
+
+// RTL primary language subtags supported by Matecat
+const RTL_PRIMARY = new Set([
+  'ar', 'he', 'fa', 'ur', 'dv', 'ps', 'ckb', 'prs', 'ydd', 'shu', 'kas',
+  'rhg', 'sd', 'azb', 'pbt', 'syc', 'tmh', 'ug', 'yi', 'nqo', 'sdh', 'syr',
+])
+
+const isRTLLanguage = (code) => {
+  if (!code) return false
+  try {
+    const dir = new Intl.Locale(code).textInfo?.direction
+    if (dir) return dir === 'rtl'
+  } catch {}
+  return RTL_PRIMARY.has(code.split('-')[0].toLowerCase())
+}
 
 const ContextPreview = () => {
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
@@ -111,12 +126,15 @@ const ContextPreview = () => {
     // no additional action needed here; useContextPreviewMessages updates segments state
   }, [])
 
+  const targetDir = isRTLLanguage(targetCode) ? 'rtl' : 'ltr'
+
   const {segments, currentContextUrl, currentSid} = useContextPreviewMessages({
     onHighlight,
     onTranslationUpdate,
     targetRef,
     showNodeWarning,
     clearNodeWarning,
+    targetDir,
   })
 
   const {htmlContent, loading, error} = useContextDocument(currentContextUrl)
@@ -251,6 +269,8 @@ const ContextPreview = () => {
     ]
 
     if (links.length === 0) {
+      suppressClickTraps(sourceRef.current)
+      suppressClickTraps(targetRef.current)
       setHtmlReady((prev) => prev + 1)
       return
     }
@@ -260,6 +280,8 @@ const ContextPreview = () => {
     const onSettle = () => {
       settled++
       if (!cancelled && settled >= links.length) {
+        suppressClickTraps(sourceRef.current)
+        suppressClickTraps(targetRef.current)
         setHtmlReady((prev) => prev + 1)
       }
     }
@@ -290,6 +312,7 @@ const ContextPreview = () => {
       tagSegments(targetRef.current, mappableSegments, {
         replaceWithTarget: true,
         metadataMap,
+        targetDir,
       })
     }
     if (sourceRef.current) {
