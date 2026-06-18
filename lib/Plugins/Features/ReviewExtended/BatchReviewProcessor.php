@@ -54,7 +54,7 @@ class BatchReviewProcessor
         $this->reviewedWordCountModelFactory = $reviewedWordCountModelFactory
             ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews);
         $this->chunkReviewModelFactory = $chunkReviewModelFactory
-            ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr);
+            ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr, $this->chunkReviewDao->getDatabaseHandler());
     }
 
     /**
@@ -114,7 +114,7 @@ class BatchReviewProcessor
             ];
 
             $chunkReview = $this->chunkReviewDao->createRecord($data);
-            (new ChunkReviewModel($chunkReview))->recountAndUpdatePassFailResult($project);
+            (new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler()))->recountAndUpdatePassFailResult($project);
             $chunkReviews[] = $chunkReview;
 
             LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);

@@ -11,6 +11,7 @@ use Exception;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ModelStruct;
@@ -55,6 +56,7 @@ class DownloadQRControllerTest extends AbstractTest
         $this->reflector->getProperty('response')->setValue($this->controller, $this->createStub(Response::class));
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
         $this->reflector->getProperty('jobDao')->setValue($this->controller, $this->createStub(JobDao::class));
+        $this->reflector->getProperty('database')->setValue($this->controller, $this->createStub(IDatabase::class));
         $this->reflector->getProperty('segmentsPerFile')->setValue($this->controller, 20);
     }
 
@@ -69,7 +71,22 @@ class DownloadQRControllerTest extends AbstractTest
     private function makeChunkStub(?ModelStruct $lqaModel): JobStruct
     {
         $project = $this->createStub(ProjectStruct::class);
-        $project->method('getLqaModel')->willReturn($lqaModel);
+        $project->id_qa_model = $lqaModel !== null ? 1 : null;
+
+        if ($lqaModel !== null) {
+            $stmtStub = $this->createStub(\PDOStatement::class);
+            $stmtStub->queryString = '';
+            $stmtStub->method('execute')->willReturn(true);
+            $stmtStub->method('fetchAll')->willReturn([$lqaModel]);
+
+            $pdoStub = $this->createStub(\PDO::class);
+            $pdoStub->method('prepare')->willReturn($stmtStub);
+
+            $dbStub = $this->createStub(IDatabase::class);
+            $dbStub->method('getConnection')->willReturn($pdoStub);
+
+            $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
+        }
 
         $chunk = $this->createStub(JobStruct::class);
         $chunk->method('getProject')->willReturn($project);

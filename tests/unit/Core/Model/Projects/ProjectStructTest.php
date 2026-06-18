@@ -8,7 +8,6 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
-use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Constants\ProjectStatus;
 
@@ -39,27 +38,6 @@ class ProjectStructTest extends AbstractTest
         $project->status_analysis = ProjectStatus::STATUS_BUSY;
 
         $this->assertFalse($project->analysisComplete());
-    }
-
-    #[Test]
-    public function getJobsCountReturnsZeroWhenNoJobs(): void
-    {
-        $project = new ProjectStructTestDouble();
-        $project->jobs = [];
-
-        $this->assertSame(0, $project->getJobsCount());
-    }
-
-    #[Test]
-    public function getJobsCountReturnsCountWhenJobsExist(): void
-    {
-        $jobOne = new JobStruct();
-        $jobTwo = new JobStruct();
-
-        $project = new ProjectStructTestDouble();
-        $project->jobs = [$jobOne, $jobTwo];
-
-        $this->assertSame(2, $project->getJobsCount());
     }
 
     #[Test]
@@ -144,15 +122,6 @@ class ProjectStructTest extends AbstractTest
     }
 
     #[Test]
-    public function getLqaModelReturnsNullWhenIdQaModelIsNull(): void
-    {
-        $project = new ProjectStruct();
-        $project->id_qa_model = null;
-
-        $this->assertNull($project->getLqaModel());
-    }
-
-    #[Test]
     public function getJobsReturnsArrayWhenProjectIdIsSet(): void
     {
         $project = new ProjectStruct();
@@ -188,50 +157,6 @@ class ProjectStructTest extends AbstractTest
         $project->id = 1;
 
         $this->assertIsArray($project->getChunks());
-    }
-
-    #[Test]
-    public function getRemoteFileServiceNameReturnsStructOrNullWhenProjectIdIsSet(): void
-    {
-        $project = new ProjectStruct();
-        $project->id = 1;
-
-        $result = $project->getRemoteFileServiceName();
-
-        $this->assertTrue($result === null || $result instanceof RemoteFileServiceNameStruct);
-    }
-
-    #[Test]
-    public function getTeamReturnsStructOrNullWhenIdTeamIsSet(): void
-    {
-        $project = new ProjectStruct();
-        $project->id_team = 1;
-
-        $result = $project->getTeam();
-
-        $this->assertTrue($result === null || is_object($result));
-    }
-
-    #[Test]
-    public function getRemoteFileServiceNameReturnsStructFromCacheablePath(): void
-    {
-        $service = new RemoteFileServiceNameStruct();
-        $service->id_project = 100;
-        $service->service = 'gdrive';
-
-        $project = new ProjectStructTestDouble();
-        $project->setCachedResult('Model\\Projects\\ProjectStruct::getRemoteFileServiceName', $service);
-
-        $this->assertSame($service, $project->getRemoteFileServiceName());
-    }
-
-    #[Test]
-    public function getTeamReturnsNullWhenIdTeamIsNull(): void
-    {
-        $project = new ProjectStruct();
-        $project->id_team = null;
-
-        $this->assertNull($project->getTeam());
     }
 
     #[Test]

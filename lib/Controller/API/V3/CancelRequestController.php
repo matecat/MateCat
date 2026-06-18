@@ -17,6 +17,7 @@ use Exception;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
 use Model\Segments\SegmentDisabledService;
+use Model\Teams\TeamDao;
 use Model\Translations\SegmentTranslationDao;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\Utils;
@@ -28,11 +29,13 @@ class CancelRequestController extends KleinController
 
     protected SegmentDisabledService $segmentDisabledService;
     protected SegmentTranslationDao $segmentTranslationDao;
+    protected TeamDao $teamDao;
 
     protected function initDependencies(): void
     {
         $this->segmentDisabledService = new SegmentDisabledService();
         $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
+        $this->teamDao = new TeamDao($this->getDatabase());
     }
 
     protected function registerValidators(): void
@@ -142,7 +145,8 @@ class CancelRequestController extends KleinController
         }
 
         // 4. check if user is part of the team
-        $team = $job->getProject()->getTeam();
+        $project = $job->getProject();
+        $team = $project->id_team !== null ? $this->teamDao->findById($project->id_team) : null;
         if (empty($team)) {
             throw new NotFoundException('Team not found');
         }

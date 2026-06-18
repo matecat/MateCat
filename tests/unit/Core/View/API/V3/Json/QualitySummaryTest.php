@@ -3,6 +3,7 @@
 namespace Matecat\Core\View\API\V3\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
@@ -98,7 +99,7 @@ class QualitySummaryTest extends AbstractTest
 
         $this->project = new ProjectStruct();
 
-        $this->sut = new TestableQualitySummary($this->chunk, $this->project);
+        $this->sut = new TestableQualitySummary($this->chunk, $this->project, $this->createStub(IDatabase::class));
 
         $qrDao = $this->createStub(QualityReportDao::class);
         $qrDao->method('getReviseIssuesByChunk')->willReturn([]);

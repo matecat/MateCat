@@ -180,7 +180,7 @@ class Project
             'features' => implode(",", $featureSet->getCodes()),
             'is_cancelled' => (in_array(JobStatus::STATUS_CANCELLED, $jobStatuses)),
             'is_archived' => (in_array(JobStatus::STATUS_ARCHIVED, $jobStatuses)),
-            'remote_file_service' => $project->getRemoteFileServiceName(),
+            'remote_file_service' => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
             'due_date' => Utils::api_timestamp($project->due_date),
             'project_info' => (null !== $projectInfo) ? $projectInfo->value : null,
         ];

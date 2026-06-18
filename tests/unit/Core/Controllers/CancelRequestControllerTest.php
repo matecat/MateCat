@@ -12,6 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDisabledService;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
@@ -396,7 +397,7 @@ class CancelRequestControllerTest extends AbstractTest
         $this->expectExceptionMessage('Team not found');
 
         $projectStruct = $this->createStub(ProjectStruct::class);
-        $projectStruct->method('getTeam')->willReturn(null);
+        $projectStruct->id_team = null;
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
@@ -428,8 +429,11 @@ class CancelRequestControllerTest extends AbstractTest
         $teamStruct->created_by = 999;
         $teamStruct->method('hasUser')->willReturn(false);
 
+        $teamDao = $this->createStub(TeamDao::class);
+        $teamDao->method('findById')->willReturn($teamStruct);
+
         $projectStruct = $this->createStub(ProjectStruct::class);
-        $projectStruct->method('getTeam')->willReturn($teamStruct);
+        $projectStruct->id_team = 1;
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
@@ -445,6 +449,7 @@ class CancelRequestControllerTest extends AbstractTest
             jobReturn: $jobStruct,
             segmentReturn: $segmentTranslation,
             user: $user,
+            teamDao: $teamDao,
         );
 
         $this->request->method('param')->willReturnMap([
@@ -466,8 +471,11 @@ class CancelRequestControllerTest extends AbstractTest
         $teamStruct->created_by = 999;
         $teamStruct->method('hasUser')->willReturn(true);
 
+        $teamDao = $this->createStub(TeamDao::class);
+        $teamDao->method('findById')->willReturn($teamStruct);
+
         $projectStruct = $this->createStub(ProjectStruct::class);
-        $projectStruct->method('getTeam')->willReturn($teamStruct);
+        $projectStruct->id_team = 1;
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
@@ -483,6 +491,7 @@ class CancelRequestControllerTest extends AbstractTest
             jobReturn: $jobStruct,
             segmentReturn: $segmentTranslation,
             user: $user,
+            teamDao: $teamDao,
         );
 
         $this->request->method('param')->willReturnMap([
@@ -606,8 +615,11 @@ class CancelRequestControllerTest extends AbstractTest
         $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
 
+        $teamDao = $this->createStub(TeamDao::class);
+        $teamDao->method('findById')->willReturn($teamStruct);
+
         $projectStruct = $this->createStub(ProjectStruct::class);
-        $projectStruct->method('getTeam')->willReturn($teamStruct);
+        $projectStruct->id_team = 1;
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
@@ -623,6 +635,7 @@ class CancelRequestControllerTest extends AbstractTest
             jobReturn: $jobStruct,
             segmentReturn: $segmentTranslation,
             user: $user,
+            teamDao: $teamDao,
         );
 
         $this->request->method('param')->willReturnMap([
@@ -730,8 +743,11 @@ class CancelRequestControllerTest extends AbstractTest
         $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
 
+        $teamDao = $this->createStub(TeamDao::class);
+        $teamDao->method('findById')->willReturn($teamStruct);
+
         $projectStruct = $this->createStub(ProjectStruct::class);
-        $projectStruct->method('getTeam')->willReturn($teamStruct);
+        $projectStruct->id_team = 1;
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
@@ -747,6 +763,7 @@ class CancelRequestControllerTest extends AbstractTest
             jobReturn: $jobStruct,
             segmentReturn: $segmentTranslation,
             user: $user,
+            teamDao: $teamDao,
         );
     }
 
@@ -756,8 +773,11 @@ class CancelRequestControllerTest extends AbstractTest
         $teamStruct = $this->createStub(TeamStruct::class);
         $teamStruct->created_by = 123;
 
+        $teamDao = $this->createStub(TeamDao::class);
+        $teamDao->method('findById')->willReturn($teamStruct);
+
         $projectStruct = $this->createStub(ProjectStruct::class);
-        $projectStruct->method('getTeam')->willReturn($teamStruct);
+        $projectStruct->id_team = 1;
 
         $jobStruct = $this->createStub(JobStruct::class);
         $jobStruct->method('getProject')->willReturn($projectStruct);
@@ -774,6 +794,7 @@ class CancelRequestControllerTest extends AbstractTest
             segmentReturn: $segmentTranslation,
             user: $user,
             segmentDisabledService: $segmentDisabledService,
+            teamDao: $teamDao,
         );
     }
 
@@ -784,6 +805,7 @@ class CancelRequestControllerTest extends AbstractTest
         ?Response $rateLimitResponseIp = null,
         ?Response $rateLimitResponseEmail = null,
         ?SegmentDisabledService $segmentDisabledService = null,
+        ?TeamDao $teamDao = null,
     ): CancelRequestController {
         $controller = $this->getMockBuilder(CancelRequestController::class)
             ->disableOriginalConstructor()
@@ -824,6 +846,13 @@ class CancelRequestControllerTest extends AbstractTest
             $controller,
             $segmentDisabledService ?? $this->createStub(SegmentDisabledService::class)
         );
+
+        // Inject TeamDao
+        if ($teamDao !== null) {
+            $ref->getProperty('teamDao')->setValue($controller, $teamDao);
+        } else {
+            $ref->getProperty('teamDao')->setValue($controller, $this->createStub(TeamDao::class));
+        }
 
         // Rate limit mocking — order matches performChecks: [$userIp, $userEmail]
         $callIndex = 0;

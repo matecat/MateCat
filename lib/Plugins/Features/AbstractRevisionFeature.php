@@ -282,7 +282,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         foreach ($reviews as $review) {
-            $model = new ChunkReviewModel($review);
+            $model = new ChunkReviewModel($review, $this->getDatabase());
             $model->recountAndUpdatePassFailResult($project);
         }
     }
@@ -334,7 +334,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         foreach ($reviews as $review) {
-            $model = new ChunkReviewModel($review);
+            $model = new ChunkReviewModel($review, $this->getDatabase());
             $model->recountAndUpdatePassFailResult($project);
         }
     }
@@ -532,7 +532,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     public function getChunkReviewModel(ChunkReviewStruct $chunkReviewStruct): ChunkReviewModel
     {
-        return new ChunkReviewModel($chunkReviewStruct);
+        return new ChunkReviewModel($chunkReviewStruct, $this->getDatabase());
     }
 
 }

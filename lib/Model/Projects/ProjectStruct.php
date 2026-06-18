@@ -7,18 +7,10 @@ use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\LQA\ModelDao;
-use Model\LQA\ModelStruct;
-use Model\RemoteFiles\RemoteFileServiceNameStruct;
-use Model\Teams\TeamDao;
-use Model\Teams\TeamStruct;
-use PDOException;
-use ReflectionException;
 use Utils\Constants\ProjectStatus;
 
 /**
@@ -79,33 +71,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      *
      * @throws DomainException
      */
-    public function getJobsCount(): int
-    {
-        if (empty($this->getJobs())) {
-            return 0;
-        }
 
-        return count($this->getJobs());
-    }
-
-     /**
-      * Proxy to set metadata for the current project
-      *
-      * @param string $key
-      * @param string $value
-      *
-      * @return bool
-      * @throws DomainException
-      * @throws ReflectionException
-      * @throws PDOException
-      */
-     public function setMetadata(string $key, string $value): bool
-    {
-        $id = $this->id ?? throw new DomainException("Project ID must not be null");
-        $dao = new MetadataDao(Database::obtain());
-
-        return $dao->set($id, $key, $value);
-    }
 
     /**
      *
@@ -159,35 +125,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         });
     }
 
-    /**
-     * @return ?RemoteFileServiceNameStruct
-     */
-    public function getRemoteFileServiceName(): ?RemoteFileServiceNameStruct
-    {
-        return $this->cachable(__METHOD__, function () {
-            $dao = new ProjectDao();
 
-            $projectId = $this->id !== null ? [$this->id] : [];
-
-            /** @var RemoteFileServiceNameStruct[] */
-            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName($projectId)[0] ?? null;
-        });
-    }
-
-     /**
-      * @return null|TeamStruct
-      * @throws ReflectionException
-      * @throws Exception
-      */
-     public function getTeam(): ?TeamStruct
-    {
-        if (is_null($this->id_team)) {
-            return null;
-        }
-        $dao = new TeamDao();
-
-        return $dao->fetchById($this->id_team, TeamStruct::class);
-    }
 
     /**
      * @param $feature_code
@@ -252,22 +190,6 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     public function hasFeature(string $feature_code): bool
     {
         return in_array($feature_code, $this->getFeaturesSet()->getCodes());
-    }
-
-    /**
-     * @param int $ttl
-     *
-     * @return ?ModelStruct
-     */
-    public function getLqaModel(int $ttl = 86400): ?ModelStruct
-    {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
-            if ($this->id_qa_model === null) {
-                return null;
-            }
-
-            return (new ModelDao())->fetchById($this->id_qa_model, ModelStruct::class, $ttl ?: null);
-        });
     }
 
 

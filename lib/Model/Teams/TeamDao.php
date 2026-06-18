@@ -47,6 +47,16 @@ class TeamDao extends AbstractDao
     ";
 
     /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function findById(int $id): ?TeamStruct
+    {
+        /** @var ?TeamStruct */
+        return $this->fetchById($id, TeamStruct::class);
+    }
+
+    /**
      * Delete a team
      *
      * @param TeamStruct $teamStruct

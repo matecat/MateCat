@@ -59,6 +59,7 @@ class BatchReviewProcessorTest extends AbstractTest
         [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
 
         $this->chunkReviewDaoStub = $this->createStub(ChunkReviewDao::class);
+        $this->chunkReviewDaoStub->method('getDatabaseHandler')->willReturn($this->dbStub);
 
         $featureSet = $this->createStub(FeatureSet::class);
         $featureSet->method('getFeaturesStructs')->willReturn([
@@ -183,6 +184,7 @@ class BatchReviewProcessorTest extends AbstractTest
         $createdReview->method('getChunk')->willReturn($this->chunk);
 
         $daoMock = $this->createMock(ChunkReviewDao::class);
+        $daoMock->method('getDatabaseHandler')->willReturn($this->dbStub);
         $daoMock->method('findChunkReviews')->willReturn([]);
         $daoMock->expects($this->once())
             ->method('createRecord')

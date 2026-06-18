@@ -176,7 +176,7 @@ class Chunk extends \View\API\V2\Json\Chunk
      */
     protected function renderQualitySummary(JobStruct $chunk, ProjectStruct $project, array $chunkReviewsList): array
     {
-        return (new QualitySummary($chunk, $project))->render($chunkReviewsList);
+        return (new QualitySummary($chunk, $project, $this->jobDao->getDatabaseHandler()))->render($chunkReviewsList);
     }
 
     /**

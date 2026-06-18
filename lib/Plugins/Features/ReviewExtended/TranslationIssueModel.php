@@ -232,7 +232,7 @@ class TranslationIssueModel
 
     protected function createChunkReviewModel(ChunkReviewStruct $chunkReview): ChunkReviewModel
     {
-        return new ChunkReviewModel($chunkReview);
+        return new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler());
     }
 
     /**

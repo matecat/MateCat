@@ -16,6 +16,7 @@ use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -328,7 +329,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
-        $team = $job->getProject()->getTeam();
+        $project = $job->getProject();
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if ($team === null || $team->id === null) {
             throw new AuthorizationError( "Team not found. Not Authorized", 401 );

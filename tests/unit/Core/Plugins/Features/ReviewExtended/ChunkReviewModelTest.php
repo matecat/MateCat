@@ -76,7 +76,7 @@ class ChunkReviewModelTest extends AbstractTest
         [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
 
         $this->nullLqaProjectStub = $this->createStub(ProjectStruct::class);
-        $this->nullLqaProjectStub->method('getLqaModel')->willReturn(null);
+        $this->nullLqaProjectStub->id_qa_model = null;
 
         $this->jobStruct = new StubJobStruct([
             'id'       => 1,
@@ -110,7 +110,7 @@ class ChunkReviewModelTest extends AbstractTest
     #[Test]
     public function constructorSetsChunkFromChunkReview(): void
     {
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame($this->jobStruct, $model->getChunk());
     }
 
@@ -122,7 +122,7 @@ class ChunkReviewModelTest extends AbstractTest
     public function getScoreReturnsZeroWhenReviewedWordsCountIsZero(): void
     {
         $this->chunkReviewStruct->reviewed_words_count = 0;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame(0.0, $model->getScore());
     }
 
@@ -132,7 +132,7 @@ class ChunkReviewModelTest extends AbstractTest
         // 5 penalty / 100 words * 1000 = 50.0
         $this->chunkReviewStruct->penalty_points       = 5.0;
         $this->chunkReviewStruct->reviewed_words_count = 100;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertEqualsWithDelta(50.0, $model->getScore(), 0.0001);
     }
 
@@ -141,7 +141,7 @@ class ChunkReviewModelTest extends AbstractTest
     {
         $this->chunkReviewStruct->penalty_points       = 0.0;
         $this->chunkReviewStruct->reviewed_words_count = 200;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame(0.0, $model->getScore());
     }
 
@@ -153,7 +153,7 @@ class ChunkReviewModelTest extends AbstractTest
     public function getPenaltyPointsReturnsStructValue(): void
     {
         $this->chunkReviewStruct->penalty_points = 12.5;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame(12.5, $model->getPenaltyPoints());
     }
 
@@ -161,7 +161,7 @@ class ChunkReviewModelTest extends AbstractTest
     public function getPenaltyPointsReturnsNullWhenNull(): void
     {
         $this->chunkReviewStruct->penalty_points = null;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertNull($model->getPenaltyPoints());
     }
 
@@ -173,7 +173,7 @@ class ChunkReviewModelTest extends AbstractTest
     public function getReviewedWordsCountReturnsStructValue(): void
     {
         $this->chunkReviewStruct->reviewed_words_count = 250;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame(250, $model->getReviewedWordsCount());
     }
 
@@ -194,7 +194,7 @@ class ChunkReviewModelTest extends AbstractTest
         ]);
 
         $this->chunkReviewStruct->source_page = 2;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame(8, $model->getQALimit($lqaModel));
     }
 
@@ -211,7 +211,7 @@ class ChunkReviewModelTest extends AbstractTest
         ]);
 
         $this->chunkReviewStruct->source_page = 4;
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $this->assertSame(5, $model->getQALimit($lqaModel));
     }
 
@@ -226,7 +226,7 @@ class ChunkReviewModelTest extends AbstractTest
 
         $projectStub = $this->createStub(ProjectStruct::class);
         $projectStub->method('getFeaturesSet')->willReturn($featureSetStub);
-        $projectStub->method('getLqaModel')->willReturn(null);
+        $projectStub->id_qa_model = null;
 
         return $projectStub;
     }
@@ -238,7 +238,7 @@ class ChunkReviewModelTest extends AbstractTest
 
         $projectStub = $this->buildProjectStubWithNullLqa();
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->addPenaltyPoints(3.7, $projectStub);
         $this->assertTrue(true);
     }
@@ -250,7 +250,7 @@ class ChunkReviewModelTest extends AbstractTest
 
         $projectStub = $this->buildProjectStubWithNullLqa();
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->subtractPenaltyPoints(2.5, $projectStub);
         $this->assertTrue(true);
     }
@@ -262,7 +262,7 @@ class ChunkReviewModelTest extends AbstractTest
 
         $projectStub = $this->buildProjectStubWithNullLqa();
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->updateChunkReviewCountersAndPassFail(7.9, 10, 500, $projectStub);
         $this->assertTrue(true);
     }
@@ -277,9 +277,9 @@ class ChunkReviewModelTest extends AbstractTest
 
         $projectStub = $this->createStub(ProjectStruct::class);
         $projectStub->method('getFeaturesSet')->willReturn($featureSetStub);
-        $projectStub->method('getLqaModel')->willReturn(null);
+        $projectStub->id_qa_model = null;
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $projectStub);
     }
 
@@ -297,7 +297,7 @@ class ChunkReviewModelTest extends AbstractTest
 
         $projectStub = $this->buildProjectStubWithNullLqa();
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->recountAndUpdatePassFailResult($projectStub);
 
         $this->assertTrue($this->chunkReviewStruct->is_pass);
@@ -306,11 +306,6 @@ class ChunkReviewModelTest extends AbstractTest
     #[Test]
     public function recountAndUpdatePassFailResultWithLqaModelSetsIsPassWhenScoreBelowLimit(): void
     {
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('rowCount')->willReturn(1);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-        $this->stmtStub->method('fetch')->willReturn([0 => null]);
-
         // After DAO calls, penalty_points=0, reviewed_words_count=0 → score=0 ≤ limit=8 → is_pass=true
         $lqaModel = new ModelStruct([
             'pass_options' => json_encode(['limit' => [8, 5]]),
@@ -320,14 +315,19 @@ class ChunkReviewModelTest extends AbstractTest
             'hash'         => 'abc',
         ]);
 
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
+        $this->stmtStub->method('fetchAll')->willReturnOnConsecutiveCalls([$lqaModel], [], [], []);
+        $this->stmtStub->method('fetch')->willReturn([0 => null]);
+
         $featureSetStub = $this->createStub(FeatureSet::class);
         $featureSetStub->method('dispatch')->willReturnArgument(0);
 
         $projectStub = $this->createStub(ProjectStruct::class);
         $projectStub->method('getFeaturesSet')->willReturn($featureSetStub);
-        $projectStub->method('getLqaModel')->willReturn($lqaModel);
+        $projectStub->id_qa_model = 1;
 
-        $model = new ChunkReviewModel($this->chunkReviewStruct);
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
         $model->recountAndUpdatePassFailResult($projectStub);
 
         $this->assertTrue($this->chunkReviewStruct->is_pass);

@@ -428,7 +428,7 @@ class ChunkReviewDaoTest extends AbstractTest
     public function passFailCountsAtomicUpdateReturnsEarlyWhenLqaModelIsNull(): void
     {
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getLqaModel')->willReturn(null);
+        $projectStub->id_qa_model = null;
 
         $chunkStub = $this->createStub(JobStruct::class);
         $chunkStub->method('getProject')->willReturn($projectStub);
@@ -466,7 +466,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([10]);
 
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getLqaModel')->willReturn($lqaModel);
+        $projectStub->id_qa_model = 1;
 
         $chunkStub = $this->createStub(JobStruct::class);
         $chunkStub->method('getProject')->willReturn($projectStub);
@@ -480,6 +480,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview->review_password = 'rp';
 
         $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
 
         $dao = new ChunkReviewDao($this->dbStub);
         $dao->passFailCountsAtomicUpdate(99, [
@@ -499,7 +500,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([5, 8]);
 
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getLqaModel')->willReturn($lqaModel);
+        $projectStub->id_qa_model = 1;
 
         $chunkStub = $this->createStub(JobStruct::class);
         $chunkStub->method('getProject')->willReturn($projectStub);
@@ -513,6 +514,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview->review_password = 'rrp';
 
         $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
 
         $dao = new ChunkReviewDao($this->dbStub);
         $dao->passFailCountsAtomicUpdate(100, [

@@ -601,7 +601,8 @@ class ChunkReviewDao extends AbstractDao
     public function passFailCountsAtomicUpdate(int $chunkReviewID, array $data): void
     {
         $chunkReview = $data['chunkReview'];
-        $lqaModel = $chunkReview->getChunk()->getProject()->getLqaModel();
+        $project = $chunkReview->getChunk()->getProject();
+        $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
         if ($lqaModel === null) {
             return;
         }

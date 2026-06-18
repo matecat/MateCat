@@ -21,16 +21,6 @@ class ProjectStructNullIdGuardTest extends AbstractTest
     }
 
     #[Test]
-    public function setMetadata_throws_when_id_is_null(): void
-    {
-        $struct = new ProjectStruct();
-        $struct->id = null;
-
-        $this->expectException(DomainException::class);
-        $struct->setMetadata('key', 'value');
-    }
-
-    #[Test]
     public function getMetadataValue_throws_when_id_is_null(): void
     {
         $struct = new ProjectStruct();

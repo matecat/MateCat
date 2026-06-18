@@ -12,10 +12,12 @@ namespace View\API\V3\Json;
 
 use DomainException;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
+use Model\LQA\ModelDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportDao;
 use Model\ReviseFeedback\FeedbackDAO;
@@ -36,17 +38,18 @@ class QualitySummary
      * @var ProjectStruct
      */
     protected ProjectStruct $project;
+    protected IDatabase $database;
 
     /**
-     * QualitySummary constructor.
-     *
      * @param JobStruct $chunk
      * @param ProjectStruct $project
+     * @param IDatabase $database
      */
-    public function __construct(JobStruct $chunk, ProjectStruct $project)
+    public function __construct(JobStruct $chunk, ProjectStruct $project, IDatabase $database)
     {
         $this->chunk = $chunk;
         $this->project = $project;
+        $this->database = $database;
     }
 
     /**
@@ -235,7 +238,7 @@ class QualitySummary
         $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
         $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
 
-        $model = $project->getLqaModel();
+        $model = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
         $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
 
         if ($model) {

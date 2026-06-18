@@ -14,6 +14,7 @@ use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Tools\CatUtils;
@@ -160,7 +161,7 @@ class ChangePasswordController extends KleinController
     private function checkUserPermissions(ProjectStruct $project, UserStruct $user): void
     {
         // check if user is belongs to the project team
-        $team = $project->getTeam();
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
         if ($team === null) {
             throw new Exception('Project has no team', 403);
         }

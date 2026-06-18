@@ -3,8 +3,10 @@
 namespace Model\LQA;
 
 use DomainException;
+use Exception;
 use Model\DataAccess\AbstractDao;
 use PDOException;
+use ReflectionException;
 use TypeError;
 
 class ModelDao extends AbstractDao
@@ -12,6 +14,16 @@ class ModelDao extends AbstractDao
     const string TABLE = "qa_models";
 
     protected static array $auto_increment_field = ['id'];
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function findById(int $id, ?int $ttl = null): ?ModelStruct
+    {
+        /** @var ?ModelStruct */
+        return $this->fetchById($id, ModelStruct::class, $ttl);
+    }
 
     /**
      * @param array{

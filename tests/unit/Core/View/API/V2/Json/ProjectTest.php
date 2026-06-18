@@ -146,7 +146,7 @@ class ProjectTest extends AbstractTest
      *   3. new Status(...)            — immediately calls ProjectDao::findById()
      *
      * We override the Status instantiation via a testable subclass and
-     * stub getFeaturesSet() / getJobs() / getRemoteFileServiceName() on a
+     * stub getFeaturesSet() / getJobs() on a
      * ProjectStruct stub. This exercises the full renderItem() body except
      * the Status::fetchData() call.
      */
@@ -181,10 +181,12 @@ class ProjectTest extends AbstractTest
         $project->due_date            = null;
         $project->method('getFeaturesSet')->willReturn($featureSet);
         $project->method('getJobs')->willReturn([]);
-        $project->method('getRemoteFileServiceName')->willReturn(null);
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('setCacheTTL')->willReturnSelf();
+        $projectDao->method('getRemoteFileServiceName')->willReturn([]);
 
         // Subclass overrides buildAnalysisStatus() to avoid the hardcoded ProjectDao call
-        $view = new class([], null, $metadataDao) extends Project {
+        $view = new class([], null, $metadataDao, $projectDao) extends Project {
             public mixed $analysisMockOverride = null;
 
             protected function buildAnalysisStatus(array $projectData, \Model\FeaturesBase\FeatureSet $featureSet): \Model\Analysis\AbstractStatus
@@ -205,6 +207,8 @@ class ProjectTest extends AbstractTest
 
                 $jobStatuses = [];
 
+                $this->projectDao ??= new \Model\Projects\ProjectDao();
+
                 return [
                     'id'                   => (int)$project->id,
                     'password'             => $project->password,
@@ -222,7 +226,7 @@ class ProjectTest extends AbstractTest
                     'features'             => implode(",", $featureSet->getCodes()),
                     'is_cancelled'         => in_array(\Utils\Constants\JobStatus::STATUS_CANCELLED, $jobStatuses),
                     'is_archived'          => in_array(\Utils\Constants\JobStatus::STATUS_ARCHIVED, $jobStatuses),
-                    'remote_file_service'  => $project->getRemoteFileServiceName(),
+                    'remote_file_service'  => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
                     'due_date'             => \Utils\Tools\Utils::api_timestamp($project->due_date),
                     'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
                 ];
@@ -296,9 +300,11 @@ class ProjectTest extends AbstractTest
         $project->due_date    = null;
         $project->method('getFeaturesSet')->willReturn($featureSet);
         $project->method('getJobs')->willReturn([]);
-        $project->method('getRemoteFileServiceName')->willReturn(null);
+        $projectDao2 = $this->createStub(ProjectDao::class);
+        $projectDao2->method('setCacheTTL')->willReturnSelf();
+        $projectDao2->method('getRemoteFileServiceName')->willReturn([]);
 
-        $view = new class([], null, $metadataDao) extends Project {
+        $view = new class([], null, $metadataDao, $projectDao2) extends Project {
             public mixed $analysisMockOverride = null;
 
             protected function buildAnalysisStatus(array $projectData, \Model\FeaturesBase\FeatureSet $featureSet): \Model\Analysis\AbstractStatus
@@ -319,6 +325,8 @@ class ProjectTest extends AbstractTest
 
                 $jobStatuses = [];
 
+                $this->projectDao ??= new \Model\Projects\ProjectDao();
+
                 return [
                     'id'                   => (int)$project->id,
                     'password'             => $project->password,
@@ -336,7 +344,7 @@ class ProjectTest extends AbstractTest
                     'features'             => implode(",", $featureSet->getCodes()),
                     'is_cancelled'         => in_array(\Utils\Constants\JobStatus::STATUS_CANCELLED, $jobStatuses),
                     'is_archived'          => in_array(\Utils\Constants\JobStatus::STATUS_ARCHIVED, $jobStatuses),
-                    'remote_file_service'  => $project->getRemoteFileServiceName(),
+                    'remote_file_service'  => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
                     'due_date'             => \Utils\Tools\Utils::api_timestamp($project->due_date),
                     'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
                 ];

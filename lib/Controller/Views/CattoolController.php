@@ -27,10 +27,12 @@ use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Users\UserDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -163,7 +165,8 @@ class CattoolController extends BaseKleinViewController
             $this->notFound();
         }
 
-        $model = $chunkStruct->getProject()->getLqaModel();
+        $project = $chunkStruct->getProject();
+        $model = $project->id_qa_model !== null ? (new ModelDao($this->getDatabase()))->findById($project->id_qa_model) : null;
         $jobsMetadataDao = new MetadataDao($this->getDatabase());
         $public_tm_penalty = $jobsMetadataDao->get($chunkId, $chunkPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
 
@@ -368,7 +371,7 @@ class CattoolController extends BaseKleinViewController
         $ownerMail = AppConfig::$SUPPORT_MAIL;
         $jobOwnerIsMe = false;
 
-        $team = $project->getTeam();
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if (!empty($team)) {
             $teamModel = new TeamModel($team);
