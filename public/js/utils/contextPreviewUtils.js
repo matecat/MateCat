@@ -488,7 +488,7 @@ export const findElementByTextMatch = (container, searchText) => {
 export const tagSegments = (
   container,
   segments,
-  {replaceWithTarget = false, metadataMap = {}} = {},
+  {replaceWithTarget = false, metadataMap = {}, targetDir = null} = {},
 ) => {
   if (!container || !segments || !segments.length) return
 
@@ -690,8 +690,12 @@ export const tagSegments = (
     const map = getSegmentNodeMap(container)
     if (map) {
       map.nodes.forEach((el) => {
-        updateNodeTranslation(el, segments)
+        const result = updateNodeTranslation(el, segments)
         // mismatch silently ignored here — shown via the updateTranslation message handler
+        if (targetDir) {
+          if (result === 'ok') el.dir = targetDir
+          else el.removeAttribute('dir')
+        }
       })
     }
   }

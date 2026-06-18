@@ -35,6 +35,21 @@ const CONTENT_VIEW_OPTIONS = [
   {id: CONTENT_VIEWS.SCREENSHOT, name: 'Screenshot'},
 ]
 
+// RTL primary language subtags supported by Matecat
+const RTL_PRIMARY = new Set([
+  'ar', 'he', 'fa', 'ur', 'dv', 'ps', 'ckb', 'prs', 'ydd', 'shu', 'kas',
+  'rhg', 'sd', 'azb', 'pbt', 'syc', 'tmh', 'ug', 'yi', 'nqo', 'sdh', 'syr',
+])
+
+const isRTLLanguage = (code) => {
+  if (!code) return false
+  try {
+    const dir = new Intl.Locale(code).textInfo?.direction
+    if (dir) return dir === 'rtl'
+  } catch {}
+  return RTL_PRIMARY.has(code.split('-')[0].toLowerCase())
+}
+
 const ContextPreview = () => {
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
   const [contentView, setContentView] = useState(CONTENT_VIEWS.LIVE_PREVIEW)
@@ -111,12 +126,15 @@ const ContextPreview = () => {
     // no additional action needed here; useContextPreviewMessages updates segments state
   }, [])
 
+  const targetDir = isRTLLanguage(targetCode) ? 'rtl' : 'ltr'
+
   const {segments, currentContextUrl, currentSid} = useContextPreviewMessages({
     onHighlight,
     onTranslationUpdate,
     targetRef,
     showNodeWarning,
     clearNodeWarning,
+    targetDir,
   })
 
   const {htmlContent, loading, error} = useContextDocument(currentContextUrl)
@@ -294,6 +312,7 @@ const ContextPreview = () => {
       tagSegments(targetRef.current, mappableSegments, {
         replaceWithTarget: true,
         metadataMap,
+        targetDir,
       })
     }
     if (sourceRef.current) {
