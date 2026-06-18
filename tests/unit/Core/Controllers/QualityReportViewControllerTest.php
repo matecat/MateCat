@@ -24,10 +24,6 @@ class TestableQualityReportViewController extends QualityReportController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public string $lastTemplate = '';
     /** @var array<string, mixed> */
     public array $lastViewData = [];
@@ -160,7 +156,7 @@ class QualityReportViewControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstructAppendsViewLoginRedirectValidator(): void
+    public function registerValidatorsAppendsViewLoginRedirectValidator(): void
     {
         $realReflector = new ReflectionClass(QualityReportController::class);
         /** @var QualityReportController $realController */
@@ -172,7 +168,7 @@ class QualityReportViewControllerTest extends AbstractTest
         $realReflector->getProperty('request')->setValue($realController, $request);
         $realReflector->getProperty('response')->setValue($realController, $response);
 
-        $realReflector->getMethod('afterConstruct')->invoke($realController);
+        $realReflector->getMethod('registerValidators')->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);

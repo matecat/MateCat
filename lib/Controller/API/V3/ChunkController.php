@@ -35,6 +35,7 @@ class ChunkController extends KleinController
     /**
      * @throws Exception
      * @throws NotFoundException
+     * @throws \TypeError
      */
     public function show(): void
     {
@@ -48,7 +49,7 @@ class ChunkController extends KleinController
         $this->response->json($format->renderOne($this->chunk));
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
@@ -57,7 +58,7 @@ class ChunkController extends KleinController
             $this->chunk = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject();
             $this->featureSet = $this->project->getFeaturesSet();
-            $this->chunk_reviews = (new ChunkReviewDao())->findChunkReviews($Validator->getChunk());
+            $this->chunk_reviews = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews($Validator->getChunk());
         });
         $this->appendValidator($Validator);
     }

@@ -7,7 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 
 class LaraController extends KleinController
 {
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

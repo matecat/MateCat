@@ -3,6 +3,7 @@
 
 namespace Matecat\Core\Structs;
 
+use DomainException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Comments\CommentDao;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -11,6 +12,7 @@ use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Outsource\TranslatedConfirmationStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
 use Model\TmKeyManagement\UserKeysModel;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
@@ -18,7 +20,9 @@ use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use stdClass;
 use Utils\Constants\JobStatus;
+use Utils\Tools\CatUtils;
 
 #[AllowMockObjectsWithoutExpectations]
 class JobStructDITest extends AbstractTest
@@ -140,7 +144,7 @@ class JobStructDITest extends AbstractTest
     #[Test]
     public function getOpenThreadsCount_returns_count_for_matching_job()
     {
-        $thread = new \stdClass();
+        $thread = new stdClass();
         $thread->id_job = 42;
         $thread->password = 'secret';
         $thread->count = 5;
@@ -157,7 +161,7 @@ class JobStructDITest extends AbstractTest
     #[Test]
     public function getOpenThreadsCount_returns_zero_for_non_matching_job()
     {
-        $thread = new \stdClass();
+        $thread = new stdClass();
         $thread->id_job = 999;
         $thread->password = 'other';
         $thread->count = 5;
@@ -187,7 +191,7 @@ class JobStructDITest extends AbstractTest
     #[Test]
     public function getWarningsCount_returns_count_for_matching_job()
     {
-        $warning = new \stdClass();
+        $warning = new stdClass();
         $warning->id_job = 42;
         $warning->password = 'secret';
         $warning->count = '3';
@@ -206,7 +210,7 @@ class JobStructDITest extends AbstractTest
     #[Test]
     public function getWarningsCount_returns_zero_when_no_matching_job()
     {
-        $warning = new \stdClass();
+        $warning = new stdClass();
         $warning->id_job = 999;
         $warning->password = 'other';
         $warning->count = '3';
@@ -255,7 +259,7 @@ class JobStructDITest extends AbstractTest
         $struct = new JobStruct(['id' => null, 'password' => 'x', 'id_project' => 1]);
         $dao = $this->createStub(JobDao::class);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $struct->getChunks($dao);
     }
 
@@ -323,7 +327,7 @@ class JobStructDITest extends AbstractTest
         $struct = new JobStruct(['id' => null, 'password' => 'x', 'id_project' => 1]);
         $dao = $this->createStub(JobDao::class);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $struct->getPeeForTranslatedSegments($dao);
     }
 
@@ -333,7 +337,7 @@ class JobStructDITest extends AbstractTest
         $struct = new JobStruct(['id' => 1, 'password' => null, 'id_project' => 1]);
         $dao = $this->createStub(JobDao::class);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $struct->getPeeForTranslatedSegments($dao);
     }
 
@@ -341,7 +345,7 @@ class JobStructDITest extends AbstractTest
     #[Test]
     public function getSegments_returns_segments_from_dao()
     {
-        $segments = [new \Model\Segments\SegmentStruct(['id' => 1])];
+        $segments = [new SegmentStruct(['id' => 1])];
 
         $dao = $this->createMock(SegmentDao::class);
         $dao->method('getByChunkId')->willReturn($segments);
@@ -357,7 +361,7 @@ class JobStructDITest extends AbstractTest
         $struct = new JobStruct(['id' => null, 'password' => 'x', 'id_project' => 1]);
         $dao = $this->createStub(SegmentDao::class);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $struct->getSegments($dao);
     }
 
@@ -367,7 +371,7 @@ class JobStructDITest extends AbstractTest
         $struct = new JobStruct(['id' => 1, 'password' => null, 'id_project' => 1]);
         $dao = $this->createStub(SegmentDao::class);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $struct->getSegments($dao);
     }
 
@@ -435,5 +439,28 @@ class JobStructDITest extends AbstractTest
     {
         $struct = new JobStruct(['id' => 1, 'password' => 'x', 'id_project' => 1, 'status_owner' => JobStatus::STATUS_ACTIVE]);
         $this->assertFalse($struct->isDeleted());
+    }
+
+
+    #[Test]
+    public function getQualityOverall_delegates_to_injected_cat_utils()
+    {
+        $catUtils = $this->createMock(CatUtils::class);
+        $catUtils->method('getQualityOverallFromJobStruct')->willReturn('excellent');
+
+        $result = $this->struct->getQualityOverall([], $catUtils);
+
+        $this->assertSame('excellent', $result);
+    }
+
+    #[Test]
+    public function getQualityOverall_returns_null_from_injected_cat_utils()
+    {
+        $catUtils = $this->createMock(CatUtils::class);
+        $catUtils->method('getQualityOverallFromJobStruct')->willReturn(null);
+
+        $result = $this->struct->getQualityOverall([], $catUtils);
+
+        $this->assertNull($result);
     }
 }

@@ -30,12 +30,11 @@ class TeamsProjectsController extends KleinController
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao();
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new TeamAccessValidator($this));
     }
@@ -44,6 +43,8 @@ class TeamsProjectsController extends KleinController
      * @throws NotFoundException
      * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
+     * @throws \TypeError
+     * @throws \DivisionByZeroError
      */
     public function getPaginated(): void
     {
@@ -61,7 +62,7 @@ class TeamsProjectsController extends KleinController
             $filter['search'] = $search;
         }
 
-        $this->featureSet->loadFromUserEmail($this->user->email);
+        $this->featureSet->loadFromUserEmail($this->user->email ?? '');
 
         /** @var ProjectStruct[] $projectsList */
         $projectsList = $this->getProjectDao()->findByTeamId($id_team, $filter);
@@ -76,7 +77,7 @@ class TeamsProjectsController extends KleinController
                 '_links' => $this->_getPaginationLinks($page, $totals, $step, $search),
                 'projects' => []
             ]);
-            exit();
+            return;
         }
 
         if ($page > $total_pages) {
@@ -93,13 +94,15 @@ class TeamsProjectsController extends KleinController
      * @param int $page
      * @param int $totals
      * @param int $step
-     * @param ?array $search
+     * @param array<string, mixed>|null $search
      *
-     * @return array
+     * @return array<string, mixed>
+     * @throws \DivisionByZeroError
      */
     private function _getPaginationLinks(int $page, int $totals, int $step = 20, ?array $search = []): array
     {
         $url = parse_url($_SERVER['REQUEST_URI']);
+        $urlPath = is_array($url) ? ($url['path'] ?? '') : '';
 
         $links = [
             "base" => AppConfig::$HTTPHOST,
@@ -114,11 +117,11 @@ class TeamsProjectsController extends KleinController
             isset($search['id']) ? "&search[id]=" . $search['id'] : null);
 
         if ($page < $total_pages) {
-            $links['next'] = $url['path'] . "?page=" . ($page + 1) . $last_part_of_url;
+            $links['next'] = $urlPath . "?page=" . ($page + 1) . $last_part_of_url;
         }
 
         if ($page > 1) {
-            $links['prev'] = $url['path'] . "?page=" . ($page - 1) . $last_part_of_url;
+            $links['prev'] = $urlPath . "?page=" . ($page - 1) . $last_part_of_url;
         }
 
         return $links;
@@ -144,16 +147,14 @@ class TeamsProjectsController extends KleinController
      * @param int $totals
      *
      * @return int
+     * @throws \DivisionByZeroError
      */
     private function getTotalPages(int $step, int $totals): int
     {
         return (int)ceil($totals / $step);
     }
 
-    /**
-     * @param $team
-     */
-    public function setTeam($team): void
+    public function setTeam(TeamStruct $team): void
     {
         $this->team = $team;
     }

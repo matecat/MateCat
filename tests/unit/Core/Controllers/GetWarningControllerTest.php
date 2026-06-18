@@ -25,9 +25,6 @@ class TestableGetWarningController extends GetWarningController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]

@@ -63,10 +63,6 @@ class TestableDeleteContributionController extends DeleteContributionController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function createTmsEngine(mixed $id_tms): AbstractEngine
     {
         return new FakeEngine();

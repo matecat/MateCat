@@ -22,10 +22,6 @@ class TestableGetContributionController extends GetContributionController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     protected function dispatchContribution(GetContributionRequest $contributionRequest): void
     {
         $this->capturedRequest = $contributionRequest;

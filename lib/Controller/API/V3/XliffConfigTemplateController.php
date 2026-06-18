@@ -20,12 +20,11 @@ class XliffConfigTemplateController extends KleinController
 
     private function getXliffConfigTemplateDao(): XliffConfigTemplateDao
     {
-        return $this->xliffConfigTemplateDao ??= new XliffConfigTemplateDao();
+        return $this->xliffConfigTemplateDao ??= new XliffConfigTemplateDao($this->getDatabase());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
     }
 
@@ -35,6 +34,7 @@ class XliffConfigTemplateController extends KleinController
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws \Swaggest\JsonSchema\Exception
+     * @throws Exception
      */
     protected function validateJSON(string $json): void
     {

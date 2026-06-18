@@ -7,6 +7,7 @@ use Controller\Views\CustomPageView;
 use Exceptions\BootstrapTerminatedException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\LoggerFactory;
@@ -31,6 +32,8 @@ class Bootstrap
     private static array $TASK_RUNNER_CONFIG = [];
 
     private static string $_ROOT;
+
+    private static IDatabase $database;
 
     /**
      * @throws Exception
@@ -111,7 +114,12 @@ class Bootstrap
     private function installApplicationSingletons(): void
     {
         WorkerClient::init();
-        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        self::$database = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+    }
+
+    public static function getDatabase(): IDatabase
+    {
+        return self::$database;
     }
 
     /**
@@ -174,6 +182,7 @@ class Bootstrap
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public static function exceptionHandler(Throwable $exception): never
     {
@@ -231,6 +240,7 @@ class Bootstrap
      * @throws InvalidArgumentException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     private static function formatOutputExceptions(int $httpStatusCode, Throwable $exception): void
     {
@@ -257,6 +267,7 @@ class Bootstrap
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public static function shutdownFunctionHandler(): never
     {
@@ -272,6 +283,7 @@ class Bootstrap
      * @throws BootstrapTerminatedException
      * @throws RenderTerminatedException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     public static function handleFatalError(?array $error): void
     {

@@ -20,6 +20,16 @@ if (getenv('USE_LOCAL_DEVELOPMENT_ENV')) {
     Bootstrap::start(new SplFileInfo(TEST_DIR . '/inc/config.local.ini'), new SplFileInfo(TEST_DIR . '/inc/task_manager_config.ini'));
 }
 
+// Worktree autoloader prepend: ensures worktree lib/ shadows the symlinked vendor PSR-4 root.
+// vendor/ is a symlink to the original checkout; its autoload_psr4.php resolves '' => original lib/.
+// Prepending here guarantees classes modified in this worktree are loaded from THIS lib/.
+spl_autoload_register(static function (string $class): void {
+    $file = PROJECT_ROOT . 'lib/' . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+    if (file_exists($file)) {
+        require_once $file;
+    }
+}, prepend: true);
+
 global $klein;
 try {
     $klein = mockKleinFramework();

@@ -3,6 +3,7 @@
 namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 
@@ -32,10 +33,19 @@ class EngineOwnershipValidator extends Base
         $this->engineClass = $engineClass;
     }
 
+    /**
+     * @throws AuthorizationError
+     * @throws \Exception
+     */
     protected function _validate(): void
     {
+        $user = $this->controller->getUser();
+        if ($user->uid === null) {
+            throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
+        }
+
         /** @var T $engine */
-        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $this->controller->getUser()->uid, $this->engineClass);
+        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $user->uid, $this->engineClass);
         $this->engine = $engine;
     }
 

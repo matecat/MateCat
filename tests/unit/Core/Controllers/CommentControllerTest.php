@@ -25,9 +25,6 @@ class TestableCommentController extends CommentController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class FakeJobStructForTeamMentions extends JobStruct

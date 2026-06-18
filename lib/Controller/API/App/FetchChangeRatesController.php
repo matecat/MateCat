@@ -9,7 +9,7 @@ use Utils\Currency\TranslatedChangeRatesFetcher;
 class FetchChangeRatesController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }

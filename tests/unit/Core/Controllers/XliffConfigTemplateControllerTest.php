@@ -27,10 +27,6 @@ class TestableXliffConfigTemplateController extends XliffConfigTemplateControlle
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     /**
      * @param string $json
      * @throws \Swaggest\JsonSchema\Exception

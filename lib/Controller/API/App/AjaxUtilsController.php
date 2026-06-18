@@ -7,21 +7,25 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
-use Model\DataAccess\Database;
+use PDOException;
+use RuntimeException;
+use TypeError;
 use Utils\TMS\TMSService;
 
 class AjaxUtilsController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
+    /**
+     * @throws PDOException
+     */
     public function ping(): void
     {
-        $db = Database::obtain();
-        $stmt = $db->getConnection()->prepare("SELECT 1");
+        $stmt = $this->getDatabase()->getConnection()->prepare("SELECT 1");
         $stmt->execute();
 
         $this->response->json([
@@ -58,6 +62,9 @@ class AjaxUtilsController extends KleinController
 
     /**
      * @return void
+     * @throws Exception
+     * @throws RuntimeException
+     * @throws TypeError
      */
     public function clearNotCompletedUploads(): void
     {

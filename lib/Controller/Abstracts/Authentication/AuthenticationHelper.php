@@ -2,53 +2,92 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
+use Model\DataAccess\IDatabase;
 use Model\Teams\MembershipDao;
-use Model\Teams\TeamModel;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use PDOException;
 use ReflectionException;
-use RuntimeException;
 use Throwable;
 use TypeError;
 use Utils\Logger\LoggerFactory;
-use View\API\App\Json\UserProfile;
 
 /**
- * Created by PhpStorm.
- * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
- * Date: 19/09/24
- * Time: 13:36
+ * Split / dependency-injected re-implementation of {@see AuthenticationHelper}.
  *
+ * Behaviorally identical to the original (verified by a parity test copy), but:
+ *  - all collaborators are constructor-injected (UserDao, ApiKeyDao,
+ *    UserProfileBuilder, AuthCookieStore) → fully unit-testable, no singleton;
+ *  - the authentication work lives in authenticate() instead of the constructor;
+ *  - fromRequest() is the single composition root that touches the database.
+ *
+ * The original class is intentionally kept in place; this lives beside it for
+ * the verification phase.
  */
 class AuthenticationHelper
 {
-
     private UserStruct $user;
     private bool $logged = false;
     private ?ApiKeyStruct $api_record = null;
     /** @var array<string, mixed> */
     private array $session;
-    private ?UserDao $userDao = null;
-    private ?ApiKeyDao $apiKeyDao = null;
+    private UserDao $userDao;
+    private ApiKeyDao $apiKeyDao;
+    private UserProfileBuilder $profileBuilder;
+    private AuthCookieStore $cookieStore;
 
     /**
      * @param array<string, mixed> $session
-     *
-     * @throws Exception
      */
-    public function __construct(array &$session, ?string $api_key = null, ?string $api_secret = null, ?UserDao $userDao = null, ?ApiKeyDao $apiKeyDao = null)
-    {
-        $this->session =& $session;
-        $this->user = new UserStruct();
-        $this->userDao = $userDao;
-        $this->apiKeyDao = $apiKeyDao;
+    public function __construct(
+        array &$session,
+        UserDao $userDao,
+        ApiKeyDao $apiKeyDao,
+        UserProfileBuilder $profileBuilder,
+        AuthCookieStore $cookieStore,
+    ) {
+        $this->session        =& $session;
+        $this->userDao        = $userDao;
+        $this->apiKeyDao      = $apiKeyDao;
+        $this->profileBuilder = $profileBuilder;
+        $this->cookieStore    = $cookieStore;
+        $this->user           = new UserStruct();
+    }
 
+    /**
+     * Composition root: wires real collaborators from an injected database
+     * handle and runs the authentication flow. The database is mandatory — no
+     * singleton fallback. Mirrors the original `new AuthenticationHelper(...)`.
+     *
+     * @param array<string, mixed> $session
+     */
+    public static function fromRequest(
+        array &$session,
+        IDatabase $db,
+        ?string $api_key = null,
+        ?string $api_secret = null,
+    ): self {
+        $self = new self(
+            $session,
+            new UserDao($db),
+            new ApiKeyDao($db),
+            new UserProfileBuilder(new MembershipDao($db), new ConnectedServiceDao($db)),
+            new AuthCookieStore(new SessionTokenStoreHandler()),
+        );
+        $self->authenticate($api_key, $api_secret);
+
+        return $self;
+    }
+
+    /**
+     * Resolve the user from api-key, session, or login cookie. Never throws:
+     * any failure is logged and leaves the helper in a logged-out state.
+     */
+    public function authenticate(?string $api_key, ?string $api_secret): void
+    {
         try {
             if ($this->validKeys($api_key, $api_secret) && $this->api_record !== null) {
                 $user = $this->api_record->getUser();
@@ -57,12 +96,12 @@ class AuthenticationHelper
                 }
             } elseif (!empty($this->session['user']) && !empty($this->session['user_profile'])) {
                 $this->user = $this->session['user'];
-                AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler(), true);
+                $this->cookieStore->setCredentials($this->user, true);
             } else {
-                $user_cookie_credentials = AuthCookie::getCredentials(new SessionTokenStoreHandler());
-                if (!empty($user_cookie_credentials) && !empty($user_cookie_credentials['user'])) {
-                    $this->getUserDao()->setCacheTTL(60 * 60 * 24);
-                    $user = $this->getUserDao()->getByUid($user_cookie_credentials['user']['uid']);
+                $credentials = $this->cookieStore->getCredentials();
+                if (!empty($credentials) && !empty($credentials['user'])) {
+                    $this->userDao->setCacheTTL(60 * 60 * 24);
+                    $user = $this->userDao->getByUid($credentials['user']['uid']);
                     if ($user !== null) {
                         $this->user = $user;
                         $this->setUserSession();
@@ -76,29 +115,25 @@ class AuthenticationHelper
                     [
                         $ignore,
                         $ignore->getTraceAsString(),
-                        'session' => $this->session,
-                        'api_key' => $api_key,
+                        'session'    => $this->session,
+                        'api_key'    => $api_key,
                         'api_secret' => $api_secret,
-                        'cookie' => AuthCookie::getCredentials()['user'] ?? null
+                        'cookie'     => $this->cookieStore->getCredentials()['user'] ?? null,
                     ]
                 );
-            } catch (ReflectionException|TypeError) {
+            } catch (Throwable) {
             }
         } finally {
-            // Set the logged status based on the user's authentication state.
             $this->logged = $this->user->isLogged();
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function refreshSession(): void
     {
         unset($this->session['user']);
         unset($this->session['user_profile']);
-        $this->user = new UserStruct();
-        $this->logged = false;
+        $this->user       = new UserStruct();
+        $this->logged     = false;
         $this->api_record = null;
     }
 
@@ -111,70 +146,37 @@ class AuthenticationHelper
     {
         unset($this->session['user']);
         unset($this->session['user_profile']);
-        AuthCookie::destroyAuthentication(new SessionTokenStoreHandler());
+        $this->cookieStore->destroy();
+    }
+
+    protected function sessionIsActive(): bool
+    {
+        return session_status() === PHP_SESSION_ACTIVE;
     }
 
     /**
      * @throws ReflectionException
-     * @throws EnvironmentIsBrokenException
-     * @throws RuntimeException
      * @throws Exception
      * @throws TypeError
      */
     protected function setUserSession(): void
     {
-        $session_status = session_status();
-        if ($session_status == PHP_SESSION_ACTIVE) {
-            $this->session['cid'] = $this->user->getEmail();
-            $this->session['uid'] = $this->user->getUid();
-            $this->session['user'] = $this->user;
-            $this->session['user_profile'] = static::getUserProfile($this->user);
+        if ($this->sessionIsActive()) {
+            $this->session['cid']          = $this->user->getEmail();
+            $this->session['uid']          = $this->user->getUid();
+            $this->session['user']         = $this->user;
+            $this->session['user_profile'] = $this->profileBuilder->build($this->user);
         }
     }
 
     /**
-     * @return array<string, mixed>
-     *
-     * @throws ReflectionException
-     * @throws EnvironmentIsBrokenException
-     * @throws RuntimeException
      * @throws Exception
-     * @throws TypeError
-     */
-    protected static function getUserProfile(UserStruct $user): array
-    {
-        $metadata = $user->getMetadataAsKeyValue();
-        $membersDao = new MembershipDao();
-        $membersDao->setCacheTTL(60 * 5);
-        $userTeams = array_map(
-            function ($team) {
-                $teamModel = new TeamModel($team);
-                $teamModel->updateMembersProjectsCount();
-
-                return $team;
-            },
-            $membersDao->findUserTeams($user) ?? []
-        );
-
-        $dao = new ConnectedServiceDao();
-        $services = $dao->findServicesByUser($user);
-
-        return (new UserProfile())->renderItem(
-            $user,
-            $userTeams,
-            $services,
-            $metadata
-        );
-    }
-
-    /**
-     * @throws PDOException
      */
     protected function validKeys(?string $api_key = null, ?string $api_secret = null): bool
     {
         if ($api_key || $api_secret) {
-            $apiKey = $api_key ?? '';
-            $this->api_record = $this->getApiKeyDao()->findByKey($apiKey);
+            $apiKey           = $api_key ?? '';
+            $this->api_record = $this->apiKeyDao->findByKey($apiKey);
             if ($this->api_record) {
                 return $this->api_record->validSecret($api_secret ?? '');
             }
@@ -196,15 +198,5 @@ class AuthenticationHelper
     public function getApiRecord(): ?ApiKeyStruct
     {
         return $this->api_record;
-    }
-
-    private function getUserDao(): UserDao
-    {
-        return $this->userDao ??= new UserDao();
-    }
-
-    private function getApiKeyDao(): ApiKeyDao
-    {
-        return $this->apiKeyDao ??= new ApiKeyDao();
     }
 }

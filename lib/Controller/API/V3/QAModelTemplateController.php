@@ -23,12 +23,11 @@ class QAModelTemplateController extends KleinController
 
     private function getQaModelTemplateDao(): QAModelTemplateDao
     {
-        return $this->qaModelTemplateDao ??= new QAModelTemplateDao();
+        return $this->qaModelTemplateDao ??= new QAModelTemplateDao($this->getDatabase());
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
-        parent::afterConstruct();
         $this->appendValidator(new LoginValidator($this));
     }
 

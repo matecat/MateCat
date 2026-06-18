@@ -20,9 +20,6 @@ class TestableContextUrlSchemaController extends ContextUrlSchemaController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class ContextUrlSchemaControllerTest extends AbstractTest

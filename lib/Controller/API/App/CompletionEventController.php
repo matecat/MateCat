@@ -15,7 +15,6 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\Jobs\JobStruct;
@@ -36,13 +35,13 @@ class CompletionEventController extends KleinController
     /**
      * @throws Exception
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $event = (new ChunkCompletionEventDao())->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
+            $event = (new ChunkCompletionEventDao($this->getDatabase()))->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
 
             if (!$event) {
                 throw new NotFoundException("Event Not Found.", 404);
@@ -71,15 +70,15 @@ class CompletionEventController extends KleinController
      */
     private function __performUndo(): void
     {
-        Database::obtain()->begin();
+        $this->getDatabase()->begin();
 
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
         $this->featureSet->dispatch(new AlterChunkReviewStructEvent($this->event));
 
-        (new ChunkCompletionEventDao())->deleteEvent($this->event);
-        Database::obtain()->commit();
+        (new ChunkCompletionEventDao($this->getDatabase()))->deleteEvent($this->event);
+        $this->getDatabase()->commit();
     }
 
 }

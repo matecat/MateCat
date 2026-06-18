@@ -6,6 +6,7 @@ use Controller\API\V3\SegmentAnalysisController;
 use Exception;
 use Klein\Request;
 use Klein\Response;
+use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 use Model\DataAccess\Database;
@@ -25,9 +26,6 @@ class TestableSegmentAnalysisController extends SegmentAnalysisController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 class SegmentAnalysisControllerTest extends AbstractTest
@@ -509,5 +507,75 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $this->assertArrayHasKey('notesAggregate', $result);
         $this->assertArrayHasKey('issuesAggregate', $result);
         $this->assertArrayHasKey('idRequestsAggregate', $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function countRawWordsCountsPlainStringWords(): void
+    {
+        /** @var MateCatFilter $filter */
+        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'en-US', []);
+
+        $result = $this->invokePrivate('countRawWords', ['hello world', 'en-US', $filter]);
+
+        $this->assertSame(2, $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function countRawWordsReturnsZeroForEmptyString(): void
+    {
+        /** @var MateCatFilter $filter */
+        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'en-US', []);
+
+        $result = $this->invokePrivate('countRawWords', [null, 'en-US', $filter]);
+
+        $this->assertSame(0, $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSegmentTranslationsCountReturnsCountForProject(): void
+    {
+        $project = (new ProjectDao())->findById(self::TEST_PROJECT_ID);
+
+        $result = $this->invokePrivate('getSegmentTranslationsCount', [$project]);
+
+        $this->assertSame(3, $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function projectRoutesSegmentsCountThroughSeam(): void
+    {
+        $requestStub = $this->createStub(Request::class);
+        $requestStub->method('param')->willReturnCallback(static function (string $key) {
+            return match ($key) {
+                'page' => '1',
+                'per_page' => '50',
+                'id_project' => (string)self::TEST_PROJECT_ID,
+                'password' => 'projpw_sa',
+                default => null,
+            };
+        });
+        $reqProp = $this->reflector->getProperty('request');
+        $reqProp->setValue($this->controller, $requestStub);
+
+        $this->controller->project();
+
+        $projectProp = $this->reflector->getProperty('project');
+        $project = $projectProp->getValue($this->controller);
+        $this->assertSame(self::TEST_PROJECT_ID, (int)$project->id);
     }
 }

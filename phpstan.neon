@@ -10,6 +10,7 @@ parameters:
     # OpenAi::chat() declares $stream as null but accepts callable at runtime
     stubFiles:
         - phpstan-stubs/OpenAi.stub
+        - phpstan-stubs/KleinApp.stub
     scanFiles:
         - router.php
     excludePaths:
@@ -29,6 +30,7 @@ parameters:
     exceptions:
         uncheckedExceptionClasses:
             - 'Model\DataAccess\UnknownPropertyException'
+            - 'Controller\Exceptions\RenderTerminatedException'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

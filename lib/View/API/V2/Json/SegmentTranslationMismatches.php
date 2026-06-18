@@ -11,6 +11,7 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
@@ -19,7 +20,7 @@ use RuntimeException;
 class SegmentTranslationMismatches
 {
 
-    /** @var array<int, array<string, mixed>> */
+    /** @var array<int, ShapelessConcreteStruct|array<string, mixed>> */
     protected array $data;
     protected int $thereArePropagations;
     protected ?FeatureSet $featureSet;
@@ -30,7 +31,7 @@ class SegmentTranslationMismatches
      * SegmentTranslationMismatches constructor.
      * from query: getWarning(id_job, password)
      *
-     * @param array<int, array<string, mixed>> $Translation_mismatches
+     * @param array<int, ShapelessConcreteStruct|array<string, mixed>> $Translation_mismatches
      * @param JobStruct $jobStruct
      * @param int $thereArePropagations
      * @param FeatureSet|null $featureSet

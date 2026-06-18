@@ -28,7 +28,7 @@ class ChunkTranslationIssueController extends KleinController
         $this->return404IfTheJobWasDeleted();
 
         // find all issues by chunk and return the json representation.
-        $result = (new EntryDao())->findAllByChunk($this->chunk);
+        $result = (new EntryDao($this->getDatabase()))->findAllByChunk($this->chunk);
 
         $json = new JsonFormatter();
         $rendered = $json->render($result);
@@ -36,7 +36,7 @@ class ChunkTranslationIssueController extends KleinController
         $this->response->json(['issues' => $rendered]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

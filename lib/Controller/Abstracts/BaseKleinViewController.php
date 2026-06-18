@@ -54,6 +54,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      * @param App|null $app
      *
      * @throws Exception
+     * @throws TypeError
      */
     public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
     {

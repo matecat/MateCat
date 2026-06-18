@@ -28,7 +28,7 @@ class ChunkTranslationVersionController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        $results = (new TranslationVersionDao())->getVersionsForChunk($this->chunk);
+        $results = (new TranslationVersionDao($this->getDatabase()))->getVersionsForChunk($this->chunk);
 
         $this->featureSet->loadForProject($this->chunk->getProject());
 
@@ -39,7 +39,7 @@ class ChunkTranslationVersionController extends KleinController
         ]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

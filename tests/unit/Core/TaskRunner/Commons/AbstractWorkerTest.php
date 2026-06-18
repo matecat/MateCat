@@ -341,15 +341,10 @@ class AbstractWorkerTest extends AbstractTest
         $dbStub = $this->createStub(Database::class);
         $dbStub->method('ping')->willReturn(true);
 
-        $ref = new ReflectionClass(Database::class);
-        $ref->getProperty('instance')->setValue(null, $dbStub);
+        $this->setDatabaseInstance($dbStub);
 
-        try {
-            $worker->checkDatabaseConnection();
-            $this->assertTrue(true);
-        } finally {
-            $ref->getProperty('instance')->setValue(null, null);
-        }
+        $worker->checkDatabaseConnection();
+        $this->assertTrue(true);
     }
 
     #[Test]
@@ -376,14 +371,9 @@ class AbstractWorkerTest extends AbstractTest
         };
         $worker->attach($log);
 
-        $ref = new ReflectionClass(Database::class);
-        $ref->getProperty('instance')->setValue(null, $dbStub);
+        $this->setDatabaseInstance($dbStub);
 
-        try {
-            $worker->checkDatabaseConnection();
-        } finally {
-            $ref->getProperty('instance')->setValue(null, null);
-        }
+        $worker->checkDatabaseConnection();
 
         $this->assertCount(2, $log->messages);
         $this->assertStringContainsString('MySQL server has gone away', $log->messages[0]);

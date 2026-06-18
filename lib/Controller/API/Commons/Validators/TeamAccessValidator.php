@@ -30,12 +30,12 @@ class TeamAccessValidator extends Base
         $name = (!empty($this->request->param('team_name'))) ? base64_decode($this->request->param('team_name')) : null;
 
         if ($name !== null and strtolower($name) !== Teams::PERSONAL) {
-            $this->team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndName(
+            $this->team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL(60 * 10)->findTeamByIdAndName(
                 $id_team,
                 $name
             );
         } else {
-            $this->team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndUser(
+            $this->team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL(60 * 10)->findTeamByIdAndUser(
                 $id_team,
                 $this->controller->getUser()
             );

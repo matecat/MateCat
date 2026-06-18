@@ -68,7 +68,7 @@ class ProjectAssignedEmail extends AbstractEmail
             $jobStats->setRejectedWords($jStruct->rejected_words);
             $jobStats->setTranslatedWords($jStruct->translated_words);
             $jobStats->setApprovedWords($jStruct->approved_words);
-            $stats = CatUtils::getFastStatsForJob($jobStats, false);
+            $stats = (new CatUtils())->getFastStatsForJob($jobStats, false);
             $words_count[] = $stats[ProjectsMetadataMarshaller::WORD_COUNT_RAW->value]['total'];
         }
 

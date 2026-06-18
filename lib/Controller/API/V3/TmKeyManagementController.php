@@ -5,14 +5,13 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 
 class TmKeyManagementController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -23,7 +22,7 @@ class TmKeyManagementController extends KleinController
     public function getByUser(): void
     {
         try {
-            $_keyDao = new MemoryKeyDao(Database::obtain());
+            $_keyDao = new MemoryKeyDao($this->getDatabase());
             $dh = new MemoryKeyStruct(['uid' => $this->user->uid]);
             $keyList = $_keyDao->read($dh);
 
@@ -33,7 +32,6 @@ class TmKeyManagementController extends KleinController
             }
 
             $this->response->json($list);
-            exit();
         } catch (Exception $exception) {
             $this->response->status()->setCode(500);
             $this->response->json([
@@ -41,7 +39,6 @@ class TmKeyManagementController extends KleinController
                     $exception->getMessage()
                 ]
             ]);
-            exit();
         }
     }
 
