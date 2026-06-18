@@ -456,6 +456,26 @@ describe('findSegmentSidsByClick', () => {
       expect(result).not.toBeNull()
       expect(result.sids).toEqual([1])
     })
+
+    it('strips XLIFF tags from segment source before matching rendered HTML text', () => {
+      const segments = [
+        {
+          sid: 42,
+          source: 'Use code <g id="1">NEW122 </g>at checkout to save.',
+          target: '',
+        },
+      ]
+      document.body.innerHTML = '<p>Use code NEW122 at checkout to save.</p>'
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([42])
+    })
   })
 
   describe('edge cases', () => {

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import {mountPage} from './mountPage'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
-import {findSegmentSidsByClick, tagSegments} from '../utils/contextPreviewUtils'
+import {findSegmentSidsByClick, tagSegments, suppressClickTraps} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconChevronLeft from '../components/icons/IconChevronLeft'
 import IconChevronRight from '../components/icons/IconChevronRight'
@@ -251,6 +251,8 @@ const ContextPreview = () => {
     ]
 
     if (links.length === 0) {
+      suppressClickTraps(sourceRef.current)
+      suppressClickTraps(targetRef.current)
       setHtmlReady((prev) => prev + 1)
       return
     }
@@ -260,6 +262,8 @@ const ContextPreview = () => {
     const onSettle = () => {
       settled++
       if (!cancelled && settled >= links.length) {
+        suppressClickTraps(sourceRef.current)
+        suppressClickTraps(targetRef.current)
         setHtmlReady((prev) => prev + 1)
       }
     }

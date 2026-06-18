@@ -75,6 +75,40 @@ const parseHtmlContent = (rawHtml, sourceUrl) => {
     headHtml += el.outerHTML
   })
   doc.querySelectorAll('script').forEach((el) => el.remove())
+
+  // Remove phantom overlay elements that block clicks in the preview.
+  //
+  // Source 1 — premature </script> closure: when a <script> block contains </script>
+  // inside a JS string literal, the HTML parser terminates the script early; the remaining
+  // JS code (lightbox/modal template strings) is parsed as real DOM elements carrying
+  // full-viewport CSS (position:fixed, z-index:99992+).
+  //
+  // Source 2 — real backdrop/overlay divs that happen to have no translatable text (cookie
+  // banners, lightbox backdrops, sticky nav clones, etc.).
+  //
+  // Detection rule for both: no semantic text-content children (p, h1…h6, li, td, th,
+  // article, section) AND no already-tagged nodes. Real dialogs/sections with translatable
+  // content always have such elements.
+  const CONTENT_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, td, th, article, section'
+  const TAGGED_SELECTOR = '[data-node-path], [data-context-sids]'
+
+  doc.querySelectorAll('[role="dialog"], [role="alertdialog"]').forEach((el) => {
+    if (!el.querySelector(TAGGED_SELECTOR) && !el.querySelector(CONTENT_SELECTOR)) {
+      el.remove()
+    }
+  })
+
+  // Remove elements with position:fixed in their inline style that have no
+  // translatable text content — overlays, backdrops, sticky clones, etc.
+  // position:absolute is intentionally excluded: it's used by many legitimate
+  // decorative elements (icons, spacers, positioned sub-elements).
+  doc.querySelectorAll('[style]').forEach((el) => {
+    if (el.style.position !== 'fixed') return
+    if (el.querySelector(TAGGED_SELECTOR) || el.querySelector(CONTENT_SELECTOR)) return
+    if (el.textContent.trim()) return
+    el.remove()
+  })
+
   const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
   return headHtml + bodyHtml
 }

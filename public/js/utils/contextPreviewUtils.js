@@ -360,7 +360,7 @@ export const findSegmentSidsByClick = (
   const matchingSids = []
   const seenSids = new Set()
   for (const seg of segments) {
-    const segText = seg[field]
+    const segText = stripSegmentTags(seg[field])
     if (!segText) continue
     const numSid = Number(seg.sid)
     if (seenSids.has(numSid)) continue
@@ -726,6 +726,28 @@ export const isNodeHidden = (el) => {
  * @param {{metadata?: Array<{meta_key: string, meta_value: string}>, context_url?: string|null}} segment
  * @returns {{context_url: string|null, resname: string|null, restype: string|null, screenshot: string|null}}
  */
+/**
+ * Scans a container for positioned elements (fixed or absolute via any CSS source)
+ * that have no translatable text content and suppresses their pointer-events.
+ *
+ * Must be called AFTER external stylesheets have loaded so that getComputedStyle
+ * reflects class-based positioning (e.g. `.fxModalBox-spaceball { position: absolute }`).
+ *
+ * @param {HTMLElement} container
+ */
+export const suppressClickTraps = (container) => {
+  if (!container) return
+  const CONTENT_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, td, th, article, section'
+  container.querySelectorAll('*').forEach((el) => {
+    if (el.getAttribute(SEGMENT_SIDS_ATTR)) return
+    const pos = getComputedStyle(el).position
+    if (pos !== 'fixed' && pos !== 'absolute') return
+    if (el.querySelector(CONTENT_SELECTOR)) return
+    if (el.textContent.trim()) return
+    el.style.pointerEvents = 'none'
+  })
+}
+
 export const extractSegmentContextFields = (segment) => {
   const meta = segment.metadata ?? []
   const find = (key) => meta.find((m) => m.meta_key === key)?.meta_value ?? null
