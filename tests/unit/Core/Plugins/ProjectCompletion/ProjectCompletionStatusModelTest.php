@@ -57,7 +57,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $eventDao, $featureSet);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
         $status = $model->getStatus();
 
         $this->assertTrue($status['completed']);
@@ -79,7 +79,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $eventDao, $featureSet);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
         $status = $model->getStatus();
 
         $this->assertFalse($status['completed']);
@@ -107,7 +107,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $eventDao, $featureSet);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
         $status = $model->getStatus();
 
         $this->assertFalse($status['completed']);
@@ -128,7 +128,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $eventDao, $featureSet);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
         $first = $model->getStatus();
         $second = $model->getStatus();
 
@@ -149,7 +149,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $eventDao, $featureSet);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
         $status = $model->getStatus();
 
         $this->assertTrue($status['completed']);
@@ -170,7 +170,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
         $featureSet->expects($this->once())->method('loadForProject');
         $featureSet->expects($this->once())->method('dispatch');
 
-        $model = new ProjectCompletionStatusModel($project, $eventDao, $featureSet);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
         $model->getStatus();
     }
 }

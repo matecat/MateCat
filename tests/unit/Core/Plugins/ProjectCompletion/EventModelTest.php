@@ -98,7 +98,7 @@ class EventModelTest extends AbstractTest
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('currentPhase')->willReturn(ChunkCompletionEventDao::TRANSLATE);
 
-        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class));
+        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class), new FeatureSet());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Cannot save event, current status mismatch.');
@@ -115,7 +115,7 @@ class EventModelTest extends AbstractTest
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('currentPhase')->willReturn(ChunkCompletionEventDao::REVISE);
 
-        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class));
+        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class), new FeatureSet());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Cannot save event, current status mismatch.');
@@ -153,6 +153,7 @@ class EventModelTest extends AbstractTest
             $this->makeEventStruct(),
             $this->createStub(ChunkCompletionEventDao::class),
             $this->createStub(ProjectDao::class),
+            new FeatureSet(),
         );
 
         $this->assertNull($model->getChunkCompletionEventId());

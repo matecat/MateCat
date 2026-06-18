@@ -41,12 +41,12 @@ class ProjectCompletionStatusModel
      */
     public function __construct(
         ProjectStruct $project,
+        FeatureSet $featureSet,
         ?ChunkCompletionEventDao $chunkCompletionEventDao = null,
-        ?FeatureSet $featureSet = null,
     ) {
         $this->project = $project;
         $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
-        $this->featureSet = $featureSet ?? new FeatureSet();
+        $this->featureSet = $featureSet;
     }
 
     /**

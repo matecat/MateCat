@@ -44,13 +44,13 @@ class EventModel
         CompletionEventStruct $eventStruct,
         ChunkCompletionEventDao $chunkCompletionEventDao,
         ProjectDao $projectDao,
-        ?FeatureSet $featureSet = null,
+        FeatureSet $featureSet,
     ) {
         $this->eventStruct = $eventStruct;
         $this->chunk = $chunk;
         $this->chunkCompletionEventDao = $chunkCompletionEventDao;
         $this->projectDao = $projectDao;
-        $this->featureSet = $featureSet ?? new FeatureSet();
+        $this->featureSet = $featureSet;
     }
 
     /**

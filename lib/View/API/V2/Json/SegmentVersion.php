@@ -44,12 +44,7 @@ class SegmentVersion
         $this->with_issues = $with_issues;
         $this->chunk = $chunk;
         $this->metadataDao = $metadataDao;
-
-        if ($featureSet == null) {
-            $featureSet = new FeatureSet();
-        }
-
-        $this->featureSet = $featureSet;
+        $this->featureSet = $featureSet ?? new FeatureSet();
     }
 
     /**
