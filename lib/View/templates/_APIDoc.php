@@ -4,6 +4,7 @@
 use Controller\Views\CustomPageView;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -126,7 +127,7 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
     $reflect = new ReflectionClass(CustomPageView::class);
     $instance = $reflect->newInstanceArgs();
 
-    $featureSet = new FeatureSet();
+    $featureSet = new FeatureSet(null, Database::obtain());
 
     if ($instance->getUser()->email !== null) {
         $featureSet->loadFromUserEmail($instance->getUser()->email);

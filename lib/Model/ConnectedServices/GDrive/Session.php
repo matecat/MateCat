@@ -19,6 +19,7 @@ use InvalidArgumentException;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\Conversion\FilesConverter;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -753,7 +754,7 @@ class Session
      */
     protected function createFeatureSet(): FeatureSet
     {
-        return new FeatureSet();
+        return new FeatureSet(null, Database::obtain());
     }
 
     /**
