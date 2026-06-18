@@ -3,6 +3,7 @@
 namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -112,6 +113,8 @@ class JobTest extends AbstractTest
         $featureSet     = $this->createStub(FeatureSet::class);
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('findChunkReviews')->willReturn([]);
+        [$dbStub] = $this->createDatabaseMock();
+        $chunkReviewDao->method('getDatabaseHandler')->willReturn($dbStub);
 
         $view   = $this->makeViewWithMockedFillUrls($chunkReviewDao);
         $result = $view->renderItem($chunk, $project, $featureSet);
@@ -137,6 +140,8 @@ class JobTest extends AbstractTest
         $featureSet     = $this->createStub(FeatureSet::class);
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('findChunkReviews')->willReturn([]);
+        [$dbStub] = $this->createDatabaseMock();
+        $chunkReviewDao->method('getDatabaseHandler')->willReturn($dbStub);
 
         $view   = $this->makeViewWithMockedFillUrls($chunkReviewDao);
         $result = $view->renderItem($chunk, $project, $featureSet);
@@ -159,6 +164,8 @@ class JobTest extends AbstractTest
 
         $chunkReviewDao = $this->createStub(ChunkReviewDao::class);
         $chunkReviewDao->method('findChunkReviews')->willReturn([$chunkReview]);
+        [$dbStub] = $this->createDatabaseMock();
+        $chunkReviewDao->method('getDatabaseHandler')->willReturn($dbStub);
 
         $view   = $this->makeViewWithMockedFillUrls($chunkReviewDao);
         $result = $view->renderItem($chunk, $project, $featureSet);

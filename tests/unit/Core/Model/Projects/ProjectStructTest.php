@@ -100,28 +100,6 @@ class ProjectStructTest extends AbstractTest
     }
 
     #[Test]
-    public function getWordCountTypeReturnsEquivalentWhenMetadataIsNull(): void
-    {
-        $project = new ProjectStructTestDouble();
-        $project->metadataValues = [
-            ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value => null,
-        ];
-
-        $this->assertSame(ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value, $project->getWordCountType());
-    }
-
-    #[Test]
-    public function getWordCountTypeReturnsMetadataValueWhenPresent(): void
-    {
-        $project = new ProjectStructTestDouble();
-        $project->metadataValues = [
-            ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value => ProjectsMetadataMarshaller::WORD_COUNT_RAW->value,
-        ];
-
-        $this->assertSame(ProjectsMetadataMarshaller::WORD_COUNT_RAW->value, $project->getWordCountType());
-    }
-
-    #[Test]
     public function getJobsReturnsArrayWhenProjectIdIsSet(): void
     {
         $project = new ProjectStruct();

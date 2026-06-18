@@ -23,6 +23,8 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ManageModel;
 use Model\Projects\ProjectDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
@@ -195,7 +197,10 @@ class Job
             'private_tm_key' => $this->getKeyList($chunk),
             'warnings_count' => $warningsCount->warnings_count,
             'warning_segments' => ($warningsCount->warning_segments ?? []),
-            'word_count_type' => $chunk->getProject()->getWordCountType(),
+            'word_count_type' => (new ProjectMetadataDao($this->chunkReviewDao->getDatabaseHandler()))
+                    ->setCacheTTL(3600)
+                    ->get((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)->value ??
+                ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
             'stats' => $jobStats,
             'outsource' => $outsource,
             'outsource_available' => $outsourceAvailable,

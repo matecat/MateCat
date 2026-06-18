@@ -30,6 +30,7 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
@@ -75,8 +76,8 @@ class CattoolController extends BaseKleinViewController
         $result = filter_var_array($this->request->paramsNamed()->all(), $filterArgs);
 
         return [
-            'jid' => (string) ($result['jid'] ?? ''),
-            'password' => (string) ($result['password'] ?? ''),
+            'jid' => (string)($result['jid'] ?? ''),
+            'password' => (string)($result['password'] ?? ''),
         ];
     }
 
@@ -131,7 +132,7 @@ class CattoolController extends BaseKleinViewController
         $revisionNumber = null;
 
         try {
-            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int) $request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
+            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int)$request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
             $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($chunkAndPasswords->chunkReviewStruct ? $chunkAndPasswords->chunkReviewStruct->source_page : null);
         } catch (NotFoundException) {
             $this->notFound();
@@ -239,7 +240,10 @@ class CattoolController extends BaseKleinViewController
             'translation_engines_intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'translation_matches_enabled' => new PHPTalBoolean(true),
             'warningPollingInterval' => 1000 * (AppConfig::$WARNING_POLLING_INTERVAL),
-            'word_count_type' => $chunkStruct->getProject()->getWordCountType(),
+            'word_count_type' => (new \Model\Projects\MetadataDao($this->getDatabase()))
+                    ->setCacheTTL(3600)
+                    ->get((int)$project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)->value ??
+                ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
             'analysis_enabled' => new PHPTalBoolean(AppConfig::$VOLUME_ANALYSIS_ENABLED),
             'get_public_matches' => new PHPTalBoolean(!$chunkStruct->only_private_tm),
 

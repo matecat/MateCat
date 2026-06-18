@@ -169,23 +169,6 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
         });
     }
 
-    /**
-     * @return string
-     *
-     * @throws DomainException
-     */
-    public function getWordCountType(): string
-    {
-        //this method is already cached internally by the MetadataDao.
-        // we can avoid using the cachable method here
-        $type = $this->getMetadataValue(ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value);
-
-        if ($type == null) {
-            return ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
-        } else {
-            return $type;
-        }
-    }
 
     public function hasFeature(string $feature_code): bool
     {

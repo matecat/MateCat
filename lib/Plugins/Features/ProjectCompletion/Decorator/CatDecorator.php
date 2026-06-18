@@ -10,6 +10,7 @@ use DivisionByZeroError;
 use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use RuntimeException;
 use Utils\Templating\PHPTALWithAppend;
@@ -69,6 +70,7 @@ class CatDecorator extends AbstractDecorator
 
     /**
      * @throws DomainException
+     * @throws Exception
      */
     private function varsForUncomplete(): void
     {
@@ -89,10 +91,16 @@ class CatDecorator extends AbstractDecorator
 
     /**
      * @throws DomainException
+     * @throws Exception
      */
     private function completable(): bool
     {
-        if ($this->arguments->getJob()->getProject()->getWordCountType() != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
+        $project = $this->arguments->getJob()->getProject();
+        $wordCountType = (new MetadataDao($this->controller->getDatabase()))
+            ->setCacheTTL(3600)
+            ->get((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)->value ??
+            ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+        if ($wordCountType != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             if ($this->arguments->isRevision()) {
                 $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
                     ($this->stats['DRAFT'] ?? 0) == 0 &&
