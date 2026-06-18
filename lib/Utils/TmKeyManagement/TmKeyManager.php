@@ -230,7 +230,7 @@ class TmKeyManager
         }
 
         if (!is_null($obj->name)) {
-            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s]+/u', '', $obj->name);
+            $obj->name = preg_replace('/[^.\-_\p{L}\p{N}\s{}]+/u', '', $obj->name);
             $sanitized = filter_var($obj->name, FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
             $obj->name = $sanitized !== false ? $sanitized : null;
         }
