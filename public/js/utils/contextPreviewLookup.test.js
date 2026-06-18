@@ -471,16 +471,15 @@ describe('AemContainerTextMatchStrategy', () => {
     ).toBeNull()
   })
 
-  it('returns null when no text match exists within the container', () => {
+  it('falls back to the AEM container when no text match exists within it', () => {
     container.innerHTML =
       '<div data-node-path="/content/jcr:content"><p>Other Text</p></div>'
-    expect(
-      strategy.execute(
-        container,
-        'data-node-path=/content/jcr:content',
-        'Target Text',
-      ),
-    ).toBeNull()
+    const result = strategy.execute(
+      container,
+      'data-node-path=/content/jcr:content',
+      'Target Text',
+    )
+    expect(result).toBe(container.querySelector('[data-node-path]'))
   })
 
   it('returns null when path is empty', () => {
