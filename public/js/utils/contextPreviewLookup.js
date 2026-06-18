@@ -132,7 +132,9 @@ export class AemContainerTextMatchStrategy {
       'x-attribute_name_value',
     )
     if (!aemContainer) return null
-    return findElementByTextMatch(aemContainer, normSource)
+    // Fall back to the container itself when no inner block element matches the
+    // source text.
+    return findElementByTextMatch(aemContainer, normSource) ?? aemContainer
   }
 }
 

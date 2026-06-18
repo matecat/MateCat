@@ -387,7 +387,7 @@ export const findSegmentSidsByClick = (
  */
 export const stripSegmentTags = (text) => {
   if (!text) return ''
-  return decodeHtmlEntities(
+  const decoded = decodeHtmlEntities(
     removeTagsFromText(
       excludeSomeTagsTransformToText(text, [
         'g',
@@ -397,12 +397,10 @@ export const stripSegmentTags = (text) => {
         'ex',
         'x',
         'ph',
-      ])
-        .replace(/##\$_[^$]+\$##/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim(),
+      ]).replace(/##\$_[^$]+\$##/g, ' '),
     ),
   )
+  return decoded.replace(/\s+/g, ' ').trim()
 }
 
 /**

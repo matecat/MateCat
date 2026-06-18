@@ -8,6 +8,7 @@ import {
   extractSegmentContextFields,
   isNodeHidden,
   findElementByTextMatch,
+  stripSegmentTags,
 } from './contextPreviewUtils'
 
 describe('getSidsFromElement', () => {
@@ -1180,7 +1181,7 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
     ).not.toContain(1)
   })
 
-  it('falls back to standard text-match (pass 2) when text not found in container', () => {
+  it('falls back to the AEM container itself when source text is not found inside it', () => {
     document.body.innerHTML = `
       <div data-node-path="/content/we-retail/jcr:content">
         <p>Wrong Text</p>
@@ -1200,7 +1201,12 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
         },
       },
     )
-    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
+    // AEM path is authoritative: tag the container itself when text match fails
+    expect(
+      getSidsFromElement(document.body.querySelector('[data-node-path]')),
+    ).toContain(1)
+    // The <p> outside the container should NOT be tagged
+    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).not.toContain(1)
   })
 
   it('falls back when container element not found', () => {
@@ -1312,5 +1318,55 @@ describe('tagSegments — x-attribute_name_value without client_name (plain sele
       },
     )
     expect(getSidsFromElement(document.body.querySelector('p'))).toContain(1)
+  })
+})
+
+// ─── stripSegmentTags — &nbsp; normalisation ─────────────────────────────────
+
+describe('stripSegmentTags — &nbsp; normalisation', () => {
+  it('strips trailing &nbsp; entity so the result matches trimmed DOM textContent', () => {
+    expect(stripSegmentTags('Ends 2/28.&nbsp;')).toBe('Ends 2/28.')
+  })
+
+  it('collapses internal &nbsp; entity to a regular space', () => {
+    expect(stripSegmentTags('foo&nbsp;bar')).toBe('foo bar')
+  })
+
+  it('returns plain text unchanged', () => {
+    expect(stripSegmentTags('Hello world')).toBe('Hello world')
+  })
+})
+
+// ─── tagSegments — segment source ending with &nbsp; ─────────────────────────
+
+describe('tagSegments — segment source ending with &nbsp;', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('maps a segment whose source ends with &nbsp; to the HTML element that has trailing U+00A0', () => {
+    // Browser parses &nbsp; in HTML to U+00A0; segment source carries the literal entity.
+    document.body.innerHTML =
+      '<p>Get inspired by our print solutions. Ends 2/28. </p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {sid: 1, source: 'Get inspired by our print solutions. Ends 2/28.&nbsp;', target: ''},
+    ])
+    expect(getSidsFromElement(p)).toContain(1)
+  })
+
+  it('maps a segment whose source has &nbsp; inside inline XLIFF tags to the matching element', () => {
+    document.body.innerHTML =
+      '<p>Use code NEW122 at checkout to save. Ends 2/28. </p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {
+        sid: 42,
+        source:
+          'Use code <g id="1">NEW122 </g>at checkout to save. Ends 2/28.&nbsp;',
+        target: '',
+      },
+    ])
+    expect(getSidsFromElement(p)).toContain(42)
   })
 })
