@@ -7,10 +7,12 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DomainException;
+use Exception;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 use RuntimeException;
@@ -63,6 +65,7 @@ class MetaDataController extends KleinController
      *
      * @return stdClass
      * @throws DomainException
+     * @throws Exception
      */
     private function getProjectInfo(ProjectStruct $project): stdClass
     {
@@ -77,7 +80,7 @@ class MetaDataController extends KleinController
 
         $myExtraKeys = array_unique($myExtraKeys);
 
-        foreach ($project->getAllMetadata() as $metadatum) {
+        foreach ((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->allByProjectId((int) $project->id) as $metadatum) {
             $key = $metadatum->key;
 
             if (in_array($key, $myExtraKeys)) {

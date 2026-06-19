@@ -4,7 +4,6 @@ namespace Matecat\Core\Model\Projects;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
 use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -100,15 +99,6 @@ class ProjectStructTest extends AbstractTest
     }
 
     #[Test]
-    public function getJobsReturnsArrayWhenProjectIdIsSet(): void
-    {
-        $project = new ProjectStruct();
-        $project->id = 1;
-
-        $this->assertIsArray($project->getJobs());
-    }
-
-    #[Test]
     public function getMetadataValueReturnsNullOrStringWhenProjectIdIsSet(): void
     {
         $project = new ProjectStruct();
@@ -119,55 +109,10 @@ class ProjectStructTest extends AbstractTest
         $this->assertTrue($value === null || is_string($value));
     }
 
-    #[Test]
-    public function getAllMetadataReturnsArrayWhenProjectIdIsSet(): void
-    {
-        $project = new ProjectStruct();
-        $project->id = 1;
-
-        $this->assertIsArray($project->getAllMetadata());
-    }
-
-    #[Test]
-    public function getChunksReturnsArrayWhenProjectIdIsSet(): void
-    {
-        $project = new ProjectStruct();
-        $project->id = 1;
-
-        $this->assertIsArray($project->getChunks());
-    }
-
-    #[Test]
-    public function getAllMetadataAsKeyValueReturnsKeyValueMap(): void
-    {
-        $recordOne = new MetadataStruct();
-        $recordOne->id_project = 1;
-        $recordOne->key = 'first_key';
-        $recordOne->value = 'first_value';
-
-        $recordTwo = new MetadataStruct();
-        $recordTwo->id_project = 1;
-        $recordTwo->key = 'second_key';
-        $recordTwo->value = 'second_value';
-
-        $project = new ProjectStructTestDouble();
-        $project->allMetadata = [$recordOne, $recordTwo];
-
-        $this->assertSame(
-            [
-                'first_key' => 'first_value',
-                'second_key' => 'second_value',
-            ],
-            $project->getAllMetadataAsKeyValue()
-        );
-    }
 }
 
 class ProjectStructTestDouble extends ProjectStruct
 {
-    /** @var JobStruct[] */
-    public array $jobs = [];
-
     /** @var array<string, mixed> */
     public array $metadataValues = [];
 
@@ -177,11 +122,6 @@ class ProjectStructTestDouble extends ProjectStruct
     public function setCachedResult(string $key, mixed $value): void
     {
         $this->cached_results[$key] = $value;
-    }
-
-    public function getJobs(int $ttl = 0): array
-    {
-        return $this->jobs;
     }
 
     public function getMetadataValue(string $key): mixed

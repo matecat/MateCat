@@ -5,6 +5,7 @@ namespace Matecat\Core\Plugins\ProjectCompletion;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,13 +28,23 @@ class ProjectCompletionStatusModelTest extends AbstractTest
         ]);
     }
 
-    private function makeProject(array $chunks): ProjectStruct
+    private function makeProject(): ProjectStruct
     {
-        $project = $this->createStub(ProjectStruct::class);
+        $project = new ProjectStruct();
         $project->id = 100;
-        $project->method('getChunks')->willReturn($chunks);
 
         return $project;
+    }
+
+    /**
+     * @param JobStruct[] $chunks
+     */
+    private function makeJobDao(array $chunks): JobDao
+    {
+        $jobDao = $this->createStub(JobDao::class);
+        $jobDao->method('getNotDeletedByProjectId')->willReturn($chunks);
+
+        return $jobDao;
     }
 
     private function makeCompletionRecord(int $eventId, string $createDate): array
@@ -48,7 +59,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
     public function getStatusAllCompleted(): void
     {
         $chunk = $this->makeChunk();
-        $project = $this->makeProject([$chunk]);
+        $project = $this->makeProject();
 
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('lastCompletionRecord')->willReturn(
@@ -57,7 +68,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao, $this->makeJobDao([$chunk]));
         $status = $model->getStatus();
 
         $this->assertTrue($status['completed']);
@@ -72,14 +83,14 @@ class ProjectCompletionStatusModelTest extends AbstractTest
     public function getStatusNoneCompleted(): void
     {
         $chunk = $this->makeChunk();
-        $project = $this->makeProject([$chunk]);
+        $project = $this->makeProject();
 
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('lastCompletionRecord')->willReturn([]);
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao, $this->makeJobDao([$chunk]));
         $status = $model->getStatus();
 
         $this->assertFalse($status['completed']);
@@ -92,7 +103,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
     public function getStatusTranslateCompletedReviseNot(): void
     {
         $chunk = $this->makeChunk();
-        $project = $this->makeProject([$chunk]);
+        $project = $this->makeProject();
 
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('lastCompletionRecord')->willReturnCallback(
@@ -107,7 +118,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao, $this->makeJobDao([$chunk]));
         $status = $model->getStatus();
 
         $this->assertFalse($status['completed']);
@@ -119,7 +130,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
     public function getStatusCachesResult(): void
     {
         $chunk = $this->makeChunk();
-        $project = $this->makeProject([$chunk]);
+        $project = $this->makeProject();
 
         $eventDao = $this->createMock(ChunkCompletionEventDao::class);
         $eventDao->expects($this->exactly(2))
@@ -128,7 +139,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao, $this->makeJobDao([$chunk]));
         $first = $model->getStatus();
         $second = $model->getStatus();
 
@@ -140,7 +151,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
     {
         $chunk1 = $this->makeChunk(1, 'pw1');
         $chunk2 = $this->makeChunk(2, 'pw2');
-        $project = $this->makeProject([$chunk1, $chunk2]);
+        $project = $this->makeProject();
 
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('lastCompletionRecord')->willReturn(
@@ -149,7 +160,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao, $this->makeJobDao([$chunk1, $chunk2]));
         $status = $model->getStatus();
 
         $this->assertTrue($status['completed']);
@@ -161,7 +172,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
     public function getStatusDispatchesFeatureSetForReviewPassword(): void
     {
         $chunk = $this->makeChunk();
-        $project = $this->makeProject([$chunk]);
+        $project = $this->makeProject();
 
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('lastCompletionRecord')->willReturn([]);
@@ -170,7 +181,7 @@ class ProjectCompletionStatusModelTest extends AbstractTest
         $featureSet->expects($this->once())->method('loadForProject');
         $featureSet->expects($this->once())->method('dispatch');
 
-        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao);
+        $model = new ProjectCompletionStatusModel($project, $featureSet, $eventDao, $this->makeJobDao([$chunk]));
         $model->getStatus();
     }
 }

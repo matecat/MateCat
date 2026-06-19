@@ -907,7 +907,7 @@ class CatUtils
     {
         $idJobs = [];
 
-        foreach ($projectStruct->getJobs() as $job) {
+        foreach ($this->jobDao->getNotDeletedByProjectId((int) $projectStruct->id) as $job) {
             $idJobs[] = $job->id;
         }
 

@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -42,7 +43,7 @@ class SplitJobController extends KleinController
         $pManager = $projectStructure['pManager'];
         $project = $projectStructure['project'];
 
-        $jobStructs = $this->checkMergeAccess($request['job_id'], $project->getJobs());
+        $jobStructs = $this->checkMergeAccess($request['job_id'], $this->getProjectJobs($project));
         $data->jobToMerge = $request['job_id'];
         $pManager->mergeALL($data, $jobStructs);
 
@@ -109,7 +110,7 @@ class SplitJobController extends KleinController
         $project = $projectStructure['project'];
         $count_type = $projectStructure['count_type'];
 
-        $this->checkSplitAccess($request['job_id'], $request['job_pass'], $project->getJobs());
+        $this->checkSplitAccess($request['job_id'], $request['job_pass'], $this->getProjectJobs($project));
 
         $data->jobToSplit = $request['job_id'];
         $data->jobToSplitPass = $request['job_pass'];
@@ -166,6 +167,16 @@ class SplitJobController extends KleinController
             'num_split' => (int)$num_split,
             'split_values' => $split_values,
         ];
+    }
+
+    /**
+     * @return JobStruct[]
+     *
+     * @throws Exception
+     */
+    protected function getProjectJobs(ProjectStruct $project): array
+    {
+        return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $project->id);
     }
 
     /**

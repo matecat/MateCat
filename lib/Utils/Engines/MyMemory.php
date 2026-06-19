@@ -105,6 +105,7 @@ class MyMemory extends AbstractEngine
      *
      * @return TMSAbstractResponse
      * @throws TypeError
+     * @throws Exception
      */
     protected function _decode(mixed $rawValue, array $parameters = [], ?string $function = null): TMSAbstractResponse
     {
@@ -894,6 +895,7 @@ class MyMemory extends AbstractEngine
      *
      * @throws RuntimeException
      * @throws TypeError
+     * @throws Exception
      * @throws \Psr\Log\InvalidArgumentException
      */
     private function callAnalyzeUrl(array $segments): void

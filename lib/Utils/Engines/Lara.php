@@ -13,6 +13,7 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
+use Model\Jobs\JobDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -693,7 +694,7 @@ class Lara extends AbstractEngine
                 return;
             }
 
-            foreach ($project->getJobs() as $job) {
+            foreach ((new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id) as $job) {
                 $keyIds = [];
                 $jobKeyListRead = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
                 $jobKeyListWrite = TmKeyManager::getJobTmKeys($job->tm_keys, 'w', 'tm', $user->uid);

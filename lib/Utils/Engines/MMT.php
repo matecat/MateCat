@@ -8,6 +8,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
@@ -426,7 +427,7 @@ class MMT extends AbstractEngine
                 return;
             }
 
-            foreach ($project->getJobs() as $job) {
+            foreach ((new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id) as $job) {
                 $memoryKeyStructs = [];
                 $jobKeyList = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
 

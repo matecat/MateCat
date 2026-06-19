@@ -25,8 +25,7 @@ class MetadataDao extends AbstractDao
      */
     public function allByProjectId(int $id): array
     {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(self::$_query_get_metadata);
+        $stmt = $this->_getStatementForQuery(self::$_query_get_metadata);
 
         /** @var MetadataStruct[] $list */
         $list = $this->_fetchObjectMap($stmt, MetadataStruct::class, ['id_project' => $id]);
@@ -35,6 +34,21 @@ class MetadataDao extends AbstractDao
         }
 
         return $list;
+    }
+
+    /**
+     * @return array<string, string>
+     * @throws Exception
+     */
+    public function allByProjectIdAsKeyValue(int $id): array
+    {
+        $collection = $this->allByProjectId($id);
+        $data = [];
+        foreach ($collection as $record) {
+            $data[$record->key] = $record->value;
+        }
+
+        return $data;
     }
 
 

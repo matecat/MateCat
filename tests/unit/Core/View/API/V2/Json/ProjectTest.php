@@ -140,15 +140,13 @@ class ProjectTest extends AbstractTest
     // ------------------------------------------------------------------
 
     /**
-     * renderItem() contains three DB blockers that cannot be injected:
+     * renderItem() contains two DB blockers that cannot be injected:
      *   1. $project->getFeaturesSet() — hits ProjectDao internally
-     *   2. $project->getJobs()        — hits JobDao internally
-     *   3. new Status(...)            — immediately calls ProjectDao::findById()
+     *   2. new Status(...)            — immediately calls ProjectDao::findById()
      *
      * We override the Status instantiation via a testable subclass and
-     * stub getFeaturesSet() / getJobs() on a
-     * ProjectStruct stub. This exercises the full renderItem() body except
-     * the Status::fetchData() call.
+     * stub getFeaturesSet() on a ProjectStruct stub. This exercises the full
+     * renderItem() body except the Status::fetchData() call.
      */
     public function testRenderItemReturnsExpectedKeys(): void
     {
@@ -180,7 +178,6 @@ class ProjectTest extends AbstractTest
         $project->tm_analysis_wc      = 300.0;
         $project->due_date            = null;
         $project->method('getFeaturesSet')->willReturn($featureSet);
-        $project->method('getJobs')->willReturn([]);
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('setCacheTTL')->willReturnSelf();
         $projectDao->method('getRemoteFileServiceName')->willReturn([]);
@@ -197,7 +194,6 @@ class ProjectTest extends AbstractTest
             public function renderItem(ProjectStruct $project): array
             {
                 $featureSet = $project->getFeaturesSet();
-                $jobs       = $project->getJobs(60 * 10);
 
                 $this->metadataDao ??= new \Model\Projects\MetadataDao();
                 $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
@@ -299,7 +295,6 @@ class ProjectTest extends AbstractTest
         $project->tm_analysis_wc      = 0.0;
         $project->due_date    = null;
         $project->method('getFeaturesSet')->willReturn($featureSet);
-        $project->method('getJobs')->willReturn([]);
         $projectDao2 = $this->createStub(ProjectDao::class);
         $projectDao2->method('setCacheTTL')->willReturnSelf();
         $projectDao2->method('getRemoteFileServiceName')->willReturn([]);
@@ -315,7 +310,6 @@ class ProjectTest extends AbstractTest
             public function renderItem(ProjectStruct $project): array
             {
                 $featureSet = $project->getFeaturesSet();
-                $jobs       = $project->getJobs(60 * 10);
 
                 $this->metadataDao ??= new \Model\Projects\MetadataDao();
                 $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');

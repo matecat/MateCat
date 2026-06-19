@@ -46,7 +46,7 @@ class FeatureSet implements EventDispatcherInterface
 
     private LoggerInterface $logger;
 
-    private ?IDatabase $database = null;
+    private ?IDatabase $database;
 
     /**
      * @return BasicFeatureStruct[]

@@ -579,7 +579,8 @@ class SegmentTranslationDao extends AbstractDao
         ProjectStruct $project,
         bool $execute_update = true
     ): array {
-        $wordCountType = (new MetadataDao($this->database))->setCacheTTL(3600)->get((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)->value ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+        $wordCountMeta = (new MetadataDao($this->database))->setCacheTTL(3600)->get((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value);
+        $wordCountType = $wordCountMeta !== null ? $wordCountMeta->value : ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
         if ($wordCountType == ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {

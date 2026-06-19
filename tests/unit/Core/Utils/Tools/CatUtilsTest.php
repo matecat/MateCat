@@ -1402,17 +1402,29 @@ class CatUtilsTest extends AbstractTest
 
     /**
      * getSegmentTranslationsCount exercising filter path.
-     * Covers lines 878-886 (getJobs, array_unique, array_filter).
-     * Note: getJobs() returns empty array for a stub project with no DB data,
-     * but passing empty array to IN() causes SQL error, so we just verify it runs.
+     * Covers lines 878-886 (JobDao::getNotDeletedByProjectId, array_unique, array_filter).
+     * When the injected JobDao returns no jobs the downstream
+     * getSegmentTranslationsCount() receives an empty $idJobs and returns null.
      */
     #[Test]
-    public function testGetSegmentTranslationsCountWithEmptyJobsThrowsPdo(): void
+    public function testGetSegmentTranslationsCountWithEmptyJobsReturnsNull(): void
     {
+        [$dbStub] = $this->createDatabaseMock();
+
+        $fakeJobDao = new class($dbStub) extends JobDao {
+            public function getNotDeletedByProjectId(int $projectId, int $ttl = 0): array
+            {
+                return [];
+            }
+
+            public function getSegmentTranslationsCount(array $idJobs, int $ttl = 0): ?int
+            {
+                return null;
+            }
+        };
+
         $project = new ProjectStruct(['id' => 999999]);
-        // getJobs() returns empty → idJobs is empty → SQL IN() with no values → PDOException
-        $this->expectException(PDOException::class);
-        (new CatUtils())->getSegmentTranslationsCount($project);
+        $this->assertNull((new CatUtils(null, $fakeJobDao))->getSegmentTranslationsCount($project));
     }
 
     // =========================================================================
@@ -1635,22 +1647,19 @@ class CatUtilsTest extends AbstractTest
             {
                 parent::__construct($db);
             }
+            public function getNotDeletedByProjectId(int $projectId, int $ttl = 0): array
+            {
+                $job = new JobStruct();
+                $job->id = 1;
+                return [$job];
+            }
             public function getSegmentTranslationsCount(array $idJobs, int $ttl = 0): ?int
             {
                 return $this->count;
             }
         };
 
-        // ProjectStruct::getJobs() hits DB; override with anonymous subclass.
-        $fakeProject = new class extends ProjectStruct {
-            /** @return JobStruct[] */
-            public function getJobs(int $ttl = 0): array
-            {
-                $job = new JobStruct();
-                $job->id = 1;
-                return [$job];
-            }
-        };
+        $fakeProject = new ProjectStruct(['id' => 1]);
 
         $cat = new CatUtils(null, $fakeJobDao);
         $result = $cat->getSegmentTranslationsCount($fakeProject);

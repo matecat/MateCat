@@ -34,15 +34,16 @@ class ProjectAssignedEmail extends AbstractEmail
     private array $jobs;
 
     /**
+     * @param JobStruct[] $jobs
      * @throws DomainException
      */
-    public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee)
+    public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee, array $jobs)
     {
         $this->user = $user;
         $this->project = $project;
         $this->assignee = $assignee;
 
-        $this->jobs = $project->getJobs();
+        $this->jobs = $jobs;
 
         $this->title = "You've been assigned a project";
 

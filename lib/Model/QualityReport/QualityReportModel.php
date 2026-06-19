@@ -18,6 +18,7 @@ use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\Users\UserDao;
@@ -252,12 +253,16 @@ class QualityReportModel
         return $this->quality_report_structure;
     }
 
-    /** @return array<string, mixed>
+    /**
+     * @return array<string, mixed>
      * @throws DomainException
+     * @throws Exception
      */
     protected function getAndDecodePossiblyProjectMetadataJson(): array
     {
-        return $this->getProject()->getAllMetadataAsKeyValue();
+        $project = $this->getProject();
+
+        return (new ProjectMetadataDao($this->database))->setCacheTTL(3600)->allByProjectIdAsKeyValue((int) $project->id);
     }
 
     /**

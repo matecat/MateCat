@@ -11,6 +11,7 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Model\Analysis\Status;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -121,7 +122,8 @@ class Project
     public function renderItem(ProjectStruct $project): array
     {
         $featureSet = $project->getFeaturesSet();
-        $jobs = $project->getJobs(60 * 10); //cached
+        $this->projectDao ??= new ProjectDao();
+        $jobs = (new JobDao($this->projectDao->getDatabaseHandler()))->getNotDeletedByProjectId((int) $project->id, 60 * 10); //cached
 
         $jobJSONs = [];
         $jobStatuses = [];

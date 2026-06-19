@@ -149,7 +149,7 @@ class ProjectsController extends KleinController
     {
         (new ProjectAccessValidator($this, $this->project))->validate();
 
-        $chunks = $this->project->getJobs();
+        $chunks = (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int) $this->project->id);
 
         foreach ($chunks as $chunk) {
             // update a job only if it is NOT deleted

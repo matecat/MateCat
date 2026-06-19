@@ -16,6 +16,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -303,7 +304,9 @@ class FastAnalysis extends AbstractDaemon
 
                         return [
                             'project' => $projectStruct,
-                            'metadata' => $projectStruct->getAllMetadataAsKeyValue(),
+                            'metadata' => (new ProjectMetadataDao($this->db()))
+                                ->setCacheTTL(3600)
+                                ->allByProjectIdAsKeyValue((int)$projectStruct->id),
                         ];
                     });
 
@@ -543,18 +546,19 @@ class FastAnalysis extends AbstractDaemon
      * @throws Throwable
      */
     protected function _insertFastAnalysis(
-        ProjectStruct $projectStruct,
-        string $projectFeaturesString,
-        array $equivalentWordMapping,
-        FeatureSet $featureSet,
-        bool $perform_Tms_Analysis = true,
-        ?bool $mt_evaluation = false,
-        ?bool $mt_qe_workflow_enabled = false,
+        ProjectStruct       $projectStruct,
+        string              $projectFeaturesString,
+        array               $equivalentWordMapping,
+        FeatureSet          $featureSet,
+        bool                $perform_Tms_Analysis = true,
+        ?bool               $mt_evaluation = false,
+        ?bool               $mt_qe_workflow_enabled = false,
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
-        ?int $mt_quality_value_in_editor = 85,
-        ?array $subfiltering_handlers = [],
-        bool $icu_enabled = false
-    ): int {
+        ?int                $mt_quality_value_in_editor = 85,
+        ?array              $subfiltering_handlers = [],
+        bool                $icu_enabled = false
+    ): int
+    {
         $pid = $projectStruct->id;
         if ($pid === null) {
             throw new RuntimeException('ProjectStruct has no ID');
@@ -920,7 +924,8 @@ HD;
             'pid' => null,
             'queueInfo' => null
         ]
-    ): void {
+    ): void
+    {
         if (empty($config['pid'])) {
             throw new Exception('Can Not set a Total without a Queue ID.');
         }

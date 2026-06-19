@@ -9,8 +9,6 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobDao;
-use Model\Jobs\JobStruct;
 use Utils\Constants\ProjectStatus;
 
 /**
@@ -50,46 +48,6 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
             $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
     }
 
-    /**
-     * @param int $ttl
-     *
-     * @return JobStruct[]
-     *
-     * @throws DomainException
-     */
-    public function getJobs(int $ttl = 0): array
-    {
-        $id = $this->id ?? throw new DomainException("Project ID must not be null");
-
-        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
-            return (new JobDao())->getNotDeletedByProjectId($id, $ttl);
-        });
-    }
-
-    /**
-     * @return int
-     *
-     * @throws DomainException
-     */
-
-
-    /**
-     *
-     * @return array<string, string>
-     *
-     * @throws DomainException
-     */
-    public function getAllMetadataAsKeyValue(): array
-    {
-        $collection = $this->getAllMetadata();
-        $data = [];
-        foreach ($collection as $record) {
-            $data[$record->key] = $record->value;
-        }
-
-        return $data;
-    }
-
 
     /**
      * @param string $key
@@ -106,22 +64,6 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
             $mDao = new MetadataDao();
 
             return $mDao->setCacheTTL(60 * 60)->get($id, $key)?->value;
-        });
-    }
-
-    /**
-     * @return MetadataStruct[]
-     *
-     * @throws DomainException
-     */
-    public function getAllMetadata(): array
-    {
-        $id = $this->id ?? throw new DomainException("Project ID must not be null");
-
-        return $this->cachable(__METHOD__, function () use ($id) {
-            $mDao = new MetadataDao();
-
-            return $mDao->setCacheTTL(60 * 60)->allByProjectId($id);
         });
     }
 
@@ -148,24 +90,6 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
             $featureSet->loadForProject($this);
 
             return $featureSet;
-        });
-    }
-
-    /**
-     * @param int $ttl
-     *
-     * @return JobStruct[]
-     *
-     * @throws DomainException
-     */
-    public function getChunks(int $ttl = 0): array
-    {
-        $id = $this->id ?? throw new DomainException("Project ID must not be null");
-
-        return $this->cachable(__METHOD__, function () use ($id, $ttl) {
-            $dao = new JobDao();
-
-            return $dao->setCacheTTL($ttl)->getNotDeletedByProjectId($id);
         });
     }
 

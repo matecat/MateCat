@@ -67,6 +67,7 @@ abstract class AbstractEngine implements EngineInterface
     protected bool $logging = true;
     protected string $content_type = 'xml';
 
+    protected ?IDatabase $database = null;
     protected ?FeatureSet $featureSet = null;
     protected ?int $mt_penalty = null;
 
@@ -81,6 +82,7 @@ abstract class AbstractEngine implements EngineInterface
      */
     public function __construct(EngineStruct $engineRecord, ?IDatabase $database = null)
     {
+        $this->database = $database;
         $this->engineRecord = $engineRecord;
         $this->className = get_class($this);
 

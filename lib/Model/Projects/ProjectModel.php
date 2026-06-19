@@ -5,6 +5,7 @@ namespace Model\Projects;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
@@ -125,7 +126,8 @@ class ProjectModel
             if ($assignee === null) {
                 return;
             }
-            $email = new ProjectAssignedEmail($this->user, $this->project_struct, $assignee);
+            $jobs = (new JobDao())->getNotDeletedByProjectId((int) $this->project_struct->id);
+            $email = new ProjectAssignedEmail($this->user, $this->project_struct, $assignee, $jobs);
             $email->send();
         }
     }
