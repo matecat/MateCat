@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\ReviewPasswordChangedEvent;
 use Model\Jobs\JobDao;
@@ -118,8 +119,8 @@ class ChangePasswordController extends KleinController
                 $dao = new ChunkReviewDao($this->getDatabase());
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
-                $jStruct->getProject()
-                    ->getFeaturesSet()->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
+                FeatureSet::forProject($jStruct->getProject(), $this->getDatabase())
+                    ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
 
             } else { // change job password
                 $jDao = new JobDao($this->getDatabase());
@@ -132,8 +133,8 @@ class ChangePasswordController extends KleinController
                 $this->checkUserPermissions($jStruct->getProject(), $user);
 
                 $jDao->changePassword($jStruct, $new_password);
-                $jStruct->getProject()
-                    ->getFeaturesSet()->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
+                FeatureSet::forProject($jStruct->getProject(), $this->getDatabase())
+                    ->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
             }
 
             // invalidate ChunkReviewDao cache for the job

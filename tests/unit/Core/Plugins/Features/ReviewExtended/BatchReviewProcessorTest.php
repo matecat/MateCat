@@ -6,8 +6,6 @@ namespace Matecat\Core\Plugins\Features\ReviewExtended;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
-use Model\FeaturesBase\BasicFeatureStruct;
-use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -61,13 +59,7 @@ class BatchReviewProcessorTest extends AbstractTest
         $this->chunkReviewDaoStub = $this->createStub(ChunkReviewDao::class);
         $this->chunkReviewDaoStub->method('getDatabaseHandler')->willReturn($this->dbStub);
 
-        $featureSet = $this->createStub(FeatureSet::class);
-        $featureSet->method('getFeaturesStructs')->willReturn([
-            new BasicFeatureStruct(['feature_code' => 'review_extended']),
-        ]);
-
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getFeaturesSet')->willReturn($featureSet);
         $projectStub->id = 1;
 
         $this->chunk = new BatchReviewProcessorStubJobStruct([

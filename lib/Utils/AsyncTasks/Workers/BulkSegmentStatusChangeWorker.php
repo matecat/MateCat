@@ -5,6 +5,7 @@ namespace Utils\AsyncTasks\Workers;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
@@ -73,9 +74,12 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $segmentTranslationDao = new SegmentTranslationDao($this->database);
 
+        $project = $chunk->getProject();
+        $featureSet = FeatureSet::forProject($project, $this->database);
+
         $batchEventCreator = $this->createTranslationEventsHandler($chunk);
-        $batchEventCreator->setFeatureSet($chunk->getProject()->getFeaturesSet());
-        $batchEventCreator->setProject($chunk->getProject());
+        $batchEventCreator->setFeatureSet($featureSet);
+        $batchEventCreator->setProject($project);
 
         $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], (int)$chunk->id);
 
@@ -92,7 +96,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
             $new_translations[] = $new_translation;
 
-            if ($chunk->getProject()->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+            if ($featureSet->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
                     $segmentTranslationEvent = $this->createTranslationEvent($old_translation, $new_translation, $user, $source_page);
                 } catch (Exception $e) {

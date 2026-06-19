@@ -187,7 +187,7 @@ class QualityReportModel
      */
     protected function createRevisionFactory(): RevisionFactory
     {
-        return RevisionFactory::initFromProject($this->getProject());
+        return RevisionFactory::initFromProject($this->getProject(), $this->database);
     }
 
     /**

@@ -58,7 +58,7 @@ class JobsTranslatorsController extends KleinController
             throw new NotFoundException('No job found.');
         }
 
-        $TranslatorsModel = new TranslatorsModel($this->jStruct);
+        $TranslatorsModel = new TranslatorsModel($this->jStruct, $this->getDatabase());
         $TranslatorsModel
             ->setUserInvite($this->user)
             ->setDeliveryDate((string)($this->params['delivery_date'] ?? ''))

@@ -3,11 +3,9 @@
 namespace Model\Projects;
 
 use ArrayAccess;
-use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
-use Model\FeaturesBase\FeatureSet;
 use Utils\Constants\ProjectStatus;
 
 /**
@@ -46,39 +44,5 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
             $this->status_analysis == ProjectStatus::STATUS_DONE ||
             $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
     }
-
-
-
-
-    /**
-     * @param $feature_code
-     *
-     * @return bool
-     *
-     */
-    public function isFeatureEnabled(string $feature_code): bool
-    {
-        return in_array($feature_code, $this->getFeaturesSet()->getCodes());
-    }
-
-    /**
-     * @return FeatureSet
-     */
-    public function getFeaturesSet(): FeatureSet
-    {
-        return $this->cachable(__METHOD__, function () {
-            $featureSet = new FeatureSet();
-            $featureSet->loadForProject($this);
-
-            return $featureSet;
-        });
-    }
-
-
-    public function hasFeature(string $feature_code): bool
-    {
-        return in_array($feature_code, $this->getFeaturesSet()->getCodes());
-    }
-
 
 }

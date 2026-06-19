@@ -4,6 +4,8 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Exception;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -81,6 +83,7 @@ class ProjectValidator extends Base
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _validate(): void
     {
@@ -101,9 +104,16 @@ class ProjectValidator extends Base
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function validateFeatureEnabled(): bool
     {
-        return $this->feature == null || $this->project->isFeatureEnabled($this->feature);
+        if ($this->feature === null || $this->project === null) {
+            return true;
+        }
+
+        return FeatureSet::forProject($this->project, $this->controller->getDatabase())->hasFeature($this->feature);
     }
 
     /**

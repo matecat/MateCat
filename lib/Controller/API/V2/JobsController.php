@@ -53,7 +53,7 @@ class JobsController extends KleinController
      */
     public function show(): void
     {
-        $format = new Chunk();
+        $format = new Chunk($this->getDatabase());
         $format->setUser($this->user);
         $format->setCalledFromApi(true);
 

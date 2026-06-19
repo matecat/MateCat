@@ -41,7 +41,7 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function getChunk(): JobStruct
     {
-        return $this->cachable(__METHOD__, function () {
+        return $this->memoize(__METHOD__, function () {
             return (new JobDao())->getByIdAndPasswordOrFail($this->id_job, $this->password);
         });
     }

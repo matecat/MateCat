@@ -13,6 +13,7 @@ namespace Model\Translators;
 use Controller\Abstracts\KleinController;
 use Exception;
 use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
@@ -71,6 +72,8 @@ class TranslatorsModel
      * @var FeatureSet
      */
     protected FeatureSet $featureSet;
+
+    protected IDatabase $database;
 
     /**
      * Override the Job Password from Outside
@@ -151,20 +154,23 @@ class TranslatorsModel
      * TranslatorsModel constructor.
      *
      * @param JobStruct $jStruct
+     * @param IDatabase $database
      * @param int $project_cache_TTL
      *
      * @throws TypeError
+     * @throws Exception
      */
-    public function __construct(JobStruct $jStruct, int $project_cache_TTL = 60 * 60)
+    public function __construct(JobStruct $jStruct, IDatabase $database, int $project_cache_TTL = 60 * 60)
     {
         //get the job
         $this->jStruct = $jStruct;
+        $this->database = $database;
 
         $this->id_job = $jStruct->id;
         $this->job_password = $jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
         $this->project = $this->jStruct->getProject($project_cache_TTL);
-        $this->featureSet = $this->project->getFeaturesSet();
+        $this->featureSet = FeatureSet::forProject($this->project, $this->database);
     }
 
     /**

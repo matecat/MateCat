@@ -901,10 +901,11 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * init VersionHandler
      * @throws RuntimeException
+     * @throws Exception
      */
     private function initVersionHandler(): void
     {
-        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->data['chunk'], $this->user, $this->data['project'], (int)$this->data['id_segment']);
+        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance($this->data['chunk'], $this->user, $this->data['project'], (int)$this->data['id_segment'], $this->getDatabase());
     }
 
     /**

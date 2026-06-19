@@ -62,7 +62,7 @@ class TeamsProjectsController extends KleinController
         }
 
         $updatedStruct = $projectModel->update();
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
         $formatted->setUser($this->user);
 
         $this->refreshClientSessionIfNotApi();
@@ -98,7 +98,7 @@ class TeamsProjectsController extends KleinController
     public function get(): void
     {
         $this->_appendSingleProjectTeamValidators()->validateRequest();
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
         $this->response->json(['project' => $formatted->renderItem($this->project)]);
     }
 
@@ -124,6 +124,7 @@ class TeamsProjectsController extends KleinController
 
         $projects = ManageModel::getProjects(
             $this->user,
+            $this->getDatabase(),
             $start,
             $step,
             $search_in_pname,

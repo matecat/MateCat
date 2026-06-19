@@ -6,6 +6,7 @@ use ArrayObject;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use PDOException;
 use TypeError;
 use Model\Analysis\AnalysisDao;
 use Model\Concerns\LogsMessages;
@@ -92,7 +93,7 @@ class JobSplitMergeService
 
     /**
      * Begin a database transaction using the injected handler.
-     * @throws \PDOException
+     * @throws PDOException
      */
     protected function beginTransaction(): void
     {
@@ -109,7 +110,7 @@ class JobSplitMergeService
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      * @throws ReflectionException
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
@@ -139,7 +140,7 @@ class JobSplitMergeService
 
     /**
      * Wrapper around static JobDao::deleteOnMerge() — overridable in tests.
-     * @throws \PDOException
+     * @throws PDOException
      */
     protected function deleteOnMerge(JobStruct $job): void
     {
@@ -173,11 +174,12 @@ class JobSplitMergeService
     /**
      * Create a new TranslatorsModel instance — overridable in tests.
      *
-     * @throws \TypeError
+     * @throws TypeError
+     * @throws Exception
      */
     protected function createTranslatorsModel(JobStruct $job): TranslatorsModel
     {
-        return new TranslatorsModel($job);
+        return new TranslatorsModel($job, $this->dbHandler);
     }
 
     /**
@@ -370,7 +372,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split (nullable)
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -390,7 +392,7 @@ class JobSplitMergeService
      * @param int|null $uid The user ID performing the split
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
     {
@@ -539,7 +541,7 @@ class JobSplitMergeService
      * @param JobStruct[] $jobStructs
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {

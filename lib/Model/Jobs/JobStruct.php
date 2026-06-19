@@ -138,7 +138,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getTranslator(?JobsTranslatorsDao $jTranslatorsDao = null): ?JobsTranslatorsStruct
     {
-        $this->_translator = $this->cachable(__METHOD__, function () use ($jTranslatorsDao) {
+        $this->_translator = $this->memoize(__METHOD__, function () use ($jTranslatorsDao) {
             $jTranslatorsDao ??= new JobsTranslatorsDao();
 
             return $jTranslatorsDao->setCacheTTL(60 * 60)->findByJobsStruct($this)[0] ?? null;
@@ -156,7 +156,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getOutsource(?ConfirmationDao $outsourceDao = null): ?ConfirmationStruct
     {
-        $this->_outsource = $this->cachable(__METHOD__, function () use ($outsourceDao) {
+        $this->_outsource = $this->memoize(__METHOD__, function () use ($outsourceDao) {
             $outsourceDao ??= new ConfirmationDao();
 
             return $outsourceDao->setCacheTTL(60 * 60)->getConfirmation($this);
@@ -203,7 +203,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getOpenThreadsCount(?CommentDao $dao = null): int
     {
-        $this->_openThreads = $this->cachable(__METHOD__, function () use ($dao) {
+        $this->_openThreads = $this->memoize(__METHOD__, function () use ($dao) {
             $dao ??= new CommentDao();
             $openThreads = $dao->setCacheTTL(60 * 10)->getOpenThreadsForProjects([$this->id_project]); //ten minutes cache
             foreach ($openThreads as $openThread) {
@@ -224,7 +224,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getWarningsCount(?WarningDao $dao = null): object
     {
-        return $this->cachable(__METHOD__, function () use ($dao) {
+        return $this->memoize(__METHOD__, function () use ($dao) {
             $dao ??= new WarningDao();
             $warningsCount = $dao->setCacheTTL(60 * 10)->getWarningsByProjectIds([$this->id_project]);
             $ret = [];
@@ -265,7 +265,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getProject(int $ttl = 86400): ProjectStruct
     {
-        return $this->cachable(__METHOD__, function () use ($ttl) {
+        return $this->memoize(__METHOD__, function () use ($ttl) {
             return (new ProjectDao())->findById($this->id_project, $ttl);
         });
     }
@@ -279,7 +279,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     {
         $id = $this->id ?? throw new DomainException("Job ID must not be null");
 
-        return $this->cachable(__METHOD__, function () use ($id, $dao) {
+        return $this->memoize(__METHOD__, function () use ($id, $dao) {
             $dao ??= new JobDao();
             return $dao->getNotDeletedById($id);
         });

@@ -426,18 +426,6 @@ parameters:
 			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
 
 		-
-			message: '#^Cannot call method isFeatureEnabled\(\) on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
 			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:getProject\(\) should return Model\\Projects\\ProjectStruct but returns Model\\Projects\\ProjectStruct\|null\.$#'
 			identifier: return.type
 			count: 1

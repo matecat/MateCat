@@ -11,6 +11,7 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\ChunkReviewUpdatedEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -138,7 +139,7 @@ class ChunkReviewModel implements IChunkReviewModel
         $chunkReviewDao = new ChunkReviewDao();
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
 
-        $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
+        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             1,
             $this,
@@ -197,7 +198,7 @@ class ChunkReviewModel implements IChunkReviewModel
         );
 
         // External call by Plugins
-        $project->getFeaturesSet()->dispatch(new ChunkReviewUpdatedEvent(
+        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
             $this->chunk_review,
             $update_result,
             $this,

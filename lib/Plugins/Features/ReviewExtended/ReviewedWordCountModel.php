@@ -9,7 +9,9 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
+use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
@@ -66,6 +68,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     private CounterModel $_jobWordCounter;
 
+    private IDatabase $_database;
+
     /**
      * @param ChunkReviewStruct[] $chunkReviews
      *
@@ -73,8 +77,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      * @throws RuntimeException
      * @throws Exception
      */
-    public function __construct(TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews)
+    public function __construct(TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews, IDatabase $database)
     {
+        $this->_database = $database;
         $this->_event = $event;
         $this->_chunkReviews = $chunkReviews;
 
@@ -372,7 +377,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         }
 
         $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
-        $this->_chunk->getProject()->getFeaturesSet()->dispatch($filterRevisionChangeNotificationListEvent);
+        FeatureSet::forProject($this->_chunk->getProject(), $this->_database)->dispatch($filterRevisionChangeNotificationListEvent);
         $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {

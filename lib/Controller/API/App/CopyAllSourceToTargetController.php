@@ -7,6 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -90,7 +91,7 @@ class CopyAllSourceToTargetController extends KleinController
         $database = $this->getDatabase();
         $database->begin();
 
-        $features = $chunk->getProject()->getFeaturesSet();
+        $features = FeatureSet::forProject($chunk->getProject(), $this->getDatabase());
 
         $batchEventCreator = new TranslationEventsHandler($chunk);
         $batchEventCreator->setFeatureSet($features);
@@ -126,7 +127,7 @@ class CopyAllSourceToTargetController extends KleinController
                 throw new RuntimeException($e->getMessage(), -4);
             }
 
-            if ($chunk->getProject()->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+            if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
                     $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page);
                     $batchEventCreator->addEvent($segmentTranslationEventModel);

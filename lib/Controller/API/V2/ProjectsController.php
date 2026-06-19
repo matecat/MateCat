@@ -41,7 +41,7 @@ class ProjectsController extends KleinController
      */
     public function get(): void
     {
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
         $formatted->setUser($this->user);
         if (!empty($this->api_key)) {
             $formatted->setCalledFromApi(true);
@@ -83,7 +83,7 @@ class ProjectsController extends KleinController
             $project_dao->updateField($this->project, "due_date", $due_date);
         }
 
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
 
         //$this->response->json( $this->project->toArray() );
         $this->response->json(['project' => $formatted->renderItem($this->project)]);
@@ -101,7 +101,7 @@ class ProjectsController extends KleinController
         $project_dao = new ProjectDao($this->getDatabase());
         $project_dao->updateField($this->project, "due_date", null);
 
-        $formatted = new Project();
+        $formatted = new Project($this->getDatabase());
         $this->response->json(['project' => $formatted->renderItem($this->project)]);
     }
 

@@ -52,7 +52,7 @@ class BatchReviewProcessor
         ?Closure $chunkReviewModelFactory = null,
     ) {
         $this->reviewedWordCountModelFactory = $reviewedWordCountModelFactory
-            ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews);
+            ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews, $this->chunkReviewDao->getDatabaseHandler());
         $this->chunkReviewModelFactory = $chunkReviewModelFactory
             ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr, $this->chunkReviewDao->getDatabaseHandler());
     }

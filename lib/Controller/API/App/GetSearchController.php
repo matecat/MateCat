@@ -394,7 +394,7 @@ class GetSearchController extends AbstractStatefulKleinController
             throw new NotFoundException("Project not found for job $id_job");
         }
 
-        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($chunk, $this->user, $project, $id_segment !== null ? (int)$id_segment : null);
+        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance($chunk, $this->user, $project, $id_segment !== null ? (int)$id_segment : null, $this->getDatabase());
 
         // loop all segments to replace
         foreach ($search_results as $tRow) {

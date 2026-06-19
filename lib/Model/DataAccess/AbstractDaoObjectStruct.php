@@ -18,9 +18,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
 {
 
     use RecursiveArrayCopy;
-
-    /** @var array<string, mixed> */
-    protected array $cached_results = [];
+    use MemoizeTrait;
 
     /**
      * @param array<string, mixed> $array_params
@@ -52,47 +50,6 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
             throw new UnknownPropertyException($name);
         }
         $this->$name = $value;
-    }
-
-    /**
-     * This method returns the same object so to be chainable
-     * and be sure to clear the cache when calling cachable
-     * methods.
-     *
-     * @return $this
-     * @example assuming the model has a cachable
-     *          method called foo();
-     *
-     * $model->foo(); // makes computation the first time and caches
-     * $model->foo(); // returns the cached result
-     * $model->clear()->foo(); // clears the cache and returns fresh data
-     *
-     */
-    public function clear(): AbstractDaoObjectStruct
-    {
-        $this->cached_results = [];
-
-        return $this;
-    }
-
-    /**
-     * This method makes it possible to define methods on child classes
-     * whose result is cached on the instance.
-     *
-     * @param string $cache_key_name
-     * @param callable $function
-     *
-     * @return mixed
-     *
-     */
-    protected function cachable(string $cache_key_name, callable $function)
-    {
-        $resultset = $this->cached_results[$cache_key_name] ?? null;
-        if ($resultset == null) {
-            $resultset = $this->cached_results[$cache_key_name] = call_user_func($function);
-        }
-
-        return $resultset;
     }
 
     /**

@@ -61,6 +61,7 @@ class GetProjectsController extends KleinController
 
         $projects = ManageModel::getProjects(
             $this->user,
+            $this->getDatabase(),
             $start,
             $step,
             $search_in_pname,
@@ -75,6 +76,7 @@ class GetProjectsController extends KleinController
         );
 
         $projnum = ManageModel::getProjectsNumber(
+            $this->getDatabase(),
             $search_in_pname,
             $source,
             $target,

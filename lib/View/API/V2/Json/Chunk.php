@@ -10,6 +10,7 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 
 class Chunk extends Job
@@ -26,7 +27,7 @@ class Chunk extends Job
     public function renderOne(JobStruct $chunk): array
     {
         $project = $chunk->getProject();
-        $featureSet = $project->getFeaturesSet();
+        $featureSet = FeatureSet::forProject($project, $this->database);
 
         return [
             'job' => [

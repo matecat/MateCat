@@ -85,6 +85,30 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
+     * Build a FeatureSet loaded for a specific project.
+     *
+     * Replaces the old ProjectStruct::getFeaturesSet() with an explicit
+     * IDatabase dependency so no hidden Database::obtain() fallback is needed.
+     *
+     * @throws Exception
+     */
+    public static function forProject(ProjectStruct $project, IDatabase $database): self
+    {
+        $featureSet = new self(null, $database);
+        $featureSet->loadForProject($project);
+
+        return $featureSet;
+    }
+
+    /**
+     * Check whether a feature code is active in this set.
+     */
+    public function hasFeature(string $feature_code): bool
+    {
+        return in_array($feature_code, $this->getCodes());
+    }
+
+    /**
      * @return array<string>
      */
     public function getCodes(): array

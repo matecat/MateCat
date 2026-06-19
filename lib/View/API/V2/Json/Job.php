@@ -12,6 +12,7 @@ namespace View\API\V2\Json;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\Exceptions\NotFoundException;
@@ -62,12 +63,15 @@ class Job
      */
     protected bool $called_from_api = false;
 
+    protected IDatabase $database;
+
     /**
-     * @param ChunkReviewDao|null $chunkReviewDao
+     * @param IDatabase $database
      */
-    public function __construct(?ChunkReviewDao $chunkReviewDao = null)
+    public function __construct(IDatabase $database)
     {
-        $this->chunkReviewDao = $chunkReviewDao;
+        $this->database = $database;
+        $this->chunkReviewDao = new ChunkReviewDao($database);
     }
 
     /**
@@ -155,7 +159,7 @@ class Job
         $warningsCount = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
-        $this->chunkReviewDao ??= new ChunkReviewDao();
+        $this->chunkReviewDao ??= new ChunkReviewDao($this->database);
         $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk, 60 * 5);
 
         // is outsource available?
@@ -197,7 +201,7 @@ class Job
             'private_tm_key' => $this->getKeyList($chunk),
             'warnings_count' => $warningsCount->warnings_count,
             'warning_segments' => ($warningsCount->warning_segments ?? []),
-            'word_count_type' => (new ProjectMetadataDao($this->chunkReviewDao->getDatabaseHandler()))
+            'word_count_type' => (new ProjectMetadataDao($this->database))
                     ->setCacheTTL(3600)
                     ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
                 ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,

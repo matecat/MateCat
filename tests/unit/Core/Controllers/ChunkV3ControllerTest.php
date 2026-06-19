@@ -9,6 +9,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -129,7 +130,7 @@ class ChunkV3ControllerTest extends AbstractTest
     {
         $this->setProp('chunk', $chunk);
         $this->setProp('project', $chunk->getProject());
-        $this->setProp('featureSet', $chunk->getProject()->getFeaturesSet());
+        $this->setProp('featureSet', FeatureSet::forProject($chunk->getProject(), Database::obtain()));
         $this->setProp('chunk_reviews', []);
     }
 

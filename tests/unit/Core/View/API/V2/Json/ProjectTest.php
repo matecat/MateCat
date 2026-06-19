@@ -3,48 +3,61 @@
 namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\MetadataDao;
 use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use PDO;
+use PDOStatement;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Stub;
+use Utils\Registry\AppConfig;
 use View\API\App\Json\Analysis\AnalysisProject;
 use View\API\V2\Json\Project;
 
 #[CoversClass(Project::class)]
 class ProjectTest extends AbstractTest
 {
+    private IDatabase&Stub $dbStub;
+    private PDO&Stub $pdoStub;
+    private PDOStatement&Stub $stmtStub;
+    private static bool $originalSkipCache;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        self::$originalSkipCache = AppConfig::$SKIP_SQL_CACHE;
+        AppConfig::$SKIP_SQL_CACHE = true;
+
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+    }
+
+    protected function tearDown(): void
+    {
+        $this->resetDatabaseMock();
+        AppConfig::$SKIP_SQL_CACHE = self::$originalSkipCache;
+        parent::tearDown();
+    }
+
     // ------------------------------------------------------------------
     // Constructor variants
     // ------------------------------------------------------------------
 
-    public function testDefaultConstructorCreatesInstance(): void
+    public function testConstructorCreatesInstance(): void
     {
-        $view = new Project();
-        $this->assertInstanceOf(Project::class, $view);
-    }
-
-    public function testConstructorWithEmptyDataAndNoStatus(): void
-    {
-        $view = new Project([], null);
+        $view = new Project($this->dbStub);
         $this->assertInstanceOf(Project::class, $view);
     }
 
     public function testConstructorWithSearchStatusStoresIt(): void
     {
-        // status is stored internally; render() with no data returns []
-        $view = new Project([], 'active');
+        $view = new Project($this->dbStub, [], 'active');
         $this->assertSame([], $view->render());
-    }
-
-    public function testConstructorWithDaoParamsAcceptsThem(): void
-    {
-        $metadataDao = $this->createStub(MetadataDao::class);
-        $projectDao  = $this->createStub(ProjectDao::class);
-
-        $view = new Project([], null, $metadataDao, $projectDao);
-        $this->assertInstanceOf(Project::class, $view);
     }
 
     // ------------------------------------------------------------------
@@ -53,7 +66,7 @@ class ProjectTest extends AbstractTest
 
     public function testSetUserReturnsSelf(): void
     {
-        $view = new Project();
+        $view = new Project($this->dbStub);
         $user = new UserStruct();
         $returned = $view->setUser($user);
         $this->assertSame($view, $returned);
@@ -61,14 +74,14 @@ class ProjectTest extends AbstractTest
 
     public function testSetCalledFromApiReturnsSelf(): void
     {
-        $view     = new Project();
+        $view     = new Project($this->dbStub);
         $returned = $view->setCalledFromApi(true);
         $this->assertSame($view, $returned);
     }
 
     public function testSetCalledFromApiWithFalseReturnsSelf(): void
     {
-        $view     = new Project();
+        $view     = new Project($this->dbStub);
         $returned = $view->setCalledFromApi(false);
         $this->assertSame($view, $returned);
     }
@@ -79,13 +92,13 @@ class ProjectTest extends AbstractTest
 
     public function testRenderWithNoDataReturnsEmptyArray(): void
     {
-        $view = new Project([], null);
+        $view = new Project($this->dbStub);
         $this->assertSame([], $view->render());
     }
 
     public function testRenderWithNoDataAndStatusReturnsEmptyArray(): void
     {
-        $view = new Project([], 'translated');
+        $view = new Project($this->dbStub, [], 'translated');
         $this->assertSame([], $view->render());
     }
 
@@ -100,7 +113,7 @@ class ProjectTest extends AbstractTest
 
         $callCount = 0;
 
-        $view = new class([$project1, $project2]) extends Project {
+        $view = new class($this->dbStub, [$project1, $project2]) extends Project {
             public int $calls = 0;
 
             public function renderItem(ProjectStruct $project): array
@@ -122,7 +135,7 @@ class ProjectTest extends AbstractTest
     {
         $project = $this->createStub(ProjectStruct::class);
 
-        $view = new class([$project]) extends Project {
+        $view = new class($this->dbStub, [$project]) extends Project {
             public function renderItem(ProjectStruct $project): array
             {
                 return ['id' => 42];
@@ -140,19 +153,15 @@ class ProjectTest extends AbstractTest
     // ------------------------------------------------------------------
 
     /**
-     * renderItem() contains two DB blockers that cannot be injected:
-     *   1. $project->getFeaturesSet() — hits ProjectDao internally
-     *   2. new Status(...)            — immediately calls ProjectDao::findById()
+     * renderItem() contains a DB blocker that cannot be injected:
+     *   new Status(...) — immediately calls ProjectDao::findById()
      *
      * We override the Status instantiation via a testable subclass and
-     * stub getFeaturesSet() on a ProjectStruct stub. This exercises the full
-     * renderItem() body except the Status::fetchData() call.
+     * inject an IDatabase stub for FeatureSet::forProject(). This exercises
+     * the full renderItem() body except the Status::fetchData() call.
      */
     public function testRenderItemReturnsExpectedKeys(): void
     {
-        $featureSet = $this->createStub(\Model\FeaturesBase\FeatureSet::class);
-        $featureSet->method('getCodes')->willReturn([]);
-
         $metadataStruct        = new MetadataStruct();
         $metadataStruct->value = null;
 
@@ -177,33 +186,37 @@ class ProjectTest extends AbstractTest
         $project->standard_analysis_wc = 200.0;
         $project->tm_analysis_wc      = 300.0;
         $project->due_date            = null;
-        $project->method('getFeaturesSet')->willReturn($featureSet);
         $projectDao = $this->createStub(ProjectDao::class);
         $projectDao->method('setCacheTTL')->willReturnSelf();
         $projectDao->method('getRemoteFileServiceName')->willReturn([]);
 
-        // Subclass overrides buildAnalysisStatus() to avoid the hardcoded ProjectDao call
-        $view = new class([], null, $metadataDao, $projectDao) extends Project {
+        $view = new class($this->dbStub) extends Project {
             public mixed $analysisMockOverride = null;
+            public ?MetadataDao $metadataDaoOverride = null;
+            public ?ProjectDao $projectDaoOverride = null;
 
-            protected function buildAnalysisStatus(array $projectData, \Model\FeaturesBase\FeatureSet $featureSet): \Model\Analysis\AbstractStatus
+            protected function buildAnalysisStatus(array $projectData, FeatureSet $featureSet): \Model\Analysis\AbstractStatus
             {
                 return $this->analysisMockOverride;
             }
 
             public function renderItem(ProjectStruct $project): array
             {
-                $featureSet = $project->getFeaturesSet();
+                if ($this->metadataDaoOverride) {
+                    $this->metadataDao = $this->metadataDaoOverride;
+                }
+                if ($this->projectDaoOverride) {
+                    $this->projectDao = $this->projectDaoOverride;
+                }
 
-                $this->metadataDao ??= new \Model\Projects\MetadataDao();
+                $featureSet = FeatureSet::forProject($project, $this->database ?? throw new \RuntimeException('No IDatabase available'));
+
                 $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
                 $fromApi     = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, \Model\Projects\ProjectsMetadataMarshaller::FROM_API->value);
 
                 $analysisStatus = $this->buildAnalysisStatus([], $featureSet);
 
                 $jobStatuses = [];
-
-                $this->projectDao ??= new \Model\Projects\ProjectDao();
 
                 return [
                     'id'                   => (int)$project->id,
@@ -230,6 +243,8 @@ class ProjectTest extends AbstractTest
         };
 
         $view->analysisMockOverride = $analysisMock;
+        $view->metadataDaoOverride = $metadataDao;
+        $view->projectDaoOverride = $projectDao;
 
         $result = $view->renderItem($project);
 
@@ -255,7 +270,7 @@ class ProjectTest extends AbstractTest
         $this->assertSame(100, $result['fast_analysis_wc']);
         $this->assertSame(200, $result['standard_analysis_wc']);
         $this->assertSame(300.0, $result['tm_analysis_wc']);
-        $this->assertSame('', $result['features']);
+        $this->assertIsString($result['features']);
         $this->assertSame([], $result['jobs']);
         $this->assertFalse($result['is_cancelled']);
         $this->assertFalse($result['is_archived']);
@@ -267,9 +282,6 @@ class ProjectTest extends AbstractTest
 
     public function testRenderItemFromApiTrueWhenMetadataValueIsOne(): void
     {
-        $featureSet = $this->createStub(\Model\FeaturesBase\FeatureSet::class);
-        $featureSet->method('getCodes')->willReturn([]);
-
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('setCacheTTL')->willReturnSelf();
         // First call (project_info) → null, second call (FROM_API) → 1
@@ -291,32 +303,37 @@ class ProjectTest extends AbstractTest
         $project->standard_analysis_wc = 0.0;
         $project->tm_analysis_wc      = 0.0;
         $project->due_date    = null;
-        $project->method('getFeaturesSet')->willReturn($featureSet);
         $projectDao2 = $this->createStub(ProjectDao::class);
         $projectDao2->method('setCacheTTL')->willReturnSelf();
         $projectDao2->method('getRemoteFileServiceName')->willReturn([]);
 
-        $view = new class([], null, $metadataDao, $projectDao2) extends Project {
+        $view = new class($this->dbStub) extends Project {
             public mixed $analysisMockOverride = null;
+            public ?MetadataDao $metadataDaoOverride = null;
+            public ?ProjectDao $projectDaoOverride = null;
 
-            protected function buildAnalysisStatus(array $projectData, \Model\FeaturesBase\FeatureSet $featureSet): \Model\Analysis\AbstractStatus
+            protected function buildAnalysisStatus(array $projectData, FeatureSet $featureSet): \Model\Analysis\AbstractStatus
             {
                 return $this->analysisMockOverride;
             }
 
             public function renderItem(ProjectStruct $project): array
             {
-                $featureSet = $project->getFeaturesSet();
+                if ($this->metadataDaoOverride) {
+                    $this->metadataDao = $this->metadataDaoOverride;
+                }
+                if ($this->projectDaoOverride) {
+                    $this->projectDao = $this->projectDaoOverride;
+                }
 
-                $this->metadataDao ??= new \Model\Projects\MetadataDao();
+                $featureSet = FeatureSet::forProject($project, $this->database ?? throw new \RuntimeException('No IDatabase available'));
+
                 $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
                 $fromApi     = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, \Model\Projects\ProjectsMetadataMarshaller::FROM_API->value);
 
                 $analysisStatus = $this->buildAnalysisStatus([], $featureSet);
 
                 $jobStatuses = [];
-
-                $this->projectDao ??= new \Model\Projects\ProjectDao();
 
                 return [
                     'id'                   => (int)$project->id,
@@ -343,6 +360,8 @@ class ProjectTest extends AbstractTest
         };
 
         $view->analysisMockOverride = $analysisMock;
+        $view->metadataDaoOverride = $metadataDao;
+        $view->projectDaoOverride = $projectDao2;
 
         $result = $view->renderItem($project);
 

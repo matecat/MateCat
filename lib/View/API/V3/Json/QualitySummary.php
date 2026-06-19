@@ -343,6 +343,6 @@ class QualitySummary
      */
     protected function createRevisionFeature(ProjectStruct $project): RevisionFactory
     {
-        return RevisionFactory::initFromProject($project);
+        return RevisionFactory::initFromProject($project, $this->database);
     }
 }
