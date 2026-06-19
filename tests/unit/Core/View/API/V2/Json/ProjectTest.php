@@ -158,7 +158,7 @@ class ProjectTest extends AbstractTest
 
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('setCacheTTL')->willReturnSelf();
-        $metadataDao->method('get')->willReturn(null);
+        $metadataDao->method('getValue')->willReturn(null);
 
         $analysisResult = $this->createStub(AnalysisProject::class);
 
@@ -196,8 +196,8 @@ class ProjectTest extends AbstractTest
                 $featureSet = $project->getFeaturesSet();
 
                 $this->metadataDao ??= new \Model\Projects\MetadataDao();
-                $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
-                $fromApi     = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, \Model\Projects\ProjectsMetadataMarshaller::FROM_API->value);
+                $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
+                $fromApi     = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, \Model\Projects\ProjectsMetadataMarshaller::FROM_API->value);
 
                 $analysisStatus = $this->buildAnalysisStatus([], $featureSet);
 
@@ -211,7 +211,7 @@ class ProjectTest extends AbstractTest
                     'name'                 => $project->name,
                     'id_team'              => (int)$project->id_team,
                     'id_assignee'          => (int)$project->id_assignee,
-                    'from_api'             => ($fromApi->value ?? 0) == 1,
+                    'from_api'             => ($fromApi ?? 0) == 1,
                     'analysis'             => $analysisStatus->fetchData()->getResult(),
                     'create_date'          => $project->create_date,
                     'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
@@ -224,7 +224,7 @@ class ProjectTest extends AbstractTest
                     'is_archived'          => in_array(\Utils\Constants\JobStatus::STATUS_ARCHIVED, $jobStatuses),
                     'remote_file_service'  => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
                     'due_date'             => \Utils\Tools\Utils::api_timestamp($project->due_date),
-                    'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
+                    'project_info'         => $projectInfo,
                 ];
             }
         };
@@ -270,13 +270,10 @@ class ProjectTest extends AbstractTest
         $featureSet = $this->createStub(\Model\FeaturesBase\FeatureSet::class);
         $featureSet->method('getCodes')->willReturn([]);
 
-        $fromApiStruct        = new MetadataStruct();
-        $fromApiStruct->value = 1;
-
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('setCacheTTL')->willReturnSelf();
-        // First call (project_info) → null, second call (FROM_API) → struct with value=1
-        $metadataDao->method('get')->willReturnOnConsecutiveCalls(null, $fromApiStruct);
+        // First call (project_info) → null, second call (FROM_API) → 1
+        $metadataDao->method('getValue')->willReturnOnConsecutiveCalls(null, 1);
 
         $analysisResult2 = $this->createStub(AnalysisProject::class);
         $analysisMock   = $this->createStub(\Model\Analysis\AbstractStatus::class);
@@ -312,8 +309,8 @@ class ProjectTest extends AbstractTest
                 $featureSet = $project->getFeaturesSet();
 
                 $this->metadataDao ??= new \Model\Projects\MetadataDao();
-                $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
-                $fromApi     = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, \Model\Projects\ProjectsMetadataMarshaller::FROM_API->value);
+                $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
+                $fromApi     = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, \Model\Projects\ProjectsMetadataMarshaller::FROM_API->value);
 
                 $analysisStatus = $this->buildAnalysisStatus([], $featureSet);
 
@@ -327,7 +324,7 @@ class ProjectTest extends AbstractTest
                     'name'                 => $project->name,
                     'id_team'              => (int)$project->id_team,
                     'id_assignee'          => (int)$project->id_assignee,
-                    'from_api'             => ($fromApi->value ?? 0) == 1,
+                    'from_api'             => ($fromApi ?? 0) == 1,
                     'analysis'             => $analysisStatus->fetchData()->getResult(),
                     'create_date'          => $project->create_date,
                     'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
@@ -340,7 +337,7 @@ class ProjectTest extends AbstractTest
                     'is_archived'          => in_array(\Utils\Constants\JobStatus::STATUS_ARCHIVED, $jobStatuses),
                     'remote_file_service'  => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
                     'due_date'             => \Utils\Tools\Utils::api_timestamp($project->due_date),
-                    'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
+                    'project_info'         => $projectInfo,
                 ];
             }
         };

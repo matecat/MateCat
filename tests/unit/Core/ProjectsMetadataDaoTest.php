@@ -31,14 +31,13 @@ class ProjectsMetadataDaoTest extends AbstractTest
     {
         $dao = new MetadataDao(Database::obtain());
         $this->resetProjectMetadata($dao, 1);
-        $record = $dao->get(1, 'foo');
-        $this->assertEquals($record, false);
+        $value = $dao->getValue(1, 'foo');
+        $this->assertNull($value);
 
         $dao->set(1, 'foo', 'bar');
-        $record = $dao->get(1, 'foo');
+        $value = $dao->getValue(1, 'foo');
 
-        $this->assertEquals('bar', $record->value);
-        $this->assertEquals('foo', $record->key);
+        $this->assertEquals('bar', $value);
     }
 
     /**
@@ -51,10 +50,9 @@ class ProjectsMetadataDaoTest extends AbstractTest
         $this->resetProjectMetadata($dao, 1);
         $dao->set(1, 'foo', 'bar');
         $dao->set(1, 'foo', 'bar2');
-        $record = $dao->get(1, 'foo');
+        $value = $dao->getValue(1, 'foo');
 
-        $this->assertEquals('bar2', $record->value);
-        $this->assertEquals('foo', $record->key);
+        $this->assertEquals('bar2', $value);
 
         $count = $dao->allByProjectId(1);
         $this->assertCount(1, $count);
@@ -90,13 +88,9 @@ class ProjectsMetadataDaoTest extends AbstractTest
             'key_c' => 'val_c',
         ]);
 
-        $recordA = $dao->get(1, 'key_a');
-        $recordB = $dao->get(1, 'key_b');
-        $recordC = $dao->get(1, 'key_c');
-
-        $this->assertEquals('val_a', $recordA?->value);
-        $this->assertEquals('val_b', $recordB?->value);
-        $this->assertEquals('val_c', $recordC?->value);
+        $this->assertEquals('val_a', $dao->getValue(1, 'key_a'));
+        $this->assertEquals('val_b', $dao->getValue(1, 'key_b'));
+        $this->assertEquals('val_c', $dao->getValue(1, 'key_c'));
     }
 
     /**
@@ -114,11 +108,8 @@ class ProjectsMetadataDaoTest extends AbstractTest
             'new_key' => 'fresh',
         ]);
 
-        $existing = $dao->get(1, 'existing_key');
-        $new = $dao->get(1, 'new_key');
-
-        $this->assertEquals('new_value', $existing?->value);
-        $this->assertEquals('fresh', $new?->value);
+        $this->assertEquals('new_value', $dao->getValue(1, 'existing_key'));
+        $this->assertEquals('fresh', $dao->getValue(1, 'new_key'));
     }
 
     /**

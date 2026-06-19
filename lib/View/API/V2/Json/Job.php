@@ -197,11 +197,10 @@ class Job
             'private_tm_key' => $this->getKeyList($chunk),
             'warnings_count' => $warningsCount->warnings_count,
             'warning_segments' => ($warningsCount->warning_segments ?? []),
-            'word_count_type' => ($wordCountMeta = (new ProjectMetadataDao($this->chunkReviewDao->getDatabaseHandler()))
+            'word_count_type' => (new ProjectMetadataDao($this->chunkReviewDao->getDatabaseHandler()))
                     ->setCacheTTL(3600)
-                    ->get((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)) !== null
-                ? $wordCountMeta->value
-                : ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
+                    ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+                ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
             'stats' => $jobStats,
             'outsource' => $outsource,
             'outsource_available' => $outsourceAvailable,

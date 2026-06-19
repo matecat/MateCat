@@ -240,11 +240,10 @@ class CattoolController extends BaseKleinViewController
             'translation_engines_intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'translation_matches_enabled' => new PHPTalBoolean(true),
             'warningPollingInterval' => 1000 * (AppConfig::$WARNING_POLLING_INTERVAL),
-            'word_count_type' => ($wordCountMeta = (new \Model\Projects\MetadataDao($this->getDatabase()))
+            'word_count_type' => (new \Model\Projects\MetadataDao($this->getDatabase()))
                     ->setCacheTTL(3600)
-                    ->get((int)$project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)) !== null
-                ? $wordCountMeta->value
-                : ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
+                    ->getValue((int)$project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+                ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
             'analysis_enabled' => new PHPTalBoolean(AppConfig::$VOLUME_ANALYSIS_ENABLED),
             'get_public_matches' => new PHPTalBoolean(!$chunkStruct->only_private_tm),
 

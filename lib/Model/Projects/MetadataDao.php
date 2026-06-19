@@ -80,12 +80,12 @@ class MetadataDao extends AbstractDao
     /**
      * @param int $id_project
      * @param string $key
-     * @return MetadataStruct|null
+     * @return mixed
      * @throws Exception
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function get(int $id_project, string $key): ?MetadataStruct
+    public function getValue(int $id_project, string $key): mixed
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_metadata_by_key);
 
@@ -99,18 +99,7 @@ class MetadataDao extends AbstractDao
             $result->value = ProjectsMetadataMarshaller::unMarshall($result);
         }
 
-        return $result;
-    }
-
-    /**
-     * @return mixed
-     * @throws Exception
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function getValue(int $id_project, string $key): mixed
-    {
-        return $this->get($id_project, $key)?->value;
+        return $result?->value;
     }
 
     /**
@@ -220,9 +209,9 @@ class MetadataDao extends AbstractDao
     public function getProjectStaticSubfilteringCustomHandlers(int $id_project): array
     {
         try {
-            $subfiltering = $this->setCacheTTL(86400)->get($id_project, ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
+            $subfiltering = $this->setCacheTTL(86400)->getValue($id_project, ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
 
-            return $subfiltering->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return $subfiltering ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }

@@ -90,9 +90,9 @@ class EngineService implements EngineServiceInterface
             $mtEngine->setAnalysis();
 
             $metadataDao = new ProjectsMetadataDao($this->database);
-            $lara_style = $metadataDao->get($queueElement->params->pid, 'lara_style') ?? null;
-            $enable_mt_analysis = $metadataDao->get($queueElement->params->pid, 'enable_mt_analysis');
-            $mtEngine->setSkipAnalysis(!($enable_mt_analysis->value ?? false));
+            $lara_style = $metadataDao->getValue($queueElement->params->pid, 'lara_style');
+            $enable_mt_analysis = $metadataDao->getValue($queueElement->params->pid, 'enable_mt_analysis');
+            $mtEngine->setSkipAnalysis(!($enable_mt_analysis ?? false));
 
             $mt_qe_workflow_enabled = (bool)($queueElement->params->mt_qe_workflow_enabled ?? false);
             if ($mt_qe_workflow_enabled) {
@@ -114,7 +114,7 @@ class EngineService implements EngineServiceInterface
             $engineConfig['all_job_tm_keys'] = $queueElement->params->tm_keys;
             $engineConfig['include_score'] = $queueElement->params->mt_evaluation ?? false;
             $engineConfig['tuid'] = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
-            $engineConfig['lara_style'] = (!empty($lara_style)) ? $lara_style->value : null;
+            $engineConfig['lara_style'] = $lara_style ?: null;
 
             if (!isset($engineConfig['job_id'])) {
                 $engineConfig['job_id'] = $queueElement->params->id_job;

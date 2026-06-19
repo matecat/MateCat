@@ -158,8 +158,8 @@ class Project
         }
 
         $this->metadataDao ??= new MetadataDao();
-        $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
-        $fromApi = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
+        $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
+        $fromApi = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
 
         $this->projectDao ??= new ProjectDao();
         $_project_data = $this->projectDao->getProjectAndJobData((int)$project->id);
@@ -171,7 +171,7 @@ class Project
             'name' => $project->name,
             'id_team' => (int)$project->id_team,
             'id_assignee' => (int)$project->id_assignee,
-            'from_api' => ($fromApi->value ?? 0) == 1,
+            'from_api' => ($fromApi ?? 0) == 1,
             'analysis' => $analysisStatus->fetchData()->getResult(),
             'create_date' => $project->create_date,
             'fast_analysis_wc' => (int)$project->fast_analysis_wc,
@@ -184,7 +184,7 @@ class Project
             'is_archived' => (in_array(JobStatus::STATUS_ARCHIVED, $jobStatuses)),
             'remote_file_service' => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
             'due_date' => Utils::api_timestamp($project->due_date),
-            'project_info' => (null !== $projectInfo) ? $projectInfo->value : null,
+            'project_info' => $projectInfo,
         ];
     }
 

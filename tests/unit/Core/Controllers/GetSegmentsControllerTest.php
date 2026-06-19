@@ -430,11 +430,9 @@ class GetSegmentsControllerTest extends AbstractTest
         $this->controller->fakeSegmentDao = $segmentDao;
 
         $icuStruct = $this->createStub(MetadataStruct::class);
-        $icuStruct->value = null;
-
         $projectMetaDao = $this->createStub(ProjectMetadataDao::class);
         $projectMetaDao->method('setCacheTTL')->willReturn($projectMetaDao);
-        $projectMetaDao->method('get')->willReturn($icuStruct);
+        $projectMetaDao->method('getValue')->willReturn(null);
         $this->controller->fakeProjectMetadataDao = $projectMetaDao;
 
         $filesMetaDao = $this->createStub(FilesMetadataDao::class);

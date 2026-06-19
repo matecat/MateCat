@@ -278,10 +278,10 @@ class Lara extends AbstractEngine
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
                 if (!empty($_config['id_project'])) {
-                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
-                        $translateOptions->setGlossaries($laraGlossaries->value);
+                        $translateOptions->setGlossaries($laraGlossaries);
                     }
                 }
 

@@ -96,10 +96,10 @@ class CatDecorator extends AbstractDecorator
     private function completable(): bool
     {
         $project = $this->arguments->getJob()->getProject();
-        $wordCountMeta = (new MetadataDao($this->controller->getDatabase()))
+        $wordCountType = (new MetadataDao($this->controller->getDatabase()))
             ->setCacheTTL(3600)
-            ->get((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value);
-        $wordCountType = $wordCountMeta !== null ? $wordCountMeta->value : ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
+            ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+            ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
         if ($wordCountType != ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
             if ($this->arguments->isRevision()) {
                 $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&

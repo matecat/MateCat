@@ -129,12 +129,12 @@ class MMT extends AbstractEngine
         $glossaries = null;
 
         if (!empty($_config['id_project'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'mmt_glossaries');
+            $glossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], 'mmt_glossaries');
         }
 
         if ($glossaries !== null) {
-            $mmtGlossariesArray = json_decode($glossaries->value, true);
-            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get(
+            $mmtGlossariesArray = json_decode($glossaries, true);
+            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->getValue(
                 $_config['id_project'],
                 'mmt_ignore_glossary_case'
             );
@@ -142,7 +142,7 @@ class MMT extends AbstractEngine
             $_config['glossaries'] = implode(",", $mmtGlossariesArray);
 
             if ($ignore_glossary_case !== null) {
-                $_config['ignore_glossary_case'] = $ignore_glossary_case->value;
+                $_config['ignore_glossary_case'] = $ignore_glossary_case;
             }
         }
 
@@ -348,8 +348,8 @@ class MMT extends AbstractEngine
         $pid = $projectRow['id'];
 
         $metadataDao = new ProjectsMetadataDao();
-        $context = $metadataDao->setCacheTTL(86400)->get($pid, "mmt_activate_context_analyzer");
-        $context_analyzer = $context->value ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
+        $context = $metadataDao->setCacheTTL(86400)->getValue($pid, "mmt_activate_context_analyzer");
+        $context_analyzer = $context ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
 
         if (!empty($context_analyzer)) {
             if (empty($segments) || !isset($segments[0]['source'], $segments[0]['target'])) {

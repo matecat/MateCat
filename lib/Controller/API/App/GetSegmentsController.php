@@ -108,12 +108,12 @@ class GetSegmentsController extends KleinController
         $res = [];
 
         $projectMetadata = $this->createProjectMetadataDao();
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value)->value ?? false;
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue($projectId, ProjectsMetadataMarshaller::ICU_ENABLED->value) ?? false;
 
-        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->get(
+        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->getValue(
             $projectId,
             ProjectsMetadataMarshaller::CONTEXT_URL->value
-        )?->value;
+        );
 
         $filesMetadataDao = $this->createFilesMetadataDao();
         $fileContextUrls = [];
