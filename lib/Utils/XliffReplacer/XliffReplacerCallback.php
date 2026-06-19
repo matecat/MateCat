@@ -9,6 +9,7 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
@@ -36,23 +37,24 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
 
     private FeatureSet $featureSet;
     private JobStruct $jobStruct;
+    private IDatabase $database;
 
     /**
-     * XliffReplacerCallback constructor.
-     *
      * @param FeatureSet $featureSet
      * @param string $sourceLang
      * @param string $targetLang
      * @param JobStruct $jobStruct
+     * @param IDatabase $database
      */
-    public function __construct(FeatureSet $featureSet, string $sourceLang, string $targetLang, JobStruct $jobStruct)
+    public function __construct(FeatureSet $featureSet, string $sourceLang, string $targetLang, JobStruct $jobStruct, IDatabase $database)
     {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
         $this->jobStruct = $jobStruct;
+        $this->database = $database;
 
-        $metadataDao = new MetadataDao();
+        $metadataDao = new MetadataDao($database);
         $this->subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers((int)$jobStruct->id, (string)$jobStruct->password);
 
     }
@@ -91,7 +93,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
             $this->targetLang,
             $dataRefMap ?? [],
             $this->subfilteringCustomHandlers,
-            $this->sourceContainsIcu($this->jobStruct->getProject(), $this->jobStruct, $segment)
+            $this->sourceContainsIcu($this->jobStruct->getProject(), $this->jobStruct, $segment, $this->database)
         );
 
         $segment = $filter->fromLayer0ToLayer1($segment);

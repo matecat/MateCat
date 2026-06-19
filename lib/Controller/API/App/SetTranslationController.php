@@ -29,6 +29,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -283,7 +284,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 /** @var ProjectStruct $project */
                 $project = $this->data['project'];
                 // case 1. is MT
-                $new_translation->suggestion_match = (string)($project->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
+                $new_translation->suggestion_match = (string)((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
                 $new_translation->suggestion_source = EngineConstants::MT;
             } elseif ($client_chosen_suggestion->match == InternalMatchesConstants::NO_MATCH) {
                 // case 2. no match
@@ -669,7 +670,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->password = (string)$password;
         $this->request_password = $received_password;
 
-        $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString);
+        $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString, $this->getDatabase());
 
         $data = [
             'id_job' => $id_job,

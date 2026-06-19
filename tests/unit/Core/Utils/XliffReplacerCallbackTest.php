@@ -4,6 +4,7 @@ namespace Matecat\Core\Utils;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
@@ -29,15 +30,13 @@ class XliffReplacerCallbackTest extends AbstractTest
             ])->getStub();
 
         $projectStructMock = $this->getStubBuilder(ProjectStruct::class)->getStub();
-        $projectStructMock->method('getMetadataValue')->willReturn(false);
-
         $jobStructMock->method('getProject')->willReturn($projectStructMock);
 
         $segment = '<g id="1">Hello</g>';
         $target = '<g id="3">Hola</g>';
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-EN', 'es-ES', $jobStructMock);
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-EN', 'es-ES', $jobStructMock, Database::obtain());
 
         $this->assertTrue($xliffReplacerCallback->thereAreErrors(1, $segment, $target));
     }
@@ -59,15 +58,13 @@ class XliffReplacerCallbackTest extends AbstractTest
             ])->getStub();
 
         $projectStructMock = $this->getStubBuilder(ProjectStruct::class)->getStub();
-        $projectStructMock->method('getMetadataValue')->willReturn(false);
-
         $jobStructMock->method('getProject')->willReturn($projectStructMock);
 
         $segment = '<ph id="1"/> Hello';
         $target = '<ph id="3"/> Hola';
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-EN', 'es-ES', $jobStructMock);
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-EN', 'es-ES', $jobStructMock, Database::obtain());
 
         $this->assertTrue($xliffReplacerCallback->thereAreErrors(1, $segment, $target));
     }
@@ -89,11 +86,9 @@ class XliffReplacerCallbackTest extends AbstractTest
             ])->getStub();
 
         $projectStructMock = $this->getStubBuilder(ProjectStruct::class)->getStub();
-        $projectStructMock->method('getMetadataValue')->willReturn(false);
-
         $jobStructMock->method('getProject')->willReturn($projectStructMock);
 
-        $source = '<pc id="source1" dataRefStart="source1">To identify who needs to complete the training, refer to the </pc><pc id="source2" dataRefStart="source2"><pc id="1u" type="fmt" subType="m:u">“</pc></pc><pc id="source3" dataRefStart="source3"><pc id="2u" type="fmt" subType="m:u">Learning – Compliance”</pc></pc>';
+        $source = '<pc id="source1" dataRefStart="source1">To identify who needs to complete the training, refer to the </pc><pc id="source2" dataRefStart="source2"><pc id="1u" type="fmt" subType="m:u">"</pc></pc><pc id="source3" dataRefStart="source3"><pc id="2u" type="fmt" subType="m:u">Learning – Compliance"</pc></pc>';
         $target = '<pc id="source1" dataRefStart="source1">Para identificar quién tiene que completar la formación, consulta el panel </pc><pc id="source2" dataRefStart="source2"><pc id="1u" type="fmt" subType="m:u">"Learning – Compliance"</pc></pc><pc id="source3" dataRefStart="source3"> (Formación: cumplimiento normativo)<pc id="2u" type="fmt" subType="m:u"></pc></pc>';
 
         $dataRefMap = array (
@@ -103,7 +98,7 @@ class XliffReplacerCallbackTest extends AbstractTest
         );
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-US', 'es-ES', $jobStructMock);
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet(), 'en-US', 'es-ES', $jobStructMock, Database::obtain());
 
         $this->assertFalse($xliffReplacerCallback->thereAreErrors(1, $source, $target, $dataRefMap), "Should not have errors");
     }

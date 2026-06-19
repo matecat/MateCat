@@ -844,7 +844,7 @@ class SetTranslationControllerTest extends AbstractTest
         ]);
 
         $project = $this->createStub(ProjectStruct::class);
-        $project->method('getMetadataValue')->willReturn('90');
+        $project->id = 1;
 
         $this->setProperty($controller, [
             'suggestion_array' => $suggestionArray,
@@ -862,7 +862,7 @@ class SetTranslationControllerTest extends AbstractTest
 
         $new = $result['new'];
         self::assertSame('MT translation', $new->suggestion, 'MT match → suggestion updated from client');
-        self::assertSame('90', $new->suggestion_match, 'MT match → quality from project metadata');
+        self::assertSame('85', $new->suggestion_match, 'MT match → quality default when no project metadata');
         self::assertSame(EngineConstants::MT, $new->suggestion_source);
     }
 

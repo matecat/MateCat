@@ -14,6 +14,7 @@ use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -207,7 +208,7 @@ abstract class AbstractStatus
     protected function loadObjects(): AbstractStatus
     {
         $target = null;
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+        $mt_qe_workflow_enabled = (new ProjectMetadataDao($this->featureSet->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
         $matchConstantsClass = MatchConstantsFactory::getInstance(is_bool($mt_qe_workflow_enabled) ? $mt_qe_workflow_enabled : null);
 
         $this->result = $project = new AnalysisProject(

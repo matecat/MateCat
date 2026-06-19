@@ -16,6 +16,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
@@ -72,7 +73,7 @@ class GetContributionController extends KleinController
 
         // try to get from metadata if Lara style is empty of fallback to the default
         if (empty($lara_style)) {
-            $lara_style = $projectStruct->getMetadataValue('lara_style') ?? Lara::DEFAULT_STYLE;
+            $lara_style = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, 'lara_style') ?? Lara::DEFAULT_STYLE;
         } else {
             $lara_style = $request['lara_style'];
         }
@@ -101,7 +102,7 @@ class GetContributionController extends KleinController
 
             $this->rewriteContributionContexts($request, $Filter);
 
-            $mtEvaluation = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value);
+            $mtEvaluation = (new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_EVALUATION->value);
             if ($mtEvaluation === null) {
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
                 $mtEvaluation = (new MetadataDao($this->getDatabase()))->get(
@@ -142,10 +143,11 @@ class GetContributionController extends KleinController
         $contributionRequest->fromTarget = $switch_languages;
         $contributionRequest->resultNum = $num_results;
         $contributionRequest->crossLangTargets = array_values($this->getCrossLanguages($cross_language));
-        $contributionRequest->mt_quality_value_in_editor = (int)($projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86);
-        $contributionRequest->mt_qe_workflow_enabled = (bool)$projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+        $projectMetadataDao = new ProjectMetadataDao($this->getDatabase());
+        $contributionRequest->mt_quality_value_in_editor = (int)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86);
+        $contributionRequest->mt_qe_workflow_enabled = (bool)$projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
 
-        $mtQeParams = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
+        $mtQeParams = $projectMetadataDao->setCacheTTL(3600)->getValue((int)$projectStruct->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
         $contributionRequest->mt_qe_workflow_parameters = $mtQeParams instanceof MTQEWorkflowParams ? $mtQeParams->toArray() : null;
         $contributionRequest->subfiltering_handlers = $subfiltering_handlers !== null ? array_values($subfiltering_handlers) : null;
 

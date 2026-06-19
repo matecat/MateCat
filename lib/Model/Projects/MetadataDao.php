@@ -103,6 +103,17 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @return mixed
+     * @throws Exception
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function getValue(int $id_project, string $key): mixed
+    {
+        return $this->get($id_project, $key)?->value;
+    }
+
+    /**
      * @param int $id_project
      * @param string $key
      * @param string $value

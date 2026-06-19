@@ -294,19 +294,6 @@ class QualityReportControllerAPITest extends AbstractTest
     }
 
     #[Test]
-    public function renderSegments_throws_when_project_id_is_missing(): void
-    {
-        $chunk = $this->createStub(JobStruct::class);
-        $chunk->method('getProject')->willReturn(new ProjectStruct());
-        $this->reflector->getProperty('chunk')->setValue($this->controller, $chunk);
-
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Project ID must not be null');
-
-        $this->reflector->getMethod('renderSegments')->invoke($this->controller, false);
-    }
-
-    #[Test]
     public function general_returns_project_and_job_json_payload(): void
     {
         $chunk = $this->createStub(JobStruct::class);

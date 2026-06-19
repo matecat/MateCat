@@ -4,7 +4,6 @@ namespace Matecat\Core\Model\Projects;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
-use Model\Projects\MetadataStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -42,7 +41,7 @@ class ProjectStructTest extends AbstractTest
     #[Test]
     public function getFeaturesSetLoadsFeatureSetFromOverriddenMetadataAccessor(): void
     {
-        $project = new ProjectStructFeaturesSetLoadDouble();
+        $project = new ProjectStruct();
         $project->id = 1;
 
         $featureSet = $project->getFeaturesSet();
@@ -98,42 +97,15 @@ class ProjectStructTest extends AbstractTest
         $this->assertFalse($project->hasFeature('bar_feature'));
     }
 
-    #[Test]
-    public function getMetadataValueReturnsNullOrStringWhenProjectIdIsSet(): void
-    {
-        $project = new ProjectStruct();
-        $project->id = 1;
-
-        $value = $project->getMetadataValue('this_key_should_not_exist_for_project_struct_test');
-
-        $this->assertTrue($value === null || is_string($value));
-    }
 
 }
 
 class ProjectStructTestDouble extends ProjectStruct
 {
-    /** @var array<string, mixed> */
-    public array $metadataValues = [];
-
-    /** @var MetadataStruct[] */
-    public array $allMetadata = [];
-
     public function setCachedResult(string $key, mixed $value): void
     {
         $this->cached_results[$key] = $value;
     }
-
-    public function getMetadataValue(string $key): mixed
-    {
-        return $this->metadataValues[$key] ?? null;
-    }
-
-    public function getAllMetadata(): array
-    {
-        return $this->allMetadata;
-    }
-
 }
 
 class FeatureSetTestDouble extends FeatureSet
@@ -151,10 +123,3 @@ class FeatureSetTestDouble extends FeatureSet
     }
 }
 
-class ProjectStructFeaturesSetLoadDouble extends ProjectStruct
-{
-    public function getMetadataValue(string $key): mixed
-    {
-        return '';
-    }
-}

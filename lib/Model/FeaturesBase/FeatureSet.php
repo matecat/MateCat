@@ -13,6 +13,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
 use Model\OwnerFeatures\OwnerFeatureDao;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
@@ -78,6 +79,11 @@ class FeatureSet implements EventDispatcherInterface
         }
     }
 
+    public function getDatabase(): ?IDatabase
+    {
+        return $this->database;
+    }
+
     /**
      * @return array<string>
      */
@@ -130,9 +136,10 @@ class FeatureSet implements EventDispatcherInterface
      * @return void
      * @throws Exception
      */
-    public function loadForProject(ProjectStruct $project): void
+    public function loadForProject(ProjectStruct $project, ?MetadataDao $metadataDao = null): void
     {
-        $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
+        $metadataDao ??= new MetadataDao($this->database);
+        $featureStrings = $metadataDao->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::FEATURES_KEY->value);
         $featureCodes = (!empty($featureStrings)) ? $this->splitString($featureStrings) : [];
 
         $this->clear();

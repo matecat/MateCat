@@ -122,7 +122,7 @@ class GetWarningController extends KleinController
 
         // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
         // Detect if the translation content contains ICU MessageFormat syntax
-        $this->sourceContainsIcu($chunk->getProject(), $chunk, $src_content);
+        $this->sourceContainsIcu($chunk->getProject(), $chunk, $src_content, $this->getDatabase());
 
         $chunkId = $chunk->id ?? throw new \RuntimeException('Job id is null');
 

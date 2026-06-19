@@ -78,7 +78,7 @@ class SegmentAnalysisController extends KleinController
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($idJob, $password);
         $this->project = $jobStruct->getProject();
 
-        $mt_qe_workflow_enabled = !empty($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
+        $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $this->response->json($this->getSegmentsForAJob($jobStruct, $page, $perPage, $segmentsCount, $matchClass));
     }
@@ -167,7 +167,7 @@ class SegmentAnalysisController extends KleinController
 
         $this->projectDao = new ProjectDao($this->getDatabase());
         $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
-        $mt_qe_workflow_enabled = !empty($this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
+        $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
         $segmentsCount = $this->getSegmentTranslationsCount($this->project);
         $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount, $matchClass));

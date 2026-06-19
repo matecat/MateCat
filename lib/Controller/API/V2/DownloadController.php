@@ -293,7 +293,7 @@ class DownloadController extends AbstractDownloadController
                     if ($this->disableErrorCheck === true) {
                         $xliffReplacerCallback = new SilentXliffReplacerCallback();
                     } else {
-                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job);
+                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job, $this->getDatabase());
                     }
 
                     // run xliff replacer

@@ -3,7 +3,6 @@
 namespace Model\Projects;
 
 use ArrayAccess;
-use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
@@ -48,24 +47,6 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
             $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
     }
 
-
-    /**
-     * @param string $key
-     *
-     * @return ?string
-     *
-     * @throws DomainException
-     */
-    public function getMetadataValue(string $key): mixed
-    {
-        $id = $this->id ?? throw new DomainException("Project ID must not be null");
-
-        return $this->cachable(__METHOD__ . ":" . $key, function () use ($id, $key) {
-            $mDao = new MetadataDao();
-
-            return $mDao->setCacheTTL(60 * 60)->get($id, $key)?->value;
-        });
-    }
 
 
 
