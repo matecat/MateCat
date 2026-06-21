@@ -12,6 +12,7 @@ namespace View\API\App\Json\Analysis;
 use Exception;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use TypeError;
@@ -45,6 +46,8 @@ class AnalysisChunk implements JsonSerializable
      */
     protected UserStruct $user;
 
+    protected IDatabase $database;
+
     /**
      * @var int
      */
@@ -62,8 +65,9 @@ class AnalysisChunk implements JsonSerializable
      * @throws \RuntimeException
      * @throws TypeError
      */
-    public function __construct(JobStruct $chunkStruct, string $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
+    public function __construct(IDatabase $database, JobStruct $chunkStruct, string $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
     {
+        $this->database = $database;
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user = $user;
@@ -94,7 +98,7 @@ class AnalysisChunk implements JsonSerializable
             'status' => $this->chunkStruct->status,
             'engines' => $this->getEngines(),
             'memory_keys' => $this->getMemoryKeys(),
-            'urls' => JobUrlBuilder::createFromJobStructAndProjectName($this->chunkStruct, $this->projectName)->getUrls(),
+            'urls' => JobUrlBuilder::createFromJobStructAndProjectName($this->database, $this->chunkStruct, $this->projectName)->getUrls(),
             'files' => array_values($this->files),
             'summary' => $this->summary,
             'total_raw' => $this->total_raw,

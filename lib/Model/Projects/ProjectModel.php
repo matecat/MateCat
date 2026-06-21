@@ -4,6 +4,7 @@ namespace Model\Projects;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Teams\MembershipDao;
@@ -43,8 +44,11 @@ class ProjectModel
      */
     protected UserStruct $user;
 
-    public function __construct(ProjectStruct $project)
+    protected IDatabase $database;
+
+    public function __construct(IDatabase $database, ProjectStruct $project)
     {
+        $this->database = $database;
         $this->project_struct = $project;
     }
 
@@ -127,7 +131,7 @@ class ProjectModel
                 return;
             }
             $jobs = (new JobDao())->getNotDeletedByProjectId((int) $this->project_struct->id);
-            $email = new ProjectAssignedEmail($this->user, $this->project_struct, $assignee, $jobs);
+            $email = new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
             $email->send();
         }
     }

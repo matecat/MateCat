@@ -34,6 +34,7 @@ use ReflectionException;
 use RuntimeException;
 use TypeError;
 use UnexpectedValueException;
+use Model\DataAccess\IDatabase;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
@@ -397,7 +398,7 @@ class Session
      * @throws UnexpectedValueException
      * @throws TypeError
      */
-    public function removeFile(string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): bool
+    public function removeFile(IDatabase $database, string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): bool
     {
         $success = false;
 
@@ -429,7 +430,7 @@ class Session
                 $hashFile = $file['fileHash'] . "|" . end($target);
 
                 if ($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile) {
-                    (new CatUtils())->deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
+                    (new CatUtils($database))->deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
                     unlink($item);
                 }
             }
@@ -452,10 +453,10 @@ class Session
      * @throws TypeError
      * @throws UnexpectedValueException
      */
-    public function removeAllFiles(string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
+    public function removeAllFiles(IDatabase $database, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
     {
         foreach ($this->gDriveSession[self::FILE_LIST] as $singleFileId => $file) {
-            $this->removeFile($singleFileId, $source, $segmentationRule, $filtersTemplate);
+            $this->removeFile($database, $singleFileId, $source, $segmentationRule, $filtersTemplate);
         }
 
         unset($this->gDriveSession[self::FILE_LIST]);

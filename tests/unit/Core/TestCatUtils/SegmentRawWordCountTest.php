@@ -23,6 +23,14 @@ use Utils\Tools\CatUtils;
 
 class SegmentRawWordCountTest extends AbstractTest
 {
+    private \Model\DataAccess\IDatabase $dbStub;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        [$this->dbStub] = $this->createDatabaseMock();
+    }
+
     /**
      * @throws Exception
      */
@@ -150,7 +158,7 @@ H;
                 /** @var MateCatFilter $filter */
                 $filter = MateCatFilter::getInstance(new FeatureSet(), "en-US", $language, [], $defaultHandlers);
 
-                $this->assertEquals($count, (new CatUtils())->countSegmentRawWords($phrase, $language, $filter), $phrase . ': test failed');
+                $this->assertEquals($count, (new CatUtils($this->dbStub))->countSegmentRawWords($phrase, $language, $filter), $phrase . ': test failed');
             }
         }
     }

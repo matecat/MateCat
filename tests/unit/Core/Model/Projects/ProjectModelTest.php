@@ -5,6 +5,8 @@ namespace Matecat\Core\Model\Projects;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\Factory\User;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
@@ -37,6 +39,8 @@ if (!class_exists(\Utils\Email\ProjectAssignedEmail::class, false)) {
 
 class ProjectModelTest extends AbstractTest
 {
+    private IDatabase $db;
+
     /** @var list<int> */
     private array $createdProjectIds = [];
 
@@ -46,6 +50,7 @@ class ProjectModelTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
+        $this->db = Database::obtain();
         FakeProjectAssignedEmail::$sent = 0;
     }
 
@@ -55,7 +60,7 @@ class ProjectModelTest extends AbstractTest
         $project = new ProjectStruct();
         $project->name = 'demo';
 
-        $model = new ProjectModel($project);
+        $model = new ProjectModel($this->db, $project);
 
         $property = new ReflectionProperty(ProjectModel::class, 'project_struct');
         $this->assertSame($project, $property->getValue($model));
@@ -64,7 +69,7 @@ class ProjectModelTest extends AbstractTest
     #[Test]
     public function prepareUpdateStoresPendingFieldAndValue(): void
     {
-        $model = new ProjectModel(new ProjectStruct());
+        $model = new ProjectModel($this->db, new ProjectStruct());
 
         $model->prepareUpdate('name', 'new-name');
 
@@ -75,7 +80,7 @@ class ProjectModelTest extends AbstractTest
     #[Test]
     public function setUserStoresUserOnModel(): void
     {
-        $model = new ProjectModel(new ProjectStruct());
+        $model = new ProjectModel($this->db, new ProjectStruct());
         $user = new UserStruct();
         $user->uid = 11;
 
@@ -91,7 +96,7 @@ class ProjectModelTest extends AbstractTest
         $project = $this->makeMinimalProjectStruct();
         $project->name = 'old';
 
-        $model = new ProjectModel($project);
+        $model = new ProjectModel($this->db, $project);
         $model->setUser($this->makePlainUser(1));
         $model->prepareUpdate('name', '');
 
@@ -108,7 +113,7 @@ class ProjectModelTest extends AbstractTest
         $project->name = 'old';
         $project->id_team = null;
 
-        $model = new ProjectModel($project);
+        $model = new ProjectModel($this->db, $project);
         $model->setUser($this->makePlainUser(1));
         $model->prepareUpdate('id_assignee', 99);
 
@@ -125,7 +130,7 @@ class ProjectModelTest extends AbstractTest
         $team = $this->createGeneralTeamWithMembers($owner, []);
         $project = $this->createProject($team->id, null, 'Initial Name');
 
-        $model = new ProjectModel($project);
+        $model = new ProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('name', 'Updated Name');
 
@@ -138,7 +143,7 @@ class ProjectModelTest extends AbstractTest
     #[Test]
     public function checkNameThrowsForEmptyName(): void
     {
-        $model = new TestableProjectModel(new ProjectStruct());
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
         $model->prepareUpdate('name', '');
 
         $this->expectException(ValidationError::class);
@@ -153,7 +158,7 @@ class ProjectModelTest extends AbstractTest
         $owner = $this->createUser();
         $personalTeam = (new TeamDao())->getPersonalByUid((int)$owner->uid);
 
-        $model = new TestableProjectModel(new ProjectStruct());
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
 
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Can\'t change the Assignee of a personal project.');
@@ -171,7 +176,7 @@ class ProjectModelTest extends AbstractTest
         $project = new ProjectStruct();
         $project->id_team = (int)$team->id;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->prepareUpdate('id_assignee', (int)$outsider->uid);
 
         $this->expectException(ValidationError::class);
@@ -190,7 +195,7 @@ class ProjectModelTest extends AbstractTest
         $project = new ProjectStruct();
         $project->id_team = (int)$team->id;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($outsider);
         $model->prepareUpdate('id_team', (int)$team->id);
 
@@ -211,7 +216,7 @@ class ProjectModelTest extends AbstractTest
         $project->id_team = (int)$oldTeam->id;
         $project->id_assignee = null;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('id_team', (int)$personalTeam->id);
 
@@ -228,7 +233,7 @@ class ProjectModelTest extends AbstractTest
     #[Test]
     public function cleanAssigneeCachesSkipsUnknownTeamIds(): void
     {
-        $model = new TestableProjectModel(new ProjectStruct());
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
         $model->setCacheTeamsToCleanForTest([999999999]);
 
         $model->invokeCleanAssigneeCaches();
@@ -242,7 +247,7 @@ class ProjectModelTest extends AbstractTest
         $project = new ProjectStruct();
         $project->id = null;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
 
         $model->invokeCleanProjectCache();
 
@@ -255,7 +260,7 @@ class ProjectModelTest extends AbstractTest
         $project = new ProjectStruct();
         $project->id = null;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($this->makePlainUser(10));
         $model->setChangedFieldsForTest(['id_assignee' => null]);
 
@@ -273,7 +278,7 @@ class ProjectModelTest extends AbstractTest
 
         $project = $this->createProject((int)$team->id, null, 'Email Trigger');
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($assigner);
         $model->setChangedFieldsForTest(['id_assignee' => (int)$assignee->uid]);
 
@@ -285,7 +290,7 @@ class ProjectModelTest extends AbstractTest
     #[Test]
     public function checkAssigneeChangeInPersonalTeamThrowsWhenTeamIsMissing(): void
     {
-        $model = new TestableProjectModel(new ProjectStruct());
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
 
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Team not found');
@@ -303,7 +308,7 @@ class ProjectModelTest extends AbstractTest
         $project = $this->makeMinimalProjectStruct();
         $project->id_team = (int)$team->id;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->prepareUpdate('id_assignee', (int)$assignee->uid);
 
         $model->invokeCheckIdAssignee((int)$team->id);
@@ -322,7 +327,7 @@ class ProjectModelTest extends AbstractTest
         $project->id_team = (int)$destinationTeam->id + 1;
         $project->id_assignee = (int)$currentAssignee->uid;
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('id_team', (int)$destinationTeam->id);
 
@@ -339,7 +344,7 @@ class ProjectModelTest extends AbstractTest
         $owner = $this->createUser();
         $team = $this->createGeneralTeamWithMembers($owner, []);
 
-        $model = new TestableProjectModel(new ProjectStruct());
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
         $model->setCacheTeamsToCleanForTest([(int)$team->id]);
 
         $model->invokeCleanAssigneeCaches();
@@ -354,7 +359,7 @@ class ProjectModelTest extends AbstractTest
         $team = $this->createGeneralTeamWithMembers($owner, []);
         $project = $this->createProject((int)$team->id, null, 'Cacheable Project');
 
-        $model = new TestableProjectModel($project);
+        $model = new TestableProjectModel($this->db, $project);
 
         $model->invokeCleanProjectCache();
 
@@ -369,7 +374,7 @@ class ProjectModelTest extends AbstractTest
         $team = $this->createGeneralTeamWithMembers($owner, [$assignee->email]);
         $project = $this->createProject((int)$team->id, null, 'Combined Update');
 
-        $model = new ProjectModel($project);
+        $model = new ProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('id_team', (int)$team->id);
         $model->prepareUpdate('id_assignee', (int)$assignee->uid);

@@ -12,6 +12,7 @@ use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\RemoteFileService;
 use Model\ConnectedServices\GDrive\Session;
+use Model\DataAccess\IDatabase;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Users\UserStruct;
@@ -76,6 +77,14 @@ class TestableSession extends Session
 
 class SessionTest extends AbstractTest
 {
+    private IDatabase $dbStub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        [$this->dbStub] = $this->createDatabaseMock();
+    }
+
     private function createUserStruct(): UserStruct
     {
         $user = new UserStruct();
@@ -717,7 +726,7 @@ class SessionTest extends AbstractTest
         $sessionData = $this->createSessionData();
         $session = new Session($sessionData);
 
-        $result = $session->removeFile('nonexistent', 'en-US');
+        $result = $session->removeFile($this->dbStub, 'nonexistent', 'en-US');
         $this->assertFalse($result);
     }
 
@@ -764,7 +773,7 @@ class SessionTest extends AbstractTest
             $this->assertTrue($session->hasFiles());
 
             // suppress E_WARNING from Session.php:416 ($file['fileHash'] array-to-string concat)
-            $result = @$session->removeFile('file1', 'en-US');
+            $result = @$session->removeFile($this->dbStub, 'file1', 'en-US');
             $this->assertTrue($result);
             $this->assertFalse($session->hasFiles());
         } finally {
@@ -785,7 +794,7 @@ class SessionTest extends AbstractTest
         ];
 
         $session = new Session($sessionData);
-        $session->removeAllFiles('en-US');
+        $session->removeAllFiles($this->dbStub, 'en-US');
         $this->assertArrayNotHasKey(Session::FILE_LIST, $sessionData[Session::SESSION_KEY]);
     }
 

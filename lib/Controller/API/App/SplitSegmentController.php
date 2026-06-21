@@ -49,7 +49,7 @@ class SplitSegmentController extends KleinController
         if (!$Filter instanceof MateCatFilter) {
             throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
         }
-        [, $translationStruct->source_chunk_lengths] = (new CatUtils())->parseSegmentSplit($request['segment'], '', $Filter);
+        [, $translationStruct->source_chunk_lengths] = (new CatUtils($this->getDatabase()))->parseSegmentSplit($request['segment'], '', $Filter);
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces = (count($translationStruct->source_chunk_lengths) > 1 ? count($translationStruct->source_chunk_lengths) - 1 : 1);

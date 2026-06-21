@@ -32,10 +32,10 @@ trait APISourcePageGuesserTrait
             throw new LogicException('id_job and request_password must both be set in the controller');
         }
 
-        $isRevision = (new CatUtils())->isRevisionFromIdJobAndPassword($controller->id_job, $controller->request_password);
+        $isRevision = (new CatUtils($controller->getDatabase()))->isRevisionFromIdJobAndPassword($controller->id_job, $controller->request_password);
 
         if (!$isRevision) {
-            $isRevision = (new CatUtils())->getIsRevisionFromReferer();
+            $isRevision = (new CatUtils($controller->getDatabase()))->getIsRevisionFromReferer();
         }
 
         return $isRevision;

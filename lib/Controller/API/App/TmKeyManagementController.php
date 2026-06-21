@@ -41,7 +41,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
         $idJob = $this->request->param('id_job');
         $password = $this->request->param('password');
 
-        $chunk = (new CatUtils())->getJobFromIdAndAnyPassword($idJob, $password);
+        $chunk = (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($idJob, $password);
 
         if (empty($chunk)) {
             $this->response->status()->setCode(404);
@@ -75,7 +75,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
         if ($this->getUser()->email == $chunk->status_owner) {
             $userRole = Filter::OWNER;
-        } elseif ((new CatUtils())->isRevisionFromIdJobAndPassword($idJob, $password)) {
+        } elseif ((new CatUtils($this->getDatabase()))->isRevisionFromIdJobAndPassword($idJob, $password)) {
             $userRole = Filter::ROLE_REVISOR;
         } else {
             $userRole = Filter::ROLE_TRANSLATOR;

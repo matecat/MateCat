@@ -423,10 +423,10 @@ class GDriveController extends AbstractStatefulKleinController
         $filtersTemplate = $this->request->param('filters_template');
 
         if ($fileId === 'all') {
-            $this->gdriveUserSession->removeAllFiles($source, $segmentationRule, $filtersTemplate);
+            $this->gdriveUserSession->removeAllFiles($this->getDatabase(), $source, $segmentationRule, $filtersTemplate);
             $success = true;
         } else {
-            $success = $this->gdriveUserSession->removeFile($fileId, $source, $segmentationRule, $filtersTemplate);
+            $success = $this->gdriveUserSession->removeFile($this->getDatabase(), $fileId, $source, $segmentationRule, $filtersTemplate);
 
             if ($success) {
                 if (!$this->gdriveUserSession->hasFiles()) {

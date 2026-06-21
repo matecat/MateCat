@@ -51,7 +51,7 @@ class CatDecorator extends AbstractDecorator
         $this->arguments = $arguments;
         $job = $this->arguments->getJob();
 
-        $this->stats = (new CatUtils())->getFastStatsForJob($this->arguments->getWordCountStruct());
+        $this->stats = (new CatUtils($this->controller->getDatabase()))->getFastStatsForJob($this->arguments->getWordCountStruct());
 
         $lastCompletionEvent = $this->chunkCompletionEventDao->lastCompletionRecord($job, ['is_review' => $this->arguments->isRevision()]);
 

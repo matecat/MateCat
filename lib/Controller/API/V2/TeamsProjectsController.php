@@ -52,7 +52,7 @@ class TeamsProjectsController extends KleinController
 
         $acceptedFields = ['id_assignee', 'name', 'id_team'];
 
-        $projectModel = new ProjectModel($this->project);
+        $projectModel = new ProjectModel($this->getDatabase(), $this->project);
         $projectModel->setUser($this->user);
 
         foreach ($acceptedFields as $field) {

@@ -241,7 +241,7 @@ abstract class AbstractStatus
 
             if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
                 $chunkStruct = $this->jobDao->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
+                $chunk = new AnalysisChunk($this->jobDao->getDatabaseHandler(), $chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }
@@ -327,7 +327,7 @@ abstract class AbstractStatus
                 $chunkStruct->target = $lang_pair[1];
                 $chunkStruct->payable_rates = $_job_fallback['payable_rates'];
 
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
+                $chunk = new AnalysisChunk($this->jobDao->getDatabaseHandler(), $chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }

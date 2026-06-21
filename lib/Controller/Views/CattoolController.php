@@ -128,7 +128,7 @@ class CattoolController extends BaseKleinViewController
     {
         $chunkAndPasswords = new stdClass();
         $request = $this->validateTheRequest();
-        $isRevision = (new CatUtils())->getIsRevisionFromRequestUri();
+        $isRevision = (new CatUtils($this->getDatabase()))->getIsRevisionFromRequestUri();
         $revisionNumber = null;
 
         try {
@@ -293,7 +293,7 @@ class CattoolController extends BaseKleinViewController
             new CatDecoratorArguments(
                 $chunkStruct,
                 $isRevision,
-                (new CatUtils())->getWStructFromJobArray($chunkStruct, $chunkStruct->getProject()),
+                (new CatUtils($this->getDatabase()))->getWStructFromJobArray($chunkStruct, $chunkStruct->getProject()),
                 $chunkReviewStruct
             )
         );

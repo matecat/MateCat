@@ -423,9 +423,9 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @throws ReflectionException
      * @throws Exception
      */
-    public function getQualityOverall(array $chunkReviews = [], ?CatUtils $catUtils = null): ?string
+    public function getQualityOverall(array $chunkReviews, CatUtils $catUtils): ?string
     {
-        return ($catUtils ?? new CatUtils())->getQualityOverallFromJobStruct($this, $chunkReviews);
+        return $catUtils->getQualityOverallFromJobStruct($this, $chunkReviews);
     }
 
     /**

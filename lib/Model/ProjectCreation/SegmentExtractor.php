@@ -333,7 +333,7 @@ class SegmentExtractor
             // mrk in the list will not be too!!!
             $show_in_cattool = 1;
 
-            $wordCount = (new CatUtils())->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
+            $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCountEvent = new WordCountEvent($wordCount);
             $this->features->dispatch($wordCountEvent);
             $wordCount = $wordCountEvent->getWordCount();
@@ -413,7 +413,7 @@ class SegmentExtractor
     ): int {
         $show_in_cattool = 1;
 
-        $wordCount = (new CatUtils())->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
+        $wordCount = (new CatUtils($this->dbHandler))->countSegmentRawWords($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
         $sourceLayer0 = $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']);
 

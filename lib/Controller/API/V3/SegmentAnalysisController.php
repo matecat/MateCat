@@ -178,7 +178,7 @@ class SegmentAnalysisController extends KleinController
      */
     protected function getSegmentTranslationsCount(ProjectStruct $project): int
     {
-        return (new CatUtils())->getSegmentTranslationsCount($project) ?? 0;
+        return (new CatUtils($this->getDatabase()))->getSegmentTranslationsCount($project) ?? 0;
     }
 
     /**
@@ -186,7 +186,7 @@ class SegmentAnalysisController extends KleinController
      */
     protected function countRawWords(?string $string, string $lang, ?MateCatFilter $filter): int
     {
-        return (new CatUtils())->countSegmentRawWords($string, $lang, $filter);
+        return (new CatUtils($this->getDatabase()))->countSegmentRawWords($string, $lang, $filter);
     }
 
     /**

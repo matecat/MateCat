@@ -557,7 +557,7 @@ class CommentController extends KleinController
      */
     private function sendEmail(CommentStruct $comment, JobStruct $job, array $users, array $users_mentioned): void
     {
-        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job, [
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($this->getDatabase(), $job, [
             'id_segment' => $comment->id_segment,
             'skip_check_segment' => true
         ]);
