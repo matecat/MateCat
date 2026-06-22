@@ -520,7 +520,7 @@ class DownloadControllersTest extends AbstractTest
         $user->uid = 1;
         $user->email = 'test@example.org';
         $this->setControllerProp($controller, 'user', $user);
-        $this->setControllerProp($controller, 'featureSet', new FeatureSet());
+        $this->setControllerProp($controller, 'featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         return $controller;
     }

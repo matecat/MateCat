@@ -81,7 +81,7 @@ class CatUtils
         $this->chunkReviewDao = new ChunkReviewDao($database);
         $this->jobDao = new JobDao($database);
         $this->segmentTranslationDao = new SegmentTranslationDao($database);
-        $this->featureSet = new FeatureSet(null, $database);
+        $this->featureSet = new FeatureSet($database);
     }
 
     /**

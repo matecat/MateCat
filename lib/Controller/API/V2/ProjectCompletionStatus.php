@@ -51,7 +51,7 @@ class ProjectCompletionStatus extends KleinController
     {
         $model = new ProjectCompletionStatusModel(
             $this->project ?? throw new RuntimeException('Project not found'),
-            new FeatureSet(null, $this->getDatabase()),
+            new FeatureSet($this->getDatabase()),
         );
         $this->response->json([
             'project_status' => $model->getStatus()

@@ -106,7 +106,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
         $logProp->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $fsProp = $this->reflector->getProperty('featureSet');
-        $fsProp->setValue($this->controller, new FeatureSet());
+        $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**

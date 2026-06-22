@@ -13,6 +13,7 @@ use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Lara\LaraException;
+use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
 use ReflectionException;
 use TypeError;
@@ -28,6 +29,10 @@ use Utils\Validator\Contracts\ValidatorObjectInterface;
 class LaraEngineValidator extends AbstractValidator
 {
 
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
+
     /**
      * @param EngineValidatorObject $object
      * @return ValidatorObjectInterface|null
@@ -42,7 +47,7 @@ class LaraEngineValidator extends AbstractValidator
         }
 
         /** @var Lara $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct, $this->database);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";

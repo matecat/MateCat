@@ -90,7 +90,7 @@ class MyMemory extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord, ?IDatabase $database = null)
+    public function __construct($engineRecord, IDatabase $database)
     {
         parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::TM) {
@@ -282,10 +282,8 @@ class MyMemory extends AbstractEngine
         ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
         $filterMyMemoryGetParametersEvent = new FilterMyMemoryGetParametersEvent($parameters, $_config);
-        if ($this->featureSet !== null) {
-            $this->featureSet->dispatch($filterMyMemoryGetParametersEvent);
-            $parameters = $filterMyMemoryGetParametersEvent->getParameters();
-        }
+        $this->featureSet->dispatch($filterMyMemoryGetParametersEvent);
+        $parameters = $filterMyMemoryGetParametersEvent->getParameters();
 
         $this->call("translate_relative_url", $parameters, true);
 

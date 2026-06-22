@@ -11,6 +11,7 @@ namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Utils\Engines\Altlang;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
@@ -19,6 +20,10 @@ use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class AltLangEngineValidator extends AbstractValidator
 {
+
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
 
     /**
      * @param EngineValidatorObject $object
@@ -31,7 +36,7 @@ class AltLangEngineValidator extends AbstractValidator
         $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
 
         /** @var Altlang $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->database);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";

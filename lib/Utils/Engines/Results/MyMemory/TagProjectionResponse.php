@@ -48,7 +48,7 @@ class TagProjectionResponse extends TMSAbstractResponse
      * @throws \TypeError
      * @throws Exception
      */
-    public static function getInstance(mixed $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null): static
+    public static function getInstance(mixed $result, FeatureSet $featureSet, ?array $dataRefMap = [], ?int $id_project = null): static
     {
         /** @var static $instance */
         $instance = parent::getInstance($result, $featureSet, $dataRefMap, $id_project);

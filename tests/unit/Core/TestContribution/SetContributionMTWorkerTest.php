@@ -93,7 +93,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver
         parent::setUp();
         Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->featureSet->loadFromString("translation_versions,review_extended,mmt");
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 

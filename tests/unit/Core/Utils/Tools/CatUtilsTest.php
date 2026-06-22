@@ -841,7 +841,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testParseSegmentSplitWithNoPlaceholderReturnsUnchangedL(): void
     {
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US');
         [$segment, $positions] = (new CatUtils($this->dbStub))->parseSegmentSplit('hello world', ' ', $filter);
         $this->assertEquals('hello world', $segment);
         $this->assertEquals([], $positions);
@@ -850,7 +850,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testParseSegmentSplitWithPlaceholderBuildsPositionsL(): void
     {
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US');
         $input = 'hello' . CatUtils::splitPlaceHolder . 'world';
         [$segment, $positions] = (new CatUtils($this->dbStub))->parseSegmentSplit($input, ' ', $filter);
         $this->assertNotEmpty($positions);
@@ -918,7 +918,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testParseSegmentSplitWithEmptyFirstChunkBreaksL(): void
     {
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US');
         // Segment starts with placeholder → first chunk is ''
         $input = CatUtils::splitPlaceHolder . 'world';
         [$segment, $positions] = (new CatUtils($this->dbStub))->parseSegmentSplit($input, ' ', $filter);
@@ -933,7 +933,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testParseSegmentSplitChunkEndsWithSeparatorL(): void
     {
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US');
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US');
         // "hello " ends with space (separator), so separator is removed to avoid double space
         $input = 'hello ' . CatUtils::splitPlaceHolder . 'world';
         [$segment, $positions] = (new CatUtils($this->dbStub))->parseSegmentSplit($input, ' ', $filter);
@@ -1735,7 +1735,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testCountSegmentWordsUsesInjectedFeatureSet(): void
     {
-        $fakeFeatureSet = new FeatureSet([]);
+        $fakeFeatureSet = new FeatureSet($this->dbStub, []);
 
         $cat = new class($this->dbStub, $fakeFeatureSet) extends CatUtils {
             public function __construct(IDatabase $db, FeatureSet $featureSet) {

@@ -62,7 +62,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $resProp = $this->reflector->getProperty('response');
         $resProp->setValue($this->controller, $responseMock);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);
 
@@ -517,7 +517,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function countRawWordsCountsPlainStringWords(): void
     {
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'en-US', []);
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'en-US', []);
 
         $result = $this->invokePrivate('countRawWords', ['hello world', 'en-US', $filter]);
 
@@ -532,7 +532,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function countRawWordsReturnsZeroForEmptyString(): void
     {
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'en-US', []);
+        $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'en-US', []);
 
         $result = $this->invokePrivate('countRawWords', [null, 'en-US', $filter]);
 

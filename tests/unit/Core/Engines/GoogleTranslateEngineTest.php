@@ -30,7 +30,7 @@ class GoogleTranslateEngineTest extends AbstractTest
             'client_secret' => 'test-secret',
         ];
 
-        $this->engine = new TestGoogleTranslate($struct);
+        $this->engine = new TestGoogleTranslate($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]
@@ -197,7 +197,7 @@ class GoogleTranslateEngineTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('is not a MT engine');
 
-        new TestGoogleTranslate($struct);
+        new TestGoogleTranslate($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]

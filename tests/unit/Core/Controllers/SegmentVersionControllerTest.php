@@ -75,7 +75,7 @@ class SegmentVersionControllerTest extends AbstractTest
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**

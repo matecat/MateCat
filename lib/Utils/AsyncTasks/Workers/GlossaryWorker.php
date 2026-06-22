@@ -501,6 +501,6 @@ class GlossaryWorker extends AbstractWorker
      */
     protected function getMyMemoryClient(): MyMemory
     {
-        return $this->getEngine(new FeatureSet(null, $this->database));
+        return $this->getEngine(new FeatureSet($this->database));
     }
 }

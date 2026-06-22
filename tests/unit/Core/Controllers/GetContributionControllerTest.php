@@ -500,7 +500,7 @@ class GetContributionControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(Database::obtain());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);
 
         $user = new UserStruct();
@@ -556,7 +556,7 @@ class GetContributionControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(Database::obtain());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);
 
         $user = new UserStruct();

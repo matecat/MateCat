@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers\Abstracts;
 
+use Model\DataAccess\Database;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\Base;
 use Klein\Request;
@@ -65,7 +66,7 @@ class KleinControllerTest extends AbstractTest
     public function setFeatureSetUpdatesFeatureSet(): void
     {
         $controller = $this->createController();
-        $newFeatureSet = new FeatureSet();
+        $newFeatureSet = new FeatureSet(Database::obtain());
 
         $result = $controller->setFeatureSet($newFeatureSet);
 

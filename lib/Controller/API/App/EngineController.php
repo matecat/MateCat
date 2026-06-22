@@ -78,7 +78,7 @@ class EngineController extends KleinController
                 assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['DeepL-Auth-Key'] = $engineData['client_id'];
 
-                (new DeepLEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+                (new DeepLEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -110,7 +110,7 @@ class EngineController extends KleinController
                 assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
-                (new AltlangEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+                (new AltlangEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -158,7 +158,7 @@ class EngineController extends KleinController
                 assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['client_secret'] = $engineData['secret'];
 
-                (new GoogleTranslateEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+                (new GoogleTranslateEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -173,7 +173,7 @@ class EngineController extends KleinController
                 assert(is_array($newEngineStruct->extra_parameters));
                 $newEngineStruct->extra_parameters['apikey'] = $engineData['secret'];
 
-                (new IntentoEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+                (new IntentoEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -190,7 +190,7 @@ class EngineController extends KleinController
                 $newEngineStruct->extra_parameters['Lara-AccessKeySecret'] = $engineData['secret'];
                 $newEngineStruct->extra_parameters['MMT-License'] = $engineData['mmt-license'];
 
-                (new LaraEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+                (new LaraEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -206,7 +206,7 @@ class EngineController extends KleinController
                 $newEngineStruct->extra_parameters['MMT-License'] = $engineData['secret'];
                 $newEngineStruct->extra_parameters['MMT-context-analyzer'] = true;
 
-                (new MMTEngineValidator())->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+                (new MMTEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -279,7 +279,7 @@ class EngineController extends KleinController
             throw new RuntimeException("Deletion failed. Generic error", -9);
         }
 
-        $engine = EnginesFactory::createTempInstance($result);
+        $engine = EnginesFactory::createTempInstance($result, $this->getDatabase());
 
         if ($engine->isAdaptiveMT()) {
             $uid = $this->user->uid ?? throw new AuthorizationError('User not authenticated', 403);

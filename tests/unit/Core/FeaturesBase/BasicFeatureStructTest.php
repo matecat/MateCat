@@ -64,7 +64,7 @@ class BasicFeatureStructTest extends AbstractTest
         $struct->feature_code = 'completely_nonexistent_feature_xyz';
         $struct->options = null;
 
-        $result = $struct->toNewObject();
+        $result = $struct->toNewObject($this->createStub(\Model\DataAccess\IDatabase::class));
 
         self::assertInstanceOf(\Plugins\Features\UnknownFeature::class, $result);
     }

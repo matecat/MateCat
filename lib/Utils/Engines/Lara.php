@@ -90,7 +90,7 @@ class Lara extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord, ?IDatabase $database = null)
+    public function __construct($engineRecord, IDatabase $database)
     {
         parent::__construct($engineRecord, $database);
 
@@ -137,7 +137,7 @@ class Lara extends AbstractEngine
         /**
          * @var MMTEngine $engine
          */
-        $engine = EnginesFactory::createTempInstance($mmtStruct);
+        $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
         $this->mmt_GET_Fallback = $engine;
 
         if (!empty($extraParams['MMT-License'])) {
@@ -149,7 +149,7 @@ class Lara extends AbstractEngine
             /**
              * @var MMTEngine $engine
              */
-            $engine = EnginesFactory::createTempInstance($mmtStruct);
+            $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
             $this->mmt_SET_PrivateLicense = $engine;
         }
 

@@ -73,7 +73,7 @@ class CompletionEventControllerTest extends AbstractTest
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet(Database::obtain()));
         $this->setProp('database', Database::obtain());
 
         $event           = new ChunkCompletionEventStruct();
@@ -233,7 +233,7 @@ class CompletionEventControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($controller, $request);
         $ref->getProperty('response')->setValue($controller, $this->createMock(Response::class));
         $ref->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
-        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet());
+        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet(Database::obtain()));
         $ref->getProperty('database')->setValue($controller, Database::obtain());
 
         $paramsProp = $ref->getProperty('params');
@@ -279,7 +279,7 @@ class CompletionEventControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($controller, $request);
         $ref->getProperty('response')->setValue($controller, $this->createMock(Response::class));
         $ref->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
-        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet());
+        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet(Database::obtain()));
         $ref->getProperty('database')->setValue($controller, Database::obtain());
         $ref->getProperty('params')->setValue($controller, $params);
 

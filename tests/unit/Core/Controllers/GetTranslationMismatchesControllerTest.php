@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Model\DataAccess\Database;
 use Controller\API\App\GetTranslationMismatchesController;
 use Controller\API\Commons\Validators\Base;
 use Controller\API\Commons\Validators\JobPasswordValidator;
@@ -115,7 +116,7 @@ class GetTranslationMismatchesControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet(Database::obtain()));
     }
 
     protected function tearDown(): void

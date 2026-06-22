@@ -84,7 +84,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $team = new TeamStruct();
         $team->id = $this->teamId(self::BASE);

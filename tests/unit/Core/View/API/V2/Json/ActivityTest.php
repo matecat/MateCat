@@ -13,7 +13,7 @@ class ActivityTest extends AbstractTest
 {
     private function featureSet(): FeatureSet
     {
-        return new FeatureSet();
+        return new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     private function makeStruct(int $id = 1, string $email = 'user@example.com'): ActivityLogStruct

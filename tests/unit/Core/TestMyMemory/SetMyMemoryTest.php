@@ -83,7 +83,7 @@ class SetMyMemoryTest extends AbstractTest
         $this->str_tra_2 = 'For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.';
         $this->prop = '{"project_id":"987654","project_name":"barfoo","job_id":"321"}';
 
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->reflector = new ReflectionClass($this->engine_MyMemory);
         $this->property = $this->reflector->getProperty("result");
     }
@@ -182,7 +182,7 @@ TAB;
         /**
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($this->anything(), $curl_params)->willReturn($mock_json_return);
 
         $actual_result = $this->engine_MyMemory->set($params);
@@ -301,7 +301,7 @@ TAB;
         /**
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with(
             $url_mock_param,
             $curl_params
@@ -388,7 +388,7 @@ TAB;
         /**
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($rawValue_error);
 
         $actual_result = $this->engine_MyMemory->set($params);

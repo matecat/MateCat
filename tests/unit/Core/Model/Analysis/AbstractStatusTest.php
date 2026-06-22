@@ -93,7 +93,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -107,7 +107,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -123,7 +123,7 @@ class AbstractStatusTest extends AbstractTest
 
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct(),
             $user
         );
@@ -136,7 +136,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -151,7 +151,7 @@ class AbstractStatusTest extends AbstractTest
     {
         $status = new TestableAbstractStatus(
             $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -181,7 +181,7 @@ class AbstractStatusTest extends AbstractTest
 
         $status = new TestableAbstractStatus(
             $projectData,
-            new FeatureSet(),
+            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             $this->makeProjectStruct()
         );
 
@@ -264,9 +264,11 @@ class AbstractStatusTest extends AbstractTest
         ?ProjectStruct $project = null,
         ?UserStruct $user = null
     ): TestableAbstractStatus {
+        [$dbStub] = $this->createDatabaseMock();
+
         return new TestableAbstractStatus(
             $projectData ?: $this->makeProjectData(),
-            new FeatureSet(),
+            new FeatureSet($dbStub),
             $project ?? $this->makeProjectStruct(),
             $user,
             $this->makeAnalysisDaoMock($resultSet),

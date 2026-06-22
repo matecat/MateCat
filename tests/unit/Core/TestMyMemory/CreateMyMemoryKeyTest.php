@@ -59,7 +59,7 @@ T;
         /**
          * creation of the engine
          */
-        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($mock_json_return);
 
 
@@ -126,7 +126,7 @@ T;
          * creation of the engine
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
 
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
 

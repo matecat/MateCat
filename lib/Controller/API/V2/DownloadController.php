@@ -174,7 +174,7 @@ class DownloadController extends AbstractDownloadController
             $this->forceXliff = true;
         }
 
-        $this->featureSet = new FeatureSet(null, $this->getDatabase());
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $this->processDownload();
         $this->finalize($forceXliff);
     }

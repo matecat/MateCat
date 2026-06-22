@@ -42,7 +42,7 @@ class MMTEngineMethodsTest extends AbstractTest
 
     private function createEngineWithClient(MMTServiceApi $client): TestMMT
     {
-        $engine = new TestMMT($this->createEngineStruct());
+        $engine = new TestMMT($this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class));
         $engine->setMockClient($client);
 
         return $engine;
@@ -514,7 +514,7 @@ class MMTEngineMethodsTest extends AbstractTest
         $memoryKey = $this->createMemoryKey('k1');
 
         $engineMine = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineMine->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -522,7 +522,7 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertSame(['owner' => ['user' => '10']], $engineMine->getMemoryIfMine($memoryKey));
 
         $engineNotMine = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineNotMine->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -530,7 +530,7 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertNull($engineNotMine->getMemoryIfMine($memoryKey));
 
         $engineEmpty = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineEmpty->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -752,7 +752,7 @@ class MMTEngineMethodsTest extends AbstractTest
         $originalBuild = AppConfig::$BUILD_NUMBER;
         AppConfig::$BUILD_NUMBER = 'v1.2.3';
 
-        $engine = new MMT($this->createEngineStruct());
+        $engine = new MMT($this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class));
         $method = new ReflectionMethod(MMT::class, '_getClient');
 
         $client = $method->invoke($engine);

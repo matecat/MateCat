@@ -370,7 +370,7 @@ class QualityReportSegmentStructTest extends AbstractTest
         $struct->translation = 'Ciao mondo';
         $struct->target = 'it-IT';
 
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $chunk = new \Model\Jobs\JobStruct();
         $chunk->id = 1;
         $chunk->id_project = 1;

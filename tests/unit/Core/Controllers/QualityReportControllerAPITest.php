@@ -151,7 +151,7 @@ class QualityReportControllerAPITest extends AbstractTest
         $reflector->getProperty('request')->setValue($controller, $request);
         $reflector->getProperty('response')->setValue($controller, $response);
         $reflector->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
-        $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet());
+        $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $reflector->getProperty('chunk')->setValue($controller, $chunk);
 
         return [$controller, $reflector, $response];

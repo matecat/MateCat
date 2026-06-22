@@ -6,6 +6,7 @@ namespace Matecat\Core\Features\Hook;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -18,9 +19,13 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class FeatureSetDispatchTest extends AbstractTest
 {
+    private IDatabase $dbStub;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->dbStub = $this->createStub(IDatabase::class);
 
         \Plugins\Features\TestDispatchFilterPassThrough::$invoked = false;
         \Plugins\Features\TestDispatchFilterThrowsGeneric::$invoked = false;
@@ -37,7 +42,7 @@ class FeatureSetDispatchTest extends AbstractTest
     #[Test]
     public function dispatchInvokesDerivedHookAndReturnsSameEventInstance(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_pass_through'])
         ]);
 
@@ -53,7 +58,7 @@ class FeatureSetDispatchTest extends AbstractTest
     #[Test]
     public function dispatchSwallowsGenericExceptionsAndContinues(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_throws_generic']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_after_generic']),
         ]);
@@ -71,7 +76,7 @@ class FeatureSetDispatchTest extends AbstractTest
     #[Test]
     public function dispatchFilterInvokesHookHandlersWithEventAndReturnsSameEventInstance(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_pass_through'])
         ]);
 
@@ -87,7 +92,7 @@ class FeatureSetDispatchTest extends AbstractTest
     #[Test]
     public function dispatchFilterSwallowsGenericExceptionsAndContinues(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_generic']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_generic']),
         ]);
@@ -107,7 +112,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new ValidationError('validation');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
         ]);
@@ -121,7 +126,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new NotFoundException('not found');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
         ]);
@@ -135,7 +140,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new AuthenticationError('auth');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
         ]);
@@ -149,7 +154,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new ReQueueException('requeue');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
         ]);
@@ -163,7 +168,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchFilterThrowsHandled::$throwable = new EndQueueException('endqueue');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_handled']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_rethrow']),
         ]);
@@ -175,7 +180,7 @@ class FeatureSetDispatchTest extends AbstractTest
     #[Test]
     public function dispatchRunInvokesOnlyFeaturesWithMatchingHookMethod(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_handler']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_no_handler']),
         ]);
@@ -194,7 +199,7 @@ class FeatureSetDispatchTest extends AbstractTest
         \Plugins\Features\TestDispatchRunThrowsGeneric::$invoked = false;
         \Plugins\Features\TestDispatchRunAfterGeneric::$invoked = false;
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_generic']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_after_generic']),
         ]);
@@ -211,7 +216,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchRunThrowsHandled::$throwable = new NotFoundException('not found');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_handled']),
         ]);
 
@@ -224,7 +229,7 @@ class FeatureSetDispatchTest extends AbstractTest
     {
         \Plugins\Features\TestDispatchRunThrowsHandled::$throwable = new AuthenticationError('auth');
 
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_handled']),
         ]);
 
@@ -235,7 +240,7 @@ class FeatureSetDispatchTest extends AbstractTest
     #[Test]
     public function dispatchExternalEventSwallowsDomainExceptionAndContinues(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->dbStub, [
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_throws_domain']),
             new BasicFeatureStruct(['feature_code' => 'test_dispatch_psr14_after_generic']),
         ]);

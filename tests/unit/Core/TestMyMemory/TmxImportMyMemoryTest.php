@@ -78,7 +78,7 @@ class TmxImportMyMemoryTest extends AbstractTest
         $uuid = Utils::uuid4();
 
         $engine_MyMemory = $this->getMockBuilder(MyMemory::class)
-            ->setConstructorArgs([$engine_struct_param])
+            ->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['getImportStatus', 'importMemory'])
             ->getMock();
 

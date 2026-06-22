@@ -31,10 +31,9 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 /**
  * Manages the set of active features (plugins) for a request or task.
  *
- * Every db-holding root (controller, worker, ProjectManager) SHOULD pass an
+ * Every db-holding root (controller, worker, ProjectManager) MUST pass an
  * IDatabase handle via the constructor so that features receive a real connection
- * instead of calling Database::obtain(). The nullable param is transitional —
- * target state is non-nullable after all callers are migrated.
+ * instead of relying on any hidden fallback.
  */
 class FeatureSet implements EventDispatcherInterface
 {
@@ -47,7 +46,7 @@ class FeatureSet implements EventDispatcherInterface
 
     private LoggerInterface $logger;
 
-    private ?IDatabase $database;
+    private IDatabase $database;
 
     /**
      * @return BasicFeatureStruct[]
@@ -58,12 +57,12 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
+     * @param IDatabase $database A real handle from a db-holding root.
      * @param BasicFeatureStruct[]|null $features
-     * @param ?IDatabase $database Transitional: pass a real handle from db-holding roots.
      *
      * @throws Exception
      */
-    public function __construct(?array $features = null, ?IDatabase $database = null)
+    public function __construct(IDatabase $database, ?array $features = null)
     {
         $this->logger   = LoggerFactory::getLogger('feature_set');
         $this->database = $database;
@@ -79,7 +78,7 @@ class FeatureSet implements EventDispatcherInterface
         }
     }
 
-    public function getDatabase(): ?IDatabase
+    public function getDatabase(): IDatabase
     {
         return $this->database;
     }
@@ -94,7 +93,7 @@ class FeatureSet implements EventDispatcherInterface
      */
     public static function forProject(ProjectStruct $project, IDatabase $database): self
     {
-        $featureSet = new self(null, $database);
+        $featureSet = new self($database);
         $featureSet->loadForProject($project);
 
         return $featureSet;

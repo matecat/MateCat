@@ -41,7 +41,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
      */
     public function download(): void
     {
-        $this->featureSet = new FeatureSet(null, $this->getDatabase());
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $request = $this->validateTheRequest();
         $projectId = (int)$request['id_project'];
         $_project_data = $this->getProjectDao()->getProjectAndJobData($projectId);

@@ -53,7 +53,7 @@ LAB;
             (new CatUtils($this->dbStub))->parseSegmentSplit(
                 $this->source_segment,
                 $this->separator,
-                $Filter = MateCatFilter::getInstance(new \Model\FeaturesBase\FeatureSet())
+                $Filter = MateCatFilter::getInstance(new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)))
             ));
     }
 
@@ -73,7 +73,7 @@ LAB;
 <g id="1">&#1048766;</g><g id="2"> </g><bx id="3"/>Porte d'accès au bureau [1-1-13] d'entrée depuis le haut de l'escalier (P118 et P119)
 LAB;
         self::assertEquals([$this->expected_segment, $this->chunk_position],
-            (new CatUtils($this->dbStub))->parseSegmentSplit($this->source_segment, $this->separator, $Filter = MateCatFilter::getInstance(new \Model\FeaturesBase\FeatureSet())));
+            (new CatUtils($this->dbStub))->parseSegmentSplit($this->source_segment, $this->separator, $Filter = MateCatFilter::getInstance(new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)))));
     }
 
 
@@ -94,7 +94,7 @@ LAB;
 MBLE A   PPUI W	C ET NICCHIA DE S	OUTIEN DU RA    NGEMENT LUMINEUX</g>
 LAB;
         self::assertEquals([$this->expected_segment, $this->chunk_position],
-            (new CatUtils($this->dbStub))->parseSegmentSplit($this->source_segment, $this->separator, $Filter = MateCatFilter::getInstance(new \Model\FeaturesBase\FeatureSet())));
+            (new CatUtils($this->dbStub))->parseSegmentSplit($this->source_segment, $this->separator, $Filter = MateCatFilter::getInstance(new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)))));
     }
 
 

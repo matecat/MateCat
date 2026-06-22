@@ -17,7 +17,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
 {
     private function featureSet(): FeatureSet
     {
-        return new FeatureSet();
+        return new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     private function makeJobStruct(int $id = 1, string $password = 'abc123'): JobStruct
@@ -228,7 +228,7 @@ class SegmentTranslationMismatchesTest extends AbstractTest
      */
     public function testConstructorAcceptsExplicitFeatureSet(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $view       = new SegmentTranslationMismatches([], $this->makeJobStruct(), 0, $featureSet, $this->makeMetadataDao());
         $result     = $view->render();
 

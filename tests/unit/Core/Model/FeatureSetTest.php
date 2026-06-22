@@ -15,7 +15,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function getSortedFeatures(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,project_completion");
 
         $this->assertEquals(
@@ -27,7 +27,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function getFeaturesStructsReturnsLoadedFeatures(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);
 
@@ -40,7 +40,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function loadProjectDependenciesFromProjectMetadataIsNoOp(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);
 
@@ -55,7 +55,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function loadForProjectClearsAndReloadsFeatures(): void
     {
-        $featureSet = new FeatureSet([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);
 
@@ -75,7 +75,7 @@ class FeatureSetTest extends AbstractTest
     #[Test]
     public function loadForProjectLoadsMetadataFeatures(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('setCacheTTL')->willReturnSelf();
@@ -96,7 +96,7 @@ class FeatureSetTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessageMatches('/conflicting/i');
 
-        new FeatureSet([
+        new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class), [
             new BasicFeatureStruct(['feature_code' => 'test_feature_conflict_declarer']),
             new BasicFeatureStruct(['feature_code' => 'test_featureset_stub_a']),
         ]);

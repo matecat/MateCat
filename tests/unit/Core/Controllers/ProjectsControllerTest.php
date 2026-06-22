@@ -94,7 +94,7 @@ class ProjectsControllerTest extends AbstractTest
         $this->setProp('user', $this->user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet(Database::obtain()));
 
         // Inject the validated project the way registerValidators would.
         $this->setProp('project', $this->loadProject());
@@ -353,7 +353,7 @@ class ProjectsControllerTest extends AbstractTest
         $reflector->getProperty('request')->setValue($fresh, new Request());
         $reflector->getProperty('response')->setValue($fresh, $this->createMock(Response::class));
         $reflector->getProperty('user')->setValue($fresh, $this->user);
-        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet());
+        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(Database::obtain()));
         $reflector->getProperty('params')->setValue($fresh, [
             'id_project' => (string) $this->projectId(self::BASE),
             'password' => self::PROJECT_PASSWORD,
@@ -390,7 +390,7 @@ class ProjectsControllerTest extends AbstractTest
         $reflector->getProperty('request')->setValue($fresh, $request);
         $reflector->getProperty('response')->setValue($fresh, $this->createMock(Response::class));
         $reflector->getProperty('user')->setValue($fresh, $this->user);
-        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet());
+        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(Database::obtain()));
         $reflector->getProperty('params')->setValue($fresh, $params);
 
         $reflector->getMethod('registerValidators')->invoke($fresh);

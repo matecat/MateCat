@@ -99,7 +99,7 @@ class ApiKeyControllerTest extends AbstractTest
 
         $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new InternalFeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new InternalFeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**

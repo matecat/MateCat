@@ -127,7 +127,7 @@ $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
     $reflect = new ReflectionClass(CustomPageView::class);
     $instance = $reflect->newInstanceArgs();
 
-    $featureSet = new FeatureSet(null, Database::obtain());
+    $featureSet = new FeatureSet(Database::obtain());
 
     if ($instance->getUser()->email !== null) {
         $featureSet->loadFromUserEmail($instance->getUser()->email);

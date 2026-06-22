@@ -78,7 +78,7 @@ class UserV2ControllerTest extends AbstractTest
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);

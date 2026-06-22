@@ -81,7 +81,7 @@ class DownloadControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     /**
@@ -343,7 +343,7 @@ class DownloadControllerTest extends AbstractTest
         // id_job set to a non-existent job → JobDao + ChunkReviewDao both empty.
         $this->setProp('id_job', 90299999);
         $this->setProp('password', 'definitely_wrong_password');
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Not found.');
@@ -360,7 +360,7 @@ class DownloadControllerTest extends AbstractTest
         // Existing job id, wrong password → no job row, no chunk review → NotFound.
         $this->setProp('id_job', $this->jobId(self::BASE));
         $this->setProp('password', 'wrong_pw_for_seeded_job');
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $this->expectException(NotFoundException::class);
 

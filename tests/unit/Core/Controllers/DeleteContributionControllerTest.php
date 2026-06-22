@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Model\DataAccess\Database;
 use Controller\API\App\DeleteContributionController;
 use InvalidArgumentException;
 use Klein\Request;
@@ -272,7 +273,7 @@ class DeleteContributionControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet(Database::obtain());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);
 
         $user = new UserStruct();

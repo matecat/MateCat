@@ -123,7 +123,7 @@ class ProjectManager
 
         $this->dbHandler = $dbHandler;
 
-        $this->features = new FeatureSet($this->getRequestedFeatures(), $this->dbHandler);
+        $this->features = new FeatureSet($this->dbHandler, $this->getRequestedFeatures());
 
         if (!empty($this->projectStructure->id_customer)) {
             $this->features->loadAutoActivableOwnerFeatures($this->projectStructure->id_customer);

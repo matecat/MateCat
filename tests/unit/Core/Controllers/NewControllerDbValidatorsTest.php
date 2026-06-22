@@ -60,7 +60,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
         $userProp->setValue($this->controller, $this->user);
 
         $fsProp = $this->reflector->getProperty('featureSet');
-        $fsProp->setValue($this->controller, new FeatureSet());
+        $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     public function tearDown(): void

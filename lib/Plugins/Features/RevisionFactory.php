@@ -90,7 +90,7 @@ class RevisionFactory
         $featureSet = FeatureSet::forProject($project, $database);
 
         foreach ($featureSet->getFeaturesStructs() as $featureStruct) {
-            $feature = $featureStruct->toNewObject();
+            $feature = $featureStruct->toNewObject($database);
             if ($feature instanceof AbstractRevisionFeature) { //only one revision type can be present
                 return self::getInstance($feature)->setFeatureSet($featureSet);
             }

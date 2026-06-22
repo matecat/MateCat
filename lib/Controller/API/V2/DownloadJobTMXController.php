@@ -64,7 +64,7 @@ class DownloadJobTMXController extends AbstractDownloadController
             ];
         }
 
-        $this->featureSet = new FeatureSet(null, $this->getDatabase());
+        $this->featureSet = new FeatureSet($this->getDatabase());
 
         if (count($this->errors) > 0) {
             $this->response->status()->setCode(500);

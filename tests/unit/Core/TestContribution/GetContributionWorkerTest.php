@@ -386,7 +386,7 @@ class GetContributionWorkerTest extends AbstractTest
             'concordanceSearch' => false,
         ]);
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $method = new ReflectionMethod($worker, '_publishPayload');
         $method->invoke(
@@ -418,7 +418,7 @@ class GetContributionWorkerTest extends AbstractTest
     public function test_publishPayload_uses_concordance_and_cross_language_types(): void
     {
         $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $concordanceRequest = $this->makeBaseRequest(['concordanceSearch' => true]);
         $crossLangRequest = $this->makeBaseRequest(['concordanceSearch' => false]);
@@ -454,11 +454,9 @@ class GetContributionWorkerTest extends AbstractTest
             ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
             ->getMock();
 
-        $tmEngine->expects($this->once())->method('getConfigStruct')->willReturn([]);
-        $tmEngine->expects($this->once())->method('setMTPenalty')->willReturnSelf();
-        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
-            return $config['source'] === 'en-US' && $config['target'] === 'it-IT';
-        }))->willReturn(new GetMemoryResponse([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+
+        $tmResponse = new GetMemoryResponse([
             'responseStatus' => 200,
             'matches' => [[
                 'id' => 1,
@@ -471,12 +469,19 @@ class GetContributionWorkerTest extends AbstractTest
                 'tm_properties' => '[]',
                 'target_note' => '',
             ]],
-        ]));
+        ]);
+        $tmResponse->featureSet($featureSet);
+
+        $tmEngine->expects($this->once())->method('getConfigStruct')->willReturn([]);
+        $tmEngine->expects($this->once())->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return $config['source'] === 'en-US' && $config['target'] === 'it-IT';
+        }))->willReturn($tmResponse);
 
         $request->forcedTMEngine = $tmEngine;
 
         $method = new ReflectionMethod($this->worker, '_getMatches');
-        [$mt, $matches] = $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet(), false);
+        [$mt, $matches] = $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', $featureSet, false);
 
         $this->assertSame([], $mt);
         $this->assertCount(1, $matches);
@@ -507,11 +512,9 @@ class GetContributionWorkerTest extends AbstractTest
             ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
             ->getMock();
 
-        $mtEngine->expects($this->once())->method('getConfigStruct')->willReturn([]);
-        $mtEngine->expects($this->once())->method('setMTPenalty')->willReturnSelf();
-        $mtEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
-            return isset($config['pid'], $config['segid'], $config['session']);
-        }))->willReturn(new GetMemoryResponse([
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+
+        $mtResponse = new GetMemoryResponse([
             'responseStatus' => 200,
             'matches' => [[
                 'id' => 2,
@@ -524,12 +527,19 @@ class GetContributionWorkerTest extends AbstractTest
                 'tm_properties' => '[]',
                 'target_note' => '',
             ]],
-        ]));
+        ]);
+        $mtResponse->featureSet($featureSet);
+
+        $mtEngine->expects($this->once())->method('getConfigStruct')->willReturn([]);
+        $mtEngine->expects($this->once())->method('setMTPenalty')->willReturnSelf();
+        $mtEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return isset($config['pid'], $config['segid'], $config['session']);
+        }))->willReturn($mtResponse);
 
         $request->forcedMTEngine = $mtEngine;
 
         $method = new ReflectionMethod($this->worker, '_getMatches');
-        [$mt, $matches] = $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet(), false);
+        [$mt, $matches] = $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', $featureSet, false);
 
         $this->assertNotEmpty($mt);
         $this->assertSame([], $matches);
@@ -570,7 +580,7 @@ class GetContributionWorkerTest extends AbstractTest
         $request->forcedTMEngine = $tmEngine;
 
         $method = new ReflectionMethod($this->worker, '_getMatches');
-        $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet(), false);
+        $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), false);
 
         $this->assertTrue(true);
     }
@@ -636,7 +646,7 @@ class GetContributionWorkerTest extends AbstractTest
             'raw_translation' => 'Ciao',
         ]];
 
-        $this->worker->normalizeMTMatches($matches, $request, new FeatureSet());
+        $this->worker->normalizeMTMatches($matches, $request, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $this->assertSame('ICE_MT', $matches[0]['match']);
         $this->assertStringContainsString('#{Hello}#', $matches[0]['segment']);

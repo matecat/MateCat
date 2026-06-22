@@ -55,7 +55,7 @@ class SmartMATE extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord, ?IDatabase $database = null)
+    public function __construct($engineRecord, IDatabase $database)
     {
         parent::__construct($engineRecord, $database);
         if ($this->getEngineRecord()->type != EngineConstants::MT) {

@@ -48,7 +48,7 @@ class DecodeMyMemoryTest extends AbstractTest
         $engine_struct_param = $eng[0];
 
 
-        $this->myMemory = new MyMemory($engine_struct_param);
+        $this->myMemory = new MyMemory($engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $reflector = new ReflectionClass($this->myMemory);
         $this->method = $reflector->getMethod("_decode");
     }

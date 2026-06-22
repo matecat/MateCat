@@ -250,7 +250,7 @@ class UserKeysController extends KleinController
                 $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type = EngineConstants::MT;
-                $engine = EnginesFactory::createTempInstance($struct);
+                $engine = EnginesFactory::createTempInstance($struct, $this->getDatabase());
 
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {

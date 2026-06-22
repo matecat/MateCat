@@ -102,7 +102,7 @@ class StatusV3ControllerTest extends AbstractTest
         $user->email = 'ctrltest_9056000@example.org';
         $this->reflector->getProperty('user')->setValue($this->controller, $user);
 
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     protected function tearDown(): void

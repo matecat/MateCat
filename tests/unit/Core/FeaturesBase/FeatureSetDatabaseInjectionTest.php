@@ -31,15 +31,13 @@ class FeatureSetDatabaseInjectionTest extends AbstractTest
     }
 
     #[Test]
-    public function toNewObjectWithNullLeavesNullDatabase(): void
+    public function featureSetExposesInjectedDatabase(): void
     {
-        $struct = new BasicFeatureStruct();
-        $struct->feature_code = 'review_extended';
-        $struct->options = null;
+        $db = $this->createStub(IDatabase::class);
 
-        $feature = $struct->toNewObject();
+        $featureSet = new FeatureSet($db);
 
-        self::assertNull($this->readProtected($feature, 'database'));
+        self::assertSame($db, $featureSet->getDatabase());
     }
 
     #[Test]
@@ -47,7 +45,7 @@ class FeatureSetDatabaseInjectionTest extends AbstractTest
     {
         $db = $this->createStub(IDatabase::class);
 
-        $featureSet = new FeatureSet(null, $db);
+        $featureSet = new FeatureSet($db);
         $featureSet->loadFromString('review_extended');
 
         $structs = $featureSet->getFeaturesStructs();
@@ -56,20 +54,6 @@ class FeatureSetDatabaseInjectionTest extends AbstractTest
         foreach ($structs as $struct) {
             $feature = $struct->toNewObject($db);
             self::assertSame($db, $this->readProtected($feature, 'database'));
-        }
-    }
-
-    #[Test]
-    public function featureSetWithoutDatabasePassesNullToFeatures(): void
-    {
-        $featureSet = new FeatureSet();
-
-        $structs = $featureSet->getFeaturesStructs();
-        self::assertNotEmpty($structs);
-
-        foreach ($structs as $struct) {
-            $feature = $struct->toNewObject();
-            self::assertNull($this->readProtected($feature, 'database'));
         }
     }
 

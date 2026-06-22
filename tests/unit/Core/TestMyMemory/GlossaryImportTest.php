@@ -63,7 +63,7 @@ class GlossaryImportTest extends AbstractTest
          */
         $this->engine_struct_param = $eng[0];
 
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     public function tearDown(): void
@@ -183,7 +183,7 @@ class GlossaryImportTest extends AbstractTest
          * @var $this ->engine_MyMemory MyMemory
          *            mocking _call
          */
-        $this->engine_MyMemory = @$this->getMockBuilder('\Utils\Engines\MyMemory')->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder('\Utils\Engines\MyMemory')->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->willReturn($rawValue_error);
 
 

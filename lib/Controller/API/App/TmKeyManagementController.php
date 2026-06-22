@@ -181,7 +181,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                 $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type = EngineConstants::MT;
-                $engine = EnginesFactory::createTempInstance($struct);
+                $engine = EnginesFactory::createTempInstance($struct, $this->getDatabase());
 
                 if ($engine->isAdaptiveMT()) {
                      //retrieve OWNER EnginesFactory License

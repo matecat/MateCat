@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Model\DataAccess\Database;
 use Controller\API\V2\ChunkTranslationVersionController;
 use Exception;
 use Klein\Request;
@@ -73,7 +74,7 @@ class ChunkTranslationVersionControllerTest extends AbstractTest
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet(Database::obtain()));
     }
 
     protected function tearDown(): void

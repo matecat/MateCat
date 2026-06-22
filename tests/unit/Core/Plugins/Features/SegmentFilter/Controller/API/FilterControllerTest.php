@@ -68,7 +68,7 @@ class FilterControllerTest extends AbstractTest
         $this->setProp('request', new Request());
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
+        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     protected function tearDown(): void
@@ -144,7 +144,7 @@ class FilterControllerTest extends AbstractTest
             'request' => $request,
             'response' => $this->responseMock,
             'logger' => $this->createMock(MatecatLogger::class),
-            'featureSet' => new FeatureSet(),
+            'featureSet' => new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
             // ChunkPasswordValidator's ctor reads $controller->getParams() (not the request)
             'params' => ['id_job' => self::JOB_ID, 'password' => self::JOB_PASSWORD],
         ];

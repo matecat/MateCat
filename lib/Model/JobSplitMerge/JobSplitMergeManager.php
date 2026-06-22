@@ -54,7 +54,7 @@ class JobSplitMergeManager
             $project->id_customer,
         );
 
-        $this->features = new FeatureSet(null, $database);
+        $this->features = new FeatureSet($database);
         $this->features->loadForProject($this->project);
     }
 

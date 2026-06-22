@@ -87,7 +87,7 @@ class JobsControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new \Model\FeaturesBase\FeatureSet());
+        $this->setProp('featureSet', new \Model\FeaturesBase\FeatureSet(Database::obtain()));
 
         // Wire the chunk + DAOs the action path reads (normally set in the
         // ChunkPasswordValidator onSuccess closure at validation time).

@@ -37,7 +37,7 @@ class SmartMATEEngineTest extends AbstractTest
             'client_secret' => 'secret-test',
         ];
 
-        $this->engine = new TestSmartMATE($struct);
+        $this->engine = new TestSmartMATE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]
@@ -253,7 +253,7 @@ class SmartMATEEngineTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('is not a MT engine');
 
-        new TestSmartMATE($struct);
+        new TestSmartMATE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 }
 

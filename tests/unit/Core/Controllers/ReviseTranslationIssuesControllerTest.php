@@ -72,7 +72,7 @@ class ReviseTranslationIssuesControllerTest extends AbstractTest
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }
 
     protected function tearDown(): void
@@ -217,7 +217,7 @@ class ReviseTranslationIssuesControllerTest extends AbstractTest
 
         $reqProp = $this->reflector->getProperty('request');
         $reqProp->setValue($real, new Request());
-        $this->reflector->getProperty('featureSet')->setValue($real, new FeatureSet());
+        $this->reflector->getProperty('featureSet')->setValue($real, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
         $method = $this->reflector->getMethod('registerValidators');
         $method->invoke($real);

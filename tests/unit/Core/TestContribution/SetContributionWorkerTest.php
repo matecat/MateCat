@@ -85,7 +85,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         parent::setUp();
         Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
@@ -150,7 +150,8 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
             ->with($this->anything())
             ->willReturn(
                 UpdateContributionResponse::getInstance(
-                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true)
+                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true),
+                    $this->featureSet
                 )
             );
 
@@ -230,7 +231,8 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
             ->with($this->anything())
             ->willReturn(
                 UpdateContributionResponse::getInstance(
-                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545518095,545518096]}', true)
+                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545518095,545518096]}', true),
+                    $this->featureSet
                 )
             );
 

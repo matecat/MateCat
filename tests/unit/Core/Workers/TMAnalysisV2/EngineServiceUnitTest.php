@@ -82,6 +82,13 @@ class EngineServiceUnitTest extends AbstractTest
 
     private function makeEngineStub($returnValue): AbstractEngine
     {
+        // A real engine stamps its featureSet onto the response it returns
+        // (e.g. MyMemory::get -> getInstance($decoded, $this->featureSet)).
+        // Mirror that so the response matches can build their filtering layer.
+        if ($returnValue instanceof GetMemoryResponse) {
+            $returnValue->featureSet(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        }
+
         $engine = $this->createStub(AbstractEngine::class);
         $engine->method('getConfigStruct')->willReturn([]);
         $engine->method('setFeatureSet')->willReturnSelf();

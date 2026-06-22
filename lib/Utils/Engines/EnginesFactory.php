@@ -6,6 +6,7 @@ use Controller\API\Commons\Exceptions\AuthorizationError;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 
@@ -57,17 +58,18 @@ class EnginesFactory
 
     /**
      * @param EngineStruct $engineRecord
+     * @param IDatabase $database
      *
      * @return EngineInterface
      * @throws Exception
      */
-    public static function createTempInstance(EngineStruct $engineRecord): EngineInterface
+    public static function createTempInstance(EngineStruct $engineRecord, IDatabase $database): EngineInterface
     {
         $className = self::getFullyQualifiedClassName($engineRecord->class_load ?? throw new Exception("Engine has no class_load"));
         $engineRecord->class_load = $className;
 
         /** @var EngineInterface $engine */
-        $engine = new $className($engineRecord);
+        $engine = new $className($engineRecord, $database);
 
         return $engine;
     }

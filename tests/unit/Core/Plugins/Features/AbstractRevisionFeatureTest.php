@@ -8,6 +8,7 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
@@ -59,6 +60,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature = new ConcreteTestRevisionFeature(new BasicFeatureStruct([
             'feature_code' => ConcreteTestRevisionFeature::FEATURE_CODE,
         ]));
+        $this->feature->setDatabase($this->createStub(IDatabase::class));
     }
 
     #[Test]

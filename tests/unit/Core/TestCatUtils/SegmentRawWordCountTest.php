@@ -156,7 +156,7 @@ H;
                 ]);
 
                 /** @var MateCatFilter $filter */
-                $filter = MateCatFilter::getInstance(new FeatureSet(), "en-US", $language, [], $defaultHandlers);
+                $filter = MateCatFilter::getInstance(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), "en-US", $language, [], $defaultHandlers);
 
                 $this->assertEquals($count, (new CatUtils($this->dbStub))->countSegmentRawWords($phrase, $language, $filter), $phrase . ': test failed');
             }

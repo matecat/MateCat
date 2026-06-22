@@ -89,7 +89,7 @@ Z;
          */
         $engine_struct_param = $eng[0];
 
-        $engine_MyMemory = new MyMemory($engine_struct_param);
+        $engine_MyMemory = new MyMemory($engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $result = $engine_MyMemory->fastAnalysis($array_paramemeter);
 
         /**
@@ -164,7 +164,7 @@ Z;
          */
         $engine_struct_param = $eng[0];
 
-        $engine_MyMemory = new MyMemory($engine_struct_param);
+        $engine_MyMemory = new MyMemory($engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $result = $engine_MyMemory->fastAnalysis($array_paramemeter);
 
         /**
@@ -278,7 +278,7 @@ Z;
          */
         $engine_struct_param = $eng[0];
 
-        $engine_MyMemory = new MyMemory($engine_struct_param);
+        $engine_MyMemory = new MyMemory($engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->assertInstanceOf(AnalyzeResponse::class, $engine_MyMemory->fastAnalysis($array_paramemeter));
     }
 
@@ -365,7 +365,7 @@ Z;
         /**
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
 
         $result = $engine_MyMemory->fastAnalysis($array_paramemeter);

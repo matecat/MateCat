@@ -158,7 +158,7 @@ class CountWordControllerTest extends AbstractTest
     #[Test]
     public function buildSizeRestriction_returns_restriction_for_plain_text(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->reflector->getProperty('featureSet')->setValue($this->controller, $featureSet);
 
         $method = $this->reflector->getMethod('buildSizeRestriction');

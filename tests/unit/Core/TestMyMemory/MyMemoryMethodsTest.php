@@ -73,7 +73,7 @@ class MyMemoryMethodsTest extends AbstractTest
     private function makeMock(string $jsonReturn): MyMemory
     {
         $mock = @$this->getMockBuilder(MyMemory::class)
-            ->setConstructorArgs([$this->engineStruct])
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_call'])
             ->getMock();
 

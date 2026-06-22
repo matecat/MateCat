@@ -6,6 +6,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\IDatabase;
 use Plugins\Features\BaseFeature;
+use RuntimeException;
 
 /**
  * Class BasicFeatureStruct
@@ -28,7 +29,7 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     /**
      * @return string|null
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function getFullyQualifiedClassName(): ?string
     {
@@ -36,12 +37,12 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
-     * @param ?IDatabase $db Caller's handle; null = transitional (BaseFeature falls back to obtain()).
+     * @param IDatabase $db Caller's handle.
      *
      * @return BaseFeature
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    public function toNewObject(?IDatabase $db = null): BaseFeature
+    public function toNewObject(IDatabase $db): BaseFeature
     {
         $name = PluginsLoader::getPluginClass($this->feature_code);
         $obj  = new $name($this);

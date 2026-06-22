@@ -554,7 +554,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'created_by'  => 'TM-User',
         ];
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::TM_100, false, 1);
 
@@ -574,7 +574,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'created_by'  => 'MT!',
         ];
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::MT, false, 1);
 
@@ -594,7 +594,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'created_by'  => 'TM-User',
         ];
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::TM_100, false, 1);
 
@@ -612,7 +612,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'created_by'  => 'TM-User',
         ];
 
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $result = $this->service->postProcessMatch($segment, 'en-US', 'it-IT', $match, $featureSet, InternalMatchesConstants::TM_100, false, 1);
 

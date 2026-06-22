@@ -36,7 +36,7 @@ class MMTTypeSafetyTest extends AbstractTest
 
     private function createMMT(): MMT
     {
-        return new MMT($this->createEngineStruct());
+        return new MMT($this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     // ──────────────────────────────────────────────
@@ -118,7 +118,7 @@ class MMTTypeSafetyTest extends AbstractTest
         $mmtClient->method('deleteMemory')->willReturn(null);
 
         $mmt = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct()])
+            ->setConstructorArgs([$this->createEngineStruct(), $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_getClient'])
             ->getMock();
 

@@ -1255,7 +1255,7 @@ class SetTranslationControllerTest extends AbstractTest
             'revisionNumber' => 0,
         ]);
 
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
 
         $featureSet = $this->createMock(FeatureSet::class);
@@ -1312,7 +1312,7 @@ class SetTranslationControllerTest extends AbstractTest
             'revisionNumber' => 0,
         ]);
 
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
         $featureSet = $this->createStub(FeatureSet::class);
         $this->setNamedProperty($controller, 'featureSet', $featureSet);
@@ -1378,8 +1378,8 @@ class SetTranslationControllerTest extends AbstractTest
         $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject();
         $this->setNamedProperty($controller, 'chunk', $chunk);
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
 
         $this->setProperty($controller, [
             'status' => TranslationStatus::STATUS_TRANSLATED,
@@ -1425,8 +1425,8 @@ class SetTranslationControllerTest extends AbstractTest
                      VALUES ({$segmentAfter}, {$fileId}, '2', 'After context', 'hash_{$segmentAfter}', 2)");
 
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
         $this->setProperty($controller, [
             'id_before' => (string)$segmentBefore,
             'id_segment' => (string)$segmentMain,
@@ -1451,7 +1451,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => 'text',
@@ -1474,7 +1474,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['payload' => 'x'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => 'text',
@@ -1564,7 +1564,7 @@ class SetTranslationControllerTest extends AbstractTest
     public function getTranslationObjectBuildsApiV2LikePayload(): void
     {
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
 
         $saved = new SegmentTranslationStruct();
         $saved->version_number = 11;
@@ -1627,7 +1627,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => '',
@@ -1650,7 +1650,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => 'text',
@@ -1684,7 +1684,7 @@ class SetTranslationControllerTest extends AbstractTest
         $project = $chunk->getProject();
 
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
         $this->setNamedProperty($controller, 'sourceContainsIcu', false);
@@ -1836,7 +1836,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
         $this->setNamedProperty($controller, 'request', new Request([], [
             'id_job' => (string)$jobId,
             'password' => $jobPassword,
@@ -2158,7 +2158,7 @@ class SetTranslationControllerTest extends AbstractTest
             'segment' => new SegmentStruct(),
             'revisionNumber' => 0,
         ]);
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
         $this->setNamedProperty($controller, 'featureSet', $this->createStub(FeatureSet::class));
 
@@ -2239,7 +2239,7 @@ class SetTranslationControllerTest extends AbstractTest
     public function getDraftTranslationConvertsSuggestionToLayer1(): void
     {
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
 
         $old = new SegmentTranslationStruct();
         $old->suggestion = 'Suggerimento';
@@ -2295,7 +2295,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
         $this->setNamedProperty($controller, 'request', new Request([], [
             'id_job'                  => (string)$jobId,
             'password'                => $jobPassword,
@@ -2578,8 +2578,8 @@ class SetTranslationControllerTest extends AbstractTest
             $controller = $this->createControllerWithoutConstructor();
             $this->setNamedProperty($controller, 'chunk', $chunk);
             $this->setNamedProperty($controller, 'segment', $segment);
-            $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
-            $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+            $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+            $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
             $this->setNamedProperty($controller, 'id_job', $jobId);
             $this->setNamedProperty($controller, 'request_password', $jobPassword);
 

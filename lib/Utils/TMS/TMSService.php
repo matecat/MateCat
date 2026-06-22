@@ -85,7 +85,7 @@ class TMSService
         $this->mymemory_engine = $mymemory_engine;
 
         $this->output_type = 'translation';
-        $this->featureSet = $featureSet ?? new FeatureSet(null, $this->database);
+        $this->featureSet = $featureSet ?? new FeatureSet($this->database);
 
         $this->logger = LoggerFactory::getLogger('engines');
     }
@@ -229,7 +229,7 @@ class TMSService
             $struct->type = EngineConstants::MT;
 
             try {
-                $engine = EnginesFactory::createTempInstance($struct);
+                $engine = EnginesFactory::createTempInstance($struct, $this->database);
                 if ($engine->isAdaptiveMT()) {
                     //retrieve OWNER EnginesFactory License
                     $uid = $user->uid ?? throw new InvalidArgumentException('User uid is required to load adaptive MT metadata');
@@ -447,7 +447,7 @@ class TMSService
      */
     public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, ?int $uid = null): SplFileInfo
     {
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet(null, $this->database);
+        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet($this->database);
 
         $jobStruct = (new JobDao())->getByIdAndPassword($jid, $jPassword);
         if ($jobStruct === null) {

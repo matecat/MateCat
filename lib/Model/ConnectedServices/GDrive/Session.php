@@ -755,7 +755,7 @@ class Session
      */
     protected function createFeatureSet(): FeatureSet
     {
-        return new FeatureSet(null, Database::obtain());
+        return new FeatureSet(Database::obtain());
     }
 
     /**

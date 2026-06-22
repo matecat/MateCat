@@ -1058,7 +1058,7 @@ class SessionTest extends AbstractTest
 
         $session->setConversionParams('guid-789', 'fr-FR', 'de-DE', 'general');
 
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $ref = new \ReflectionClass($session);
         $ref->getProperty('featureSet')->setValue($session, $featureSet);
 
