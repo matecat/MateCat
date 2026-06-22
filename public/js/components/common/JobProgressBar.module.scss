@@ -1,0 +1,83 @@
+@use 'commons/colors';
+
+.container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  >div {
+    flex-grow: 1;
+  }
+}
+
+.bar-wrapper {
+  position: relative;
+  display: flex;
+  min-width: 196px;
+  height: 8px;
+  border-radius: 10px;
+  background-color: colors.$black100;
+  overflow: hidden;
+}
+
+.bar {
+  position: absolute;
+  height: 100%;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.translated-bar {
+  z-index: 4;
+  background-color: colors.$blue500;
+}
+
+.approved-bar {
+  z-index: 3;
+  background-color: colors.$green800;
+}
+
+.approved-bar-2nd-pass {
+  z-index: 2;
+  background-color: colors.$purple500;
+}
+
+.tooltip {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+
+    > :first-child {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+}
+
+.quad {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.unconfirmed-quad {
+  background-color: colors.$black100;
+  border: 1px solid colors.$grey200;
+}
+
+.translated-quad {
+  background-color: colors.$blue500;
+}
+
+.approved-quad {
+  background-color: colors.$green800;
+}
+
+.approved2-quad {
+  background-color: colors.$purple500;
+}
