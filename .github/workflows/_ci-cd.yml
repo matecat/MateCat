@@ -87,7 +87,7 @@ jobs:
           docker cp "$CONTAINER_ID":/var/www/matecat/nodejs/.coverage/clover.xml ./node-coverage.xml
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: |
