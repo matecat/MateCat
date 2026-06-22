@@ -143,14 +143,15 @@ export const clearHighlights = (container) => {
   const marks = Array.from(
     container.querySelectorAll(`mark.${HIGHLIGHT_CLASS}`),
   )
+  const toNormalize = new Set()
   for (let i = marks.length - 1; i >= 0; i--) {
     const mark = marks[i]
     const parent = mark.parentNode
     if (!parent) continue
-    const textNode = document.createTextNode(mark.textContent)
-    parent.replaceChild(textNode, mark)
-    parent.normalize()
+    parent.replaceChild(document.createTextNode(mark.textContent), mark)
+    toNormalize.add(parent)
   }
+  toNormalize.forEach((p) => p.normalize())
 }
 
 /**
@@ -167,11 +168,16 @@ export const clearHighlights = (container) => {
  * @param {string} searchText
  * @returns {RegExp}
  */
+const flexibleRegexCache = new Map()
+
 export const buildFlexibleRegex = (searchText) => {
+  if (flexibleRegexCache.has(searchText)) return flexibleRegexCache.get(searchText)
   const decoded = decodeHtmlEntities(searchText)
   const escaped = decoded.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const tokens = escaped.split(/\s+/)
-  return new RegExp('(?<!\\w)' + tokens.join('\\s+') + '(?!\\w)', 'gi')
+  const regex = new RegExp('(?<!\\w)' + tokens.join('\\s+') + '(?!\\w)', 'gi')
+  flexibleRegexCache.set(searchText, regex)
+  return regex
 }
 
 /**
@@ -668,7 +674,11 @@ export const tagSegments = (
     // Skip elements that were successfully tagged by the Strategy Pass,
     // or that contain / are contained by a tier1 node.
     if (tier1Nodes.has(el)) continue
-    if ([...tier1Nodes].some((n) => el.contains(n) || n.contains(el))) continue
+    let isNested = false
+    for (const n of tier1Nodes) {
+      if (el.contains(n) || n.contains(el)) { isNested = true; break }
+    }
+    if (isNested) continue
 
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue

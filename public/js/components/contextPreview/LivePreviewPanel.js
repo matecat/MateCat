@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react'
+import React, {useRef, useEffect, memo} from 'react'
 import PropTypes from 'prop-types'
 
 const SHADOW_STYLES = `
@@ -58,7 +58,7 @@ const SHADOW_STYLES = `
   }
 `
 
-export const LivePreviewPanel = ({panelRef, scrollRef, title, zoomLevel, languageLabel, ...props}) => {
+export const LivePreviewPanel = memo(({panelRef, scrollRef, title, zoomLevel, languageLabel, ...props}) => {
   const hostRef = useRef(null)
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const LivePreviewPanel = ({panelRef, scrollRef, title, zoomLevel, languag
       </div>
     </div>
   )
-}
+})
 
 LivePreviewPanel.propTypes = {
   panelRef: PropTypes.object.isRequired,

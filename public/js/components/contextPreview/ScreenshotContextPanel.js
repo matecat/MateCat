@@ -1,7 +1,7 @@
-import React from 'react'
+import React, {memo} from 'react'
 import PropTypes from 'prop-types'
 
-export const ScreenshotContextPanel = ({
+export const ScreenshotContextPanel = memo(({
   screenshotUrl,
   zoomLevel,
   title,
@@ -28,7 +28,7 @@ export const ScreenshotContextPanel = ({
       </div>
     </div>
   )
-}
+})
 
 ScreenshotContextPanel.propTypes = {
   screenshotUrl: PropTypes.string,

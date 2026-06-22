@@ -106,13 +106,14 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
 
   const navigateHighlight = useCallback(
     (direction) => {
-      if (!highlight) return
+      const h = highlightRef.current
+      if (!h) return
 
-      if (highlight.mode === 'segment') {
+      if (h.mode === 'segment') {
         const nextIndex =
           direction === 'next'
-            ? (highlight.activeIndex + 1) % highlight.total
-            : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+            ? (h.activeIndex + 1) % h.total
+            : (h.activeIndex - 1 + h.total) % h.total
         let hidden = false
         ;[sourceRef, targetRef].forEach((ref) => {
           if (!ref.current) return
@@ -130,8 +131,8 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         return
       }
 
-      if (highlight.mode === 'node') {
-        const {sids, activeSegIdx, nodeIndex} = highlight
+      if (h.mode === 'node') {
+        const {sids, activeSegIdx, nodeIndex} = h
         const nextSegIdx =
           direction === 'next'
             ? (activeSegIdx + 1) % sids.length
@@ -144,7 +145,7 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         setHighlight((prev) => ({...prev, activeSegIdx: nextSegIdx}))
       }
     },
-    [highlight, sourceRef, targetRef, applyHighlightsForNode, setHighlight],
+    [sourceRef, targetRef, applyHighlightsForNode, setHighlight],
   )
 
   const handlePrev = useCallback(
