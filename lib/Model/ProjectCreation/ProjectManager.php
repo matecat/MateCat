@@ -422,7 +422,7 @@ class ProjectManager
     {
         if (!empty($this->projectStructure->session['uid'])) {
             $this->projectStructure->session['user'] = new UserStruct($this->projectStructure->session['user']);
-            $this->gdriveSession = Session::getInstanceForCLI($this->projectStructure->session);
+            $this->gdriveSession = Session::getInstanceForCLI($this->dbHandler, $this->projectStructure->session);
         }
     }
 

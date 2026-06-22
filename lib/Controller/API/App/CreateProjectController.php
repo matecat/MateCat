@@ -923,7 +923,7 @@ class CreateProjectController extends AbstractStatefulKleinController
      */
     private function clearSessionFiles(): void
     {
-        $gdriveSession = new Session();
+        $gdriveSession = new Session($this->getDatabase());
         $gdriveSession->clearFileListFromSession();
     }
 

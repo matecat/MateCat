@@ -29,7 +29,7 @@ try {
             break;
         case 'HEAD':
         case 'GET':
-            if (!(new Session())->sessionHasFiles()) {
+            if (!(new Session(Bootstrap::getDatabase()))->sessionHasFiles()) {
                 $upload_handler->get();
             } else {
                 echo json_encode([]);

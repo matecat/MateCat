@@ -19,7 +19,6 @@ use InvalidArgumentException;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\Conversion\FilesConverter;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -84,9 +83,11 @@ class Session
 
     protected ?ConnectedServiceDao $dao = null;
 
+    protected IDatabase $database;
+
     private function getRemoteFileDao(): RemoteFileDao
     {
-        return $this->remoteFileDao ??= new RemoteFileDao();
+        return $this->remoteFileDao ??= new RemoteFileDao($this->database);
     }
 
     /**
@@ -96,13 +97,16 @@ class Session
      *
      * @param array<string, mixed>|null $sessionData Optional session data (for testing).
      *                                               If null, uses $_SESSION superglobal.
+     * @param IDatabase $database
      * @param ConnectedServiceDao|null $dao
      * @param AbstractFilesStorage|null $filesStorage
      * @throws Exception
      * @throws \TypeError
      */
-    public function __construct(?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
+    public function __construct(IDatabase $database, ?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
     {
+        $this->database = $database;
+
         // Use the provided session data or fall back to the $_SESSION superglobal
         if ($sessionData !== null) {
             $source = &$sessionData;
@@ -128,6 +132,7 @@ class Session
     /**
      * Creates a new instance of the Session class for CLI usage.
      *
+     * @param IDatabase $database
      * @param array<string, mixed> $session
      *
      * @return Session
@@ -135,13 +140,13 @@ class Session
      * @throws Exception
      * @throws \TypeError
      */
-    public static function getInstanceForCLI(array $session): Session
+    public static function getInstanceForCLI(IDatabase $database, array $session): Session
     {
         if (PHP_SAPI != 'cli') {
             throw new RuntimeException("This method MUST be called by CLI.");
         }
 
-        return new self($session);
+        return new self($database, $session);
     }
 
     /**
@@ -268,7 +273,7 @@ class Session
      */
     public function getTokenByUser(UserStruct $user): ?array
     {
-        $serviceDao = $this->dao ?? new ConnectedServiceDao();
+        $serviceDao = $this->dao ?? new ConnectedServiceDao($this->database);
         $this->serviceStruct = $serviceDao->findDefaultServiceByUserAndName($user, 'gdrive');
 
         return $this->serviceStruct?->getDecodedOauthAccessToken();
@@ -755,7 +760,7 @@ class Session
      */
     protected function createFeatureSet(): FeatureSet
     {
-        return new FeatureSet(Database::obtain());
+        return new FeatureSet($this->database);
     }
 
     /**

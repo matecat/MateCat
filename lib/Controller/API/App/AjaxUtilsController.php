@@ -68,7 +68,7 @@ class AjaxUtilsController extends KleinController
      */
     public function clearNotCompletedUploads(): void
     {
-        (new Session())->clearSession();
+        (new Session($this->getDatabase()))->clearSession();
 
         $this->response->json([
             'success' => true

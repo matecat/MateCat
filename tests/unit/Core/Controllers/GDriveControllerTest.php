@@ -86,6 +86,7 @@ class GDriveControllerTest extends AbstractTest
     private TestableGDriveController $controller;
     private Request $requestStub;
     private Response&MockObject $responseMock;
+    private \Model\DataAccess\IDatabase $dbStub;
 
     /** @var array<string, mixed> */
     private array $sessionBackup = [];
@@ -120,8 +121,9 @@ class GDriveControllerTest extends AbstractTest
         $user->last_name  = 'Tester';
         $this->setProp('user', $user);
 
+        $this->dbStub = $this->createStub(\Model\DataAccess\IDatabase::class);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('featureSet', new FeatureSet($this->dbStub));
     }
 
     protected function tearDown(): void
@@ -186,7 +188,7 @@ class GDriveControllerTest extends AbstractTest
     private function injectSession(array $sessionData): Session
     {
         $local   = $sessionData;
-        $session = new Session($local);
+        $session = new Session($this->dbStub, $local);
         $this->setProp('gdriveUserSession', $session);
 
         return $session;
