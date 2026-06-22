@@ -4,7 +4,6 @@ namespace Model\LQA;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
@@ -39,7 +38,7 @@ class ChunkReviewDao extends AbstractDao
         $sql = "UPDATE qa_chunk_reviews SET password = :new_password
                WHERE id_job = :id_job AND password = :old_password ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,
@@ -58,7 +57,7 @@ class ChunkReviewDao extends AbstractDao
         $sql = "UPDATE qa_chunk_reviews SET review_password = :new_review_password
                WHERE id_job = :id_job AND review_password = :old_review_password AND source_page = :source_page";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,
@@ -156,7 +155,7 @@ class ChunkReviewDao extends AbstractDao
                     AND e.deleted_at IS NULL
         ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $chunk->id,
@@ -187,7 +186,7 @@ class ChunkReviewDao extends AbstractDao
 
         ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $chunk->id,
@@ -224,7 +223,7 @@ class ChunkReviewDao extends AbstractDao
             AND st.version_number != 0
         ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $chunk->id,
@@ -285,7 +284,7 @@ class ChunkReviewDao extends AbstractDao
     {
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement($chunksArray, $default_condition);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($findChunkReviewsStatement['sql']);
 
         return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
@@ -361,7 +360,7 @@ class ChunkReviewDao extends AbstractDao
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
         from DUAL";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
         $parameters = [
@@ -438,7 +437,7 @@ class ChunkReviewDao extends AbstractDao
             " AND id_job = :id_job " .
             " AND source_page = :source_page ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
         $stmt->execute(
@@ -516,7 +515,7 @@ class ChunkReviewDao extends AbstractDao
             $query .= " AND source_page=:source_page";
         }
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($query);
 
 
@@ -633,7 +632,7 @@ class ChunkReviewDao extends AbstractDao
 				) <= {$data[ 'force_pass_at' ]}, 1, 0
 		);";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id' => $chunkReviewID,

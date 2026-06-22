@@ -773,4 +773,30 @@ class ChunkReviewDaoTest extends AbstractTest
 
         $this->assertFalse($result);
     }
+
+    /**
+     * Guards the obtain() removal: the DAO must take its PDO connection from the
+     * INJECTED IDatabase, never from the Database::obtain() singleton. The
+     * singleton stays wired to a distinct stub (setUp) so the pre-fix code path
+     * would silently use it instead of the injected mock.
+     */
+    #[Test]
+    public function queriesUseInjectedDatabaseNotSingleton(): void
+    {
+        $injectedStmt = $this->createStub(PDOStatement::class);
+        $injectedStmt->queryString = '';
+        $injectedStmt->method('execute')->willReturn(true);
+        $injectedStmt->method('rowCount')->willReturn(0);
+
+        $injectedPdo = $this->createStub(PDO::class);
+        $injectedPdo->method('prepare')->willReturn($injectedStmt);
+
+        $injectedDb = $this->createMock(IDatabase::class);
+        $injectedDb->expects($this->atLeastOnce())
+            ->method('getConnection')
+            ->willReturn($injectedPdo);
+
+        $dao = new ChunkReviewDao($injectedDb);
+        $dao->updatePassword(1, 'old', 'new');
+    }
 }
