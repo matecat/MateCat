@@ -189,7 +189,7 @@ class Job
             'created_at' => Utils::api_timestamp($chunk->create_date),
             'create_date' => $chunk->create_date,
             'formatted_create_date' => ManageModel::formatJobDate($chunk->create_date),
-            'quality_overall' => CatUtils::getQualityOverallFromJobStruct($chunk, $chunkReviews),
+            'quality_overall' => (new CatUtils())->getQualityOverallFromJobStruct($chunk, $chunkReviews),
             'pee' => $chunk->getPeeForTranslatedSegments(),
             'tte' => (int)($chunk->total_time_to_edit / 1000),
             'private_tm_key' => $this->getKeyList($chunk),

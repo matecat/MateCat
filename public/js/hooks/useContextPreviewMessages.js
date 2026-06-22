@@ -17,6 +17,7 @@ import {
  *   targetRef: React.RefObject,
  *   showNodeWarning: (el: HTMLElement) => void,
  *   clearNodeWarning: (el: HTMLElement) => void,
+ *   targetDir: 'ltr'|'rtl'|null,
  * }} params
  * @returns {{segments: Array, setSegments: Function, currentContextUrl: string|null, currentSid: number|null}}
  */
@@ -26,6 +27,7 @@ const useContextPreviewMessages = ({
   targetRef,
   showNodeWarning,
   clearNodeWarning,
+  targetDir = null,
 }) => {
   const [segments, setSegments] = useState([])
   const [currentContextUrl, setCurrentContextUrl] = useState(null)
@@ -91,8 +93,13 @@ const useContextPreviewMessages = ({
                     stripSegmentTags(sourceSeg.source).trim(),
                   )
                 }
+                if (targetDir) el.removeAttribute('dir')
                 showNodeWarning(el)
               } else {
+                if (targetDir) {
+                  if (result === 'ok') el.dir = targetDir
+                  else el.removeAttribute('dir')
+                }
                 clearNodeWarning(el)
               }
             })
@@ -110,6 +117,7 @@ const useContextPreviewMessages = ({
     targetRef,
     showNodeWarning,
     clearNodeWarning,
+    targetDir,
   ])
 
   // Request segments from CatTool on mount

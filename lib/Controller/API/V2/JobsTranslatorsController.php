@@ -20,6 +20,7 @@ use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
+use TypeError;
 use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController
@@ -27,7 +28,7 @@ class JobsTranslatorsController extends KleinController
 
     /**
      * @var JobStruct
-     * @see JobsTranslatorsController::afterConstruct method
+     * @see JobsTranslatorsController::registerValidators method
      */
     protected JobStruct $jStruct;
 
@@ -60,7 +61,7 @@ class JobsTranslatorsController extends KleinController
         $TranslatorsModel = new TranslatorsModel($this->jStruct);
         $TranslatorsModel
             ->setUserInvite($this->user)
-            ->setDeliveryDate($this->params['delivery_date'])
+            ->setDeliveryDate((string)($this->params['delivery_date'] ?? ''))
             ->setJobOwnerTimezone((float)$this->params['timezone'])
             ->setEmail($this->params['email']);
 
@@ -81,6 +82,7 @@ class JobsTranslatorsController extends KleinController
      * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function get(): void
     {
@@ -92,7 +94,7 @@ class JobsTranslatorsController extends KleinController
             ]
         ]);
 
-        $confDao = new ConfirmationDao();
+        $confDao = new ConfirmationDao($this->getDatabase());
         $confirmationStruct = $confDao->setCacheTTL(60 * 60)->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
@@ -121,9 +123,7 @@ class JobsTranslatorsController extends KleinController
         );
     }
 
-    /**
-     */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $validator = new JobPasswordValidator($this);

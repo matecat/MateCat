@@ -596,7 +596,7 @@ class UploadHandler
     {
         $file_path = $this->options['upload_dir'] . $file_name;
 
-        CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
+        (new CatUtils())->deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
         $success[$file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
 
@@ -644,7 +644,7 @@ class UploadHandler
     private function zipInternalFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
         $file_path = $this->options['upload_dir'] . $file_name;
-        CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
+        (new CatUtils())->deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
         $out_file_name = ZipArchiveHandler::getFileName($file_name);
 

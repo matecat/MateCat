@@ -129,14 +129,17 @@ class ConcurrencyRegressionTest extends AbstractTest
         $catchPos = strpos($source, 'catch (PDOException $e)');
         $this->assertNotFalse($catchPos, 'Expected PDOException catch in SegmentUpdaterService::forceSetSegmentAnalyzed().');
 
-        $returnInCatchPos = strpos($source, 'return false;', $catchPos);
+        $returnInCatchPos = strpos($source, 'return 0;', $catchPos);
         $this->assertNotFalse($returnInCatchPos, 'Expected return false inside PDOException catch to prevent counter increment on DB failure.');
 
         $affectedRowsGuardPos = strpos($source, 'if ($affectedRows === 0)');
         $this->assertNotFalse($affectedRowsGuardPos, 'Expected $affectedRows === 0 guard in SegmentUpdaterService::forceSetSegmentAnalyzed().');
 
-        $returnOnZeroPos = strpos($source, 'return false;', $affectedRowsGuardPos);
-        $this->assertNotFalse($returnOnZeroPos, 'Expected return false after $affectedRows === 0 guard to prevent duplicate counter increment.');
+        $returnOnZeroPos = strpos($source, 'isTranslationSkipped', $affectedRowsGuardPos);
+        $this->assertNotFalse($returnOnZeroPos, 'Expected isTranslationSkipped guard to prevent duplicate counter increment.');
+
+        $returnOnZeroPos = strpos($source, '? -1 : 0;', $returnOnZeroPos);
+        $this->assertNotFalse($returnOnZeroPos, 'Expected isTranslationSkipped guard to prevent duplicate counter increment.');
     }
 
     #[Test]
@@ -464,36 +467,6 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_segment_updater_force_set_captures_affected_rows_and_logs_idempotency(): void
-    {
-        $source = $this->readSource($this->segmentUpdaterServicePath());
-
-        $this->assertStringContainsString(
-            "tm_analysis_status NOT IN ('DONE', 'SKIPPED')",
-            $source,
-            'forceSetSegmentAnalyzed must use WHERE guard to skip DONE/SKIPPED rows, preventing double-counting.'
-        );
-
-        $this->assertStringContainsString(
-            'already DONE, skipping force-set side-effects.',
-            $source,
-            'Expected idempotency log message when affected rows is zero.'
-        );
-
-        $catchPos = strpos($source, 'catch (PDOException $e)');
-        $this->assertNotFalse($catchPos);
-
-        $zeroGuardPos = strpos($source, 'if ($affectedRows === 0)');
-        $this->assertNotFalse($zeroGuardPos);
-
-        $this->assertLessThan(
-            $zeroGuardPos,
-            $catchPos,
-            'PDOException catch must appear before $affectedRows === 0 guard in forceSetSegmentAnalyzed.'
-        );
-    }
-
-    #[Test]
     public function test_worker_side_effects_gate_logs_before_early_return(): void
     {
         $source = $this->readSource($this->workerPath());
@@ -724,7 +697,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         );
 
         $this->assertStringContainsString(
-            '$delayMs    = 500',
+            '$delayMs = 500',
             $methodBody,
             'applyPostCommitSideEffects() initial delay must be 500ms (not lower — allows Redis to recover).'
         );

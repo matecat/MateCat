@@ -21,7 +21,6 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\TmKeyManagement\UserKeysModel;
-use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\JobsTranslatorsStruct;
@@ -32,10 +31,11 @@ use ReflectionException;
 use RuntimeException;
 use TypeError;
 use Utils\Constants\JobStatus;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\Tools\CatUtils;
 
 /**
- * @implements \ArrayAccess<string, mixed>
+ * @implements ArrayAccess<string, mixed>
  */
 class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
 {
@@ -423,9 +423,9 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @throws ReflectionException
      * @throws Exception
      */
-    public function getQualityOverall(array $chunkReviews = []): ?string
+    public function getQualityOverall(array $chunkReviews = [], ?CatUtils $catUtils = null): ?string
     {
-        return CatUtils::getQualityOverallFromJobStruct($this, $chunkReviews);
+        return ($catUtils ?? new CatUtils())->getQualityOverallFromJobStruct($this, $chunkReviews);
     }
 
     /**

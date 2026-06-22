@@ -101,7 +101,7 @@ class LoginController extends AbstractStatefulKleinController
             $project->tryToRedeem();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            new AuthenticationHelper($_SESSION);
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
 
             $this->response->code(200);
         } else {
@@ -111,7 +111,7 @@ class LoginController extends AbstractStatefulKleinController
 
     protected function createUserDao(): UserDao
     {
-        return new UserDao();
+        return new UserDao($this->getDatabase());
     }
 
     /**

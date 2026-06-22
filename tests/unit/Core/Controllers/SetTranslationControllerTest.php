@@ -25,6 +25,8 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 use RuntimeException;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Logger\LoggerFactory;
@@ -2179,6 +2181,521 @@ class SetTranslationControllerTest extends AbstractTest
 
         self::assertGreaterThanOrEqual($before, $result['version']);
         self::assertLessThanOrEqual($after, $result['version']);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // SECTION 7: Coverage lift — additional reachable branches
+    // ──────────────────────────────────────────────────────────────
+
+    /**
+     * registerValidators() (post-afterConstruct refactor) must append a LoginValidator.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function registerValidatorsAppendsLoginValidator(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'request', new Request([], [], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('registerValidators');
+        $method->invoke($controller);
+
+        $validatorsProp = new ReflectionProperty($controller, 'validators');
+        $validators = $validatorsProp->getValue($controller);
+
+        self::assertIsArray($validators);
+        self::assertCount(1, $validators, 'registerValidators() must append exactly one validator');
+        self::assertInstanceOf(
+            \Controller\API\Commons\Validators\LoginValidator::class,
+            $validators[0],
+            'The appended validator must be a LoginValidator'
+        );
+    }
+
+    /**
+     * getDraftTranslation() returns empty string when the old suggestion is empty.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getDraftTranslationReturnsEmptyStringWhenSuggestionIsEmpty(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $old = new SegmentTranslationStruct();
+        $old->suggestion = '';
+
+        $method = $this->getAccessibleMethod('getDraftTranslation');
+        self::assertSame('', $method->invoke($controller, $old));
+    }
+
+    /**
+     * getDraftTranslation() converts a non-empty Layer-0 suggestion to Layer 1.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getDraftTranslationConvertsSuggestionToLayer1(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+
+        $old = new SegmentTranslationStruct();
+        $old->suggestion = 'Suggerimento';
+
+        $method = $this->getAccessibleMethod('getDraftTranslation');
+        $result = $method->invoke($controller, $old);
+
+        self::assertIsString($result);
+        self::assertStringContainsString('Suggerimento', $result);
+    }
+
+    /**
+     * getOriginalSuggestionProvider() falls back to the FIRST suggestion's created_by
+     * when suggestion_position is 0/unset and the old status is DRAFT.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getOriginalSuggestionProviderUsesFirstSuggestionWhenPositionIsZero(): void
+    {
+        $controller = $this->createControllerWithoutConstructor();
+
+        $new = new SegmentTranslationStruct();
+        $new->suggestions_array = json_encode([
+            ['created_by' => 'x-mymemory'],
+            ['created_by' => 'x-deepl'],
+        ]);
+        $new->suggestion_position = 0;
+
+        $old = new SegmentTranslationStruct();
+        $old->status = TranslationStatus::STATUS_DRAFT;
+
+        $method = $this->getAccessibleMethod('getOriginalSuggestionProvider');
+        self::assertSame('mymemory', $method->invoke($controller, $new, $old));
+    }
+
+    /**
+     * prepareTranslation() with a translation that triggers QA warnings must surface
+     * the warnings JSON in the prepared payload (covers the thereAreWarnings() branch).
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function prepareTranslationReturnsWarningsJsonWhenQaWarns(): void
+    {
+        $projectId = 9027101;
+        $jobId = 9027102;
+        $jobPassword = 'pw9027102';
+        $segmentId = 9027103;
+        $fileId = 9027104;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello world.', 2);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job'                  => (string)$jobId,
+            'password'                => $jobPassword,
+            'current_password'        => $jobPassword,
+            'id_segment'              => (string)$segmentId,
+            'time_to_edit'            => '1000',
+            'id_translator'           => '1',
+            // Tag mismatch: target contains a tag absent from the source → QA warning.
+            'translation'             => 'Ciao <b>mondo</b>',
+            'segment'                 => 'Hello world.',
+            'version'                 => '1',
+            'chosen_suggestion_index' => null,
+            'suggestion_array'        => null,
+            'status'                  => 'translated',
+            'splitStatuses'           => '',
+            'context_before'          => '',
+            'context_after'           => '',
+            'id_before'               => '0',
+            'id_after'                => '0',
+            'revision_number'         => '0',
+            'guess_tag_used'          => '0',
+            'characters_counter'      => null,
+            'propagate'               => '0',
+        ], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('prepareTranslation');
+        $prepared = $method->invoke($controller);
+
+        self::assertInstanceOf(QA::class, $prepared['check']);
+        self::assertTrue($prepared['check']->thereAreWarnings(), 'A tag-mismatch translation must produce QA warnings');
+        self::assertNotSame('', $prepared['err_json'], 'Warnings branch must populate err_json');
+        self::assertJson($prepared['err_json']);
+    }
+
+    /**
+     * getOldTranslation() creates a NEW translation row when volume analysis is disabled
+     * and no translation row exists yet (covers the create-row branch).
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function getOldTranslationCreatesNewRowWhenVolumeAnalysisDisabledAndNoExistingRow(): void
+    {
+        $original = AppConfig::$VOLUME_ANALYSIS_ENABLED;
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
+
+        try {
+            $projectId = 9027111;
+            $jobId = 9027112;
+            $jobPassword = 'pw9027112';
+            $segmentId = 9027113;
+            $fileId = 9027114;
+            $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Sorgente nuova', 3);
+
+            // Existing row with an EMPTY status so findBySegmentAndJob() returns a
+            // struct whose ['status'] is empty (not uninitialized) → enters the
+            // volume-analysis create-row branch without an uninitialized-prop Error.
+            Database::obtain()->getConnection()->exec(
+                "INSERT IGNORE INTO segment_translations (id_segment, id_job, segment_hash, translation, status, translation_date)
+                 VALUES ({$segmentId}, {$jobId}, 'hash_{$segmentId}', '', '', NOW())"
+            );
+
+            $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+            $segment = $segmentDao->fetchById($segmentId, SegmentStruct::class);
+
+            $controller = $this->createControllerWithoutConstructor();
+            $this->setNamedProperty($controller, 'segment', $segment);
+            $this->setNamedProperty($controller, 'id_job', $jobId);
+            $this->setNamedProperty($controller, 'request_password', $jobPassword);
+            $this->setProperty($controller, [
+                'id_segment' => (string)$segmentId,
+                'id_job'     => (string)$jobId,
+            ]);
+
+            $method = $this->getAccessibleMethod('getOldTranslation');
+            $old = $method->invoke($controller);
+
+            self::assertInstanceOf(SegmentTranslationStruct::class, $old);
+            self::assertSame(TranslationStatus::STATUS_NEW, $old->status, 'Created row must be NEW status');
+            self::assertSame($segmentId, $old->id_segment);
+
+            $stored = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob($segmentId, $jobId);
+            self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
+            self::assertSame(TranslationStatus::STATUS_NEW, $stored->status);
+        } finally {
+            AppConfig::$VOLUME_ANALYSIS_ENABLED = $original;
+        }
+    }
+
+    /**
+     * finalizeTranslation() enters the job-completeness branch when there are no
+     * draft/new raw words left, calling JobDao::setJobComplete and adding propagation.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function finalizeTranslationMarksJobCompleteWhenNoDraftOrNewWordsRemain(): void
+    {
+        $projectId = 9027121;
+        $jobId = 9027122;
+        $jobPassword = 'pw9027122';
+        $segmentId = 9027123;
+        $fileId = 9027124;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source complete', 2);
+
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+
+        // Ensure the job-completeness guard key is absent so the branch is entered
+        // (the key may linger from a prior run since Redis is not transaction-isolated).
+        (new \Utils\Redis\RedisHandler())->getConnection()->del('job_completeness:' . $jobId);
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], ['id_job' => (string)$jobId], [], [], [], null));
+        $this->setProperty($controller, [
+            'id_job'         => (string)$jobId,
+            'status'         => TranslationStatus::STATUS_DRAFT,
+            'password'       => $jobPassword,
+            'id_segment'     => (string)$segmentId,
+            'propagate'      => false,
+            'context_after'  => '',
+            'context_before' => '',
+            'chunk'          => $chunk,
+        ]);
+
+        $new = new SegmentTranslationStruct();
+        $old = new SegmentTranslationStruct();
+        $propagation = ['totals' => [], 'propagated_ids' => [], 'segments_for_propagation' => []];
+        $result = [
+            'stats' => [
+                ProjectsMetadataMarshaller::WORD_COUNT_RAW->value => ['draft' => 0, 'new' => 0],
+            ],
+        ];
+
+        $method = $this->getAccessibleMethod('finalizeTranslation');
+        $method->invokeArgs($controller, [$new, $old, $propagation, &$result]);
+
+        self::assertSame($propagation, $result['propagation']);
+
+        $row = Database::obtain()->getConnection()
+            ->query("SELECT completed FROM jobs WHERE id = {$jobId}")->fetch();
+        self::assertSame('1', (string)$row['completed'], 'Job must be flagged completed in the no-words-remaining branch');
+    }
+
+    /**
+     * persistTranslation() persists the split-segment row inside the transaction when
+     * the segment is split (covers the SplitDAO atomicUpdate branch).
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function persistTranslationWritesSplitRowForSplittedSegment(): void
+    {
+        $projectId = 9027131;
+        $jobId = 9027132;
+        $jobPassword = 'pw9027132';
+        $segmentId = 9027133;
+        $fileId = 9027134;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source split', 2);
+
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject();
+        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'chunk', $chunk);
+        $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, SegmentStruct::class));
+        $this->setNamedProperty($controller, 'id_job', $jobId);
+        $this->setNamedProperty($controller, 'password', $jobPassword);
+        $this->setNamedProperty($controller, 'request_password', $jobPassword);
+        $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
+
+        $versionsHandler = new class implements \Plugins\Features\TranslationVersions\VersionHandlerInterface {
+            public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
+            {
+                return true;
+            }
+
+            public function storeTranslationEvent(array $params): void
+            {
+            }
+
+            public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+            {
+                return [];
+            }
+        };
+        $this->setNamedProperty($controller, 'VersionsHandler', $versionsHandler);
+        $this->setNamedProperty($controller, 'featureSet', $this->createStub(FeatureSet::class));
+
+        $this->setProperty($controller, [
+            'id_segment'          => (string)$segmentId,
+            'id_job'              => (string)$jobId,
+            'status'              => TranslationStatus::STATUS_TRANSLATED,
+            'propagate'           => false,
+            'split_statuses'      => [TranslationStatus::STATUS_TRANSLATED],
+            'split_num'           => '1',
+            'split_chunk_lengths' => [5],
+            'project'             => $project,
+            'revisionNumber'      => 0,
+            'chunk'               => $chunk,
+            'segment'             => $segmentDao->fetchById($segmentId, SegmentStruct::class),
+        ]);
+
+        $old = new SegmentTranslationStruct();
+        $old->id_segment = $segmentId;
+        $old->id_job = $jobId;
+        $old->segment_hash = 'hash_' . $segmentId;
+        $old->translation = 'vecchia';
+        $old->status = TranslationStatus::STATUS_DRAFT;
+        $old->match_type = InternalMatchesConstants::NO_MATCH;
+        $old->locked = false;
+        $old->suggestion = 'old';
+        $old->time_to_edit = 0;
+
+        $new = new SegmentTranslationStruct();
+        $new->id_segment = $segmentId;
+        $new->id_job = $jobId;
+        $new->segment_hash = 'hash_' . $segmentId;
+        $new->translation = 'nuova';
+        $new->status = TranslationStatus::STATUS_TRANSLATED;
+        $new->match_type = InternalMatchesConstants::NO_MATCH;
+        $new->locked = false;
+        $new->time_to_edit = 1000;
+        $new->suggestion = 'new';
+        $new->translation_date = date('Y-m-d H:i:s');
+
+        $qa = $this->createStub(QA::class);
+        $qa->method('thereAreWarnings')->willReturn(false);
+
+        $method = $this->getAccessibleMethod('persistTranslation');
+        $result = $method->invoke($controller, $new, $old, 'nuova', '', $qa);
+
+        self::assertArrayHasKey('totals', $result);
+
+        $splitRow = Database::obtain()->getConnection()
+            ->query("SELECT id_segment FROM segment_translations_splits WHERE id_segment = {$segmentId} AND id_job = {$jobId}")
+            ->fetch();
+        self::assertNotFalse($splitRow, 'Split row must be persisted for a splitted segment');
+    }
+
+    /**
+     * evalSetContribution() builds a SetContributionRequest and enqueues it for a
+     * non-draft status (covers the full contribution-build body). The AMQ handler is
+     * stubbed so no real broker connection is required.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function evalSetContributionEnqueuesContributionForTranslatedStatus(): void
+    {
+        $projectId = 9027141;
+        $jobId = 9027142;
+        $jobPassword = 'pw9027142';
+        $segmentId = 9027143;
+        $fileId = 9027144;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source contribution', 2);
+        // id_mt_engine > 1 so the MT-contribution branch (Set::contributionMT) also runs.
+        Database::obtain()->getConnection()->exec("UPDATE jobs SET id_mt_engine = 2 WHERE id = {$jobId}");
+
+        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject();
+        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $segment = $segmentDao->fetchById($segmentId, SegmentStruct::class);
+
+        $amqStub = $this->getMockBuilder(AMQHandler::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['publishToQueues', 'close'])
+            ->getMock();
+        // Non-draft TRANSLATED status with propagate=true and an MT engine enqueues
+        // TWO messages: one CONTRIBUTION and one CONTRIBUTION_MT.
+        $amqStub->expects(self::exactly(2))->method('publishToQueues')->willReturn(true);
+        $amqStub->method('close');
+
+        $handlerProp = new ReflectionProperty(WorkerClient::class, '_HANDLER');
+        $originalHandler = $handlerProp->isInitialized() ? WorkerClient::$_HANDLER : null;
+        WorkerClient::init($amqStub);
+
+        try {
+            $controller = $this->createControllerWithoutConstructor();
+            $this->setNamedProperty($controller, 'chunk', $chunk);
+            $this->setNamedProperty($controller, 'segment', $segment);
+            $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', []));
+            $this->setNamedProperty($controller, 'featureSet', new FeatureSet());
+            $this->setNamedProperty($controller, 'id_job', $jobId);
+            $this->setNamedProperty($controller, 'request_password', $jobPassword);
+
+            $this->setProperty($controller, [
+                'status'         => TranslationStatus::STATUS_TRANSLATED,
+                'id_job'         => (string)$jobId,
+                'password'       => $jobPassword,
+                'id_segment'     => (string)$segmentId,
+                'segment'        => $segment,
+                'propagate'      => true,
+                'context_before' => '',
+                'context_after'  => '',
+                'project'        => $project,
+                'chunk'          => $chunk,
+            ]);
+
+            $new = new SegmentTranslationStruct();
+            $new->translation = 'nuova';
+            $new->status = TranslationStatus::STATUS_TRANSLATED;
+            $new->suggestions_array = '[]';
+            $new->suggestion_position = 0;
+
+            $old = new SegmentTranslationStruct();
+            $old->translation = 'vecchia';
+            $old->status = TranslationStatus::STATUS_DRAFT;
+
+            $method = $this->getAccessibleMethod('evalSetContribution');
+            $method->invoke($controller, $new, $old);
+
+            // The MT branch (id_mt>1) is taken, so both CONTRIBUTION and
+            // CONTRIBUTION_MT enqueues asserted on the mock are the observable result.
+            self::assertSame(2, $chunk->id_mt_engine, 'Seeded job must have MT engine 2');
+        } finally {
+            if ($originalHandler !== null) {
+                WorkerClient::$_HANDLER = $originalHandler;
+            }
+        }
+    }
+
+    /**
+     * Migrated from the legacy unit\Controllers\SetTranslationControllerTest (§6
+     * reconciliation): valid suggestion_array JSON — including 4-byte unicode /
+     * emoji payloads — must be preserved intact through the REAL validateTheRequest().
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateTheRequestPreservesEmojiSuggestionArray(): void
+    {
+        $projectId = 9027151;
+        $jobId = 9027152;
+        $jobPassword = 'pw9027152';
+        $segmentId = 9027153;
+        $fileId = 9027154;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello emoji', 2);
+
+        $jsonWithEmoji = '[{"match":"MT","created_by":"MT-Lara","translation":"Tvoja kupovina 🛒✨ 𝄞"}]';
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job'           => (string)$jobId,
+            'password'         => $jobPassword,
+            'current_password' => $jobPassword,
+            'id_segment'       => (string)$segmentId,
+            'translation'      => 'x',
+            'segment'          => 'Hello emoji',
+            'status'           => 'translated',
+            'suggestion_array' => $jsonWithEmoji,
+        ], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+        $data = $method->invoke($controller);
+
+        self::assertSame($jsonWithEmoji, $data['suggestion_array'], 'Valid emoji JSON must pass through unchanged');
+        $decoded = json_decode($data['suggestion_array'], true);
+        self::assertIsArray($decoded);
+        self::assertStringContainsString('🛒✨', $decoded[0]['translation']);
+    }
+
+    /**
+     * Migrated from the legacy suite (§6): a broken/truncated suggestion_array
+     * (e.g. emoji corruption from a stripping filter) must be nullified by the
+     * REAL validateTheRequest().
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateTheRequestNullifiesBrokenSuggestionArrayJson(): void
+    {
+        $projectId = 9027161;
+        $jobId = 9027162;
+        $jobPassword = 'pw9027162';
+        $segmentId = 9027163;
+        $fileId = 9027164;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello broken', 2);
+
+        $brokenJson = '[{"match":"MT","created_by":"MT-Lara","translation":"Tvoja kupovina ';
+
+        $controller = $this->createControllerWithoutConstructor();
+        $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
+        $this->setNamedProperty($controller, 'request', new Request([], [
+            'id_job'           => (string)$jobId,
+            'password'         => $jobPassword,
+            'current_password' => $jobPassword,
+            'id_segment'       => (string)$segmentId,
+            'translation'      => 'x',
+            'segment'          => 'Hello broken',
+            'status'           => 'translated',
+            'suggestion_array' => $brokenJson,
+        ], [], [], [], null));
+
+        $method = $this->getAccessibleMethod('validateTheRequest');
+        $data = $method->invoke($controller);
+
+        self::assertNull($data['suggestion_array'], 'Broken JSON suggestion_array must be nullified');
     }
 
     // ──────────────────────────────────────────────────────────────

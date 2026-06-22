@@ -24,15 +24,6 @@ class QAModelTemplateDao extends AbstractDao
     const string query_paginated = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
     const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
-    private ProjectTemplateDao $projectTemplateDao;
-
-    public function __construct(
-        ?ProjectTemplateDao $projectTemplateDao = null
-    ) {
-        parent::__construct();
-        $this->projectTemplateDao = $projectTemplateDao ?? new ProjectTemplateDao();
-    }
-
     /**
      * @param string $json
      * @param int|null $uid
@@ -137,7 +128,7 @@ class QAModelTemplateDao extends AbstractDao
                 'id_template' => $id
             ]);
 
-            $this->projectTemplateDao->removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
+            (new ProjectTemplateDao($this->database))->removeSubTemplateByIdAndUser($id, $uid, 'qa_model_template_id');
 
             $conn->commit();
 

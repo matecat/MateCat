@@ -9,6 +9,7 @@
 namespace Controller\Abstracts;
 
 
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 
@@ -16,21 +17,23 @@ interface IController
 {
 
     /**
-     * @return null|\Model\Users\UserStruct
+     * @return null|UserStruct
      */
     public function getUser(): ?UserStruct;
 
     public function isLoggedIn(): bool;
 
-    public function getFeatureSet();
+    public function getFeatureSet(): FeatureSet;
 
     /**
      * @param FeatureSet $featureSet
      *
-     * @return mixed
+     * @return KleinController
      */
-    public function setFeatureSet(FeatureSet $featureSet);
+    public function setFeatureSet(FeatureSet $featureSet): KleinController;
 
     public function isView(): bool;
+
+    public function getDatabase(): IDatabase;
 
 }

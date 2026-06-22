@@ -26,9 +26,6 @@ class TestableProjectTemplateController extends ProjectTemplateController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
 }
 
 #[AllowMockObjectsWithoutExpectations]

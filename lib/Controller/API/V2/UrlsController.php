@@ -29,10 +29,12 @@ class UrlsController extends KleinController
      */
     public function urls(): void
     {
-        $this->featureSet->loadForProject($this->validator->getProject());
+        $project = $this->validator->getProject() ?? throw new Exception('Project not found');
+
+        $this->featureSet->loadForProject($project);
 
         $jobCheck = 0;
-        foreach ($this->validator->getProject()->getJobs() as $job) {
+        foreach ($project->getJobs() as $job) {
             if (!$job->isDeleted()) {
                 $jobCheck++;
             }
@@ -46,10 +48,10 @@ class UrlsController extends KleinController
                     'message' => 'No project found.'
                 ]
             ]);
-            exit();
+            return;
         }
 
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
+        $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
         $formatted = new ProjectUrls($projectData);
 
@@ -65,7 +67,7 @@ class UrlsController extends KleinController
         $this->validator->validate();
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->validator = new ProjectPasswordValidator($this);
         $this->appendValidator(new LoginValidator($this));

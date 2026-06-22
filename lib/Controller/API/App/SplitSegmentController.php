@@ -7,46 +7,49 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
 
 class SplitSegmentController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function split(): void
     {
         $request = $this->validateTheRequest();
 
         $translationStruct = SegmentSplitStruct::getStruct();
-        $translationStruct->id_segment = $request['id_segment'];
-        $translationStruct->id_job = $request['id_job'];
+        $translationStruct->id_segment = (int)$request['id_segment'];
+        $translationStruct->id_job = (int)$request['id_job'];
 
         $featureSet = $this->getFeatureSet();
 
-        /** @var MateCatFilter $Filter */
-        $metadata = new MetadataDao();
+        $metadata = new MetadataDao($this->getDatabase());
         $Filter = MateCatFilter::getInstance(
             $featureSet,
             $request['jobStruct']->source,
             $request['jobStruct']->target,
             [],
-            $metadata->getSubfilteringCustomHandlers($request['jobStruct']->id, $request['jobStruct']->password)
+            $metadata->getSubfilteringCustomHandlers((int)$request['jobStruct']->id, (string)$request['jobStruct']->password)
         );
-        [, $translationStruct->source_chunk_lengths] = CatUtils::parseSegmentSplit($request['segment'], '', $Filter);
+        if (!$Filter instanceof MateCatFilter) {
+            throw new RuntimeException('Expected MateCatFilter instance from getInstance()');
+        }
+        [, $translationStruct->source_chunk_lengths] = (new CatUtils())->parseSegmentSplit($request['segment'], '', $Filter);
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces = (count($translationStruct->source_chunk_lengths) > 1 ? count($translationStruct->source_chunk_lengths) - 1 : 1);
@@ -55,7 +58,7 @@ class SplitSegmentController extends KleinController
             'statuses' => array_fill(0, $pieces, TranslationStatus::STATUS_DRAFT)
         ];
 
-        $translationDao = new SplitDAO(Database::obtain());
+        $translationDao = new SplitDAO($this->getDatabase());
         $result = $translationDao->atomicUpdate($translationStruct);
 
         if (!$result) {
@@ -71,7 +74,7 @@ class SplitSegmentController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array{id_job: string|false, id_segment: string|false, job_pass: string|false, segment: mixed, target: mixed, jobStruct: \Model\Jobs\JobStruct}
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -100,7 +103,7 @@ class SplitSegmentController extends KleinController
         }
 
         // check Job password
-        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail((int)$id_job, $password);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
 
         $this->featureSet->loadForProject($jobStruct->getProject());
 

@@ -15,19 +15,21 @@ use Utils\TMS\TMSService;
 
 class MyMemoryController extends KleinController
 {
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * Create a MM key and assign to the logged user
+     *
+     * @throws \TypeError
      */
     public function create(): void
     {
         try {
-            $json = $this->request->body();
-            $json = json_decode($json, true);
+            $body = $this->request->body();
+            $json = json_decode((string)$body, true);
 
             $key = null;
 
@@ -36,10 +38,12 @@ class MyMemoryController extends KleinController
             }
 
             if (isset($json['key'])) {
-                $key = filter_var($json['key'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+                $keyFiltered = filter_var($json['key'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+                $key = ($keyFiltered !== false) ? $keyFiltered : null;
             }
 
-            $name = filter_var($json['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+            $nameFiltered = filter_var($json['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+            $name = ($nameFiltered !== false) ? $nameFiltered : '';
 
             if ($key !== null) {
                 $newKey = $this->checkTheKeyAndAssignToUser($key, $name);
@@ -51,7 +55,6 @@ class MyMemoryController extends KleinController
             $this->response->json([
                 'key' => $newKey
             ]);
-            exit();
         } catch (Exception $exception) {
             $this->response->status()->setCode($exception->getCode());
             $this->response->json([
@@ -60,7 +63,6 @@ class MyMemoryController extends KleinController
                     'message' => $exception->getMessage()
                 ]
             ]);
-            exit();
         }
     }
 
@@ -69,11 +71,11 @@ class MyMemoryController extends KleinController
      *
      * @return mixed
      * @throws Exception
+     * @throws \TypeError
      */
     private function createANewKeyAndAssignToUser(string $name): mixed
     {
-        $tms = EnginesFactory::getInstance(1);
-        /** @var MyMemory $tms */
+        $tms = EnginesFactory::getInstance(1, MyMemory::class);
         $newKey = $tms->createMyMemoryKey();
 
         $this->saveMemoryKey($newKey->key, $name);
@@ -87,6 +89,7 @@ class MyMemoryController extends KleinController
      *
      * @return string
      * @throws Exception
+     * @throws \TypeError
      */
     private function checkTheKeyAndAssignToUser(string $key, string $name): string
     {
@@ -107,6 +110,7 @@ class MyMemoryController extends KleinController
      * @param string $name
      *
      * @throws Exception
+     * @throws \TypeError
      */
     private function saveMemoryKey(string $key, string $name): void
     {
@@ -116,10 +120,10 @@ class MyMemoryController extends KleinController
         $tmKeyStruct->tm = true;
         $tmKeyStruct->glos = true;
 
-        $mkDao = new MemoryKeyDao();
+        $mkDao = new MemoryKeyDao($this->getDatabase());
 
         $newMemoryKey = new MemoryKeyStruct();
-        $newMemoryKey->uid = $this->user->uid;
+        $newMemoryKey->uid = $this->user->uid ?? throw new \TypeError('User UID must not be null');
         $newMemoryKey->tm_key = $tmKeyStruct;
 
         try {

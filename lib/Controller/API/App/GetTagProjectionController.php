@@ -12,6 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Logger\LoggerFactory;
@@ -20,7 +21,7 @@ use Utils\Tools\Utils;
 class GetTagProjectionController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -28,21 +29,19 @@ class GetTagProjectionController extends KleinController
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws TypeError
      * @throws Exception
      */
     public function call(): void
     {
         $request = $this->validateTheRequest();
-        $jobStruct = (new JobDao())->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
+        $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
         $this->featureSet->loadForProject($jobStruct->getProject());
 
-        /**
-         * @var $engine MyMemory
-         */
-        $engine = EnginesFactory::getInstance(1);
+        $engine = EnginesFactory::getInstance(1, MyMemory::class);
         $engine->setFeatureSet($this->featureSet);
 
-        $dataRefMap = (new SegmentOriginalDataDao())->getSegmentDataRefMap($request['id_segment']);
+        $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($request['id_segment']);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance($this->getFeatureSet(), $request['source_lang'], $request['target_lang'], $dataRefMap);
 
@@ -77,7 +76,7 @@ class GetTagProjectionController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array

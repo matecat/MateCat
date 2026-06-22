@@ -6,30 +6,30 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
-use Model\WordCount\CounterModel;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
+use TypeError;
 use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController
 {
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function copy(): void
     {
@@ -42,7 +42,7 @@ class CopyAllSourceToTargetController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws InvalidArgumentException
      * @throws Exception
      */
@@ -61,7 +61,7 @@ class CopyAllSourceToTargetController extends KleinController
             throw new InvalidArgumentException("Empty job password", -2);
         }
 
-        $job_data = (new JobDao())->getByIdAndPassword((int)$id_job, (string)$pass);
+        $job_data = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$pass);
 
         if (empty($job_data)) {
             throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
@@ -79,14 +79,15 @@ class CopyAllSourceToTargetController extends KleinController
      * @param JobStruct $chunk
      * @param int $revision_number
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws TypeError
      * @throws Exception
      */
     private function saveEventsAndUpdateTranslations(JobStruct $chunk, int $revision_number): array
     {
         // BEGIN TRANSACTION
-        $database = Database::obtain();
+        $database = $this->getDatabase();
         $database->begin();
 
         $features = $chunk->getProject()->getFeaturesSet();
@@ -104,7 +105,7 @@ class CopyAllSourceToTargetController extends KleinController
             $segment_id = $segment->id;
             $chunk_id = (int)$chunk->id;
 
-            $segmentTranslationDao = new SegmentTranslationDao();
+            $segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
             $old_translation = $segmentTranslationDao->findBySegmentAndJob($segment_id, $chunk_id);
 
             if (empty($old_translation) || ($old_translation->status !== TranslationStatus::STATUS_NEW)) {
@@ -139,11 +140,6 @@ class CopyAllSourceToTargetController extends KleinController
 
         // save all events
         $batchEventCreator->save(new BatchReviewProcessor());
-
-        if (!empty($params['segment_ids'])) {
-            $counter = new CounterModel();
-            $counter->initializeJobWordCount($chunk->id, $chunk->password);
-        }
 
         $data = [
             'code' => 1,

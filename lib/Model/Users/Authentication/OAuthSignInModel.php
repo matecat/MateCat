@@ -190,10 +190,15 @@ class OAuthSignInModel
      * @throws Exception
      * @throws TypeError
      */
-    protected function _authenticateUser(?AuthenticationHelper $authHelper = null): void
+    protected function _authenticateUser(): void
     {
         AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler());
-        $authHelper ?? new AuthenticationHelper($this->session);
+        $this->buildAuthHelper();
+    }
+
+    protected function buildAuthHelper(): AuthenticationHelper
+    {
+        return AuthenticationHelper::fromRequest($this->session, $this->teamDao->getDatabaseHandler());
     }
 
     /**

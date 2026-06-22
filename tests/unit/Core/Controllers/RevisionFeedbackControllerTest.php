@@ -23,10 +23,6 @@ class TestableRevisionFeedbackController extends RevisionFeedbackController
     {
     }
 
-    protected function afterConstruct(): void
-    {
-    }
-
     public ?FeedbackDAO $injectedFeedbackDao = null;
 
     protected function createFeedbackDao(): FeedbackDAO
@@ -80,7 +76,7 @@ class RevisionFeedbackControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstructAppendsLoginAndChunkPasswordValidators(): void
+    public function registerValidatorsAppendsLoginAndChunkPasswordValidators(): void
     {
         $realReflector = new ReflectionClass(RevisionFeedbackController::class);
         /** @var RevisionFeedbackController $realController */
@@ -97,7 +93,7 @@ class RevisionFeedbackControllerTest extends AbstractTest
             'revision_number' => 1,
         ]);
 
-        $realReflector->getMethod('afterConstruct')->invoke($realController);
+        $realReflector->getMethod('registerValidators')->invoke($realController);
 
         /** @var list<mixed> $validators */
         $validators = $realReflector->getProperty('validators')->getValue($realController);

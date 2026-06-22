@@ -60,7 +60,7 @@ class ProjectAccessTokenValidator extends Base
      */
     public function _validate(): void
     {
-        $this->project = (new ProjectDao())->findById(
+        $this->project = (new ProjectDao($this->controller->getDatabase()))->findById(
             $this->id_project
         );
 

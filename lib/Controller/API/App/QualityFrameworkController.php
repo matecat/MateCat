@@ -19,7 +19,7 @@ class QualityFrameworkController extends KleinController
 {
 
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -36,7 +36,7 @@ class QualityFrameworkController extends KleinController
     {
         $idProject = $this->request->param('id_project');
         $password = $this->request->param('password');
-        $project = (new ProjectDao())->findByIdAndPassword($idProject, $password);
+        $project = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($idProject, $password);
 
         $this->response->json($this->renderQualityFramework($project));
     }
@@ -59,7 +59,7 @@ class QualityFrameworkController extends KleinController
             throw new NotFoundException('QAModel not found');
         }
 
-        $qaModel = (new ModelDao())->fetchById($idQaModel, ModelStruct::class);
+        $qaModel = (new ModelDao($this->getDatabase()))->fetchById($idQaModel, ModelStruct::class);
 
         if ($qaModel === null) {
             throw new NotFoundException('QAModel not found');
@@ -70,7 +70,7 @@ class QualityFrameworkController extends KleinController
 
         if ($qaModel->qa_model_template_id) {
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $parentTemplate = (new QAModelTemplateDao())->get(['id' => $qaModel->qa_model_template_id, 'uid' => $uid]);
+            $parentTemplate = (new QAModelTemplateDao($this->getDatabase()))->get(['id' => $qaModel->qa_model_template_id, 'uid' => $uid]);
 
             if ($parentTemplate === null) {
                 return $json;

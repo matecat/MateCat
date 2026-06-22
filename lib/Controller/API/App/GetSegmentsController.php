@@ -44,7 +44,7 @@ class GetSegmentsController extends KleinController
     const int DEFAULT_PER_PAGE = 40;
     const int MAX_PER_PAGE = 200;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -315,7 +315,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new SegmentNoteDao())->getAggregatedBySegmentIdInInterval($start, $stop);
+            return (new SegmentNoteDao($this->getDatabase()))->getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
         return [];
@@ -336,7 +336,7 @@ class GetSegmentsController extends KleinController
             $last = end($segments);
             $stop = $last['sid'];
 
-            return (new ContextGroupDao())->getBySIDRange($start, $stop);
+            return (new ContextGroupDao($this->getDatabase()))->getBySIDRange($start, $stop);
         }
 
         return [];
@@ -349,31 +349,31 @@ class GetSegmentsController extends KleinController
      */
     protected function findJob(int $jid, string $password): \Model\Jobs\JobStruct
     {
-        return (new JobDao())->getByIdAndPasswordOrFail($jid, $password);
+        return (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($jid, $password);
     }
 
     protected function createSegmentDao(): SegmentDao
     {
-        return new SegmentDao();
+        return new SegmentDao($this->getDatabase());
     }
 
     protected function createProjectMetadataDao(): ProjectMetadataDao
     {
-        return new ProjectMetadataDao();
+        return new ProjectMetadataDao($this->getDatabase());
     }
 
     protected function createFilesMetadataDao(): FilesMetadataDao
     {
-        return new FilesMetadataDao();
+        return new FilesMetadataDao($this->getDatabase());
     }
 
     protected function createJobMetadataDao(): MetadataDao
     {
-        return new MetadataDao();
+        return new MetadataDao($this->getDatabase());
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
     {
-        return new SegmentMetadataDao();
+        return new SegmentMetadataDao($this->getDatabase());
     }
 }

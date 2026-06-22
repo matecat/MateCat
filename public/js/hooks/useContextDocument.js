@@ -75,6 +75,13 @@ const parseHtmlContent = (rawHtml, sourceUrl) => {
     headHtml += el.outerHTML
   })
   doc.querySelectorAll('script').forEach((el) => el.remove())
+
+  // Phantom overlay suppression is handled at render time by CSS rules in
+  // LivePreviewPanel.js (SHADOW_STYLES): role=dialog/alertdialog with no content
+  // get pointer-events:none + visibility:hidden, and inline position:fixed elements
+  // with no content are also suppressed. Class-based overlays are caught by
+  // suppressClickTraps() after stylesheets load. No synchronous DOM scan needed here.
+
   const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
   return headHtml + bodyHtml
 }

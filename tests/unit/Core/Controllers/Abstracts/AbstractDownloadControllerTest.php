@@ -33,7 +33,7 @@ class AbstractDownloadControllerTest extends AbstractTest
         return new class ($request, $response) extends AbstractDownloadController {
             protected bool $useSession = false;
 
-            protected function identifyUser(?bool $useSession = true, ?\Controller\Abstracts\Authentication\AuthenticationHelper $authHelper = null): void
+            protected function identifyUser(?bool $useSession = true): void
             {
                 $this->userIsLogged = false;
             }

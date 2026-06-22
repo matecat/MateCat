@@ -69,7 +69,7 @@ class SignupController extends AbstractStatefulKleinController
     protected function authenticateConfirmedUser(UserStruct $user): void
     {
         AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-        new AuthenticationHelper($_SESSION);
+        AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
     }
 
     /**
@@ -97,6 +97,7 @@ class SignupController extends AbstractStatefulKleinController
      * @throws RenderTerminatedException
      * @throws InvalidArgumentException
      * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
     protected function renderErrorPage(): void
     {

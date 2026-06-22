@@ -428,7 +428,7 @@ class Session
                 $hashFile = $file['fileHash'] . "|" . end($target);
 
                 if ($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile) {
-                    CatUtils::deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
+                    (new CatUtils())->deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
                     unlink($item);
                 }
             }

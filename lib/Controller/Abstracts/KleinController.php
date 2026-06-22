@@ -13,9 +13,12 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 
@@ -39,6 +42,7 @@ abstract class KleinController implements IController
     protected Response $response;
     protected ?ServiceProvider $service = null;
     protected ?App $app = null;
+    protected IDatabase $database;
 
     /**
      * @var Base[]
@@ -100,11 +104,16 @@ abstract class KleinController implements IController
      * @param Response $response
      * @param ?ServiceProvider $service
      * @param ?App $app
-     *
+     * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
-    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
-    {
+    public function __construct(
+        Request $request,
+        Response $response,
+        ?ServiceProvider $service = null,
+        ?App $app = null
+    ) {
         $this->startTimer();
         $this->timingLogFileName = 'api_calls_time.log';
 
@@ -112,6 +121,8 @@ abstract class KleinController implements IController
         $this->response = $response;
         $this->service = $service;
         $this->app = $app;
+
+        $this->logger = LoggerFactory::getLogger();
 
         $paramsPut = $this->getPutParams() ?: [];
         $paramsGet = $this->request->paramsGet()->getIterator()->getArrayCopy();
@@ -123,8 +134,16 @@ abstract class KleinController implements IController
         $this->initDependencies();
         $this->registerValidators();
         $this->afterConstruct();
+    }
 
-        $this->logger = LoggerFactory::getLogger();
+    public function getDatabase(): IDatabase
+    {
+        if (!isset($this->database)) {
+            $injected = $this->app?->getDatabase();
+            $this->database = $injected instanceof IDatabase ? $injected : Database::obtain();
+        }
+
+        return $this->database;
     }
 
     /**
@@ -135,7 +154,7 @@ abstract class KleinController implements IController
     {
         if (empty($this->api_key)) {
             static::sessionStart();
-            (new AuthenticationHelper($_SESSION))->refreshSession();
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase())->refreshSession();
         }
     }
 
@@ -201,10 +220,18 @@ abstract class KleinController implements IController
         return $this;
     }
 
+    /**
+     * Override this method to inject dependencies, DB, Dao, etc.
+     * @return void
+     */
     protected function initDependencies(): void
     {
     }
 
+    /**
+     * Override this method to register validators.
+     * @return void
+     */
     protected function registerValidators(): void
     {
     }

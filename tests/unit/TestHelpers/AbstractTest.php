@@ -20,6 +20,13 @@ abstract class AbstractTest extends TestCase
     protected IDatabase $databaseInstance;
     protected ReflectionMethod $reflectedMethod;
 
+    /**
+     * Tracks whether this test replaced the Database singleton with a mock/stub
+     * so tearDown() can restore the real connection and avoid leaking the mock
+     * into subsequent tests in the same process.
+     */
+    protected bool $databaseMockApplied = false;
+
     public static function projectRoot(): string
     {
         return dirname(__DIR__, 3);
@@ -33,6 +40,11 @@ abstract class AbstractTest extends TestCase
 
     protected function tearDown(): void
     {
+        if ($this->databaseMockApplied) {
+            $this->resetDatabaseMock();
+            $this->databaseMockApplied = false;
+        }
+
         parent::tearDown();
         $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
         echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . round($resultTime, 6) . " seconds.\n";
@@ -56,6 +68,7 @@ abstract class AbstractTest extends TestCase
         $ref = new ReflectionClass(Database::class);
         $prop = $ref->getProperty('instance');
         $prop->setValue(null, $dbStub);
+        $this->databaseMockApplied = true;
 
         return [$dbStub, $pdoStub, $stmtStub];
     }
@@ -74,6 +87,7 @@ abstract class AbstractTest extends TestCase
         $ref = new ReflectionClass(Database::class);
         $prop = $ref->getProperty('instance');
         $prop->setValue(null, $db);
+        $this->databaseMockApplied = true;
     }
 
     /**

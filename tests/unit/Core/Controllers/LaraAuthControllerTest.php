@@ -344,12 +344,12 @@ class LaraAuthControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function afterConstruct_appends_login_and_chunk_password_validators(): void
+    public function registerValidators_appends_login_and_chunk_password_validators(): void
     {
         // ChunkPasswordValidator reads id_job/password from controller params in its constructor.
         $this->controller->setParams(['id_job' => '1', 'password' => 'pw']);
 
-        $ref = new ReflectionMethod($this->controller, 'afterConstruct');
+        $ref = new ReflectionMethod($this->controller, 'registerValidators');
         $ref->invoke($this->controller);
 
         $validatorsProp = new ReflectionProperty(
