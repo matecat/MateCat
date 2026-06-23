@@ -103,7 +103,10 @@ class StatusV3ControllerTest extends AbstractTest
         $user->email = 'ctrltest_9056000@example.org';
         $this->reflector->getProperty('user')->setValue($this->controller, $user);
 
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        // AbstractStatus resolves its ProjectDao from the FeatureSet's database;
+        // give it the real seeded test DB so an unresolvable pid returns null
+        // (→ "Project not found") instead of a stub crash.
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet(\Model\DataAccess\Database::obtain()));
     }
 
     protected function tearDown(): void

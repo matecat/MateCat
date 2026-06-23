@@ -80,7 +80,7 @@ namespace Matecat\Core\Engines {
             $struct->translate_relative_url = 'ai/text/translate';
             $struct->extra_parameters = ['apikey' => 'test-api-key'];
 
-            $this->engine = new TestIntento($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+            $this->engine = new TestIntento($struct, \Model\DataAccess\Database::obtain());
         }
 
         #[Test]
@@ -222,7 +222,7 @@ namespace Matecat\Core\Engines {
             $struct->translate_relative_url = 'ai/text/translate';
             $struct->extra_parameters = [];
 
-            $engineWithoutApiKey = new TestIntento($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+            $engineWithoutApiKey = new TestIntento($struct, \Model\DataAccess\Database::obtain());
             self::assertSame([], $engineWithoutApiKey->getRoutingList());
         }
 

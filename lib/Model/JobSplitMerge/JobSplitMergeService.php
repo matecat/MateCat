@@ -72,13 +72,13 @@ class JobSplitMergeService
      */
     protected function createJobDao(): JobDao
     {
-        return new JobDao();
+        return new JobDao($this->dbHandler);
     }
 
     protected function createJobMetadataDao(): MetadataDao
     {
         // init JobsMetadataDao
-        return new MetadataDao();
+        return new MetadataDao($this->dbHandler);
     }
 
     /**
@@ -88,7 +88,7 @@ class JobSplitMergeService
      */
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
-        return (new JobDao())->getByIdAndPassword($id, $password);
+        return (new JobDao($this->dbHandler))->getByIdAndPassword($id, $password);
     }
 
     /**
@@ -115,7 +115,7 @@ class JobSplitMergeService
      */
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
-        (new AnalysisDao())->destroyCacheByProjectId($projectId);
+        (new AnalysisDao($this->dbHandler))->destroyCacheByProjectId($projectId);
     }
 
     /**
@@ -135,7 +135,7 @@ class JobSplitMergeService
      */
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
-        (new JobDao())->updateForMerge($job, $newPassword);
+        (new JobDao($this->dbHandler))->updateForMerge($job, $newPassword);
     }
 
     /**
@@ -144,7 +144,7 @@ class JobSplitMergeService
      */
     protected function deleteOnMerge(JobStruct $job): void
     {
-        (new JobDao())->deleteOnMerge($job);
+        (new JobDao($this->dbHandler))->deleteOnMerge($job);
     }
 
     /**
@@ -160,7 +160,7 @@ class JobSplitMergeService
      */
     protected function createProjectDao(): ProjectDao
     {
-        return new ProjectDao();
+        return new ProjectDao($this->dbHandler);
     }
 
     /**
@@ -168,7 +168,7 @@ class JobSplitMergeService
      */
     protected function createProjectsMetadataDao(): ProjectsMetadataDao
     {
-        return new ProjectsMetadataDao();
+        return new ProjectsMetadataDao($this->dbHandler);
     }
 
     /**
@@ -187,7 +187,7 @@ class JobSplitMergeService
      */
     protected function createUserDao(): UserDao
     {
-        return new UserDao();
+        return new UserDao($this->dbHandler);
     }
 
     /**

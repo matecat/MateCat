@@ -170,7 +170,7 @@ class Intento extends AbstractEngine
         $parameters['context']['text'] = $_config['segment'];
 
         if (isset($_config['pid'])) {
-            $metadataDao = new MetadataDao();
+            $metadataDao = new MetadataDao($this->database);
 
             // custom provider or custom routing
             $customProvider = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'intento_provider');

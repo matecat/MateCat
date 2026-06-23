@@ -39,7 +39,7 @@ class DeepLEngineTest extends AbstractTest
             'DeepL-Auth-Key' => 'test-auth-key',
         ];
 
-        $this->engine = new TestDeepL($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+        $this->engine = new TestDeepL($struct, \Model\DataAccess\Database::obtain());
     }
 
     #[Test]
@@ -228,7 +228,7 @@ class DeepLEngineTest extends AbstractTest
         $struct->type = EngineConstants::MT;
         $struct->extra_parameters = [];
 
-        $engine = new TestDeepL($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
+        $engine = new TestDeepL($struct, \Model\DataAccess\Database::obtain());
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('API ket not set');
