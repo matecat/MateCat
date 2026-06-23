@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import {mountPage} from './mountPage'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
-import {findSegmentSidsByClick, tagSegments, suppressClickTraps} from '../utils/contextPreviewUtils'
+import {findSegmentSidsByClick, tagSegments, suppressClickTraps, getSidsFromElement, getSegmentNodeMap, checkNodeTranslationStatus} from '../utils/contextPreviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconChevronLeft from '../components/icons/IconChevronLeft'
 import IconChevronRight from '../components/icons/IconChevronRight'
@@ -51,10 +51,11 @@ const isRTLLanguage = (code) => {
 }
 
 const ContextPreview = () => {
-  const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
+  const [viewMode, setViewMode] = useState(VIEW_MODES.TARGET)
   const [contentView, setContentView] = useState(CONTENT_VIEWS.LIVE_PREVIEW)
   const [htmlReady, setHtmlReady] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(100)
+  const [hasMismatch, setHasMismatch] = useState(false)
 
   const urlParams = useMemo(() => new URLSearchParams(window.location.search), [])
   const sourceCode = urlParams.get('source_code') || config.source_code || ''
@@ -85,15 +86,6 @@ const ContextPreview = () => {
   const targetScrollRef = useRef(null)
   const pendingHighlightRef = useRef(null)
 
-  const showNodeWarning = useCallback(
-    (el) => el.classList.add('context-preview-node--mismatch'),
-    [],
-  )
-  const clearNodeWarning = useCallback(
-    (el) => el.classList.remove('context-preview-node--mismatch'),
-    [],
-  )
-
   const {
     highlight,
     highlightHidden,
@@ -105,21 +97,83 @@ const ContextPreview = () => {
     handleNext,
   } = useContextHighlight({sourceRef, targetRef})
 
+  const showNodeWarning = useCallback(
+    (el) => {
+      setHasMismatch(true)
+      const sids = getSidsFromElement(el)
+      if (sids.length > 1 && targetRef.current) {
+        const map = getSegmentNodeMap(targetRef.current)
+        if (map) {
+          const nodeIndex = map.nodes.indexOf(el)
+          if (nodeIndex !== -1) {
+            setHighlight((prev) => ({
+              mode: 'node',
+              nodeIndex,
+              sids,
+              activeSegIdx:
+                prev?.mode === 'segment'
+                  ? Math.max(0, sids.indexOf(prev.sid))
+                  : 0,
+            }))
+          }
+        }
+      }
+    },
+    [targetRef, setHighlight],
+  )
+
+  const clearNodeWarning = useCallback(
+    () => setHasMismatch(false),
+    [],
+  )
+
+  // Returns {nodeIndex, sids} when the segment's node is shared with other segments.
+  const getSharedNodeInfo = useCallback((sid) => {
+    const ref = targetRef.current || sourceRef.current
+    const map = ref ? getSegmentNodeMap(ref) : null
+    if (!map) return null
+    const nodeIndices = map.sidToNodeIndices.get(sid) ?? []
+    if (!nodeIndices.length) return null
+    const allSids = [
+      ...new Set(nodeIndices.flatMap((ni) => map.nodeIndexToSids.get(ni) ?? [])),
+    ]
+    return allSids.length > 1 ? {nodeIndex: nodeIndices[0], sids: allSids} : null
+  }, [])
+
   const onHighlight = useCallback(
     (numericSid) => {
+      setHasMismatch(false)
       const current = highlightRef.current
+      // Already in node mode for this node — just update which segment is active.
       if (current?.mode === 'node' && current.sids.includes(numericSid)) {
+        const newActiveSegIdx = current.sids.indexOf(numericSid)
+        if (newActiveSegIdx !== current.activeSegIdx) {
+          applyHighlightsForNode(current.sids, newActiveSegIdx, false)
+          setHighlight((prev) => ({...prev, activeSegIdx: newActiveSegIdx}))
+        }
         return
       }
       pendingHighlightRef.current = numericSid
       const total = applyHighlightsForSegment(numericSid, 0, true)
+      if (total > 0) {
+        const shared = getSharedNodeInfo(numericSid)
+        if (shared) {
+          setHighlight({
+            mode: 'node',
+            nodeIndex: shared.nodeIndex,
+            sids: shared.sids,
+            activeSegIdx: Math.max(0, shared.sids.indexOf(numericSid)),
+          })
+          return
+        }
+      }
       setHighlight(
         total > 0
           ? {mode: 'segment', sid: numericSid, activeIndex: 0, total}
           : null,
       )
     },
-    [applyHighlightsForSegment, setHighlight, highlightRef],
+    [applyHighlightsForSegment, applyHighlightsForNode, setHighlight, highlightRef, getSharedNodeInfo],
   )
 
   const onTranslationUpdate = useCallback(() => {
@@ -222,6 +276,26 @@ const ContextPreview = () => {
     segmentsRef.current = segments
   }, [segments])
 
+  // Detect mismatch on the highlighted node whenever segments or highlight changes.
+  // This catches the initial case where all translations already exist at load time —
+  // useContextPreviewMessages only fires showNodeWarning on live edits.
+  // Uses SID-based lookup so the correct panel element is found regardless of which
+  // panel's nodeIndex is stored in the highlight state.
+  useEffect(() => {
+    if (highlight?.mode !== 'node' || hasMismatch) return
+    const ref = targetRef.current || sourceRef.current
+    const map = ref ? getSegmentNodeMap(ref) : null
+    if (!map) return
+    const firstSid = highlight.sids?.[highlight.activeSegIdx ?? 0] ?? highlight.sids?.[0]
+    if (firstSid == null) return
+    const nodeIndices = map.sidToNodeIndices.get(firstSid) ?? []
+    const el = map.nodes[nodeIndices[0]]
+    if (!el) return
+    if (checkNodeTranslationStatus(el, segments) === 'mismatch') {
+      setHasMismatch(true)
+    }
+  }, [highlight, segments, hasMismatch, targetRef, sourceRef])
+
   // Track segment request deduplication per direction
   const requestedAtRef = useRef({before: -1, after: -1, lastDir: null})
 
@@ -309,6 +383,7 @@ const ContextPreview = () => {
     )
       return
     if (targetRef.current) {
+      targetRef.current.classList.add('context-preview-target')
       tagSegments(targetRef.current, mappableSegments, {
         replaceWithTarget: true,
         metadataMap,
@@ -325,7 +400,15 @@ const ContextPreview = () => {
     if (h?.mode === 'segment' && h.sid != null) {
       const idx = h.activeIndex ?? 0
       const total = applyHighlightsForSegment(h.sid, idx, false)
-      if (total !== h.total) {
+      const shared = total > 0 ? getSharedNodeInfo(h.sid) : null
+      if (shared) {
+        setHighlight({
+          mode: 'node',
+          nodeIndex: shared.nodeIndex,
+          sids: shared.sids,
+          activeSegIdx: Math.max(0, shared.sids.indexOf(h.sid)),
+        })
+      } else if (total !== h.total) {
         if (total === 0) {
           setHighlight(null)
         } else {
@@ -336,10 +419,10 @@ const ContextPreview = () => {
           })
         }
       }
-    } else if (h?.mode === 'node' && h.nodeIndex != null) {
-      applyHighlightsForNode(h.nodeIndex, h.activeSegIdx ?? 0, false)
+    } else if (h?.mode === 'node' && h.sids?.length) {
+      applyHighlightsForNode(h.sids, h.activeSegIdx ?? 0, false)
     }
-  }, [mappableSegments, htmlReady, viewMode, metadataMap, contentView, applyHighlightsForSegment, applyHighlightsForNode, setHighlight])
+  }, [mappableSegments, htmlReady, viewMode, metadataMap, contentView, applyHighlightsForSegment, applyHighlightsForNode, setHighlight, getSharedNodeInfo])
 
   // Re-apply pending highlight after tagging completes
   useEffect(() => {
@@ -353,7 +436,17 @@ const ContextPreview = () => {
     if (sid == null || highlight) return
     const total = applyHighlightsForSegment(sid, 0, true)
     if (total > 0) {
-      setHighlight({mode: 'segment', sid, activeIndex: 0, total})
+      const shared = getSharedNodeInfo(sid)
+      if (shared) {
+        setHighlight({
+          mode: 'node',
+          nodeIndex: shared.nodeIndex,
+          sids: shared.sids,
+          activeSegIdx: Math.max(0, shared.sids.indexOf(sid)),
+        })
+      } else {
+        setHighlight({mode: 'segment', sid, activeIndex: 0, total})
+      }
     }
   }, [
     segments,
@@ -362,6 +455,7 @@ const ContextPreview = () => {
     highlight,
     applyHighlightsForSegment,
     setHighlight,
+    getSharedNodeInfo,
   ])
 
   // Detect untagged nodes and proactively request adjacent segments
@@ -489,7 +583,7 @@ const ContextPreview = () => {
       )
       if (!result) return
       const {sids, nodeIndex} = result
-      applyHighlightsForNode(nodeIndex, 0, true)
+      applyHighlightsForNode(sids, 0, true)
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
       ContextPreviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
     }
@@ -504,7 +598,7 @@ const ContextPreview = () => {
       )
       if (!result) return
       const {sids, nodeIndex} = result
-      applyHighlightsForNode(nodeIndex, 0, true)
+      applyHighlightsForNode(sids, 0, true)
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
       ContextPreviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
     }
@@ -613,12 +707,28 @@ const ContextPreview = () => {
           )}
         </div>
 
-        <div className="context-preview-toolbar__right">
-          {contentView === CONTENT_VIEWS.LIVE_PREVIEW && highlightHidden && (
+        {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
+          htmlReady > 0 &&
+          mappableSegments.length > 0 &&
+          highlightHidden && (
             <span className="context-preview-hidden-warning">
               Segment not found in preview
             </span>
           )}
+        {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
+          highlight?.mode === 'node' &&
+          highlight.sids.length > 1 &&
+          !hasMismatch && (
+            <span className="context-preview-hidden-warning context-preview-hidden-warning--info">
+              {highlight.sids.length} segments share this element
+            </span>
+          )}
+        {contentView === CONTENT_VIEWS.LIVE_PREVIEW && hasMismatch && (
+          <span className="context-preview-hidden-warning">
+            Duplicate segments with conflicting translations
+          </span>
+        )}
+        <div className="context-preview-toolbar__right">
           {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
             highlight &&
             ((highlight.mode === 'segment' && highlight.total > 1) ||
