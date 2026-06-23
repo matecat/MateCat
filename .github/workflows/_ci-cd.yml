@@ -87,7 +87,7 @@ jobs:
           docker cp "$CONTAINER_ID":/var/www/matecat/nodejs/.coverage/clover.xml ./node-coverage.xml
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: |
@@ -144,7 +144,7 @@ jobs:
           echo "BUILD=$BUILD" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

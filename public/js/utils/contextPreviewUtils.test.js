@@ -1181,7 +1181,7 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
     ).not.toContain(1)
   })
 
-  it('falls back to the AEM container itself when source text is not found inside it', () => {
+  it('falls through to Pass 2 text-match when container text is too dissimilar (Levenshtein > 0.25)', () => {
     document.body.innerHTML = `
       <div data-node-path="/content/we-retail/jcr:content">
         <p>Wrong Text</p>
@@ -1201,12 +1201,13 @@ describe('tagSegments — AEM x-client_nodepath dispatch', () => {
         },
       },
     )
-    // AEM path is authoritative: tag the container itself when text match fails
+    // 'Wrong Text' vs 'Segment Source': Levenshtein > 0.25 → strategy returns null,
+    // container is NOT tagged
     expect(
       getSidsFromElement(document.body.querySelector('[data-node-path]')),
-    ).toContain(1)
-    // The <p> outside the container should NOT be tagged
-    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).not.toContain(1)
+    ).not.toContain(1)
+    // Pass 2 falls through to text-match and tags the <p> outside the container
+    expect(getSidsFromElement(document.body.querySelectorAll('p')[1])).toContain(1)
   })
 
   it('falls back when container element not found', () => {

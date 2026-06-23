@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react'
+import React, {useRef, useEffect, memo} from 'react'
 import PropTypes from 'prop-types'
 
 const SHADOW_STYLES = `
@@ -12,30 +12,34 @@ const SHADOW_STYLES = `
     border-radius: 2px;
   }
   mark.context-preview-highlight {
-    background-color: #fee47a;
+    background-color: transparent;
     color: inherit;
     padding: 1px 2px;
     border-radius: 2px;
     box-decoration-break: clone;
+    outline: 2px solid rgba(242, 113, 28, 0.35);
+    outline-offset: 1px;
   }
   mark.context-preview-highlight--active {
-    background-color: #f2711c;
+    background-color: transparent;
     outline: 2px solid #df681a;
     outline-offset: 1px;
   }
-  [data-context-sids].context-preview-node--mismatch {
-    outline: 2px solid #e05c00;
-    outline-offset: 2px;
-    position: relative;
+  .context-preview-target [data-context-sids] {
+    opacity: 0.35;
+    transition: opacity 0.2s ease;
   }
-  [data-context-sids].context-preview-node--mismatch::after {
-    content: '⚠';
-    position: absolute;
-    top: -0.6em;
-    right: -0.3em;
-    font-size: 0.75em;
-    color: #e05c00;
-    pointer-events: none;
+  /* Three cases that restore full opacity:
+     1. A tagged element whose own translation has been confirmed.
+     2. A tagged element that wraps other tagged descendants — it must not
+        be dimmed or its children's opacity would compound (0.35 × 0.35).
+     3. A tagged element that sits inside an already-translated ancestor —
+        handles AEM components where the same SID can appear on nested
+        containers (outer/middle divs) AND on the leaf node simultaneously. */
+  .context-preview-target [data-context-sids].context-preview-translated,
+  .context-preview-target [data-context-sids]:has([data-context-sids]),
+  .context-preview-target .context-preview-translated [data-context-sids] {
+    opacity: 1;
   }
   /* Failsafe: suppress any phantom overlay that survives DOM cleanup.
      Covers two cases:
@@ -58,7 +62,7 @@ const SHADOW_STYLES = `
   }
 `
 
-export const LivePreviewPanel = ({panelRef, scrollRef, title, zoomLevel, languageLabel, ...props}) => {
+export const LivePreviewPanel = memo(({panelRef, scrollRef, title, zoomLevel, languageLabel, ...props}) => {
   const hostRef = useRef(null)
 
   useEffect(() => {
@@ -95,7 +99,7 @@ export const LivePreviewPanel = ({panelRef, scrollRef, title, zoomLevel, languag
       </div>
     </div>
   )
-}
+})
 
 LivePreviewPanel.propTypes = {
   panelRef: PropTypes.object.isRequired,

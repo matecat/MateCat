@@ -134,6 +134,42 @@ export const updateNodeTranslation = (el, segments) => {
 }
 
 /**
+ * Pure version of updateNodeTranslation: returns the same status string
+ * ('ok' | 'mismatch' | 'no-target') but never modifies the DOM.
+ * Use this when you only need to know the translation state without side effects.
+ *
+ * @param {HTMLElement} el
+ * @param {Array} segments
+ * @returns {'ok'|'mismatch'|'no-target'}
+ */
+export const checkNodeTranslationStatus = (el, segments) => {
+  const sids = getSidsFromElement(el)
+  if (!sids.length) return 'no-target'
+  const sidSet = new Set(sids)
+  const relevant = segments.filter((s) => sidSet.has(Number(s.sid)))
+  if (!relevant.length || relevant.length < sids.length) return 'no-target'
+  const groups = new Map()
+  for (const seg of relevant) {
+    const key = seg.internal_id ?? `__sid_${seg.sid}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(seg)
+  }
+  const groupTargets = []
+  for (const [, group] of groups) {
+    group.sort((a, b) => Number(a.sid) - Number(b.sid))
+    const targets = group.map((s) => {
+      if (!s.target) return null
+      const stripped = stripSegmentTags(s.target).replace(/[\s​]+/g, ' ').trim()
+      return stripped || null
+    })
+    if (targets.some((t) => t === null)) return 'no-target'
+    groupTargets.push(targets.join(' '))
+  }
+  if (!groupTargets.length) return 'no-target'
+  return groupTargets.every((t) => t === groupTargets[0]) ? 'ok' : 'mismatch'
+}
+
+/**
  * Clears all existing highlights from the container by unwrapping
  * <mark> elements back to their original text nodes.
  *
@@ -143,14 +179,15 @@ export const clearHighlights = (container) => {
   const marks = Array.from(
     container.querySelectorAll(`mark.${HIGHLIGHT_CLASS}`),
   )
+  const toNormalize = new Set()
   for (let i = marks.length - 1; i >= 0; i--) {
     const mark = marks[i]
     const parent = mark.parentNode
     if (!parent) continue
-    const textNode = document.createTextNode(mark.textContent)
-    parent.replaceChild(textNode, mark)
-    parent.normalize()
+    parent.replaceChild(document.createTextNode(mark.textContent), mark)
+    toNormalize.add(parent)
   }
+  toNormalize.forEach((p) => p.normalize())
 }
 
 /**
@@ -167,11 +204,16 @@ export const clearHighlights = (container) => {
  * @param {string} searchText
  * @returns {RegExp}
  */
+const flexibleRegexCache = new Map()
+
 export const buildFlexibleRegex = (searchText) => {
+  if (flexibleRegexCache.has(searchText)) return flexibleRegexCache.get(searchText)
   const decoded = decodeHtmlEntities(searchText)
   const escaped = decoded.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const tokens = escaped.split(/\s+/)
-  return new RegExp('(?<!\\w)' + tokens.join('\\s+') + '(?!\\w)', 'gi')
+  const regex = new RegExp('(?<!\\w)' + tokens.join('\\s+') + '(?!\\w)', 'gi')
+  flexibleRegexCache.set(searchText, regex)
+  return regex
 }
 
 /**
@@ -472,12 +514,12 @@ export const getSegmentNodeMap = (container) =>
  * @param {Object}  [options]
  * @param {boolean} [options.replaceWithTarget=false] - Substitute matched text with target
  */
-export const findElementByTextMatch = (container, searchText) => {
+export const findElementByTextMatch = (container, searchText, {allowTagged = false} = {}) => {
   if (!container || !searchText) return null
   const needle = searchText.replace(/\s+/g, ' ').trim().toLowerCase()
   if (!needle) return null
   for (const el of container.querySelectorAll(BLOCK_SELECTOR)) {
-    if (el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
+    if (!allowTagged && el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
     if (el.querySelector(`[${SEGMENT_SIDS_ATTR}]`)) continue
     const text = el.textContent.replace(/\s+/g, ' ').trim().toLowerCase()
     if (text === needle) return el
@@ -552,8 +594,9 @@ export const tagSegments = (
 
   // Strategy pass — runs first, highest priority.
   // Segments with resname + restype are resolved via DOM-attribute lookups
-  // before any text-match runs. Misses (element not found) silently fall
-  // through to text-match exactly as segments with no metadata.
+  // before any text-match runs. Misses (element not found) are excluded from
+  // text-match passes — metadata is authoritative, so a fuzzy text match
+  // against an unrelated element would be misleading.
   //
   // When a point-mapped segment claims a node that already carries
   // text-matched SIDs (from a previous incremental call), those
@@ -599,6 +642,13 @@ export const tagSegments = (
       tier1Nodes.add(el)
       if (!pointMappedElements.has(el)) pointMappedElements.set(el, new Set())
       pointMappedElements.get(el).add(sid)
+      const idx = prepared.findIndex((p) => p.sid === sid)
+      if (idx !== -1) used.add(idx)
+    } else {
+      // Strategy miss: the segment has metadata pointing to a specific element
+      // but that element was not found. Do NOT fall through to text matching —
+      // a fuzzy text match would risk highlighting a completely unrelated element.
+      // Marking as used keeps the segment untagged → "Segment not found" badge.
       const idx = prepared.findIndex((p) => p.sid === sid)
       if (idx !== -1) used.add(idx)
     }
@@ -668,7 +718,11 @@ export const tagSegments = (
     // Skip elements that were successfully tagged by the Strategy Pass,
     // or that contain / are contained by a tier1 node.
     if (tier1Nodes.has(el)) continue
-    if ([...tier1Nodes].some((n) => el.contains(n) || n.contains(el))) continue
+    let isNested = false
+    for (const n of tier1Nodes) {
+      if (el.contains(n) || n.contains(el)) { isNested = true; break }
+    }
+    if (isNested) continue
 
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
@@ -692,6 +746,14 @@ export const tagSegments = (
       map.nodes.forEach((el) => {
         const result = updateNodeTranslation(el, segments)
         // mismatch silently ignored here — shown via the updateTranslation message handler
+        if (result === 'ok') {
+          el.classList.add('context-preview-translated')
+        } else if (result === 'mismatch') {
+          el.classList.remove('context-preview-translated')
+        }
+        // 'no-target': leave the class as-is — once a node has been visually
+        // translated, keep it at full opacity even if not all sibling SIDs
+        // have loaded yet.
         if (targetDir) {
           if (result === 'ok') el.dir = targetDir
           else el.removeAttribute('dir')

@@ -183,13 +183,7 @@ describe('applyHighlightsForSegment', () => {
 // ---------------------------------------------------------------------------
 
 describe('applyHighlightsForNode', () => {
-  it('resolves SIDs from the node map and highlights the active one', () => {
-    const el = document.createElement('div')
-    const mockMap = {
-      nodeIndexToSids: new Map([[0, [10, 20]]]),
-      nodes: [el],
-    }
-    getSegmentNodeMap.mockReturnValue(mockMap)
+  it('highlights the SID at activeSegIdx within the provided sids array', () => {
     highlightBySid.mockReturnValue({total: 1, marks: []})
 
     const sourceRef = makeRef()
@@ -198,19 +192,13 @@ describe('applyHighlightsForNode', () => {
     )
 
     act(() => {
-      result.current.applyHighlightsForNode(0, 1, false)
+      result.current.applyHighlightsForNode([10, 20], 1, false)
     })
 
     expect(highlightBySid).toHaveBeenCalledWith(sourceRef.current, 20, 0)
   })
 
   it('falls back to sids[0] when activeSegIdx is out of range', () => {
-    const el = document.createElement('div')
-    const mockMap = {
-      nodeIndexToSids: new Map([[0, [99]]]),
-      nodes: [el],
-    }
-    getSegmentNodeMap.mockReturnValue(mockMap)
     highlightBySid.mockReturnValue({total: 1, marks: []})
 
     const sourceRef = makeRef()
@@ -219,7 +207,7 @@ describe('applyHighlightsForNode', () => {
     )
 
     act(() => {
-      result.current.applyHighlightsForNode(0, 5, false)
+      result.current.applyHighlightsForNode([99], 5, false)
     })
 
     expect(highlightBySid).toHaveBeenCalledWith(sourceRef.current, 99, 0)

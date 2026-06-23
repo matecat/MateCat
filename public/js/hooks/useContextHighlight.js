@@ -3,7 +3,6 @@ import {
   clearHighlights,
   highlightBySid,
   setActiveHighlight,
-  getSegmentNodeMap,
   isNodeHidden,
 } from '../utils/contextPreviewUtils'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
@@ -79,13 +78,10 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
   )
 
   const applyHighlightsForNode = useCallback(
-    (nodeIndex, activeSegIdx, scroll) => {
+    (sids, activeSegIdx, scroll) => {
       let hidden = false
       ;[sourceRef, targetRef].forEach((ref) => {
         if (!ref.current) return
-        const map = getSegmentNodeMap(ref.current)
-        if (!map) return
-        const sids = map.nodeIndexToSids.get(nodeIndex) ?? []
         const activeSid = sids[activeSegIdx] ?? sids[0]
         if (activeSid == null) return
         clearHighlights(ref.current)
@@ -106,13 +102,14 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
 
   const navigateHighlight = useCallback(
     (direction) => {
-      if (!highlight) return
+      const h = highlightRef.current
+      if (!h) return
 
-      if (highlight.mode === 'segment') {
+      if (h.mode === 'segment') {
         const nextIndex =
           direction === 'next'
-            ? (highlight.activeIndex + 1) % highlight.total
-            : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+            ? (h.activeIndex + 1) % h.total
+            : (h.activeIndex - 1 + h.total) % h.total
         let hidden = false
         ;[sourceRef, targetRef].forEach((ref) => {
           if (!ref.current) return
@@ -130,8 +127,8 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
         return
       }
 
-      if (highlight.mode === 'node') {
-        const {sids, activeSegIdx, nodeIndex} = highlight
+      if (h.mode === 'node') {
+        const {sids, activeSegIdx} = h
         const nextSegIdx =
           direction === 'next'
             ? (activeSegIdx + 1) % sids.length
@@ -140,11 +137,11 @@ const useContextHighlight = ({sourceRef, targetRef}) => {
           type: 'segmentClicked',
           sid: sids[nextSegIdx],
         })
-        applyHighlightsForNode(nodeIndex, nextSegIdx, false)
+        applyHighlightsForNode(sids, nextSegIdx, false)
         setHighlight((prev) => ({...prev, activeSegIdx: nextSegIdx}))
       }
     },
-    [highlight, sourceRef, targetRef, applyHighlightsForNode, setHighlight],
+    [sourceRef, targetRef, applyHighlightsForNode, setHighlight],
   )
 
   const handlePrev = useCallback(

@@ -471,7 +471,7 @@ describe('AemContainerTextMatchStrategy', () => {
     ).toBeNull()
   })
 
-  it('falls back to the AEM container when no text match exists within it', () => {
+  it('returns null when container text is too dissimilar to the source (Levenshtein > 0.25)', () => {
     container.innerHTML =
       '<div data-node-path="/content/jcr:content"><p>Other Text</p></div>'
     const result = strategy.execute(
@@ -479,7 +479,7 @@ describe('AemContainerTextMatchStrategy', () => {
       'data-node-path=/content/jcr:content',
       'Target Text',
     )
-    expect(result).toBe(container.querySelector('[data-node-path]'))
+    expect(result).toBeNull()
   })
 
   it('returns null when the container has more than one block descendant (page-level container)', () => {
