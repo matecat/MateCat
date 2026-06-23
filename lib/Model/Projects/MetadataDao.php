@@ -4,7 +4,6 @@ namespace Model\Projects;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use PDOException;
 use ReflectionException;
@@ -118,7 +117,7 @@ class MetadataDao extends AbstractDao
             " VALUES " .
             " ( :id_project, :key, :value ) " .
             " ON DUPLICATE KEY UPDATE value = :value ";
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -164,7 +163,7 @@ class MetadataDao extends AbstractDao
             . implode(', ', $placeholders)
             . " ON DUPLICATE KEY UPDATE value = VALUES(value)";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
 
@@ -185,7 +184,7 @@ class MetadataDao extends AbstractDao
             " WHERE id_project = :id_project " .
             " AND `key` = :key ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_project' => $id_project,

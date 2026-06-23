@@ -6,7 +6,6 @@ use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use PDO;
 use PDOException;
@@ -50,7 +49,7 @@ class ChunkCompletionEventDao extends AbstractDao
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkCompletionEventStruct::class);
 
@@ -71,7 +70,7 @@ class ChunkCompletionEventDao extends AbstractDao
         $sql = "UPDATE chunk_completion_events SET password = :new_password
                WHERE id_job = :id_job AND password = :password ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,

@@ -3,7 +3,6 @@
 namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use PDO;
@@ -34,7 +33,7 @@ class MySQLReplaceEventDao extends AbstractDao implements ReplaceEventDAOInterfa
      */
     public function getEvents(int $id_job, int $version): array
     {
-        $conn = $this->pdo ?? Database::obtain()->getConnection();
+        $conn = $this->pdo ?? $this->database->getConnection();
         $query = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job  AND replace_version = :replace_version ORDER BY created_at DESC";
 
         $stmt = $conn->prepare($query);
@@ -54,7 +53,7 @@ class MySQLReplaceEventDao extends AbstractDao implements ReplaceEventDAOInterfa
      */
     public function save(ReplaceEventStruct $eventStruct): int
     {
-        $conn = $this->pdo ?? Database::obtain()->getConnection();
+        $conn = $this->pdo ?? $this->database->getConnection();
 
         // if not directly passed
         // try to assign the current version of the segment if it exists

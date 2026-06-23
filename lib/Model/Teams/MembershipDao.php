@@ -10,7 +10,6 @@ namespace Model\Teams;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
@@ -232,7 +231,7 @@ class MembershipDao extends AbstractDao
     {
         $user = (new UserDao())->setCacheTTL(3600)->getByUid($uid);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(self::$_delete_member);
         $stmt->execute([
             'uid' => $uid,
@@ -264,7 +263,7 @@ class MembershipDao extends AbstractDao
      */
     public function createList(array $obj_arr): array
     {
-        if (!Database::obtain()->getConnection()->inTransaction()) {
+        if (!$this->database->getConnection()->inTransaction()) {
             throw new Exception('this method requires to be wrapped in a transaction');
         }
 

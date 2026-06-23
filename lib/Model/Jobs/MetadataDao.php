@@ -4,7 +4,6 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\TransactionalTrait;
 use PDOException;
 use ReflectionException;
@@ -145,7 +144,7 @@ class MetadataDao extends AbstractDao
             " ON DUPLICATE KEY UPDATE `value` = :value ";
 
         $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,
@@ -195,7 +194,7 @@ class MetadataDao extends AbstractDao
             . " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
         $this->openTransaction();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
 
@@ -219,7 +218,7 @@ class MetadataDao extends AbstractDao
             " WHERE id_job = :id_job AND password = :password " .
             " AND `key` = :key ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_job' => $id_job,

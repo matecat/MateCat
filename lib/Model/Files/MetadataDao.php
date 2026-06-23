@@ -10,7 +10,6 @@ namespace Model\Files;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use PDOException;
 use ReflectionException;
 
@@ -144,7 +143,7 @@ class MetadataDao extends AbstractDao
             " VALUES " .
             " ( :id_project, :id_file, :key, :value, :files_parts_id ); ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_project' => $id_project,
@@ -187,7 +186,7 @@ class MetadataDao extends AbstractDao
             $args['files_parts_id'] = $filePartsId;
         }
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
 
@@ -235,7 +234,7 @@ class MetadataDao extends AbstractDao
         }
 
         if (!empty($bind_values)) {
-            $conn = Database::obtain()->getConnection();
+            $conn = $this->database->getConnection();
             $stmt = $conn->prepare($sql);
 
             $result = $stmt->execute($bind_values);
