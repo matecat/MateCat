@@ -103,7 +103,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
 
         $this->_jobWordCounter = $jobWordCounter;
 
-        $this->_finalRevisions = (new TranslationEventDao())->getAllFinalRevisionsForSegment(
+        $this->_finalRevisions = (new TranslationEventDao($this->_database))->getAllFinalRevisionsForSegment(
             $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
             $this->_segment->id
         );
@@ -273,7 +273,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             $issue->addComments((new EntryCommentStruct())->getEntriesById(
                 $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
             ));
-            (new EntryDao())->deleteEntry($issue);
+            (new EntryDao($this->_database))->deleteEntry($issue);
         }
     }
 
@@ -303,7 +303,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      */
     private function flagIssuesToBeDeleted(int $source_page): void
     {
-        $issue = (new EntryDao())->findByIdSegmentAndSourcePage(
+        $issue = (new EntryDao($this->_database))->findByIdSegmentAndSourcePage(
             $this->_segment->id,
             $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
             $source_page
@@ -355,7 +355,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             }
 
             $uid = $finalRevision->uid ?? throw new RuntimeException('Final revision uid is required to send notifications');
-            $user = (new UserDao())->getByUid($uid);
+            $user = (new UserDao($this->_database))->getByUid($uid);
             if ($user) {
                 $emails[] = [
                     'isPreviousChangeAuthor' => true,
@@ -364,7 +364,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             }
         }
 
-        $projectOwner = (new UserDao())->getByEmail($this->_chunk->getProject()->id_customer);
+        $projectOwner = (new UserDao($this->_database))->getByEmail($this->_chunk->getProject()->id_customer);
         if ($projectOwner) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,
@@ -373,7 +373,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         }
 
         $projectAssigneeId = $this->_chunk->getProject()->id_assignee;
-        $projectAssignee = $projectAssigneeId === null ? null : (new UserDao())->getByUid($projectAssigneeId);
+        $projectAssignee = $projectAssigneeId === null ? null : (new UserDao($this->_database))->getByUid($projectAssigneeId);
         if ($projectAssignee) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,
