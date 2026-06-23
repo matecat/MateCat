@@ -91,6 +91,8 @@ class ProjectTemplateDao extends AbstractDao
             "id" => "standard"
         ]) ?: null;
 
+        $default->mandatory_issues = json_encode(["r1", "r2"]);
+
         // MT
         $default->mt = json_encode($this->getUserDefaultMt()) ?: null;
 
@@ -402,7 +404,8 @@ class ProjectTemplateDao extends AbstractDao
                     `mt_quality_value_in_editor`,
                     `subfiltering_handlers`,
                     `created_at`,
-                    `icu_enabled`
+                    `icu_enabled`,
+                    `mandatory_issues`
                 ) VALUES (
                     :name,
                     :is_default,
@@ -429,7 +432,8 @@ class ProjectTemplateDao extends AbstractDao
                     :mt_quality_value_in_editor,
                     :subfiltering_handlers,
                     :now,
-                    :icu_enabled
+                    :icu_enabled,
+                    :mandatory_issues
                 ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
@@ -462,7 +466,8 @@ class ProjectTemplateDao extends AbstractDao
             "character_counter_count_tags" => $projectTemplateStruct->character_counter_count_tags,
             "character_counter_mode" => $projectTemplateStruct->character_counter_mode,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
-            'icu_enabled' => $projectTemplateStruct->icu_enabled
+            'icu_enabled' => $projectTemplateStruct->icu_enabled,
+            'mandatory_issues' => $projectTemplateStruct->mandatory_issues,
         ]);
 
         $projectTemplateStruct->id = (int)$conn->lastInsertId();
@@ -516,7 +521,8 @@ class ProjectTemplateDao extends AbstractDao
             `character_counter_mode` = :character_counter_mode,
             `mt_quality_value_in_editor` = :mt_quality_value_in_editor,
             `modified_at` = :now,
-            `icu_enabled` = :icu_enabled
+            `icu_enabled` = :icu_enabled,
+            `mandatory_issues` = :mandatory_issues
          WHERE id = :id;";
 
         $conn = $this->database->getConnection();
@@ -548,7 +554,8 @@ class ProjectTemplateDao extends AbstractDao
             "source_language" => $projectTemplateStruct->source_language,
             "target_language" => $projectTemplateStruct->target_language,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
-            'icu_enabled' => $projectTemplateStruct->icu_enabled
+            'icu_enabled' => $projectTemplateStruct->icu_enabled,
+            'mandatory_issues' => $projectTemplateStruct->mandatory_issues,
         ]);
 
         $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);

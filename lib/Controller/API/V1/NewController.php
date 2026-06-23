@@ -255,6 +255,7 @@ class NewController extends KleinController
         $projectStructure->character_counter_count_tags = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
 
         $projectStructure->subfiltering_handlers = $request[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
+        $projectStructure->mandatory_issues = $request['mandatory_issues'];
 
         // MT Extra params
         foreach ($engine->getConfigurationParameters() as $param) {
@@ -395,6 +396,11 @@ class NewController extends KleinController
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+        $mandatory_issues = filter_var(
+            $this->request->param('mandatory_issues'),
+            FILTER_SANITIZE_FULL_SPECIAL_CHARS,
+            ['flags' => FILTER_FLAG_NO_ENCODE_QUOTES]
+        );
 
         $instructions = filter_var(
             $this->request->param('instructions'),
@@ -479,6 +485,7 @@ class NewController extends KleinController
         $lara_glossaries = $this->validateLaraGlossaries($lara_glossaries);
 
         $dialect_strict = $this->validateDialectStrictParam($lang_handler, $dialect_strict);
+        $mandatory_issues = $this->validateMandatoryIssues($mandatory_issues ?: null);
         $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
             $filters_extraction_parameters,
             $filters_extraction_parameters_template_id
@@ -592,6 +599,7 @@ class NewController extends KleinController
             'legacy_icu' => $legacy_icu,
             JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode($subfiltering_handlers),
             'icu_enabled' => $icu_enabled,
+            'mandatory_issues' => $mandatory_issues,
         ];
     }
 
@@ -1323,6 +1331,35 @@ class NewController extends KleinController
         }
 
         return null;
+    }
+
+    /**
+     * @param string|null $mandatory_issues
+     *
+     * @return list<string>|null
+     * @throws InvalidArgumentException
+     */
+    private function validateMandatoryIssues(?string $mandatory_issues): ?array
+    {
+        if (empty($mandatory_issues)) {
+            return null;
+        }
+
+        $decoded = json_decode($mandatory_issues, true);
+
+        if (!is_array($decoded)) {
+            throw new InvalidArgumentException("mandatory_issues must be a valid JSON array");
+        }
+
+        foreach ($decoded as $issue) {
+            if (!is_string($issue) || !preg_match('/^r\d+$/', $issue)) {
+                throw new InvalidArgumentException(
+                    "Invalid mandatory_issues value: \"$issue\". Allowed values: r1, r2, ..."
+                );
+            }
+        }
+
+        return $decoded;
     }
 
     /**

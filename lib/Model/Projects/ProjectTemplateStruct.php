@@ -39,6 +39,7 @@ use TypeError;
  *     target_language?: list<string>|null,
  *     mt_quality_value_in_editor?: int|null,
  *     icu_enabled?: bool,
+ *     mandatory_issues?: list<string>|null,
  * }
  */
 class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
@@ -72,6 +73,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public ?string $subfiltering_handlers = null;
     public ?int $mt_quality_value_in_editor = null;
     public bool $icu_enabled = false;
+    public ?string $mandatory_issues = null;
 
     /**
      * @phpstan-param HydrationInput $decodedObject
@@ -109,6 +111,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->target_language = (!empty($decodedObject->target_language)) ? serialize($decodedObject->target_language) : null;
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
         $this->icu_enabled = $decodedObject->icu_enabled ?? false;
+        $this->mandatory_issues = (!empty($decodedObject->mandatory_issues)) ? (json_encode($decodedObject->mandatory_issues) ?: null) : null;
 
         return $this;
     }
@@ -174,6 +177,18 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     }
 
     /**
+     * @return array<string>|null
+     */
+    public function getMandatoryIssues(): ?array
+    {
+        if (!empty($this->mandatory_issues)) {
+            return json_decode($this->mandatory_issues, true);
+        }
+
+        return [];
+    }
+
+    /**
      * @return array<string, mixed>
      * @throws DateMalformedStringException
      */
@@ -207,7 +222,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             'target_language' => $this->getTargetLanguage(),
             'created_at' => (new DateTime($this->created_at))->format(DATE_RFC822),
             'modified_at' => $this->modified_at !== null ? (new DateTime($this->modified_at))->format(DATE_RFC822) : null,
-            'icu_enabled' => $this->icu_enabled
+            'icu_enabled' => $this->icu_enabled,
+            'mandatory_issues' => $this->getMandatoryIssues(),
         ];
     }
 }
