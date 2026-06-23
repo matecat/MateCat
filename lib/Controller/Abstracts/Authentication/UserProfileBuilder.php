@@ -6,7 +6,9 @@ use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
@@ -25,6 +27,8 @@ class UserProfileBuilder
     public function __construct(
         private readonly MembershipDao $membershipDao,
         private readonly ConnectedServiceDao $connectedServiceDao,
+        private readonly UserDao $userDao,
+        private readonly TeamDao $teamDao,
     ) {
     }
 
@@ -43,8 +47,8 @@ class UserProfileBuilder
 
         $this->membershipDao->setCacheTTL(60 * 5);
         $userTeams = array_map(
-            static function ($team) {
-                $teamModel = new TeamModel($team);
+            function ($team) {
+                $teamModel = new TeamModel($team, $this->userDao, $this->teamDao);
                 $teamModel->updateMembersProjectsCount();
 
                 return $team;
@@ -58,7 +62,8 @@ class UserProfileBuilder
             $user,
             $userTeams,
             $services,
-            $metadata
+            $metadata,
+            $this->userDao
         );
     }
 }

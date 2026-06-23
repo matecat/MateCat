@@ -7,6 +7,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
@@ -52,9 +53,14 @@ class TeamModel
      */
     protected array $all_memberships;
 
-    public function __construct(TeamStruct $struct)
+    protected UserDao $userDao;
+    protected TeamDao $teamDao;
+
+    public function __construct(TeamStruct $struct, UserDao $userDao, TeamDao $teamDao)
     {
         $this->struct = $struct;
+        $this->userDao = $userDao;
+        $this->teamDao = $teamDao;
     }
 
     public function addMemberEmail(string $email): void
@@ -220,7 +226,7 @@ class TeamModel
     {
         $emails_of_existing_members = array_filter(
             array_map(
-                fn(MembershipStruct $membership): ?string => $membership->getUser()->email,
+                fn(MembershipStruct $membership): ?string => $membership->getUser($this->userDao)->email,
                 $this->all_memberships
             )
         );
@@ -238,7 +244,7 @@ class TeamModel
     {
         $notify_list = [];
         foreach ($this->new_memberships as $membership) {
-            if ($membership->getUser()->uid != $this->user->uid) {
+            if ($membership->getUser($this->userDao)->uid != $this->user->uid) {
                 $notify_list[] = $membership;
             }
         }
@@ -333,7 +339,7 @@ class TeamModel
     protected function _sendEmailsToNewMemberships(): void
     {
         foreach ($this->_getNewMembershipEmailList() as $membership) {
-            $email = new MembershipCreatedEmail($this->user, $membership);
+            $email = new MembershipCreatedEmail($this->user, $membership, $this->userDao, $this->teamDao);
             $email->send();
         }
     }

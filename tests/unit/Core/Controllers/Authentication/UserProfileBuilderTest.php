@@ -6,7 +6,9 @@ use Controller\Abstracts\Authentication\UserProfileBuilder;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,7 +32,10 @@ class UserProfileBuilderTest extends AbstractTest
         parent::setUp();
         $this->membershipDao       = $this->createMock(MembershipDao::class);
         $this->connectedServiceDao = $this->createMock(ConnectedServiceDao::class);
-        $this->builder             = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao);
+        $userDao = $this->createStub(UserDao::class);
+        $userDao->method('setCacheTTL')->willReturnSelf();
+        $teamDao = $this->createStub(TeamDao::class);
+        $this->builder = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao, $userDao, $teamDao);
     }
 
     private function makeUser(): UserStruct

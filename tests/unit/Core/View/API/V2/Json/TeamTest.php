@@ -3,8 +3,10 @@
 namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Utils\Constants\Teams;
 use View\API\V2\Json\Team;
@@ -26,7 +28,8 @@ class TeamTest extends AbstractTest
 
     private function makeTestableTeam(?array $data = null): Team
     {
-        return new class ($data) extends Team {
+        $userDao = new UserDao(Database::obtain());
+        return new class ($userDao, $data) extends Team {
             /** @return array<string> */
             protected function getPendingInvitations(int $teamId): array
             {

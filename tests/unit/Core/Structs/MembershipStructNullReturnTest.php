@@ -5,6 +5,7 @@ namespace Matecat\Core\Structs;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Teams\MembershipStruct;
+use Model\Users\UserDao;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 
@@ -16,7 +17,10 @@ class MembershipStructNullReturnTest extends AbstractTest
         $struct = new MembershipStruct();
         $struct->uid = null;
 
+        $mockDao = $this->createMock(UserDao::class);
+        $mockDao->expects($this->never())->method('getByUid');
+
         $this->expectException(RuntimeException::class);
-        $struct->getUser();
+        $struct->getUser($mockDao);
     }
 }

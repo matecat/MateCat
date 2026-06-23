@@ -8,6 +8,7 @@ use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\DataAccess\IDatabase;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -49,12 +50,12 @@ class AuthenticationHelper
         UserProfileBuilder $profileBuilder,
         AuthCookieStore $cookieStore,
     ) {
-        $this->session        =& $session;
-        $this->userDao        = $userDao;
-        $this->apiKeyDao      = $apiKeyDao;
+        $this->session =& $session;
+        $this->userDao = $userDao;
+        $this->apiKeyDao = $apiKeyDao;
         $this->profileBuilder = $profileBuilder;
-        $this->cookieStore    = $cookieStore;
-        $this->user           = new UserStruct();
+        $this->cookieStore = $cookieStore;
+        $this->user = new UserStruct();
     }
 
     /**
@@ -74,7 +75,12 @@ class AuthenticationHelper
             $session,
             new UserDao($db),
             new ApiKeyDao($db),
-            new UserProfileBuilder(new MembershipDao($db), new ConnectedServiceDao($db)),
+            new UserProfileBuilder(
+                new MembershipDao($db),
+                new ConnectedServiceDao($db),
+                new UserDao($db),
+                new TeamDao($db)
+            ),
             new AuthCookieStore(new SessionTokenStoreHandler()),
         );
         $self->authenticate($api_key, $api_secret);
@@ -115,10 +121,10 @@ class AuthenticationHelper
                     [
                         $ignore,
                         $ignore->getTraceAsString(),
-                        'session'    => $this->session,
-                        'api_key'    => $api_key,
+                        'session' => $this->session,
+                        'api_key' => $api_key,
                         'api_secret' => $api_secret,
-                        'cookie'     => $this->cookieStore->getCredentials()['user'] ?? null,
+                        'cookie' => $this->cookieStore->getCredentials()['user'] ?? null,
                     ]
                 );
             } catch (Throwable) {
@@ -132,8 +138,8 @@ class AuthenticationHelper
     {
         unset($this->session['user']);
         unset($this->session['user_profile']);
-        $this->user       = new UserStruct();
-        $this->logged     = false;
+        $this->user = new UserStruct();
+        $this->logged = false;
         $this->api_record = null;
     }
 
@@ -162,9 +168,9 @@ class AuthenticationHelper
     protected function setUserSession(): void
     {
         if ($this->sessionIsActive()) {
-            $this->session['cid']          = $this->user->getEmail();
-            $this->session['uid']          = $this->user->getUid();
-            $this->session['user']         = $this->user;
+            $this->session['cid'] = $this->user->getEmail();
+            $this->session['uid'] = $this->user->getUid();
+            $this->session['user'] = $this->user;
             $this->session['user_profile'] = $this->profileBuilder->build($this->user);
         }
     }
@@ -175,7 +181,7 @@ class AuthenticationHelper
     protected function validKeys(?string $api_key = null, ?string $api_secret = null): bool
     {
         if ($api_key || $api_secret) {
-            $apiKey           = $api_key ?? '';
+            $apiKey = $api_key ?? '';
             $this->api_record = $this->apiKeyDao->findByKey($apiKey);
             if ($this->api_record) {
                 return $this->api_record->validSecret($api_secret ?? '');

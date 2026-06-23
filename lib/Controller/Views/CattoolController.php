@@ -378,14 +378,15 @@ class CattoolController extends BaseKleinViewController
         $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if (!empty($team)) {
-            $teamModel = new TeamModel($team);
+            $teamModel = new TeamModel($team, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
             $teamModel->updateMembersProjectsCount();
             $membersIdList = [];
             $members = $team->getMembers();
             if ($team->type == Teams::PERSONAL) {
                 $firstMember = $members[0] ?? null;
                 if ($firstMember !== null) {
-                    $ownerMail = $firstMember->getUser()->getEmail() ?? AppConfig::$SUPPORT_MAIL;
+                    $ownerMail = $firstMember->getUser(new UserDao($this->getDatabase()))->getEmail(
+                    ) ?? AppConfig::$SUPPORT_MAIL;
                 }
             } else {
                 $idAssignee = $project->id_assignee ?? 0;

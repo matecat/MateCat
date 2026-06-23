@@ -599,11 +599,6 @@ parameters:
 
 
 
-		-
-			message: '#^Method Controller\\API\\App\\TeamsInvitationsController\:\:collectBackInvitation\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/TeamsInvitationsController.php
 
 
 

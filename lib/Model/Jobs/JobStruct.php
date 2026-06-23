@@ -155,7 +155,6 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public function getOutsource(ConfirmationDao $outsourceDao): ?ConfirmationStruct
     {
         $this->_outsource = $this->memoize(__METHOD__, function () use ($outsourceDao) {
-
             return $outsourceDao->setCacheTTL(60 * 60)->getConfirmation($this);
         });
 
@@ -173,7 +172,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
                 throw new NotFoundException("Vendor id " . $outsource->id_vendor . " not found.");
         }
 
-        $outsourceArray = (array) $outsource;
+        $outsourceArray = (array)$outsource;
         foreach ($outsourceArray as &$value) {
             if (is_numeric($value)) {
                 if ($value == (string)(int)$value) {
@@ -201,7 +200,8 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public function getOpenThreadsCount(CommentDao $dao): int
     {
         $this->_openThreads = $this->memoize(__METHOD__, function () use ($dao) {
-            $openThreads = $dao->setCacheTTL(60 * 10)->getOpenThreadsForProjects([$this->id_project]); //ten minutes cache
+            $openThreads = $dao->setCacheTTL(60 * 10)->getOpenThreadsForProjects([$this->id_project]
+            ); //ten minutes cache
             foreach ($openThreads as $openThread) {
                 if ($openThread->id_job == $this->id && $openThread->password == $this->password) {
                     return $openThread->count;
@@ -294,7 +294,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     /**
      * @param UserStruct $user
-     * @param string     $role
+     * @param string $role
      * @param ?UserKeysModel $uKModel
      *
      * @return array<string, array<int, ClientTmKeyStruct>>
