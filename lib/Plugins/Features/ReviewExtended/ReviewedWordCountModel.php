@@ -15,6 +15,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryCommentStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
@@ -272,6 +273,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
     {
         foreach ($this->_event->getIssuesToDelete() as $issue) {
             $issue->addComments((new EntryCommentStruct())->getEntriesById(
+                new EntryCommentDao($this->_database),
                 $issue->id ?? throw new RuntimeException('Issue id is required for comment retrieval')
             ));
             (new EntryDao($this->_database))->deleteEntry($issue);

@@ -170,7 +170,7 @@ class QualityReportSegmentModel
     protected function _assignComments(QualityReportSegmentStruct $seg, array $comments): void
     {
         foreach ($comments as $comment) {
-            $comment->templateMessage();
+            $comment->templateMessage($this->commentDao);
             if ($comment->id_segment == $seg->sid) {
                 $seg->comments[] = $comment;
             }
