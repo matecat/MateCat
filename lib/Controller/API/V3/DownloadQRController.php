@@ -10,6 +10,7 @@ use DOMDocument;
 use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\CategoryDao;
 use Model\LQA\ModelDao;
 use Model\Projects\ProjectDao;
 use Model\QualityReport\QualityReportSegmentModel;
@@ -114,7 +115,7 @@ class DownloadQRController extends KleinController
         // categories issues
         $project = $chunk->getProject(new ProjectDao($this->getDatabase()));
         $model = $project->id_qa_model !== null ? (new ModelDao($this->getDatabase()))->findById($project->id_qa_model) : null;
-        $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
+        $categories = $model !== null ? $model->getCategoriesAndSeverities(new CategoryDao($this->getDatabase())) : [];
 
         $categoryIssues = [];
 

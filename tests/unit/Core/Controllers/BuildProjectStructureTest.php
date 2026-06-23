@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\App\CreateProjectController;
 use Controller\API\V1\NewController;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelInterface;
@@ -98,6 +99,8 @@ class BuildProjectStructureTest extends AbstractTest
     {
         parent::setUp();
 
+        [$dbStub] = $this->createDatabaseMock();
+
         // Create controllers without invoking the constructor (which calls
         // identifyUser(), starts sessions, etc.)
         $refNew = new ReflectionClass(TestableNewController::class);
@@ -105,6 +108,12 @@ class BuildProjectStructureTest extends AbstractTest
 
         $refCreate = new ReflectionClass(TestableCreateProjectController::class);
         $this->createProjectController = $refCreate->newInstanceWithoutConstructor();
+
+        // Inject database so getDatabase() works in tests that construct DAOs
+        $dbProp = (new ReflectionClass(\Controller\Abstracts\KleinController::class))->getProperty('database');
+        $dbProp->setAccessible(true);
+        $dbProp->setValue($this->newController, $dbStub);
+        $dbProp->setValue($this->createProjectController, $dbStub);
 
         // Stub UserStruct
         $user = new class extends UserStruct {

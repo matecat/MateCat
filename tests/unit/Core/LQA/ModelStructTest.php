@@ -7,6 +7,7 @@ namespace Matecat\Core\LQA;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
+use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
 use Model\LQA\ModelStruct;
 use PDO;
@@ -105,7 +106,7 @@ class ModelStructTest extends AbstractTest
         ]);
 
         $model = $this->makeModel();
-        $result = $model->getSerializedCategories();
+        $result = $model->getSerializedCategories(new CategoryDao($this->dbStub));
 
         $this->assertArrayHasKey('categories', $result);
         $this->assertCount(1, $result['categories']);
@@ -121,7 +122,7 @@ class ModelStructTest extends AbstractTest
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Missing model id');
 
-        $model->getSerializedCategories();
+        $model->getSerializedCategories(new CategoryDao($this->dbStub));
     }
 
     #[Test]
@@ -140,7 +141,7 @@ class ModelStructTest extends AbstractTest
         ]);
 
         $model = $this->makeModel();
-        $result = $model->getCategoriesAndSeverities();
+        $result = $model->getCategoriesAndSeverities(new CategoryDao($this->dbStub));
 
         $this->assertCount(1, $result);
         $this->assertSame('Fluency', $result[0]['label']);
@@ -160,7 +161,7 @@ class ModelStructTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([$s1]);
 
         $model = $this->makeModel();
-        $result = $model->getCategories();
+        $result = $model->getCategories(new CategoryDao($this->dbStub));
 
         $this->assertCount(1, $result);
         $this->assertInstanceOf(CategoryStruct::class, $result[0]);
@@ -183,7 +184,7 @@ class ModelStructTest extends AbstractTest
 
         $model = $this->makeModel();
         $model->uid = 42;
-        $result = $model->getDecodedModel();
+        $result = $model->getDecodedModel(new CategoryDao($this->dbStub));
 
         $this->assertArrayHasKey('model', $result);
         $this->assertSame(1, $result['model']['id']);

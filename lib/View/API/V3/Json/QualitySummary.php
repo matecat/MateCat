@@ -16,6 +16,7 @@ use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\CategoryDao;
 use Model\LQA\EntryDao;
 use Model\LQA\ModelDao;
 use Model\Projects\ProjectStruct;
@@ -240,7 +241,7 @@ class QualitySummary
         $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
 
         $model = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
-        $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
+        $categories = $model !== null ? $model->getCategoriesAndSeverities(new CategoryDao($this->database)) : [];
 
         if ($model) {
             $passFail = ['type' => $model->pass_type, 'options' => ['limit' => $chunkReviewModel->getQALimit($model)]];

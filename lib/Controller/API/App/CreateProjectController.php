@@ -16,6 +16,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\LQA\CategoryDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -896,7 +897,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         // with the qa template id
         if (!empty($data['qa_model_template'])) {
-            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel();
+            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if (!empty($data['payable_rate_model_template'])) {

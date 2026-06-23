@@ -28,27 +28,27 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      * @return array{categories: list<array<string, mixed>>}
      * @throws RuntimeException
      */
-    public function getSerializedCategories(): array
+    public function getSerializedCategories(CategoryDao $dao): array
     {
-        return ['categories' => (new CategoryDao())->getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'))];
+        return ['categories' => $dao->getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'))];
     }
 
     /**
      * @return list<array<string, mixed>>
      * @throws RuntimeException
      */
-    public function getCategoriesAndSeverities(): array
+    public function getCategoriesAndSeverities(CategoryDao $dao): array
     {
-        return (new CategoryDao())->getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
+        return $dao->getCategoriesAndSeverities($this->id ?? throw new RuntimeException('Missing model id'));
     }
 
     /**
      * @return CategoryStruct[]
      * @throws PDOException
      */
-    public function getCategories(): array
+    public function getCategories(CategoryDao $dao): array
     {
-        return (new CategoryDao())->getCategoriesByModel($this);
+        return $dao->getCategoriesByModel($this);
     }
 
     /**
@@ -98,10 +98,10 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      * @return array{model: array<string, mixed>}
      * @throws PDOException
      */
-    public function getDecodedModel(): array
+    public function getDecodedModel(CategoryDao $dao): array
     {
         $categoriesArray = [];
-        foreach ($this->getCategories() as $categoryStruct) {
+        foreach ($this->getCategories($dao) as $categoryStruct) {
             $category = $categoryStruct->toArrayWithJsonDecoded();
 
             if (!empty($category)) {

@@ -25,6 +25,7 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\LQA\CategoryDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -265,11 +266,11 @@ class NewController extends KleinController
 
         // with the qa template id
         if ($request['qaModelTemplate']) {
-            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel();
+            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if ($request['qaModel']) {
-            $projectStructure->qa_model = $request['qaModel']->getDecodedModel();
+            $projectStructure->qa_model = $request['qaModel']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if ($request['mt_qe_workflow_payable_rate']) {

@@ -25,6 +25,7 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\MetadataDao;
+use Model\LQA\CategoryDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelDao;
@@ -190,7 +191,7 @@ class CattoolController extends BaseKleinViewController
             'isTargetRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->target)),
             'jobOwnerIsMe' => new PHPTalBoolean($jobOwnership['jobOwnerIsMe']),
             'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplitted(new JobDao($this->getDatabase()))),
-            'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories() : []),
+            'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories(new CategoryDao($this->getDatabase())) : []),
             'lqa_flat_categories' => new PHPTalMap($model ? $this->getCategoriesAsJson($model) : []),
             'maxFileSize' => AppConfig::$MAX_UPLOAD_FILE_SIZE,
             'maxTMXFileSize' => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
@@ -459,7 +460,7 @@ class CattoolController extends BaseKleinViewController
      */
     private function getCategoriesAsJson(ModelStruct $model): array
     {
-        $categories = $model->getCategories();
+        $categories = $model->getCategories(new CategoryDao($this->getDatabase()));
         $out = [];
 
         foreach ($categories as $category) {
