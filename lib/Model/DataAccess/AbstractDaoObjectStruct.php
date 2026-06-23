@@ -44,7 +44,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      *
      * @throws UnknownPropertyException
      */
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
         if (!property_exists($this, $name)) {
             throw new UnknownPropertyException($name);
@@ -58,7 +58,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @return mixed
      * @throws UnknownPropertyException
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         if (!property_exists($this, $name)) {
             throw new UnknownPropertyException($name);
