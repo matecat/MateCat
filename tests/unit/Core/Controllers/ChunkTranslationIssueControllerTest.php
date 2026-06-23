@@ -10,6 +10,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use PDOException;
 use PHPUnit\Event\NoPreviousThrowableException;
@@ -91,6 +92,7 @@ class ChunkTranslationIssueControllerTest extends AbstractTest
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
+        $this->setProp('database', Database::obtain());
     }
 
     /**

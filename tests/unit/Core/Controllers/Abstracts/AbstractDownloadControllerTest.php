@@ -3,9 +3,11 @@
 namespace Matecat\Core\Controllers\Abstracts;
 
 use Controller\Abstracts\AbstractDownloadController;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -29,8 +31,10 @@ class AbstractDownloadControllerTest extends AbstractTest
     {
         $request = Request::createFromGlobals();
         $response = new Response();
+        $app = new App();
+        $app->register('getDatabase', static fn() => Database::obtain());
 
-        return new class ($request, $response) extends AbstractDownloadController {
+        return new class ($request, $response, null, $app) extends AbstractDownloadController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void

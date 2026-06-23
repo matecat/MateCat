@@ -11,6 +11,7 @@ use Exception;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -427,7 +428,9 @@ class DownloadQRControllerTest extends AbstractTest
         // The TestableDownloadQRController overrides initDependencies() to a no-op,
         // so invoke the real parent body to cover the JobDao assignment.
         $fresh  = new TestableDownloadQRController();
-        $method = (new ReflectionClass(DownloadQRController::class))->getMethod('initDependencies');
+        $ref    = new ReflectionClass(DownloadQRController::class);
+        $ref->getProperty('database')->setValue($fresh, Database::obtain());
+        $method = $ref->getMethod('initDependencies');
         $method->invoke($fresh);
 
         self::assertInstanceOf(

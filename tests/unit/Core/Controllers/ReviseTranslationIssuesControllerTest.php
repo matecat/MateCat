@@ -7,6 +7,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -71,6 +72,7 @@ class ReviseTranslationIssuesControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
         $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
     }

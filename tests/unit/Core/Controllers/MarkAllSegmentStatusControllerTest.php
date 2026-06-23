@@ -8,6 +8,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
@@ -88,6 +89,7 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('database', Database::obtain());
 
         $this->setProp('chunk', $this->buildChunk());
     }

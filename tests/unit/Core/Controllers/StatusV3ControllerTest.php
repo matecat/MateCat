@@ -88,13 +88,14 @@ class StatusV3ControllerTest extends AbstractTest
         parent::setUp();
 
         AppConfig::$SKIP_SQL_CACHE = true;
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller  = new TestableStatusV3Controller();
         $this->reflector   = new ReflectionClass(StatusController::class);
         $this->responseMock = $this->createMock(Response::class);
 
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
 
         $user = new UserStruct();
@@ -188,6 +189,8 @@ class StatusV3ControllerTest extends AbstractTest
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);
         $this->setDatabaseInstance($dbStub);
+        // Controller uses its injected $database (not the singleton); point it at the primed stub.
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
 
         $this->responseMock->expects($this->never())->method('json');
 

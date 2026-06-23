@@ -79,6 +79,7 @@ class GetTagProjectionControllerTest extends AbstractTest
 
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
         $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->reflector->getProperty('database')->setValue($this->controller, \Model\DataAccess\Database::obtain());
     }
 
     protected function tearDown(): void

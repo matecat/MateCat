@@ -52,6 +52,7 @@ class JobPasswordValidatorTest extends AbstractTest
         $user->uid = self::B;
         $user->email = self::EMAIL;
         $this->setCtrlProp('user', $user);
+        $this->setCtrlProp('database', Database::obtain());
         $this->setRequest();
     }
 

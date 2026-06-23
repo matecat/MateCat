@@ -55,6 +55,7 @@ class SegmentValidatorTest extends AbstractTest
             'request',
             new Request([], [], [], ['REQUEST_URI' => '/api/v2/jobs/' . self::JOB_ID . '/segments/' . self::SEGMENT_ID, 'REQUEST_METHOD' => 'GET'])
         );
+        $this->setCtrlProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

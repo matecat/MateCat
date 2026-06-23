@@ -8,6 +8,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\MetadataStruct;
 use Model\Users\UserStruct;
@@ -77,6 +78,7 @@ class UserV2ControllerTest extends AbstractTest
 
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
+        $this->setProp('database', Database::obtain());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 

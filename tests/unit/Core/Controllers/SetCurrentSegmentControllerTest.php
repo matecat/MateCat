@@ -107,6 +107,8 @@ class SetCurrentSegmentControllerTest extends AbstractTest
 
         $fsProp = $this->reflector->getProperty('featureSet');
         $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
     }
 
     /**

@@ -58,6 +58,7 @@ class TeamAccessValidatorTest extends AbstractTest
         $user->uid = self::UID;
         $user->email = self::EMAIL;
         $this->setCtrlProp('user', $user);
+        $this->setCtrlProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

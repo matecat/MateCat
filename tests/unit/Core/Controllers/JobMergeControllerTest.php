@@ -83,6 +83,7 @@ class JobMergeControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', \Model\DataAccess\Database::obtain());
 
         $user        = new UserStruct();
         $user->uid   = 1;

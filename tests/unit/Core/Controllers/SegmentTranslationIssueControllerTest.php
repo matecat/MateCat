@@ -82,6 +82,7 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
         $this->reflector->getProperty('logger')->setValue($this->controller, $loggerMock);
 
         $this->seedFixtures();

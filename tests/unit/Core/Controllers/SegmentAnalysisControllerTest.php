@@ -62,6 +62,9 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $resProp = $this->reflector->getProperty('response');
         $resProp->setValue($this->controller, $responseMock);
 
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, Database::obtain());
+
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);

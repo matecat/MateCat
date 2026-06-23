@@ -105,7 +105,7 @@ class UrlsControllerTest extends AbstractTest
 
         // Mock-seam: swap the Database singleton with a stub. getProjectData()'s
         // statement therefore returns no rows -> ProjectUrls renders an empty shape.
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller    = new TestableUrlsController();
         $this->reflector     = new \ReflectionClass(UrlsController::class);
@@ -114,6 +114,7 @@ class UrlsControllerTest extends AbstractTest
         $this->responseMock = $this->createMock(Response::class);
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
+        $this->setProp('database', $dbStub);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
     }
 

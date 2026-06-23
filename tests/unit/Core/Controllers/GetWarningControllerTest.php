@@ -76,6 +76,9 @@ class GetWarningControllerTest extends AbstractTest
 
         $fsProp = $this->reflector->getProperty('featureSet');
         $fsProp->setValue($this->controller, new FeatureSet(Database::obtain()));
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, Database::obtain());
     }
 
     protected function tearDown(): void

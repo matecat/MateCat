@@ -107,8 +107,10 @@ class SetTranslationControllerTest extends AbstractTest
     private function createControllerWithoutConstructor(): SetTranslationController
     {
         $reflection = new ReflectionClass(SetTranslationController::class);
+        $controller = $reflection->newInstanceWithoutConstructor();
+        $reflection->getProperty('database')->setValue($controller, Database::obtain());
 
-        return $reflection->newInstanceWithoutConstructor();
+        return $controller;
     }
 
     /**
@@ -724,6 +726,7 @@ class SetTranslationControllerTest extends AbstractTest
         $reflection = new ReflectionClass(TestableSetTranslationController::class);
         $controller = $reflection->newInstanceWithoutConstructor();
         $controller->setOldTranslation($oldTranslation);
+        $reflection->getProperty('database')->setValue($controller, Database::obtain());
 
         return $controller;
     }

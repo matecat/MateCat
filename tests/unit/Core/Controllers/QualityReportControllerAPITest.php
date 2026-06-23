@@ -10,6 +10,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
@@ -96,6 +97,7 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
     }
 
     protected function tearDown(): void
@@ -150,6 +152,7 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($controller, $request);
         $reflector->getProperty('response')->setValue($controller, $response);
+        $reflector->getProperty('database')->setValue($controller, Database::obtain());
         $reflector->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
         $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $reflector->getProperty('chunk')->setValue($controller, $chunk);

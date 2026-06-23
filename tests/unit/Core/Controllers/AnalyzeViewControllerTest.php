@@ -108,6 +108,7 @@ class AnalyzeViewControllerTest extends AbstractTest
         $this->prop('response')->setValue($this->controller, $response);
         $this->prop('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
         $this->prop('featureSet')->setValue($this->controller, new FeatureSet(Database::obtain()));
+        $this->prop('database')->setValue($this->controller, Database::obtain());
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);

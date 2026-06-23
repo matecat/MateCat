@@ -48,6 +48,7 @@ class SegmentTranslationTest extends AbstractTest
 
         $this->controller = new SegmentTranslationTestController();
         $this->ctrlRef    = new ReflectionClass(KleinController::class);
+        $this->setCtrlProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

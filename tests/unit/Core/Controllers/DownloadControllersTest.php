@@ -7,9 +7,11 @@ use Controller\API\V2\DownloadController;
 use Controller\API\V2\DownloadJobTMXController;
 use Controller\API\V2\DownloadOriginalController;
 use InvalidArgumentException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Exceptions\NotFoundException;
@@ -268,7 +270,7 @@ class DownloadControllersTest extends AbstractTest
         $request  = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadAnalysisReportController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadAnalysisReportController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -442,13 +444,21 @@ class DownloadControllersTest extends AbstractTest
         $prop->setValue($controller, $value);
     }
 
+    private function dbApp(): App
+    {
+        $app = new App();
+        $app->register('getDatabase', static fn() => Database::obtain());
+
+        return $app;
+    }
+
     /** @throws \Throwable */
     private function createDownloadController(): DownloadController
     {
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        return new class ($request, $response) extends DownloadController {
+        return new class ($request, $response, null, $this->dbApp()) extends DownloadController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -470,7 +480,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadAnalysisReportController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadAnalysisReportController {
             protected bool $useSession = false;
 
             protected function registerValidators(): void
@@ -503,7 +513,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadOriginalController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadOriginalController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void
@@ -537,7 +547,7 @@ class DownloadControllersTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
 
-        $controller = new class ($request, $response) extends DownloadJobTMXController {
+        $controller = new class ($request, $response, null, $this->dbApp()) extends DownloadJobTMXController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void

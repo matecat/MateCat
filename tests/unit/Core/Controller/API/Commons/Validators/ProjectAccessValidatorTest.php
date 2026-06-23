@@ -63,6 +63,7 @@ class ProjectAccessValidatorTest extends AbstractTest
 
         $this->controller = new ProjectAccessValidatorTestController();
         $this->setCtrlProp($this->controller, 'request', $this->makeRequest());
+        $this->setCtrlProp($this->controller, 'database', Database::obtain());
 
         $user = new UserStruct();
         $user->uid = self::UID;
@@ -140,6 +141,7 @@ class ProjectAccessValidatorTest extends AbstractTest
         $user->email = self::EMAIL;
         $this->setCtrlProp($ctrl, 'user', $user);
         $this->setCtrlProp($ctrl, 'request', $this->makeRequest());
+        $this->setCtrlProp($ctrl, 'database', Database::obtain());
 
         $project = $this->makeProjectStruct(self::TEAM_ID);
         $validator = new ProjectAccessValidator($ctrl, $project);

@@ -7,6 +7,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -79,6 +80,7 @@ class TeamMembersControllerTest extends AbstractTest
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         // skip the session-refresh path in update()/delete()
         $this->setProp('api_key', 'ctrltest-api-key');
+        $this->setProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

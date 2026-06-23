@@ -9,6 +9,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -73,6 +74,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', Database::obtain());
 
         $user            = new UserStruct();
         $user->uid       = $this->userId(self::BASE);

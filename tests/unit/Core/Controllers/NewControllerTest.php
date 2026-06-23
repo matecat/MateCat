@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\V1\NewController;
 use Exception;
 use InvalidArgumentException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -126,7 +127,9 @@ class NewControllerTest extends AbstractTest
      */
     public function createMocks(): void
     {
-        $this->controller = new NewController($this->requestMock, $this->responseMock, null, null);
+        $app = new App();
+        $app->register('getDatabase', static fn() => Database::obtain());
+        $this->controller = new NewController($this->requestMock, $this->responseMock, null, $app);
         $reflector = new ReflectionClass($this->controller);
         $this->method = $reflector->getMethod('validateTheRequest');
 

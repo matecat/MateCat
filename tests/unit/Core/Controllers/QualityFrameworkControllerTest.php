@@ -62,6 +62,7 @@ class QualityFrameworkControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
 
         $this->seedFixtures();
         $this->setControllerUser(99999, true);

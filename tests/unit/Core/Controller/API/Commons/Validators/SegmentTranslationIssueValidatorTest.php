@@ -11,6 +11,7 @@ use Exception;
 use Klein\Request;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\LQA\ChunkReviewStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -55,6 +56,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
 
         $this->controller = new SegmentTranslationIssueValidatorTestController();
         $this->ctrlRef    = new ReflectionClass(KleinController::class);
+        $this->setCtrlProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

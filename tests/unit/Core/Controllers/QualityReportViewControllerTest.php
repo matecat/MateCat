@@ -78,6 +78,7 @@ class QualityReportViewControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $response);
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
 
         $this->setControllerUser($this->buildUser(), true);
     }

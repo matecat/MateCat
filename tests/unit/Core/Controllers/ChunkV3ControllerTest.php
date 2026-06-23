@@ -75,6 +75,7 @@ class ChunkV3ControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', Database::obtain());
 
         $user            = new UserStruct();
         $user->uid       = $this->userId(self::BASE);
@@ -227,6 +228,7 @@ class ChunkV3ControllerTest extends AbstractTest
             'password' => 'jobpw',
         ]);
         $realRef->getProperty('response')->setValue($real, $this->responseMock);
+        $realRef->getProperty('database')->setValue($real, Database::obtain());
 
         $realRef->getMethod('registerValidators')->invoke($real);
 

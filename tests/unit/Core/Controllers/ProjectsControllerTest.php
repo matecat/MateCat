@@ -85,6 +85,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', Database::obtain());
 
         $this->user = new UserStruct();
         $this->user->uid = $this->userId(self::BASE);
@@ -352,6 +353,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($fresh, new Request());
         $reflector->getProperty('response')->setValue($fresh, $this->createMock(Response::class));
+        $reflector->getProperty('database')->setValue($fresh, Database::obtain());
         $reflector->getProperty('user')->setValue($fresh, $this->user);
         $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(Database::obtain()));
         $reflector->getProperty('params')->setValue($fresh, [
@@ -389,6 +391,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($fresh, $request);
         $reflector->getProperty('response')->setValue($fresh, $this->createMock(Response::class));
+        $reflector->getProperty('database')->setValue($fresh, Database::obtain());
         $reflector->getProperty('user')->setValue($fresh, $this->user);
         $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(Database::obtain()));
         $reflector->getProperty('params')->setValue($fresh, $params);

@@ -47,6 +47,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
         $this->controller = new ChunkPasswordValidatorTestController();
         $this->ctrlRef = new ReflectionClass(KleinController::class);
+        $this->setCtrlProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers\Abstracts;
 use Model\DataAccess\Database;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\Base;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -135,7 +136,9 @@ class KleinControllerTest extends AbstractTest
     {
         $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'text/html']);
         $response = new Response();
-        $controller = new class ($request, $response) extends KleinController {
+        $app = new App();
+        $app->register('getDatabase', static fn() => \Model\DataAccess\Database::obtain());
+        $controller = new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
             protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
         };
@@ -150,7 +153,9 @@ class KleinControllerTest extends AbstractTest
     {
         $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'application/json']);
         $response = new Response();
-        $controller = new class ($request, $response) extends KleinController {
+        $app = new App();
+        $app->register('getDatabase', static fn() => \Model\DataAccess\Database::obtain());
+        $controller = new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
             protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
         };
@@ -189,8 +194,10 @@ class KleinControllerTest extends AbstractTest
     {
         $request = Request::createFromGlobals();
         $response = new Response();
+        $app = new App();
+        $app->register('getDatabase', static fn() => Database::obtain());
 
-        return new class ($request, $response) extends KleinController {
+        return new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
 
             protected function identifyUser(?bool $useSession = true): void

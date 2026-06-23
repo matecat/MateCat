@@ -50,6 +50,7 @@ class ProjectAccessTokenValidatorTest extends AbstractTest
         $this->setCtrlProp('request', new Request(
             [], [], [], ['REQUEST_URI' => '/api/v2/projects', 'REQUEST_METHOD' => 'GET']
         ));
+        $this->setCtrlProp('database', Database::obtain());
     }
 
     protected function tearDown(): void

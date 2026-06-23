@@ -80,6 +80,9 @@ class GetSearchControllerTest extends AbstractTest
 
         $fsProp = $this->reflector->getProperty('featureSet');
         $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, Database::obtain());
     }
 
     protected function tearDown(): void

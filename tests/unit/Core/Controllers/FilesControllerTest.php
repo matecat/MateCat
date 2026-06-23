@@ -87,6 +87,7 @@ class FilesControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('database', \Model\DataAccess\Database::obtain());
     }
 
     /**
@@ -360,6 +361,7 @@ class FilesControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($controller, $request);
         $this->reflector->getProperty('response')->setValue($controller, $this->createMock(Response::class));
+        $this->reflector->getProperty('database')->setValue($controller, \Model\DataAccess\Database::obtain());
         $this->reflector->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
         $this->reflector->getProperty('featureSet')->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $this->reflector->getProperty('params')->setValue($controller, $params);

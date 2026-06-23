@@ -83,6 +83,7 @@ class ConnectedServicesControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
+        $this->setProp('database', Database::obtain());
 
         $user        = new UserStruct();
         $user->uid   = $this->userId(self::BASE);

@@ -7,6 +7,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ModelStruct;
 use Model\Teams\TeamStruct;
@@ -58,6 +59,9 @@ class NewControllerDbValidatorsTest extends AbstractTest
         $this->user->email = $this->ownerEmail(self::BASE);
         $userProp = $this->reflector->getProperty('user');
         $userProp->setValue($this->controller, $this->user);
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, Database::obtain());
 
         $fsProp = $this->reflector->getProperty('featureSet');
         $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));

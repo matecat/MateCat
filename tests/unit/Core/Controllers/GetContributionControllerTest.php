@@ -59,6 +59,8 @@ class GetContributionControllerTest extends AbstractTest
         $responseProp = $this->reflector->getProperty('response');
         $responseProp->setValue($this->controller, $responseMock);
 
+        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+
         $featureSet = $this->createStub(FeatureSet::class);
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);
@@ -499,6 +501,7 @@ class GetContributionControllerTest extends AbstractTest
 
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
+        $ref->getProperty('database')->setValue($testable, Database::obtain());
 
         $featureSet = new FeatureSet(Database::obtain());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);
@@ -555,6 +558,7 @@ class GetContributionControllerTest extends AbstractTest
 
         $ref->getProperty('request')->setValue($testable, $requestStub);
         $ref->getProperty('response')->setValue($testable, $responseStub);
+        $ref->getProperty('database')->setValue($testable, Database::obtain());
 
         $featureSet = new FeatureSet(Database::obtain());
         $ref->getProperty('featureSet')->setValue($testable, $featureSet);

@@ -124,6 +124,7 @@ class GDriveControllerTest extends AbstractTest
         $this->dbStub = $this->createStub(\Model\DataAccess\IDatabase::class);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->dbStub));
+        $this->setProp('database', \Model\DataAccess\Database::obtain());
     }
 
     protected function tearDown(): void
