@@ -223,7 +223,7 @@ const ContextPreview = () => {
   }, [segments])
 
   // Track segment request deduplication per direction
-  const requestedAtRef = useRef({before: -1, after: -1})
+  const requestedAtRef = useRef({before: -1, after: -1, lastDir: null})
 
   // Render the fetched HTML into panels once (or when viewMode changes)
   const htmlRenderedRef = useRef({source: '', target: '', url: null})
@@ -374,68 +374,85 @@ const ContextPreview = () => {
     let lastCheckTime = 0
     const segCount = mappableSegments.length
 
+    // An element counts as "tagged" only if it (or a small, leaf-like
+    // ancestor) carries data-context-sids. A high-level wrapper <div> that
+    // maps a single segment but contains many block descendants must NOT
+    // suppress lazy-loading for all those descendants.
+    const SIDS_ATTR = 'data-context-sids'
+    const BLOCK_CHECK = 'p, li, td, th, h1, h2, h3, h4'
+    const isEffectivelyTagged = (el) => {
+      if (el.hasAttribute(SIDS_ATTR)) return true
+      const tagged = el.closest(`[${SIDS_ATTR}]`)
+      if (!tagged) return false
+      return tagged.querySelectorAll(BLOCK_CHECK).length <= 1
+    }
+
     const checkForUntaggedNodes = () => {
       const now = Date.now()
       if (now - lastCheckTime < THROTTLE_MS) return
       lastCheckTime = now
 
-      const meaningfulEls = container.querySelectorAll(
-        'p, li, td, th, h1, h2, h3, h4',
-      )
+      const meaningfulEls = container.querySelectorAll(BLOCK_CHECK)
       if (!meaningfulEls.length) return
 
       let firstTaggedIdx = -1
       let lastTaggedIdx = -1
       for (let i = 0; i < meaningfulEls.length; i++) {
-        if (meaningfulEls[i].closest('[data-context-sids]')) {
+        if (isEffectivelyTagged(meaningfulEls[i])) {
           if (firstTaggedIdx === -1) firstTaggedIdx = i
           lastTaggedIdx = i
         }
       }
 
-      if (firstTaggedIdx === -1) {
-        if (requestedAtRef.current.before !== segCount) {
-          requestedAtRef.current.before = segCount
-          ContextPreviewChannel.sendMessage({
-            type: 'loadMoreSegments',
-            where: 'before',
-          })
-        }
-        if (requestedAtRef.current.after !== segCount) {
-          requestedAtRef.current.after = segCount
-          ContextPreviewChannel.sendMessage({
-            type: 'loadMoreSegments',
-            where: 'after',
-          })
-        }
-        return
-      }
-
       let hasUntaggedBefore = false
-      for (let i = 0; i < firstTaggedIdx; i++) {
-        if (!meaningfulEls[i].closest('[data-context-sids]')) {
-          hasUntaggedBefore = true
-          break
-        }
-      }
-
       let hasUntaggedAfter = false
-      for (let i = lastTaggedIdx + 1; i < meaningfulEls.length; i++) {
-        if (!meaningfulEls[i].closest('[data-context-sids]')) {
-          hasUntaggedAfter = true
-          break
+
+      if (firstTaggedIdx === -1) {
+        hasUntaggedBefore = true
+        hasUntaggedAfter = true
+      } else {
+        for (let i = 0; i < firstTaggedIdx; i++) {
+          if (!isEffectivelyTagged(meaningfulEls[i])) {
+            hasUntaggedBefore = true
+            break
+          }
+        }
+        for (let i = lastTaggedIdx + 1; i < meaningfulEls.length; i++) {
+          if (!isEffectivelyTagged(meaningfulEls[i])) {
+            hasUntaggedAfter = true
+            break
+          }
         }
       }
 
-      if (hasUntaggedBefore && requestedAtRef.current.before !== segCount) {
+      const wantBefore =
+        hasUntaggedBefore && requestedAtRef.current.before !== segCount
+      const wantAfter =
+        hasUntaggedAfter && requestedAtRef.current.after !== segCount
+
+      // CatTool uses a single {segmentId, where} state for the segment
+      // loader, so sending both directions in the same tick causes the
+      // second to overwrite the first. Send only one per cycle.
+      if (wantBefore && wantAfter) {
+        const pick = requestedAtRef.current.lastDir === 'before'
+          ? 'after'
+          : 'before'
+        requestedAtRef.current[pick] = segCount
+        requestedAtRef.current.lastDir = pick
+        ContextPreviewChannel.sendMessage({
+          type: 'loadMoreSegments',
+          where: pick,
+        })
+      } else if (wantBefore) {
         requestedAtRef.current.before = segCount
+        requestedAtRef.current.lastDir = 'before'
         ContextPreviewChannel.sendMessage({
           type: 'loadMoreSegments',
           where: 'before',
         })
-      }
-      if (hasUntaggedAfter && requestedAtRef.current.after !== segCount) {
+      } else if (wantAfter) {
         requestedAtRef.current.after = segCount
+        requestedAtRef.current.lastDir = 'after'
         ContextPreviewChannel.sendMessage({
           type: 'loadMoreSegments',
           where: 'after',
