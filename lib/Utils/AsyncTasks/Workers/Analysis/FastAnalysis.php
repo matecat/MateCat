@@ -46,6 +46,7 @@ use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\Tools\Utils;
@@ -177,6 +178,9 @@ class FastAnalysis extends AbstractDaemon
         } catch (Exception $ex) {
             $this->logger->debug(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
             $this->logger->debug(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
+            if (AppConfig::$ENV === 'testing') {
+                throw new DaemonTerminatedException();
+            }
             die();
         }
 
