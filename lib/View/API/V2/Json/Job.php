@@ -32,6 +32,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
@@ -151,7 +152,7 @@ class Job
         if (!empty($outsourceInfo)) {
             $outsource = (new OutsourceConfirmation($outsourceInfo))->render();
         } else {
-            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);
+            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct, new UserDao($this->database)))->renderItem() : null);
         }
 
         $jobStats = WordCountStruct::loadFromJob($chunk);

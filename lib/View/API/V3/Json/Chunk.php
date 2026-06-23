@@ -21,6 +21,7 @@ use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
+use Model\Users\UserDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectDao;
@@ -92,7 +93,7 @@ class Chunk extends \View\API\V2\Json\Chunk
         if (!empty($outsourceInfo)) {
             $outsource = (new OutsourceConfirmation($outsourceInfo))->render();
         } else {
-            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);
+            $translator = (!empty($tStruct) ? (new JobTranslator($tStruct, new UserDao($this->database)))->renderItem() : null);
         }
 
         $jobStats = WordCountStruct::loadFromJob($chunk);

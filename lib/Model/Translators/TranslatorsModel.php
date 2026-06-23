@@ -188,7 +188,9 @@ class TranslatorsModel
     {
         $jTranslatorsDao = new JobsTranslatorsDao($this->database);
 
-        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct($this->jStruct)[0] ?? null;
+        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct(
+            $this->jStruct
+        )[0] ?? null;
     }
 
     /**
@@ -244,7 +246,9 @@ class TranslatorsModel
 
         //set the old id and password to make "ON DUPLICATE KEY UPDATE" possible
         $translatorStruct->id_job = $this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null');
-        $translatorStruct->job_password = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
+        $translatorStruct->job_password = $this->jStruct->password ?? throw new TypeError(
+            'JobStruct::$password cannot be null'
+        );
         $translatorStruct->delivery_date = Utils::mysqlTimestamp($this->delivery_date);
         $translatorStruct->job_owner_timezone = $this->job_owner_timezone;
         $translatorStruct->added_by = $this->callingUser->uid ?? throw new TypeError('Calling user uid cannot be null');
@@ -335,7 +339,9 @@ class TranslatorsModel
             throw new InvalidArgumentException("Who invites can not be empty. Try TranslatorsModel::setUser() ");
         }
 
-        $project = (new ProjectDao($this->database))->findByJobId($this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'));
+        $project = (new ProjectDao($this->database))->findByJobId(
+            $this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null')
+        );
 
         if ($project === null) {
             throw new RuntimeException('Project not found for job id ' . $this->jStruct->id);
@@ -348,15 +354,30 @@ class TranslatorsModel
 
             switch ($type) {
                 case 'new':
-                    $mailSender = new SendToTranslatorForNewJobEmail($this->callingUser, $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'), $project->name);
+                    $mailSender = new SendToTranslatorForNewJobEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
                 case 'update':
-                    $mailSender = new SendToTranslatorForDeliveryChangeEmail($this->callingUser, $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'), $project->name);
+                    $mailSender = new SendToTranslatorForDeliveryChangeEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
                 case 'split':
-                    $mailSender = new SendToTranslatorForJobSplitEmail($this->callingUser, $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'), $project->name);
+                    $mailSender = new SendToTranslatorForJobSplitEmail(
+                        $this->callingUser,
+                        $this->jobTranslator ?? throw new RuntimeException('jobTranslator not set'),
+                        $project->name,
+                        new UserDao($this->database)
+                    );
                     $mailSender->send();
                     break;
             }
