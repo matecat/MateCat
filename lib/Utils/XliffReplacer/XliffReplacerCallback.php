@@ -13,6 +13,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\ProjectDao;
 use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
 
@@ -93,7 +94,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
             $this->targetLang,
             $dataRefMap ?? [],
             $this->subfilteringCustomHandlers,
-            $this->sourceContainsIcu($this->jobStruct->getProject(), $this->jobStruct, $segment, $this->database)
+            $this->sourceContainsIcu($this->jobStruct->getProject(new ProjectDao($this->database)), $this->jobStruct, $segment, $this->database)
         );
 
         $segment = $filter->fromLayer0ToLayer1($segment);

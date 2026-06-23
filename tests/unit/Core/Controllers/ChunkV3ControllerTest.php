@@ -13,6 +13,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -130,8 +131,8 @@ class ChunkV3ControllerTest extends AbstractTest
     private function injectChunkState(JobStruct $chunk): void
     {
         $this->setProp('chunk', $chunk);
-        $this->setProp('project', $chunk->getProject());
-        $this->setProp('featureSet', FeatureSet::forProject($chunk->getProject(), Database::obtain()));
+        $this->setProp('project', $chunk->getProject(new ProjectDao(Database::obtain())));
+        $this->setProp('featureSet', FeatureSet::forProject($chunk->getProject(new ProjectDao(Database::obtain())), Database::obtain()));
         $this->setProp('chunk_reviews', []);
     }
 

@@ -30,6 +30,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -670,7 +671,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->password = (string)$password;
         $this->request_password = $received_password;
 
-        $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString, $this->getDatabase());
+        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $segmentString, $this->getDatabase());
 
         $data = [
             'id_job' => $id_job,
@@ -698,7 +699,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'status' => $status,
             'split_statuses' => $split_statuses,
             'chunk' => $chunk,
-            'project' => $chunk->getProject(),
+            'project' => $chunk->getProject(new ProjectDao($this->getDatabase())),
             'id_project' => $chunk->id_project,
             'segment_contains_icu' => $this->sourceContainsIcu,
             'split_num' => null,

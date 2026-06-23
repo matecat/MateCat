@@ -22,6 +22,7 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
@@ -213,10 +214,12 @@ class JobSplitMergeService
      * Retrieve the ProjectStruct for a given job — used for cache invalidation.
      *
      * Wraps JobStruct::getProject() so tests can override without DB access.
+     *
+     * @throws ReflectionException
      */
     protected function getProjectForCacheInvalidation(JobStruct $job): ProjectStruct
     {
-        return $job->getProject(60 * 10);
+        return $job->getProject(new ProjectDao($this->dbHandler), 60 * 10);
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -615,7 +618,7 @@ class JobSplitMergeService
 
         $this->beginTransaction();
 
-        if ($first_job->getTranslator()) {
+        if ($first_job->getTranslator(new JobsTranslatorsDao($this->dbHandler))) {
             //Update the password in the struct and in the database for the first job
             $this->updateForMerge($first_job, $this->generateRandomString());
             $this->getCart()->emptyCart();

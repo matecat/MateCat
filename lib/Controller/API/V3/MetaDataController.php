@@ -8,7 +8,9 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DomainException;
 use Exception;
+use Model\Files\FileDao;
 use Model\Files\MetadataDao as FileMetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
@@ -53,7 +55,7 @@ class MetaDataController extends KleinController
         $this->return404IfTheJobWasDeleted();
 
         $metadata = new stdClass();
-        $metadata->project = $this->getProjectInfo($job->getProject());
+        $metadata->project = $this->getProjectInfo($job->getProject(new ProjectDao($this->getDatabase())));
         $metadata->job = $this->getJobMetaData($job);
         $metadata->files = $this->getJobFilesMetaData($job);
 
@@ -134,9 +136,9 @@ class MetaDataController extends KleinController
     {
         $metadata = [];
         $filesMetaDataDao = new FileMetadataDao($this->getDatabase());
-        $projectId = $job->getProject()->id ?? throw new DomainException('Project ID must not be null');
+        $projectId = $job->getProject(new ProjectDao($this->getDatabase()))->id ?? throw new DomainException('Project ID must not be null');
 
-        foreach ($job->getFiles() as $file) {
+        foreach ($job->getFiles(new FileDao($this->getDatabase())) as $file) {
             $metadatum = new stdClass();
             foreach ($filesMetaDataDao->getByJobIdProjectAndIdFile($projectId, $file->id, 60 * 5) ?? [] as $meta) {
                 $metadatum->{$meta->key} = $meta->value;

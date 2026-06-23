@@ -9,6 +9,7 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use SplTempFileObject;
 use TypeError;
 use Utils\TMS\TMSService;
@@ -77,9 +78,9 @@ class DownloadJobTMXController extends AbstractDownloadController
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
         $jobData = $this->jobInfo = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($this->jobID, $jobPass);
-        $this->featureSet->loadForProject($this->jobInfo->getProject());
+        $this->featureSet->loadForProject($this->jobInfo->getProject(new ProjectDao($this->getDatabase())));
 
-        $projectData = $this->jobInfo->getProject();
+        $projectData = $this->jobInfo->getProject(new ProjectDao($this->getDatabase()));
 
         $source = $jobData['source'];
         $target = $jobData['target'];

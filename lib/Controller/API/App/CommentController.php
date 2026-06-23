@@ -361,7 +361,7 @@ class CommentController extends KleinController
         $users = [];
 
         if (str_contains($message, "{@team@}")) {
-            $project = $job->getProject();
+            $project = $job->getProject(new ProjectDao($this->getDatabase()));
 
             if ($project->id_team === null) {
                 return [];

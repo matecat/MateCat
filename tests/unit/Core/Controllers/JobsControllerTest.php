@@ -22,6 +22,7 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
@@ -94,7 +95,7 @@ class JobsControllerTest extends AbstractTest
         // ChunkPasswordValidator onSuccess closure at validation time).
         $chunk = $this->loadChunk();
         $this->setProp('chunk', $chunk);
-        $this->setProp('project', $chunk->getProject());
+        $this->setProp('project', $chunk->getProject(new ProjectDao(Database::obtain())));
         $this->setProp('jobDao', new JobDao(Database::obtain()));
         $this->setProp('segmentTranslationDao', new SegmentTranslationDao(Database::obtain()));
     }

@@ -22,6 +22,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -282,7 +283,7 @@ class MetaDataControllerTest extends AbstractTest
     public function getProjectInfo_routes_engine_keys_to_mt_extra_and_keeps_other_keys_top_level(): void
     {
         $job     = $this->loadSeededJob();
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao(Database::obtain()));
 
         /** @var stdClass $result */
         $result = $this->invokePrivate('getProjectInfo', [$project]);

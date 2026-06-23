@@ -21,6 +21,7 @@ use Model\LQA\ModelDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportDao;
 use Model\ReviseFeedback\FeedbackDAO;
+use Model\Translations\WarningDao;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\RevisionFactory;
@@ -176,7 +177,7 @@ class QualitySummary
             'model_template_id' => $model_template_id ?: null,
             'is_pass' => $is_pass,
             'quality_overall' => $quality_overall,
-            'errors_count' => $jStruct->getErrorsCount(),
+            'errors_count' => $jStruct->getErrorsCount(new WarningDao($this->database)),
             'revise_issues' => $reviseIssues,
             'score' => $score,
             'categories' => $categories,

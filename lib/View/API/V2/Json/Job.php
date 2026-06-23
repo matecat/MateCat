@@ -20,8 +20,13 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
+use Model\Comments\CommentDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\Outsource\ConfirmationDao;
+use Model\Translations\WarningDao;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Projects\ManageModel;
 use Model\Projects\ProjectDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
@@ -139,8 +144,8 @@ class Job
      */
     public function renderItem(JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
-        $outsourceInfo = $chunk->getOutsource();
-        $tStruct = $chunk->getTranslator();
+        $outsourceInfo = $chunk->getOutsource(new ConfirmationDao($this->database));
+        $tStruct = $chunk->getTranslator(new JobsTranslatorsDao($this->database));
         $outsource = null;
         $translator = null;
         if (!empty($outsourceInfo)) {
@@ -156,14 +161,14 @@ class Job
         $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
-        $warningsCount = $chunk->getWarningsCount();
+        $warningsCount = $chunk->getWarningsCount(new WarningDao($this->database));
 
         // Added 5 minutes cache here
         $this->chunkReviewDao ??= new ChunkReviewDao($this->database);
         $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk, 60 * 5);
 
         // is outsource available?
-        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($chunk->target, (string)$chunk->getProject()->id_customer, (int)$chunk->id);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($chunk->target, (string)$chunk->getProject(new ProjectDao($this->database))->id_customer, (int)$chunk->id);
         $featureSet->dispatch($outsourceAvailableInfoEvent);
         $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
@@ -190,13 +195,13 @@ class Job
             'subject' => $chunk->subject,
             'subject_printable' => $subjectsHashMap[$chunk->subject],
             'owner' => $chunk->owner,
-            'open_threads_count' => (int)$chunk->getOpenThreadsCount(),
+            'open_threads_count' => (int)$chunk->getOpenThreadsCount(new CommentDao($this->database)),
             'create_timestamp' => strtotime($chunk->create_date ?? ''),
             'created_at' => Utils::api_timestamp($chunk->create_date),
             'create_date' => $chunk->create_date,
             'formatted_create_date' => ManageModel::formatJobDate($chunk->create_date),
             'quality_overall' => (new CatUtils($this->database))->getQualityOverallFromJobStruct($chunk, $chunkReviews),
-            'pee' => $chunk->getPeeForTranslatedSegments(),
+            'pee' => $chunk->getPeeForTranslatedSegments(new JobDao($this->database)),
             'tte' => (int)($chunk->total_time_to_edit / 1000),
             'private_tm_key' => $this->getKeyList($chunk),
             'warnings_count' => $warningsCount->warnings_count,
@@ -214,7 +219,7 @@ class Job
             'standard_wc' => (float)$chunk->standard_analysis_wc,
             'quality_summary' => [
                 'quality_overall' => $chunk->getQualityOverall($chunkReviews, new CatUtils($this->database)),
-                'errors_count' => $chunk->getErrorsCount()
+                'errors_count' => $chunk->getErrorsCount(new WarningDao($this->database))
             ],
 
         ];

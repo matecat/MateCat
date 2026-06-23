@@ -8,6 +8,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
+use Model\DataAccess\IDatabase;
 use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobMetadataDao;
@@ -444,6 +445,9 @@ class GetSegmentsControllerTest extends AbstractTest
         $this->controller->fakeSegmentMetadataDao = $segmentMetaDao;
 
         $this->setFeatureSet();
+
+        $dbProp = $this->reflector->getProperty('database');
+        $dbProp->setValue($this->controller, $this->createStub(IDatabase::class));
 
         $captured = null;
         $responseMock = $this->createMock(Response::class);

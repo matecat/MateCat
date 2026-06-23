@@ -17,6 +17,7 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
@@ -87,9 +88,12 @@ class QualityReportModel
         return $this->chunk;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getProject(): ProjectStruct
     {
-        return $this->chunk->getProject();
+        return $this->chunk->getProject(new ProjectDao($this->database));
     }
 
     /**

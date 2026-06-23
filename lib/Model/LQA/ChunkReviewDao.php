@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use PDO;
 use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -600,7 +601,7 @@ class ChunkReviewDao extends AbstractDao
     public function passFailCountsAtomicUpdate(int $chunkReviewID, array $data): void
     {
         $chunkReview = $data['chunkReview'];
-        $project = $chunkReview->getChunk()->getProject();
+        $project = $chunkReview->getChunk()->getProject(new ProjectDao($this->database));
         $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
         if ($lqaModel === null) {
             return;

@@ -17,6 +17,7 @@ use Exception;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
 use Model\Segments\SegmentDisabledService;
+use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Translations\SegmentTranslationDao;
 use Utils\Constants\TranslationStatus;
@@ -145,7 +146,7 @@ class CancelRequestController extends KleinController
         }
 
         // 4. check if user is part of the team
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
         $team = $project->id_team !== null ? $this->teamDao->findById($project->id_team) : null;
         if (empty($team)) {
             throw new NotFoundException('Team not found');

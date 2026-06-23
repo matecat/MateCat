@@ -12,6 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
+use Model\Projects\ProjectDao;
 use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
@@ -36,7 +37,7 @@ class GetTagProjectionController extends KleinController
     {
         $request = $this->validateTheRequest();
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
-        $this->featureSet->loadForProject($jobStruct->getProject());
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
         $engine = EnginesFactory::getInstance(1, MyMemory::class);
         $engine->setFeatureSet($this->featureSet);

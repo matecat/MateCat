@@ -15,6 +15,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
+use Model\Projects\ProjectDao;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -52,7 +53,7 @@ class DeleteContributionController extends KleinController
 
         //check Job password
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
-        $this->featureSet->loadForProject($jobStruct->getProject());
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
         $tm_keys = $jobStruct['tm_keys'];
 

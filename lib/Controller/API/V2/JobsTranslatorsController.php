@@ -18,6 +18,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
 use TypeError;
@@ -106,8 +107,8 @@ class JobsTranslatorsController extends KleinController
         }
 
         //do not show outsourced translators
-        $outsourceInfo = $this->jStruct->getOutsource();
-        $tStruct = $this->jStruct->getTranslator();
+        $outsourceInfo = $this->jStruct->getOutsource(new ConfirmationDao($this->getDatabase()));
+        $tStruct = $this->jStruct->getTranslator(new JobsTranslatorsDao($this->getDatabase()));
         $translator = null;
         if (empty($outsourceInfo)) {
             $translator = (!empty($tStruct) ? (new JobTranslator($tStruct))->renderItem() : null);

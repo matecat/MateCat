@@ -76,7 +76,7 @@ class SegmentAnalysisController extends KleinController
 
         // raise exception if the job does not exist
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($idJob, $password);
-        $this->project = $jobStruct->getProject();
+        $this->project = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
 
         $mt_qe_workflow_enabled = !empty((new MetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value));
         $matchClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);

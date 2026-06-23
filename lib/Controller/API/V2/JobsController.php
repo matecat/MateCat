@@ -16,6 +16,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
@@ -129,7 +130,7 @@ class JobsController extends KleinController
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
-            $this->project = $Validator->getChunk()->getProject(60 * 10);
+            $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()), 60 * 10);
             $this->jobDao = new JobDao($this->getDatabase());
             $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
             $this->appendValidator(new ProjectAccessValidator($this, $this->project));

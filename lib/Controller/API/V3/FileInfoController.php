@@ -21,6 +21,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PDOException;
 use ReflectionException;
@@ -44,7 +45,7 @@ class FileInfoController extends KleinController
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
-            $this->project = $Validator->getChunk()->getProject();
+            $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()));
             $this->appendValidator(new ProjectAccessValidator($this, $this->project));
         });
         $this->appendValidator($Validator);
@@ -52,10 +53,11 @@ class FileInfoController extends KleinController
 
     /**
      * @throws RuntimeException
+     * @throws ReflectionException
      */
     protected function createFilesInfoUtility(JobStruct $chunk): FilesInfoUtility
     {
-        return new FilesInfoUtility($chunk);
+        return new FilesInfoUtility($chunk, new ProjectDao($this->getDatabase()));
     }
 
     /**

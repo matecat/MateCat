@@ -18,6 +18,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\ProjectDao;
 use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
 use Model\LQA\ChunkReviewDao;
@@ -80,7 +81,7 @@ class QualityReportSegmentModel
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
         if (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != 'all') {
-            $idQaModel = $this->chunk->getProject()->id_qa_model;
+            $idQaModel = $this->chunk->getProject(new ProjectDao($this->database))->id_qa_model;
             if ($idQaModel !== null) {
                 $subCategories = (new CategoryDao($this->database))->findByIdModelAndIdParent(
                     $idQaModel,
@@ -203,7 +204,7 @@ class QualityReportSegmentModel
 
         $featureSet = new FeatureSet($this->database);
 
-        $featureSet->loadForProject($this->chunk->getProject());
+        $featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->database)));
         $issue_comments = [];
 
          $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);

@@ -12,6 +12,7 @@ use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
+use Model\Projects\ProjectDao;
 use TypeError;
 use Utils\Constants\TranslationStatus;
 use Utils\Tools\CatUtils;
@@ -105,7 +106,7 @@ class SplitSegmentController extends KleinController
         // check Job password
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$id_job, $password);
 
-        $this->featureSet->loadForProject($jobStruct->getProject());
+        $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
         return [
             'id_job' => $id_job,

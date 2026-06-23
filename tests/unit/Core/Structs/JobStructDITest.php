@@ -6,11 +6,14 @@ namespace Matecat\Core\Structs;
 use DomainException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Comments\CommentDao;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Outsource\TranslatedConfirmationStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\TmKeyManagement\UserKeysModel;
@@ -462,5 +465,65 @@ class JobStructDITest extends AbstractTest
         $result = $this->struct->getQualityOverall([], $catUtils);
 
         $this->assertNull($result);
+    }
+
+    #[Test]
+    public function getProject_returns_struct_from_injected_dao(): void
+    {
+        $expected = new ProjectStruct(['id' => 99, 'name' => 'Test Project']);
+
+        $dao = $this->createMock(ProjectDao::class);
+        $dao->method('findById')->with(99)->willReturn($expected);
+
+        $poison = $this->createMock(IDatabase::class);
+        $poison->expects($this->never())->method('getConnection');
+        $this->setDatabaseInstance($poison);
+
+        // Fresh struct so memoize cache is empty
+        $struct = new JobStruct([
+            'id' => 42,
+            'password' => 'secret',
+            'id_project' => 99,
+            'job_first_segment' => '1',
+            'job_last_segment' => '100',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+        ]);
+
+        $result = $struct->getProject($dao);
+
+        $this->assertSame($expected, $result);
+    }
+
+    #[Test]
+    public function getTMProps_uses_injected_project_dao(): void
+    {
+        $projectStruct = new ProjectStruct(['id' => 99, 'name' => 'My Project']);
+
+        $dao = $this->createMock(ProjectDao::class);
+        $dao->method('findById')->with(99)->willReturn($projectStruct);
+
+        $poison = $this->createMock(IDatabase::class);
+        $poison->expects($this->never())->method('getConnection');
+        $this->setDatabaseInstance($poison);
+
+        // Fresh struct so memoize cache is empty
+        $struct = new JobStruct([
+            'id' => 42,
+            'password' => 'secret',
+            'id_project' => 99,
+            'job_first_segment' => '1',
+            'job_last_segment' => '100',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+        ]);
+
+        $result = $struct->getTMProps($dao);
+
+        $this->assertSame([
+            'project_id' => 99,
+            'project_name' => 'My Project',
+            'job_id' => 42,
+        ], $result);
     }
 }

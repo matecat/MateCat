@@ -12,6 +12,7 @@ use Model\Files\MetadataDao;
 use Model\Files\MetadataStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
@@ -30,7 +31,7 @@ class FilesInfoUtilityTest extends AbstractTest
                 $this->job_last_segment  = 10;
             }
 
-            public function getProject(int $ttl = 86400): ProjectStruct
+            public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
             {
                 return $this->projectStruct;
             }
@@ -43,13 +44,13 @@ class FilesInfoUtilityTest extends AbstractTest
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Project ID must not be null');
 
-        new FilesInfoUtility($this->makeChunk(null));
+        new FilesInfoUtility($this->makeChunk(null), $this->createStub(ProjectDao::class));
     }
 
     #[Test]
     public function constructor_succeeds_with_valid_project_id(): void
     {
-        $utility = new FilesInfoUtility($this->makeChunk(42));
+        $utility = new FilesInfoUtility($this->makeChunk(42), $this->createStub(ProjectDao::class));
         $this->assertInstanceOf(FilesInfoUtility::class, $utility);
     }
 
@@ -59,7 +60,7 @@ class FilesInfoUtilityTest extends AbstractTest
         $fileDao = $this->createStub(FileDao::class);
         $fileDao->method('isFileInProject')->willReturn(0);
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), fileDao: $fileDao);
 
         $this->assertNull($utility->getInstructions(99));
     }
@@ -73,7 +74,7 @@ class FilesInfoUtilityTest extends AbstractTest
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('get')->willReturn(null);
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), metadataDao: $metadataDao, fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), metadataDao: $metadataDao, fileDao: $fileDao);
 
         $this->assertNull($utility->getInstructions(5));
     }
@@ -90,7 +91,7 @@ class FilesInfoUtilityTest extends AbstractTest
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('get')->willReturn($struct);
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), metadataDao: $metadataDao, fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), metadataDao: $metadataDao, fileDao: $fileDao);
 
         $this->assertSame(['instructions' => 'Translate carefully'], $utility->getInstructions(5));
     }
@@ -109,7 +110,7 @@ class FilesInfoUtilityTest extends AbstractTest
             fn(int $p, int $f, string $key) => $key === 'mtc:instructions' ? $struct : null
         );
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), metadataDao: $metadataDao, fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), metadataDao: $metadataDao, fileDao: $fileDao);
 
         $this->assertSame(['instructions' => 'MTC instructions'], $utility->getInstructions(5));
     }
@@ -120,7 +121,7 @@ class FilesInfoUtilityTest extends AbstractTest
         $fileDao = $this->createStub(FileDao::class);
         $fileDao->method('isFileInProject')->willReturn(0);
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), fileDao: $fileDao);
 
         $this->assertFalse($utility->setInstructions(99, 'Do this'));
     }
@@ -137,7 +138,7 @@ class FilesInfoUtilityTest extends AbstractTest
             ->with(1, 5, 'instructions', 'new text');
         $metadataDao->expects($this->never())->method('insert');
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), metadataDao: $metadataDao, fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), metadataDao: $metadataDao, fileDao: $fileDao);
 
         $this->assertTrue($utility->setInstructions(5, 'new text'));
     }
@@ -154,7 +155,7 @@ class FilesInfoUtilityTest extends AbstractTest
             ->with(1, 5, 'instructions', 'brand new');
         $metadataDao->expects($this->never())->method('update');
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), metadataDao: $metadataDao, fileDao: $fileDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), metadataDao: $metadataDao, fileDao: $fileDao);
 
         $this->assertTrue($utility->setInstructions(5, 'brand new'));
     }
@@ -165,7 +166,7 @@ class FilesInfoUtilityTest extends AbstractTest
         $jobDao = $this->createStub(JobDao::class);
         $jobDao->method('getFilesInfoInJob')->willReturn([]);
 
-        $utility = new FilesInfoUtility($this->makeChunk(1), jobDao: $jobDao);
+        $utility = new FilesInfoUtility($this->makeChunk(1), $this->createStub(ProjectDao::class), jobDao: $jobDao);
 
         $result = $utility->getInfo(false);
 
@@ -204,6 +205,7 @@ class FilesInfoUtilityTest extends AbstractTest
 
         $utility = new FilesInfoUtility(
             $this->makeChunk(1),
+            $this->createStub(ProjectDao::class),
             jobDao: $jobDao,
             metadataDao: $metadataDao,
             filesPartsDao: $this->createStub(FilesPartsDao::class)
@@ -232,6 +234,7 @@ class FilesInfoUtilityTest extends AbstractTest
 
         $utility = new FilesInfoUtility(
             $this->makeChunk(1),
+            $this->createStub(ProjectDao::class),
             jobDao: $jobDao,
             metadataDao: $metadataDao,
             filesPartsDao: $filesPartsDao
@@ -259,6 +262,7 @@ class FilesInfoUtilityTest extends AbstractTest
 
         $utility = new FilesInfoUtility(
             $this->makeChunk(1),
+            $this->createStub(ProjectDao::class),
             jobDao: $jobDao,
             metadataDao: $metadataDao,
             filesPartsDao: $this->createStub(FilesPartsDao::class)

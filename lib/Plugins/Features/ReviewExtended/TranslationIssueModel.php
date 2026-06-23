@@ -15,6 +15,7 @@ use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
@@ -58,6 +59,7 @@ class TranslationIssueModel
      * @param ChunkReviewDao        $chunkReviewDao
      * @param EntryDao              $entryDao
      * @param TranslationVersionDao $translationVersionDao
+     * @param ProjectDao            $projectDao
      *
      * @throws Exception
      * @throws TypeError
@@ -68,7 +70,8 @@ class TranslationIssueModel
         EntryStruct $issue,
         ChunkReviewDao $chunkReviewDao,
         EntryDao $entryDao,
-        TranslationVersionDao $translationVersionDao
+        TranslationVersionDao $translationVersionDao,
+        ProjectDao $projectDao
     ) {
         $this->issue = $issue;
         $this->chunkReviewDao = $chunkReviewDao;
@@ -82,7 +85,7 @@ class TranslationIssueModel
         }
         $this->chunk_review = $review;
         $this->chunk = $this->chunk_review->getChunk();
-        $this->project = $this->chunk->getProject();
+        $this->project = $this->chunk->getProject($projectDao);
     }
 
     /**

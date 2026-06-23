@@ -13,6 +13,7 @@ use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
@@ -132,7 +133,7 @@ class BatchReviewProcessor
      */
     public function process(): void
     {
-        $project = $this->chunk->getProject();
+        $project = $this->chunk->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
         $chunkReviews = $this->getOrCreateChunkReviews($project);
 
         foreach ($this->prepared_events as $translationEvent) {
@@ -143,7 +144,7 @@ class BatchReviewProcessor
             $segmentTranslationModel->sendNotificationEmail();
 
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
-                $project = $chunkReview->getChunk()->getProject();
+                $project = $chunkReview->getChunk()->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
                 $chunkReviewModel = ($this->chunkReviewModelFactory)($chunkReview);
                 $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }

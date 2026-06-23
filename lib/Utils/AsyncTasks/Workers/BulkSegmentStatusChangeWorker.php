@@ -7,6 +7,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
@@ -74,7 +75,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $segmentTranslationDao = new SegmentTranslationDao($this->database);
 
-        $project = $chunk->getProject();
+        $project = $chunk->getProject(new ProjectDao($this->database));
         $featureSet = FeatureSet::forProject($project, $this->database);
 
         $batchEventCreator = $this->createTranslationEventsHandler($chunk);

@@ -13,6 +13,7 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
+use Model\Projects\ProjectDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Teams\MembershipDao;
@@ -286,7 +287,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $issue,
             new ChunkReviewDao($this->getDatabase()),
             new EntryDao($this->getDatabase()),
-            new TranslationVersionDao($this->getDatabase())
+            new TranslationVersionDao($this->getDatabase()),
+            new ProjectDao($this->getDatabase())
         );
     }
 
@@ -329,7 +331,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao($this->getDatabase()));
         $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if ($team === null || $team->id === null) {

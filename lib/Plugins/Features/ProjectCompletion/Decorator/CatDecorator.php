@@ -11,6 +11,7 @@ use DomainException;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use RuntimeException;
 use Utils\Templating\PHPTALWithAppend;
@@ -95,7 +96,7 @@ class CatDecorator extends AbstractDecorator
      */
     private function completable(): bool
     {
-        $project = $this->arguments->getJob()->getProject();
+        $project = $this->arguments->getJob()->getProject(new ProjectDao($this->controller->getDatabase()));
         $wordCountType = (new MetadataDao($this->controller->getDatabase()))
             ->setCacheTTL(3600)
             ->getValue((int) $project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)

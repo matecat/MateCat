@@ -8,9 +8,11 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\LQA\ModelStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -292,7 +294,7 @@ class CattoolViewControllerTest extends AbstractTest
     public function findOwnerEmailAndTeam_resolves_owner_for_personal_team(): void
     {
         $job = $this->loadSeededJob();
-        $project = $job->getProject();
+        $project = $job->getProject(new ProjectDao(Database::obtain()));
 
         $result = $this->invokePrivate('findOwnerEmailAndTeam', [$project]);
 

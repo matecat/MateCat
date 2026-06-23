@@ -210,7 +210,7 @@ class DownloadController extends AbstractDownloadController
 
         $this->job = $jobData;
 
-        $this->project = $this->job->getProject();
+        $this->project = $this->job->getProject(new ProjectDao($this->getDatabase()));
 
         $this->featureSet->loadForProject($this->project);
 

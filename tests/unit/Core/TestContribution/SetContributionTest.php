@@ -14,6 +14,7 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\ActiveMQ\AMQHandler;
@@ -222,7 +223,7 @@ class SetContributionTest extends AbstractTest
         ]);
         $request->props = '{"isConcordance":"0","id_file":"123"}';
 
-        $result = $request->getProp();
+        $result = $request->getProp(new ProjectDao(Database::obtain()));
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('isConcordance', $result);
@@ -242,7 +243,7 @@ class SetContributionTest extends AbstractTest
         ]);
         $request->props = ['isConcordance' => '0', 'id_file' => '123'];
 
-        $result = $request->getProp();
+        $result = $request->getProp(new ProjectDao(Database::obtain()));
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('isConcordance', $result);
@@ -261,7 +262,7 @@ class SetContributionTest extends AbstractTest
         ]);
         $request->props = 'not-valid-json';
 
-        $result = $request->getProp();
+        $result = $request->getProp(new ProjectDao(Database::obtain()));
 
         // Should fallback to empty array merged with job TM props
         $this->assertIsArray($result);

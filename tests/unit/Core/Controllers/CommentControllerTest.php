@@ -12,6 +12,7 @@ use Model\Comments\CommentStruct;
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -31,7 +32,7 @@ class FakeJobStructForTeamMentions extends JobStruct
 {
     public ProjectStruct $fakeProject;
 
-    public function getProject(int $ttl = 86400): ProjectStruct
+    public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
     {
         return $this->fakeProject;
     }

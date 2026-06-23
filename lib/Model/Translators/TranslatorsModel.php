@@ -174,7 +174,7 @@ class TranslatorsModel
         $this->id_job = $jStruct->id;
         $this->job_password = $jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
-        $this->project = $this->jStruct->getProject($project_cache_TTL);
+        $this->project = $this->jStruct->getProject(new ProjectDao($this->database), $project_cache_TTL);
         $this->featureSet = FeatureSet::forProject($this->project, $this->database);
     }
 

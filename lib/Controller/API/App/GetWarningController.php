@@ -26,6 +26,7 @@ use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Model\Projects\ProjectDao;
 use View\API\V2\Json\QAGlobalWarning;
 use View\API\V2\Json\QALocalWarning;
 
@@ -122,7 +123,7 @@ class GetWarningController extends KleinController
 
         // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
         // Detect if the translation content contains ICU MessageFormat syntax
-        $this->sourceContainsIcu($chunk->getProject(), $chunk, $src_content, $this->getDatabase());
+        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $src_content, $this->getDatabase());
 
         $chunkId = $chunk->id ?? throw new \RuntimeException('Job id is null');
 
@@ -238,7 +239,7 @@ class GetWarningController extends KleinController
     private function getChunkAndLoadProjectFeatures(string $id_job, string $password): JobStruct
     {
         $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int) $id_job, $password);
-        $this->featureSet->loadForProject($chunk->getProject());
+        $this->featureSet->loadForProject($chunk->getProject(new ProjectDao($this->getDatabase())));
 
         return $chunk;
     }

@@ -113,13 +113,14 @@ class ChangePasswordController extends KleinController
                     throw new Exception('Job not found');
                 }
 
-                $this->checkUserPermissions($jStruct->getProject(), $user);
+                $pDao = new ProjectDao($this->getDatabase());
+                $this->checkUserPermissions($jStruct->getProject($pDao), $user);
 
                 $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
                 $dao = new ChunkReviewDao($this->getDatabase());
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
-                FeatureSet::forProject($jStruct->getProject(), $this->getDatabase())
+                FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
                     ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
 
             } else { // change job password
@@ -130,10 +131,11 @@ class ChangePasswordController extends KleinController
                     throw new Exception('Job not found');
                 }
 
-                $this->checkUserPermissions($jStruct->getProject(), $user);
+                $pDao = new ProjectDao($this->getDatabase());
+                $this->checkUserPermissions($jStruct->getProject($pDao), $user);
 
                 $jDao->changePassword($jStruct, $new_password);
-                FeatureSet::forProject($jStruct->getProject(), $this->getDatabase())
+                FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
                     ->dispatch(new JobPasswordChangedEvent($jStruct, $actual_pwd));
             }
 
@@ -143,9 +145,9 @@ class ChangePasswordController extends KleinController
 
             // invalidate cache for ProjectData
             $pDao = new ProjectDao($this->getDatabase());
-            $projectId = $jStruct->getProject()->id ?? throw new Exception('Project not found');
-            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject()->password);
-            $pDao->destroyFetchByIdCache($jStruct->getProject()->id, ProjectStruct::class);
+            $projectId = $jStruct->getProject($pDao)->id ?? throw new Exception('Project not found');
+            $pDao->destroyCacheForProjectData((int)$projectId, $jStruct->getProject($pDao)->password);
+            $pDao->destroyFetchByIdCache($jStruct->getProject($pDao)->id, ProjectStruct::class);
 
             $this->getDatabase()->commit();
         }

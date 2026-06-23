@@ -9,6 +9,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Exceptions\NotFoundException;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDisabledService;
@@ -816,6 +817,7 @@ class CancelRequestControllerTest extends AbstractTest
 
         $ref->getProperty('request')->setValue($controller, $this->request);
         $ref->getProperty('response')->setValue($controller, $this->response);
+        $ref->getProperty('database')->setValue($controller, $this->createStub(IDatabase::class));
 
         if ($user === null) {
             $user = $this->createStub(UserStruct::class);

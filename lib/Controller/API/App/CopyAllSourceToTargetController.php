@@ -10,6 +10,8 @@ use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -91,14 +93,14 @@ class CopyAllSourceToTargetController extends KleinController
         $database = $this->getDatabase();
         $database->begin();
 
-        $features = FeatureSet::forProject($chunk->getProject(), $this->getDatabase());
+        $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
 
         $batchEventCreator = new TranslationEventsHandler($chunk);
         $batchEventCreator->setFeatureSet($features);
-        $batchEventCreator->setProject($chunk->getProject());
+        $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
 
         $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
-        $segments = $chunk->getSegments();
+        $segments = $chunk->getSegments(new SegmentDao($this->getDatabase()));
 
         $affected_rows = 0;
 

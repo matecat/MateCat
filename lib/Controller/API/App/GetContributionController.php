@@ -28,6 +28,7 @@ use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\Lara;
 use Utils\Registry\AppConfig;
+use Model\Projects\ProjectDao;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
@@ -59,7 +60,7 @@ class GetContributionController extends KleinController
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($id_job, $password);
         $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id_segment);
 
-        $projectStruct = $jobStruct->getProject();
+        $projectStruct = $jobStruct->getProject(new ProjectDao($this->getDatabase()));
         $this->featureSet->loadForProject($projectStruct);
 
         $id_client = $request['id_client'];

@@ -11,6 +11,7 @@ use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ModelDao;
+use Model\Projects\ProjectDao;
 use Model\QualityReport\QualityReportSegmentModel;
 use TypeError;
 use Utils\Registry\AppConfig;
@@ -111,7 +112,7 @@ class DownloadQRController extends KleinController
         $qrSegmentModel = $this->qrSegmentModel ?? new QualityReportSegmentModel($chunk, $this->getDatabase());
 
         // categories issues
-        $project = $chunk->getProject();
+        $project = $chunk->getProject(new ProjectDao($this->getDatabase()));
         $model = $project->id_qa_model !== null ? (new ModelDao($this->getDatabase()))->findById($project->id_qa_model) : null;
         $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
 

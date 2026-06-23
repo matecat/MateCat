@@ -18,6 +18,7 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentStruct;
 use Model\Users\UserDao;
@@ -93,7 +94,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             throw new RuntimeException('Chunk is required for ReviewedWordCountModel');
         }
         $this->_chunk = $chunk;
-        $this->_project = $this->_chunk->getProject();
+        $this->_project = $this->_chunk->getProject(new ProjectDao($this->_database));
 
         $segment = $event->getSegmentStruct();
         if ($segment === null) {
@@ -364,7 +365,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             }
         }
 
-        $projectOwner = (new UserDao($this->_database))->getByEmail($this->_chunk->getProject()->id_customer);
+        $projectOwner = (new UserDao($this->_database))->getByEmail($this->_chunk->getProject(new ProjectDao($this->_database))->id_customer);
         if ($projectOwner) {
             $emails[] = [
                 'isPreviousChangeAuthor' => false,
@@ -372,7 +373,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $projectAssigneeId = $this->_chunk->getProject()->id_assignee;
+        $projectAssigneeId = $this->_chunk->getProject(new ProjectDao($this->_database))->id_assignee;
         $projectAssignee = $projectAssigneeId === null ? null : (new UserDao($this->_database))->getByUid($projectAssigneeId);
         if ($projectAssignee) {
             $emails[] = [
@@ -382,12 +383,12 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
         }
 
         $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
-        FeatureSet::forProject($this->_chunk->getProject(), $this->_database)->dispatch($filterRevisionChangeNotificationListEvent);
+        FeatureSet::forProject($this->_chunk->getProject(new ProjectDao($this->_database)), $this->_database)->dispatch($filterRevisionChangeNotificationListEvent);
         $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {
             $url = CanonicalRoutes::revise(
-                $this->_chunk->getProject()->name,
+                $this->_chunk->getProject(new ProjectDao($this->_database))->name,
                 $revision->id_job,
                 $revision->review_password ?? throw new RuntimeException('Review password is required'),
                 $this->_chunk->source,
@@ -401,7 +402,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
             // use the event chunk to generate the link.
             $url = CanonicalRoutes::translate(
-                $this->_chunk->getProject()->name,
+                $this->_chunk->getProject(new ProjectDao($this->_database))->name,
                 $this->_chunk->id ?? throw new RuntimeException('Chunk id is required'),
                 $this->_chunk->password ?? throw new RuntimeException('Chunk password is required'),
                 $this->_chunk->source,

@@ -10,6 +10,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ReviewExtended\ChunkReviewModel;
@@ -28,7 +29,7 @@ class StubJobStruct extends JobStruct
         $this->projectStruct = $projectStruct;
     }
 
-    public function getProject(int $ttl = 86400): ProjectStruct
+    public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
     {
         return $this->projectStruct;
     }

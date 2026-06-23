@@ -146,9 +146,9 @@ class CattoolController extends BaseKleinViewController
 
         $chunkId = $chunkStruct->id ?? throw new RuntimeException('Chunk id is null after successful load');
         $chunkPassword = $chunkStruct->password ?? throw new RuntimeException('Chunk password is null after successful load');
-        $projectId = $chunkStruct->getProject()->id ?? throw new RuntimeException('Project id is null');
+        $projectId = $chunkStruct->getProject(new ProjectDao($this->getDatabase()))->id ?? throw new RuntimeException('Project id is null');
 
-        $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject());
+        $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
 
         if ($chunkStruct->isCanceled()) {
             $this->cancelled($jobOwnership);
@@ -166,7 +166,7 @@ class CattoolController extends BaseKleinViewController
             $this->notFound();
         }
 
-        $project = $chunkStruct->getProject();
+        $project = $chunkStruct->getProject(new ProjectDao($this->getDatabase()));
         $model = $project->id_qa_model !== null ? (new ModelDao($this->getDatabase()))->findById($project->id_qa_model) : null;
         $jobsMetadataDao = new MetadataDao($this->getDatabase());
         $public_tm_penalty = $jobsMetadataDao->get($chunkId, $chunkPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
@@ -181,7 +181,7 @@ class CattoolController extends BaseKleinViewController
             'first_job_segment' => $chunkStruct->job_first_segment,
             'id_job' => $chunkId,
             'id_project' => $projectId,
-            'id_team' => $chunkStruct->getProject()->id_team,
+            'id_team' => $chunkStruct->getProject(new ProjectDao($this->getDatabase()))->id_team,
             'isCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->source)),
             'isGDriveProject' => new PHPTalBoolean((new ProjectDao($this->getDatabase()))->isGDriveProject($chunkStruct->id_project)),
             'isOpenAiEnabled' => new PHPTalBoolean(!empty(AppConfig::$OPENAI_API_KEY)),
@@ -189,7 +189,7 @@ class CattoolController extends BaseKleinViewController
             'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->source)),
             'isTargetRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->target)),
             'jobOwnerIsMe' => new PHPTalBoolean($jobOwnership['jobOwnerIsMe']),
-            'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplitted()),
+            'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplitted(new JobDao($this->getDatabase()))),
             'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories() : []),
             'lqa_flat_categories' => new PHPTalMap($model ? $this->getCategoriesAsJson($model) : []),
             'maxFileSize' => AppConfig::$MAX_UPLOAD_FILE_SIZE,
@@ -199,8 +199,8 @@ class CattoolController extends BaseKleinViewController
             'overall_quality_class' => $chunkReviewStruct ? ($chunkReviewStruct->is_pass ? 'excellent' : 'fail') : '',
             'pageTitle' => $this->buildPageTitle($revisionNumber, $chunkStruct),
             'password' => $chunkPassword,
-            'project' => $chunkStruct->getProject(),
-            'project_name' => Utils::friendlySlug($chunkStruct->getProject()->name),
+            'project' => $chunkStruct->getProject(new ProjectDao($this->getDatabase())),
+            'project_name' => Utils::friendlySlug($chunkStruct->getProject(new ProjectDao($this->getDatabase()))->name),
             'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkId-$chunkPassword",
             'review_extended' => new PHPTalBoolean(true),
             'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
@@ -279,7 +279,7 @@ class CattoolController extends BaseKleinViewController
         }
 
         // reset the feature set and load only the features for the current project (plus the autoloaded ones)
-        $this->featureSet->loadForProject($chunkStruct->getProject());
+        $this->featureSet->loadForProject($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
         $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
         $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
         $this->addParamsToView([
@@ -293,7 +293,7 @@ class CattoolController extends BaseKleinViewController
             new CatDecoratorArguments(
                 $chunkStruct,
                 $isRevision,
-                (new CatUtils($this->getDatabase()))->getWStructFromJobArray($chunkStruct, $chunkStruct->getProject()),
+                (new CatUtils($this->getDatabase()))->getWStructFromJobArray($chunkStruct, $chunkStruct->getProject(new ProjectDao($this->getDatabase()))),
                 $chunkReviewStruct
             )
         );
@@ -473,6 +473,7 @@ class CattoolController extends BaseKleinViewController
      * @param JobStruct $jobStruct
      *
      * @return string
+     * @throws ReflectionException
      */
     protected function buildPageTitle(?int $revisionNumber, JobStruct $jobStruct): string
     {
@@ -484,7 +485,7 @@ class CattoolController extends BaseKleinViewController
             $pageTitle = 'Translate - ';
         }
 
-        return $pageTitle . $jobStruct->getProject()->name . ' - ' . $jobStruct->id;
+        return $pageTitle . $jobStruct->getProject(new ProjectDao($this->getDatabase()))->name . ' - ' . $jobStruct->id;
     }
 
 }

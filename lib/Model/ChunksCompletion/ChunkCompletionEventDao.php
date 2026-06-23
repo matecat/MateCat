@@ -7,8 +7,10 @@ use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use PDO;
 use PDOException;
+use ReflectionException;
 use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao
@@ -94,6 +96,7 @@ class ChunkCompletionEventDao extends AbstractDao
      *
      * @return string
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
     {
@@ -112,7 +115,7 @@ class ChunkCompletionEventDao extends AbstractDao
 
         $validSources = $this->validSources();
         $stmt->execute([
-            'id_project' => $chunk->getProject()->id,
+            'id_project' => $chunk->getProject(new ProjectDao($this->database))->id,
             'id_job' => $chunk->id,
             'password' => $chunk->password,
             'job_first_segment' => $chunk->job_first_segment,

@@ -9,6 +9,7 @@ use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
@@ -32,7 +33,7 @@ class BatchReviewProcessorStubJobStruct extends JobStruct
         $this->projectStruct = $projectStruct;
     }
 
-    public function getProject(int $ttl = 86400): ProjectStruct
+    public function getProject(ProjectDao $dao, int $ttl = 86400): ProjectStruct
     {
         return $this->projectStruct;
     }
