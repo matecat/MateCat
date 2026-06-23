@@ -9,6 +9,7 @@
 namespace View\API\V2\Json;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -36,15 +37,18 @@ class ProjectUrls
 
     private ?ChunkReviewDao $chunkReviewDao;
 
+    private ?IDatabase $database;
+
     /**
      * ProjectUrls constructor.
      *
      * @param ShapelessConcreteStruct[] $data
      */
-    public function __construct(array $data, ?ChunkReviewDao $chunkReviewDao = null)
+    public function __construct(array $data, ?ChunkReviewDao $chunkReviewDao = null, ?IDatabase $database = null)
     {
         $this->data = $data;
         $this->chunkReviewDao = $chunkReviewDao;
+        $this->database = $database;
     }
 
     /**
@@ -113,7 +117,7 @@ class ProjectUrls
                 'translate_url' => $this->translateUrl($record),
             ];
 
-            $this->chunkReviewDao ??= new ChunkReviewDao();
+            $this->chunkReviewDao ??= new ChunkReviewDao($this->database);
             $reviews = $this->chunkReviewDao->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]), 60 * 10);
 
             foreach ($reviews as $review) {

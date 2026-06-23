@@ -254,7 +254,7 @@ class Job
     {
         $projectData = (new ProjectDao($this->database))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$project->id, $project->password);
 
-        $formatted = new ProjectUrls($projectData);
+        $formatted = new ProjectUrls($projectData, null, $this->database);
 
         $projectUrlsEvent = new ProjectUrlsEvent($formatted);
         $featureSet->dispatch($projectUrlsEvent);

@@ -56,7 +56,7 @@ class UrlsController extends KleinController
 
         $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
-        $formatted = new ProjectUrls($projectData);
+        $formatted = new ProjectUrls($projectData, null, $this->getDatabase());
 
         $projectUrlsEvent = new ProjectUrlsEvent($formatted);
         $this->featureSet->dispatch($projectUrlsEvent);

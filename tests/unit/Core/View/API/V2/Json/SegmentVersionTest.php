@@ -17,7 +17,7 @@ class SegmentVersionTest extends AbstractTest
 {
     private function featureSet(): FeatureSet
     {
-        return new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+        return new FeatureSet(\Model\DataAccess\Database::obtain());
     }
 
     private function makeJobStruct(int $id = 1, string $password = 'abc123', string $source = 'en-US', string $target = 'it-IT'): JobStruct
@@ -69,7 +69,7 @@ class SegmentVersionTest extends AbstractTest
      */
     public function testConstructorAcceptsExplicitFeatureSet(): void
     {
-        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+        $featureSet = new FeatureSet(\Model\DataAccess\Database::obtain());
         $view       = new SegmentVersion($this->makeJobStruct(), [], false, $featureSet);
         $this->assertInstanceOf(SegmentVersion::class, $view);
     }

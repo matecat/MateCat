@@ -71,7 +71,7 @@ class SegmentVersion
         $versionId = null;
         $version = null;
 
-        $issues_renderer = new SegmentTranslationIssue();
+        $issues_renderer = new SegmentTranslationIssue(null, $this->featureSet->getDatabase());
 
         foreach ($this->data as $record) {
             if (!is_null($versionId) && $versionId != $record->id) {
@@ -157,7 +157,7 @@ class SegmentVersion
      */
     public function renderItem(AbstractDaoObjectStruct $version): array
     {
-        $this->metadataDao ??= new MetadataDao();
+        $this->metadataDao ??= new MetadataDao($this->featureSet->getDatabase());
         $Filter = MateCatFilter::getInstance(
             $this->featureSet,
             $this->chunk->source,

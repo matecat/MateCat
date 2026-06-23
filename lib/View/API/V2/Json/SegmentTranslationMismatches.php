@@ -59,7 +59,7 @@ class SegmentTranslationMismatches
         ];
 
         $featureSet = $this->featureSet;
-        $metadataDao = $this->metadataDao ?? new MetadataDao();
+        $metadataDao = $this->metadataDao ?? new MetadataDao($this->featureSet->getDatabase());
 
         $jobId = $this->jobStruct->id ?? throw new RuntimeException('JobStruct::$id must not be null');
         $jobPassword = $this->jobStruct->password ?? throw new RuntimeException('JobStruct::$password must not be null');
