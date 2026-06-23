@@ -619,7 +619,14 @@ class SetTranslationController extends AbstractStatefulKleinController
             FILTER_UNSAFE_RAW,
             ['flags' => FILTER_NULL_ON_FAILURE]
         );
-        $suggestion_array = (is_string($suggestion_array) && $suggestion_array !== '' && json_decode($suggestion_array) === null) ? null : $suggestion_array;
+        if (is_string($suggestion_array) && $suggestion_array !== '') {
+            $decoded = json_decode($suggestion_array);
+            // Re-encode without JSON_UNESCAPED_UNICODE: 4-byte UTF-8 chars (emojis) become
+            // \uXXXX sequences, making the string safe for MySQL utf8 connections.
+            $suggestion_array = ($decoded !== null) ? json_encode($decoded, JSON_UNESCAPED_SLASHES) : null;
+        } else {
+            $suggestion_array = null;
+        }
         $status = filter_var($this->request->param('status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $splitStatuses = filter_var($this->request->param('splitStatuses'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $context_before = (string)filter_var($this->request->param('context_before'), FILTER_UNSAFE_RAW);

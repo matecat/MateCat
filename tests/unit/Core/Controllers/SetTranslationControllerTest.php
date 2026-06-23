@@ -2620,14 +2620,15 @@ class SetTranslationControllerTest extends AbstractTest
     }
 
     /**
-     * Migrated from the legacy unit\Controllers\SetTranslationControllerTest (§6
-     * reconciliation): valid suggestion_array JSON — including 4-byte unicode /
-     * emoji payloads — must be preserved intact through the REAL validateTheRequest().
+     * suggestion_array JSON containing 4-byte UTF-8 characters (emojis, supplementary
+     * Unicode) must be re-encoded to \uXXXX escape sequences so that the stored bytes
+     * are ASCII-safe for MySQL utf8 connections. The semantic content (decoded values)
+     * must remain identical.
      *
      * @throws ReflectionException
      */
     #[Test]
-    public function validateTheRequestPreservesEmojiSuggestionArray(): void
+    public function validateTheRequestNormalizesEmojiInSuggestionArrayToUnicodeEscapes(): void
     {
         $projectId = 9027151;
         $jobId = 9027152;
@@ -2636,6 +2637,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 9027154;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello emoji', 2);
 
+        // Contains a mix of 3-byte (✨ U+2728) and 4-byte (🛒 U+1F6D2, 𝄞 U+1D11E) chars.
         $jsonWithEmoji = '[{"match":"MT","created_by":"MT-Lara","translation":"Tvoja kupovina 🛒✨ 𝄞"}]';
 
         $controller = $this->createControllerWithoutConstructor();
@@ -2654,10 +2656,17 @@ class SetTranslationControllerTest extends AbstractTest
         $method = $this->getAccessibleMethod('validateTheRequest');
         $data = $method->invoke($controller);
 
-        self::assertSame($jsonWithEmoji, $data['suggestion_array'], 'Valid emoji JSON must pass through unchanged');
+        // Raw emoji bytes must NOT be present in the stored string (they would truncate
+        // in MySQL utf8 connections at the first 4-byte sequence).
+        self::assertStringNotContainsString('🛒', $data['suggestion_array'], '4-byte emoji must be escaped, not stored as raw bytes');
+        self::assertStringNotContainsString('𝄞', $data['suggestion_array'], '4-byte char must be escaped, not stored as raw bytes');
+
+        // The stored string must still be valid JSON.
         $decoded = json_decode($data['suggestion_array'], true);
-        self::assertIsArray($decoded);
-        self::assertStringContainsString('🛒✨', $decoded[0]['translation']);
+        self::assertIsArray($decoded, 'Normalized suggestion_array must decode to a valid array');
+
+        // Semantic content is preserved: json_decode restores \uXXXX back to the original chars.
+        self::assertSame('Tvoja kupovina 🛒✨ 𝄞', $decoded[0]['translation'], 'Decoded translation must equal the original emoji string');
     }
 
     /**
