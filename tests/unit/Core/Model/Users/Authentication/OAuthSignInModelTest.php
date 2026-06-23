@@ -30,7 +30,10 @@ class TestableOAuthSignInModel extends OAuthSignInModel
 
     protected function createRedeemableProject(): RedeemableProject
     {
-        return new class($this->user, $this->session) extends RedeemableProject {
+        $teamDao = new class extends TeamDao {
+            public function __construct() {}
+        };
+        return new class($this->user, $this->session, $teamDao) extends RedeemableProject {
             public function tryToRedeem(): void { /* no-op in tests */ }
         };
     }

@@ -91,7 +91,7 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createRedeemableProject(UserStruct $user, array &$session): RedeemableProject
     {
-        return new RedeemableProject($user, $session);
+        return new RedeemableProject($user, $session, new TeamDao($this->getDatabase()));
     }
 
     /**

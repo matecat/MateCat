@@ -8,6 +8,7 @@ use Model\ConnectedServices\ConnectedServiceDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -35,7 +36,9 @@ class UserProfileBuilderTest extends AbstractTest
         $userDao = $this->createStub(UserDao::class);
         $userDao->method('setCacheTTL')->willReturnSelf();
         $teamDao = $this->createStub(TeamDao::class);
-        $this->builder = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao, $userDao, $teamDao);
+        $metadataDao = $this->createStub(MetadataDao::class);
+        $metadataDao->method('getAllByUid')->willReturn([]);
+        $this->builder = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao, $userDao, $teamDao, $metadataDao);
     }
 
     private function makeUser(): UserStruct

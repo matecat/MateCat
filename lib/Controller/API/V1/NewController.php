@@ -40,6 +40,7 @@ use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -1012,7 +1013,7 @@ class NewController extends KleinController
             return $org;
         }
 
-        return $this->user->getPersonalTeam();
+        return $this->user->getPersonalTeam(new TeamDao($this->getDatabase()));
     }
 
     /**

@@ -410,6 +410,9 @@ class NewControllerTest extends AbstractTest
         $userProp->setValue($controller, $user);
         $fsProp = new ReflectionProperty($controller, 'featureSet');
         $fsProp->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $dbProp = (new ReflectionClass(\Controller\Abstracts\KleinController::class))->getProperty('database');
+        $dbProp->setAccessible(true);
+        $dbProp->setValue($controller, $this->createStub(\Model\DataAccess\IDatabase::class));
 
         $validateMethod = (new ReflectionClass(NewController::class))->getMethod('validateTheRequest');
         /** @var array<string, mixed> $validated */

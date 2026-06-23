@@ -4,6 +4,7 @@
 namespace Matecat\Core\Structs;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\Teams\MembershipDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -35,6 +36,7 @@ class UserStructNullHandlingTest extends AbstractTest
         $struct = $this->createStub(UserStruct::class);
         $struct->method('getUserTeams')->willReturn(null);
 
-        $this->assertFalse($struct->belongsToTeam(123));
+        $membershipDao = $this->createStub(MembershipDao::class);
+        $this->assertFalse($struct->belongsToTeam(123, $membershipDao));
     }
 }

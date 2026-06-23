@@ -8,6 +8,7 @@ use Model\ConnectedServices\ConnectedServiceDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
+use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -29,6 +30,7 @@ class UserProfileBuilder
         private readonly ConnectedServiceDao $connectedServiceDao,
         private readonly UserDao $userDao,
         private readonly TeamDao $teamDao,
+        private readonly MetadataDao $metadataDao,
     ) {
     }
 
@@ -43,7 +45,7 @@ class UserProfileBuilder
      */
     public function build(UserStruct $user): array
     {
-        $metadata = $user->getMetadataAsKeyValue();
+        $metadata = $user->getMetadataAsKeyValue($this->metadataDao);
 
         $this->membershipDao->setCacheTTL(60 * 5);
         $userTeams = array_map(

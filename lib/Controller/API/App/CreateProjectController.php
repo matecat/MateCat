@@ -26,6 +26,7 @@ use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
@@ -802,7 +803,7 @@ class CreateProjectController extends AbstractStatefulKleinController
     private function setTeam(string|false|null $id_team = null): TeamStruct
     {
         if ($id_team === null || $id_team === false || $id_team === '') {
-            return $this->user->getPersonalTeam();
+            return $this->user->getPersonalTeam(new TeamDao($this->getDatabase()));
         }
 
         // check for the team to be allowed

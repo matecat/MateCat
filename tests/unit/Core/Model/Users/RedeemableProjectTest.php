@@ -6,6 +6,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\RedeemableProject;
 use Model\Users\UserStruct;
@@ -15,6 +16,7 @@ class RedeemableProjectTest extends AbstractTest
     private UserStruct $user;
     private ProjectDao $projectDao;
     private JobDao $jobDao;
+    private TeamDao $teamDao;
 
     protected function setUp(): void
     {
@@ -22,11 +24,12 @@ class RedeemableProjectTest extends AbstractTest
         $this->user = $this->createStub(UserStruct::class);
         $this->projectDao = $this->createStub(ProjectDao::class);
         $this->jobDao = $this->createStub(JobDao::class);
+        $this->teamDao = $this->createStub(TeamDao::class);
     }
 
     private function make(array &$session): RedeemableProject
     {
-        return new RedeemableProject($this->user, $session, $this->projectDao, $this->jobDao);
+        return new RedeemableProject($this->user, $session, $this->teamDao, $this->projectDao, $this->jobDao);
     }
 
     public function testIsPresentReturnsFalseWhenNoSessionPid(): void
@@ -130,7 +133,7 @@ class RedeemableProjectTest extends AbstractTest
         $projectDao->expects($this->once())->method('updateStruct');
         $jobDao->expects($this->once())->method('updateOwner');
 
-        $rp = new RedeemableProject($this->user, $session, $projectDao, $jobDao);
+        $rp = new RedeemableProject($this->user, $session, $this->teamDao, $projectDao, $jobDao);
         $rp->redeem();
 
         $this->assertEquals('test@example.com', $project->id_customer);
@@ -146,7 +149,7 @@ class RedeemableProjectTest extends AbstractTest
         $projectDao->expects($this->never())->method('updateStruct');
         $jobDao->expects($this->never())->method('updateOwner');
 
-        $rp = new RedeemableProject($this->user, $session, $projectDao, $jobDao);
+        $rp = new RedeemableProject($this->user, $session, $this->teamDao, $projectDao, $jobDao);
         $rp->redeem();
     }
 
@@ -158,7 +161,7 @@ class RedeemableProjectTest extends AbstractTest
         $projectDao->method('findById')->willReturn($project);
         $projectDao->expects($this->never())->method('updateStruct');
 
-        $rp = new RedeemableProject($this->user, $session, $projectDao, $this->jobDao);
+        $rp = new RedeemableProject($this->user, $session, $this->teamDao, $projectDao, $this->jobDao);
         $rp->redeem();
     }
 
@@ -181,7 +184,7 @@ class RedeemableProjectTest extends AbstractTest
         $projectDao->expects($this->once())->method('updateStruct');
         $jobDao->expects($this->once())->method('updateOwner');
 
-        $rp = new RedeemableProject($this->user, $session, $projectDao, $jobDao);
+        $rp = new RedeemableProject($this->user, $session, $this->teamDao, $projectDao, $jobDao);
         $rp->tryToRedeem();
     }
 
@@ -191,7 +194,7 @@ class RedeemableProjectTest extends AbstractTest
         $session = [];
         $projectDao->expects($this->never())->method('updateStruct');
 
-        $rp = new RedeemableProject($this->user, $session, $projectDao, $this->jobDao);
+        $rp = new RedeemableProject($this->user, $session, $this->teamDao, $projectDao, $this->jobDao);
         $rp->tryToRedeem();
     }
 
@@ -227,7 +230,7 @@ class RedeemableProjectTest extends AbstractTest
         $projectDao = $this->createMock(ProjectDao::class);
         $projectDao->expects($this->once())->method('findById')->willReturn($project);
 
-        $rp = new RedeemableProject($this->user, $session, $projectDao, $this->jobDao);
+        $rp = new RedeemableProject($this->user, $session, $this->teamDao, $projectDao, $this->jobDao);
         $rp->isPresent();
         $rp->isPresent();
 

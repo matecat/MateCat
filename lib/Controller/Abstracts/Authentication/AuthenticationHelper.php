@@ -9,6 +9,7 @@ use Model\ConnectedServices\ConnectedServiceDao;
 use Model\DataAccess\IDatabase;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
+use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -79,7 +80,8 @@ class AuthenticationHelper
                 new MembershipDao($db),
                 new ConnectedServiceDao($db),
                 new UserDao($db),
-                new TeamDao($db)
+                new TeamDao($db),
+                new MetadataDao($db)
             ),
             new AuthCookieStore(new SessionTokenStoreHandler()),
         );

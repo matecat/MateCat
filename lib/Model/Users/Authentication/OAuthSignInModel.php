@@ -217,7 +217,7 @@ class OAuthSignInModel
 
     protected function createRedeemableProject(): RedeemableProject
     {
-        return new RedeemableProject($this->user, $this->session);
+        return new RedeemableProject($this->user, $this->session, $this->teamDao);
     }
 
 }
