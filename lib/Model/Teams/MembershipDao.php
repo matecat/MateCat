@@ -283,7 +283,7 @@ class MembershipDao extends AbstractDao
         $members = $obj_arr['members'];
         $teamStruct = $obj_arr['team'];
 
-        $users = (new UserDao)->getByEmails($members);
+        $users = (new UserDao($this->database))->getByEmails($members);
 
         if (empty($users)) {
             return [];
