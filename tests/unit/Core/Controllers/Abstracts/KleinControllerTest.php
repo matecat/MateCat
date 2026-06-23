@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers\Abstracts;
 use Model\DataAccess\Database;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\Base;
+use Controller\Exceptions\MissingDatabaseException;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
@@ -12,7 +13,20 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use ReflectionMethod;
+
+/**
+ * Concrete neutered subclass: empty ctor so it can be built without the Klein
+ * lifecycle, leaving $database unset and $app null to exercise getDatabase()'s
+ * missing-database contract.
+ */
+class ContractTestableKleinController extends KleinController
+{
+    public function __construct()
+    {
+    }
+}
 
 #[CoversClass(KleinController::class)]
 class KleinControllerTest extends AbstractTest
@@ -188,6 +202,19 @@ class KleinControllerTest extends AbstractTest
         $validateMethod->invoke($controller);
 
         // mock expectation on validate() being called once is the real assertion
+    }
+
+    #[Test]
+    public function getDatabaseThrowsWhenNoAppAndNoInjectedDatabase(): void
+    {
+        // Neither a Klein App with a getDatabase service nor a pre-injected
+        // $database: getDatabase() must reject rather than reach for a singleton.
+        $controller = (new ReflectionClass(ContractTestableKleinController::class))
+            ->newInstanceWithoutConstructor();
+
+        $this->expectException(MissingDatabaseException::class);
+
+        $controller->getDatabase();
     }
 
     private function createController(): KleinController
