@@ -37,6 +37,11 @@ class TranslatorsModel
 
     use TransactionalTrait;
 
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->database;
+    }
+
     /**
      * @var ?UserStruct
      */

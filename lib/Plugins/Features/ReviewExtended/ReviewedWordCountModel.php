@@ -38,6 +38,11 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
 
     use TransactionalTrait;
 
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->_database;
+    }
+
     /**
      * @var TranslationEvent
      */

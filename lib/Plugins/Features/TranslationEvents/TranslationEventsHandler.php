@@ -9,6 +9,7 @@
 namespace Plugins\Features\TranslationEvents;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -26,6 +27,11 @@ class TranslationEventsHandler
 {
 
     use TransactionalTrait;
+
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->translationEventDao->getDatabaseHandler();
+    }
 
     /**
      * @var TranslationEvent[]
