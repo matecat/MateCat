@@ -315,7 +315,7 @@ class QualitySummary
 
     protected function createQualityReportDao(): QualityReportDao
     {
-        return new QualityReportDao();
+        return new QualityReportDao($this->database);
     }
 
     protected function createFeedbackDao(): FeedbackDAO
@@ -325,7 +325,7 @@ class QualitySummary
 
     protected function createEntryDao(): EntryDao
     {
-        return new EntryDao();
+        return new EntryDao($this->database);
     }
 
     /**
@@ -335,7 +335,7 @@ class QualitySummary
      */
     protected function getReviewedWordsCountGroupedByFileParts(int $idJob, string $password, int $revisionNumber): array
     {
-        return (new JobDao())->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+        return (new JobDao($this->database))->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
     }
 
     /**

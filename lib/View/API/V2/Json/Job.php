@@ -252,7 +252,7 @@ class Job
      */
     protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
     {
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$project->id, $project->password);
+        $projectData = (new ProjectDao($this->database))->setCacheTTL(60 * 60 * 24)->getProjectData((int)$project->id, $project->password);
 
         $formatted = new ProjectUrls($projectData);
 

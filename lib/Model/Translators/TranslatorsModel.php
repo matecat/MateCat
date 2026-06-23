@@ -181,7 +181,7 @@ class TranslatorsModel
      */
     public function getTranslator(int $cache = 86400): ?JobsTranslatorsStruct
     {
-        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao($this->database);
 
         return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct($this->jStruct)[0] ?? null;
     }
@@ -194,7 +194,7 @@ class TranslatorsModel
      */
     public function update(): JobsTranslatorsStruct
     {
-        $confDao = new ConfirmationDao();
+        $confDao = new ConfirmationDao($this->database);
         $confirmationStruct = $confDao->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
@@ -204,13 +204,13 @@ class TranslatorsModel
         //create jobs_translator struct to call inside the dao
         $translatorStruct = new JobsTranslatorsStruct();
 
-        $translatorUser = (new UserDao())->setCacheTTL(60 * 60)->getByEmail($this->email);
+        $translatorUser = (new UserDao($this->database))->setCacheTTL(60 * 60)->getByEmail($this->email);
         if (!empty($translatorUser)) {
             //associate the translator with an existent user and create a profile if not exists
             $translatorStruct->id_translator_profile = $this->saveProfile($translatorUser);
         }
 
-        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao($this->database);
         if (empty($this->jobTranslator)) { // self::getTranslator() can be called from outside
             // retrieve with no cache
             $this->getTranslator(0);
@@ -280,7 +280,7 @@ class TranslatorsModel
         $profileStruct->source = $this->jStruct['source'];
         $profileStruct->target = $this->jStruct['target'];
 
-        $tProfileDao = new TranslatorsProfilesDao();
+        $tProfileDao = new TranslatorsProfilesDao($this->database);
         $existentProfileStruct = $tProfileDao->getByProfile($profileStruct);
 
         if (empty($existentProfileStruct)) {
@@ -313,7 +313,7 @@ class TranslatorsModel
         $oldPassword = $this->jStruct->password ?? throw new TypeError('JobStruct::$password cannot be null');
 
         $this->openTransaction();
-        $jobDao = new JobDao();
+        $jobDao = new JobDao($this->database);
         $jobDao->changePassword($this->jStruct, $newPassword);
         $jobDao->destroyCacheByIdAndPassword($this->jStruct);
         $this->featureSet->dispatch(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
@@ -330,7 +330,7 @@ class TranslatorsModel
             throw new InvalidArgumentException("Who invites can not be empty. Try TranslatorsModel::setUser() ");
         }
 
-        $project = (new ProjectDao())->findByJobId($this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'));
+        $project = (new ProjectDao($this->database))->findByJobId($this->jStruct->id ?? throw new TypeError('JobStruct::$id cannot be null'));
 
         if ($project === null) {
             throw new RuntimeException('Project not found for job id ' . $this->jStruct->id);

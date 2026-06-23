@@ -124,7 +124,7 @@ class MMT extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $metadataDao = new ProjectsMetadataDao();
+        $metadataDao = new ProjectsMetadataDao($this->database);
 
         $glossaries = null;
 
@@ -347,7 +347,7 @@ class MMT extends AbstractEngine
     {
         $pid = $projectRow['id'];
 
-        $metadataDao = new ProjectsMetadataDao();
+        $metadataDao = new ProjectsMetadataDao($this->database);
         $context = $metadataDao->setCacheTTL(86400)->getValue($pid, "mmt_activate_context_analyzer");
         $context_analyzer = $context ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
 
@@ -384,7 +384,7 @@ class MMT extends AbstractEngine
                     return;
                 }
 
-                $jMetadataDao = new MetadataDao();
+                $jMetadataDao = new MetadataDao($this->database);
 
                 Database::obtain()->begin();
                 foreach ($result as $langPair => $context) {
@@ -422,7 +422,7 @@ class MMT extends AbstractEngine
             }
 
             // get jobs keys
-            $project = (new ProjectDao())->findById($pid);
+            $project = (new ProjectDao($this->database))->findById($pid);
             if ($project === null) {
                 return;
             }
@@ -745,7 +745,7 @@ class MMT extends AbstractEngine
 
         // Common metadata loading
         if (!empty($id_job)) {
-            $metadataDao = new MetadataDao();
+            $metadataDao = new MetadataDao($this->database);
             $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
             $mt_context = array_pop($contextRs);

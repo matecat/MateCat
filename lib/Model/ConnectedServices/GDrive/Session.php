@@ -587,7 +587,7 @@ class Session
         $gdriveFile = $service->files->get($remoteFile->remote_id);
         $fileTitle = $gdriveFile->getName();
 
-        $job = (new JobDao())->getNotDeletedById($id_job)[0];
+        $job = (new JobDao($this->database))->getNotDeletedById($id_job)[0];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
         $remoteFileService = $this->buildRemoteFile($gClient);

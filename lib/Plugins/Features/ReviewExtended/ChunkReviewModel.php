@@ -136,7 +136,7 @@ class ChunkReviewModel implements IChunkReviewModel
      */
     protected function _updatePassFailResult(ProjectStruct $project, array $data): void
     {
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->database);
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
 
         FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
@@ -175,7 +175,7 @@ class ChunkReviewModel implements IChunkReviewModel
         /**
          * Count penalty points based on this source_page
          */
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->database);
         $this->chunk_review->penalty_points = $chunkReviewDao->getPenaltyPointsForChunk($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page);
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit($this->chunk, $this->chunk_review->source_page);
@@ -187,7 +187,7 @@ class ChunkReviewModel implements IChunkReviewModel
             $this->chunk_review->is_pass = true;
         }
 
-        $update_result = (new ChunkReviewDao())->updateStruct($this->chunk_review, [
+        $update_result = (new ChunkReviewDao($this->database))->updateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',

@@ -245,7 +245,7 @@ class Lara extends AbstractEngine
             return new GetMemoryResponse(null);
         }
 
-        $metadataDao = new MetadataDao();
+        $metadataDao = new MetadataDao($this->database);
         $laraStyle = $_config['lara_style'] ?? null;
         $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
         $laraModel = $_config['lara_model'] ?? '';
@@ -684,7 +684,7 @@ class Lara extends AbstractEngine
     {
         try {
             // get jobs keys
-            $project = (new ProjectDao())->findById($projectRow['id']);
+            $project = (new ProjectDao($this->database))->findById($projectRow['id']);
             if ($project === null) {
                 return;
             }

@@ -234,7 +234,7 @@ class TMSService
                     //retrieve OWNER EnginesFactory License
                     $uid = $user->uid ?? throw new InvalidArgumentException('User uid is required to load adaptive MT metadata');
                     $engineClassLoad = $engine->getEngineRecord()->class_load ?? throw new InvalidArgumentException('Engine class name is required to load adaptive MT metadata');
-                    $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
+                    $ownerMmtEngineMetaData = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
                     if (!empty($ownerMmtEngineMetaData)) {
                         $engineId = $ownerMmtEngineMetaData->value;
                         if (!is_numeric($engineId)) {
@@ -449,11 +449,11 @@ class TMSService
     {
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet($this->database);
 
-        $jobStruct = (new JobDao())->getByIdAndPassword($jid, $jPassword);
+        $jobStruct = (new JobDao($this->database))->getByIdAndPassword($jid, $jPassword);
         if ($jobStruct === null) {
             throw new RuntimeException("Job not found for id $jid and password $jPassword");
         }
-        $metadata = new JobsMetadataDao();
+        $metadata = new JobsMetadataDao($this->database);
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
             $featureSet,
@@ -500,7 +500,7 @@ class TMSService
                 break;
         }
 
-        $chunks = (new JobDao())->getNotDeletedById($jid);
+        $chunks = (new JobDao($this->database))->getNotDeletedById($jid);
 
         foreach ($result as $k => $row) {
             /**

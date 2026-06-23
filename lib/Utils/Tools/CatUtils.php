@@ -947,7 +947,7 @@ class CatUtils
         $extraction_parameters = null;
 
         if ($filtersTemplateId > 0) {
-            $filtersDao ??= new FiltersConfigTemplateDao();
+            $filtersDao ??= new FiltersConfigTemplateDao($this->database);
             $filtersTemplateStruct = $filtersDao->getById($filtersTemplateId);
 
             if ($filtersTemplateStruct !== null) {
