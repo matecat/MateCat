@@ -80,7 +80,7 @@ class ConvertFileControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('featureSet', new FeatureSet(\Model\DataAccess\Database::obtain()));
     }
 
     protected function tearDown(): void
