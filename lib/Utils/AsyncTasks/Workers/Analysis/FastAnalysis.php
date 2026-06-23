@@ -101,7 +101,7 @@ class FastAnalysis extends AbstractDaemon
      * the Database singleton is resolved, then threaded into the DAOs this
      * daemon builds.
      */
-    private function db(): IDatabase
+    protected function db(): IDatabase
     {
         return $this->db ??= Database::obtain();
     }
@@ -138,7 +138,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _checkDatabaseConnection(): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
         if (!$db instanceof Database) {
             return;
         }
@@ -296,7 +296,7 @@ class FastAnalysis extends AbstractDaemon
                     /**
                      * Ensure we have fresh data from the master node
                      */
-                    $metadataResult = Database::obtain()->transaction(function () use ($pid) {
+                    $metadataResult = $this->db()->transaction(function () use ($pid) {
                         $projectStruct = $this->getProjectDao()->findById($pid);
                         if ($projectStruct === null) {
                             return null;
@@ -400,7 +400,7 @@ class FastAnalysis extends AbstractDaemon
             $this->logger->debug("Error Fetching data from disk. Fallback to database.");
 
             try {
-                $this->segments = self::_getSegmentsForFastVolumeAnalysis($pid);
+                $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
             } catch (PDOException) {
                 throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
@@ -480,7 +480,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _updateProject(int $pid, string $status): void
     {
-        Database::obtain()->transaction(function () use ($pid, $status) {
+        $this->db()->transaction(function () use ($pid, $status) {
             $project = $this->getProjectDao()->findById($pid);
             if ($project === null) {
                 $this->logger->debug("*** Project $pid: not found. Skip update.");
@@ -508,7 +508,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _executeInsert(array $tuple_list, array $bind_values): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
         $query_st = "INSERT INTO `segment_translations` ( 
                                       id_job, 
                                       id_segment, 
@@ -661,7 +661,7 @@ class FastAnalysis extends AbstractDaemon
         $where = ["id" => $pid];
 
         try {
-            $project_creation_success = Database::obtain()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
+            $project_creation_success = $this->db()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
                 /*
                  * IF NO TM ANALYSIS, update the jobs global word count
                  */
@@ -680,7 +680,7 @@ class FastAnalysis extends AbstractDaemon
                 }
                 /* IF NO TM ANALYSIS, upload the jobs global word count */
 
-                return Database::obtain()->update('projects', $data2, $where);
+                return $this->db()->update('projects', $data2, $where);
             });
         } catch (PDOException $e) {
             $this->logger->debug($e->getMessage());
@@ -865,7 +865,7 @@ class FastAnalysis extends AbstractDaemon
      * @return array<int, array<string, mixed>>
      * @throws Exception
      */
-    protected static function _getSegmentsForFastVolumeAnalysis(int $pid): array
+    protected function _getSegmentsForFastVolumeAnalysis(int $pid): array
     {
         //with this query, we decide what segments
         //must be inserted in the segment_translations table
@@ -892,7 +892,7 @@ class FastAnalysis extends AbstractDaemon
             ORDER BY s.id
 HD;
 
-        $db = Database::obtain();
+        $db = $this->db();
         try {
             $stmt = $db->getConnection()->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -1005,7 +1005,7 @@ HD;
             GROUP BY p.id
         ORDER BY id LIMIT " . $limit;
 
-        $db = Database::obtain();
+        $db = $this->db();
         // Needed to address the query to the master database if exists
         $results = $db->transaction(function () use ($db, $query, $bindParams) {
             $stmt = $db->getConnection()->prepare($query);
