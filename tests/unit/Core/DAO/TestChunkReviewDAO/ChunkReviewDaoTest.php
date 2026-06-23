@@ -796,6 +796,14 @@ class ChunkReviewDaoTest extends AbstractTest
             ->method('getConnection')
             ->willReturn($injectedPdo);
 
+        // Poison the singleton: it must NEVER be touched. Any Database::obtain()
+        // fallback (full revert OR a partial/mixed path) hits this mock and trips
+        // the never() expectation — a clean, deterministic failure that does not
+        // depend on the permissive createDatabaseMock stub installed in setUp.
+        $poison = $this->createMock(IDatabase::class);
+        $poison->expects($this->never())->method('getConnection');
+        $this->setDatabaseInstance($poison);
+
         $dao = new ChunkReviewDao($injectedDb);
         $dao->updatePassword(1, 'old', 'new');
     }

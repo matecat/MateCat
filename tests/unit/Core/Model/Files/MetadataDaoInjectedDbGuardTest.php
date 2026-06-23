@@ -3,13 +3,11 @@
 namespace Matecat\Core\Model\Files;
 
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Files\MetadataDao;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
-use ReflectionClass;
 
 class MetadataDaoInjectedDbGuardTest extends AbstractTest
 {
@@ -36,15 +34,14 @@ class MetadataDaoInjectedDbGuardTest extends AbstractTest
             ->method('getConnection')
             ->willReturn($pdoStub);
 
-        // Poison the singleton so any Database::obtain() call would return a
-        // different object — proving the DAO uses the injected $db instead.
-        $poisonPdo = $this->createStub(PDO::class);
-        $poisonDb  = $this->createStub(IDatabase::class);
-        $poisonDb->method('getConnection')->willReturn($poisonPdo);
-
-        $ref  = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $poisonDb);
+        // Poison the singleton: it must NEVER be touched. Any Database::obtain()
+        // fallback (full revert OR a partial/mixed path) hits this mock and trips
+        // the never() expectation — a clean, deterministic failure that does not
+        // depend on the real test DB schema. setDatabaseInstance() (not raw
+        // reflection) sets the reset flag so tearDown restores the real DB.
+        $poison = $this->createMock(IDatabase::class);
+        $poison->expects($this->never())->method('getConnection');
+        $this->setDatabaseInstance($poison);
 
         $dao = new MetadataDao($db);
         $dao->insert(1, 1, 'k', 'v');

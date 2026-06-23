@@ -28,6 +28,14 @@ class ChunkCompletionUpdateDaoInjectedDbGuardTest extends AbstractTest
             ->method('getConnection')
             ->willReturn($injectedPdo);
 
+        // Poison the singleton: it must NEVER be touched. Any Database::obtain()
+        // fallback (full revert OR a partial/mixed path) hits this mock and trips
+        // the never() expectation — a clean, deterministic failure that does not
+        // depend on the real test DB schema.
+        $poison = $this->createMock(IDatabase::class);
+        $poison->expects($this->never())->method('getConnection');
+        $this->setDatabaseInstance($poison);
+
         $dao = new ChunkCompletionUpdateDao($injectedDb);
         $dao->updatePassword(1, 'old', 'new');
     }
