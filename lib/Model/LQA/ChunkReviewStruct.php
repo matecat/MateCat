@@ -4,8 +4,11 @@ namespace Model\LQA;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use ReflectionException;
+use Throwable;
 use Utils\Tools\Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
@@ -40,6 +43,9 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * @param JobDao $jobDao
      *
      * @return JobStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Throwable
      */
     public function getChunk(JobDao $jobDao): JobStruct
     {
