@@ -17,6 +17,8 @@ use Model\LQA\EntryCommentDao;
 use Model\Projects\ProjectDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
+use Model\LQA\EntryValidator;
+use Model\Translations\SegmentTranslationDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Users\UserDao;
@@ -150,11 +152,17 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $oldStruct->setDefaults();
+        $oldStruct->setDefaults(
+            new EntryValidator( $oldStruct, database: $this->getDatabase() ),
+            new SegmentTranslationDao( $this->getDatabase() )
+        );
 
         $newStruct     = new EntryStruct( $data );
         $newStruct->id = $data[ 'id_issue' ];
-        $newStruct->setDefaults();
+        $newStruct->setDefaults(
+            new EntryValidator( $newStruct, database: $this->getDatabase() ),
+            new SegmentTranslationDao( $this->getDatabase() )
+        );
 
         // remove old issue
         $model = $this->_getSegmentTranslationIssueModel(

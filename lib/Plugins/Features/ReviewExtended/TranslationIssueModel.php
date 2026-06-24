@@ -16,10 +16,13 @@ use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
+use Model\LQA\EntryValidator;
 use Model\Projects\ProjectDao;
+use Model\Translations\SegmentTranslationDao;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Throwable;
 use TypeError;
 use Utils\Tools\Utils;
 
@@ -63,7 +66,7 @@ class TranslationIssueModel
      * @param ProjectDao            $projectDao
      *
      * @throws Exception
-     * @throws TypeError
+     * @throws TypeError|Throwable
      */
     public function __construct(
         int $id_job,
@@ -117,7 +120,7 @@ class TranslationIssueModel
         }
 
         $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->issue->setDefaults();
+        $this->applyIssueDefaults();
         $this->entryDao->modifyEntry($this->issue);
 
         // update score
@@ -152,13 +155,28 @@ class TranslationIssueModel
         }
 
         $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->issue->setDefaults();
+        $this->applyIssueDefaults();
         $this->entryDao->createEntry($this->issue);
 
         $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
         $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
 
         return $this->issue;
+    }
+
+    /**
+     * Builds the issue collaborators from the live database handle and applies defaults.
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function applyIssueDefaults(): void
+    {
+        $db = $this->chunkReviewDao->getDatabaseHandler();
+        $this->issue->setDefaults(
+            new EntryValidator($this->issue, database: $db),
+            new SegmentTranslationDao($db)
+        );
     }
 
     /**

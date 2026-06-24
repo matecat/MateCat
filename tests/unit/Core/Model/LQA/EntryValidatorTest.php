@@ -3,6 +3,7 @@
 namespace Matecat\Core\Model\LQA;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
@@ -77,7 +78,7 @@ class EntryValidatorTest extends AbstractTest
         ModelDao    $modelDao,
         CategoryDao $categoryDao
     ): EntryValidator {
-        return new EntryValidator($struct, $segmentDao, $jobDao, $projectDao, $modelDao, $categoryDao);
+        return new EntryValidator($struct, Database::obtain(), $segmentDao, $jobDao, $projectDao, $modelDao, $categoryDao);
     }
 
     // ─── isValid ────────────────────────────────────────────────────────

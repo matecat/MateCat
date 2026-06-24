@@ -9,6 +9,7 @@ use Model\Exceptions\NotFoundException;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
+use Model\LQA\EntryValidator;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
@@ -121,6 +122,6 @@ class SegmentTranslationIssueValidator extends Base
             throw new ValidationError('issue not found');
         }
 
-        $this->issue->ensureValid();
+        $this->issue->ensureValid(new EntryValidator($this->issue, database: $this->controller->getDatabase()));
     }
 }
