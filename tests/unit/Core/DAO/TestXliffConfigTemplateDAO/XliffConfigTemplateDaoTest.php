@@ -3,6 +3,7 @@
 namespace Matecat\Core\DAO\TestXliffConfigTemplateDAO;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Xliff\XliffConfigTemplateDao;
 use Model\Xliff\XliffConfigTemplateStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -17,7 +18,7 @@ class XliffConfigTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new XliffConfigTemplateDao();
+        $this->dao = new XliffConfigTemplateDao(Database::obtain());
         $this->createdIds = [];
     }
 
