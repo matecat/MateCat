@@ -716,6 +716,7 @@ const ContextPreview = () => {
             </span>
           )}
         {contentView === CONTENT_VIEWS.LIVE_PREVIEW &&
+          !highlightHidden &&
           highlight?.mode === 'node' &&
           highlight.sids.length > 1 &&
           !hasMismatch && (
@@ -723,7 +724,7 @@ const ContextPreview = () => {
               {highlight.sids.length} segments share this element
             </span>
           )}
-        {contentView === CONTENT_VIEWS.LIVE_PREVIEW && hasMismatch && (
+        {contentView === CONTENT_VIEWS.LIVE_PREVIEW && !highlightHidden && hasMismatch && (
           <span className="context-preview-hidden-warning">
             Duplicate segments with conflicting translations
           </span>
