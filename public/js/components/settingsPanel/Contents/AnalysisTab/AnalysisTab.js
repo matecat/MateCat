@@ -104,7 +104,7 @@ export const AnalysisTab = () => {
                 ...acc,
                 [cur]: {
                   ...objectValue[cur],
-                  ...(name !== 'MT' && {[name]: value}),
+                  ...(name !== ANALYSIS_BREAKDOWNS.mt && {[name]: value}),
                 },
               }
             }, {})
@@ -129,13 +129,7 @@ export const AnalysisTab = () => {
 
       return {
         ...prevTemplate,
-        breakdowns /*: {
-          ...prevTemplate.breakdowns,
-          default: {
-            ...prevTemplate.breakdowns.default,
-            [name]: value,
-          },
-        },*/,
+        breakdowns,
       }
     })
   }
@@ -216,18 +210,24 @@ export const AnalysisTab = () => {
 
   // Select billing model template when curren project template change
   useEffect(() => {
-    if (
-      currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current &&
-      typeof prevCurrentProjectTemplateId.current === 'number'
-    ) {
-      setTemplates((prevState) =>
-        prevState.map((template) => ({
+    if (currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current) {
+      const selectedTemplateId =
+        typeof currentProjectTemplateBillingId === 'number'
+          ? currentProjectTemplateBillingId
+          : 0
+      setTemplates((prevState) => {
+        const hasTemporaryForSelectedId = prevState.some(
+          (t) => t.id === selectedTemplateId && t.isTemporary,
+        )
+        return prevState.map((template) => ({
           ...template,
           isSelected:
-            template.id === currentProjectTemplateBillingId &&
-            !template.isTemporary,
-        })),
-      )
+            template.id === selectedTemplateId &&
+            (hasTemporaryForSelectedId
+              ? template.isTemporary
+              : !template.isTemporary),
+        }))
+      })
     }
 
     prevCurrentProjectTemplateId.current = currentProjectTemplate?.id

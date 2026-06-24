@@ -147,17 +147,24 @@ export const QualityFrameworkTab = () => {
 
   // Select QF template when curren project template change
   useEffect(() => {
-    if (
-      currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current &&
-      typeof prevCurrentProjectTemplateId.current === 'number'
-    ) {
-      setTemplates((prevState) =>
-        prevState.map((template) => ({
+    if (currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current) {
+      const selectedTemplateId =
+        typeof currentProjectTemplateQaId === 'number'
+          ? currentProjectTemplateQaId
+          : 0
+      setTemplates((prevState) => {
+        const hasTemporaryForSelectedId = prevState.some(
+          (t) => t.id === selectedTemplateId && t.isTemporary,
+        )
+        return prevState.map((template) => ({
           ...template,
           isSelected:
-            template.id === currentProjectTemplateQaId && !template.isTemporary,
-        })),
-      )
+            template.id === selectedTemplateId &&
+            (hasTemporaryForSelectedId
+              ? template.isTemporary
+              : !template.isTemporary),
+        }))
+      })
     }
 
     prevCurrentProjectTemplateId.current = currentProjectTemplate?.id
