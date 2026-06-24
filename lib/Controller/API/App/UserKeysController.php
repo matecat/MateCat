@@ -115,7 +115,7 @@ class UserKeysController extends KleinController
 
         $userMemoryKeys = $mkDao->read($memoryKeyToUpdate) ?: throw new NotFoundException("No user memory keys found");
 
-        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user);
+        (new TmKeyManager())->shareKey(array_values($emailList), $userMemoryKeys[0], $this->user, $this->getDatabase());
 
         $this->response->json([
             'errors' => [],

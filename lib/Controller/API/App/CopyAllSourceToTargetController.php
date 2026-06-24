@@ -10,6 +10,7 @@ use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
@@ -142,7 +143,7 @@ class CopyAllSourceToTargetController extends KleinController
         }
 
         // save all events
-        $batchEventCreator->save(new BatchReviewProcessor());
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->getDatabase())));
 
         $data = [
             'code' => 1,

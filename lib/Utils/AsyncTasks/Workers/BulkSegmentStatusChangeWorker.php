@@ -7,6 +7,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
@@ -110,7 +111,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $segmentTranslationDao->updateTranslationAndStatusAndDateByList($new_translations);
 
-        $batchEventCreator->save(new BatchReviewProcessor());
+        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database)));
 
         $this->_doLog('completed');
 

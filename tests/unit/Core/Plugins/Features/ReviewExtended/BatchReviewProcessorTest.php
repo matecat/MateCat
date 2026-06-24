@@ -96,13 +96,6 @@ class BatchReviewProcessorTest extends AbstractTest
     }
 
     #[Test]
-    public function constructorUsesDefaultDaoWhenNoneProvided(): void
-    {
-        $processor = new BatchReviewProcessor();
-        $this->assertInstanceOf(BatchReviewProcessor::class, $processor);
-    }
-
-    #[Test]
     public function setChunkReturnsSelf(): void
     {
         $processor = new BatchReviewProcessor($this->chunkReviewDaoStub);

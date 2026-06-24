@@ -6,6 +6,7 @@ use Exception;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -292,7 +293,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
     protected function createBatchReviewProcessor(): BatchReviewProcessor
     {
-        return new BatchReviewProcessor();
+        return new BatchReviewProcessor(new ChunkReviewDao($this->jobDao->getDatabaseHandler()));
     }
 
 }

@@ -49,7 +49,7 @@ class BatchReviewProcessor
     private Closure $chunkReviewModelFactory;
 
     public function __construct(
-        private ChunkReviewDao $chunkReviewDao = new ChunkReviewDao(),
+        private readonly ChunkReviewDao $chunkReviewDao,
         ?Closure $reviewedWordCountModelFactory = null,
         ?Closure $chunkReviewModelFactory = null,
     ) {

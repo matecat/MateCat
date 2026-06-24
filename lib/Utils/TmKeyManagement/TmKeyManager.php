@@ -5,6 +5,7 @@ namespace Utils\TmKeyManagement;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
@@ -583,14 +584,15 @@ class TmKeyManager
      * @param list<string> $emailList
      * @param MemoryKeyStruct $memoryKeyToUpdate
      * @param UserStruct $user
+     * @param IDatabase $database
      *
      * @throws Exception
      * @throws \TypeError
      */
-    public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user): void
+    public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user, IDatabase $database): void
     {
-        $mkDao = new MemoryKeyDao();
-        $userDao = new UserDao();
+        $mkDao = new MemoryKeyDao($database);
+        $userDao = new UserDao($database);
 
         foreach ($emailList as $email) {
             $userQuery = UserStruct::getStruct();
