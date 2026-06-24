@@ -2329,12 +2329,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
 		-
-			message: '#^Method Utils\\TMS\\TMSService\:\:uploadFile\(\) invoked with 0 parameters, 1\-2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
-
-		-
 			message: '#^Property Model\\TmKeyManagement\\MemoryKeyStruct\:\:\$uid \(int\) does not accept int\|null\.$#'
 			identifier: assign.propertyType
 			count: 2

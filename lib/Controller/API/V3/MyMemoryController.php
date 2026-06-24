@@ -93,7 +93,7 @@ class MyMemoryController extends KleinController
      */
     private function checkTheKeyAndAssignToUser(string $key, string $name): string
     {
-        $tmxHandler = new TMSService();
+        $tmxHandler = new TMSService($this->getDatabase());
         $keyExists = $tmxHandler->checkCorrectKey($key);
 
         if ($keyExists === false) {

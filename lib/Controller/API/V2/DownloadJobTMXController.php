@@ -85,7 +85,7 @@ class DownloadJobTMXController extends AbstractDownloadController
         $source = $jobData['source'];
         $target = $jobData['target'];
 
-        $tmsService = new TMSService($this->featureSet);
+        $tmsService = new TMSService($this->getDatabase(), $this->featureSet);
 
         switch ($type) {
             case 'csv':

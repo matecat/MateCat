@@ -205,7 +205,7 @@ class UserKeysController extends KleinController
      */
     private function getMemoryToUpdate(string $key, ?string $description = null): MemoryKeyStruct
     {
-        $tmService = new TMSService();
+        $tmService = new TMSService($this->getDatabase());
 
         //validate the key
         $tmService->checkCorrectKey($key);

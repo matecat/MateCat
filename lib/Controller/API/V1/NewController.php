@@ -913,7 +913,7 @@ class NewController extends KleinController
             //from api a key is sent and the value is 'new'
             if ($tm_key['key'] == 'new') {
                 try {
-                    $APIKeySrv = new TMSService();
+                    $APIKeySrv = new TMSService($this->getDatabase());
                     $newUser = $APIKeySrv->createMyMemoryKey();
 
                     $private_tm_user = $newUser->id;

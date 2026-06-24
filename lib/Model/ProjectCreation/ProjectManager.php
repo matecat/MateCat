@@ -118,10 +118,10 @@ class ProjectManager
 
         $this->projectStructure = $projectStructure;
 
-        //get the TMX management component from the factory
-        $this->tmxServiceWrapper = new TMSService();
-
         $this->dbHandler = $dbHandler;
+
+        //get the TMX management component from the factory
+        $this->tmxServiceWrapper = new TMSService($this->dbHandler);
 
         $this->features = new FeatureSet($this->dbHandler, $this->getRequestedFeatures());
 

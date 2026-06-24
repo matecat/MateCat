@@ -8,20 +8,17 @@ use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Conversion\Upload;
-use Model\Conversion\UploadElement;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
-use SplFileInfo;
 use SplTempFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
@@ -38,25 +35,19 @@ use Utils\Tools\Utils;
 
 class TMSService
 {
+    public const string OUTPUT_TRANSLATION = 'translation';
+    public const string OUTPUT_TM          = 'tm';
+    public const string OUTPUT_MT          = 'mt';
 
-    /**
-     * @var FeatureSet|null
-     */
-    protected ?FeatureSet $featureSet;
+    protected FeatureSet $featureSet;
 
-    /**
-     * @var string The name of the uploaded TMX
-     */
+    /** @var string The name of the uploaded TMX */
     protected string $name = '';
 
-    /**
-     * @var MyMemory
-     */
     protected MyMemory $mymemory_engine;
-
     private string $output_type;
-    protected MatecatLogger $logger;
-    protected IDatabase $database;
+    private MatecatLogger $logger;
+    private IDatabase $database;
     private ?TMSServiceDao $tmsServiceDao = null;
 
     private function getTmsServiceDao(): TMSServiceDao
@@ -66,14 +57,14 @@ class TMSService
 
     /**
      *
+     * @param IDatabase $database
      * @param FeatureSet|null $featureSet
-     * @param IDatabase|null $database
      *
      * @throws Exception
      */
-    public function __construct(?FeatureSet $featureSet = null, ?IDatabase $database = null)
+    public function __construct(IDatabase $database, ?FeatureSet $featureSet = null)
     {
-        $this->database = $database ?? Database::obtain();
+        $this->database = $database;
 
         //get MyMemory service
         $mymemory_engine = EnginesFactory::getInstance(1, MyMemory::class);
@@ -84,7 +75,7 @@ class TMSService
 
         $this->mymemory_engine = $mymemory_engine;
 
-        $this->output_type = 'translation';
+        $this->output_type = self::OUTPUT_TRANSLATION;
         $this->featureSet = $featureSet ?? new FeatureSet($this->database);
 
         $this->logger = LoggerFactory::getLogger('engines');
@@ -134,22 +125,6 @@ class TMSService
         }
 
         return $newUser;
-    }
-
-    /**
-     * Saves the uploaded file and returns the file info.
-     *
-     * @param array<string, mixed> $files Raw files array (e.g. from $request->files()->all()).
-     * @param bool $disable_upload_limit
-     *
-     * @return UploadElement
-     * @throws Exception
-     */
-    public function uploadFile(array $files, ?bool $disable_upload_limit = false): UploadElement
-    {
-        $uploadManager = new Upload();
-
-        return $uploadManager->uploadFiles($files, $disable_upload_limit);
     }
 
     /**
@@ -311,6 +286,8 @@ class TMSService
     {
         $allMemories = $this->mymemory_engine->getImportStatus($uuid);
 
+        $result = ['data' => [], 'completed' => false];
+
         if ($allMemories->responseStatus >= 400 || $allMemories->responseData['status'] == 2) {
             $this->logger->debug("Error response from TMX status check: " . $allMemories->responseData['log']);
             //what the hell? No memories, although I've just loaded some? Eject!
@@ -440,16 +417,18 @@ class TMSService
      *
      * @param int|null $uid
      *
-     * @return SplTempFileObject $tmpFile
+     * @return SplTempFileObject
      *
      * @throws ReflectionException
      * @throws Exception
+     * @throws \PDOException
      */
-    public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, ?int $uid = null): SplFileInfo
+    public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, ?int $uid = null): SplTempFileObject
     {
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet($this->database);
+        $featureSet = $this->featureSet;
 
-        $jobStruct = (new JobDao($this->database))->getByIdAndPassword($jid, $jPassword);
+        $jobDao    = new JobDao($this->database);
+        $jobStruct = $jobDao->getByIdAndPassword($jid, $jPassword);
         if ($jobStruct === null) {
             throw new RuntimeException("Job not found for id $jid and password $jPassword");
         }
@@ -462,7 +441,7 @@ class TMSService
             [],
             $metadata->getSubfilteringCustomHandlers($jid, $jPassword)
         );
-        $tmpFile = new SplTempFileObject(15 * 1024 * 1024 /* 5MB */);
+        $tmpFile = new SplTempFileObject(15 * 1024 * 1024 /* 15MB */);
 
         $tmpFile->fwrite(
             '<?xml version="1.0" encoding="UTF-8"?>
@@ -486,51 +465,26 @@ class TMSService
         $hideUnconfirmedRows = true;
 
         switch ($this->output_type) {
-            case 'mt' :
+            case self::OUTPUT_MT:
                 $hideUnconfirmedRows = false;
                 $result = $this->getTmsServiceDao()->getMTForTMXExport($jid, $jPassword);
                 break;
-            case 'tm' :
+            case self::OUTPUT_TM:
                 $hideUnconfirmedRows = false;
                 $result = $this->getTmsServiceDao()->getTMForTMXExport($jid, $jPassword);
                 break;
-            case 'translation':
+            case self::OUTPUT_TRANSLATION:
             default:
                 $result = $this->getTmsServiceDao()->getTranslationsForTMXExport($jid, $jPassword);
                 break;
         }
 
-        $chunks = (new JobDao($this->database))->getNotDeletedById($jid);
+        $chunks = $jobDao->getNotDeletedById($jid);
 
         foreach ($result as $k => $row) {
-            /**
-             * Evaluate the incremental chunk index.
-             * If there's more than 1 chunk, add an 'id_chunk' prop to the segment
-             */
-            $idChunk = 1;
-            $chunkPropString = '';
-            if (count($chunks) > 1) {
-                foreach ($chunks as $i => $chunk) {
-                    if ($row['id_segment'] >= $chunk->job_first_segment &&
-                        $row['id_segment'] <= $chunk->job_last_segment
-                    ) {
-                        $idChunk = $i + 1;
-                        break;
-                    }
-                }
-                $chunkPropString = '<prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>';
-            }
-            $dateCreate = new DateTime($row['translation_date'] ?? 'now', new DateTimeZone('UTC'));
-
-            $tmOrigin = "";
-            if (str_contains($this->output_type, 'tm')) {
-                $suggestionsArray = json_decode($row['suggestions_array'], true);
-                $suggestionOrigin = Utils::changeMemorySuggestionSource($suggestionsArray[0], $row['tm_keys'], $uid);
-                $tmOrigin = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
-                if (preg_match("/[a-f0-9]{8,}/", $suggestionsArray[0]['memory_key'])) {
-                    $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[0]['memory_key'] . "</prop>";
-                }
-            }
+            $chunkPropString = $this->buildChunkProp($chunks, (int)$row['id_segment']);
+            $tmOrigin        = $this->buildTmOriginProp($row, $uid);
+            $dateCreate      = new DateTime($row['translation_date'] ?? 'now', new DateTimeZone('UTC'));
 
             $contextPre = (isset($result[($k - 1)])) ? $result[($k - 1)]['segment'] : '';
             $contextPost = (isset($result[($k + 1)])) ? $result[($k + 1)]['segment'] : '';
@@ -584,6 +538,51 @@ class TMSService
     }
 
     /**
+     * Builds the optional `x-MateCAT-id_chunk` prop. Empty string for single-chunk jobs.
+     *
+     * @param JobStruct[] $chunks
+     */
+    private function buildChunkProp(array $chunks, int $idSegment): string
+    {
+        if (count($chunks) <= 1) {
+            return '';
+        }
+
+        $idChunk = 1;
+        foreach ($chunks as $i => $chunk) {
+            if ($idSegment >= $chunk->job_first_segment && $idSegment <= $chunk->job_last_segment) {
+                $idChunk = (int)$i + 1;
+                break;
+            }
+        }
+
+        return '<prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>';
+    }
+
+    /**
+     * Builds the `x-MateCAT-suggestion-origin` props. Empty string unless exporting a TM.
+     *
+     * @param array<string, mixed> $row
+     *
+     * @throws Exception
+     */
+    private function buildTmOriginProp(array $row, ?int $uid): string
+    {
+        if ($this->output_type !== self::OUTPUT_TM) {
+            return '';
+        }
+
+        $suggestionsArray = json_decode($row['suggestions_array'], true);
+        $suggestionOrigin = Utils::changeMemorySuggestionSource($suggestionsArray[0], $row['tm_keys'], $uid);
+        $tmOrigin = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
+        if (preg_match("/[a-f0-9]{8,}/", $suggestionsArray[0]['memory_key'])) {
+            $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[0]['memory_key'] . "</prop>";
+        }
+
+        return $tmOrigin;
+    }
+
+    /**
      * Export Job as CSV File
      *
      * @param int $jid
@@ -591,7 +590,7 @@ class TMSService
      * @param string $sourceLang
      * @param string $targetLang
      *
-     * @return SplTempFileObject $tmpFile
+     * @return SplTempFileObject
      *
      * @throws RuntimeException
      * @throws \PDOException
