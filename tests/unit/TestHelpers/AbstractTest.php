@@ -43,6 +43,17 @@ abstract class AbstractTest extends TestCase
         if ($this->databaseMockApplied) {
             $this->resetDatabaseMock();
             $this->databaseMockApplied = false;
+        } else {
+            // Roll back any transaction a test left open on the shared connection.
+            // Without this, a DAO that throws inside an open tx (e.g. once the
+            // AbstractDao ctor requires a non-null IDatabase) orphans the tx on the
+            // singleton -> innodb_lock_wait cascade into the next test's setUp.
+            // rollback() is a no-op when no transaction is active; teardown cleanup
+            // must never mask the test result, so swallow any error.
+            try {
+                Database::obtain()->rollback();
+            } catch (\Throwable) {
+            }
         }
 
         parent::tearDown();
