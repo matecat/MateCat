@@ -190,7 +190,7 @@ class CattoolController extends BaseKleinViewController
             'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->source)),
             'isTargetRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->target)),
             'jobOwnerIsMe' => new PHPTalBoolean($jobOwnership['jobOwnerIsMe']),
-            'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplitted(new JobDao($this->getDatabase()))),
+            'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplit(new JobDao($this->getDatabase()))),
             'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories(new CategoryDao($this->getDatabase())) : []),
             'lqa_flat_categories' => new PHPTalMap($model ? $this->getCategoriesAsJson($model) : []),
             'maxFileSize' => AppConfig::$MAX_UPLOAD_FILE_SIZE,

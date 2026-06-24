@@ -287,7 +287,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @return bool
      * @throws Exception
      */
-    public function isSplitted(JobDao $dao): bool
+    public function isSplit(JobDao $dao): bool
     {
         return count($this->getChunks($dao)) > 1;
     }

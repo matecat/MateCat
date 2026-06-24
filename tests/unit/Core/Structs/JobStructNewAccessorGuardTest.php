@@ -124,7 +124,7 @@ class JobStructNewAccessorGuardTest extends AbstractTest
         $this->setDatabaseInstance($poison);
 
         // After T1: isSplitted(JobDao $dao)
-        $result = $this->struct->isSplitted($dao);
+        $result = $this->struct->isSplit($dao);
 
         $this->assertTrue($result);
     }
@@ -144,7 +144,7 @@ class JobStructNewAccessorGuardTest extends AbstractTest
         $poison->expects($this->never())->method('getConnection');
         $this->setDatabaseInstance($poison);
 
-        $result = $this->struct->isSplitted($dao);
+        $result = $this->struct->isSplit($dao);
 
         $this->assertFalse($result);
     }
