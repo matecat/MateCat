@@ -178,8 +178,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->userDaoMock->method('getByUid')->with(42)->willReturn($user);
 
         $apiRecord = new ApiKeyStruct(
-            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
-            $this->userDaoMock
+            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 
@@ -198,8 +197,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
         $this->userDaoMock->method('getByUid')->willReturn(null);
 
         $apiRecord = new ApiKeyStruct(
-            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
-            $this->userDaoMock
+            ['api_key' => 'k1', 'api_secret' => 's1', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 
@@ -214,8 +212,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     public function constructorWithInvalidSecretDoesNotSetUser(): void
     {
         $apiRecord = new ApiKeyStruct(
-            ['api_key' => 'k1', 'api_secret' => 'real_secret', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01'],
-            $this->userDaoMock
+            ['api_key' => 'k1', 'api_secret' => 'real_secret', 'uid' => 42, 'enabled' => true, 'create_date' => '2024-01-01', 'last_update' => '2024-01-01']
         );
         $this->apiKeyDaoMock->method('findByKey')->with('k1')->willReturn($apiRecord);
 

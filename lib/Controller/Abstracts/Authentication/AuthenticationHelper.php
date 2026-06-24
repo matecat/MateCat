@@ -98,7 +98,7 @@ class AuthenticationHelper
     {
         try {
             if ($this->validKeys($api_key, $api_secret) && $this->api_record !== null) {
-                $user = $this->api_record->getUser();
+                $user = $this->api_record->getUser($this->userDao);
                 if ($user !== null) {
                     $this->user = $user;
                 }
