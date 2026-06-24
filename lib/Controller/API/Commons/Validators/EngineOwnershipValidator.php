@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
- * Date: 19/08/25
- * Time: 18:06
- *
- */
 
 namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 
@@ -19,13 +13,12 @@ use Utils\Engines\EnginesFactory;
 class EngineOwnershipValidator extends Base
 {
 
-
     private int $engineId;
-    private ?string $engineClass;
 
-    /**
-     * @var T
-     */
+    /** @var class-string<T> */
+    private string $engineClass;
+
+    /** @var T */
     private AbstractEngine $engine;
 
     /**
@@ -40,9 +33,20 @@ class EngineOwnershipValidator extends Base
         $this->engineClass = $engineClass;
     }
 
+    /**
+     * @throws AuthorizationError
+     * @throws \Exception
+     */
     protected function _validate(): void
     {
-        $this->engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $this->controller->getUser()->uid, $this->engineClass);
+        $user = $this->controller->getUser();
+        if ($user->uid === null) {
+            throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
+        }
+
+        /** @var T $engine */
+        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $user->uid, $this->engineClass);
+        $this->engine = $engine;
     }
 
     /**

@@ -15,9 +15,9 @@ class UserMetadata
 {
 
     /**
-     * @param $collection MetadataStruct[]
+     * @param MetadataStruct[]|null $collection
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public static function renderMetadataCollection(?array $collection = null): array
     {

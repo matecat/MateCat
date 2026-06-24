@@ -60,7 +60,7 @@ class ProjectPasswordValidator extends Base
             throw new NotFoundException("No project found.", 404);
         }
 
-        $this->project = ProjectDao::findByIdAndPassword(
+        $this->project = (new ProjectDao($this->controller->getDatabase()))->findByIdAndPassword(
             $this->id_project,
             $this->password
         );

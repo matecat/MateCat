@@ -9,8 +9,8 @@ class FilesPartsStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
     public ?int $id = null;
-    public int $id_file;
-    public string $tag_key;
-    public string $tag_value;
+    public ?int $id_file = null;
+    public ?string $tag_key = null;
+    public ?string $tag_value = null;
 
 }

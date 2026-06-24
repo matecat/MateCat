@@ -1,0 +1,14 @@
+<?php
+
+namespace Orhanerday\OpenAi;
+
+class OpenAi
+{
+    /**
+     * @param array<string, mixed> $opts
+     * @param callable|null $stream
+     * @return bool|string
+     * @throws \Exception
+     */
+    public function chat(array $opts, ?callable $stream = null): bool|string {}
+}

@@ -16,7 +16,7 @@ class NotFoundException extends \Model\Exceptions\NotFoundException
 {
 
     // Redefine the exception so message isn't optional
-    public function __construct($message = null, $code = 404, Exception $previous = null)
+    public function __construct(string $message = '', int $code = 404, ?Exception $previous = null)
     {
         // make sure everything is assigned properly
         parent::__construct($message, $code, $previous);

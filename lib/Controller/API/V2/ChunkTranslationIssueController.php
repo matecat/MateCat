@@ -13,18 +13,22 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\LQA\EntryDao;
+use RuntimeException;
 use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 
 class ChunkTranslationIssueController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
+    /**
+     * @throws RuntimeException
+     */
     public function index(): void
     {
         $this->return404IfTheJobWasDeleted();
 
         // find all issues by chunk and return the json representation.
-        $result = EntryDao::findAllByChunk($this->chunk);
+        $result = (new EntryDao($this->getDatabase()))->findAllByChunk($this->chunk);
 
         $json = new JsonFormatter();
         $rendered = $json->render($result);
@@ -32,7 +36,7 @@ class ChunkTranslationIssueController extends KleinController
         $this->response->json(['issues' => $rendered]);
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $Validator = new ChunkPasswordValidator($this);

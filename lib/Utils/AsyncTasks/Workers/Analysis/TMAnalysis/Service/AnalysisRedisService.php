@@ -16,6 +16,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct(AMQHandler $queueHandler)
     {

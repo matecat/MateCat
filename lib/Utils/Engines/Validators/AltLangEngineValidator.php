@@ -15,20 +15,23 @@ use Utils\Engines\Altlang;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
-use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class AltLangEngineValidator extends AbstractValidator
 {
 
     /**
      * @param EngineValidatorObject $object
-     * @return ValidatorObject|null
+     * @return ValidatorObjectInterface|null
      * @throws Exception
+     * @throws \TypeError
      */
-    public function validate(ValidatorObject $object): ?ValidatorObject
+    public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
     {
-        /** @var AltLang $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
+        $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
+
+        /** @var Altlang $newTestCreatedMT */
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
@@ -36,8 +39,8 @@ class AltLangEngineValidator extends AbstractValidator
 
         $mt_result = $newTestCreatedMT->get($config);
 
-        if (isset($mt_result['error']['code'])) {
-            throw new DomainException($mt_result['error']['message']);
+        if ($mt_result->error !== null) {
+            throw new DomainException($mt_result->error->message ?? 'Unknown error');
         }
 
         return null;

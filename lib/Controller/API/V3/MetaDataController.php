@@ -6,12 +6,14 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DomainException;
 use Model\Files\MetadataDao as FileMetadataDao;
-use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use RuntimeException;
 use stdClass;
 use Utils\Constants\EngineConstants;
 
@@ -19,7 +21,7 @@ class MetaDataController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -28,12 +30,15 @@ class MetaDataController extends KleinController
     /**
      * @throws ReflectionException
      * @throws NotFoundException
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws \Exception
      */
     public function index(): void
     {
         // params
-        $id_job = $this->request->param('id_job');
-        $password = $this->request->param('password');
+        $id_job = (int)$this->request->param('id_job');
+        $password = (string)$this->request->param('password');
 
         // find a job
         $job = $this->getJob($id_job, $password);
@@ -57,6 +62,7 @@ class MetaDataController extends KleinController
      * @param ProjectStruct $project
      *
      * @return stdClass
+     * @throws DomainException
      */
     private function getProjectInfo(ProjectStruct $project): stdClass
     {
@@ -89,13 +95,19 @@ class MetaDataController extends KleinController
      *
      * @return stdClass
      * @throws ReflectionException
+     * @throws DomainException
+     * @throws \Exception
      */
     private function getJobMetaData(JobStruct $job): object
     {
         $metadata = new stdClass();
-        $jobMetaDataDao = new MetadataDao();
+        $jobMetaDataDao = new MetadataDao($this->getDatabase());
 
-        foreach ($jobMetaDataDao->getByJobIdAndPassword($job->id, $job->password, 60 * 5) as $metadatum) {
+        foreach ($jobMetaDataDao->getByJobIdAndPassword(
+            $job->id ?? throw new DomainException('Job ID must not be null'),
+            $job->password ?? throw new DomainException('Job password must not be null'),
+            60 * 5
+        ) as $metadatum) {
             $metadata->{$metadatum->key} = $metadatum->value;
         }
 
@@ -109,17 +121,21 @@ class MetaDataController extends KleinController
     /**
      * @param JobStruct $job
      *
-     * @return array
+     * @return array<int, stdClass>
      * @throws ReflectionException
+     * @throws RuntimeException
+     * @throws DomainException
+     * @throws \Exception
      */
     private function getJobFilesMetaData(JobStruct $job): array
     {
         $metadata = [];
-        $filesMetaDataDao = new FileMetadataDao();
+        $filesMetaDataDao = new FileMetadataDao($this->getDatabase());
+        $projectId = $job->getProject()->id ?? throw new DomainException('Project ID must not be null');
 
         foreach ($job->getFiles() as $file) {
             $metadatum = new stdClass();
-            foreach ($filesMetaDataDao->getByJobIdProjectAndIdFile($job->getProject()->id, $file->id, 60 * 5) as $meta) {
+            foreach ($filesMetaDataDao->getByJobIdProjectAndIdFile($projectId, $file->id, 60 * 5) ?? [] as $meta) {
                 $metadatum->{$meta->key} = $meta->value;
             }
 

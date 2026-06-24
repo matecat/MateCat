@@ -11,6 +11,7 @@ namespace View\API\App\Json\Analysis;
 
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
+use RuntimeException;
 
 class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable
 {
@@ -20,6 +21,9 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable
      */
     protected array $matches = [];
 
+    /**
+     * @throws RuntimeException
+     */
     public function __construct(ConstantsInterface $matchConstantsClass)
     {
         foreach ($matchConstantsClass::forValue() as $matchType) {
@@ -27,6 +31,9 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable
         }
     }
 
+    /**
+     * @return list<AnalysisMatch>
+     */
     public function jsonSerialize(): array
     {
         return array_values($this->matches);

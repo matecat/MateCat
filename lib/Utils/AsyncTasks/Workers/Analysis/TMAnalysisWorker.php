@@ -3,11 +3,15 @@
 namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
+use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\ProjectDao;
+use Model\WordCount\CounterModel;
 use Predis\Connection\ConnectionException as PredisConnectionException;
 use Predis\Response\ServerException as PredisServerException;
 use ReflectionException;
@@ -28,6 +32,7 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -58,6 +63,7 @@ class TMAnalysisWorker extends AbstractWorker
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct(
         AMQHandler $queueHandler,
@@ -71,7 +77,16 @@ class TMAnalysisWorker extends AbstractWorker
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
         $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService(Database::obtain());
-        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService($this->redisService, new ProjectCompletionRepository());
+        $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
+            $this->redisService,
+            new ProjectCompletionRepository(
+                Database::obtain(),
+                new ProjectDao(),
+                new JobDao(),
+                new AnalysisDao(),
+                new CounterModel(),
+            )
+        );
         $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver());
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter());
     }
@@ -120,7 +135,7 @@ class TMAnalysisWorker extends AbstractWorker
             $matches = $this->matchProcessor->sortMatches($mtResult, $tmMatches);
 
             if (empty($matches)) {
-                $this->_doLog("--- (Worker $this->_workerPid) : No contribution found for this segment.");
+                $this->_doLog("--- (Worker $this->_workerPid) : No contribution found for this segment: " . $params->id_segment);
                 $this->_forceSetSegmentAnalyzed($queueElement);
                 throw new EmptyElementException("--- (Worker $this->_workerPid) : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT);
             }
@@ -207,8 +222,10 @@ class TMAnalysisWorker extends AbstractWorker
             }
 
             if ($updateRes === 0) {
-                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (already DONE/SKIPPED or missing), skipping side-effects.");
+                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (already DONE or missing), skipping side-effects.");
                 return;
+            } elseif ($updateRes === -1) {
+                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (SKIPPED) pre-translation");
             }
 
             $this->_doLog("Row found: {$tmData['id_segment']}-{$tmData['id_job']} - UPDATED.");
@@ -271,8 +288,11 @@ class TMAnalysisWorker extends AbstractWorker
             (int)$queueElement->params->id_job
         );
 
-        if (!$segmentSet) {
+        if ($segmentSet === 0) {
+            LoggerFactory::doJsonLog("Segment {$queueElement->params->id_segment} already DONE, skipping force-set side-effects.");
             return;
+        } elseif ($segmentSet === -1) {
+            LoggerFactory::doJsonLog("Segment {$queueElement->params->id_segment} not updated (SKIPPED) pre-translation");
         }
 
         // POINT OF NO RETURN — DB committed
@@ -437,7 +457,7 @@ class TMAnalysisWorker extends AbstractWorker
     ): void {
         // 1. Retry loop for the critical counter increment
         $maxRetries = 5;
-        $delayMs    = 500;
+        $delayMs = 500;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {

@@ -25,7 +25,10 @@ class JobTranslator
     }
 
     /**
+     * @return array<string, mixed>
+     *
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function renderItem(JobsTranslatorsStruct $jTranslatorsStruct = null): array
     {
@@ -45,7 +48,10 @@ class JobTranslator
         ];
 
         if (!empty($jTranslatorsStruct->id_translator_profile)) {
-            $translatorJson['user'] = User::renderItem($jTranslatorsStruct->getUser());
+            $user = $jTranslatorsStruct->getUser();
+            if ($user !== null) {
+                $translatorJson['user'] = User::renderItem($user);
+            }
         }
 
         return $translatorJson;

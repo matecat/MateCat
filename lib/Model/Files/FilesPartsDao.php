@@ -2,18 +2,22 @@
 
 namespace Model\Files;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
+use PDOException;
 use ReflectionException;
 
 class FilesPartsDao extends AbstractDao
 {
 
+    const string TABLE = 'files_parts';
+
     /**
      * @param FilesPartsStruct $filesPartsStruct
      *
      * @return int
+     * @throws PDOException
      */
     public function insert(FilesPartsStruct $filesPartsStruct): int
     {
@@ -22,7 +26,7 @@ class FilesPartsDao extends AbstractDao
             " VALUES " .
             " ( :id_file, :tag_key, :tag_value ); ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'id_file' => $filesPartsStruct->id_file,
@@ -31,7 +35,7 @@ class FilesPartsDao extends AbstractDao
         ]);
 
         if ($stmt->rowCount() === 1) {
-            return $conn->lastInsertId();
+            return (int)$conn->lastInsertId();
         }
 
         return 0;
@@ -46,12 +50,13 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return ShapelessConcreteStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getFirstAndLastSegment(int $id, int $ttl = 86400): ?ShapelessConcreteStruct
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT 
                 min(s.id) as first_segment, 
                 max(s.id) as last_segment, 
@@ -66,27 +71,7 @@ class FilesPartsDao extends AbstractDao
         $stmt = $conn->prepare($sql);
 
         /** @var  ShapelessConcreteStruct $result */
-        $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, ['id' => $id])[0] ?? null;
-
-        return $result;
-    }
-
-    /**
-     * @param int $id
-     * @param int $ttl
-     *
-     * @return FilesPartsStruct|null
-     * @throws ReflectionException
-     */
-    public function getById(int $id, int $ttl = 0): ?FilesPartsStruct
-    {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $sql = "SELECT * FROM files_parts  WHERE id = :id ";
-        $stmt = $conn->prepare($sql);
-
-        /** @var  FilesPartsStruct $result */
-        $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['id' => $id])[0] ?? null;
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, ['id' => $id])[0] ?? null;
 
         return $result;
     }
@@ -96,16 +81,17 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return FilesPartsStruct[]
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getByFileId(int $fileId, int $ttl = 86400): array
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "SELECT * FROM files_parts  WHERE id_file = :fileId ";
         $stmt = $conn->prepare($sql);
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['fileId' => $fileId]);
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['fileId' => $fileId]);
     }
 
     /**
@@ -113,12 +99,13 @@ class FilesPartsDao extends AbstractDao
      * @param int $ttl
      *
      * @return FilesPartsStruct|null
+     * @throws PDOException
+     * @throws Exception
      * @throws ReflectionException
      */
     public function getBySegmentId(int $segmentId, int $ttl = 86400): ?FilesPartsStruct
     {
-        $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $sql = "
             SELECT 
                 fp.id,
@@ -132,7 +119,7 @@ class FilesPartsDao extends AbstractDao
         $stmt = $conn->prepare($sql);
 
         /** @var  FilesPartsStruct $result */
-        $result = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['segmentId' => $segmentId])[0] ?? null;
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, FilesPartsStruct::class, ['segmentId' => $segmentId])[0] ?? null;
 
         return $result;
     }

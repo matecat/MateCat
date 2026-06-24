@@ -20,6 +20,8 @@ class Configuration
     protected ContextList $_contextList;
 
     protected string $_loggerName;
+
+    /** @var array<string, mixed> */
     private array $__raw;
 
     /**
@@ -27,6 +29,7 @@ class Configuration
      * @param string|null $contextIndex
      *
      * @throws Exception
+     * @throws \TypeError
      */
     public function __construct(string $rawConfig, ?string $contextIndex = null)
     {
@@ -56,6 +59,9 @@ class Configuration
         return $this->_loggerName;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getRaw(): array
     {
         return $this->__raw;

@@ -29,20 +29,28 @@ class AnalysisMatch implements JsonSerializable
      */
     protected string $type;
 
+    /**
+     * @throws \RuntimeException
+     */
     public static function forName(string $name, ConstantsInterface $matchConstantsClass): AnalysisMatch
     {
-        return new static($name, $matchConstantsClass);
+        return new self($name, $matchConstantsClass);
     }
 
     /**
      * @param string $name
      * @param ConstantsInterface $matchConstantsClass
+     *
+     * @throws \RuntimeException
      */
     protected function __construct(string $name, ConstantsInterface $matchConstantsClass)
     {
         $this->type = $matchConstantsClass::validate($name);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

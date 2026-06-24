@@ -135,7 +135,7 @@ export const transformTagsToText = (text) => {
 export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
   try {
     for (let key in tagSignatures) {
-      const {placeholderRegex, decodeNeeded, placeholder, regex, type} =
+      const {placeholderRegex, decodeNeeded, encodedPlaceholder, regex, type} =
         tagSignatures[key]
       const shouldExcludeTag = excludeTags.some((value) => value === type)
       if (placeholderRegex) {
@@ -159,7 +159,7 @@ export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
           globalRegex,
           !shouldExcludeTag
             ? (match) => {
-                return placeholder ? placeholder : match
+                return encodedPlaceholder ? encodedPlaceholder : match
               }
             : '',
         )

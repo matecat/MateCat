@@ -6,11 +6,13 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Controller\Traits\APISourcePageGuesserTrait;
+use Exception;
 use InvalidArgumentException;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Jobs\JobDao;
 use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
+use TypeError;
 use Utils\Tools\Utils;
 
 class SetChunkCompletedController extends KleinController
@@ -18,13 +20,15 @@ class SetChunkCompletedController extends KleinController
 
     use APISourcePageGuesserTrait;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function complete(): void
     {
@@ -50,8 +54,11 @@ class SetChunkCompletedController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws InvalidArgumentException
+     * @throws Exception
+     * @throws TypeError
      */
     private function validateTheRequest(): array
     {
@@ -67,14 +74,14 @@ class SetChunkCompletedController extends KleinController
             throw new InvalidArgumentException("Missing id password", -2);
         }
 
-        $job = JobDao::getByIdAndPassword($id_job, $password);
+        $job = (new JobDao($this->getDatabase()))->getByIdAndPassword((int)$id_job, (string)$password);
 
         if (empty($job)) {
             throw new InvalidArgumentException("wrong password", -10);
         }
 
-        $this->id_job = $id_job;
-        $this->request_password = $received_password;
+        $this->id_job = (int)$id_job;
+        $this->request_password = (string)$received_password;
 
         return [
             'id_job' => $id_job,

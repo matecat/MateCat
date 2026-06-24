@@ -18,7 +18,7 @@ abstract class TMSAbstractResponse
     public int $responseStatus = 200;
 
     /**
-     * @var string|array
+     * @var string|array<string, mixed>
      */
     public string|array $responseDetails = "";
 
@@ -41,25 +41,19 @@ abstract class TMSAbstractResponse
     protected ?FeatureSet $featureSet = null;
 
     /**
-     * @template T of TMSAbstractResponse
-     *
-     * @param array|int $result
+     * @param array<string, mixed>|int|null $result
      * @param FeatureSet|null $featureSet
-     * @param array|null $dataRefMap
+     * @param array<string, mixed>|null $dataRefMap
      * @param int|null $id_project
      *
-     * @return TMSAbstractResponse
+     * @return static
+     * @throws \TypeError
      */
-    public static function getInstance($result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null): TMSAbstractResponse
+    public static function getInstance(mixed $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null): static
     {
-        /**
-         * @var class-string<T> $class
-         */
-        $class = get_called_class(); // late static binding, note: php >= 5.3
+        $class = get_called_class(); // late static binding
 
-        /**
-         * @var T $instance
-         */
+        /** @var static $instance */
         $instance = new $class($result, $dataRefMap, $id_project);
 
         if (is_array($result) && isset($result['responseStatus']) && $result['responseStatus'] >= 400) {
@@ -86,9 +80,9 @@ abstract class TMSAbstractResponse
      * This method is useful in conjunction with PDO execute, where only
      * a subset of the attributes may be required to be bound to the query.
      *
-     * @param $mask array|null a mask for the keys to return
+     * @param array<string>|null $mask a mask for the keys to return
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function toArray(?array $mask = []): array
     {

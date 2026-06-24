@@ -3,6 +3,7 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
+use Controller\Exceptions\RenderTerminatedException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\Oauth\OauthClient;
@@ -22,6 +23,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
     /**
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws RenderTerminatedException
      */
     public function response(): void
     {
@@ -44,10 +46,9 @@ class OauthResponseHandlerController extends BaseKleinViewController
     }
 
     /**
-     * @return void
      * @throws Exception
      */
-    protected function afterConstruct(): void
+    protected function initDependencies(): void
     {
         $this->setView('oauth_response_handler.html', ['wanted_url' => $_SESSION['wanted_url'] ?? null]); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
     }
@@ -60,6 +61,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      *
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
+     * @throws RenderTerminatedException
      */
     protected function _processSuccessfulOAuth($code, $provider = null): void
     {
@@ -67,6 +69,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
         $this->_initRemoteUser($code, $provider);
 
         $model = new OAuthSignInModel(
+            $_SESSION,
             $this->remoteUser->email,
             $this->remoteUser->name,
             $this->remoteUser->lastName
@@ -85,6 +88,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      *
      * @param      $code
      * @param null $provider
+     * @throws RenderTerminatedException
      */
     protected function _initRemoteUser($code, $provider = null): void
     {

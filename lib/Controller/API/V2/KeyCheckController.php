@@ -22,6 +22,13 @@ class KeyCheckController extends KleinController
 
     use RateLimiterTrait;
 
+    private ?ApiKeyDao $apiKeyDao = null;
+
+    private function getApiKeyDao(): ApiKeyDao
+    {
+        return $this->apiKeyDao ??= new ApiKeyDao($this->getDatabase());
+    }
+
     /**
      * @throws AuthenticationError
      * @throws Exception
@@ -79,7 +86,7 @@ class KeyCheckController extends KleinController
         [$user_api_key, $user_api_secret] = explode('-', $this->params['user_api_key']);
 
         if ($user_api_key && $user_api_secret) {
-            $api_record = ApiKeyDao::findByKey($user_api_key);
+            $api_record = $this->getApiKeyDao()->findByKey($user_api_key);
 
             if ($api_record && $api_record->validSecret($user_api_secret)) {
                 $userJson = ['user' => ['uid' => $api_record->uid]];

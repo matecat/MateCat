@@ -4,10 +4,10 @@ namespace Model\Comments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;
+use PDOException;
 use ReflectionException;
 
 class CommentDao extends AbstractDao
@@ -16,7 +16,9 @@ class CommentDao extends AbstractDao
     const string TABLE = "comments";
     const string STRUCT_TYPE = "CommentStruct";
 
+    /** @var list<string> */
     protected static array $auto_increment_field = ['id'];
+    /** @var list<string> */
     protected static array $primary_keys = ['id'];
 
     const int TYPE_COMMENT = 1;
@@ -26,13 +28,15 @@ class CommentDao extends AbstractDao
     /**
      * Returns a structure that lists open threads count
      *
-     * @param $projectIds
+     * @param list<int> $projectIds
      *
-     * @return  OpenThreadsStruct[];
+     * @return list<OpenThreadsStruct>
      *
      * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
-    public function getOpenThreadsForProjects($projectIds): array
+    public function getOpenThreadsForProjects(array $projectIds): array
     {
         $ids = implode(',', array_map(function ($id) {
             return (int)$id;
@@ -56,7 +60,7 @@ class CommentDao extends AbstractDao
         $con = $this->database->getConnection();
         $stmt = $con->prepare($sql);
 
-        return $this->_fetchObjectMap($stmt, OpenThreadsStruct::class, []);
+        return array_values($this->_fetchObjectMap($stmt, OpenThreadsStruct::class, []));
     }
 
     /**
@@ -64,6 +68,7 @@ class CommentDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function deleteComment(BaseCommentStruct $comment): bool
     {
@@ -83,6 +88,7 @@ class CommentDao extends AbstractDao
      *
      * @return bool
      * @throws ReflectionException
+     * @throws PDOException
      */
     public function destroySegmentIdSegmentCache(int $idSegment): bool
     {
@@ -106,6 +112,7 @@ class CommentDao extends AbstractDao
      *
      * @return BaseCommentStruct[]
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getBySegmentId(int $idSegment, int $ttl = 7200): array
     {
@@ -117,25 +124,6 @@ class CommentDao extends AbstractDao
             'message_type_comment' => CommentDao::TYPE_COMMENT,
             'message_type_resolve' => CommentDao::TYPE_RESOLVE,
         ]);
-    }
-
-    /**
-     * @param     $id
-     * @param int $ttl
-     *
-     * @return BaseCommentStruct|null
-     * @throws ReflectionException
-     */
-    public function getById($id, int $ttl = 86400): ?BaseCommentStruct
-    {
-        $stmt = $this->_getStatementForQuery("SELECT * from comments WHERE id = :id");
-
-        /** @var $res BaseCommentStruct */
-        $res = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, BaseCommentStruct::class, [
-            'id' => $id
-        ])[0] ?? null;
-
-        return $res;
     }
 
     /**
@@ -180,6 +168,7 @@ class CommentDao extends AbstractDao
      * @param CommentStruct $obj
      *
      * @return CommentStruct
+     * @throws PDOException
      */
     public function resolveThread(CommentStruct $obj): CommentStruct
     {
@@ -191,7 +180,7 @@ class CommentDao extends AbstractDao
         try {
             $comment = $this->saveComment($obj);
 
-            self::updateFields(
+            $this->updateFields(
                 ['resolve_date' => $obj->resolve_date],
                 [
                     'id_segment' => $obj->id_segment,
@@ -214,6 +203,10 @@ class CommentDao extends AbstractDao
         return $obj;
     }
 
+    /**
+     * @return list<array{uid: int|string}>
+     * @throws PDOException
+     */
     public function getThreadContributorUids(CommentStruct $obj): array
     {
         $bind_values = [
@@ -235,14 +228,20 @@ class CommentDao extends AbstractDao
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute($bind_values);
 
-        return $stmt->fetchAll();
+        return array_values($stmt->fetchAll());
     }
 
-    public function getThreadsBySegments($segments_id, $job_id): array
+    /**
+     * @param list<int> $segments_id
+     * @param int $job_id
+     * @return list<BaseCommentStruct>
+     * @throws PDOException
+     */
+    public function getThreadsBySegments(array $segments_id, int $job_id): array
     {
         $prepare_str_segments_id = str_repeat('UNION SELECT ? ', count($segments_id) - 1);
 
-        $db = Database::obtain()->getConnection();
+        $db = $this->database->getConnection();
         $comments_query = "SELECT * FROM comments 
         JOIN ( 
                 SELECT ? as id_segment
@@ -254,36 +253,35 @@ class CommentDao extends AbstractDao
         $stmt->setFetchMode(PDO::FETCH_CLASS, BaseCommentStruct::class);
         $stmt->execute(array_merge($segments_id, [$job_id]));
 
-        return $stmt->fetchAll();
+        return array_values($stmt->fetchAll());
     }
 
     /**
-     *
      * @param JobStruct $chunk
-     * @param array $options
+     * @param array{from_id?: int|null} $options
      *
-     * @return BaseCommentStruct[]
+     * @return list<BaseCommentStruct>
+     * @throws PDOException
      */
-
-    public static function getCommentsForChunk(JobStruct $chunk, array $options = []): array
+    public function getCommentsForChunk(JobStruct $chunk, array $options = []): array
     {
-        $sql = "SELECT 
-                  id, 
-                  uid, 
-                  resolve_date, 
-                  id_job, 
-                  id_segment, 
-                  create_date, 
-                  IF( is_anonymous = 0, full_name, 'Anonymous' ) as full_name, 
-                  source_page, 
+        $sql = "SELECT
+                  id,
+                  uid,
+                  resolve_date,
+                  id_job,
+                  id_segment,
+                  create_date,
+                  IF( is_anonymous = 0, full_name, 'Anonymous' ) as full_name,
+                  source_page,
                   is_anonymous,
-                  message_type, 
-                  message, 
-                  email, 
-                  IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
-                ) AS thread_id 
+                  message_type,
+                  message,
+                  email,
+                  IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) )
+                ) AS thread_id
                 FROM " . self::TABLE . "
-                WHERE id_job = :id_job 
+                WHERE id_job = :id_job
                 AND message_type IN(1,2)
                 ORDER BY id_segment, create_date";
 
@@ -294,20 +292,21 @@ class CommentDao extends AbstractDao
             $params['from_id'] = $options['from_id'];
         }
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, BaseCommentStruct::class);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return array_values($stmt->fetchAll());
     }
 
     /**
+     * @param CommentStruct $obj
      * @throws Exception
      */
-    private function validateComment($obj): void
+    private function validateComment(CommentStruct $obj): void
     {
         if (($obj->message === null or $obj->message === '') and $obj->message_type == self::TYPE_COMMENT) {
             throw new Exception("Comment message can't be blank.");
@@ -319,12 +318,15 @@ class CommentDao extends AbstractDao
     }
 
     /**
+     * @param string $content
+     * @return string
+     * @throws Exception
      * @throws ReflectionException
      */
-    public static function placeholdContent($content)
+    public function placeholdContent(string $content): string
     {
-        $users_ids = self::getUsersIdFromContent($content);
-        $userDao = new UserDao(Database::obtain());
+        $users_ids = $this->getUsersIdFromContent($content);
+        $userDao = new UserDao($this->database);
         $users = $userDao->getByUids($users_ids);
         foreach ($users as $user) {
             $content = str_replace("{@" . $user->uid . "@}", "@" . $user->first_name, $content);
@@ -333,16 +335,15 @@ class CommentDao extends AbstractDao
         return str_replace("{@team@}", "@team", $content);
     }
 
-    public static function getUsersIdFromContent($content): array
+    /**
+     * @param string $content
+     * @return list<numeric-string>
+     */
+    public function getUsersIdFromContent(string $content): array
     {
-        $users = [];
-
         preg_match_all("/\{@(\d+)@}/", $content, $find_users);
-        if (isset($find_users[1])) {
-            $users = $find_users[1];
-        }
 
-        return $users;
+        return $find_users[1];
     }
 
 }

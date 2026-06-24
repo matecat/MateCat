@@ -10,25 +10,31 @@
 namespace Model\Conversion;
 
 use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\RecursiveArrayCopy;
 use stdClass;
+use Traversable;
 
 /**
  * @property string $name
  * @property string $type
  * @property string $tmp_name
- * @property string $error
+ * @property string|array{code: int|string, message: string} $error
  * @property int $size
  * @property string $file_path
+ *
+ * @implements ArrayAccess<string, mixed>
+ * @implements IteratorAggregate<string, mixed>
  */
-class UploadElement extends stdClass implements ArrayAccess
+class UploadElement extends stdClass implements ArrayAccess, IteratorAggregate
 {
     use ArrayAccessTrait;
     use RecursiveArrayCopy;
 
     /**
-     * @param array $array_params Optional map of property names to values to hydrate on construction.
+     * @param array<string, mixed> $array_params Optional map of property names to values to hydrate on construction.
      */
     public function __construct(array $array_params = [])
     {
@@ -69,7 +75,7 @@ class UploadElement extends stdClass implements ArrayAccess
     /**
      * Returns a plain array copy of all properties on this element.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getArrayCopy(): array
     {
@@ -84,6 +90,14 @@ class UploadElement extends stdClass implements ArrayAccess
     public function __isset(string $name): bool
     {
         return property_exists($this, $name);
+    }
+
+    /**
+     * @return Traversable<string, mixed>
+     */
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator(get_object_vars($this));
     }
 
 }

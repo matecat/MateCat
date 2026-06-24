@@ -4,20 +4,24 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\Exceptions\RenderTerminatedException;
+use DivisionByZeroError;
 use DOMDocument;
 use Exception;
-use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentModel;
+use TypeError;
+use Utils\Registry\AppConfig;
 
 
 class DownloadQRController extends KleinController
 {
 
     /**
-     * @var string|null
+     * @var string
      */
-    private ?string $format;
+    private string $format;
 
     /**
      * @var int
@@ -25,20 +29,33 @@ class DownloadQRController extends KleinController
     private int $segmentsPerFile;
 
     /**
-     * @var array
+     * @var list<string>
      */
     private array $allowedFormats = ['csv', 'json', 'xml'];
 
+    protected JobDao $jobDao;
+
+    protected ?QualityReportSegmentModel $qrSegmentModel = null;
+
+    protected function initDependencies(): void
+    {
+        $this->jobDao = new JobDao($this->getDatabase());
+    }
+
     /**
      * Download QR to a file
+     *
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
+     * @throws RenderTerminatedException
      */
     public function download(): void
     {
-        $idJob = $this->request->param('jid');
-        $password = $this->request->param('password');
-        $this->format = $this->request->param('format', 'csv');
-        $this->segmentsPerFile = $this->request->param('segmentsPerFile', 20);
+        $idJob = (int)$this->request->param('jid');
+        $password = (string)$this->request->param('password');
+        $this->format = (string)$this->request->param('format', 'csv');
+        $this->segmentsPerFile = (int)$this->request->param('segmentsPerFile', 20);
 
         if ($this->segmentsPerFile > 100) {
             $this->segmentsPerFile = 100;
@@ -48,7 +65,7 @@ class DownloadQRController extends KleinController
             throw new AuthorizationError('Invalid format. Allowed formats are [' . implode(', ', $this->allowedFormats) . ']');
         }
 
-        $chunk = ChunkDao::getByIdAndPassword($idJob, $password);
+        $chunk = $this->jobDao->getByIdAndPasswordOrFail($idJob, $password);
 
         $prefix = "QR_" . $idJob . "_" . $password . "_";
         $filePath = tempnam("/tmp", $prefix);
@@ -81,14 +98,16 @@ class DownloadQRController extends KleinController
     /**
      * @param JobStruct $chunk
      *
-     * @return bool|false|string
+     * @return string|false
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     private function composeFileContent(JobStruct $chunk): bool|string
     {
         $data = [];
 
-        $qrSegmentModel = new QualityReportSegmentModel($chunk);
+        $qrSegmentModel = $this->qrSegmentModel ?? new QualityReportSegmentModel($chunk);
 
         // categories issues
         $project = $chunk->getProject();
@@ -135,7 +154,7 @@ class DownloadQRController extends KleinController
      * @param QualityReportSegmentModel $qrSegmentModel
      * @param int $step
      * @param int $refSegment
-     * @param array $ids
+     * @param list<list<int>> $ids
      *
      * @return void
      * @throws Exception
@@ -148,20 +167,23 @@ class DownloadQRController extends KleinController
         $segments_ids = $qrSegmentModel->getSegmentsIdForQR($step, $refSegment, $where, $filter);
 
         if (!empty($segments_ids)) {
-            $refSegment = end($segments_ids);
-            $ids[] = $segments_ids;
+            $normalized = array_values(array_map('intval', $segments_ids));
+            $refSegment = (int)end($normalized);
+            $ids[] = $normalized;
             $this->buildArrayOfSegmentIds($qrSegmentModel, $step, $refSegment, $ids);
         }
     }
 
     /**
      * @param QualityReportSegmentModel $qrSegmentModel
-     * @param                           $segments_ids
+     * @param list<int>                 $segments_ids
      *
-     * @return array
+     * @return list<array<int, mixed>>
      * @throws Exception
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
-    private function buildFileContentFromArrayOfSegmentIds(QualityReportSegmentModel $qrSegmentModel, $segments_ids): array
+    private function buildFileContentFromArrayOfSegmentIds(QualityReportSegmentModel $qrSegmentModel, array $segments_ids): array
     {
         $segments = $qrSegmentModel->getSegmentsForQR($segments_ids);
 
@@ -225,10 +247,10 @@ class DownloadQRController extends KleinController
     }
 
     /**
-     * @param array $data
-     * @param array $categoryIssues
+     * @param list<array<int, mixed>> $data
+     * @param list<string>            $categoryIssues
      *
-     * @return bool|false|string
+     * @return string|false
      */
     private function createCSVFile(array $data, array $categoryIssues = []): bool|string
     {
@@ -300,11 +322,25 @@ class DownloadQRController extends KleinController
         }
 
         $tmpFilePath = tempnam("/tmp", '');
+        // @codeCoverageIgnoreStart - tempnam failure is not reproducible in a unit test
+        if ($tmpFilePath === false) {
+            return false;
+        }
+        // @codeCoverageIgnoreEnd
 
         $fp = fopen($tmpFilePath, 'w');
+        // @codeCoverageIgnoreStart - fopen failure is not reproducible in a unit test
+        if ($fp === false) {
+            return false;
+        }
+        // @codeCoverageIgnoreEnd
+
         foreach ($csvData as $fields) {
             if (!fputcsv($fp, $fields)) {
+                // @codeCoverageIgnoreStart - fputcsv failure is not reproducible in a unit test
+                fclose($fp);
                 return false;
+                // @codeCoverageIgnoreEnd
             }
         }
         fclose($fp);
@@ -315,6 +351,12 @@ class DownloadQRController extends KleinController
         return $fileContent;
     }
 
+    /**
+     * @param list<array<int, mixed>> $data
+     * @param list<string>            $categoryIssues
+     *
+     * @return false|string
+     */
     private function createXMLFile(array $data, array $categoryIssues = []): false|string
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -413,8 +455,8 @@ class DownloadQRController extends KleinController
     }
 
     /**
-     * @param array $data
-     * @param array $categoryIssues
+     * @param list<array<int, mixed>> $data
+     * @param list<string>            $categoryIssues
      *
      * @return false|string
      */
@@ -483,26 +525,40 @@ class DownloadQRController extends KleinController
      * @param string $mimeType
      * @param string $filename
      * @param string $filePath
+     *
+     * @throws RenderTerminatedException
      */
     private function downloadFile(string $mimeType, string $filename, string $filePath): never
     {
         $outputContent = file_get_contents($filePath);
+        if ($outputContent === false) {
+            $outputContent = '';
+        }
 
         ob_get_contents();
         ob_get_clean();
         ob_start("ob_gzhandler");
-        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
-        header("Content-Type: $mimeType");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header("Expires: 0");
-        header("Connection: close");
-        header("Content-Length: " . strlen($outputContent));
+        if (!headers_sent()) {
+            // @codeCoverageIgnoreStart - HTTP header emission is unreachable under CLI/PHPUnit (headers already sent)
+            header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+            header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+            header("Cache-Control: post-check=0, pre-check=0", false);
+            header("Pragma: no-cache");
+            header("Content-Type: $mimeType");
+            header("Content-Disposition: attachment; filename=\"$filename\"");
+            header("Expires: 0");
+            header("Connection: close");
+            header("Content-Length: " . strlen($outputContent));
+            // @codeCoverageIgnoreEnd
+        }
         echo $outputContent;
         unlink($filePath);
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
         exit;
     }
 }

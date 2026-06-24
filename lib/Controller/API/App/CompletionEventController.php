@@ -15,10 +15,9 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\Jobs\JobStruct;
-use Model\Projects\ProjectStruct;
 
 class CompletionEventController extends KleinController
 {
@@ -29,11 +28,6 @@ class CompletionEventController extends KleinController
     protected JobStruct $chunk;
 
     /**
-     * @var ProjectStruct
-     */
-    protected ProjectStruct $project;
-
-    /**
      * @var ChunkCompletionEventStruct
      */
     protected ChunkCompletionEventStruct $event;
@@ -41,24 +35,21 @@ class CompletionEventController extends KleinController
     /**
      * @throws Exception
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $event = (new ChunkCompletionEventDao())->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
+            $event = (new ChunkCompletionEventDao($this->getDatabase()))->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
 
             if (!$event) {
                 throw new NotFoundException("Event Not Found.", 404);
             }
 
             $this->chunk = $Validator->getChunk();
-
-            $project = $this->chunk->getProject(60 * 60);
-            $this->project = $project;
             $this->event = $event;
-            $this->featureSet->loadForProject($project);
+            $this->featureSet->loadForProject($this->chunk->getProject(60 * 60));
         });
 
         $this->appendValidator($Validator);
@@ -69,15 +60,9 @@ class CompletionEventController extends KleinController
      */
     public function delete(): void
     {
-        $undoable = $this->featureSet->filter('filterIsChunkCompletionUndoable', true, $this->project, $this->chunk);
-
-        if ($undoable) {
-            $this->__performUndo();
-            $this->response->code(200);
-            $this->response->send();
-        } else {
-            $this->response->code(400);
-        }
+        $this->__performUndo();
+        $this->response->code(200);
+        $this->response->send();
     }
 
     /**
@@ -85,15 +70,15 @@ class CompletionEventController extends KleinController
      */
     private function __performUndo(): void
     {
-        Database::obtain()->begin();
+        $this->getDatabase()->begin();
 
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
-        $this->featureSet->filter('alter_chunk_review_struct', $this->event);
+        $this->featureSet->dispatch(new AlterChunkReviewStructEvent($this->event));
 
-        (new ChunkCompletionEventDao())->deleteEvent($this->event);
-        Database::obtain()->commit();
+        (new ChunkCompletionEventDao($this->getDatabase()))->deleteEvent($this->event);
+        $this->getDatabase()->commit();
     }
 
 }

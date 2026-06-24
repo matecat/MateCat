@@ -19,7 +19,7 @@ class SubfilteringOptionsValidator
      *
      * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
      *
-     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @return ?array<int|string, mixed> The decoded JSON data as an associative array, or an empty array if an error occurs.
      * @throws Exception
      */
     public static function validate(string $subfiltering_handlers): ?array
@@ -42,7 +42,7 @@ class SubfilteringOptionsValidator
 
         if(
             count($defaultHandlers ?? []) === count($subfiltering_handlers_array) &&
-            empty(array_diff($defaultHandlers, $subfiltering_handlers_array))
+            empty(array_diff($defaultHandlers ?? [], $subfiltering_handlers_array))
         ){
             // subfiltering is default
             return [];
@@ -52,10 +52,13 @@ class SubfilteringOptionsValidator
         $validator = new JSONValidator('subfiltering_handlers.json', true);
         $validator->validate($validatorObject);
 
-        if (is_null($validatorObject->getValue())) {
+        /** @var array<int|string, mixed>|null $value */
+        $value = $validatorObject->getValue();
+
+        if (is_null($value)) {
             return null;
         }
 
-        return $validatorObject->getValue();
+        return $value;
     }
 }

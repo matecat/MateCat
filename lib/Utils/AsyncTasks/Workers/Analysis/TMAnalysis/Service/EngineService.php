@@ -5,11 +5,12 @@ namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use TypeError;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
@@ -33,6 +34,7 @@ class EngineService implements EngineServiceInterface
      * @throws ReQueueException
      * @throws NotSupportedMTException
      * @throws Exception
+     * @throws TypeError
      */
     public function getTMMatches(array $config, FeatureSet $featureSet, ?int $mtPenalty): array
     {
@@ -44,46 +46,17 @@ class EngineService implements EngineServiceInterface
 
         $tmsEngine->setMTPenalty($mtPenalty);
 
-        /** @var GetMemoryResponse|array<string, mixed>|null $tms_match */
         $tms_match = $tmsEngine->get($engineConfig);
 
-        if (!$tms_match instanceof GetMemoryResponse) {
-            if (empty($tms_match) && ($engineConfig['get_mt'] ?? false)) {
-                throw new ReQueueException("Error from MyMemory. Empty field received even if MT was requested.", 2);
-            }
-
-            if (!is_array($tms_match)) {
-                return [];
-            }
-
-            if (empty($tms_match)) {
-                return [];
-            }
-
-            $firstMatch = reset($tms_match);
-            if (is_array($firstMatch)) {
-                $normalizedMatches = [];
-                foreach ($tms_match as $match) {
-                    if (is_array($match)) {
-                        $normalizedMatches[] = $match;
-                    }
-                }
-
-                $matches = $normalizedMatches;
-            } else {
-                $matches = [$tms_match];
-            }
-        } else {
-            if (!empty($tms_match->error)) {
-                throw new ReQueueException("Error from Matches. NULL received.", 2);
-            }
-
-            if (!$tms_match->mtLangSupported) {
-                throw new NotSupportedMTException("Error from Matches. MT not supported.", 3);
-            }
-
-            $matches = $tms_match->get_matches_as_array(1);
+        if (!empty($tms_match->error)) {
+            throw new ReQueueException("Error from Matches. NULL received.", 2);
         }
+
+        if (!$tms_match->mtLangSupported) {
+            throw new NotSupportedMTException("Error from Matches. MT not supported.", 3);
+        }
+
+        $matches = $tms_match->get_matches_as_array(1);
 
         $mt_qe_workflow_enabled = (bool)($config['mt_qe_workflow_enabled'] ?? false);
         $mt_qe_config           = $config['mt_qe_config'] ?? null;
@@ -101,6 +74,7 @@ class EngineService implements EngineServiceInterface
      * @param QueueElement $queueElement
      *
      * @return array<string, mixed>
+     * @throws TypeError
      */
     public function getMTTranslation(array $config, FeatureSet $featureSet, ?int $mtPenalty, QueueElement $queueElement): array
     {
@@ -143,22 +117,18 @@ class EngineService implements EngineServiceInterface
                 $engineConfig['job_id'] = $queueElement->params->id_job;
             }
 
-            $engineConfig = $featureSet->filter(
-                'analysisBeforeMTGetContribution',
-                $engineConfig,
-                $mtEngine,
-                $queueElement
-            );
+            $analysisEvent = new AnalysisBeforeMTGetContributionEvent($engineConfig, $mtEngine, $queueElement);
+            $featureSet->dispatch($analysisEvent);
+            $engineConfig = $analysisEvent->getConfig();
 
-            $mt_result = $mtEngine->get($engineConfig);
+            $engineResponse = $mtEngine->get($engineConfig);
 
-            if ($mt_result instanceof GetMemoryResponse) {
-                if ($mt_result->responseStatus >= 400) {
-                    return [];
-                }
-                $mt_result = $mt_result->get_matches_as_array(1);
-                $mt_result = $mt_result[0] ?? [];
+            if ($engineResponse->responseStatus >= 400) {
+                return [];
             }
+
+            $mt_result = $engineResponse->get_matches_as_array(1);
+            $mt_result = $mt_result[0] ?? [];
 
             if (isset($mt_result['error']['code'])) {
                 return [];

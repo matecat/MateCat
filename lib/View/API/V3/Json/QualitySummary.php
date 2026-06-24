@@ -10,6 +10,7 @@
 namespace View\API\V3\Json;
 
 
+use DomainException;
 use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -18,9 +19,11 @@ use Model\LQA\EntryDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportDao;
 use Model\ReviseFeedback\FeedbackDAO;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\RevisionFactory;
 use ReflectionException;
+use RuntimeException;
 
 class QualitySummary
 {
@@ -49,8 +52,9 @@ class QualitySummary
     /**
      * @param ChunkReviewStruct[] $chunkReviewList
      *
-     * @return array
+     * @return array{quality_summary: list<array<string, mixed>>}
      * @throws Exception
+     * @throws ReflectionException
      */
     public function render(array $chunkReviewList): array
     {
@@ -67,8 +71,9 @@ class QualitySummary
     /**
      * @param ChunkReviewStruct $chunkReview
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
+     * @throws ReflectionException
      */
     protected function renderItem(ChunkReviewStruct $chunkReview): array
     {
@@ -85,9 +90,9 @@ class QualitySummary
             $model_id,
             $model_label,
             $model_template_id
-        ] = self::revisionQualityVars($this->chunk, $this->project, $chunkReview);
+        ] = $this->revisionQualityVars($this->chunk, $this->project, $chunkReview);
 
-        return self::populateQualitySummarySection(
+        return $this->populateQualitySummarySection(
             $chunkReview->source_page,
             $this->chunk,
             $quality_overall,
@@ -108,42 +113,42 @@ class QualitySummary
     }
 
     /**
-     * @param int $source_page
-     * @param JobStruct $jStruct
-     * @param                $quality_overall
-     * @param array $reviseIssues
-     * @param float $score
-     * @param array $categories
-     * @param float|null $total_issues_weight
-     * @param int $total_reviewed_words_count
-     * @param array $passfail
+     * @param int                                                                   $source_page
+     * @param JobStruct                                                             $jStruct
+     * @param ?string                                                               $quality_overall
+     * @param array<int|string, array{name: string, founds: array<string, int>}>    $reviseIssues
+     * @param float                                                                 $score
+     * @param list<array<string, mixed>>                                            $categories
+     * @param float|null                                                            $total_issues_weight
+     * @param int                                                                   $total_reviewed_words_count
+     * @param array{type: string, options: array{limit: float}}|true                $passfail
+     * @param float                                                                 $total_tte
+     * @param bool|null                                                             $is_pass
+     * @param int|null                                                            $model_version
+     * @param int|null                                                              $model_id
+     * @param string|null                                                           $model_label
+     * @param int|null                                                              $model_template_id
+     * @param string|null                                                           $chunkReviewPassword
      *
-     * @param float $total_tte
-     * @param bool|null $is_pass
-     *
-     * @param int $model_version
-     * @param int|null $model_id
-     * @param string|null $model_label
-     * @param int|null $model_template_id
-     *
-     * @param string|null $chunkReviewPassword
-     *
-     * @return array
+     * @return array<string, mixed>
+     * @throws DomainException
+     * @throws Exception
+     * @throws PDOException
      * @throws ReflectionException
      */
-    private static function populateQualitySummarySection(
+    protected function populateQualitySummarySection(
         int $source_page,
         JobStruct $jStruct,
-        $quality_overall,
+        ?string $quality_overall,
         array $reviseIssues,
         float $score,
         array $categories,
         ?float $total_issues_weight,
         int $total_reviewed_words_count,
-        array $passfail,
+        array|bool $passfail,
         float $total_tte,
         ?bool $is_pass,
-        int $model_version,
+        ?int $model_version,
         int $model_id = null,
         ?string $model_label = null,
         ?int $model_template_id = null,
@@ -153,8 +158,11 @@ class QualitySummary
 
         $feedback = null;
         if ($chunkReviewPassword) {
-            $feedback = (new FeedbackDAO())->getFeedback($jStruct->id, $chunkReviewPassword, $revisionNumber);
+            $feedback = $this->createFeedbackDao()->getFeedback($jStruct->id, $chunkReviewPassword, $revisionNumber);
         }
+
+        $jobId       = $jStruct->id ?? throw new RuntimeException('Job id is required');
+        $jobPassword = $jStruct->password ?? throw new RuntimeException('Job password is required');
 
         return [
             'revision_number' => $revisionNumber,
@@ -173,25 +181,27 @@ class QualitySummary
             'total_reviewed_words_count' => $total_reviewed_words_count,
             'passfail' => $passfail,
             'total_time_to_edit' => (int)$total_tte,
-            'details' => self::getDetails($jStruct->id, $jStruct->password, $revisionNumber + 1),
+            'details' => $this->getDetails($jobId, $jobPassword, $revisionNumber + 1),
         ];
     }
 
     /**
-     * @param JobStruct $jStruct
-     * @param ProjectStruct $project
+     * @param JobStruct         $jStruct
+     * @param ProjectStruct     $project
      * @param ChunkReviewStruct $chunkReview
      *
-     * @return array
+     * @return list<mixed>
      * @throws Exception
-     * @internal param $reviseIssues
      */
-    protected static function revisionQualityVars(JobStruct $jStruct, ProjectStruct $project, ChunkReviewStruct $chunkReview): array
+    protected function revisionQualityVars(JobStruct $jStruct, ProjectStruct $project, ChunkReviewStruct $chunkReview): array
     {
         $reviseIssues = [];
 
-        $qualityReportDao = new QualityReportDao();
-        $qa_data = $qualityReportDao->getReviseIssuesByChunk($jStruct->id, $jStruct->password, $chunkReview->source_page);
+        $jobId       = $jStruct->id ?? throw new RuntimeException('Job id is required');
+        $jobPassword = $jStruct->password ?? throw new RuntimeException('Job password is required');
+
+        $qualityReportDao = $this->createQualityReportDao();
+        $qa_data = $qualityReportDao->getReviseIssuesByChunk($jobId, $jobPassword, $chunkReview->source_page);
         foreach ($qa_data as $issue) {
             if (!isset($reviseIssues[$issue->id_category])) {
                 $reviseIssues[$issue->id_category] = [
@@ -218,7 +228,7 @@ class QualitySummary
             $is_pass = false;
         }
 
-        $chunkReviewModel = RevisionFactory::initFromProject($project)->getChunkReviewModel($chunkReview);
+        $chunkReviewModel = $this->createRevisionFeature($project)->getChunkReviewModel($chunkReview);
 
         $score = number_format($chunkReviewModel->getScore(), 2, ".", "");
 
@@ -251,13 +261,15 @@ class QualitySummary
     }
 
     /**
+     * @return list<array<string, mixed>>
+     * @throws Exception
      * @throws ReflectionException
      */
-    private static function getDetails(int $idJob, string $password, int $revisionNumber): array
+    protected function getDetails(int $idJob, string $password, int $revisionNumber): array
     {
         $details = [];
 
-        $fileParts = JobDao::getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+        $fileParts = $this->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
 
         foreach ($fileParts as $filePart) {
             $originalFileName = $filePart->filename;
@@ -265,7 +277,7 @@ class QualitySummary
                 $originalFileName = $filePart->tag_value;
             }
 
-            $issuesGroupedByIdFilePart = (new EntryDao())->getIssuesGroupedByIdFilePart($idJob, $password, $revisionNumber, $filePart->id_file_part);
+            $issuesGroupedByIdFilePart = $this->createEntryDao()->getIssuesGroupedByIdFilePart($idJob, $password, $revisionNumber, $filePart->id_file_part);
 
             $issues = [];
             $issuesWeight = 0;
@@ -296,5 +308,38 @@ class QualitySummary
         }
 
         return $details;
+    }
+
+    protected function createQualityReportDao(): QualityReportDao
+    {
+        return new QualityReportDao();
+    }
+
+    protected function createFeedbackDao(): FeedbackDAO
+    {
+        return new FeedbackDAO();
+    }
+
+    protected function createEntryDao(): EntryDao
+    {
+        return new EntryDao();
+    }
+
+    /**
+     * @return array<\Model\DataAccess\ShapelessConcreteStruct>
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    protected function getReviewedWordsCountGroupedByFileParts(int $idJob, string $password, int $revisionNumber): array
+    {
+        return (new JobDao())->getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function createRevisionFeature(ProjectStruct $project): RevisionFactory
+    {
+        return RevisionFactory::initFromProject($project);
     }
 }

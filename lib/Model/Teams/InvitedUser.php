@@ -17,6 +17,9 @@ use Exception;
 use Klein\Response;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
+use UnexpectedValueException;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
@@ -25,32 +28,45 @@ class InvitedUser
 {
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $jwt = [];
 
-    protected Response $response;
+    protected ?Response $response;
+    protected TeamDao $teamDao;
+    protected RedisHandler $redisHandler;
 
     /**
-     * InvitedUser constructor.
-     *
      * @param string $jwt
-     * @param Response $response
+     * @param Response|null $response
+     * @param TeamDao|null $teamDao
+     * @param RedisHandler|null $redisHandler
      *
      * @throws ValidationError
+     * @throws TypeError
+     * @throws UnexpectedValueException
+     * @throws Exception
      */
-    public function __construct(string $jwt, Response $response)
-    {
-        try {
-            $this->jwt = SimpleJWT::getValidatedInstanceFromString(
-                $jwt,
-                AppConfig::$AUTHSECRET
-            )->getPayload();
-        } catch (DomainException $e) {
-            throw new ValidationError($e->getMessage(), $e->getCode(), $e);
+    public function __construct(
+        string        $jwt = '',
+        ?Response     $response = null,
+        ?TeamDao      $teamDao = null,
+        ?RedisHandler $redisHandler = null
+    ) {
+        if ($jwt !== '') {
+            try {
+                $this->jwt = SimpleJWT::getValidatedInstanceFromString(
+                    $jwt,
+                    AppConfig::$AUTHSECRET
+                )->getPayload();
+            } catch (DomainException $e) {
+                throw new ValidationError($e->getMessage(), $e->getCode(), $e);
+            }
         }
 
         $this->response = $response;
+        $this->teamDao = $teamDao ?? new TeamDao();
+        $this->redisHandler = $redisHandler ?? new RedisHandler();
     }
 
     /**
@@ -65,37 +81,41 @@ class InvitedUser
 
     /**
      * @param UserStruct $user
-     * @param array $invitation
+     * @param array{team_id: int, email: string} $invitation
      *
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
-    public static function completeTeamSignUp(UserStruct $user, array $invitation): void
+    public function completeTeamSignUp(UserStruct $user, array $invitation): void
     {
-        $teamStruct = (new TeamDao)->findById($invitation['team_id']);
+        $teamStruct = $this->teamDao->fetchById($invitation['team_id'], TeamStruct::class)
+            ?? throw new RuntimeException('Team not found');
 
         $teamModel = new TeamModel($teamStruct);
         $teamModel->setUser($user);
         $teamModel->addMemberEmail($invitation['email']);
         $teamModel->updateMembers();
 
-        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), $invitation);
-        $pendingInvitation->remove(); // remove pending invitation
+        $pendingInvitation = new PendingInvitations($this->redisHandler->getConnection(), $invitation);
+        $pendingInvitation->remove();
 
         unset($_SESSION['invited_to_team']);
     }
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function hasPendingInvitations(): bool
+    public function hasPendingInvitations(): bool
     {
-        if (!isset($_SESSION['invited_to_team']) || empty($_SESSION['invited_to_team']['team_id'])) { // check if this is the right session caller
+        if (!isset($_SESSION['invited_to_team']) || empty($_SESSION['invited_to_team']['team_id'])) {
             return false;
         }
 
-        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), $_SESSION['invited_to_team']);
+        $pendingInvitation = new PendingInvitations($this->redisHandler->getConnection(), $_SESSION['invited_to_team']);
         if (!$pendingInvitation->hasPendingInvitation($_SESSION['invited_to_team']['team_id'])) {
-            return false; // pending invitation already accepted (one-time token consumed)
+            return false;
         }
 
         return true;

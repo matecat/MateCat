@@ -25,7 +25,8 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     protected UserStruct $user;
     protected string $projectName;
     protected JobsTranslatorsStruct $translator;
-    protected array $_RoutesMethod;
+    /** @var callable */
+    protected mixed $_RoutesMethod;
 
     /**
      * @throws DateInvalidTimeZoneException
@@ -66,11 +67,14 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     }
 
     /**
+     * @return array<string, mixed>
      * @throws ReflectionException
+     * @throws \Exception
      */
     protected function _getTemplateVariables(): array
     {
-        $userRecipient = $this->translator->getUser()->getArrayCopy();
+        $userObj = $this->translator->getUser();
+        $userRecipient = $userObj !== null ? $userObj->getArrayCopy() : [];
         if (!empty($userRecipient['uid'])) {
             $userRecipient['_name'] = $userRecipient['first_name'] . " " . $userRecipient['last_name'];
         } else {
@@ -93,7 +97,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
         ];
     }
 
-    protected function _offsetToTimeZone($offset)
+    protected function _offsetToTimeZone(int|float $offset): string
     {
         $offset = $offset * 60 * 60;
         $abbreviations_list = array_reverse(timezone_abbreviations_list());

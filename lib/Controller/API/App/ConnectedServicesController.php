@@ -17,6 +17,8 @@ use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\NotFoundException;
+use PDOException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use View\API\App\Json\ConnectedService;
@@ -32,7 +34,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     /**
      * @return void
      */
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
     }
@@ -41,6 +43,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function verify(): void
     {
@@ -54,37 +57,41 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     /**
      * @throws NotFoundException
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): void
     {
         $this->__validateOwnership();
+        $service = $this->connectedServiceStruct ?? throw new TypeError('connectedServiceStruct is null');
 
         $params = filter_var_array($this->request->params(), [
             'disabled' => FILTER_VALIDATE_BOOLEAN
         ]);
 
         if ($params['disabled']) {
-            $this->connectedServiceStruct->disabled_at = Utils::mysqlTimestamp(time());
+            $service->disabled_at = Utils::mysqlTimestamp(time());
         } else {
-            $this->connectedServiceStruct->disabled_at = null;
+            $service->disabled_at = null;
         }
 
-        ConnectedServiceDao::updateStruct($this->connectedServiceStruct, ['fields' => ['disabled_at']]);
+        (new ConnectedServiceDao($this->getDatabase()))->updateStruct($service, ['fields' => ['disabled_at']]);
 
         $this->refreshClientSessionIfNotApi();
 
         $formatter = new ConnectedService([]);
-        $this->response->json(['connected_service' => $formatter->renderItem($this->connectedServiceStruct)]);
+        $this->response->json(['connected_service' => $formatter->renderItem($service)]);
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function __handleGDrive(): void
     {
-        $verifier = new GDriveTokenVerifyModel($this->connectedServiceStruct);
+        $service = $this->connectedServiceStruct ?? throw new TypeError('connectedServiceStruct is null');
+        $verifier = new GDriveTokenVerifyModel($service);
 
-        $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+        $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
 
         if ($verifier->validOrRefreshed($client)) {
             $this->response->code(200);
@@ -98,10 +105,13 @@ class ConnectedServicesController extends AbstractStatefulKleinController
 
     /**
      * @throws NotFoundException
+     * @throws PDOException
+     *
+     * @phpstan-assert !null $this->connectedServiceStruct
      */
     private function __validateOwnership(): void
     {
-        $serviceDao = new ConnectedServiceDao();
+        $serviceDao = new ConnectedServiceDao($this->getDatabase());
         $this->connectedServiceStruct = $serviceDao->findServiceByUserAndId($this->user, $this->request->param('id_service'));
 
         if (!$this->connectedServiceStruct) {

@@ -2,15 +2,14 @@
 
 namespace Model\Filters\DTO;
 
-use JsonSerializable;
-
-class Dita implements IDto, JsonSerializable
+class Dita implements IDto
 {
 
+    /** @var list<string> */
     private array $do_not_translate_elements = [];
 
     /**
-     * @param array $do_not_translate_elements
+     * @param list<string> $do_not_translate_elements
      */
     public function setDoNotTranslateElements(array $do_not_translate_elements): void
     {
@@ -18,7 +17,7 @@ class Dita implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function fromArray(array $data): void
     {
@@ -28,7 +27,7 @@ class Dita implements IDto, JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, list<string>>
      */
     public function jsonSerialize(): array
     {

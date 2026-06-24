@@ -8,16 +8,19 @@
 
 namespace Plugins\Features\ReviewExtended;
 
+use Closure;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PDOException;
 use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
-use Plugins\Features\RevisionFactory;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 
 class BatchReviewProcessor
@@ -28,7 +31,7 @@ class BatchReviewProcessor
      */
     private CounterModel $jobWordCounter;
     /**
-     * @var mixed
+     * @var JobStruct
      */
     private JobStruct $chunk;
 
@@ -37,26 +40,41 @@ class BatchReviewProcessor
      */
     private array $prepared_events;
 
-    public function __construct()
-    {
+    /** @var Closure(TranslationEvent, CounterModel, ChunkReviewStruct[]): ReviewedWordCountModel */
+    private Closure $reviewedWordCountModelFactory;
+
+    /** @var Closure(ChunkReviewStruct): ChunkReviewModel */
+    private Closure $chunkReviewModelFactory;
+
+    public function __construct(
+        private ChunkReviewDao $chunkReviewDao = new ChunkReviewDao(),
+        ?Closure $reviewedWordCountModelFactory = null,
+        ?Closure $chunkReviewModelFactory = null,
+    ) {
+        $this->reviewedWordCountModelFactory = $reviewedWordCountModelFactory
+            ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews);
+        $this->chunkReviewModelFactory = $chunkReviewModelFactory
+            ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr);
     }
 
     /**
      * @param JobStruct $chunk
+     * @param CounterModel|null $jobWordCounter
      *
      * @return $this
+     * @throws TypeError
      */
-    public function setChunk(JobStruct $chunk): BatchReviewProcessor
+    public function setChunk(JobStruct $chunk, ?CounterModel $jobWordCounter = null): BatchReviewProcessor
     {
         $this->chunk = $chunk;
         $old_wStruct = WordCountStruct::loadFromJob($chunk);
-        $this->jobWordCounter = new CounterModel($old_wStruct);
+        $this->jobWordCounter = $jobWordCounter ?? new CounterModel($old_wStruct);
 
         return $this;
     }
 
     /**
-     * @param array $prepared_events
+     * @param TranslationEvent[] $prepared_events
      *
      * @return $this
      */
@@ -68,11 +86,15 @@ class BatchReviewProcessor
     }
 
     /**
+     * @return ChunkReviewStruct[]
      * @throws ReflectionException
+     * @throws Exception
+     * @throws PDOException
+     * @throws TypeError
      */
     private function getOrCreateChunkReviews(ProjectStruct $project): array
     {
-        $chunkReviews = (new ChunkReviewDao())->findChunkReviews($this->chunk);
+        $chunkReviews = $this->chunkReviewDao->findChunkReviews($this->chunk);
 
         //
         // ----------------------------------------------
@@ -91,7 +113,7 @@ class BatchReviewProcessor
                 'source_page' => 2,
             ];
 
-            $chunkReview = ChunkReviewDao::createRecord($data);
+            $chunkReview = $this->chunkReviewDao->createRecord($data);
             (new ChunkReviewModel($chunkReview))->recountAndUpdatePassFailResult($project);
             $chunkReviews[] = $chunkReview;
 
@@ -106,29 +128,24 @@ class BatchReviewProcessor
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function process(): void
     {
         $project = $this->chunk->getProject();
         $chunkReviews = $this->getOrCreateChunkReviews($project);
 
-        $revisionFactory = RevisionFactory::initFromProject($project);
-
-        $data = [];
-
         foreach ($this->prepared_events as $translationEvent) {
-            $segmentTranslationModel = new ReviewedWordCountModel($translationEvent, $this->jobWordCounter, $chunkReviews);
+            $segmentTranslationModel = ($this->reviewedWordCountModelFactory)($translationEvent, $this->jobWordCounter, $chunkReviews);
 
-            // here we process and count the reviewed word count and
             $segmentTranslationModel->evaluateChunkReviewEventTransitions();
             $segmentTranslationModel->deleteIssues();
             $segmentTranslationModel->sendNotificationEmail();
 
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
-                // send chunkReviewUpdated notifications through FeaturesSet hook
                 $project = $chunkReview->getChunk()->getProject();
-                $chunkReviewModel = new ChunkReviewModel($chunkReview);
-                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
+                $chunkReviewModel = ($this->chunkReviewModelFactory)($chunkReview);
+                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }
         }
 
@@ -137,6 +154,7 @@ class BatchReviewProcessor
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     private function updateJobWordCounter(): void
     {
@@ -150,12 +168,12 @@ class BatchReviewProcessor
             $this->chunk->approved2_words = $newCount->getApproved2Words();
             $this->chunk->rejected_words = $newCount->getRejectedWords();
 
-            $this->chunk->draft_raw_words = $newCount->getDraftRawWords();
-            $this->chunk->new_raw_words = $newCount->getNewRawWords();
-            $this->chunk->translated_raw_words = $newCount->getTranslatedRawWords();
-            $this->chunk->approved_raw_words = $newCount->getApprovedRawWords();
-            $this->chunk->approved2_raw_words = $newCount->getApproved2RawWords();
-            $this->chunk->rejected_raw_words = $newCount->getRejectedRawWords();
+            $this->chunk->draft_raw_words = (int)$newCount->getDraftRawWords();
+            $this->chunk->new_raw_words = (int)$newCount->getNewRawWords();
+            $this->chunk->translated_raw_words = (int)$newCount->getTranslatedRawWords();
+            $this->chunk->approved_raw_words = (int)$newCount->getApprovedRawWords();
+            $this->chunk->approved2_raw_words = (int)$newCount->getApproved2RawWords();
+            $this->chunk->rejected_raw_words = (int)$newCount->getRejectedRawWords();
             // updateTodoValues for the JOB
         }
     }

@@ -11,5 +11,5 @@ namespace Utils\Engines\Lara;
 
 interface HttpClientInterface
 {
-    public function authenticate();
+    public function authenticate(): string;
 }

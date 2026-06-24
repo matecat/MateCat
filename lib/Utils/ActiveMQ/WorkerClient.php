@@ -9,10 +9,13 @@
 
 namespace Utils\ActiveMQ;
 
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Stomp\Transport\Message;
+use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -20,6 +23,7 @@ use Utils\TaskRunner\Commons\QueueElement;
 class WorkerClient
 {
 
+    /** @var array<string, Context> */
     public static array $_QUEUES = [];
     /**
      * @var AMQHandler
@@ -33,6 +37,7 @@ class WorkerClient
      * @param AMQHandler|null $handler
      *
      * @throws Exception
+     * @throws TypeError
      */
     public static function init(AMQHandler $handler = null): void
     {
@@ -52,11 +57,10 @@ class WorkerClient
     /**
      * WARNING this method should never be used in a daemon context
      *
-     * @param string $queue
-     * @param string $class_name
-     * @param array $data
-     * @param array $options
-     *
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     public static function enqueue(string $queue, string $class_name, array $data, array $options = []): void
     {
@@ -64,11 +68,10 @@ class WorkerClient
     }
 
     /**
-     * @param AMQHandler $handler
-     * @param string $queue
-     * @param string $class_name
-     * @param array $data
-     * @param array $options
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     public static function enqueueWithClient(AMQHandler $handler, string $queue, string $class_name, array $data, array $options = []): void
     {

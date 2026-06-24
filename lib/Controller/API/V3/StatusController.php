@@ -16,7 +16,7 @@ class StatusController extends KleinController
     /**
      * Validation callbacks
      */
-    public function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
         $this->appendValidator(new ProjectPasswordValidator($this));
@@ -26,10 +26,11 @@ class StatusController extends KleinController
      * @throws NotFoundException
      * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
+     * @throws \TypeError
      */
     public function index(): void
     {
-        $_project_data = ProjectDao::getProjectAndJobData($this->request->param('id_project'));
+        $_project_data = (new ProjectDao($this->getDatabase()))->getProjectAndJobData($this->request->param('id_project'));
         $analysisStatus = new Status($_project_data, $this->featureSet, $this->user);
         $result = $analysisStatus->fetchData()->getResult();
 

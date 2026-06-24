@@ -26,7 +26,8 @@ trait ProjectWordCount
      * @param int $pid
      *
      * @return array<int, array<string, mixed>>
-     * @throws \RuntimeException
+     *
+     * @throws RuntimeException
      */
     protected function getProjectSegmentsTranslationSummary(int $pid): array
     {

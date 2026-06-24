@@ -27,7 +27,7 @@ class OCRCheck
 
     /**
      * @see https://www.iana.org/assignments/media-types/media-types.xhtml#image
-     * @var array
+     * @var array<int, string>
      */
     private array $mimeTypes = [
         'image/',
@@ -54,6 +54,7 @@ class OCRCheck
      * @param string $filePath
      *
      * @return bool
+     * @throws \LogicException
      */
     public function thereIsWarning(string $filePath): bool
     {
@@ -65,9 +66,11 @@ class OCRCheck
 
         if (!in_array($this->source_lang, $languages::getLanguagesWithOcrSupported())) {
             $mimeType = (new MimeTypes())->guessMimeType($filePath);
-            foreach ($this->mimeTypes as $mType) {
-                if (stripos($mimeType, $mType) !== false) {
-                    return true;
+            if ($mimeType !== null) {
+                foreach ($this->mimeTypes as $mType) {
+                    if (stripos($mimeType, $mType) !== false) {
+                        return true;
+                    }
                 }
             }
         }
@@ -79,6 +82,7 @@ class OCRCheck
      * @param string $filePath
      *
      * @return bool
+     * @throws \LogicException
      */
     public function thereIsError(string $filePath): bool
     {
@@ -90,9 +94,11 @@ class OCRCheck
 
         if (in_array($this->source_lang, $languages::getLanguagesWithOcrNotSupported())) {
             $mimeType = (new MimeTypes())->guessMimeType($filePath);
-            foreach ($this->mimeTypes as $mType) {
-                if (stripos($mimeType, $mType) !== false) {
-                    return true;
+            if ($mimeType !== null) {
+                foreach ($this->mimeTypes as $mType) {
+                    if (stripos($mimeType, $mType) !== false) {
+                        return true;
+                    }
                 }
             }
         }

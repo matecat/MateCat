@@ -12,6 +12,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
+use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Projects\ProjectDao;
 use View\API\V2\Json\ProjectUrls;
 
@@ -28,10 +29,12 @@ class UrlsController extends KleinController
      */
     public function urls(): void
     {
-        $this->featureSet->loadForProject($this->validator->getProject());
+        $project = $this->validator->getProject() ?? throw new Exception('Project not found');
+
+        $this->featureSet->loadForProject($project);
 
         $jobCheck = 0;
-        foreach ($this->validator->getProject()->getJobs() as $job) {
+        foreach ($project->getJobs() as $job) {
             if (!$job->isDeleted()) {
                 $jobCheck++;
             }
@@ -45,14 +48,16 @@ class UrlsController extends KleinController
                     'message' => 'No project found.'
                 ]
             ]);
-            exit();
+            return;
         }
 
-        $projectData = (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
+        $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
         $formatted = new ProjectUrls($projectData);
 
-        $formatted = $this->featureSet->filter('projectUrls', $formatted);
+        $projectUrlsEvent = new ProjectUrlsEvent($formatted);
+        $this->featureSet->dispatch($projectUrlsEvent);
+        $formatted = $projectUrlsEvent->getFormatted();
 
         $this->response->json(['urls' => $formatted->render()]);
     }
@@ -62,7 +67,7 @@ class UrlsController extends KleinController
         $this->validator->validate();
     }
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->validator = new ProjectPasswordValidator($this);
         $this->appendValidator(new LoginValidator($this));

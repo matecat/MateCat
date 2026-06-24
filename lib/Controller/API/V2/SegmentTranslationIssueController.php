@@ -8,8 +8,6 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Exception;
-use Model\Comments\CommentDao;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
@@ -22,6 +20,9 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use RuntimeException;
+use TypeError;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use View\API\V2\Json\TranslationIssueComment;
 
@@ -32,8 +33,11 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      */
     private SegmentTranslationIssueValidator $validator;
 
+    /**
+     * @throws RuntimeException
+     */
     public function index(): void {
-        $result = EntryDao::findAllByTranslationVersion(
+        $result = (new EntryDao($this->getDatabase()))->findAllByTranslationVersion(
             $this->validator->translation->id_segment,
             $this->validator->translation->id_job,
             $this->getVersionNumber()
@@ -47,6 +51,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      * @throws ValidationError
+     * @throws RuntimeException
+     * @throws Exception
+     * @throws \TypeError
      */
     public function create(): void {
         $data = [
@@ -66,7 +73,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'source_page' => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
         ];
 
-        Database::obtain()->begin();
+        $this->getDatabase()->begin();
 
         $struct = new EntryStruct( $data );
 
@@ -78,7 +85,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $struct = $model->save();
 
-        Database::obtain()->commit();
+        $this->getDatabase()->commit();
 
         $json     = new TranslationIssueFormatter();
         $rendered = $json->renderItem( $struct );
@@ -88,6 +95,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function update(): void {
         $data = [
@@ -107,34 +115,35 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'uid'                 => $this->user->uid ?? null,
         ];
 
-        Database::obtain()->begin();
+        $this->getDatabase()->begin();
 
-        $oldStruct = EntryDao::findById( $data[ 'id_issue' ] );
-        $data['source_page'] =  $oldStruct->source_page ;
+        $oldStruct = (new EntryDao($this->getDatabase()))->findById( $data[ 'id_issue' ] );
 
-        if ( empty( $oldStruct ) ) {
+        if ( $oldStruct === null ) {
             throw new NotFoundException( "Issue not found", 404 );
         }
 
-        $chunkReviewDao = new ChunkReviewDao();
-        $chunkReviewStruct = $chunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $data['source_page'] = $oldStruct->source_page;
 
-        if ( empty( $chunkReviewStruct ) ) {
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+        $chunkReviewStruct = $chunkReviewDao->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+
+        if ( $chunkReviewStruct === null ) {
             throw new NotFoundException( "Job not found", 404 );
         }
 
         $jobStruct = $chunkReviewStruct->getChunk();
 
-        if ( empty( $jobStruct ) ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
-
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
         // This is the chunk review that will be updated
-        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage($jobStruct->id, $jobStruct->password, $oldStruct->source_page);
+        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage(
+            $jobStruct->id ?? throw new RuntimeException('Missing job id'),
+            $jobStruct->password ?? throw new RuntimeException('Missing job password'),
+            $oldStruct->source_page
+        );
 
-        if ( empty( $chunkReviewToBeUpdated ) ) {
+        if ( $chunkReviewToBeUpdated === null ) {
             throw new NotFoundException( "Job not found", 404 );
         }
 
@@ -147,7 +156,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         // remove old issue
         $model = $this->_getSegmentTranslationIssueModel(
             $chunkReviewToBeUpdated->id_job,
-            $chunkReviewToBeUpdated->review_password,
+            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
             $oldStruct
         );
 
@@ -156,24 +165,24 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         // create new issue
         $model = $this->_getSegmentTranslationIssueModel(
             $chunkReviewToBeUpdated->id_job,
-            $chunkReviewToBeUpdated->review_password,
+            $chunkReviewToBeUpdated->review_password ?? throw new RuntimeException('Missing review password'),
             $newStruct
         );
 
         $struct = $model->save();
 
         // move comments from old issue to new one
-        $commentDao = new EntryCommentDao();
+        $commentDao = new EntryCommentDao($this->getDatabase());
         $commentDao->move(
             (int)$oldStruct->id,
             (int)$struct->id
         );
 
-        // update replies count
-        $entryDao = new EntryDao();
-        $entryDao->updateRepliesCount($struct->id);
+         // update replies count
+         $entryDao = new EntryDao($this->getDatabase());
+         $entryDao->updateRepliesCount($struct->id ?? throw new RuntimeException('Missing entry id'));
 
-        Database::obtain()->commit();
+        $this->getDatabase()->commit();
 
         $msg = "[AUDIT][ISSUE_UPDATE] issue_id={$struct->id}; segment_id={$struct->id_segment}; user={$this->user->email}; new_severity={$struct->severity}";
         $this->logger->debug($msg);
@@ -186,61 +195,65 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      * @throws Exception
+     * @throws \TypeError
      */
     public function delete(): void {
-        Database::obtain()->begin();
+        $issue = $this->validator->issue ?? throw new RuntimeException('Missing issue');
+
+        $this->getDatabase()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
             $this->request->param( 'id_job' ),
             $this->request->param( 'password' ),
-            $this->validator->issue
+            $issue
         );
 
-        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
-        if ( empty( $chunkReviewStruct ) ) {
+        if ( $chunkReviewStruct === null ) {
             throw new NotFoundException( "Job not found", 404 );
         }
 
         $jobStruct = $chunkReviewStruct->getChunk();
 
-        if ( empty( $jobStruct ) ) {
-            throw new NotFoundException( "Job not found", 404 );
-        }
-
-        $this->checkLoggedUserPermissions($this->validator->issue, $jobStruct, $this->user);
+        $this->checkLoggedUserPermissions($issue, $jobStruct, $this->user);
 
         $model->delete();
-        Database::obtain()->commit();
+        $this->getDatabase()->commit();
 
         $this->response->code( 200 );
     }
 
-    public function getComments(): void {
-        $dao = new EntryCommentDao();
+      /**
+       * @throws RuntimeException
+       */
+      public function getComments(): void {
+          $dao = new EntryCommentDao($this->getDatabase());
 
-        $comments = $dao->findByIssueId(
-            $this->validator->issue->id
-        );
+          $comments = $dao->findByIssueId(
+              $this->validator->issue->id ?? throw new RuntimeException('Missing issue id')
+          );
 
-        $json = new TranslationIssueComment();
-        $rendered = $json->render( $comments );
-        $this->response->json( [ 'comments' => $rendered ] );
-    }
+         $json = new TranslationIssueComment();
+         $rendered = $json->render( $comments );
+         $this->response->json( [ 'comments' => $rendered ] );
+     }
 
-    /**
-     * @throws AuthorizationError
-     * @throws NotFoundException
-     */
-    public function createComment(): void {
-        $data = [
-            'comment' => $this->request->param( 'message' ),
-            'id_qa_entry' => $this->validator->issue->id,
-            'source_page' => $this->request->param( 'source_page' ),
-            'uid' => $this->user->uid
-        ];
+     /**
+      * @throws AuthorizationError
+      * @throws NotFoundException
+      * @throws RuntimeException
+      * @throws TypeError
+      */
+      public function createComment(): void {
+         $data = [
+             'comment' => $this->request->param( 'message' ),
+             'id_qa_entry' => (int)($this->validator->issue->id ?? throw new RuntimeException('Missing issue id')),
+             'source_page' => (int)($this->request->param( 'source_page' ) ?? throw new RuntimeException('Missing source_page')),
+             'uid' => (int)($this->user->uid ?? throw new RuntimeException('Missing user uid'))
+         ];
 
-        $dao = new EntryCommentDao();
-        $entry = EntryDao::findById( $this->validator->issue->id );
+         $dao = new EntryCommentDao($this->getDatabase());
+         $entry = (new EntryDao($this->getDatabase()))->findById( $this->validator->issue->id ?? throw new RuntimeException('Missing issue id') );
 
         if ( empty( $entry ) ) {
             throw new NotFoundException( "Issue not found", 404 );
@@ -262,12 +275,21 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @param EntryStruct $issue
      *
      * @return TranslationIssueModel
+     * @throws Exception
+     * @throws \TypeError
      */
     protected function _getSegmentTranslationIssueModel( int $id_job, string $password, EntryStruct $issue ): TranslationIssueModel {
-        return new TranslationIssueModel( $id_job, $password, $issue );
+        return new TranslationIssueModel(
+            $id_job,
+            $password,
+            $issue,
+            new ChunkReviewDao($this->getDatabase()),
+            new EntryDao($this->getDatabase()),
+            new TranslationVersionDao($this->getDatabase())
+        );
     }
 
-    protected function afterConstruct(): void {
+    protected function registerValidators(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
@@ -286,13 +308,17 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         return (int)$this->validator->translation->version_number;
     }
 
+    /**
+     * @throws AuthorizationError
+     * @throws Exception
+     */
     private function checkLoggedUserPermissions(EntryStruct $entry, JobStruct $job, UserStruct $loggerUser): void
     {
         if($entry->uid === $loggerUser->uid){
             return;
         }
 
-        $owner = (new UserDao())->getByEmail($job->owner);
+        $owner = (new UserDao($this->getDatabase()))->getByEmail($job->owner);
 
         if($owner === null){
             throw new AuthorizationError( "Job owner not found. Not Authorized", 401 );
@@ -302,10 +328,15 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
-        $teamId = $job->getProject()->getTeam()->id;
-        $mDao = new MembershipDao();
+        $team = $job->getProject()->getTeam();
 
-        foreach ($mDao->getMemberListByTeamId($teamId) as $member){
+        if ($team === null || $team->id === null) {
+            throw new AuthorizationError( "Team not found. Not Authorized", 401 );
+        }
+
+        $mDao = new MembershipDao($this->getDatabase());
+
+        foreach ($mDao->getMemberListByTeamId($team->id) as $member){
             if($member->uid === $loggerUser->uid){
                 return;
             }

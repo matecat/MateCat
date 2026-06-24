@@ -2,11 +2,14 @@
 
 namespace View\API\V2\Json;
 
+use LogicException;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryStruct;
+use PDOException;
 use Plugins\Features\ReviewExtended\ReviewUtils;
+use RuntimeException;
 use SplFileObject;
 
 class SegmentTranslationIssue
@@ -17,21 +20,30 @@ class SegmentTranslationIssue
      */
     private SplFileObject $csvHandler;
 
-    public function __construct()
+    private ?EntryCommentDao $entryCommentDao;
+
+    public function __construct(?EntryCommentDao $entryCommentDao = null)
     {
+        $this->entryCommentDao = $entryCommentDao;
     }
 
-    public function renderItem(IdaoStruct $record): array
+    /**
+     * @return array<string, mixed>
+     * @throws RuntimeException
+     * @throws PDOException
+     */
+    public function renderItem(IDaoStruct $record): array
     {
-        $dao = new EntryCommentDao();
+        $dao = $this->entryCommentDao ?? new EntryCommentDao();
         /** @var EntryStruct $record */
-        $comments = $dao->findByIssueId($record->id);
+        $comments = $dao->findByIssueId($record->id ?? throw new RuntimeException('Missing issue id'));
         $record = new EntryStruct($record->getArrayCopy());
+        $timestamp = strtotime($record->create_date ?? 'now');
 
         return [
             'uid' => $record->uid,
             'comment' => $record->comment,
-            'created_at' => date('c', strtotime($record->create_date ?? 'now')),
+            'created_at' => date('c', $timestamp !== false ? $timestamp : null),
             'id' => $record->id,
             'id_category' => $record->id_category,
             'id_job' => $record->id_job,
@@ -51,7 +63,13 @@ class SegmentTranslationIssue
         ];
     }
 
-    public function genCSVTmpFile($data): string
+    /**
+     * @param EntryStruct[] $data
+     * @throws LogicException
+     * @throws RuntimeException
+     * @throws PDOException
+     */
+    public function genCSVTmpFile(array $data): string
     {
         $filePath = tempnam("/tmp", "SegmentsIssuesComments_");
         $csvHandler = new SplFileObject($filePath, "w");
@@ -71,8 +89,11 @@ class SegmentTranslationIssue
         $csvHandler->fputcsv($csv_fields);
 
         foreach ($data as $record) {
-            $dao = new EntryCommentDao();
+            $dao = $this->entryCommentDao ?? new EntryCommentDao();
 
+            if ($record->id === null) {
+                continue;
+            }
             $comments = $dao->findByIssueId($record->id);
             foreach ($comments as $c) {
                 $combined = array_combine($csv_fields, array_fill(0, count($csv_fields), ''));
@@ -95,7 +116,9 @@ class SegmentTranslationIssue
      *
      * @param AbstractDaoObjectStruct[] $array
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
+     * @throws RuntimeException
+     * @throws PDOException
      */
     public function render(array $array): array
     {
@@ -111,7 +134,8 @@ class SegmentTranslationIssue
     private function getDateValue(?string $strDate = null): ?string
     {
         if ($strDate != null) {
-            return date('c', strtotime($strDate));
+            $timestamp = strtotime($strDate);
+            return date('c', $timestamp !== false ? $timestamp : null);
         }
 
         return null;

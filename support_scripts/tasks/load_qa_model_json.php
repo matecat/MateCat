@@ -28,12 +28,12 @@ if (empty($options))                               usage() ;
 if (!array_key_exists('file', $options))           usage() ;
 if (!array_key_exists('id_project', $options))     usage() ;
 
-$project = ProjectDao::findById( $options['id_project']);
+$project = (new ProjectDao())->findById( $options['id_project']);
 
 $content = file_get_contents( $options['file']);
 $json = json_decode( $content, true );
 
-$model_record = Model\LQA\ModelDao::createModelFromJsonDefinition( $json );
+$model_record = (new Model\LQA\ModelDao())->createModelFromJsonDefinition( $json );
 
 $dao = new \Model\Projects\ProjectDao( \Model\DataAccess\Database::obtain() );
 $dao->updateField( $this->project, 'id_qa_model', $model_record->id );

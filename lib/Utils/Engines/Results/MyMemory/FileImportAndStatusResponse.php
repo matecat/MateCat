@@ -2,6 +2,7 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
+use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\LoggerFactory;
 
@@ -30,9 +31,14 @@ class FileImportAndStatusResponse extends TMSAbstractResponse
     }
     */
 
-    public $id;
+    public ?string $id = null;
 
-    public function __construct($response)
+    /**
+     * @param array<string, mixed> $response
+     *
+     * @throws TypeError
+     */
+    public function __construct(array $response)
     {
         $this->responseData = $response['responseData'] ?? '';
         $this->responseStatus = (int)($response['responseStatus'] ?? 200);

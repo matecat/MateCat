@@ -15,6 +15,7 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
     targetLang: undefined,
     selectedTeam: undefined,
     filtersTemplate: undefined,
+    laraStyleGuide: undefined,
   },
   updateProject: function (data) {
     this.projectData = {

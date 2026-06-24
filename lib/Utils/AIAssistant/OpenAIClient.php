@@ -6,7 +6,7 @@ use Exception;
 use Orhanerday\OpenAi\OpenAi;
 use Utils\Registry\AppConfig;
 
-class OpenAIClient implements AIClientInterface
+class OpenAIClient implements TranslationEvaluatorClientInterface, ContextExplainerClientInterface
 {
     /**
      * @var OpenAi
@@ -24,6 +24,7 @@ class OpenAIClient implements AIClientInterface
     }
 
     /**
+     * @return array{category: string, comment: string}
      * @throws Exception
      */
     public function evaluateTranslation(
@@ -72,8 +73,8 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
         ];
 
         $prompt = strtr($promptTemplate, $vars);
-        $model = (AppConfig::$OPEN_AI_MODEL and AppConfig::$OPEN_AI_MODEL !== '') ? AppConfig::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
-        $maxTokens = (AppConfig::$OPEN_AI_MAX_TOKENS and AppConfig::$OPEN_AI_MAX_TOKENS !== '') ? (int)AppConfig::$OPEN_AI_MAX_TOKENS : 500;
+        $model = AppConfig::$OPEN_AI_MODEL ?: 'gpt-3.5-turbo';
+        $maxTokens = (int)(AppConfig::$OPEN_AI_MAX_TOKENS ?: 500);
         $realMaxTokens = (4000 - $maxTokens);
 
         $opts = [
@@ -112,7 +113,7 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
         ];
 
         $response = $this->openAi->chat($opts);
-        $response = json_decode($response, true);
+        $response = json_decode((string)$response, true);
 
         $message = $response['choices'][0]['message']['content'];
         $feedback = json_decode($message);
@@ -138,20 +139,14 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
     }
 
     /**
-     * @param          $word
-     * @param          $phrase
-     * @param          $target
-     * @param callable $callback
-     *
-     * @return void
      * @throws Exception
      */
-    public function findContextForAWord($word, $phrase, $target, callable $callback): void
+    public function findContextForAWord(string $word, string $phrase, string $target, callable $callback): void
     {
         $phrase = strip_tags($phrase);
         $content = "Explain, in " . $target . ", the meaning of '" . $word . "' when used in this context : '" . $phrase . "'";
-        $model = (AppConfig::$OPEN_AI_MODEL and AppConfig::$OPEN_AI_MODEL !== '') ? AppConfig::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
-        $maxTokens = (AppConfig::$OPEN_AI_MAX_TOKENS and AppConfig::$OPEN_AI_MAX_TOKENS !== '') ? (int)AppConfig::$OPEN_AI_MAX_TOKENS : 500;
+        $model = AppConfig::$OPEN_AI_MODEL ?: 'gpt-3.5-turbo';
+        $maxTokens = (int)(AppConfig::$OPEN_AI_MAX_TOKENS ?: 500);
         $realMaxTokens = (4000 - $maxTokens);
 
         $opts = [
@@ -171,4 +166,5 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
 
         $this->openAi->chat($opts, $callback);
     }
+
 }

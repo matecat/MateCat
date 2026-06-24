@@ -1,0 +1,29 @@
+<?php
+
+namespace Klein;
+
+/**
+ * `getDatabase` is registered dynamically in router.php via
+ * $app->register('getDatabase', fn() => Bootstrap::getDatabase());
+ * Typed as `object` (not the project IDatabase, which a stub file cannot
+ * resolve); callers narrow with `instanceof IDatabase`
+ * (see KleinController::resolveDatabase()).
+ *
+ * @method object getDatabase()
+ */
+class App
+{
+    /**
+     * @var array<string, callable> $services
+     */
+    protected array $services = [];
+
+    public function __get(string $name): mixed {}
+
+    /**
+     * @param mixed[] $args
+     */
+    public function __call(string $method, array $args): mixed {}
+
+    public function register(string $name, callable $closure): void {}
+}

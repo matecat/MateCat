@@ -85,7 +85,7 @@ class SegmentTranslationIssueValidator extends Base
      */
     protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber(): void
     {
-        $latestSegmentEvent = (new TranslationEventDao())->getLatestEventForSegment($this->chunkReview->id_job, $this->translation->id_segment);
+        $latestSegmentEvent = (new TranslationEventDao($this->controller->getDatabase()))->getLatestEventForSegment($this->chunkReview->id_job, $this->translation->id_segment);
 
         if (!$latestSegmentEvent && ($this->translation->isICE() || $this->translation->isPreTranslated())) {
             throw new ValidationError('Cannot set issues on unmodified ICE.', -2000);
@@ -111,7 +111,7 @@ class SegmentTranslationIssueValidator extends Base
      */
     protected function __ensureIssueIsInScope(): void
     {
-        $this->issue = EntryDao::findById($this->request->param('id_issue'));
+        $this->issue = (new EntryDao($this->controller->getDatabase()))->findById($this->request->param('id_issue'));
 
         if (!$this->issue) {
             throw new ValidationError('issue not found');

@@ -27,14 +27,14 @@ class DeepLStruct extends EngineStruct
     public ?string $translate_relative_url = "v1/translate";
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $others = [
         "relative_glossaries_url" => "glossaries",
     ];
 
     /**
-     * @var string|array|null
+     * @var array<string, mixed>|string|null
      */
     public string|array|null $extra_parameters = [
         'DeepL-Auth-Key' => "",
@@ -52,6 +52,6 @@ class DeepLStruct extends EngineStruct
 
     public static function getStruct(): static
     {
-        return new DeepLStruct();
+        return new static();
     }
 }

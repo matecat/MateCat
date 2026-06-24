@@ -90,6 +90,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?string $deepl_engine_type = null;
     public ?string $lara_glossaries = null;
     public ?string $lara_style = null;
+    public ?string $lara_style_guideline_id = null;
     public ?string $intento_routing = null;
     public ?string $intento_provider = null;
     public ?string $enable_mt_analysis = null;

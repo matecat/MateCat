@@ -13,7 +13,7 @@ class XliffRulesModel implements JsonSerializable
     const string XLIFF_20 = 'xliff20';
 
     /**
-     * @var array
+     * @var array<string, list<XliffRuleInterface>>
      */
     private array $ruleSets = [
         self::XLIFF_12 => [],
@@ -56,12 +56,12 @@ class XliffRulesModel implements JsonSerializable
     /**
      * @param array<string, array<int, array{states: string[], analysis: string, editor?: string|null, match_category?: string|null}>> $structure
      *
-     * @return static
+     * @return self
      * @throws Exception
      */
     public static function fromArray(array $structure): XliffRulesModel
     {
-        $self = new static();
+        $self = new self();
         foreach ($structure as $ruleType => $ruleSet) {
             if ($ruleType == self::XLIFF_12) {
                 $ruleClass = Xliff12Rule::class;
@@ -83,6 +83,7 @@ class XliffRulesModel implements JsonSerializable
      * @param int $versionNumber
      *
      * @return XliffRuleInterface[]
+     * @throws DomainException
      */
     public function getRulesForVersion(int $versionNumber): array
     {
@@ -120,25 +121,27 @@ class XliffRulesModel implements JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, list<XliffRuleInterface>>
      */
-    public
-    function jsonSerialize(): array
+    public function jsonSerialize(): array
     {
         return $this->ruleSets;
     }
 
     public function __toString(): string
     {
-        return json_encode($this->ruleSets);
+        return json_encode($this->ruleSets) ?: '';
     }
 
+    /**
+     * @return array<string, list<array<string, mixed>>>
+     */
     public function getArrayCopy(): array
     {
         $copy = [];
         foreach ($this->ruleSets as $ruleType => $rules) {
             foreach ($rules as $rule) {
-                /** @var $rule AbstractXliffRule * */
+                /** @var AbstractXliffRule $rule */
                 $copy[$ruleType][] = $rule->getArrayCopy();
             }
         }

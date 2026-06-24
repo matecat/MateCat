@@ -70,7 +70,7 @@ class AnalysisJob implements JsonSerializable
     protected object $payable_rates;
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

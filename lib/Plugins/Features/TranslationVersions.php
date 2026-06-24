@@ -20,6 +20,7 @@ class TranslationVersions extends BaseFeature
      * @param ProjectStruct $projectStruct
      * @param int|null $id_segment
      * @return VersionHandlerInterface
+     * @throws \RuntimeException
      */
     public static function getVersionHandlerNewInstance(JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null): VersionHandlerInterface
     {
@@ -27,7 +28,6 @@ class TranslationVersions extends BaseFeature
             return new TranslationVersionsHandler(
                 $chunkStruct,
                 $id_segment,
-                $userStruct,
                 $projectStruct
             );
         }

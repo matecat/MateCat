@@ -8,14 +8,19 @@ use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Exceptions\RenderTerminatedException;
 use Controller\Traits\RateLimiterTrait;
 use Controller\Views\CustomPageView;
 use Exception;
+use InvalidArgumentException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\Teams\InvitedUser;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\RedeemableProject;
+use Model\Users\UserStruct;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -28,6 +33,7 @@ class SignupController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -51,13 +57,69 @@ class SignupController extends AbstractStatefulKleinController
             return;
         }
 
-        $signup = new SignupModel($user, $_SESSION);
+        $signup = $this->createSignupModel($user, $_SESSION);
         $signup->processSignup();
         $this->response->code(200);
     }
 
     /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function authenticateConfirmedUser(UserStruct $user): void
+    {
+        AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
+        AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
+    }
+
+    /**
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function createInvitedUser(): InvitedUser
+    {
+        return new InvitedUser();
+    }
+
+    /**
+     * @param UserStruct $user
+     * @param array<string, mixed> $session
+     *
+     * @return RedeemableProject
+     */
+    protected function createRedeemableProject(UserStruct $user, array &$session): RedeemableProject
+    {
+        return new RedeemableProject($user, $session);
+    }
+
+    /**
+     * @throws Exception
+     * @throws RenderTerminatedException
+     * @throws InvalidArgumentException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
+     */
+    protected function renderErrorPage(): void
+    {
+        $controllerInstance = new CustomPageView();
+        $controllerInstance->setView('410.html', [], 410);
+        $controllerInstance->render();
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     * @param array<string, mixed> $session
+     *
+     * @return SignupModel
+     */
+    protected function createSignupModel(array $params, array &$session): SignupModel
+    {
+        return new SignupModel($params, $session);
+    }
+
+    /**
      * @throws ValidationError
+     * @return array<string, mixed>
      */
     private function validateCreationRequest(): array
     {
@@ -83,8 +145,15 @@ class SignupController extends AbstractStatefulKleinController
                     'filter' => FILTER_CALLBACK,
                     'options' => function ($wanted_url) {
                         $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
-
-                        return parse_url($wanted_url)['host'] != parse_url(AppConfig::$HTTPHOST)['host'] ? AppConfig::$HTTPHOST : $wanted_url;
+                        if ($wanted_url === false) {
+                            return AppConfig::$HTTPHOST;
+                        }
+                        $parsed     = parse_url($wanted_url);
+                        $parsedHost = parse_url(AppConfig::$HTTPHOST);
+                        if ($parsed === false || $parsedHost === false) {
+                            return AppConfig::$HTTPHOST;
+                        }
+                        return ($parsed['host'] ?? '') !== ($parsedHost['host'] ?? '') ? AppConfig::$HTTPHOST : $wanted_url;
                     }
                 ]
             ]
@@ -102,31 +171,35 @@ class SignupController extends AbstractStatefulKleinController
             throw new ValidationError("Last name must contain at least one letter");
         }
 
-        $this->validatePasswordRequirements($user['password'], $user['password_confirmation']);
+        $this->validatePasswordRequirements(
+            is_string($user['password']) ? $user['password'] : '',
+            is_string($user['password_confirmation']) ? $user['password_confirmation'] : ''
+        );
 
         return $user;
     }
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function confirm(): void
     {
         $token = filter_var($this->request->param('token'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 
-        $signupModel = new SignupModel(['token' => $token], $_SESSION);
+        $signupModel = $this->createSignupModel(['token' => $token], $_SESSION);
 
         try {
             $user = $signupModel->confirm();
 
-            AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelper::getInstance($_SESSION);
+            $this->authenticateConfirmedUser($user);
 
-            if (InvitedUser::hasPendingInvitations()) {
-                InvitedUser::completeTeamSignUp($user, $_SESSION['invited_to_team']);
+            $invitedUser = $this->createInvitedUser();
+            if ($invitedUser->hasPendingInvitations()) {
+                $invitedUser->completeTeamSignUp($user, $_SESSION['invited_to_team']);
             }
 
-            $project = new RedeemableProject($user, $_SESSION);
+            $project = $this->createRedeemableProject($user, $_SESSION);
             $project->tryToRedeem();
 
             if ($project->getDestinationURL()) {
@@ -139,10 +212,7 @@ class SignupController extends AbstractStatefulKleinController
         } catch (Exception $e) {
             FlashMessage::set('confirmToken', $e->getMessage(), FlashMessage::ERROR);
 
-            // return a 410 status code
-            $controllerInstance = new CustomPageView();
-            $controllerInstance->setView('410.html', [], 410);
-            $controllerInstance->render();
+            $this->renderErrorPage();
         }
     }
 

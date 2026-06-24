@@ -56,13 +56,10 @@ class AltlangStruct extends EngineStruct
      */
     public ?int $penalty = 14;
 
-    /**
-     * An empty struct
-     * @return AltlangStruct
-     */
+    
     public static function getStruct(): static
     {
-        return new AltlangStruct();
+        return new static();
     }
 
 }

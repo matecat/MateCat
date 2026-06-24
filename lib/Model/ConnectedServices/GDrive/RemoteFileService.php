@@ -12,7 +12,9 @@ use Exception;
 use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_DriveFile;
+use InvalidArgumentException;
 use Model\RemoteFiles\RemoteFileStruct;
+use TypeError;
 
 class RemoteFileService
 {
@@ -26,31 +28,36 @@ class RemoteFileService
     const string MIME_GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
 
 
+    /** @var array<string, mixed>|string */
     protected string|array $raw_token;
     protected Google_Service_Drive $gdriveService;
 
     /**
      * RemoteFileService constructor.
      *
-     * @param               $raw_token
+     * @param array<string, mixed>|string $raw_token
      * @param Google_Client $client
+     * @param Google_Service_Drive|null $gdriveService
+     * @throws TypeError
+     * @throws InvalidArgumentException
      */
-    public function __construct($raw_token, Google_Client $client)
+    public function __construct(array|string $raw_token, Google_Client $client, ?Google_Service_Drive $gdriveService = null)
     {
         $this->raw_token = $raw_token;
-        $this->gdriveService = self::getService($this->raw_token, $client);
+        $this->gdriveService = $gdriveService ?? self::getService($this->raw_token, $client);
     }
 
     /**
-     * @param string|array $token
+     * @param array<string, mixed>|string $token
      * @param Google_Client $client
      *
      * @return Google_Service_Drive
+     * @throws InvalidArgumentException
      */
-    public static function getService(string|array $token, Google_Client $client): Google_Service_Drive
+    public static function getService(array|string $token, Google_Client $client): Google_Service_Drive
     {
         if (is_array($token)) {
-            $token = json_encode($token);
+            $token = json_encode($token) ?: '{}';
         }
 
         $client->setAccessToken($token);
@@ -87,12 +94,12 @@ class RemoteFileService
     }
 
     /**
-     * @param $remote_id
+     * @param string $remote_id
      *
      * @return Google_Service_Drive_DriveFile
      * @throws \Google\Service\Exception
      */
-    public function getFileLink($remote_id): Google_Service_Drive_DriveFile
+    public function getFileLink(string $remote_id): Google_Service_Drive_DriveFile
     {
         $optParams = [
             'fields' => 'capabilities, webViewLink',
@@ -116,7 +123,7 @@ class RemoteFileService
      * @param Google_Service_Drive_DriveFile $gdriveFile
      * @param string $content
      * @param bool $canAddMyDriveParent
-     * @param array|null $parents
+     * @param array<string, mixed>|null $parents
      *
      * @return void
      * @throws \Google\Service\Exception
@@ -130,7 +137,7 @@ class RemoteFileService
         $newGDriveFileInstance->setKind($gdriveFile->getKind());
 
         if(!empty($gdriveFile->getMimeType())){
-            $newGDriveFileInstance->setMimeType(self::officeMimeFromGoogle($gdriveFile->getMimeType()));
+            $newGDriveFileInstance->setMimeType(self::officeMimeFromGoogle($gdriveFile->getMimeType()) ?: '');
         }
 
         $optParams = [
@@ -145,20 +152,20 @@ class RemoteFileService
         // and the enforceSingleParent set to true, to add a parent folder for the file.
         if (true === $canAddMyDriveParent and false === empty($parents)) {
             $optParams['enforceSingleParent'] = true;
-            $optParams['addParents'] = $parents[0]; // the ID of the first parent
+            $optParams['addParents'] = $parents[0] ?? ''; // the ID of the first parent
         }
 
         $this->gdriveService->files->update($remoteId, $newGDriveFileInstance, $optParams);
     }
 
     /**
-     * @param $originFileId
-     * @param $copyTitle
+     * @param string $originFileId
+     * @param string $copyTitle
      *
      * @return Google_Service_Drive_DriveFile|null
      * @throws Exception
      */
-    public function copyFile($originFileId, $copyTitle): ?Google_Service_Drive_DriveFile
+    public function copyFile(string $originFileId, string $copyTitle): ?Google_Service_Drive_DriveFile
     {
         $copiedFile = new Google_Service_Drive_DriveFile();
         $copiedFile->setName($copyTitle);

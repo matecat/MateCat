@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\FeaturesBase\Hook\Event\Run\FilterProjectNameModifiedEvent;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
@@ -20,7 +21,7 @@ class ChangeProjectNameController extends KleinController
 
     private ?ProjectStruct $project;
 
-    protected function afterConstruct(): void
+    protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
 
@@ -50,13 +51,14 @@ class ChangeProjectNameController extends KleinController
             throw new InvalidArgumentException('Missing required parameters [`id `, `password`]');
         }
 
-        $name = CatUtils::sanitizeOrFallbackProjectName($name ?? '');
+        $name = CatUtils::sanitizeOrFallbackProjectName(is_string($name) ? $name : '');
 
-        (new ProjectAccessValidator($this, $this->project))->validate();
-        $ownerEmail = $this->project->id_customer;
+        $project = $this->project ?? throw new \RuntimeException('Project not loaded');
+        (new ProjectAccessValidator($this, $project))->validate();
+        $ownerEmail = $project->id_customer;
 
-        $this->changeProjectName($id, $password, $name);
-        $this->featureSet->filter('filterProjectNameModified', $id, $name, $password, $ownerEmail);
+        $this->changeProjectName((int)$id, (string)$password, $name);
+        $this->featureSet->dispatch(new FilterProjectNameModifiedEvent((int)$id, $name, $password, $ownerEmail));
 
         $this->response->status()->setCode(200);
         $this->response->json([
@@ -66,22 +68,23 @@ class ChangeProjectNameController extends KleinController
     }
 
     /**
-     * @param $id
-     * @param $password
-     * @param $name
+     * @param int $id
+     * @param string $password
+     * @param string $name
      *
      * @throws Exception
      */
-    private function changeProjectName($id, $password, $name): void
+    private function changeProjectName(int $id, string $password, string $name): void
     {
-        $pStruct = ProjectDao::findByIdAndPassword($id, $password);
+        $pStruct = (new ProjectDao($this->getDatabase()))->findByIdAndPassword($id, $password);
 
         $this->checkUserPermissions($pStruct, $this->getUser());
 
-        $pDao = new ProjectDao();
+        $pDao = new ProjectDao($this->getDatabase());
         $pDao->changeName($pStruct, $name);
-        $pDao->destroyCacheById($id);
-        $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
+        $pDao->destroyFetchByIdCache($id, ProjectStruct::class);
+        $projectId = $pStruct->id ?? throw new Exception('Project not found');
+        $pDao->destroyCacheForProjectData((int)$projectId, $pStruct->password);
     }
 
     /**
@@ -96,7 +99,11 @@ class ChangeProjectNameController extends KleinController
     {
         // check if user is belongs to the project team
         $team = $project->getTeam();
-        $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
+        if ($team === null) {
+            throw new Exception('Project has no team', 403);
+        }
+        $teamId = $team->id ?? throw new Exception('Project has no team', 403);
+        $check = (new MembershipDao($this->getDatabase()))->findTeamByIdAndUser($teamId, $user);
 
         if ($check === null) {
             throw new Exception('The logged user does not belong to the right team', 403);

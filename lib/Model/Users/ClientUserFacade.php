@@ -27,7 +27,7 @@ class ClientUserFacade extends stdClass implements Stringable
      */
     public function __construct(UserStruct $userStruct)
     {
-        foreach ($userStruct as $property => $value) {
+        foreach (get_object_vars($userStruct) as $property => $value) {
             if (property_exists($this, $property)) {
                 $this->$property = $value;
             }
@@ -36,7 +36,7 @@ class ClientUserFacade extends stdClass implements Stringable
 
     public function __toString(): string
     {
-        return json_encode($this);
+        return json_encode($this) ?: '';
     }
 
 }

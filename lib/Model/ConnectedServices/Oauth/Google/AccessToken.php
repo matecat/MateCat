@@ -12,8 +12,10 @@ namespace Model\ConnectedServices\Oauth\Google;
 class AccessToken extends \League\OAuth2\Client\Token\AccessToken
 {
 
+    /** @var array<string, mixed> */
     protected array $originalValues = [];
 
+    /** @param array<string, mixed> $options */
     public function __construct(array $options = [])
     {
         $this->originalValues = $options;
@@ -21,7 +23,7 @@ class AccessToken extends \League\OAuth2\Client\Token\AccessToken
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function __toArray(): array
     {

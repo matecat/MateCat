@@ -9,6 +9,8 @@
 
 namespace Model\DataAccess;
 
+use DomainException;
+
 /**
  * Trait ArrayAccessTrait
  *
@@ -39,6 +41,7 @@ trait ArrayAccessTrait
      * @param mixed $offset
      *
      * @return mixed
+     * @throws DomainException
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -50,6 +53,8 @@ trait ArrayAccessTrait
      *
      * @param mixed $offset
      * @param mixed $value
+     *
+     * @throws DomainException
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
@@ -60,6 +65,8 @@ trait ArrayAccessTrait
      * Unsets the value at the given offset.
      *
      * @param mixed $offset
+     *
+     * @throws DomainException
      */
     public function offsetUnset(mixed $offset): void
     {

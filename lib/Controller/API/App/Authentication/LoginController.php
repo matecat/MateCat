@@ -18,6 +18,7 @@ use Klein\Response;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
@@ -29,6 +30,8 @@ class LoginController extends AbstractStatefulKleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function directLogout(): void
     {
@@ -38,6 +41,7 @@ class LoginController extends AbstractStatefulKleinController
 
     /**
      * @throws Exception
+     * @throws TypeError
      */
     public function login(): void
     {
@@ -83,20 +87,21 @@ class LoginController extends AbstractStatefulKleinController
             return;
         }
 
-        $dao = new UserDao();
-        $user = $dao->getByEmail($params['email']);
+        $dao = $this->createUserDao();
+        $user = is_string($params['email']) ? $dao->getByEmail($params['email']) : null;
 
-        if ($user && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
+        if ($user && is_string($params['password']) && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
             $user->clearAuthToken();
 
             $dao->updateUser($user);
-            $dao->destroyCacheByUid($user->uid);
+            $uid = $user->uid ?? throw new Exception('User not authenticated');
+            $dao->destroyCacheByUid($uid);
 
             $project = new RedeemableProject($user, $_SESSION);
             $project->tryToRedeem();
 
             AuthCookie::setCredentials($user, new SessionTokenStoreHandler());
-            AuthenticationHelper::getInstance($_SESSION);
+            AuthenticationHelper::fromRequest($_SESSION, $this->getDatabase());
 
             $this->response->code(200);
         } else {
@@ -104,9 +109,15 @@ class LoginController extends AbstractStatefulKleinController
         }
     }
 
+    protected function createUserDao(): UserDao
+    {
+        return new UserDao($this->getDatabase());
+    }
+
     /**
      * Signed Double-Submit Cookie
      * @throws Exception
+     * @throws TypeError
      */
     public function token(): void
     {
@@ -125,6 +136,7 @@ class LoginController extends AbstractStatefulKleinController
     /**
      * Signed Double-Submit Cookie
      * @throws Exception
+     * @throws TypeError
      */
     public function socketToken(): void
     {

@@ -3,44 +3,41 @@
 namespace Utils\Search;
 
 use InvalidArgumentException;
-use Model\Search\MySQLReplaceEventDAO;
-use Model\Search\MySQLReplaceEventIndexDAO;
-use Model\Search\RedisReplaceEventDAO;
-use Model\Search\RedisReplaceEventIndexDAO;
+use Model\Search\MySQLReplaceEventDao;
+use Model\Search\MySQLReplaceEventIndexDao;
+use Model\Search\RedisReplaceEventDao;
+use Model\Search\RedisReplaceEventIndexDao;
 
 class ReplaceHistoryFactory
 {
 
     /**
-     * @param $id_job
-     * @param $driver
-     * @param $ttl
-     *
-     * @return ReplaceHistory
+     * @throws \Exception
+     * @throws InvalidArgumentException
      */
-    public static function create($id_job, $driver, $ttl): ReplaceHistory
+    public static function create(int $id_job, string $driver, int $ttl): ReplaceHistory
     {
         self::_checkDriver($driver);
 
         if ($driver === 'redis') {
             return new ReplaceHistory(
                 $id_job,
-                new RedisReplaceEventDAO(),
-                new RedisReplaceEventIndexDAO(),
+                new RedisReplaceEventDao(),
+                new RedisReplaceEventIndexDao(),
                 $ttl
             );
         }
 
         return new ReplaceHistory(
             $id_job,
-            new MySQLReplaceEventDAO(),
-            new MySQLReplaceEventIndexDAO(),
+            new MySQLReplaceEventDao(),
+            new MySQLReplaceEventIndexDao(),
             $ttl
         );
     }
 
     /**
-     * @param string $driver
+     * @throws InvalidArgumentException
      */
     private static function _checkDriver(string $driver): void
     {

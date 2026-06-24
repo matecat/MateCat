@@ -148,17 +148,18 @@ class FilterSegments extends React.Component {
         id: 'APPROVED-2',
       })
     }
-    let optionsCategory = this.lqaNestedCategories
-      .map((item) => {
+    let optionsCategory = [
+      {
+        name: 'Any',
+        id: 'all',
+      },
+      ...this.lqaNestedCategories.map((item) => {
         return {
           name: item.get('label'),
           id: item.get('id'),
         }
-      })
-      .unshift({
-        name: 'Any',
-        id: 'all',
-      })
+      }),
+    ]
     let optionsSeverities = this.severities.map((item) => {
       return {
         name: item.get('label'),

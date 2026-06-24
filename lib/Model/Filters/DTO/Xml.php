@@ -2,26 +2,24 @@
 
 namespace Model\Filters\DTO;
 
-use JsonSerializable;
-
-class Xml implements IDto, JsonSerializable
+class Xml implements IDto
 {
 
     private bool $preserve_whitespace = false;
+    /** @var list<string> */
     private array $translate_elements = [];
+    /** @var list<string> */
     private array $do_not_translate_elements = [];
+    /** @var list<string> */
     private array $translate_attributes = [];
 
-    /**
-     * @param bool|null $preserve_whitespace
-     */
     public function setPreserveWhitespace(bool $preserve_whitespace): void
     {
         $this->preserve_whitespace = $preserve_whitespace;
     }
 
     /**
-     * @param array $translate_elements
+     * @param list<string> $translate_elements
      */
     public function setTranslateElements(array $translate_elements): void
     {
@@ -29,7 +27,7 @@ class Xml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $do_not_translate_elements
+     * @param list<string> $do_not_translate_elements
      */
     public function setDoNotTranslateElements(array $do_not_translate_elements): void
     {
@@ -37,7 +35,7 @@ class Xml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $translate_attributes
+     * @param list<string> $translate_attributes
      */
     public function setTranslateAttributes(array $translate_attributes): void
     {
@@ -45,7 +43,7 @@ class Xml implements IDto, JsonSerializable
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function fromArray(array $data): void
     {
@@ -67,7 +65,7 @@ class Xml implements IDto, JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

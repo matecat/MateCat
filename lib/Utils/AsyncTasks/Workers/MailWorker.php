@@ -30,30 +30,31 @@ class MailWorker extends AbstractWorker
      */
     public function process(AbstractElement $queueElement): void
     {
-        /**
-         * @var $queueElement QueueElement
-         */
+        if (!$queueElement instanceof QueueElement) {
+            return;
+        }
+
         $this->_checkForReQueueEnd($queueElement);
 
-        $mail = new PHPMailer();
+        $mail = $this->createMailer();
 
         $mail->isSMTP();
 
-        $mail->Host = $queueElement->params['Host'];
-        $mail->Port = $queueElement->params['port'];
-        $mail->Sender = $queueElement->params['sender'];
-        $mail->Hostname = $queueElement->params['hostname'];
-        $mail->From = $queueElement->params['from'];
-        $mail->FromName = $queueElement->params['fromName'];
+        $mail->Host = (string)$queueElement->params['Host'];
+        $mail->Port = (int)$queueElement->params['port'];
+        $mail->Sender = (string)$queueElement->params['sender'];
+        $mail->Hostname = (string)$queueElement->params['hostname'];
+        $mail->From = (string)$queueElement->params['from'];
+        $mail->FromName = (string)$queueElement->params['fromName'];
 
-        $mail->addReplyTo($queueElement->params['returnPath'], $mail->FromName);
+        $mail->addReplyTo((string)$queueElement->params['returnPath'], $mail->FromName);
 
-        $mail->Subject = $queueElement->params['subject'];
-        $mail->Body = $queueElement->params['htmlBody'];
+        $mail->Subject = (string)$queueElement->params['subject'];
+        $mail->Body = (string)$queueElement->params['htmlBody'];
 
         $mail->msgHTML($mail->Body);
 
-        $mail->AltBody = $queueElement->params['altBody'];
+        $mail->AltBody = (string)$queueElement->params['altBody'];
 
         $mail->XMailer = 'Matecat Mailer';
         $mail->CharSet = 'UTF-8';
@@ -65,7 +66,9 @@ class MailWorker extends AbstractWorker
             throw new EndQueueException(" Mailer Error: You must provide at least one recipient email address.");
         }
 
-        $mail->addAddress($queueElement->params['address'][0], $queueElement->params['address'][1]);
+        /** @var array{0: string, 1: string} $address */
+        $address = $queueElement->params['address'];
+        $mail->addAddress($address[0], $address[1]);
 
         if (!$mail->send()) {
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Mailer Error: " . $mail->ErrorInfo);
@@ -74,6 +77,11 @@ class MailWorker extends AbstractWorker
         }
 
         $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message has been sent.");
+    }
+
+    protected function createMailer(): PHPMailer
+    {
+        return new PHPMailer();
     }
 
 }
