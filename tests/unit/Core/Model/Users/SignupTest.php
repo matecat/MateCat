@@ -6,6 +6,7 @@ namespace Matecat\Core\Model\Users;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Exceptions\ValidationError;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\UserDao;
 use PHPUnit\Framework\Attributes\Group;
@@ -35,11 +36,11 @@ class SignupTest extends AbstractTest
             'password_confirmation' => '1234abcdxxxxxx!',
             'email' => 'foo@example.org',
             'wanted_url' => 'https://fake.example.com'
-        ], $session);
+        ], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
 
         $signup->processSignup();
 
-        $dao = new UserDao();
+        $dao = new UserDao(Database::obtain());
         $user = $dao->getByEmail('foo@example.org');
         $this->assertNotEmpty($user);
         $this->assertEquals('https://fake.example.com', $session['wanted_url']);

@@ -116,7 +116,7 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createSignupModel(array $params, array &$session): SignupModel
     {
-        return new SignupModel($params, $session);
+        return new SignupModel($params, $session, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
     }
 
     /**
@@ -255,7 +255,7 @@ class SignupController extends AbstractStatefulKleinController
             return;
         }
 
-        SignupModel::resendConfirmationEmail($this->request->param('email'));
+        SignupModel::resendConfirmationEmail($this->request->param('email'), new UserDao($this->getDatabase()));
         $this->response->code(200);
     }
 

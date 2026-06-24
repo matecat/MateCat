@@ -40,16 +40,16 @@ class SignupModel
     /**
      * @param array<string, mixed> $params
      * @param array<string, mixed> $session
-     * @param ?UserDao $userDao
-     * @param ?TeamDao $teamDao
+     * @param UserDao $userDao
+     * @param TeamDao $teamDao
      */
-    public function __construct(array $params, array &$session, ?UserDao $userDao = null, ?TeamDao $teamDao = null)
+    public function __construct(array $params, array &$session, UserDao $userDao, TeamDao $teamDao)
     {
         $this->params = $params;
         $this->session =& $session;
         $this->user = new UserStruct($this->params);
-        $this->userDao = $userDao ?? new UserDao();
-        $this->teamDao = $teamDao ?? new TeamDao();
+        $this->userDao = $userDao;
+        $this->teamDao = $teamDao;
     }
 
     /**
@@ -263,12 +263,12 @@ class SignupModel
 
     /**
      * @param string $email
-     * @param ?UserDao $dao
+     * @param UserDao $dao
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function resendConfirmationEmail(string $email, ?UserDao $dao = null): void
+    public static function resendConfirmationEmail(string $email, UserDao $dao): void
     {
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
@@ -276,7 +276,6 @@ class SignupModel
             return;
         }
 
-        $dao ??= new UserDao();
         $user = $dao->getByEmail($email);
 
         if ($user) {

@@ -8,7 +8,10 @@ use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\Oauth\OauthClient;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\OAuthSignInModel;
+use Model\Users\MetadataDao;
+use Model\Users\UserDao;
 use ReflectionException;
 use Utils\Registry\AppConfig;
 
@@ -72,7 +75,10 @@ class OauthResponseHandlerController extends BaseKleinViewController
             $_SESSION,
             $this->remoteUser->email,
             $this->remoteUser->name,
-            $this->remoteUser->lastName
+            $this->remoteUser->lastName,
+            new UserDao($this->getDatabase()),
+            new MetadataDao($this->getDatabase()),
+            new TeamDao($this->getDatabase())
         );
 
         $model->setProvider($this->remoteUser->provider);

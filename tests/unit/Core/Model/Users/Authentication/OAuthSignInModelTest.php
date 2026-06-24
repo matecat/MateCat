@@ -3,6 +3,7 @@
 namespace Matecat\Core\Model\Users\Authentication;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Teams\TeamDao;
 use Model\Users\Authentication\OAuthSignInModel;
 use Model\Users\MetadataDao;
@@ -52,7 +53,7 @@ class OAuthSignInModelTest extends AbstractTest
     public function constructor_sets_user_with_provided_values(): void
     {
         $session = $this->makeSession();
-        $model   = new OAuthSignInModel($session, 'test@example.com', 'John', 'Doe');
+        $model   = new OAuthSignInModel($session, 'test@example.com', 'John', 'Doe', new UserDao(Database::obtain()), new MetadataDao(Database::obtain()), new TeamDao(Database::obtain()));
         $user    = $model->getUser();
 
         $this->assertSame('test@example.com', $user->email);
@@ -64,7 +65,7 @@ class OAuthSignInModelTest extends AbstractTest
     public function constructor_defaults_name_to_anonymous_user(): void
     {
         $session = $this->makeSession();
-        $model   = new OAuthSignInModel($session, 'x@x.com');
+        $model   = new OAuthSignInModel($session, 'x@x.com', null, null, new UserDao(Database::obtain()), new MetadataDao(Database::obtain()), new TeamDao(Database::obtain()));
         $user    = $model->getUser();
 
         $this->assertSame('Anonymous', $user->first_name);
@@ -75,7 +76,7 @@ class OAuthSignInModelTest extends AbstractTest
     public function set_provider_and_get_user(): void
     {
         $session = $this->makeSession();
-        $model   = new OAuthSignInModel($session, 'a@b.com', 'A', 'B');
+        $model   = new OAuthSignInModel($session, 'a@b.com', 'A', 'B', new UserDao(Database::obtain()), new MetadataDao(Database::obtain()), new TeamDao(Database::obtain()));
         $model->setProvider('google');
 
         $this->assertSame('a@b.com', $model->getUser()->email);
@@ -85,7 +86,7 @@ class OAuthSignInModelTest extends AbstractTest
     public function set_profile_picture_does_not_throw(): void
     {
         $session = $this->makeSession();
-        $model   = new OAuthSignInModel($session, 'a@b.com');
+        $model   = new OAuthSignInModel($session, 'a@b.com', null, null, new UserDao(Database::obtain()), new MetadataDao(Database::obtain()), new TeamDao(Database::obtain()));
         $model->setProfilePicture('https://example.com/pic.jpg');
         $this->assertTrue(true);
     }
@@ -94,7 +95,7 @@ class OAuthSignInModelTest extends AbstractTest
     public function set_access_token_encrypts_and_stores(): void
     {
         $session = $this->makeSession();
-        $model   = new OAuthSignInModel($session, 'test@example.com');
+        $model   = new OAuthSignInModel($session, 'test@example.com', null, null, new UserDao(Database::obtain()), new MetadataDao(Database::obtain()), new TeamDao(Database::obtain()));
         try {
             $model->setAccessToken('my-oauth-token');
             $this->assertNotNull($model->getUser()->oauth_access_token);
