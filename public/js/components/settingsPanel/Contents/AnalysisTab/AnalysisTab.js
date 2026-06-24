@@ -28,7 +28,6 @@ export const ANALYSIS_SCHEMA_KEYS = {
   version: 'version',
 }
 
-
 const getFilteredSchemaCreateUpdate = (template) => {
   /* eslint-disable no-unused-vars */
   const {
@@ -82,6 +81,7 @@ export const AnalysisTab = () => {
   const currentTemplateId = currentTemplate?.id
   const currentProjectTemplateBillingId =
     currentProjectTemplate.payableRateTemplateId
+  const prevCurrentProjectTemplateId = useRef()
   const prevCurrentProjectTemplateBillingId = useRef()
 
   const originalCurrentTemplate = templates?.find(
@@ -92,15 +92,50 @@ export const AnalysisTab = () => {
 
   const setWordsValue = (name, value) => {
     modifyingCurrentTemplate((prevTemplate) => {
+      const entries = Object.entries(prevTemplate.breakdowns)
+
+      const breakdowns = entries
+        .map(([key, objectValue]) => {
+          const isDefault = key === 'default'
+          if (!isDefault) {
+            const nestedKeys = Object.keys(objectValue)
+            const result = nestedKeys.reduce((acc, cur) => {
+              return {
+                ...acc,
+                [cur]: {
+                  ...objectValue[cur],
+                  ...(name !== 'MT' && {[name]: value}),
+                },
+              }
+            }, {})
+            return [key, result]
+          } else {
+            return [
+              key,
+              {
+                ...objectValue,
+                [name]: value,
+              },
+            ]
+          }
+        })
+        .reduce(
+          (acc, cur) => ({
+            ...acc,
+            [cur[0]]: cur[1],
+          }),
+          {},
+        )
+
       return {
         ...prevTemplate,
-        breakdowns: {
+        breakdowns /*: {
           ...prevTemplate.breakdowns,
           default: {
             ...prevTemplate.breakdowns.default,
             [name]: value,
           },
-        },
+        },*/,
       }
     })
   }
@@ -181,14 +216,21 @@ export const AnalysisTab = () => {
 
   // Select billing model template when curren project template change
   useEffect(() => {
-    setTemplates((prevState) =>
-      prevState.map((template) => ({
-        ...template,
-        isSelected:
-          template.id === currentProjectTemplateBillingId &&
-          !template.isTemporary,
-      })),
-    )
+    if (
+      currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current &&
+      typeof prevCurrentProjectTemplateId.current === 'number'
+    ) {
+      setTemplates((prevState) =>
+        prevState.map((template) => ({
+          ...template,
+          isSelected:
+            template.id === currentProjectTemplateBillingId &&
+            !template.isTemporary,
+        })),
+      )
+    }
+
+    prevCurrentProjectTemplateId.current = currentProjectTemplate?.id
   }, [
     currentProjectTemplate?.id,
     currentProjectTemplateBillingId,

@@ -84,6 +84,7 @@ export const QualityFrameworkTab = () => {
 
   const currentTemplateId = currentTemplate?.id
   const currentProjectTemplateQaId = currentProjectTemplate.qaModelTemplateId
+  const prevCurrentProjectTemplateId = useRef()
   const prevCurrentProjectTemplateQaId = useRef()
 
   const saveErrorCallback = (error) => {
@@ -146,13 +147,20 @@ export const QualityFrameworkTab = () => {
 
   // Select QF template when curren project template change
   useEffect(() => {
-    setTemplates((prevState) =>
-      prevState.map((template) => ({
-        ...template,
-        isSelected:
-          template.id === currentProjectTemplateQaId && !template.isTemporary,
-      })),
-    )
+    if (
+      currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current &&
+      typeof prevCurrentProjectTemplateId.current === 'number'
+    ) {
+      setTemplates((prevState) =>
+        prevState.map((template) => ({
+          ...template,
+          isSelected:
+            template.id === currentProjectTemplateQaId && !template.isTemporary,
+        })),
+      )
+    }
+
+    prevCurrentProjectTemplateId.current = currentProjectTemplate?.id
   }, [currentProjectTemplate?.id, currentProjectTemplateQaId, setTemplates])
 
   // Modify current project template qa model template id when qf template id change
