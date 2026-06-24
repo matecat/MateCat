@@ -48,7 +48,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->getVersionNumber()
         );
 
-        $json = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->render( $result );
 
         $this->response->json( [ 'issues' => $rendered ] );
@@ -92,7 +92,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $this->getDatabase()->commit();
 
-        $json     = new TranslationIssueFormatter();
+        $json     = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
@@ -198,7 +198,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $msg = "[AUDIT][ISSUE_UPDATE] issue_id={$struct->id}; segment_id={$struct->id_segment}; user={$this->user->email}; new_severity={$struct->severity}";
         $this->logger->debug($msg);
 
-        $json = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
@@ -272,7 +272,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $dao->createComment( $data );
 
-        $json = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter(new EntryCommentDao($this->getDatabase()));
         $rendered = $json->renderItem( $entry );
 
         $response = [ 'comment' => $rendered ];

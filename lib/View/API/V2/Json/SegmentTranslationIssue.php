@@ -4,7 +4,6 @@ namespace View\API\V2\Json;
 
 use LogicException;
 use Model\DataAccess\AbstractDaoObjectStruct;
-use Model\DataAccess\IDatabase;
 use Model\DataAccess\IDaoStruct;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryStruct;
@@ -21,14 +20,11 @@ class SegmentTranslationIssue
      */
     private SplFileObject $csvHandler;
 
-    private ?EntryCommentDao $entryCommentDao;
+    private EntryCommentDao $entryCommentDao;
 
-    private ?IDatabase $database;
-
-    public function __construct(?EntryCommentDao $entryCommentDao = null, ?IDatabase $database = null)
+    public function __construct(EntryCommentDao $entryCommentDao)
     {
         $this->entryCommentDao = $entryCommentDao;
-        $this->database = $database;
     }
 
     /**
@@ -38,7 +34,7 @@ class SegmentTranslationIssue
      */
     public function renderItem(IDaoStruct $record): array
     {
-        $dao = $this->entryCommentDao ?? new EntryCommentDao($this->database);
+        $dao = $this->entryCommentDao;
         /** @var EntryStruct $record */
         $comments = $dao->findByIssueId($record->id ?? throw new RuntimeException('Missing issue id'));
         $record = new EntryStruct($record->getArrayCopy());
@@ -93,7 +89,7 @@ class SegmentTranslationIssue
         $csvHandler->fputcsv($csv_fields);
 
         foreach ($data as $record) {
-            $dao = $this->entryCommentDao ?? new EntryCommentDao($this->database);
+            $dao = $this->entryCommentDao;
 
             if ($record->id === null) {
                 continue;

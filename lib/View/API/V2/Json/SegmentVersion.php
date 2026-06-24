@@ -8,6 +8,7 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryStruct;
 use RuntimeException;
 
@@ -71,7 +72,7 @@ class SegmentVersion
         $versionId = null;
         $version = null;
 
-        $issues_renderer = new SegmentTranslationIssue(null, $this->featureSet->getDatabase());
+        $issues_renderer = new SegmentTranslationIssue(new EntryCommentDao($this->featureSet->getDatabase()));
 
         foreach ($this->data as $record) {
             if (!is_null($versionId) && $versionId != $record->id) {

@@ -15,6 +15,7 @@ use Exception;
 use Model\FeaturesBase\Hook\Event\Filter\ProjectUrlsEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use View\API\V2\Json\ProjectUrls;
@@ -56,7 +57,7 @@ class UrlsController extends KleinController
 
         $projectData = (new ProjectDao($this->getDatabase()))->setCacheTTL(60 * 60)->getProjectData($project->id ?? throw new Exception('Project id is null'));
 
-        $formatted = new ProjectUrls($projectData, null, $this->getDatabase());
+        $formatted = new ProjectUrls($projectData, new ChunkReviewDao($this->getDatabase()));
 
         $projectUrlsEvent = new ProjectUrlsEvent($formatted);
         $this->featureSet->dispatch($projectUrlsEvent);
