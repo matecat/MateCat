@@ -66,7 +66,7 @@ class DownloadOriginalController extends AbstractDownloadController
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job, false);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job, false);
 
         if (empty($files_job)) {
             throw new Exception("No files found for job {$this->id_job}");

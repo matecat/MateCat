@@ -6,7 +6,6 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use Model\DataAccess\IDatabase;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
@@ -30,13 +29,12 @@ class FsFilesStorage extends AbstractFilesStorage
 
     /**
      * @param FilesystemAdapter|null $filesystem
-     * @param IDatabase|null $database
      *
      * @throws \TypeError
      */
-    public function __construct(?FilesystemAdapter $filesystem = null, ?IDatabase $database = null)
+    public function __construct(?FilesystemAdapter $filesystem = null)
     {
-        parent::__construct($filesystem, $database);
+        parent::__construct($filesystem);
         $this->filesDir = AppConfig::$FILES_REPOSITORY;
         $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
     }

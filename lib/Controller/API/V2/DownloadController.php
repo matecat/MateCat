@@ -216,7 +216,7 @@ class DownloadController extends AbstractDownloadController
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job);
 
         $output_content = [];
 
