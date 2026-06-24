@@ -17,7 +17,7 @@ class MySQLReplaceEventDao extends AbstractDao implements ReplaceEventDAOInterfa
     private ?\PDO $pdo;
     private ?SegmentTranslationDao $segmentTranslationDao;
 
-    public function __construct(?IDatabase $con = null, ?\PDO $pdo = null, ?SegmentTranslationDao $segmentTranslationDao = null)
+    public function __construct(IDatabase $con, ?\PDO $pdo = null, ?SegmentTranslationDao $segmentTranslationDao = null)
     {
         parent::__construct($con);
         $this->pdo = $pdo;

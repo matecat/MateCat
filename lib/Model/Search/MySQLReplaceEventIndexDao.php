@@ -14,7 +14,7 @@ class MySQLReplaceEventIndexDao extends AbstractDao implements ReplaceEventIndex
 
     private ?\PDO $pdo;
 
-    public function __construct(?IDatabase $con = null, ?\PDO $pdo = null)
+    public function __construct(IDatabase $con, ?\PDO $pdo = null)
     {
         parent::__construct($con);
         $this->pdo = $pdo;

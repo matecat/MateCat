@@ -3,6 +3,7 @@
 namespace Utils\Search;
 
 use InvalidArgumentException;
+use Model\DataAccess\IDatabase;
 use Model\Search\MySQLReplaceEventDao;
 use Model\Search\MySQLReplaceEventIndexDao;
 use Model\Search\RedisReplaceEventDao;
@@ -15,23 +16,23 @@ class ReplaceHistoryFactory
      * @throws \Exception
      * @throws InvalidArgumentException
      */
-    public static function create(int $id_job, string $driver, int $ttl): ReplaceHistory
+    public static function create(int $id_job, string $driver, int $ttl, IDatabase $database): ReplaceHistory
     {
         self::_checkDriver($driver);
 
         if ($driver === 'redis') {
             return new ReplaceHistory(
                 $id_job,
-                new RedisReplaceEventDao(),
-                new RedisReplaceEventIndexDao(),
+                new RedisReplaceEventDao($database),
+                new RedisReplaceEventIndexDao($database),
                 $ttl
             );
         }
 
         return new ReplaceHistory(
             $id_job,
-            new MySQLReplaceEventDao(),
-            new MySQLReplaceEventIndexDao(),
+            new MySQLReplaceEventDao($database),
+            new MySQLReplaceEventIndexDao($database),
             $ttl
         );
     }

@@ -247,7 +247,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $srh_driver = ('' !== AppConfig::$REPLACE_HISTORY_DRIVER) ? AppConfig::$REPLACE_HISTORY_DRIVER : 'redis';
         $srh_ttl = (0 !== AppConfig::$REPLACE_HISTORY_TTL) ? AppConfig::$REPLACE_HISTORY_TTL : 300;
 
-        return ReplaceHistoryFactory::create($job_id, $srh_driver, $srh_ttl);
+        return ReplaceHistoryFactory::create($job_id, $srh_driver, $srh_ttl, $this->getDatabase());
     }
 
     /**
