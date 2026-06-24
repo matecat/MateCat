@@ -36,7 +36,10 @@ class CatDecorator extends AbstractDecorator
         ?ChunkCompletionEventDao $chunkCompletionEventDao = null
     ) {
         parent::__construct($controller, $template);
-        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        if ($chunkCompletionEventDao === null) {
+            $chunkCompletionEventDao = new ChunkCompletionEventDao($this->controller->getDatabase());
+        }
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
     }
 
     /**

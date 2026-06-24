@@ -48,9 +48,15 @@ class ProjectCompletionStatusModel
         ?JobDao $jobDao = null,
     ) {
         $this->project = $project;
-        $this->chunkCompletionEventDao = $chunkCompletionEventDao ?? new ChunkCompletionEventDao();
+        if ($chunkCompletionEventDao === null) {
+            $chunkCompletionEventDao = new ChunkCompletionEventDao($featureSet->getDatabase());
+        }
+        $this->chunkCompletionEventDao = $chunkCompletionEventDao;
         $this->featureSet = $featureSet;
-        $this->jobDao = $jobDao ?? new JobDao();
+        if ($jobDao === null) {
+            $jobDao = new JobDao($featureSet->getDatabase());
+        }
+        $this->jobDao = $jobDao;
     }
 
     /**

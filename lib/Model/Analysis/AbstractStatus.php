@@ -81,9 +81,6 @@ abstract class AbstractStatus
      * @param array<mixed> $_project_data
      * @param FeatureSet $features
      * @param UserStruct|null $user
-     * @param AnalysisDao|null $analysisDao
-     * @param JobDao|null $jobDao
-     * @param FileMetadataDao|null $fileMetadataDao
      *
      * @throws ReflectionException
      * @throws Exception
@@ -92,26 +89,24 @@ abstract class AbstractStatus
     public function __construct(
         array $_project_data,
         FeatureSet $features,
-        ?UserStruct $user = null,
-        ?AnalysisDao $analysisDao = null,
-        ?JobDao $jobDao = null,
-        ?FileMetadataDao $fileMetadataDao = null
+        ?UserStruct $user = null
     ) {
         if (is_null($user)) {
             $user = new UserStruct();
             $user->uid = -1;
         }
         $this->user = $user;
-        $project = (new ProjectDao($features->getDatabase()))->findById((int)$_project_data[0]['pid'], 60 * 60);
+        $db = $features->getDatabase();
+        $project = (new ProjectDao($db))->findById((int)$_project_data[0]['pid'], 60 * 60);
         if ($project === null) {
             throw new Exception("Project not found for pid: " . $_project_data[0]['pid']);
         }
         $this->project = $project;
         $this->_project_data = $_project_data;
         $this->featureSet = $features;
-        $this->analysisDao = $analysisDao ?? new AnalysisDao();
-        $this->jobDao = $jobDao ?? new JobDao();
-        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao();
+        $this->analysisDao = new AnalysisDao($db);
+        $this->jobDao = new JobDao($db);
+        $this->fileMetadataDao = new FileMetadataDao($db);
     }
 
     /**
