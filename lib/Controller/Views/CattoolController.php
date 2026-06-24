@@ -112,7 +112,7 @@ class CattoolController extends BaseKleinViewController
                 throw new NotFoundException('Review record was not found');
             }
 
-            $result['chunk'] = $chunkReviewStruct->getChunk();
+            $result['chunk'] = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
             $result['chunkReviewStruct'] = $chunkReviewStruct;
         } else {
             $result['chunk'] = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($job_id, $password);

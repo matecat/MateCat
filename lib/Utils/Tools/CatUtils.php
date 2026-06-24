@@ -843,7 +843,7 @@ class CatUtils
 
         if (!$job) {
             $chunkReview = $this->chunkReviewDao->findByReviewPasswordAndJobId($jobPassword, $jobId);
-            $job = $chunkReview?->getChunk();
+            $job = $chunkReview?->getChunk($this->jobDao);
         }
 
         return $job;

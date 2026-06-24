@@ -7,6 +7,7 @@ namespace Matecat\Core\Plugins\Features\ReviewExtended;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
@@ -48,7 +49,7 @@ class StubChunkReviewStruct extends ChunkReviewStruct
         $this->jobStruct = $jobStruct;
     }
 
-    public function getChunk(): JobStruct
+    public function getChunk(JobDao $jobDao): JobStruct
     {
         return $this->jobStruct;
     }

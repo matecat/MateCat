@@ -10,6 +10,7 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -84,7 +85,7 @@ class TranslationIssueModel
             throw new Exception('ChunkReview not found for job ' . $id_job);
         }
         $this->chunk_review = $review;
-        $this->chunk = $this->chunk_review->getChunk();
+        $this->chunk = $this->chunk_review->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()));
         $this->project = $this->chunk->getProject($projectDao);
     }
 

@@ -10,6 +10,7 @@ namespace Plugins\Features\ReviewExtended;
 
 use Closure;
 use Exception;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -144,7 +145,7 @@ class BatchReviewProcessor
             $segmentTranslationModel->sendNotificationEmail();
 
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
-                $project = $chunkReview->getChunk()->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
+                $project = $chunkReview->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()))->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
                 $chunkReviewModel = ($this->chunkReviewModelFactory)($chunkReview);
                 $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }

@@ -205,7 +205,7 @@ class DownloadController extends AbstractDownloadController
             if (empty($chunkReviewStruct)) {
                 throw new NotFoundException("Not found.");
             }
-            $jobData = $chunkReviewStruct->getChunk();
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         $this->job = $jobData;

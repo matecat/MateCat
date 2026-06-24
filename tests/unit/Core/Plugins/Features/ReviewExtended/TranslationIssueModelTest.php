@@ -49,6 +49,8 @@ class TranslationIssueModelTest extends AbstractTest
         parent::setUp();
 
         $this->chunkReviewDao = $this->createMock(ChunkReviewDao::class);
+        [$dbStub] = $this->createDatabaseMock();
+        $this->chunkReviewDao->method('getDatabaseHandler')->willReturn($dbStub);
         $this->entryDao = $this->createMock(EntryDao::class);
         $this->translationVersionDao = $this->createMock(TranslationVersionDao::class);
         $this->chunkReviewModel = $this->createMock(ChunkReviewModel::class);

@@ -10,6 +10,7 @@ use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
@@ -134,7 +135,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $jobStruct = $chunkReviewStruct->getChunk();
+        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
 
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
@@ -215,7 +216,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $jobStruct = $chunkReviewStruct->getChunk();
+        $jobStruct = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
 
         $this->checkLoggedUserPermissions($issue, $jobStruct, $this->user);
 

@@ -13,6 +13,7 @@ use Exception;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\ChunkReviewUpdatedEvent;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -50,7 +51,7 @@ class ChunkReviewModel implements IChunkReviewModel
     public function __construct(ChunkReviewStruct $chunk_review, IDatabase $database)
     {
         $this->chunk_review = $chunk_review;
-        $this->chunk = $this->chunk_review->getChunk();
+        $this->chunk = $this->chunk_review->getChunk(new JobDao($database));
         $this->database = $database;
     }
 

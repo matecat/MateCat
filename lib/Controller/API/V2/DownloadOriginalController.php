@@ -61,7 +61,7 @@ class DownloadOriginalController extends AbstractDownloadController
                 $this->logger->debug($msg);
                 return;
             }
-            $jobData = $chunkReviewStruct->getChunk();
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         //get storage object

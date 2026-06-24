@@ -12,6 +12,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\ProjectCreation\ProjectStructure;
@@ -41,7 +42,7 @@ class ReviewExtendedProbe extends ReviewExtended
 
 class TestChunkReviewStruct extends ChunkReviewStruct
 {
-    public function getChunk(): JobStruct
+    public function getChunk(JobDao $jobDao): JobStruct
     {
         return new JobStruct([
             'id' => 1,

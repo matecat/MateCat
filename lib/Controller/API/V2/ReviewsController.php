@@ -136,6 +136,6 @@ class ReviewsController extends KleinController
             throw new ValidationError("Job id / password combination is not in projects list");
         }
 
-        $this->chunk = $this->latestChunkReview->getChunk();
+        $this->chunk = $this->latestChunkReview->getChunk(new JobDao($this->getDatabase()));
     }
 }
