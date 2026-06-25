@@ -69,6 +69,7 @@ class FilterControllerTest extends AbstractTest
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $this->setProp('database', Database::obtain());
     }
 
     protected function tearDown(): void
