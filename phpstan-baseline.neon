@@ -2624,18 +2624,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
-			message: '#^Call to an undefined method Features\\Aligner\\Model\\Segments_SegmentDao\:\:countByFile\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Files_FileStruct\:\:getSegmentsCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileStruct.php
-
-		-
 			message: '#^Property Features\\Aligner\\Model\\Files_FileStruct\:\:\$extension has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -3054,30 +3042,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Call to an undefined method Features\\Aligner\\Model\\Projects_ProjectDao\:\:getRemoteFileServiceName\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectStruct\:\:getOriginalOwner\(\) should return Model\\Users\\UserStruct but returns Model\\Users\\UserStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectStruct\:\:getOriginalOwner\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectStruct\:\:getRemoteFileServiceName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
 
 		-
 			message: '#^Property Features\\Aligner\\Model\\Projects_ProjectStruct\:\:\$create_date has no type specified\.$#'
