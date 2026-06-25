@@ -1847,7 +1847,7 @@ class CatUtilsTest extends AbstractTest
     #[Test]
     public function testIsRevisionFromIdJobAndPasswordUsesInjectedValidator(): void
     {
-        $fakeValidator = new class extends IsJobRevisionValidator {
+        $fakeValidator = new class($this->createStub(ChunkReviewDao::class)) extends IsJobRevisionValidator {
             public function validate(ValidatorObjectInterface $object): ?ValidatorObjectInterface
             {
                 return $object; // non-null → method returns true

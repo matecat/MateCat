@@ -757,7 +757,7 @@ class CatUtils
      */
     public function isRevisionFromIdJobAndPassword(int $jid, string $password, ?IsJobRevisionValidator $validator = null): bool
     {
-        $validator ??= new IsJobRevisionValidator();
+        $validator ??= new IsJobRevisionValidator($this->chunkReviewDao);
 
         try {
             return $validator->validate(
