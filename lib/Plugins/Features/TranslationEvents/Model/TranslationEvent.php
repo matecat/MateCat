@@ -4,7 +4,6 @@ namespace Plugins\Features\TranslationEvents\Model;
 
 use Error;
 use Exception;
-use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;
@@ -91,8 +90,8 @@ class TranslationEvent
      * @param UserStruct|null $user
      * @param int $source_page_code
      * @param JobStruct|null $chunk
-     * @param TranslationEventDao|null $translationEventDao
-     * @param SegmentDao|null $segmentDao
+     * @param TranslationEventDao $translationEventDao
+     * @param SegmentDao $segmentDao
      *
      * @throws RuntimeException
      */
@@ -101,16 +100,16 @@ class TranslationEvent
         SegmentTranslationStruct $translation,
         ?UserStruct $user,
         int $source_page_code,
-        ?JobStruct $chunk = null,
-        ?TranslationEventDao $translationEventDao = null,
-        ?SegmentDao $segmentDao = null,
+        ?JobStruct $chunk,
+        TranslationEventDao $translationEventDao,
+        SegmentDao $segmentDao,
     ) {
         $this->old_translation = $old_translation;
         $this->wanted_translation = $translation;
         $this->user = $user;
         $this->source_page = $source_page_code;
-        $this->translationEventDao = $translationEventDao ?? new TranslationEventDao();
-        $this->segmentDao = $segmentDao ?? new SegmentDao(Database::obtain());
+        $this->translationEventDao = $translationEventDao;
+        $this->segmentDao = $segmentDao;
 
         if ($chunk !== null) {
             $this->chunk = $chunk;

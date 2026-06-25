@@ -9,6 +9,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
@@ -16,6 +17,7 @@ use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use TypeError;
@@ -148,7 +150,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
     {
-        return new TranslationEventsHandler($chunk);
+        return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
     /**
@@ -160,7 +162,15 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
         ?UserStruct $user,
         int $sourcePage
     ): TranslationEvent {
-        return new TranslationEvent($oldTranslation, $newTranslation, $user, $sourcePage);
+        return new TranslationEvent(
+            $oldTranslation,
+            $newTranslation,
+            $user,
+            $sourcePage,
+            null,
+            new TranslationEventDao($this->database),
+            new SegmentDao($this->database)
+        );
     }
 
 }

@@ -8,6 +8,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use PDO;
@@ -34,7 +35,8 @@ class TestableTranslationVersionsHandler extends TranslationVersionsHandler
 {
     private ?TranslationEventsHandler $eventsHandlerOverride = null;
     private ?BatchReviewProcessor $batchReviewProcessorOverride = null;
-    private ?TranslationEventDao $translationEventDaoStub = null;
+    private TranslationEventDao $translationEventDaoStub;
+    private SegmentDao $segmentDaoStub;
 
     public function setEventsHandlerOverride(TranslationEventsHandler $handler): void
     {
@@ -51,6 +53,11 @@ class TestableTranslationVersionsHandler extends TranslationVersionsHandler
         $this->translationEventDaoStub = $dao;
     }
 
+    public function setSegmentDaoStub(SegmentDao $dao): void
+    {
+        $this->segmentDaoStub = $dao;
+    }
+
     protected function createTranslationEvent(
         SegmentTranslationStruct $old_translation,
         SegmentTranslationStruct $translation,
@@ -65,6 +72,7 @@ class TestableTranslationVersionsHandler extends TranslationVersionsHandler
             $source_page_code,
             $chunk,
             $this->translationEventDaoStub,
+            $this->segmentDaoStub,
         );
     }
 
@@ -255,6 +263,7 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $eventDaoStub = $this->createStub(TranslationEventDao::class);
         $eventDaoStub->method('getLatestEventForSegment')->willReturn(null);
         $handler->setTranslationEventDaoStub($eventDaoStub);
+        $handler->setSegmentDaoStub($this->createStub(SegmentDao::class));
 
         return $handler;
     }

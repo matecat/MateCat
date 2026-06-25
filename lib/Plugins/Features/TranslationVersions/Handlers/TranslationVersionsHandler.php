@@ -10,11 +10,13 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
@@ -280,12 +282,14 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $user,
             $source_page_code,
             $chunk,
+            new TranslationEventDao($this->database),
+            new SegmentDao($this->database),
         );
     }
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
     {
-        return new TranslationEventsHandler($chunk);
+        return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
     protected function createBatchReviewProcessor(): BatchReviewProcessor

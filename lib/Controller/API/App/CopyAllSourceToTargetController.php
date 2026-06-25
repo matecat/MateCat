@@ -17,6 +17,7 @@ use Model\Translations\SegmentTranslationDao;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
@@ -96,7 +97,7 @@ class CopyAllSourceToTargetController extends KleinController
 
         $features = FeatureSet::forProject($chunk->getProject(new ProjectDao($this->getDatabase())), $this->getDatabase());
 
-        $batchEventCreator = new TranslationEventsHandler($chunk);
+        $batchEventCreator = new TranslationEventsHandler($chunk, new TranslationEventDao($this->getDatabase()));
         $batchEventCreator->setFeatureSet($features);
         $batchEventCreator->setProject($chunk->getProject(new ProjectDao($this->getDatabase())));
 
@@ -132,7 +133,7 @@ class CopyAllSourceToTargetController extends KleinController
 
             if ($features->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
                 try {
-                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page);
+                    $segmentTranslationEventModel = new TranslationEvent($old_translation, $new_translation, $this->user, $source_page, null, new TranslationEventDao($this->getDatabase()), new SegmentDao($this->getDatabase()));
                     $batchEventCreator->addEvent($segmentTranslationEventModel);
                 } catch (Exception) {
                     $database->rollback();

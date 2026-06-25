@@ -59,14 +59,14 @@ class TranslationEventsHandler
      * TranslationEventsHandler constructor.
      *
      * @param JobStruct $chunkStruct
-     * @param TranslationEventDao|null $translationEventDao
+     * @param TranslationEventDao $translationEventDao
      */
     public function __construct(
         JobStruct $chunkStruct,
-        ?TranslationEventDao $translationEventDao = null,
+        TranslationEventDao $translationEventDao,
     ) {
         $this->_chunk = $chunkStruct;
-        $this->translationEventDao = $translationEventDao ?? new TranslationEventDao();
+        $this->translationEventDao = $translationEventDao;
     }
 
     /**
