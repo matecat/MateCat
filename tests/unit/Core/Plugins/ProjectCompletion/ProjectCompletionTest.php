@@ -6,12 +6,16 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ProjectCompletion;
+use ReflectionClass;
+use ReflectionMethod;
 
 class ProjectCompletionTest extends AbstractTest
 {
@@ -177,5 +181,32 @@ class ProjectCompletionTest extends AbstractTest
 
         $feature = $this->makeFeature();
         $feature->jobPasswordChanged(new JobPasswordChangedEvent($job, 'old_pw'));
+    }
+
+    #[Test]
+    public function lazilyBuildsDaosFromInjectedDatabaseNotSingleton(): void
+    {
+        $injected  = $this->createStub(IDatabase::class);
+        $singleton = $this->createStub(IDatabase::class);
+
+        // Poison the singleton with a *different* instance so a stray Database::obtain()
+        // would be observably distinct from the injected handler.
+        $prop = (new ReflectionClass(Database::class))->getProperty('instance');
+        $prop->setValue(null, $singleton);
+        $this->databaseMockApplied = true;
+
+        $feature = new ProjectCompletion(
+            new BasicFeatureStruct(['feature_code' => ProjectCompletion::FEATURE_CODE])
+        );
+        $feature->setDatabase($injected);
+
+        $eventDao  = (new ReflectionMethod(ProjectCompletion::class, 'chunkCompletionEventDao'))->invoke($feature);
+        $updateDao = (new ReflectionMethod(ProjectCompletion::class, 'chunkCompletionUpdateDao'))->invoke($feature);
+
+        $this->assertInstanceOf(ChunkCompletionEventDao::class, $eventDao);
+        $this->assertInstanceOf(ChunkCompletionUpdateDao::class, $updateDao);
+        $this->assertSame($injected, $eventDao->getDatabaseHandler());
+        $this->assertSame($injected, $updateDao->getDatabaseHandler());
+        $this->assertNotSame($singleton, $eventDao->getDatabaseHandler());
     }
 }
