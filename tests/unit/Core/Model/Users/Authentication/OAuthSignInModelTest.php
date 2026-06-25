@@ -5,8 +5,6 @@ namespace Matecat\Core\Model\Users\Authentication;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Teams\TeamDao;
-use Model\Projects\ProjectDao;
-use Model\Jobs\JobDao;
 use Model\Users\Authentication\OAuthSignInModel;
 use Model\Users\MetadataDao;
 use Model\Users\RedeemableProject;
@@ -33,10 +31,8 @@ class TestableOAuthSignInModel extends OAuthSignInModel
 
     protected function createRedeemableProject(): RedeemableProject
     {
-        $teamDao = new class extends TeamDao {
-            public function __construct() {}
-        };
-        return new class($this->user, $this->session, $teamDao, new ProjectDao(Database::obtain()), new JobDao(Database::obtain())) extends RedeemableProject {
+        $teamDao = new TeamDao(Database::obtain());
+        return new class($this->user, $this->session, $teamDao) extends RedeemableProject {
             public function tryToRedeem(): void { /* no-op in tests */ }
         };
     }

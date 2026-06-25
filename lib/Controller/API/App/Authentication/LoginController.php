@@ -15,8 +15,6 @@ use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
-use Model\Jobs\JobDao;
-use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
@@ -103,9 +101,7 @@ class LoginController extends AbstractStatefulKleinController
             $project = new RedeemableProject(
                 $user,
                 $_SESSION,
-                new TeamDao($this->getDatabase()),
-                new ProjectDao($this->getDatabase()),
-                new JobDao($this->getDatabase())
+                new TeamDao($this->getDatabase())
             );
             $project->tryToRedeem();
 

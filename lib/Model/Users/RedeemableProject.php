@@ -34,15 +34,13 @@ class RedeemableProject
     public function __construct(
         UserStruct $user,
         array &$session,
-        TeamDao $teamDao,
-        ProjectDao $projectDao,
-        JobDao $jobDao
+        TeamDao $teamDao
     ) {
         $this->user = $user;
         $this->session =& $session;
         $this->teamDao = $teamDao;
-        $this->projectDao = $projectDao;
-        $this->jobDao = $jobDao;
+        $this->projectDao = new ProjectDao($teamDao->getDatabaseHandler());
+        $this->jobDao = new JobDao($teamDao->getDatabaseHandler());
     }
 
     /**
