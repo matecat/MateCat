@@ -127,7 +127,7 @@ class SegmentAnalysisController extends KleinController
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
         $this->projectDao = new ProjectDao($this->getDatabase());
-        $this->segmentDisabledService = new SegmentDisabledService();
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
 
         $idJob = $jobStruct->id ?? throw new RuntimeException('Job ID must not be null');
         $password = $jobStruct->password ?? throw new RuntimeException('Job password must not be null');
@@ -231,7 +231,7 @@ class SegmentAnalysisController extends KleinController
         $segments = [];
         $limit = $perPage;
         $offset = ($page - 1) * $perPage;
-        $this->segmentDisabledService = new SegmentDisabledService();
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
 
         $segmentsForAnalysis = (new SegmentDao($this->getDatabase()))->getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
         $projectIdFromProject = $this->project->id ?? throw new Exception('Project not found');

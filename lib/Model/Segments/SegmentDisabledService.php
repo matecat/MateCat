@@ -17,9 +17,9 @@ class SegmentDisabledService
 {
     private SegmentMetadataDao $segmentMetadataDao;
 
-    public function __construct(?SegmentMetadataDao $segmentMetadataDao = null)
+    public function __construct(SegmentMetadataDao $segmentMetadataDao)
     {
-        $this->segmentMetadataDao = $segmentMetadataDao ?? new SegmentMetadataDao();
+        $this->segmentMetadataDao = $segmentMetadataDao;
     }
 
     /**

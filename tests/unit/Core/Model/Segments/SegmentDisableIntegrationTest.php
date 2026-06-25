@@ -40,7 +40,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->service = new SegmentDisabledService();
+        $this->service = new SegmentDisabledService(new SegmentMetadataDao($this->database));
         $this->cleanFixtures();
     }
 

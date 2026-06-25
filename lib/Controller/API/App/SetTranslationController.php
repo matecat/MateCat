@@ -723,7 +723,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     {
         $id_segment = (int)$this->data['id_segment'];
 
-        if ((new SegmentDisabledService())->isDisabled($id_segment)) {
+        if ((new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase())))->isDisabled($id_segment)) {
             throw new RuntimeException("Segment #" . $id_segment . " is disabled", -5);
         }
     }

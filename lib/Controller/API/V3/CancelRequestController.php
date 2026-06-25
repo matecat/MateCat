@@ -17,6 +17,7 @@ use Exception;
 use Klein\Response;
 use Model\Exceptions\NotFoundException;
 use Model\Segments\SegmentDisabledService;
+use Model\Segments\SegmentMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Translations\SegmentTranslationDao;
@@ -34,7 +35,7 @@ class CancelRequestController extends KleinController
 
     protected function initDependencies(): void
     {
-        $this->segmentDisabledService = new SegmentDisabledService();
+        $this->segmentDisabledService = new SegmentDisabledService(new SegmentMetadataDao($this->getDatabase()));
         $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
         $this->teamDao = new TeamDao($this->getDatabase());
     }

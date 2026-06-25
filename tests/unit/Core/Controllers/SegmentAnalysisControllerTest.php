@@ -15,6 +15,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Segments\SegmentDisabledService;
+use Model\Segments\SegmentMetadataDao;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
@@ -70,7 +71,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $featureSetProp->setValue($this->controller, $featureSet);
 
         $segmentDisabledServiceProp = $this->reflector->getProperty('segmentDisabledService');
-        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService());
+        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService(new SegmentMetadataDao(Database::obtain())));
     }
 
     protected function tearDown(): void
