@@ -185,7 +185,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             return json_decode($this->mandatory_issues, true);
         }
 
-        return [];
+        return null;
     }
 
     /**
