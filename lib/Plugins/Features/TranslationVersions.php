@@ -32,7 +32,8 @@ class TranslationVersions extends BaseFeature
             return new TranslationVersionsHandler(
                 $chunkStruct,
                 $id_segment,
-                $projectStruct
+                $projectStruct,
+                $database
             );
         }
 
