@@ -589,15 +589,15 @@ class CommentController extends KleinController
         $project_data = $this->projectData($job->id_project);
 
         foreach ($users_mentioned as $user_mentioned) {
-            $email = new CommentMentionEmail($user_mentioned, $comment, $url, $project_data[0], $job);
+            $email = new CommentMentionEmail($user_mentioned, $comment, $url, $project_data[0], $job, $this->getDatabase());
             $email->send();
         }
 
         foreach ($users as $user) {
             if ($comment->message_type == CommentDao::TYPE_RESOLVE) {
-                $email = new CommentResolveEmail($user, $comment, $url, $project_data[0], $job);
+                $email = new CommentResolveEmail($user, $comment, $url, $project_data[0], $job, $this->getDatabase());
             } else {
-                $email = new CommentEmail($user, $comment, $url, $project_data[0], $job);
+                $email = new CommentEmail($user, $comment, $url, $project_data[0], $job, $this->getDatabase());
             }
 
             $email->send();
