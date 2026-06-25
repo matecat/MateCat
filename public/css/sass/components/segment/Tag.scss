@@ -212,7 +212,6 @@
       font-size: 12px;
     }
     &.tag-ph {
-      display: inline-block;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -465,8 +464,10 @@ body.ph-tags-compressed {
   }
 }
 
-// Ensure inline layout for index + text inside HTML-rendered ph tags
-.tag.tag-ph {
+// Ensure inline layout for index + text inside HTML-rendered ph tags only.
+// Scoped to tag-container-lite so it does not override display:flow-root
+// in the Draft.js editor (where flex handles inline layout automatically).
+.tag-container-lite .tag.tag-ph {
   .index-counter,
   span[data-text='true'] {
     display: inline;
@@ -723,4 +724,13 @@ body.ph-tags-compressed {
 
 .tag-container-lite {
   pointer-events: none;
+
+  .tag-text-lite {
+    display: inline-block;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
 }

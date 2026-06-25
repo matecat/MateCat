@@ -2,6 +2,7 @@ import React, {useRef, useState, useEffect} from 'react'
 import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 import CatToolStore from '../../../stores/CatToolStore'
 import CatToolConstants from '../../../constants/CatToolConstants'
+import Tooltip from '../../common/Tooltip'
 
 export const TagEntityLite = ({
   entityKey,
@@ -11,6 +12,7 @@ export const TagEntityLite = ({
   children,
 }) => {
   const tagRef = useRef()
+  const containerRef = useRef()
   const [phTagsCompressed, setPhTagsCompressed] = useState(
     CatToolStore.isPhTagsCompressed(),
   )
@@ -45,7 +47,7 @@ export const TagEntityLite = ({
   const style = getStyle()
 
   const {
-    data: {index, name: entityName},
+    data: {index, name: entityName, placeholder},
   } = contentState.getEntity(entityKey)
 
   const isPhTag = entityName === 'ph'
@@ -56,15 +58,17 @@ export const TagEntityLite = ({
       return (
         <>
           <span className="index-counter">{index + 1}</span>
-          {!phTagsCompressed && children}
+          {!phTagsCompressed && (
+            <span className="tag-text-lite">{children}</span>
+          )}
         </>
       )
     }
     return children
   }
 
-  return (
-    <div className="tag-container tag-container-lite">
+  const tag = (
+    <span ref={containerRef} className="tag-container tag-container-lite">
       <span
         ref={tagRef}
         className={`tag ${style}${isCompressedPh ? ' tag-compressed' : ''}`}
@@ -74,6 +78,23 @@ export const TagEntityLite = ({
       >
         {getChildrenContent()}
       </span>
-    </div>
+    </span>
   )
+
+  if (isPhTag && placeholder) {
+    return (
+      <Tooltip
+        stylePointerElement={{display: 'inline-block', position: 'relative'}}
+        content={
+          <span className={`tag ${style}`}>
+            <span>{placeholder}</span>
+          </span>
+        }
+      >
+        {tag}
+      </Tooltip>
+    )
+  }
+
+  return tag
 }

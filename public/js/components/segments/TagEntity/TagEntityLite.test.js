@@ -26,9 +26,19 @@ jest.mock('../utils/DraftMatecatUtils/tagModel', () => ({
   },
 }))
 
-const mockContentState = (entityName, index) => ({
+jest.mock('../../common/Tooltip', () => ({
+  __esModule: true,
+  default: ({children, content}) => (
+    <div data-testid="tooltip-wrapper">
+      {children}
+      <div data-testid="tooltip-content">{content}</div>
+    </div>
+  ),
+}))
+
+const mockContentState = (entityName, index, placeholder = 'test') => ({
   getEntity: () => ({
-    data: {name: entityName, index, placeholder: 'test'},
+    data: {name: entityName, index, placeholder},
   }),
 })
 
@@ -205,5 +215,51 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     expect(container.querySelector('.index-counter')).toBeNull()
+  })
+
+  test('shows tooltip with placeholder when ph tag is compressed', () => {
+    mockCompressed = true
+    const {container} = render(
+      <TagEntityLite
+        entityKey="1"
+        contentState={mockContentState('ph', 0)}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>{'<p>'}</span>
+      </TagEntityLite>,
+    )
+    expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeTruthy()
+    const tooltipContent = container.querySelector('[data-testid="tooltip-content"]')
+    expect(tooltipContent.textContent).toContain('test')
+  })
+
+  test('does not show tooltip when not compressed', () => {
+    const {container} = render(
+      <TagEntityLite
+        entityKey="1"
+        contentState={mockContentState('ph', 0)}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>{'<p>'}</span>
+      </TagEntityLite>,
+    )
+    expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
+  })
+
+  test('does not show tooltip when placeholder is absent', () => {
+    mockCompressed = true
+    const {container} = render(
+      <TagEntityLite
+        entityKey="1"
+        contentState={mockContentState('ph', 0, undefined)}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>{'<p>'}</span>
+      </TagEntityLite>,
+    )
+    expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
   })
 })
