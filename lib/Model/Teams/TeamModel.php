@@ -5,7 +5,7 @@ namespace Model\Teams;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -63,6 +63,11 @@ class TeamModel
         $this->teamDao = $teamDao;
     }
 
+    private function db(): IDatabase
+    {
+        return $this->teamDao->getDatabaseHandler();
+    }
+
     public function addMemberEmail(string $email): void
     {
         $this->member_emails[] = $email;
@@ -106,9 +111,9 @@ class TeamModel
 
         $teamId = $this->getTeamId();
 
-        Database::obtain()->begin();
+        $this->db()->begin();
 
-        $membershipDao = new MembershipDao();
+        $membershipDao = new MembershipDao($this->db());
 
         if (!empty($this->member_emails)) {
             $this->_checkAddMembersToPersonalTeam();
@@ -123,7 +128,7 @@ class TeamModel
             //check if this is the last user of the team
             $memberList = $membershipDao->getMemberListByTeamId($teamId);
 
-            $projectDao = new ProjectDao();
+            $projectDao = new ProjectDao($this->db());
 
             foreach ($this->uids_to_remove as $uid) {
                 $user = $membershipDao->deleteUserFromTeam($uid, $teamId);
@@ -135,7 +140,7 @@ class TeamModel
                     if ($user === null) {
                         continue;
                     }
-                    $teamDao = new TeamDao();
+                    $teamDao = new TeamDao($this->db());
                     $personalTeam = $teamDao->setCacheTTL(60 * 60 * 24)->getPersonalByUser($user);
                     $projectDao->massiveSelfAssignment($this->struct, $user, $personalTeam);
                     $teamDao->deleteTeam($this->struct);
@@ -152,7 +157,7 @@ class TeamModel
             ->setCacheTTL(3600)
             ->getMemberListByTeamId($teamId);
 
-        Database::obtain()->commit();
+        $this->db()->commit();
 
         $this->_sendEmailsToNewMemberships();
         $this->_sendEmailsToInvited();
@@ -289,7 +294,7 @@ class TeamModel
             return;
         }
 
-        $dao = new TeamDao();
+        $dao = new TeamDao($this->db());
         $dao->getPersonalByUid($this->struct->created_by);
         throw new InvalidArgumentException("User already has the personal team");
     }
@@ -315,9 +320,9 @@ class TeamModel
     {
         $this->_checkAddMembersToPersonalTeam();
 
-        $dao = new TeamDao();
+        $dao = new TeamDao($this->db());
 
-        Database::obtain()->begin();
+        $this->db()->begin();
         $team = $dao->createUserTeam($this->user, [
             'type' => $this->struct->type,
             'name' => $this->struct->name,
@@ -326,7 +331,7 @@ class TeamModel
 
         $this->new_memberships = $this->all_memberships = $team->getMembers();
 
-        Database::obtain()->commit();
+        $this->db()->commit();
 
         return $team;
     }
@@ -363,10 +368,10 @@ class TeamModel
     public function updateMembersProjectsCount(): TeamModel
     {
         $teamId = $this->getTeamId();
-        $this->all_memberships = (new MembershipDao())->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($teamId);
+        $this->all_memberships = (new MembershipDao($this->db()))->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($teamId);
 
         if (!empty($this->all_memberships)) {
-            $membersWithProjects = (new TeamDao())->setCacheTTL(60 * 60)->getAssigneeWithProjectsByTeam($this->struct);
+            $membersWithProjects = (new TeamDao($this->db()))->setCacheTTL(60 * 60)->getAssigneeWithProjectsByTeam($this->struct);
 
             $assigneeIds = [];
             foreach ($membersWithProjects as $assignee) {

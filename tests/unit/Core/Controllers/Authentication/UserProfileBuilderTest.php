@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers\Authentication;
 use Controller\Abstracts\Authentication\UserProfileBuilder;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ConnectedServices\ConnectedServiceDao;
+use Model\DataAccess\Database;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
@@ -36,6 +37,7 @@ class UserProfileBuilderTest extends AbstractTest
         $userDao = $this->createStub(UserDao::class);
         $userDao->method('setCacheTTL')->willReturnSelf();
         $teamDao = $this->createStub(TeamDao::class);
+        $teamDao->method('getDatabaseHandler')->willReturn(Database::obtain());
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('getAllByUid')->willReturn([]);
         $this->builder = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao, $userDao, $teamDao, $metadataDao);

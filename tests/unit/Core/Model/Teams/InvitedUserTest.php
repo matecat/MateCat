@@ -4,6 +4,7 @@
 namespace Matecat\Core\Model\Teams;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\Teams\InvitedUser;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
@@ -30,7 +31,9 @@ class InvitedUserTest extends AbstractTest
 
     private function makeTeamDaoStub(): TeamDao
     {
-        return $this->createStub(TeamDao::class);
+        $stub = $this->createStub(TeamDao::class);
+        $stub->method('getDatabaseHandler')->willReturn(Database::obtain());
+        return $stub;
     }
 
     private function makeUserDaoStub(): UserDao
@@ -192,6 +195,7 @@ class InvitedUserTest extends AbstractTest
 
         $teamDao = $this->createStub(TeamDao::class);
         $teamDao->method('fetchById')->willReturn($teamStruct);
+        $teamDao->method('getDatabaseHandler')->willReturn(Database::obtain());
 
         $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']];
 
