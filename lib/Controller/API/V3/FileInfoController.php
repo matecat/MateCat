@@ -57,7 +57,7 @@ class FileInfoController extends KleinController
      */
     protected function createFilesInfoUtility(JobStruct $chunk): FilesInfoUtility
     {
-        return new FilesInfoUtility($chunk, new ProjectDao($this->getDatabase()));
+        return new FilesInfoUtility($chunk, $this->getDatabase());
     }
 
     /**

@@ -124,7 +124,7 @@ class QualityReportControllerAPI extends KleinController
             $ttlArray = $segmentTranslationEventDao->setCacheTTL(60 * 5)->getTteForSegments($segments_ids, $this->chunk->id);
             $segments = $qrSegmentModel->getSegmentsForQR(array_values($segments_ids), $isForUI);
 
-            $filesInfoUtility = new FilesInfoUtility($this->chunk, new ProjectDao($this->getDatabase()));
+            $filesInfoUtility = new FilesInfoUtility($this->chunk, $this->getDatabase());
             $filesInfo = $filesInfoUtility->getInfo(false);
 
             $mt_qe_workflow_enabled = (bool)($projectMetadataDao->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false);
