@@ -6,6 +6,7 @@ use Error;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Model\Jobs\JobDao;
 use Model\LQA\EntryWithCategoryStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
@@ -115,7 +116,7 @@ class TranslationEvent
             $this->chunk = $chunk;
         } else {
             try {
-                $this->chunk = $this->wanted_translation->getJob() ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
+                $this->chunk = $this->wanted_translation->getJob(new JobDao($this->segmentDao->getDatabaseHandler())) ?? throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
             } catch (Error) {
                 throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
             }

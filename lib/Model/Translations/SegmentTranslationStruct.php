@@ -68,13 +68,13 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     }
 
     /**
-     * @param JobDao|null $jobDao
+     * @param JobDao $jobDao
      * @return JobStruct|null
      */
-    public function getJob(?JobDao $jobDao = null): ?JobStruct
+    public function getJob(JobDao $jobDao): ?JobStruct
     {
         return $this->memoize(__METHOD__, function () use ($jobDao) {
-            return ($jobDao ?? new JobDao())->getNotDeletedById($this->id_job)[0] ?? null;
+            return $jobDao->getNotDeletedById($this->id_job)[0] ?? null;
         });
     }
 
