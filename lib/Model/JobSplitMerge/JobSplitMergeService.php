@@ -153,7 +153,7 @@ class JobSplitMergeService
      */
     protected function createCounterModel(): CounterModel
     {
-        return new CounterModel();
+        return new CounterModel($this->dbHandler);
     }
 
     /**

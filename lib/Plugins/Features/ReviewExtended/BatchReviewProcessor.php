@@ -70,7 +70,7 @@ class BatchReviewProcessor
     {
         $this->chunk = $chunk;
         $old_wStruct = WordCountStruct::loadFromJob($chunk);
-        $this->jobWordCounter = $jobWordCounter ?? new CounterModel($old_wStruct);
+        $this->jobWordCounter = $jobWordCounter ?? new CounterModel($this->chunkReviewDao->getDatabaseHandler(), $old_wStruct);
 
         return $this;
     }

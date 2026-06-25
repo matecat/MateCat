@@ -4,10 +4,12 @@
 namespace Matecat\Core\TestWordCountCounter;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * @group  regression
@@ -58,7 +60,7 @@ class ConstructorTest extends AbstractTest
     #[Test]
     public function test__constructor_with_no_args()
     {
-        $word_counter = new CounterModel();
+        $word_counter = new CounterModel(\Model\DataAccess\Database::obtain());
         $mirror_word_counter = new ReflectionClass($word_counter);
         $constCache = $mirror_word_counter->getProperty('constCache');
 
@@ -77,6 +79,16 @@ class ConstructorTest extends AbstractTest
 
 
         $this->assertNull($old_w_count->getValue($word_counter));
+    }
+
+    #[Test]
+    public function constructorRequiresInjectedDatabase(): void
+    {
+        $param = (new ReflectionMethod(CounterModel::class, '__construct'))->getParameters()[0] ?? null;
+        $this->assertNotNull($param, 'CounterModel must accept an injected $database');
+        $this->assertSame(IDatabase::class, (string)$param->getType(), '$database must be typed IDatabase');
+        $this->assertFalse($param->isOptional(), '$database must be mandatory');
+        $this->assertFalse($param->allowsNull(), '$database must be non-nullable');
     }
 
 

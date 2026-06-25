@@ -43,7 +43,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function constructorWithoutArgInitializesNullOldWCount(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $this->assertEmpty($model->getValues());
     }
 
@@ -51,7 +51,7 @@ class CounterModelTest extends AbstractTest
     public function constructorWithOldWCountSetsIt(): void
     {
         $wc = $this->makeOldWCount();
-        $model = new CounterModel($wc);
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $wc);
         // Verify no exception when using getUpdatedValues (oldWCount is set)
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
@@ -63,7 +63,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function setNewStatusWithValidStatusSucceeds(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
         // No exception means success — verify via getUpdatedValues behavior
         $this->assertTrue(true);
@@ -72,7 +72,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function setOldStatusWithValidStatusSucceeds(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $model->setOldStatus(TranslationStatus::STATUS_DRAFT);
         $this->assertTrue(true);
     }
@@ -80,7 +80,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function setNewStatusWithInvalidStatusThrowsBadMethodCall(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $this->expectException(BadMethodCallException::class);
         $this->expectExceptionMessage('INVALID_STATUS status is not defined');
         $model->setNewStatus('INVALID_STATUS');
@@ -89,7 +89,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function setOldStatusWithInvalidStatusThrowsBadMethodCall(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $this->expectException(BadMethodCallException::class);
         $model->setOldStatus('NOT_A_STATUS');
     }
@@ -98,7 +98,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function getUpdatedValuesThrowsLogicExceptionWhenNoOldWCount(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -110,7 +110,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function getUpdatedValuesWithDifferentStatusesAppliesDifferential(): void
     {
-        $model = new CounterModel($this->makeOldWCount());
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $this->makeOldWCount());
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -135,7 +135,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function getUpdatedValuesWithEquivalentStatusesReturnsZeroDiff(): void
     {
-        $model = new CounterModel($this->makeOldWCount());
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $this->makeOldWCount());
         $model->setOldStatus(TranslationStatus::STATUS_TRANSLATED);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -152,7 +152,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function getUpdatedValuesWithZeroRawSkipsRawDifferential(): void
     {
-        $model = new CounterModel($this->makeOldWCount());
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $this->makeOldWCount());
         $model->setOldStatus(TranslationStatus::STATUS_DRAFT);
         $model->setNewStatus(TranslationStatus::STATUS_APPROVED);
 
@@ -171,7 +171,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function setUpdatedValuesAccumulatesInValuesArray(): void
     {
-        $model = new CounterModel($this->makeOldWCount());
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $this->makeOldWCount());
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_DRAFT);
 
@@ -188,7 +188,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function sumDifferentialsThrowsLogicExceptionWhenNoOldWCount(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -200,7 +200,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function sumDifferentialsSumsMultipleStructs(): void
     {
-        $model = new CounterModel($this->makeOldWCount());
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $this->makeOldWCount());
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -233,7 +233,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function sumDifferentialsWithEmptyArrayReturnsZeroStruct(): void
     {
-        $model = new CounterModel($this->makeOldWCount());
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $this->makeOldWCount());
         $model->setOldStatus(TranslationStatus::STATUS_DRAFT);
         $model->setNewStatus(TranslationStatus::STATUS_APPROVED);
 
@@ -249,7 +249,7 @@ class CounterModelTest extends AbstractTest
     #[Test]
     public function updateDBThrowsLogicExceptionWhenNoOldWCount(): void
     {
-        $model = new CounterModel();
+        $model = new CounterModel(\Model\DataAccess\Database::obtain());
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -266,7 +266,7 @@ class CounterModelTest extends AbstractTest
         $daoMock = $this->createStub(WordCounterDao::class);
         $daoMock->method('updateWordCount')->willReturn(0);
 
-        $model = new CounterModel($oldWCount, $daoMock);
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $oldWCount, $daoMock);
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -290,7 +290,7 @@ class CounterModelTest extends AbstractTest
         $daoMock = $this->createStub(WordCounterDao::class);
         $daoMock->method('updateWordCount')->willReturn(1);
 
-        $model = new CounterModel($oldWCount, $daoMock);
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), $oldWCount, $daoMock);
         $model->setOldStatus(TranslationStatus::STATUS_NEW);
         $model->setNewStatus(TranslationStatus::STATUS_TRANSLATED);
 
@@ -340,7 +340,7 @@ class CounterModelTest extends AbstractTest
         ]);
         $daoMock->method('initializeWordCount')->willReturn(1);
 
-        $model = new CounterModel(null, $daoMock);
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), null, $daoMock);
         $result = $model->initializeJobWordCount(99, 'pass123');
 
         $this->assertInstanceOf(WordCountStruct::class, $result);
@@ -386,7 +386,7 @@ class CounterModelTest extends AbstractTest
         ]);
         $methodDao->method('initializeWordCount')->willReturn(1);
 
-        $model = new CounterModel(null, $constructorDao);
+        $model = new CounterModel(\Model\DataAccess\Database::obtain(), null, $constructorDao);
         $result = $model->initializeJobWordCount(77, 'pw', $methodDao);
 
         $this->assertEquals(77, $result->getIdJob());

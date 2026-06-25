@@ -151,7 +151,7 @@ class UpdateDBTest extends AbstractTest
         $this->word_count_struct->setNewStatus("TRANSLATED");
 
 
-        $this->word_counter = new CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel(\Model\DataAccess\Database::obtain(), $this->word_count_struct);
 
         $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
         $this->flusher->select(AppConfig::$INSTANCE_ID);

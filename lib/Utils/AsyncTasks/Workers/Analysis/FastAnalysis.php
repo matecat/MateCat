@@ -678,7 +678,7 @@ class FastAnalysis extends AbstractDaemon
                     $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
 
                     foreach ($_details as $job_info) {
-                        $counter = new CounterModel();
+                        $counter = new CounterModel($this->db());
                         $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
                     }
                 }

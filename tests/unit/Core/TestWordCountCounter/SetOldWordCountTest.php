@@ -26,7 +26,7 @@ class SetOldWordCountTest extends AbstractTest
     #[Test]
     public function test_setOldWordCount()
     {
-        $word_count = new CounterModel();
+        $word_count = new CounterModel(\Model\DataAccess\Database::obtain());
 
 
         $word_count_struct = new WordCountStruct();

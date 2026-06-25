@@ -85,7 +85,7 @@ class TMAnalysisWorker extends AbstractWorker
                 new ProjectDao($this->database),
                 new JobDao($this->database),
                 new AnalysisDao($this->database),
-                new CounterModel(),
+                new CounterModel($this->database),
             )
         );
         $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver(), $this->database);

@@ -645,7 +645,7 @@ class CatUtils
 
         // For projects created with No tm analysis enabled
         if ($wStruct->getTotal() == 0 && ($projectStruct['status_analysis'] == ProjectStatus::STATUS_DONE || $projectStruct['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
-            $counter ??= new CounterModel();
+            $counter ??= new CounterModel($this->database);
             $wStruct = $counter->initializeJobWordCount($job['id'], $job['password']);
             LoggerFactory::doJsonLog("BackWard compatibility set Counter.");
 
