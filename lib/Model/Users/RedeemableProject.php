@@ -35,14 +35,14 @@ class RedeemableProject
         UserStruct $user,
         array &$session,
         TeamDao $teamDao,
-        ?ProjectDao $projectDao = null,
-        ?JobDao $jobDao = null
+        ProjectDao $projectDao,
+        JobDao $jobDao
     ) {
         $this->user = $user;
         $this->session =& $session;
         $this->teamDao = $teamDao;
-        $this->projectDao = $projectDao ?? new ProjectDao();
-        $this->jobDao = $jobDao ?? new JobDao();
+        $this->projectDao = $projectDao;
+        $this->jobDao = $jobDao;
     }
 
     /**

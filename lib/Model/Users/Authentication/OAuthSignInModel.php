@@ -9,6 +9,8 @@ use Controller\Abstracts\FlashMessage;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Users\MetadataDao;
 use Model\Users\RedeemableProject;
@@ -220,7 +222,13 @@ class OAuthSignInModel
 
     protected function createRedeemableProject(): RedeemableProject
     {
-        return new RedeemableProject($this->user, $this->session, $this->teamDao);
+        return new RedeemableProject(
+            $this->user,
+            $this->session,
+            $this->teamDao,
+            new ProjectDao($this->teamDao->getDatabaseHandler()),
+            new JobDao($this->teamDao->getDatabaseHandler())
+        );
     }
 
 }

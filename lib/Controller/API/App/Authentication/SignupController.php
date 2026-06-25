@@ -15,6 +15,8 @@ use Exception;
 use InvalidArgumentException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Model\Teams\InvitedUser;
 use Model\Teams\TeamDao;
 use Model\Users\Authentication\PasswordRules;
@@ -91,7 +93,13 @@ class SignupController extends AbstractStatefulKleinController
      */
     protected function createRedeemableProject(UserStruct $user, array &$session): RedeemableProject
     {
-        return new RedeemableProject($user, $session, new TeamDao($this->getDatabase()));
+        return new RedeemableProject(
+            $user,
+            $session,
+            new TeamDao($this->getDatabase()),
+            new ProjectDao($this->getDatabase()),
+            new JobDao($this->getDatabase())
+        );
     }
 
     /**

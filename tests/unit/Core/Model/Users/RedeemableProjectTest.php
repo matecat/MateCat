@@ -27,6 +27,16 @@ class RedeemableProjectTest extends AbstractTest
         $this->teamDao = $this->createStub(TeamDao::class);
     }
 
+    public function testConstructorRequiresInjectedDaos(): void
+    {
+        $params = (new \ReflectionMethod(RedeemableProject::class, '__construct'))->getParameters();
+
+        foreach (['projectDao' => $params[3], 'jobDao' => $params[4]] as $name => $param) {
+            $this->assertFalse($param->isOptional(), "$name must be a mandatory ctor dependency (no Database::obtain() fallback)");
+            $this->assertFalse($param->allowsNull(), "$name ctor param must not be nullable");
+        }
+    }
+
     private function make(array &$session): RedeemableProject
     {
         return new RedeemableProject($this->user, $session, $this->teamDao, $this->projectDao, $this->jobDao);
