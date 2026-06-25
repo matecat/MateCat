@@ -129,6 +129,88 @@ test('Modify template breakdowns', async () => {
   ).toHaveBeenCalledTimes(1)
 })
 
+describe('setWordsValue', () => {
+  const templateWithLangBreakdowns = payableRateTemplateMock.items[1]
+
+  const setup = async () => {
+    const {result} = renderHook(() => useTemplates(ANALYSIS_SCHEMA_KEYS))
+    const contextProps = {
+      openLoginModal: jest.fn(),
+      modifyingCurrentTemplate: jest.fn(),
+      currentProjectTemplate: projectTemplatesMock.items[0],
+      projectTemplates: projectTemplatesMock.items,
+      analysisTemplates: result.current,
+      portalTarget: wrapperElement,
+    }
+    const {rerender} = render(<WrapperComponent {...contextProps} />)
+    await waitFor(() => expect(result.current.templates.length).not.toBe(0))
+
+    const capturedUpdater = jest.fn()
+    contextProps.analysisTemplates = result.current
+    contextProps.analysisTemplates.modifyingCurrentTemplate = capturedUpdater
+    rerender(<WrapperComponent {...contextProps} />)
+
+    return capturedUpdater
+  }
+
+  test('propagates non-MT value change to default and all language-specific breakdowns', async () => {
+    const capturedUpdater = await setup()
+
+    const noMatchInput = screen.getByTestId(ANALYSIS_BREAKDOWNS.newWords)
+    fireEvent.change(noMatchInput, {target: {value: 55}})
+    fireEvent.blur(noMatchInput)
+
+    expect(capturedUpdater).toHaveBeenCalledTimes(1)
+    const updater = capturedUpdater.mock.calls[0][0]
+    const updated = updater(templateWithLangBreakdowns)
+
+    expect(updated.breakdowns.default.NO_MATCH).toBe(55)
+    expect(updated.breakdowns['fr-FR']['it-IT'].NO_MATCH).toBe(55)
+    expect(updated.breakdowns['az-AZ']['de-AT'].NO_MATCH).toBe(55)
+  })
+
+  test('does not propagate MT value to language-specific breakdowns', async () => {
+    const capturedUpdater = await setup()
+
+    const mtInput = screen.getByTestId(ANALYSIS_BREAKDOWNS.mt)
+    fireEvent.change(mtInput, {target: {value: 88}})
+    fireEvent.blur(mtInput)
+
+    expect(capturedUpdater).toHaveBeenCalledTimes(1)
+    const updater = capturedUpdater.mock.calls[0][0]
+    const updated = updater(templateWithLangBreakdowns)
+
+    expect(updated.breakdowns.default.MT).toBe(88)
+    expect(updated.breakdowns['fr-FR']['it-IT'].MT).toBe(
+      templateWithLangBreakdowns.breakdowns['fr-FR']['it-IT'].MT,
+    )
+    expect(updated.breakdowns['az-AZ']['de-AT'].MT).toBe(
+      templateWithLangBreakdowns.breakdowns['az-AZ']['de-AT'].MT,
+    )
+  })
+
+  test('preserves other breakdown values when updating a single key', async () => {
+    const capturedUpdater = await setup()
+
+    const noMatchInput = screen.getByTestId(ANALYSIS_BREAKDOWNS.newWords)
+    fireEvent.change(noMatchInput, {target: {value: 75}})
+    fireEvent.blur(noMatchInput)
+
+    const updater = capturedUpdater.mock.calls[0][0]
+    const updated = updater(templateWithLangBreakdowns)
+
+    expect(updated.breakdowns.default.REPETITIONS).toBe(
+      templateWithLangBreakdowns.breakdowns.default.REPETITIONS,
+    )
+    expect(updated.breakdowns.default.MT).toBe(
+      templateWithLangBreakdowns.breakdowns.default.MT,
+    )
+    expect(updated.breakdowns['fr-FR']['it-IT'].REPETITIONS).toBe(
+      templateWithLangBreakdowns.breakdowns['fr-FR']['it-IT'].REPETITIONS,
+    )
+  })
+})
+
 test('Change template', async () => {
   const {result} = renderHook(() => useTemplates(ANALYSIS_SCHEMA_KEYS))
   let contextProps = {
