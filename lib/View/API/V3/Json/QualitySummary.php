@@ -322,7 +322,7 @@ class QualitySummary
 
     protected function createFeedbackDao(): FeedbackDAO
     {
-        return new FeedbackDAO();
+        return new FeedbackDAO($this->database);
     }
 
     protected function createEntryDao(): EntryDao

@@ -418,7 +418,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
-        $feedbackDao = new FeedbackDAO();
+        $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
     }
 
