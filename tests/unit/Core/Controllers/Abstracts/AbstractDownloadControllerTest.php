@@ -32,7 +32,7 @@ class AbstractDownloadControllerTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
         $app = new App();
-        $app->register('getDatabase', static fn() => Database::obtain());
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
 
         return new class ($request, $response, null, $app) extends AbstractDownloadController {
             protected bool $useSession = false;

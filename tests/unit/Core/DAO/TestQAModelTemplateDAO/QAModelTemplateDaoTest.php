@@ -22,7 +22,7 @@ class QAModelTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new QAModelTemplateDao(\Model\DataAccess\Database::obtain());
+        $this->dao = new QAModelTemplateDao(obtainTestDatabase());
         $this->createdIds = [];
         $this->cleanupTestData();
     }
@@ -41,7 +41,7 @@ class QAModelTemplateDaoTest extends AbstractTest
 
     private function cleanupTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM qa_model_templates WHERE uid = {$this->uid}");
     }
 

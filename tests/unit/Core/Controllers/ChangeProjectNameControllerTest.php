@@ -85,7 +85,7 @@ class ChangeProjectNameControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->setProp('database', \Model\DataAccess\Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -121,7 +121,7 @@ class ChangeProjectNameControllerTest extends AbstractTest
 
     private function loadSeededProject(): ProjectStruct
     {
-        return (new ProjectDao(\Model\DataAccess\Database::obtain()))
+        return (new ProjectDao(obtainTestDatabase()))
             ->findByIdAndPassword($this->projectId(self::BASE), self::PROJECT_PASSWORD);
     }
 

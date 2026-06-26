@@ -39,9 +39,9 @@ class AbstractRevisionFeatureTest extends AbstractTest
             new BasicFeatureStruct(['feature_code' => 'second_pass_review'])
         );
         // The feature's in-method DAOs now resolve their connection from the
-        // injected database (previously they fell back to Database::obtain()).
+        // injected database (previously they fell back to the global singleton).
         // Provide the same real seeded test DB so those code paths keep working.
-        $this->feature->setDatabase(Database::obtain());
+        $this->feature->setDatabase(obtainTestDatabase());
     }
 
     // ─────────────────────────────────────────────────────────────────

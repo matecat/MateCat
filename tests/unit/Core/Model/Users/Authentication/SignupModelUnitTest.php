@@ -21,7 +21,7 @@ class SignupModelUnitTest extends AbstractTest
     {
         $session = [];
         $params = ['email' => 'test@example.com', 'password' => 'secret'];
-        $model = new SignupModel($params, $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel($params, $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->assertSame($params, $model->getParams());
     }
@@ -30,7 +30,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testConstructCreatesUserStruct()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->assertInstanceOf(UserStruct::class, $model->getUser());
     }
@@ -50,7 +50,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testGetUserReturnsUserStructWithGivenData()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->assertSame('test@example.com', $model->getUser()->email);
     }
@@ -59,7 +59,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testGetErrorReturnsNullInitially()
     {
         $session = [];
-        $model = new SignupModel([], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel([], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->assertNull($model->getError());
     }
@@ -68,7 +68,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testFlushWantedUrlReturnsAppRootWhenNotSet()
     {
         $session = [];
-        $model = new SignupModel([], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel([], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $url = $model->flushWantedURL();
 
@@ -80,7 +80,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testFlushWantedUrlReturnsStoredUrlAndUnsetsIt()
     {
         $session = [];
-        $model = new SignupModel(['wanted_url' => '/dashboard'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['wanted_url' => '/dashboard'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__saveWantedUrl');
@@ -94,7 +94,7 @@ class SignupModelUnitTest extends AbstractTest
     #[Test]
     public function testResendConfirmationEmailWithEmptyStringReturnsEarly()
     {
-        SignupModel::resendConfirmationEmail('', new UserDao(Database::obtain()));
+        SignupModel::resendConfirmationEmail('', new UserDao(obtainTestDatabase()));
 
         $this->expectNotToPerformAssertions();
     }
@@ -102,7 +102,7 @@ class SignupModelUnitTest extends AbstractTest
     #[Test]
     public function testResendConfirmationEmailWithWhitespaceReturnsEarly()
     {
-        SignupModel::resendConfirmationEmail('   ', new UserDao(Database::obtain()));
+        SignupModel::resendConfirmationEmail('   ', new UserDao(obtainTestDatabase()));
 
         $this->expectNotToPerformAssertions();
     }
@@ -138,7 +138,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testUserAlreadyExistsReturnsFalseWhenEmailIsNull()
     {
         $session = [];
-        $model = new SignupModel([], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel([], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__userAlreadyExists');
@@ -158,7 +158,7 @@ class SignupModelUnitTest extends AbstractTest
             ->willReturn($existingUser);
 
         $session = [];
-        $model = new SignupModel(['email' => 'existing@example.com'], $session, $dao, new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'existing@example.com'], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__userAlreadyExists');
@@ -176,7 +176,7 @@ class SignupModelUnitTest extends AbstractTest
             ->willReturn(null);
 
         $session = [];
-        $model = new SignupModel(['email' => 'new@example.com'], $session, $dao, new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'new@example.com'], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__userAlreadyExists');
@@ -188,7 +188,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testUserAlreadyExistsAndIsActiveReturnsFalseWhenUidNotSet()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__userAlreadyExistsAndIsActive');
@@ -200,7 +200,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testUserAlreadyExistsAndIsActiveReturnsTrueWhenEmailConfirmed()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->getUser()->uid = 123;
         $model->getUser()->email_confirmed_at = '2024-01-01 00:00:00';
 
@@ -214,7 +214,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testUserAlreadyExistsAndIsActiveReturnsTrueWhenHasOauthToken()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->getUser()->uid = 123;
         $model->getUser()->oauth_access_token = 'token123';
 
@@ -228,7 +228,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testPrepareNewUserThrowsRuntimeExceptionWhenEmailIsNull()
     {
         $session = [];
-        $model = new SignupModel([], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel([], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__prepareNewUser');
@@ -243,7 +243,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testSaveWantedUrlStoresInSession()
     {
         $session = [];
-        $model = new SignupModel(['wanted_url' => '/projects/123'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['wanted_url' => '/projects/123'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__saveWantedUrl');
@@ -256,7 +256,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testUpdatePersistedUserGeneratesSaltWhenEmpty()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com', 'password' => 'secret123'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com', 'password' => 'secret123'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->getUser()->salt = '';
 
         $ref = new ReflectionClass($model);
@@ -271,7 +271,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testUpdatePersistedUserKeepsExistingSalt()
     {
         $session = [];
-        $model = new SignupModel(['email' => 'test@example.com', 'password' => 'secret123'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['email' => 'test@example.com', 'password' => 'secret123'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->getUser()->salt = 'existing_salt_v';
 
         $ref = new ReflectionClass($model);
@@ -290,7 +290,7 @@ class SignupModelUnitTest extends AbstractTest
             ->willReturn(null);
 
         $session = [];
-        $signup = new SignupModel(['token' => 'bad_token'], $session, $dao, new TeamDao(Database::obtain()));
+        $signup = new SignupModel(['token' => 'bad_token'], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Confirmation token not found');
@@ -314,7 +314,7 @@ class SignupModelUnitTest extends AbstractTest
             ->willReturn($user);
 
         $session = [];
-        $signup = new SignupModel(['token' => 'abc123'], $session, $dao, new TeamDao(Database::obtain()));
+        $signup = new SignupModel(['token' => 'abc123'], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('Confirmation token is invalid');
@@ -343,7 +343,7 @@ class SignupModelUnitTest extends AbstractTest
         $dao->method('destroyCacheByUid')->willReturn(true);
 
         $session = [];
-        $signup = new SignupModel(['token' => 'abc123'], $session, $dao, new TeamDao(Database::obtain()));
+        $signup = new SignupModel(['token' => 'abc123'], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $result = $signup->confirm();
 
@@ -367,7 +367,7 @@ class SignupModelUnitTest extends AbstractTest
         $signup = new SignupModel([
             'email' => 'test@example.com',
             'wanted_url' => '/path',
-        ], $session, $dao, new TeamDao(Database::obtain()));
+        ], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $this->assertTrue($signup->forgotPassword());
     }
@@ -384,7 +384,7 @@ class SignupModelUnitTest extends AbstractTest
         $signup = new SignupModel([
             'email' => 'unknown@example.com',
             'wanted_url' => '/path',
-        ], $session, $dao, new TeamDao(Database::obtain()));
+        ], $session, $dao, new TeamDao(obtainTestDatabase()));
 
         $this->assertFalse($signup->forgotPassword());
     }
@@ -393,7 +393,7 @@ class SignupModelUnitTest extends AbstractTest
     public function testSessionIsPassedByReference()
     {
         $session = ['existing' => 'value'];
-        $model = new SignupModel(['wanted_url' => '/path'], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new SignupModel(['wanted_url' => '/path'], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $ref = new ReflectionClass($model);
         $method = $ref->getMethod('__saveWantedUrl');

@@ -89,7 +89,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', \Model\DataAccess\Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $user        = new UserStruct();
         $user->uid   = $this->userId(self::BASE);
@@ -192,7 +192,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
      */
     private function enableTranslationVersionsFeature(): void
     {
-        (new MetadataDao(\Model\DataAccess\Database::obtain()))->set($this->projectId(self::BASE), 'features', 'translation_versions');
+        (new MetadataDao(obtainTestDatabase()))->set($this->projectId(self::BASE), 'features', 'translation_versions');
     }
 
     // ─── validateTheRequest ───

@@ -77,7 +77,7 @@ class NewControllerTest extends AbstractTest
         /**
          * engine insertion
          */
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $sql_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".engines (
                 name, 
                 type, 
@@ -128,7 +128,7 @@ class NewControllerTest extends AbstractTest
     public function createMocks(): void
     {
         $app = new App();
-        $app->register('getDatabase', static fn() => Database::obtain());
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
         $this->controller = new NewController($this->requestMock, $this->responseMock, null, $app);
         $reflector = new ReflectionClass($this->controller);
         $this->method = $reflector->getMethod('validateTheRequest');

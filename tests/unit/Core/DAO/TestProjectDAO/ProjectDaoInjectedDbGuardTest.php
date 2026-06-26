@@ -28,7 +28,7 @@ class ProjectDaoInjectedDbGuardTest extends AbstractTest
             ->method('getConnection')
             ->willReturn($pdoStub);
 
-        // Poison the singleton: it must NEVER be touched. Any Database::obtain()
+        // Poison the singleton: it must NEVER be touched. Any obtainTestDatabase()
         // fallback (full revert OR a partial/mixed path) hits this mock and trips
         // the never() expectation — a clean, deterministic failure that does not
         // depend on the real test DB schema.

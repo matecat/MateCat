@@ -26,7 +26,7 @@ class TestableSegmentExtractor extends SegmentExtractor
         MatecatLogger $logger,
         ?SegmentMetadataMapper $segmentMetadataMapper = null,
     ) {
-        parent::__construct($config, $filter, $features, $filesMetadataDao, $segmentMetadataMapper ?? new SegmentMetadataMapper(), Database::obtain(), $logger);
+        parent::__construct($config, $filter, $features, $filesMetadataDao, $segmentMetadataMapper ?? new SegmentMetadataMapper(), obtainTestDatabase(), $logger);
     }
 
     /**

@@ -20,7 +20,7 @@ class SetMultiMyMemoryTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $engineDAO = new EngineDAO(Database::obtain(
+        $engineDAO = new EngineDAO(obtainTestDatabase(
             AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE
         ));
         $struct = EngineStruct::getStruct();

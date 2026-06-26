@@ -20,7 +20,7 @@ class MatchProcessorServiceTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new MatchProcessorService(new MatchSorter(), Database::obtain());
+        $this->service = new MatchProcessorService(new MatchSorter(), obtainTestDatabase());
     }
 
     #[Test]

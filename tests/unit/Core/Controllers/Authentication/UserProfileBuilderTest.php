@@ -37,7 +37,7 @@ class UserProfileBuilderTest extends AbstractTest
         $userDao = $this->createStub(UserDao::class);
         $userDao->method('setCacheTTL')->willReturnSelf();
         $teamDao = $this->createStub(TeamDao::class);
-        $teamDao->method('getDatabaseHandler')->willReturn(Database::obtain());
+        $teamDao->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
         $metadataDao = $this->createStub(MetadataDao::class);
         $metadataDao->method('getAllByUid')->willReturn([]);
         $this->builder = new UserProfileBuilder($this->membershipDao, $this->connectedServiceDao, $userDao, $teamDao, $metadataDao);

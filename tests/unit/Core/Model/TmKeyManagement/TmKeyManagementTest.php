@@ -1222,7 +1222,7 @@ class TmKeyManagementTest extends AbstractTest
     public function testMergeJsonKeys_invalidClientJson()
     {
         try {
-            TmKeyManager::mergeJsonKeys(self::$invalidClientJson, self::$validServerJson, \Model\DataAccess\Database::obtain());
+            TmKeyManager::mergeJsonKeys(self::$invalidClientJson, self::$validServerJson, obtainTestDatabase());
         } catch (Exception $e) {
             $this->assertTrue($e->getCode() > 0);
         }
@@ -1232,7 +1232,7 @@ class TmKeyManagementTest extends AbstractTest
     public function testMergeJsonKeys_invalidServerJson()
     {
         try {
-            TmKeyManager::mergeJsonKeys(self::$validClientJson, self::$invalidServerJson, \Model\DataAccess\Database::obtain());
+            TmKeyManager::mergeJsonKeys(self::$validClientJson, self::$invalidServerJson, obtainTestDatabase());
         } catch (Exception $e) {
             $this->assertTrue($e->getCode() > 0);
         }
@@ -1247,7 +1247,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC_DEF,
             self::$srv_json_ABC,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1305,7 +1305,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
         );
 
         /*
@@ -1344,7 +1344,7 @@ class TmKeyManagementTest extends AbstractTest
             self::$client_json_INVALID_GHI,
             self::$srv_json_GHI
         ,
-            \Model\DataAccess\Database::obtain());
+            obtainTestDatabase());
     }
 
     #[Test]
@@ -1355,7 +1355,7 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             'invalid role!',
             123
         );
@@ -1369,7 +1369,7 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::OWNER
         );
     }
@@ -1383,7 +1383,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             '[]',
             self::$srv_json_GHI,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::OWNER,
             123
         );
@@ -1400,7 +1400,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_GHI,
             self::$srv_json_GHI,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::OWNER,
             123
         );
@@ -1441,7 +1441,7 @@ class TmKeyManagementTest extends AbstractTest
             self::$client_json_GHI_DEF,
             self::$srv_json_GHI
         ,
-            \Model\DataAccess\Database::obtain());
+            obtainTestDatabase());
 
         $this->assertCount(2, $resultMerge);
 
@@ -1479,7 +1479,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC,
             self::$srv_json_ABC,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1523,7 +1523,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_DEF,
             self::$srv_json_ABC,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1544,7 +1544,7 @@ class TmKeyManagementTest extends AbstractTest
             self::$client_json_ABC_GHI_JKL,
             self::$srv_json_ABC_GHI_DEF
         ,
-            \Model\DataAccess\Database::obtain());
+            obtainTestDatabase());
     }
 
     /**
@@ -1554,7 +1554,7 @@ class TmKeyManagementTest extends AbstractTest
     #[Test]
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF()
     {
-        $db = Database::obtain();
+        $db = obtainTestDatabase();
         $db->getConnection()->query("TRUNCATE TABLE memory_keys");
 
         //this should not to be, because a client can not send not hashed keys
@@ -1562,12 +1562,12 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             self::$client_json_ABC_GHI_JKL,
             self::$srv_json_ABC_GHI_DEF,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
 
-        $MemoryDao = new MemoryKeyDao(Database::obtain());
+        $MemoryDao = new MemoryKeyDao(obtainTestDatabase());
         $dh = new MemoryKeyStruct([
             'uid' => 123
         ]);
@@ -1679,7 +1679,7 @@ class TmKeyManagementTest extends AbstractTest
         $resultMerge = TmKeyManager::mergeJsonKeys(
             $client_json,
             $server_json,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );
@@ -1769,7 +1769,7 @@ class TmKeyManagementTest extends AbstractTest
         TmKeyManager::mergeJsonKeys(
             $client_json,
             $server_json,
-            \Model\DataAccess\Database::obtain(),
+            obtainTestDatabase(),
             Filter::ROLE_TRANSLATOR,
             123
         );

@@ -40,9 +40,9 @@ class TestableAbstractStatus extends AbstractStatus
         $this->project         = $project;
         $this->_project_data   = $_project_data;
         $this->featureSet      = $features;
-        $this->analysisDao     = $analysisDao ?? new AnalysisDao(\Model\DataAccess\Database::obtain());
-        $this->jobDao          = $jobDao ?? new JobDao(\Model\DataAccess\Database::obtain());
-        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao(\Model\DataAccess\Database::obtain());
+        $this->analysisDao     = $analysisDao ?? new AnalysisDao(obtainTestDatabase());
+        $this->jobDao          = $jobDao ?? new JobDao(obtainTestDatabase());
+        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao(obtainTestDatabase());
     }
 
     public function callIsOutsourceEnabled(string $targetLang, string $id_customer, int $idJob): bool

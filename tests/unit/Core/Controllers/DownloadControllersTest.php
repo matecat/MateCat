@@ -447,7 +447,7 @@ class DownloadControllersTest extends AbstractTest
     private function dbApp(): App
     {
         $app = new App();
-        $app->register('getDatabase', static fn() => Database::obtain());
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
 
         return $app;
     }

@@ -54,7 +54,7 @@ class ExecutorTest extends AbstractTest
 
         $props = [
             '_queueHandler'         => $this->mockAmqHandler,
-            'database'              => Database::obtain(),
+            'database'              => obtainTestDatabase(),
             '_executionContext'      => $this->context,
             '_executorPID'          => 12345,
             '_executor_instance_id' => '12345:localhost:test',
@@ -642,7 +642,7 @@ class ExecutorTest extends AbstractTest
 
         // Pre-set worker to skip namespace allowlist check
         $ref = new ReflectionClass($executor);
-        $ref->getProperty('_worker')->setValue($executor, new TestDummyWorker($this->mockAmqHandler, Database::obtain()));
+        $ref->getProperty('_worker')->setValue($executor, new TestDummyWorker($this->mockAmqHandler, obtainTestDatabase()));
 
         $executor->main(0);
 
@@ -666,7 +666,7 @@ class ExecutorTest extends AbstractTest
         $mockPublisher->expects($this->once())->method('reQueue');
 
         $ref = new ReflectionClass($executor);
-        $ref->getProperty('_worker')->setValue($executor, new TestReQueueWorker($this->mockAmqHandler, Database::obtain()));
+        $ref->getProperty('_worker')->setValue($executor, new TestReQueueWorker($this->mockAmqHandler, obtainTestDatabase()));
         $ref->getProperty('_testPublisherOverride')->setValue($executor, $mockPublisher);
 
         $executor->main(0);
@@ -691,7 +691,7 @@ class ExecutorTest extends AbstractTest
         $mockPublisher->expects($this->once())->method('reQueue');
 
         $ref = new ReflectionClass($executor);
-        $ref->getProperty('_worker')->setValue($executor, new TestPDOExceptionWorker($this->mockAmqHandler, Database::obtain()));
+        $ref->getProperty('_worker')->setValue($executor, new TestPDOExceptionWorker($this->mockAmqHandler, obtainTestDatabase()));
         $ref->getProperty('_testPublisherOverride')->setValue($executor, $mockPublisher);
 
         $executor->main(0);
@@ -713,7 +713,7 @@ class ExecutorTest extends AbstractTest
         $this->mockAmqHandler->expects($this->once())->method('ack');
 
         $ref = new ReflectionClass($executor);
-        $ref->getProperty('_worker')->setValue($executor, new TestThrowableWorker($this->mockAmqHandler, Database::obtain()));
+        $ref->getProperty('_worker')->setValue($executor, new TestThrowableWorker($this->mockAmqHandler, obtainTestDatabase()));
 
         $executor->main(0);
 
@@ -796,7 +796,7 @@ class ExecutorTest extends AbstractTest
 
         // Pre-set a DIFFERENT worker — forces re-instantiation
         $ref = new ReflectionClass($executor);
-        $ref->getProperty('_worker')->setValue($executor, new TestDummyWorker($this->mockAmqHandler, Database::obtain()));
+        $ref->getProperty('_worker')->setValue($executor, new TestDummyWorker($this->mockAmqHandler, obtainTestDatabase()));
 
         $executor->main(0);
 

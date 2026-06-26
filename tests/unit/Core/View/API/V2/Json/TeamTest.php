@@ -28,7 +28,7 @@ class TeamTest extends AbstractTest
 
     private function makeTestableTeam(?array $data = null): Team
     {
-        $userDao = new UserDao(Database::obtain());
+        $userDao = new UserDao(obtainTestDatabase());
         return new class ($userDao, $data) extends Team {
             /** @return array<string> */
             protected function getPendingInvitations(int $teamId): array

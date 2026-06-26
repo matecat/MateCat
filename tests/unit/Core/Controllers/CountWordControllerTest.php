@@ -78,7 +78,7 @@ class CountWordControllerTest extends AbstractTest
 
         $this->controller = new TestableCountWordController();
         $this->reflector = new ReflectionClass(CountWordController::class);
-        $this->reflector->getProperty('database')->setValue($this->controller, \Model\DataAccess\Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────

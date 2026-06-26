@@ -46,7 +46,7 @@ class TeamModelTest extends AbstractTest
 
     private function cleanupUserTeams(int $uid): void
     {
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $teamIds = $conn->query("SELECT id FROM teams WHERE created_by = $uid")->fetchAll(PDO::FETCH_COLUMN);
         foreach ($teamIds as $teamId) {
             $conn->exec("DELETE FROM teams_users WHERE id_team = $teamId");
@@ -60,7 +60,7 @@ class TeamModelTest extends AbstractTest
     public function test_addMemberEmail_stores_email(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $model->addMemberEmail('a@example.org');
 
@@ -71,7 +71,7 @@ class TeamModelTest extends AbstractTest
     public function test_addMemberEmails_appends_multiple(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $model->addMemberEmails(['a@example.org', 'b@example.org']);
 
@@ -84,7 +84,7 @@ class TeamModelTest extends AbstractTest
     public function test_removeMemberUids_accumulates(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $model->removeMemberUids([1, 2]);
         $model->removeMemberUids([3]);
@@ -98,7 +98,7 @@ class TeamModelTest extends AbstractTest
     public function test_checkType_accepts_general(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $method = new ReflectionMethod($model, '_checkType');
         $method->invoke($model);
@@ -109,7 +109,7 @@ class TeamModelTest extends AbstractTest
     public function test_checkType_accepts_personal(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::PERSONAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $method = new ReflectionMethod($model, '_checkType');
         $method->invoke($model);
@@ -120,7 +120,7 @@ class TeamModelTest extends AbstractTest
     public function test_checkType_rejects_invalid_type(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => 'bogus', 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Invalid Team Type");
@@ -134,7 +134,7 @@ class TeamModelTest extends AbstractTest
     public function test_checkAddMembersToPersonalTeam_throws_for_personal(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::PERSONAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage("Can not invite members to a Personal team");
@@ -146,7 +146,7 @@ class TeamModelTest extends AbstractTest
     public function test_checkAddMembersToPersonalTeam_allows_general(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $method = new ReflectionMethod($model, '_checkAddMembersToPersonalTeam');
         $method->invoke($model);
@@ -160,7 +160,7 @@ class TeamModelTest extends AbstractTest
     {
         // Factory_User::create() already creates a personal team for $this->user
         $struct = new TeamStruct(['name' => 'personal', 'type' => Teams::PERSONAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("User already has the personal team");
@@ -172,7 +172,7 @@ class TeamModelTest extends AbstractTest
     public function test_checkPersonalUnique_does_nothing_for_general_type(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $method = new ReflectionMethod($model, '_checkPersonalUnique');
         $method->invoke($model);
@@ -185,7 +185,7 @@ class TeamModelTest extends AbstractTest
     public function test_getRemovedMembersEmailList_excludes_current_user(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
 
         $removedUsers = new ReflectionProperty($model, 'removed_users');
@@ -201,7 +201,7 @@ class TeamModelTest extends AbstractTest
     public function test_getRemovedMembersEmailList_empty_when_only_current_user(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
 
         $removedUsers = new ReflectionProperty($model, 'removed_users');
@@ -219,7 +219,7 @@ class TeamModelTest extends AbstractTest
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
         // id is null by default
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Team must be persisted before this operation');
@@ -232,7 +232,7 @@ class TeamModelTest extends AbstractTest
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
         $struct->id = 42;
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $method = new ReflectionMethod($model, 'getTeamId');
         $this->assertSame(42, $method->invoke($model));
@@ -248,7 +248,7 @@ class TeamModelTest extends AbstractTest
             'type' => Teams::GENERAL
         ]);
 
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
         $model->addMemberEmail($this->otherUser->email);
 
@@ -266,7 +266,7 @@ class TeamModelTest extends AbstractTest
         $this->assertContains($this->otherUser->uid, $memberUids);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $result->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $result->id);
     }
@@ -279,7 +279,7 @@ class TeamModelTest extends AbstractTest
             'type' => Teams::PERSONAL
         ]);
 
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
         $model->addMemberEmail($this->otherUser->email);
 
@@ -295,7 +295,7 @@ class TeamModelTest extends AbstractTest
             'type' => 'INVALID'
         ]);
 
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
 
         $this->expectException(InvalidArgumentException::class);
@@ -308,16 +308,16 @@ class TeamModelTest extends AbstractTest
     public function test_updateMembers_adds_new_member(): void
     {
         // Create a general team first
-        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
-        \Model\DataAccess\Database::obtain()->begin();
+        $teamDao = new TeamDao(obtainTestDatabase());
+        obtainTestDatabase()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
             'name' => 'Update Test Team',
             'members' => []
         ]);
-        \Model\DataAccess\Database::obtain()->commit();
+        obtainTestDatabase()->commit();
 
-        $model = new TeamModel($team, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($team, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
         $model->addMemberEmail($this->otherUser->email);
 
@@ -327,7 +327,7 @@ class TeamModelTest extends AbstractTest
         $this->assertContains($this->otherUser->uid, $memberUids);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $team->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $team->id);
     }
@@ -335,16 +335,16 @@ class TeamModelTest extends AbstractTest
     public function test_updateMembers_removes_member(): void
     {
         // Create a general team with both users
-        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
-        \Model\DataAccess\Database::obtain()->begin();
+        $teamDao = new TeamDao(obtainTestDatabase());
+        obtainTestDatabase()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
             'name' => 'Remove Test Team',
             'members' => [$this->otherUser->email]
         ]);
-        \Model\DataAccess\Database::obtain()->commit();
+        obtainTestDatabase()->commit();
 
-        $model = new TeamModel($team, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($team, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
         $model->removeMemberUids([$this->otherUser->uid]);
 
@@ -355,7 +355,7 @@ class TeamModelTest extends AbstractTest
         $this->assertContains($this->user->uid, $memberUids);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $team->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $team->id);
     }
@@ -363,7 +363,7 @@ class TeamModelTest extends AbstractTest
     public function test_updateMembers_throws_when_team_not_persisted(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
 
         $this->expectException(RuntimeException::class);
@@ -374,22 +374,22 @@ class TeamModelTest extends AbstractTest
 
     public function test_updateMembersProjectsCount_returns_self(): void
     {
-        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
-        \Model\DataAccess\Database::obtain()->begin();
+        $teamDao = new TeamDao(obtainTestDatabase());
+        obtainTestDatabase()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
             'name' => 'Projects Count Team',
             'members' => [$this->otherUser->email]
         ]);
-        \Model\DataAccess\Database::obtain()->commit();
+        obtainTestDatabase()->commit();
 
-        $model = new TeamModel($team, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($team, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $result = $model->updateMembersProjectsCount();
 
         $this->assertSame($model, $result);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $team->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $team->id);
     }
@@ -397,7 +397,7 @@ class TeamModelTest extends AbstractTest
     public function test_updateMembersProjectsCount_throws_when_team_not_persisted(): void
     {
         $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $this->expectException(RuntimeException::class);
         $model->updateMembersProjectsCount();
@@ -408,16 +408,16 @@ class TeamModelTest extends AbstractTest
     public function test_getInvitedEmails_returns_only_non_member_emails(): void
     {
         // Create a team with both users as members
-        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
-        \Model\DataAccess\Database::obtain()->begin();
+        $teamDao = new TeamDao(obtainTestDatabase());
+        obtainTestDatabase()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
             'name' => 'Invite Test',
             'members' => [$this->otherUser->email]
         ]);
-        \Model\DataAccess\Database::obtain()->commit();
+        obtainTestDatabase()->commit();
 
-        $model = new TeamModel($team, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($team, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
 
         // Add emails: one existing member and one new
@@ -426,7 +426,7 @@ class TeamModelTest extends AbstractTest
 
         // Set all_memberships from the team
         $allMemberships = new ReflectionProperty($model, 'all_memberships');
-        $allMemberships->setValue($model, (new MembershipDao(\Model\DataAccess\Database::obtain()))->getMemberListByTeamId($team->id));
+        $allMemberships->setValue($model, (new MembershipDao(obtainTestDatabase()))->getMemberListByTeamId($team->id));
 
         $method = new ReflectionMethod($model, '_getInvitedEmails');
         $result = $method->invoke($model);
@@ -435,7 +435,7 @@ class TeamModelTest extends AbstractTest
         $this->assertNotContains($this->otherUser->email, $result);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $team->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $team->id);
     }
@@ -450,8 +450,8 @@ class TeamModelTest extends AbstractTest
             'type' => Teams::GENERAL
         ]);
 
-        $userDao = new UserDao(Database::obtain());
-        $model = new TeamModel($struct, $userDao, new TeamDao(Database::obtain()));
+        $userDao = new UserDao(obtainTestDatabase());
+        $model = new TeamModel($struct, $userDao, new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
         $model->addMemberEmail($this->otherUser->email);
 
@@ -464,7 +464,7 @@ class TeamModelTest extends AbstractTest
         $this->assertSame($this->otherUser->email, $result[0]->getUser($userDao)->email);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $createdTeam->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $createdTeam->id);
     }
@@ -479,7 +479,7 @@ class TeamModelTest extends AbstractTest
             'type' => Teams::GENERAL
         ]);
 
-        $model = new TeamModel($struct, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
         $model->setUser($this->user);
 
         $result = $model->create();
@@ -490,7 +490,7 @@ class TeamModelTest extends AbstractTest
         $this->assertSame($this->user->uid, $members[0]->uid);
 
         // Cleanup
-        $conn = \Model\DataAccess\Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . $result->id);
         $conn->exec("DELETE FROM teams WHERE id = " . $result->id);
     }

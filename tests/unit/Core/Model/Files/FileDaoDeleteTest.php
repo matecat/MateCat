@@ -31,7 +31,7 @@ class FileDaoDeleteTest extends AbstractTest
     #[Test]
     public function deleteFailedProjectFilesReturnsZeroForEmptyArray(): void
     {
-        $dao = new FileDao(\Model\DataAccess\Database::obtain());
+        $dao = new FileDao(obtainTestDatabase());
         $result = $dao->deleteFailedProjectFiles([]);
 
         $this->assertSame(0, $result);
@@ -43,7 +43,7 @@ class FileDaoDeleteTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(3);
 
-        $dao = new FileDao(\Model\DataAccess\Database::obtain());
+        $dao = new FileDao(obtainTestDatabase());
         $result = $dao->deleteFailedProjectFiles([1, 2, 3]);
 
         $this->assertSame(3, $result);
@@ -55,7 +55,7 @@ class FileDaoDeleteTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $dao = new FileDao(\Model\DataAccess\Database::obtain());
+        $dao = new FileDao(obtainTestDatabase());
         $result = $dao->deleteFailedProjectFiles([42]);
 
         $this->assertSame(1, $result);

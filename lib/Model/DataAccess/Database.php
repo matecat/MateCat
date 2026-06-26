@@ -16,12 +16,6 @@ class Database implements IDatabase
 {
 
     /**
-     * Unique instance of the class (singleton design pattern)
-     * @var ?IDatabase $instance
-     */
-    protected static ?IDatabase $instance = null;
-
-    /**
      * Established connection
      * @var ?PDO $connection
      */
@@ -63,35 +57,6 @@ class Database implements IDatabase
         $this->database = $database;
     }
 
-
-    /**
-     * @Override
-     * {@inheritdoc}
-     *
-     * @deprecated Process-wide singleton accessor. The ONLY legitimate caller is the application
-     *             composition root {@see \Bootstrap::start()}; everything beyond it — domain code
-     *             and entry points alike — must receive an {@see IDatabase} by injection (read it
-     *             from {@see \Bootstrap::getDatabase()} at an entry point, then thread it down).
-     *             Full rationale and best practices: {@see IDatabase::obtain()}.
-     */
-    public static function obtain(?string $server = null, ?string $user = null, ?string $password = null, ?string $database = null): IDatabase
-    {
-        if (!self::$instance || $server !== null && $user !== null && $password !== null && $database !== null) {
-            self::$instance = new Database($server ?? '', $user ?? '', $password ?? '', $database ?? '');
-        }
-
-        return self::$instance;
-    }
-
-    /**
-     * Register the instance built by the composition root so that legacy/test callers of the
-     * deprecated {@see self::obtain()} singleton accessor receive the SAME connection that
-     * {@see \Bootstrap::start()} constructed, instead of lazily building one with empty config.
-     */
-    public static function setInstance(IDatabase $database): void
-    {
-        self::$instance = $database;
-    }
 
     /**
      * Class destructor

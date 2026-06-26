@@ -37,7 +37,7 @@ class ProjectCreationWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         return $this->getMockBuilder(ProjectCreationWorker::class)
-            ->setConstructorArgs([$amq, Database::obtain()])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'createProjectManager', 'publishProjectResults'])
             ->getMock();
     }
@@ -139,7 +139,7 @@ class ProjectCreationWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
-            ->setConstructorArgs([$amq, Database::obtain()])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishProjectResults'])
             ->getMock();
 

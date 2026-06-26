@@ -6,7 +6,6 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
@@ -14,7 +13,6 @@ use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\Jobs\JobStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ProjectCompletion;
-use ReflectionClass;
 use ReflectionMethod;
 
 class ProjectCompletionTest extends AbstractTest
@@ -189,10 +187,9 @@ class ProjectCompletionTest extends AbstractTest
         $injected  = $this->createStub(IDatabase::class);
         $singleton = $this->createStub(IDatabase::class);
 
-        // Poison the singleton with a *different* instance so a stray Database::obtain()
+        // Poison the test DB provider with a *different* instance so a stray obtainTestDatabase()
         // would be observably distinct from the injected handler.
-        $prop = (new ReflectionClass(Database::class))->getProperty('instance');
-        $prop->setValue(null, $singleton);
+        \TestDatabaseProvider::set($singleton);
         $this->databaseMockApplied = true;
 
         $feature = new ProjectCompletion(

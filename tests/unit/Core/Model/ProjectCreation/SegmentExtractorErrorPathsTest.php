@@ -35,7 +35,7 @@ class SegmentExtractorErrorPathsTest extends AbstractTest
                 \Utils\Logger\MatecatLogger $logger,
                 bool $returnFalse
             ) {
-                parent::__construct($config, $filter, $features, $metadataDao, $mapper, Database::obtain(), $logger);
+                parent::__construct($config, $filter, $features, $metadataDao, $mapper, obtainTestDatabase(), $logger);
                 $this->returnFalse = $returnFalse;
             }
 

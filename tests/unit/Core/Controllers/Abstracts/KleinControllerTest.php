@@ -81,7 +81,7 @@ class KleinControllerTest extends AbstractTest
     public function setFeatureSetUpdatesFeatureSet(): void
     {
         $controller = $this->createController();
-        $newFeatureSet = new FeatureSet(Database::obtain());
+        $newFeatureSet = new FeatureSet(obtainTestDatabase());
 
         $result = $controller->setFeatureSet($newFeatureSet);
 
@@ -151,7 +151,7 @@ class KleinControllerTest extends AbstractTest
         $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'text/html']);
         $response = new Response();
         $app = new App();
-        $app->register('getDatabase', static fn() => \Model\DataAccess\Database::obtain());
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
         $controller = new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
             protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
@@ -168,7 +168,7 @@ class KleinControllerTest extends AbstractTest
         $request = new Request([], [], [], ['HTTP_CONTENT_TYPE' => 'application/json']);
         $response = new Response();
         $app = new App();
-        $app->register('getDatabase', static fn() => \Model\DataAccess\Database::obtain());
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
         $controller = new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;
             protected function identifyUser(?bool $useSession = true): void { $this->userIsLogged = false; }
@@ -222,7 +222,7 @@ class KleinControllerTest extends AbstractTest
         $request = Request::createFromGlobals();
         $response = new Response();
         $app = new App();
-        $app->register('getDatabase', static fn() => Database::obtain());
+        $app->register('getDatabase', static fn() => obtainTestDatabase());
 
         return new class ($request, $response, null, $app) extends KleinController {
             protected bool $useSession = false;

@@ -88,16 +88,16 @@ class JobsControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new \Model\FeaturesBase\FeatureSet(Database::obtain()));
-        $this->setProp('database', Database::obtain());
+        $this->setProp('featureSet', new \Model\FeaturesBase\FeatureSet(obtainTestDatabase()));
+        $this->setProp('database', obtainTestDatabase());
 
         // Wire the chunk + DAOs the action path reads (normally set in the
         // ChunkPasswordValidator onSuccess closure at validation time).
         $chunk = $this->loadChunk();
         $this->setProp('chunk', $chunk);
-        $this->setProp('project', $chunk->getProject(new ProjectDao(Database::obtain())));
-        $this->setProp('jobDao', new JobDao(Database::obtain()));
-        $this->setProp('segmentTranslationDao', new SegmentTranslationDao(Database::obtain()));
+        $this->setProp('project', $chunk->getProject(new ProjectDao(obtainTestDatabase())));
+        $this->setProp('jobDao', new JobDao(obtainTestDatabase()));
+        $this->setProp('segmentTranslationDao', new SegmentTranslationDao(obtainTestDatabase()));
     }
 
     protected function tearDown(): void
@@ -129,7 +129,7 @@ class JobsControllerTest extends AbstractTest
      */
     private function loadChunk(): JobStruct
     {
-        return (new JobDao(Database::obtain()))
+        return (new JobDao(obtainTestDatabase()))
             ->getByIdAndPasswordOrFail($this->jobId(self::BASE), self::JOB_PASSWORD);
     }
 
@@ -364,7 +364,7 @@ class JobsControllerTest extends AbstractTest
             ['REQUEST_URI' => '/api/v2/jobs', 'REQUEST_METHOD' => 'POST']
         ));
 
-        $this->reflector->getProperty('database')->setValue($real, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($real, obtainTestDatabase());
 
         $paramsProp = $this->reflector->getProperty('params');
         $paramsProp->setValue($real, $params);
@@ -403,7 +403,7 @@ class JobsControllerTest extends AbstractTest
      */
     private function assertJobStatusOwnerInDb(string $expectedStatus): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare('SELECT status_owner FROM jobs WHERE id = :id');
         $stmt->execute(['id' => $this->jobId(self::BASE)]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);

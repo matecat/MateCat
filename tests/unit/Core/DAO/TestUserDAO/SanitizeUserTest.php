@@ -37,7 +37,7 @@ class SanitizeUserTest extends AbstractTest
         parent::setUp();
         $this->user_struct_input = new UserStruct();
         $this->user_struct_expected = new UserStruct();
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->user_Dao = new UserDao($this->database_instance);
     }
 

@@ -80,7 +80,7 @@ class JobStructTest extends AbstractTest
             ]
         );
 
-        $this->dao = new JobDao(Database::obtain());
+        $this->dao = new JobDao(obtainTestDatabase());
     }
 
     #[Test]

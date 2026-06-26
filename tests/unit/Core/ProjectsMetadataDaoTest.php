@@ -29,7 +29,7 @@ class ProjectsMetadataDaoTest extends AbstractTest
     #[Test]
     function testCreateNewKey()
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $this->resetProjectMetadata($dao, 1);
         $value = $dao->getValue(1, 'foo');
         $this->assertNull($value);
@@ -46,7 +46,7 @@ class ProjectsMetadataDaoTest extends AbstractTest
     #[Test]
     function testUpdate()
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $this->resetProjectMetadata($dao, 1);
         $dao->set(1, 'foo', 'bar');
         $dao->set(1, 'foo', 'bar2');
@@ -64,7 +64,7 @@ class ProjectsMetadataDaoTest extends AbstractTest
     #[Test]
     function testDelete()
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $this->resetProjectMetadata($dao, 1);
         $dao->set(1, 'foo', 'bar2');
         $dao->delete(1, 'foo');
@@ -79,7 +79,7 @@ class ProjectsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetInsertsMultipleKeys(): void
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $this->resetProjectMetadata($dao, 1);
 
         $dao->bulkSet(1, [
@@ -99,7 +99,7 @@ class ProjectsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetUpsertsExistingKeys(): void
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $this->resetProjectMetadata($dao, 1);
         $dao->set(1, 'existing_key', 'old_value');
 
@@ -118,7 +118,7 @@ class ProjectsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetWithEmptyArrayIsNoop(): void
     {
-        $dao = new MetadataDao(Database::obtain());
+        $dao = new MetadataDao(obtainTestDatabase());
         $this->resetProjectMetadata($dao, 1);
         $countBefore = count($dao->allByProjectId(1));
 

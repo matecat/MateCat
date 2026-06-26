@@ -108,7 +108,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
         $fsProp = $this->reflector->getProperty('featureSet');
         $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     /**
@@ -125,7 +125,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
      */
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec("INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" . self::TEST_PROJECT_ID . ", '" . self::OWNER . "', 'projpw', 'CurSegProject', NOW(), 'DONE')");
 
@@ -148,7 +148,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
      */
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec("DELETE FROM segment_translations_splits WHERE id_job = " . self::TEST_JOB_ID);
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);
@@ -309,7 +309,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
     public function set_returns_translated_next_segment_when_revision_number_set(): void
     {
         // mark the next segment TRANSLATED so the revision branch finds it
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "UPDATE segment_translations SET status = 'TRANSLATED' WHERE id_segment = " . self::TEST_NEXT_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID
         );
 
@@ -391,7 +391,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
     public function set_returns_next_chunk_id_for_non_last_split_chunk(): void
     {
         // two source chunks => index 1 is last; split_num 0 is NOT last
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "INSERT INTO segment_translations_splits (id_segment, id_job, source_chunk_lengths, target_chunk_lengths) "
             . "VALUES (" . self::TEST_SEGMENT_ID . ", " . self::TEST_JOB_ID . ", '[5,5]', '{\"len\":[0],\"statuses\":[\"DRAFT\"]}')"
         );
@@ -412,7 +412,7 @@ class SetCurrentSegmentControllerTest extends AbstractTest
 
         $this->controller->set();
 
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "DELETE FROM segment_translations_splits WHERE id_segment = " . self::TEST_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID
         );
     }

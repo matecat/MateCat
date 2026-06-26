@@ -24,13 +24,13 @@ class MetadataDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->dao = new MetadataDao(\Model\DataAccess\Database::obtain());
+        $this->dao = new MetadataDao(obtainTestDatabase());
         $this->deleteFixtureRows();
     }
 

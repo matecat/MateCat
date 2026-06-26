@@ -35,7 +35,7 @@ class SetContributionTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $insertJobQuery = "INSERT INTO `jobs` 
             (`id`, 
@@ -100,15 +100,15 @@ class SetContributionTest extends AbstractTest
             '{\\\"NO_MATCH\\\":100,\\\"50 % -74 % \\\":100,\\\"75 % -84 % \\\":60,\\\"85 % -94 % \\\":60,\\\"95 % -99 % \\\":60,\\\"100 % \\\":30,\\\"100 % _PUBLIC\\\":30,\\\"REPETITIONS\\\":30,\\\"INTERNAL\\\":60,\\\"MT\\\":80}', 
             '1') ";
 
-        Database::obtain()->getConnection()->exec($insertJobQuery);
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec($insertJobQuery);
+        obtainTestDatabase()->getConnection()->exec(
             "INSERT INTO `projects` (`id`, `password`, `id_customer`, `name`, `create_date`, `id_engine_tm`, `id_engine_mt`, `status_analysis`, `fast_analysis_wc`, `tm_analysis_wc`, `standard_analysis_wc`, `remote_ip_address`, `pretranslate_100`, `id_qa_model`) VALUES ('22222222', 'b9e73b518ca2', 'domenico@translated.net', 'MATECAT_PROJ-201604150853', '2016-04-15 20:53:18', NULL, NULL, 'DONE', '353.00', '105.30', '105.30', '127.0.0.1', '0', NULL );"
         );
     }
 
     public function tearDown(): void
     {
-        $conn = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
+        $conn = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
         $redisHandler = (new RedisHandler())->getConnection();
         $redisHandler->flushdb();
         $conn->exec("DELETE FROM jobs WHERE id = 1999999");
@@ -223,7 +223,7 @@ class SetContributionTest extends AbstractTest
         ]);
         $request->props = '{"isConcordance":"0","id_file":"123"}';
 
-        $result = $request->getProp(new ProjectDao(Database::obtain()));
+        $result = $request->getProp(new ProjectDao(obtainTestDatabase()));
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('isConcordance', $result);
@@ -243,7 +243,7 @@ class SetContributionTest extends AbstractTest
         ]);
         $request->props = ['isConcordance' => '0', 'id_file' => '123'];
 
-        $result = $request->getProp(new ProjectDao(Database::obtain()));
+        $result = $request->getProp(new ProjectDao(obtainTestDatabase()));
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('isConcordance', $result);
@@ -262,7 +262,7 @@ class SetContributionTest extends AbstractTest
         ]);
         $request->props = 'not-valid-json';
 
-        $result = $request->getProp(new ProjectDao(Database::obtain()));
+        $result = $request->getProp(new ProjectDao(obtainTestDatabase()));
 
         // Should fallback to empty array merged with job TM props
         $this->assertIsArray($result);

@@ -52,7 +52,7 @@ class GlossaryWorkerTest extends AbstractTest
         parent::setUp();
 
         $amqStub = $this->createStub(AMQHandler::class);
-        $this->worker = new TestableGlossaryWorker($amqStub, Database::obtain());
+        $this->worker = new TestableGlossaryWorker($amqStub, obtainTestDatabase());
 
         $observerRef = new ReflectionProperty(AbstractWorker::class, '_observer');
         $observerRef->setValue($this->worker, []);

@@ -25,7 +25,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
@@ -79,7 +79,7 @@ class SegmentDisabledServiceTest extends AbstractTest
 
         $this->assertFalse(
             $param->isOptional(),
-            'SegmentMetadataDao must be a mandatory ctor dependency (no Database::obtain() fallback)'
+            'SegmentMetadataDao must be a mandatory ctor dependency (no obtainTestDatabase() fallback)'
         );
         $this->assertFalse($param->allowsNull(), 'SegmentMetadataDao ctor param must not be nullable');
     }

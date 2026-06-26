@@ -85,7 +85,7 @@ class ProjectCreationStatusControllerTest extends AbstractTest
         $this->controller = new TestableProjectCreationStatusController();
         $this->reflector  = new ReflectionClass(ProjectCreationStatusController::class);
 
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
     }
 

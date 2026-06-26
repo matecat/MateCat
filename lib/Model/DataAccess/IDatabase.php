@@ -10,60 +10,6 @@ use Throwable;
 interface IDatabase
 {
 
-    /**
-     * Obtain the process-wide database singleton.
-     *
-     * @param string|null $server
-     * @param string|null $user
-     * @param string|null $password
-     * @param string|null $database
-     *
-     * @return IDatabase
-     * @deprecated Do NOT call this anywhere except the application composition root. Everything
-     *             beyond the root — domain code AND entry points alike — must receive an
-     *             {@see IDatabase} by injection (see "The only legitimate caller" below).
-     *
-     * Why this is discouraged
-     * -----------------------
-     * 1. Hidden global state. It is a static singleton: every caller silently couples to one
-     *    process-wide connection instead of declaring an {@see IDatabase} dependency. The
-     *    dependency becomes invisible at the call site and impossible to vary.
-     * 2. Untestable SQL. A caller that reaches for the singleton cannot be given a test double,
-     *    so its queries are either left untested or "covered" by mocks that never execute SQL.
-     *    Real dialect breakage (e.g. MySQL 5.7 -> 8) then surfaces in production, not in CI.
-     *    Injecting the connection lets integration tests run the real SQL against the CI DB.
-     * 3. Cross-request leakage. Under PHP-FPM the singleton lives for the whole worker. Per-request
-     *    connection state (open transactions, schema/useDb toggles) leaks into the next request
-     *    served by the same worker. Injected, per-scope instances keep that state isolated.
-     * 4. Unclear ownership. With a global accessor there is no single owner of connect / begin /
-     *    commit / reconnect; lifecycle decisions get scattered across the codebase.
-     *
-     * Best practice
-     * -------------
-     * - Require an {@see IDatabase} in the constructor and store it. {@see AbstractDao} now
-     *   REQUIRES an injected connection — its `?? Database::obtain()` fallback was removed.
-     * - Thread the SAME instance down the call chain: DAOs, models, services, and factories
-     *   (e.g. EnginesFactory::getInstance($id, $database)) all take it explicitly.
-     * - Reach for the connection the way your layer already provides it: controllers expose
-     *   getDatabase(); workers hold $this->database; features receive it via setDatabase() from
-     *   the FeatureSet framework. Never re-fetch the singleton from inside those layers.
-     *
-     * The only legitimate caller
-     * --------------------------
-     * The application composition root: {@see \Bootstrap::start()} (lib/Bootstrap.php), which
-     * builds the connection from config exactly once and exposes it via
-     * {@see \Bootstrap::getDatabase()}. NOTHING else may call obtain().
-     *
-     * Everything lives BEYOND the root and must be injected — not only domain code (controllers,
-     * DAOs, models, services, workers, the task runner, features) but the entry points and
-     * submodules too. An entry point (web front controller, daemon, CLI script) boots by calling
-     * Bootstrap::start(), then reads Bootstrap::getDatabase() to seed injection downward; it must
-     * not reach for the singleton itself. Any remaining direct obtain() call past the Bootstrap
-     * (e.g. in a daemon/worker/script) is residual debt to be removed, not a pattern to copy.
-     *
-     */
-    public static function obtain(?string $server = null, ?string $user = null, ?string $password = null, ?string $database = null): IDatabase;
-
 
     /**
      * Connect and select database

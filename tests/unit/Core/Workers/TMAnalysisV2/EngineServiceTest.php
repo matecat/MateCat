@@ -31,7 +31,7 @@ class EngineServiceTest extends AbstractTest
     #[Test]
     public function test_service_can_be_instantiated(): void
     {
-        $service = new EngineService(new DefaultEngineResolver(Database::obtain()), Database::obtain());
+        $service = new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase());
         $this->assertInstanceOf(EngineService::class, $service);
         $this->assertInstanceOf(EngineServiceInterface::class, $service);
     }

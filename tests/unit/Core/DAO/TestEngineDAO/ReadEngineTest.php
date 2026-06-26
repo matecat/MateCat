@@ -47,7 +47,7 @@ class ReadEngineTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->engine_Dao = new EngineDAO($this->database_instance);
         $this->engine_struct_param = new EngineStruct();
 
@@ -111,7 +111,7 @@ class ReadEngineTest extends AbstractTest
     #[Test]
     public function test_read_engine_just_created_in_database()
     {
-        $this->engine_Dao = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->engine_Dao = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
 
         $wrapped_result = $this->engine_Dao->read($this->engine_struct_param);
 

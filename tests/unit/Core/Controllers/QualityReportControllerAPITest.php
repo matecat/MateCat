@@ -97,7 +97,7 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -127,7 +127,7 @@ class QualityReportControllerAPITest extends AbstractTest
             'INSERT IGNORE INTO files_job (id_job, id_file) VALUES (' . $this->jobId(self::BASE) . ', ' . $this->fileId(self::BASE) . ')'
         );
 
-        $job = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
 
         return $job;
@@ -152,7 +152,7 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($controller, $request);
         $reflector->getProperty('response')->setValue($controller, $response);
-        $reflector->getProperty('database')->setValue($controller, Database::obtain());
+        $reflector->getProperty('database')->setValue($controller, obtainTestDatabase());
         $reflector->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
         $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $reflector->getProperty('chunk')->setValue($controller, $chunk);

@@ -23,7 +23,7 @@ class MetadataDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->beginTransaction();
 
         $this->testProjectId = self::BASE_TEST_PROJECT_ID + random_int(1, 999);
@@ -35,12 +35,12 @@ class MetadataDaoTest extends AbstractTest
 
         $conn->exec('DELETE FROM project_metadata WHERE id_project = ' . $this->testProjectId);
 
-        $this->dao = new MetadataDao(Database::obtain());
+        $this->dao = new MetadataDao(obtainTestDatabase());
     }
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
             $conn->rollBack();
         }
@@ -158,7 +158,7 @@ class MetadataDaoTest extends AbstractTest
         $chunk->id = 321;
         $chunk->password = 'chunk_pwd';
 
-        $result = (new MetadataDao(\Model\DataAccess\Database::obtain()))->buildChunkKey('base_key', $chunk);
+        $result = (new MetadataDao(obtainTestDatabase()))->buildChunkKey('base_key', $chunk);
 
         $this->assertSame('base_key_chunk_321_chunk_pwd', $result);
     }

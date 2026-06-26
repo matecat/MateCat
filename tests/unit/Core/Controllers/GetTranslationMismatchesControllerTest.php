@@ -116,8 +116,8 @@ class GetTranslationMismatchesControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet(Database::obtain()));
-        $this->setProp('database', Database::obtain());
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
+        $this->setProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void

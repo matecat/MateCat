@@ -64,7 +64,7 @@ class InitializeJobWordCountTest extends AbstractTest
             ->with($this->isInstanceOf(WordCountStruct::class))
             ->willReturn(1);
 
-        $wordCount = new CounterModel(\Model\DataAccess\Database::obtain());
+        $wordCount = new CounterModel(obtainTestDatabase());
         $result = $wordCount->initializeJobWordCount(1, 'a_password', $wordCounterMock);
 
         $inspector = new InvocationInspector($spy);

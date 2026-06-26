@@ -42,7 +42,7 @@ class MyMemoryMethodsTest extends AbstractTest
         parent::setUp();
 
         $engineDAO = new EngineDAO(
-            Database::obtain(
+            obtainTestDatabase(
                 AppConfig::$DB_SERVER,
                 AppConfig::$DB_USER,
                 AppConfig::$DB_PASS,

@@ -429,7 +429,7 @@ class DownloadQRControllerTest extends AbstractTest
         // so invoke the real parent body to cover the JobDao assignment.
         $fresh  = new TestableDownloadQRController();
         $ref    = new ReflectionClass(DownloadQRController::class);
-        $ref->getProperty('database')->setValue($fresh, Database::obtain());
+        $ref->getProperty('database')->setValue($fresh, obtainTestDatabase());
         $method = $ref->getMethod('initDependencies');
         $method->invoke($fresh);
 

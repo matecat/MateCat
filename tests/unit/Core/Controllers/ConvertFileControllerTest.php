@@ -72,7 +72,7 @@ class ConvertFileControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $user        = new UserStruct();
         $user->uid   = $this->userId(self::BASE);
@@ -80,7 +80,7 @@ class ConvertFileControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet(\Model\DataAccess\Database::obtain()));
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
     }
 
     protected function tearDown(): void
@@ -94,7 +94,7 @@ class ConvertFileControllerTest extends AbstractTest
         $this->seedUser(self::BASE, $this->ownerEmail(self::BASE));
 
         $uid = $this->userId(self::BASE);
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "INSERT IGNORE INTO filters_config_templates (id, name, uid, json, created_at, modified_at) "
             . "VALUES (" . self::TEMPLATE_ID . ", 'CtrlConvertTpl', $uid, '{}', NOW(), NOW())"
         );
@@ -102,7 +102,7 @@ class ConvertFileControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "DELETE FROM filters_config_templates WHERE id = " . self::TEMPLATE_ID
         );
         $this->cleanFragments(self::BASE);

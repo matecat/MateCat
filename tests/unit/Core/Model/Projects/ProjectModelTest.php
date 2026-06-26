@@ -50,7 +50,7 @@ class ProjectModelTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->db = Database::obtain();
+        $this->db = obtainTestDatabase();
         FakeProjectAssignedEmail::$sent = 0;
     }
 
@@ -156,7 +156,7 @@ class ProjectModelTest extends AbstractTest
     public function checkAssigneeChangeInPersonalTeamThrowsValidationError(): void
     {
         $owner = $this->createUser();
-        $personalTeam = (new TeamDao(\Model\DataAccess\Database::obtain()))->getPersonalByUid((int)$owner->uid);
+        $personalTeam = (new TeamDao(obtainTestDatabase()))->getPersonalByUid((int)$owner->uid);
 
         $model = new TestableProjectModel($this->db, new ProjectStruct());
 
@@ -210,7 +210,7 @@ class ProjectModelTest extends AbstractTest
     {
         $owner = $this->createUser();
         $oldTeam = $this->createGeneralTeamWithMembers($owner, []);
-        $personalTeam = (new TeamDao(\Model\DataAccess\Database::obtain()))->getPersonalByUid((int)$owner->uid);
+        $personalTeam = (new TeamDao(obtainTestDatabase()))->getPersonalByUid((int)$owner->uid);
 
         $project = new ProjectStruct();
         $project->id_team = (int)$oldTeam->id;
@@ -387,7 +387,7 @@ class ProjectModelTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $connection = \Model\DataAccess\Database::obtain()->getConnection();
+        $connection = obtainTestDatabase()->getConnection();
 
         foreach ($this->createdProjectIds as $projectId) {
             $connection->exec('DELETE FROM projects WHERE id = ' . (int)$projectId);
@@ -444,8 +444,8 @@ class ProjectModelTest extends AbstractTest
      */
     private function createGeneralTeamWithMembers(UserStruct $owner, array $memberEmails): TeamStruct
     {
-        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
-        \Model\DataAccess\Database::obtain()->begin();
+        $teamDao = new TeamDao(obtainTestDatabase());
+        obtainTestDatabase()->begin();
 
         $team = $teamDao->createUserTeam($owner, [
             'type' => Teams::GENERAL,
@@ -453,14 +453,14 @@ class ProjectModelTest extends AbstractTest
             'members' => $memberEmails,
         ]);
 
-        \Model\DataAccess\Database::obtain()->commit();
+        obtainTestDatabase()->commit();
 
         return $team;
     }
 
     private function createProject(int $teamId, ?int $assigneeId, string $name): ProjectStruct
     {
-        $connection = \Model\DataAccess\Database::obtain()->getConnection();
+        $connection = obtainTestDatabase()->getConnection();
 
         $assigneeSql = $assigneeId === null ? 'NULL' : (string)(int)$assigneeId;
         $escapedName = $connection->quote($name);
@@ -492,7 +492,7 @@ class ProjectModelTest extends AbstractTest
 
     private function fetchProjectName(int $projectId): string
     {
-        $connection = \Model\DataAccess\Database::obtain()->getConnection();
+        $connection = obtainTestDatabase()->getConnection();
 
         return (string)$connection
             ->query('SELECT name FROM projects WHERE id = ' . $projectId)

@@ -26,7 +26,7 @@ class EquivalentStatusesTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->word_counter = new CounterModel(\Model\DataAccess\Database::obtain());
+        $this->word_counter = new CounterModel(obtainTestDatabase());
         $mirror_word_counter = new ReflectionClass($this->word_counter);
         $this->method_equivalentStatuses = $mirror_word_counter->getMethod('equivalentStatuses');
     }

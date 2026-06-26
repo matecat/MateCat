@@ -35,7 +35,7 @@ class ConstructorMyMemoryTest extends AbstractTest
      */
     public function setUp(): void
     {
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);

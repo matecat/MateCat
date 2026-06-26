@@ -52,7 +52,7 @@ class JobPasswordValidatorTest extends AbstractTest
         $user->uid = self::B;
         $user->email = self::EMAIL;
         $this->setCtrlProp('user', $user);
-        $this->setCtrlProp('database', Database::obtain());
+        $this->setCtrlProp('database', obtainTestDatabase());
         $this->setRequest();
     }
 
@@ -80,7 +80,7 @@ class JobPasswordValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT INTO jobs (id, password, id_project, job_first_segment, job_last_segment, tm_keys, create_date, disabled, source, target, owner) "
             . "VALUES (" . self::JOB_ID . ", '" . self::PASSWORD . "', " . self::PROJECT_ID . ", 1, 1, '', NOW(), 0, 'en-US', 'it-IT', '" . self::EMAIL . "')"
@@ -89,7 +89,7 @@ class JobPasswordValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID);
     }
 

@@ -89,14 +89,14 @@ class SetTranslationControllerTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
     }
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -109,7 +109,7 @@ class SetTranslationControllerTest extends AbstractTest
     {
         $reflection = new ReflectionClass(SetTranslationController::class);
         $controller = $reflection->newInstanceWithoutConstructor();
-        $reflection->getProperty('database')->setValue($controller, Database::obtain());
+        $reflection->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         return $controller;
     }
@@ -151,7 +151,7 @@ class SetTranslationControllerTest extends AbstractTest
         string $segmentText = 'Hello world',
         int $rawWordCount = 2
     ): void {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec("INSERT IGNORE INTO projects (id, id_customer, password, name, create_date, status_analysis)
                      VALUES ({$projectId}, 'test@example.org', 'projectpw', 'SetTranslationTestProject', NOW(), 'DONE')");
@@ -727,7 +727,7 @@ class SetTranslationControllerTest extends AbstractTest
         $reflection = new ReflectionClass(TestableSetTranslationController::class);
         $controller = $reflection->newInstanceWithoutConstructor();
         $controller->setOldTranslation($oldTranslation);
-        $reflection->getProperty('database')->setValue($controller, Database::obtain());
+        $reflection->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         return $controller;
     }
@@ -1076,7 +1076,7 @@ class SetTranslationControllerTest extends AbstractTest
             ['translation' => '', 'time_to_edit' => 50]
         );
 
-        $row = Database::obtain()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+        $row = obtainTestDatabase()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
         self::assertSame('150', (string)$row['total_time_to_edit']);
     }
 
@@ -1115,7 +1115,7 @@ class SetTranslationControllerTest extends AbstractTest
                 ['translation' => '', 'time_to_edit' => 50]
             );
 
-            $row = Database::obtain()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+            $row = obtainTestDatabase()->getConnection()->query("SELECT total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
             self::assertSame('200', (string)$row['total_time_to_edit']);
         } finally {
             if ($originalReferer === null) {
@@ -1157,7 +1157,7 @@ class SetTranslationControllerTest extends AbstractTest
             ['translation' => 'abcd', 'time_to_edit' => 1000]
         );
 
-        $row = Database::obtain()->getConnection()->query("SELECT avg_post_editing_effort, total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
+        $row = obtainTestDatabase()->getConnection()->query("SELECT avg_post_editing_effort, total_time_to_edit FROM jobs WHERE id = {$jobId}")->fetch();
         self::assertSame('1010', (string)$row['total_time_to_edit']);
         self::assertNotSame('50', (string)$row['avg_post_editing_effort']);
     }
@@ -1193,7 +1193,7 @@ class SetTranslationControllerTest extends AbstractTest
             ['translation' => 'abx', 'time_to_edit' => 900]
         );
 
-        $row = Database::obtain()->getConnection()->query("SELECT avg_post_editing_effort FROM jobs WHERE id = {$jobId}")->fetch();
+        $row = obtainTestDatabase()->getConnection()->query("SELECT avg_post_editing_effort FROM jobs WHERE id = {$jobId}")->fetch();
         self::assertNotSame('100', (string)$row['avg_post_editing_effort']);
     }
 
@@ -1228,7 +1228,7 @@ class SetTranslationControllerTest extends AbstractTest
             ['translation' => 'abcf', 'time_to_edit' => 100000]
         );
 
-        $row = Database::obtain()->getConnection()->query("SELECT avg_post_editing_effort FROM jobs WHERE id = {$jobId}")->fetch();
+        $row = obtainTestDatabase()->getConnection()->query("SELECT avg_post_editing_effort FROM jobs WHERE id = {$jobId}")->fetch();
         self::assertNotSame('200', (string)$row['avg_post_editing_effort']);
     }
 
@@ -1259,7 +1259,7 @@ class SetTranslationControllerTest extends AbstractTest
             'revisionNumber' => 0,
         ]);
 
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
 
         $featureSet = $this->createMock(FeatureSet::class);
@@ -1316,7 +1316,7 @@ class SetTranslationControllerTest extends AbstractTest
             'revisionNumber' => 0,
         ]);
 
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
         $featureSet = $this->createStub(FeatureSet::class);
         $this->setNamedProperty($controller, 'featureSet', $featureSet);
@@ -1379,11 +1379,11 @@ class SetTranslationControllerTest extends AbstractTest
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Eval set', 2);
 
         $controller = $this->createControllerWithoutConstructor();
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
         $this->setNamedProperty($controller, 'chunk', $chunk);
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
 
         $this->setProperty($controller, [
             'status' => TranslationStatus::STATUS_TRANSLATED,
@@ -1422,15 +1422,15 @@ class SetTranslationControllerTest extends AbstractTest
         $segmentAfter = 891006;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentMain, $fileId, 'Main segment', 2);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
                      VALUES ({$segmentBefore}, {$fileId}, '0', 'Before context', 'hash_{$segmentBefore}', 2)");
         $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
                      VALUES ({$segmentAfter}, {$fileId}, '2', 'After context', 'hash_{$segmentAfter}', 2)");
 
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
         $this->setProperty($controller, [
             'id_before' => (string)$segmentBefore,
             'id_segment' => (string)$segmentMain,
@@ -1455,7 +1455,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => 'text',
@@ -1478,7 +1478,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['payload' => 'x'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => 'text',
@@ -1532,7 +1532,7 @@ class SetTranslationControllerTest extends AbstractTest
         $segmentId = 892003;
         $fileId = 892004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Archived', 2);
-        Database::obtain()->getConnection()->exec("UPDATE jobs SET status = 'archived' WHERE id = {$jobId}");
+        obtainTestDatabase()->getConnection()->exec("UPDATE jobs SET status = 'archived' WHERE id = {$jobId}");
 
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
@@ -1568,7 +1568,7 @@ class SetTranslationControllerTest extends AbstractTest
     public function getTranslationObjectBuildsApiV2LikePayload(): void
     {
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
 
         $saved = new SegmentTranslationStruct();
         $saved->version_number = 11;
@@ -1631,7 +1631,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => '',
@@ -1654,7 +1654,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'request', new Request([], ['foo' => 'bar'], [], [], [], null));
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
 
         $this->setProperty($controller, [
             'translation' => 'text',
@@ -1684,11 +1684,11 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 884004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source', 2);
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
 
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
         $this->setNamedProperty($controller, 'sourceContainsIcu', false);
@@ -1715,7 +1715,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 885004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Hello old', 2);
 
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "INSERT IGNORE INTO segment_translations (id_segment, id_job, segment_hash, translation, status, translation_date, time_to_edit)
              VALUES ({$segmentId}, {$jobId}, 'hash_{$segmentId}', 'ciao vecchio', 'DRAFT', NOW(), 10)"
         );
@@ -1831,7 +1831,7 @@ class SetTranslationControllerTest extends AbstractTest
         $afterId = 893006;
 
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source segment', 2);
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
                      VALUES ({$beforeId}, {$fileId}, '0', 'Before text', 'hash_{$beforeId}', 2)");
         $conn->exec("INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count)
@@ -1840,7 +1840,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
         $this->setNamedProperty($controller, 'request', new Request([], [
             'id_job' => (string)$jobId,
             'password' => $jobPassword,
@@ -1886,12 +1886,12 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 894004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source persist', 2);
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
 
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'chunk', $chunk);
-        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $segmentDao = new \Model\Segments\SegmentDao(obtainTestDatabase());
         $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
         $this->setNamedProperty($controller, 'password', $jobPassword);
@@ -1970,7 +1970,7 @@ class SetTranslationControllerTest extends AbstractTest
             'segments_for_propagation' => [],
         ], $result);
 
-        $stored = (new \Model\Translations\SegmentTranslationDao(\Model\DataAccess\Database::obtain()))->findBySegmentAndJob($segmentId, $jobId);
+        $stored = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob($segmentId, $jobId);
         self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
         self::assertSame('nuova', $stored->translation);
     }
@@ -1985,11 +1985,11 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 898004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source propagation', 2);
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
 
         $controller = $this->createControllerWithoutConstructor();
-        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $segmentDao = new \Model\Segments\SegmentDao(obtainTestDatabase());
         $this->setNamedProperty($controller, 'chunk', $chunk);
         $this->setNamedProperty($controller, 'segment', $segmentDao->fetchById($segmentId, \Model\Segments\SegmentStruct::class));
         $this->setNamedProperty($controller, 'id_job', $jobId);
@@ -2078,7 +2078,7 @@ class SetTranslationControllerTest extends AbstractTest
     {
         $jobId = 895001;
         $segmentId = 895002;
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT IGNORE INTO segment_metadata (id_segment, meta_key, meta_value)
                      VALUES ({$segmentId}, 'translation_disabled', '1')");
 
@@ -2123,8 +2123,8 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 897004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Init version', 2);
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
 
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
@@ -2162,7 +2162,7 @@ class SetTranslationControllerTest extends AbstractTest
             'segment' => new SegmentStruct(),
             'revisionNumber' => 0,
         ]);
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
         $this->setNamedProperty($controller, 'featureSet', $this->createStub(FeatureSet::class));
 
@@ -2243,7 +2243,7 @@ class SetTranslationControllerTest extends AbstractTest
     public function getDraftTranslationConvertsSuggestionToLayer1(): void
     {
         $controller = $this->createControllerWithoutConstructor();
-        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
+        $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
 
         $old = new SegmentTranslationStruct();
         $old->suggestion = 'Suggerimento';
@@ -2299,7 +2299,7 @@ class SetTranslationControllerTest extends AbstractTest
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'logger', LoggerFactory::getLogger());
         $this->setNamedProperty($controller, 'user', new \Model\Users\UserStruct());
-        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
+        $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
         $this->setNamedProperty($controller, 'request', new Request([], [
             'id_job'                  => (string)$jobId,
             'password'                => $jobPassword,
@@ -2357,12 +2357,12 @@ class SetTranslationControllerTest extends AbstractTest
             // Existing row with an EMPTY status so findBySegmentAndJob() returns a
             // struct whose ['status'] is empty (not uninitialized) → enters the
             // volume-analysis create-row branch without an uninitialized-prop Error.
-            Database::obtain()->getConnection()->exec(
+            obtainTestDatabase()->getConnection()->exec(
                 "INSERT IGNORE INTO segment_translations (id_segment, id_job, segment_hash, translation, status, translation_date)
                  VALUES ({$segmentId}, {$jobId}, 'hash_{$segmentId}', '', '', NOW())"
             );
 
-            $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+            $segmentDao = new \Model\Segments\SegmentDao(obtainTestDatabase());
             $segment = $segmentDao->fetchById($segmentId, SegmentStruct::class);
 
             $controller = $this->createControllerWithoutConstructor();
@@ -2381,7 +2381,7 @@ class SetTranslationControllerTest extends AbstractTest
             self::assertSame(TranslationStatus::STATUS_NEW, $old->status, 'Created row must be NEW status');
             self::assertSame($segmentId, $old->id_segment);
 
-            $stored = (new \Model\Translations\SegmentTranslationDao(\Model\DataAccess\Database::obtain()))->findBySegmentAndJob($segmentId, $jobId);
+            $stored = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob($segmentId, $jobId);
             self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
             self::assertSame(TranslationStatus::STATUS_NEW, $stored->status);
         } finally {
@@ -2405,7 +2405,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 9027124;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source complete', 2);
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
 
         // Ensure the job-completeness guard key is absent so the branch is entered
         // (the key may linger from a prior run since Redis is not transaction-isolated).
@@ -2439,7 +2439,7 @@ class SetTranslationControllerTest extends AbstractTest
 
         self::assertSame($propagation, $result['propagation']);
 
-        $row = Database::obtain()->getConnection()
+        $row = obtainTestDatabase()->getConnection()
             ->query("SELECT completed FROM jobs WHERE id = {$jobId}")->fetch();
         self::assertSame('1', (string)$row['completed'], 'Job must be flagged completed in the no-words-remaining branch');
     }
@@ -2460,9 +2460,9 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 9027134;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source split', 2);
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
-        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
+        $segmentDao = new \Model\Segments\SegmentDao(obtainTestDatabase());
 
         $controller = $this->createControllerWithoutConstructor();
         $this->setNamedProperty($controller, 'chunk', $chunk);
@@ -2535,7 +2535,7 @@ class SetTranslationControllerTest extends AbstractTest
 
         self::assertArrayHasKey('totals', $result);
 
-        $splitRow = Database::obtain()->getConnection()
+        $splitRow = obtainTestDatabase()->getConnection()
             ->query("SELECT id_segment FROM segment_translations_splits WHERE id_segment = {$segmentId} AND id_job = {$jobId}")
             ->fetch();
         self::assertNotFalse($splitRow, 'Split row must be persisted for a splitted segment');
@@ -2558,11 +2558,11 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 9027144;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source contribution', 2);
         // id_mt_engine > 1 so the MT-contribution branch (Set::contributionMT) also runs.
-        Database::obtain()->getConnection()->exec("UPDATE jobs SET id_mt_engine = 2 WHERE id = {$jobId}");
+        obtainTestDatabase()->getConnection()->exec("UPDATE jobs SET id_mt_engine = 2 WHERE id = {$jobId}");
 
-        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
-        $project = $chunk->getProject(new ProjectDao(Database::obtain()));
-        $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
+        $chunk = (new \Model\Jobs\JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
+        $segmentDao = new \Model\Segments\SegmentDao(obtainTestDatabase());
         $segment = $segmentDao->fetchById($segmentId, SegmentStruct::class);
 
         $amqStub = $this->getMockBuilder(AMQHandler::class)
@@ -2582,8 +2582,8 @@ class SetTranslationControllerTest extends AbstractTest
             $controller = $this->createControllerWithoutConstructor();
             $this->setNamedProperty($controller, 'chunk', $chunk);
             $this->setNamedProperty($controller, 'segment', $segment);
-            $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
-            $this->setNamedProperty($controller, 'featureSet', new FeatureSet(Database::obtain()));
+            $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
+            $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
             $this->setNamedProperty($controller, 'id_job', $jobId);
             $this->setNamedProperty($controller, 'request_password', $jobPassword);
 

@@ -276,7 +276,7 @@ class JobStructDITest extends AbstractTest
         $model = $this->createMock(UserKeysModel::class);
         $model->method('getKeys')->willReturn($expectedKeys);
 
-        $result = $this->struct->getClientKeys($user, 'translator', \Model\DataAccess\Database::obtain(), $model);
+        $result = $this->struct->getClientKeys($user, 'translator', obtainTestDatabase(), $model);
 
         $this->assertSame($expectedKeys, $result);
     }

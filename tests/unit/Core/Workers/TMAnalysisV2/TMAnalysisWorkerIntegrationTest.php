@@ -56,7 +56,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
      */
     private function ensureFakeEnginesExist(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("
             INSERT IGNORE INTO engines (id, name, type, description, base_url, translate_relative_url, others, class_load, extra_parameters, penalty, active)
             VALUES
@@ -123,7 +123,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $amqHandler = $this->createMock(AMQHandler::class);
         $amqHandler->method('getRedisClient')->willReturn($this->createMock(Client::class));
 
-        $worker = new TMAnalysisWorker($amqHandler, Database::obtain());
+        $worker = new TMAnalysisWorker($amqHandler, obtainTestDatabase());
 
         $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'redisService'));
         $this->assertNotNull($this->getPrivateProperty($worker, TMAnalysisWorker::class, 'segmentUpdater'));
@@ -144,7 +144,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $worker = new TMAnalysisWorker(
             $amqHandler,
-            Database::obtain(),
+            obtainTestDatabase(),
             $redisService,
             $segmentUpdater,
             $projectCompletion,
@@ -165,7 +165,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $amqHandler = $this->createMock(AMQHandler::class);
         $amqHandler->method('getRedisClient')->willReturn($this->createMock(Client::class));
 
-        $worker = new TMAnalysisWorker($amqHandler, Database::obtain());
+        $worker = new TMAnalysisWorker($amqHandler, obtainTestDatabase());
 
         $workerRedisService = $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'redisService');
         $projectCompletion = $this->getPrivateProperty($worker, TMAnalysisWorker::class, 'projectCompletion');
@@ -217,7 +217,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         );
 
         $this->assertIsString($source);
-        // Database::obtain() is allowed ONLY in the constructor for DI wiring
+        // obtainTestDatabase() is allowed ONLY in the constructor for DI wiring
         // It must NOT appear in process() or any other method
         $this->assertStringNotContainsString('SegmentTranslationDao::', $source);
 
@@ -225,7 +225,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $constructorEnd = strpos($source, 'public function process(');
         $this->assertNotFalse($constructorEnd);
         $operationalCode = substr($source, $constructorEnd);
-        $this->assertStringNotContainsString('Database::obtain()', $operationalCode);
+        $this->assertStringNotContainsString('obtainTestDatabase()', $operationalCode);
     }
 
     #[Test]
@@ -240,7 +240,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $worker = new IntegrationTestableTMAnalysisWorker(
             $amqHandler,
-            Database::obtain(),
+            obtainTestDatabase(),
             $redisService,
             $segmentUpdater,
             $projectCompletion,
@@ -377,12 +377,12 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $worker = new IntegrationTestableTMAnalysisWorker(
             $amqHandler,
-            Database::obtain(),
+            obtainTestDatabase(),
             $redisService ?? $this->createStub(AnalysisRedisServiceInterface::class),
             $segmentUpdater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
             $projectCompletion ?? $this->createStub(ProjectCompletionServiceInterface::class),
-            new EngineService(new DefaultEngineResolver(Database::obtain()), Database::obtain()),
-            new MatchProcessorService(new MatchSorter(), Database::obtain()),
+            new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase()),
+            new MatchProcessorService(new MatchSorter(), obtainTestDatabase()),
         );
 
         (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($worker, []);
@@ -739,7 +739,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     {
         $this->ensureFakeEnginesExist();
 
-        $worker = new class($this->createStub(AMQHandler::class), Database::obtain()) extends TMAnalysisWorker {
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
             public function exposedBuildEngineConfig(QueueElement $queueElement): array
             {
                 return $this->buildEngineConfig($queueElement);
@@ -778,7 +778,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     {
         $this->ensureFakeEnginesExist();
 
-        $worker = new class($this->createStub(AMQHandler::class), Database::obtain()) extends TMAnalysisWorker {
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
             public function exposedBuildEngineConfig(QueueElement $queueElement): array
             {
                 return $this->buildEngineConfig($queueElement);
@@ -802,7 +802,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     {
         $this->ensureFakeEnginesExist();
 
-        $worker = new class($this->createStub(AMQHandler::class), Database::obtain()) extends TMAnalysisWorker {
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
             public function exposedBuildEngineConfig(QueueElement $queueElement): array
             {
                 return $this->buildEngineConfig($queueElement);
@@ -826,7 +826,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     {
         $this->ensureFakeEnginesExist();
 
-        $worker = new class($this->createStub(AMQHandler::class), Database::obtain()) extends TMAnalysisWorker {
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
             public function exposedBuildEngineConfig(QueueElement $queueElement): array
             {
                 return $this->buildEngineConfig($queueElement);
@@ -857,7 +857,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     {
         $this->ensureFakeEnginesExist();
 
-        $worker = new class($this->createStub(AMQHandler::class), Database::obtain()) extends TMAnalysisWorker {
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
             public function exposedBuildEngineConfig(QueueElement $queueElement): array
             {
                 return $this->buildEngineConfig($queueElement);
@@ -885,7 +885,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     {
         $this->ensureFakeEnginesExist();
 
-        $worker = new class($this->createStub(AMQHandler::class), Database::obtain()) extends TMAnalysisWorker {
+        $worker = new class($this->createStub(AMQHandler::class), obtainTestDatabase()) extends TMAnalysisWorker {
             public function exposedBuildEngineConfig(QueueElement $queueElement): array
             {
                 return $this->buildEngineConfig($queueElement);

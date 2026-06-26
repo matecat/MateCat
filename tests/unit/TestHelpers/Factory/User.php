@@ -15,10 +15,10 @@ class User extends Base
     {
         $userStruct = static::getNewUser($values);
 
-        $dao = new UserDao(Database::obtain());
+        $dao = new UserDao(obtainTestDatabase());
         $user = $dao->createUser($userStruct);
 
-        $orgDao = new TeamDao(\Model\DataAccess\Database::obtain());
+        $orgDao = new TeamDao(obtainTestDatabase());
         $orgDao->createUserTeam($user, [
             'type' => Teams::PERSONAL,
             'name' => 'personal'

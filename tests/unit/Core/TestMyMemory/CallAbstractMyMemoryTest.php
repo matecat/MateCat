@@ -63,7 +63,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = (new EngineDAO(\Model\DataAccess\Database::obtain()))->read($engine_struct_MyMemory)[0];
+        $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
 
         /** @var $engine_MyMemory Stub|MockObject|MyMemory */
         $this->engine_MyMemory = @$this->getStubBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getStub();
@@ -112,7 +112,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
-        $engine_struct_MyMemory = (new EngineDAO(\Model\DataAccess\Database::obtain()))->read($engine_struct_MyMemory)[0];
+        $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
         $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
 
         $MyMemory->expects($this->once())
@@ -165,7 +165,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
-        $engine_struct_MyMemory = (new EngineDAO(\Model\DataAccess\Database::obtain()))->read($engine_struct_MyMemory)[0];
+        $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
         $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
 
         $MyMemory->expects($this->once())
@@ -224,7 +224,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
-        $engine_struct_MyMemory = (new EngineDAO(\Model\DataAccess\Database::obtain()))->read($engine_struct_MyMemory)[0];
+        $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
         $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
 
         $MyMemory->expects($this->once())
@@ -309,7 +309,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
-        $engine_struct_MyMemory = (new EngineDAO(\Model\DataAccess\Database::obtain()))->read($engine_struct_MyMemory)[0];
+        $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
         $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
 
         /** @var array $url_mock_param */
@@ -397,7 +397,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = (new EngineDAO(\Model\DataAccess\Database::obtain()))->read($engine_struct_MyMemory)[0];
+        $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
         $engine_MyMemory = new MyMemory($engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class));
 
         $engine_MyMemory->call("translate_relative_url", $params, true);

@@ -63,7 +63,7 @@ class UpdateDBTest extends AbstractTest
         $this->second_half_of_number = "11";
         $sum_of_numbers = number_format((int)$this->first_half_of_number + (int)$this->second_half_of_number, 2);
         $this->number_of_words_changed = "{$sum_of_numbers}";
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         /**
          * job initialization
@@ -151,7 +151,7 @@ class UpdateDBTest extends AbstractTest
         $this->word_count_struct->setNewStatus("TRANSLATED");
 
 
-        $this->word_counter = new CounterModel(\Model\DataAccess\Database::obtain(), $this->word_count_struct);
+        $this->word_counter = new CounterModel(obtainTestDatabase(), $this->word_count_struct);
 
         $this->flusher = new \Predis\Client(AppConfig::$REDIS_SERVERS);
         $this->flusher->select(AppConfig::$INSTANCE_ID);

@@ -37,7 +37,7 @@ class DestroyCacheEngineTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
 
         $this->engine_struct = new EngineStruct();
         $this->cache = new \Predis\Client(AppConfig::$REDIS_SERVERS);

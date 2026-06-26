@@ -76,7 +76,7 @@ class ChunkV3ControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $user            = new UserStruct();
         $user->uid       = $this->userId(self::BASE);
@@ -119,7 +119,7 @@ class ChunkV3ControllerTest extends AbstractTest
      */
     private function loadChunk(): JobStruct
     {
-        $job = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
 
         return $job;
@@ -131,8 +131,8 @@ class ChunkV3ControllerTest extends AbstractTest
     private function injectChunkState(JobStruct $chunk): void
     {
         $this->setProp('chunk', $chunk);
-        $this->setProp('project', $chunk->getProject(new ProjectDao(Database::obtain())));
-        $this->setProp('featureSet', FeatureSet::forProject($chunk->getProject(new ProjectDao(Database::obtain())), Database::obtain()));
+        $this->setProp('project', $chunk->getProject(new ProjectDao(obtainTestDatabase())));
+        $this->setProp('featureSet', FeatureSet::forProject($chunk->getProject(new ProjectDao(obtainTestDatabase())), obtainTestDatabase()));
         $this->setProp('chunk_reviews', []);
     }
 
@@ -204,7 +204,7 @@ class ChunkV3ControllerTest extends AbstractTest
     #[Test]
     public function wrong_password_does_not_load_the_seeded_job(): void
     {
-        $job = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'wrong_pw_xyz');
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'wrong_pw_xyz');
 
         $this->assertNull($job);
     }
@@ -229,7 +229,7 @@ class ChunkV3ControllerTest extends AbstractTest
             'password' => 'jobpw',
         ]);
         $realRef->getProperty('response')->setValue($real, $this->responseMock);
-        $realRef->getProperty('database')->setValue($real, Database::obtain());
+        $realRef->getProperty('database')->setValue($real, obtainTestDatabase());
 
         $realRef->getMethod('registerValidators')->invoke($real);
 

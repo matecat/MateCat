@@ -63,7 +63,7 @@ class ProjectAccessValidatorTest extends AbstractTest
 
         $this->controller = new ProjectAccessValidatorTestController();
         $this->setCtrlProp($this->controller, 'request', $this->makeRequest());
-        $this->setCtrlProp($this->controller, 'database', Database::obtain());
+        $this->setCtrlProp($this->controller, 'database', obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = self::UID;
@@ -103,7 +103,7 @@ class ProjectAccessValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT INTO users (uid, email, first_name, last_name) VALUES (" . self::UID . ", '" . self::EMAIL . "', 'T', 'U')");
         $conn->exec("INSERT INTO teams (id, name, created_by) VALUES (" . self::TEAM_ID . ", '" . self::TEAM_NAME . "', " . self::UID . ")");
         $conn->exec("INSERT INTO teams_users (uid, id_team, is_admin) VALUES (" . self::UID . ", " . self::TEAM_ID . ", 1)");
@@ -111,7 +111,7 @@ class ProjectAccessValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . self::TEAM_ID);
         $conn->exec("DELETE FROM teams WHERE id = " . self::TEAM_ID);
         $conn->exec("DELETE FROM users WHERE uid = " . self::UID);
@@ -141,7 +141,7 @@ class ProjectAccessValidatorTest extends AbstractTest
         $user->email = self::EMAIL;
         $this->setCtrlProp($ctrl, 'user', $user);
         $this->setCtrlProp($ctrl, 'request', $this->makeRequest());
-        $this->setCtrlProp($ctrl, 'database', Database::obtain());
+        $this->setCtrlProp($ctrl, 'database', obtainTestDatabase());
 
         $project = $this->makeProjectStruct(self::TEAM_ID);
         $validator = new ProjectAccessValidator($ctrl, $project);

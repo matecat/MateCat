@@ -86,7 +86,7 @@ class MetaDataControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
     }
 
     /**
@@ -142,9 +142,9 @@ class MetaDataControllerTest extends AbstractTest
         $conn->exec("INSERT IGNORE INTO file_metadata (id_project, id_file, `key`, value) VALUES ($projectId, $fileId, 'original_filename', 'real_name.docx')");
 
         // metadata DAOs are Redis-cached (TTL); drop any stale cache for the seeded ids
-        (new ProjectMetadataDao(\Model\DataAccess\Database::obtain()))->destroyMetadataCache($projectId);
-        (new JobMetadataDao(\Model\DataAccess\Database::obtain()))->destroyCacheByJobAndPassword($jobId, self::JOB_PASSWORD);
-        (new FileMetadataDao(\Model\DataAccess\Database::obtain()))->destroyCacheByJobIdProjectAndIdFile($projectId, $fileId);
+        (new ProjectMetadataDao(obtainTestDatabase()))->destroyMetadataCache($projectId);
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheByJobAndPassword($jobId, self::JOB_PASSWORD);
+        (new FileMetadataDao(obtainTestDatabase()))->destroyCacheByJobIdProjectAndIdFile($projectId, $fileId);
     }
 
     /**
@@ -283,7 +283,7 @@ class MetaDataControllerTest extends AbstractTest
     public function getProjectInfo_routes_engine_keys_to_mt_extra_and_keeps_other_keys_top_level(): void
     {
         $job     = $this->loadSeededJob();
-        $project = $job->getProject(new ProjectDao(Database::obtain()));
+        $project = $job->getProject(new ProjectDao(obtainTestDatabase()));
 
         /** @var stdClass $result */
         $result = $this->invokePrivate('getProjectInfo', [$project]);

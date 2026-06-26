@@ -30,7 +30,7 @@ class FilesInfoUtilityTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,

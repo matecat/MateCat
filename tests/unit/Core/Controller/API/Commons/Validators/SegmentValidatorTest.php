@@ -55,7 +55,7 @@ class SegmentValidatorTest extends AbstractTest
             'request',
             new Request([], [], [], ['REQUEST_URI' => '/api/v2/jobs/' . self::JOB_ID . '/segments/' . self::SEGMENT_ID, 'REQUEST_METHOD' => 'GET'])
         );
-        $this->setCtrlProp('database', Database::obtain());
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -79,7 +79,7 @@ class SegmentValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         // project
         $conn->exec(
@@ -115,7 +115,7 @@ class SegmentValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM segments  WHERE id      = " . self::SEGMENT_ID);
         $conn->exec("DELETE FROM files_job WHERE id_job  = " . self::JOB_ID);
         $conn->exec("DELETE FROM jobs      WHERE id      = " . self::JOB_ID);

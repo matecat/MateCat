@@ -76,7 +76,7 @@ class ReviewsControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 

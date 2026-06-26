@@ -67,7 +67,7 @@ class QualityReportViewControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
         $this->seedFixtures();
 
         $this->reflector = new ReflectionClass(TestableQualityReportViewController::class);
@@ -78,16 +78,16 @@ class QualityReportViewControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $response);
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $this->setControllerUser($this->buildUser(), true);
     }
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -95,7 +95,7 @@ class QualityReportViewControllerTest extends AbstractTest
 
     private function seedFixtures(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID_VALID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
@@ -251,7 +251,7 @@ class QualityReportViewControllerTest extends AbstractTest
     #[Test]
     public function renderViewAddsArchivedJobParamsWhenJobIsArchived(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "UPDATE jobs SET status_owner = 'archived' WHERE id = " . self::JOB_ID_VALID
         );

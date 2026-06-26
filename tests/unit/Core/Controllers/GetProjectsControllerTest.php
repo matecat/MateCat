@@ -86,8 +86,8 @@ class GetProjectsControllerTest extends AbstractTest
 
         $this->reflector->getProperty('user')->setValue($this->controller, $this->user);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet(\Model\DataAccess\Database::obtain()));
-        $this->reflector->getProperty('database')->setValue($this->controller, \Model\DataAccess\Database::obtain());
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet(obtainTestDatabase()));
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     /**

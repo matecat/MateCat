@@ -79,7 +79,7 @@ Z;
             ]
 
         ];
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -154,7 +154,7 @@ Z;
             ]
 
         ];
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -268,7 +268,7 @@ Z;
         $array_paramemeter = ["bar_and_foo"];
 
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -339,7 +339,7 @@ Z;
 
         $url_mock_param = "https://analyze.mymemory.translated.net/api/v1/analyze";
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);

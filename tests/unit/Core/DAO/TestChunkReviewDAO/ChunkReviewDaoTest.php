@@ -776,7 +776,7 @@ class ChunkReviewDaoTest extends AbstractTest
 
     /**
      * Guards the obtain() removal: the DAO must take its PDO connection from the
-     * INJECTED IDatabase, never from the Database::obtain() singleton. The
+     * INJECTED IDatabase, never from the obtainTestDatabase() singleton. The
      * singleton stays wired to a distinct stub (setUp) so the pre-fix code path
      * would silently use it instead of the injected mock.
      */
@@ -796,7 +796,7 @@ class ChunkReviewDaoTest extends AbstractTest
             ->method('getConnection')
             ->willReturn($injectedPdo);
 
-        // Poison the singleton: it must NEVER be touched. Any Database::obtain()
+        // Poison the singleton: it must NEVER be touched. Any obtainTestDatabase()
         // fallback (full revert OR a partial/mixed path) hits this mock and trips
         // the never() expectation — a clean, deterministic failure that does not
         // depend on the permissive createDatabaseMock stub installed in setUp.

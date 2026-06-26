@@ -46,7 +46,7 @@ class SplitDAOTest extends AbstractTest
         $query->id_segment = 1;
         $query->id_job = 10;
 
-        $dao = new SplitDAO(\Model\DataAccess\Database::obtain());
+        $dao = new SplitDAO(obtainTestDatabase());
         $results = $dao->read($query);
 
         $this->assertIsArray($results);
@@ -65,7 +65,7 @@ class SplitDAOTest extends AbstractTest
         $query->id_segment = 999;
         $query->id_job = 999;
 
-        $dao = new SplitDAO(\Model\DataAccess\Database::obtain());
+        $dao = new SplitDAO(obtainTestDatabase());
         $results = $dao->read($query);
 
         $this->assertIsArray($results);
@@ -83,7 +83,7 @@ class SplitDAOTest extends AbstractTest
         $struct->source_chunk_lengths = [100, 200];
         $struct->target_chunk_lengths = [150, 250];
 
-        $dao = new SplitDAO(\Model\DataAccess\Database::obtain());
+        $dao = new SplitDAO(obtainTestDatabase());
         $result = $dao->sanitize($struct);
 
         $this->assertSame('[100,200]', $result->source_chunk_lengths);
@@ -99,7 +99,7 @@ class SplitDAOTest extends AbstractTest
         $struct->source_chunk_lengths = null;
         $struct->target_chunk_lengths = null;
 
-        $dao = new SplitDAO(\Model\DataAccess\Database::obtain());
+        $dao = new SplitDAO(obtainTestDatabase());
         $result = $dao->sanitize($struct);
 
         $this->assertNull($result->source_chunk_lengths);

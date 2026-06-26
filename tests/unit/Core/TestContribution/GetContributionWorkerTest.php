@@ -40,7 +40,7 @@ class GetContributionWorkerTest extends AbstractTest
         parent::setUp();
         $this->worker = new GetContributionWorker(
             self::getStubBuilder(AMQHandler::class)->getStub(),
-            Database::obtain()
+            obtainTestDatabase()
         );
 
         $this->cleanupDbFixtures();
@@ -363,7 +363,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function process_builds_request_and_calls_exec(): void
     {
-        $spyWorker = new ProcessSpyGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
+        $spyWorker = new ProcessSpyGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
         $queueElement = new QueueElement();
         $queueElement->classLoad = GetContributionWorker::class;
@@ -380,7 +380,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function test_publishPayload_formats_payload_and_rewrites_mt_created_by(): void
     {
-        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $request = $this->makeBaseRequest([
             'segmentId' => 42,
             'concordanceSearch' => false,
@@ -417,7 +417,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function test_publishPayload_uses_concordance_and_cross_language_types(): void
     {
-        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
 
         $concordanceRequest = $this->makeBaseRequest(['concordanceSearch' => true]);
@@ -588,7 +588,7 @@ class GetContributionWorkerTest extends AbstractTest
     #[Test]
     public function test_execGetContribution_publishes_primary_and_cross_language_payloads(): void
     {
-        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), Database::obtain());
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
         $worker->queueMatchResult([], [[
             'match' => '90%',
             'score' => 0.9,
@@ -683,7 +683,7 @@ class GetContributionWorkerTest extends AbstractTest
         $method = new ReflectionMethod($this->worker, 'updateAnalysisSuggestion');
         $method->invoke($this->worker, $matches, $request);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare('SELECT suggestion, suggestion_match, suggestion_source, suggestions_array FROM segment_translations WHERE id_segment = ? AND id_job = ?');
         $stmt->execute([self::TEST_SEGMENT_ID, self::TEST_JOB_ID]);
         $row = $stmt->fetch();
@@ -724,7 +724,7 @@ class GetContributionWorkerTest extends AbstractTest
         $method = new ReflectionMethod($this->worker, 'updateAnalysisSuggestion');
         $method->invoke($this->worker, $matches, $request);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare('SELECT suggestion FROM segment_translations WHERE id_segment = ? AND id_job = ?');
         $stmt->execute([self::TEST_SEGMENT_ID, self::TEST_JOB_ID]);
         $row = $stmt->fetch();
@@ -788,7 +788,7 @@ class GetContributionWorkerTest extends AbstractTest
 
     private function seedDbFixtures(string $translationStatus): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec("INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" . self::TEST_PROJECT_ID . ", 'coverage@test.org', 'pw_project', 'Coverage Project', NOW(), 'DONE')");
         $conn->exec("INSERT INTO files (id, id_project, filename, source_language, mime_type) VALUES (" . self::TEST_FILE_ID . ", " . self::TEST_PROJECT_ID . ", 'coverage.xliff', 'en-US', 'application/xliff+xml')");
@@ -799,7 +799,7 @@ class GetContributionWorkerTest extends AbstractTest
 
     private function cleanupDbFixtures(): void
     {
-        $conn = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
+        $conn = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
         $conn->exec('DELETE FROM segment_translations WHERE id_job = ' . self::TEST_JOB_ID);
         $conn->exec('DELETE FROM segments WHERE id = ' . self::TEST_SEGMENT_ID);
         $conn->exec('DELETE FROM jobs WHERE id = ' . self::TEST_JOB_ID);

@@ -60,7 +60,7 @@ class AIAssistantWorkerTest extends AbstractTest
         }
 
         $worker = $this->getMockBuilder(AIAssistantWorker::class)
-            ->setConstructorArgs([$amq, Database::obtain()])
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
             ->onlyMethods($methods)
             ->getMock();
 

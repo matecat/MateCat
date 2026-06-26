@@ -319,7 +319,7 @@ class AuthenticationHelperRefactoredTest extends AbstractTest
     public function fromRequestBuildsLoggedOutHelperForEmptySession(): void
     {
         $session = [];
-        $helper  = AuthenticationHelper::fromRequest($session, Database::obtain());
+        $helper  = AuthenticationHelper::fromRequest($session, obtainTestDatabase());
 
         $this->assertFalse($helper->isLogged());
         $this->assertInstanceOf(UserStruct::class, $helper->getUser());

@@ -52,7 +52,7 @@ class TMAnalysisWorkerTest extends AbstractTest
     ): TestableTMAnalysisWorker {
         $worker = new TestableTMAnalysisWorker(
             $this->createStub(AMQHandler::class),
-            Database::obtain(),
+            obtainTestDatabase(),
             $redis ?? $this->createStub(AnalysisRedisServiceInterface::class),
             $updater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
             $completion ?? $this->createStub(ProjectCompletionServiceInterface::class),

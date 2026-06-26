@@ -234,7 +234,7 @@ class CommentDaoTest extends AbstractTest
         $comment->id = 1;
         $stmtStub->method('fetchAll')->willReturn([$comment]);
 
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $results = $dao->getCommentsForChunk($this->makeChunk());
 
         $this->assertIsArray($results);
@@ -252,7 +252,7 @@ class CommentDaoTest extends AbstractTest
 
         $stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $results = $dao->getCommentsForChunk($this->makeChunk());
 
         $this->assertIsArray($results);
@@ -270,7 +270,7 @@ class CommentDaoTest extends AbstractTest
 
         $stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $results = $dao->getCommentsForChunk($this->makeChunk(), ['from_id' => 5]);
 
         $this->assertIsArray($results);
@@ -282,7 +282,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function instanceGetUsersIdFromContentReturnsEmptyArray(): void
     {
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $result = $dao->getUsersIdFromContent('Hello world, no mentions here.');
 
         $this->assertSame([], $result);
@@ -291,7 +291,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function instanceGetUsersIdFromContentReturnsSingleId(): void
     {
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $result = $dao->getUsersIdFromContent('Hey {@999@}');
 
         $this->assertSame(['999'], $result);
@@ -300,7 +300,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function instanceGetUsersIdFromContentReturnsMultipleIds(): void
     {
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $result = $dao->getUsersIdFromContent('Hello {@123@} and {@456@}');
 
         $this->assertSame(['123', '456'], $result);
@@ -314,7 +314,7 @@ class CommentDaoTest extends AbstractTest
 
         $stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
+        $dao = new CommentDao(obtainTestDatabase());
         $result = $dao->placeholdContent('Hello {@team@}');
 
         $this->assertSame('Hello @team', $result);

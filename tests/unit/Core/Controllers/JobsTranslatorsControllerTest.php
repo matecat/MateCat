@@ -68,7 +68,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
         $this->seedTestData();
         // Drop any leaked Redis confirmation cache for this job (1h TTL) so each
         // test reads a fresh DB state for the outsource check.
-        (new ConfirmationDao(\Model\DataAccess\Database::obtain()))->destroyConfirmationCache($this->loadJobStruct());
+        (new ConfirmationDao(obtainTestDatabase()))->destroyConfirmationCache($this->loadJobStruct());
 
         $this->controller = new TestableJobsTranslatorsController();
         $this->reflector  = new ReflectionClass(JobsTranslatorsController::class);
@@ -88,7 +88,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
     }
 
     /**
@@ -115,7 +115,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
         );
         // The DAO caches getConfirmation() in Redis with a 1h TTL; drop any stale
         // (empty) cache entry so the freshly-seeded row is read deterministically.
-        (new ConfirmationDao(\Model\DataAccess\Database::obtain()))->destroyConfirmationCache($jStruct);
+        (new ConfirmationDao(obtainTestDatabase()))->destroyConfirmationCache($jStruct);
     }
 
     /**
@@ -177,7 +177,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
     public function get_returns_job_payload_with_null_translator_when_not_outsourced(): void
     {
         $jStruct = $this->loadJobStruct();
-        (new ConfirmationDao(\Model\DataAccess\Database::obtain()))->destroyConfirmationCache($jStruct);
+        (new ConfirmationDao(obtainTestDatabase()))->destroyConfirmationCache($jStruct);
         $this->setProp('jStruct', $jStruct);
         $this->setParams(['id_job' => (string) $this->jobId(self::BASE), 'password' => 'jobpw']);
 

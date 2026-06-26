@@ -51,7 +51,7 @@ class QualityFrameworkControllerTest extends AbstractTest
     {
         parent::setUp();
 
-        Database::obtain()->begin();
+        obtainTestDatabase()->begin();
 
         $this->reflector = new ReflectionClass(TestableQualityFrameworkController::class);
         $this->controller = $this->reflector->newInstanceWithoutConstructor();
@@ -62,7 +62,7 @@ class QualityFrameworkControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
         $this->seedFixtures();
         $this->setControllerUser(99999, true);
@@ -70,9 +70,9 @@ class QualityFrameworkControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         if ($conn->inTransaction()) {
-            Database::obtain()->rollback();
+            obtainTestDatabase()->rollback();
         }
 
         parent::tearDown();
@@ -80,7 +80,7 @@ class QualityFrameworkControllerTest extends AbstractTest
 
     private function seedFixtures(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         $conn->exec(
             "DELETE FROM projects WHERE id IN ("

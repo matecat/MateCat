@@ -85,7 +85,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $this->user = new UserStruct();
         $this->user->uid = $this->userId(self::BASE);
@@ -95,7 +95,7 @@ class ProjectsControllerTest extends AbstractTest
         $this->setProp('user', $this->user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet(Database::obtain()));
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
 
         // Inject the validated project the way registerValidators would.
         $this->setProp('project', $this->loadProject());
@@ -125,7 +125,7 @@ class ProjectsControllerTest extends AbstractTest
      */
     private function loadProject(): ProjectStruct
     {
-        $project = (new ProjectDao(Database::obtain()))->findById($this->projectId(self::BASE));
+        $project = (new ProjectDao(obtainTestDatabase()))->findById($this->projectId(self::BASE));
         self::assertInstanceOf(ProjectStruct::class, $project);
 
         return $project;
@@ -199,7 +199,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $this->controller->updateDueDate();
 
-        $reloaded = (new ProjectDao(Database::obtain()))->findById($this->projectId(self::BASE));
+        $reloaded = (new ProjectDao(obtainTestDatabase()))->findById($this->projectId(self::BASE));
         $this->assertNotNull($reloaded);
         $this->assertNotEmpty($reloaded->due_date);
     }
@@ -219,7 +219,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $this->controller->updateDueDate();
 
-        $reloaded = (new ProjectDao(Database::obtain()))->findById($this->projectId(self::BASE));
+        $reloaded = (new ProjectDao(obtainTestDatabase()))->findById($this->projectId(self::BASE));
         $this->assertNotNull($reloaded);
         $this->assertEmpty($reloaded->due_date);
     }
@@ -246,7 +246,7 @@ class ProjectsControllerTest extends AbstractTest
     public function deleteDueDate_clears_due_date_and_returns_project(): void
     {
         // Pre-set a due date so we can observe it being cleared.
-        $dao = new ProjectDao(Database::obtain());
+        $dao = new ProjectDao(obtainTestDatabase());
         $project = $dao->findById($this->projectId(self::BASE));
         $this->assertNotNull($project);
         $dao->updateField($project, 'due_date', \Utils\Tools\Utils::mysqlTimestamp(time() + 86400));
@@ -263,7 +263,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $this->controller->deleteDueDate();
 
-        $reloaded = (new ProjectDao(Database::obtain()))->findById($this->projectId(self::BASE));
+        $reloaded = (new ProjectDao(obtainTestDatabase()))->findById($this->projectId(self::BASE));
         $this->assertNotNull($reloaded);
         $this->assertEmpty($reloaded->due_date);
     }
@@ -284,7 +284,7 @@ class ProjectsControllerTest extends AbstractTest
 
         $this->controller->cancel();
 
-        $job = (new \Model\Jobs\JobDao(Database::obtain()))
+        $job = (new \Model\Jobs\JobDao(obtainTestDatabase()))
             ->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
         $this->assertSame(JobStatus::STATUS_CANCELLED, $job->status_owner);
@@ -353,9 +353,9 @@ class ProjectsControllerTest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($fresh, new Request());
         $reflector->getProperty('response')->setValue($fresh, $this->createMock(Response::class));
-        $reflector->getProperty('database')->setValue($fresh, Database::obtain());
+        $reflector->getProperty('database')->setValue($fresh, obtainTestDatabase());
         $reflector->getProperty('user')->setValue($fresh, $this->user);
-        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(Database::obtain()));
+        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(obtainTestDatabase()));
         $reflector->getProperty('params')->setValue($fresh, [
             'id_project' => (string) $this->projectId(self::BASE),
             'password' => self::PROJECT_PASSWORD,
@@ -391,9 +391,9 @@ class ProjectsControllerTest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($fresh, $request);
         $reflector->getProperty('response')->setValue($fresh, $this->createMock(Response::class));
-        $reflector->getProperty('database')->setValue($fresh, Database::obtain());
+        $reflector->getProperty('database')->setValue($fresh, obtainTestDatabase());
         $reflector->getProperty('user')->setValue($fresh, $this->user);
-        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(Database::obtain()));
+        $reflector->getProperty('featureSet')->setValue($fresh, new FeatureSet(obtainTestDatabase()));
         $reflector->getProperty('params')->setValue($fresh, $params);
 
         $reflector->getMethod('registerValidators')->invoke($fresh);

@@ -83,7 +83,7 @@ class ConnectedServicesControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $user        = new UserStruct();
         $user->uid   = $this->userId(self::BASE);
@@ -113,7 +113,7 @@ class ConnectedServicesControllerTest extends AbstractTest
         $this->seedUser(self::BASE, $this->ownerEmail(self::BASE));
         // Seed a connected service with NULL oauth token so the JSON formatter's
         // getDecryptedOauthAccessToken() returns null (no encryption env needed).
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "INSERT IGNORE INTO connected_services (id, uid, service, remote_id, name, email, oauth_access_token, created_at, is_default) "
             . "VALUES (" . $this->connectedServiceId(self::BASE) . ", " . $this->userId(self::BASE) . ", 'dropbox', "
             . "'remote_" . self::BASE . "', 'CtrlService', '" . $this->ownerEmail(self::BASE) . "', NULL, NOW(), 1)"
@@ -157,7 +157,7 @@ class ConnectedServicesControllerTest extends AbstractTest
      */
     private function fetchDisabledAt(int $serviceId): ?string
     {
-        $stmt = Database::obtain()->getConnection()->prepare(
+        $stmt = obtainTestDatabase()->getConnection()->prepare(
             "SELECT disabled_at FROM connected_services WHERE id = :id"
         );
         $stmt->execute(['id' => $serviceId]);
@@ -291,7 +291,7 @@ class ConnectedServicesControllerTest extends AbstractTest
         $serviceId = $this->connectedServiceId(self::BASE);
 
         // Pre-set a disabled_at so we can assert it gets cleared.
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "UPDATE connected_services SET disabled_at = NOW() WHERE id = $serviceId"
         );
 

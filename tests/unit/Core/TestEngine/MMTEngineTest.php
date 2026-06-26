@@ -36,7 +36,7 @@ class MMTEngineTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database_instance = Database::obtain();
+        $this->database_instance = obtainTestDatabase();
 
         /**
          * engine insertion
@@ -74,7 +74,7 @@ H;
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT");
-        EnginesFactory::getInstance($this->not_valid_engine_id, \Model\DataAccess\Database::obtain());
+        EnginesFactory::getInstance($this->not_valid_engine_id, obtainTestDatabase());
     }
 
     /**

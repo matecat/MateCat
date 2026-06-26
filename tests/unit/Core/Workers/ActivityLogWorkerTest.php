@@ -35,7 +35,7 @@ class ActivityLogWorkerTest extends AbstractTest
     {
         $amq = $this->createStub(AMQHandler::class);
 
-        return new ActivityLogWorker($amq, Database::obtain());
+        return new ActivityLogWorker($amq, obtainTestDatabase());
     }
 
     #[Test]
@@ -77,7 +77,7 @@ class ActivityLogWorkerTest extends AbstractTest
         $queueElement->reQueueNum = 0;
 
         $worker = $this->getMockBuilder(ActivityLogWorker::class)
-            ->setConstructorArgs([$this->createMock(AMQHandler::class), Database::obtain()])
+            ->setConstructorArgs([$this->createMock(AMQHandler::class), obtainTestDatabase()])
             ->onlyMethods(['_writeLog', '_checkDatabaseConnection'])
             ->getMock();
 

@@ -44,7 +44,7 @@ class FilesPartsDaoTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
         $this->pdoStub->method('lastInsertId')->willReturn('42');
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $result = $dao->insert($struct);
 
         $this->assertSame(42, $result);
@@ -61,7 +61,7 @@ class FilesPartsDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(0);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $result = $dao->insert($struct);
 
         $this->assertSame(0, $result);
@@ -79,7 +79,7 @@ class FilesPartsDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $result = $dao->getFirstAndLastSegment(5);
 
         $this->assertInstanceOf(ShapelessConcreteStruct::class, $result);
@@ -90,7 +90,7 @@ class FilesPartsDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $result = $dao->getFirstAndLastSegment(999);
 
         $this->assertNull($result);
@@ -109,7 +109,7 @@ class FilesPartsDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $results = $dao->getByFileId(10);
 
         $this->assertIsArray($results);
@@ -122,7 +122,7 @@ class FilesPartsDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $results = $dao->getByFileId(999);
 
         $this->assertIsArray($results);
@@ -140,7 +140,7 @@ class FilesPartsDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $result = $dao->getBySegmentId(100);
 
         $this->assertInstanceOf(FilesPartsStruct::class, $result);
@@ -151,7 +151,7 @@ class FilesPartsDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FilesPartsDao(\Model\DataAccess\Database::obtain());
+        $dao = new FilesPartsDao(obtainTestDatabase());
         $result = $dao->getBySegmentId(999);
 
         $this->assertNull($result);

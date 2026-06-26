@@ -30,7 +30,7 @@ class JobUrlBuilderTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->database_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
         $this->database_instance->getConnection()->query(
             "INSERT INTO projects

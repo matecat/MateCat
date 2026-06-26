@@ -38,7 +38,7 @@ class JobsWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(JobsWorker::class)
-            ->setConstructorArgs([$amq, Database::obtain(), $jobDao])
+            ->setConstructorArgs([$amq, obtainTestDatabase(), $jobDao])
             ->onlyMethods(['_checkDatabaseConnection', '_doLog'])
             ->getMock();
 

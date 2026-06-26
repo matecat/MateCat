@@ -77,7 +77,7 @@ class TeamsProjectsV2ControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);

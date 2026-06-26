@@ -80,7 +80,7 @@ class TeamMembersControllerTest extends AbstractTest
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         // skip the session-refresh path in update()/delete()
         $this->setProp('api_key', 'ctrltest-api-key');
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void

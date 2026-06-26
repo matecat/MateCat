@@ -130,7 +130,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
     public function getLoggerNameReturnsExpected(): void
     {
         $amq = $this->createStub(AMQHandler::class);
-        $worker = new BulkSegmentStatusChangeWorker($amq, Database::obtain());
+        $worker = new BulkSegmentStatusChangeWorker($amq, obtainTestDatabase());
 
         $this->assertSame('bulk_segment_status_change.log', $worker->getLoggerName());
     }

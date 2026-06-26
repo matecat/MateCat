@@ -58,7 +58,7 @@ class TeamAccessValidatorTest extends AbstractTest
         $user->uid = self::UID;
         $user->email = self::EMAIL;
         $this->setCtrlProp('user', $user);
-        $this->setCtrlProp('database', Database::obtain());
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -85,7 +85,7 @@ class TeamAccessValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT INTO users (uid, email, first_name, last_name) VALUES (" . self::UID . ", '" . self::EMAIL . "', 'T', 'U')");
         $conn->exec("INSERT INTO teams (id, name, created_by) VALUES (" . self::TEAM_ID . ", '" . self::TEAM_NAME . "', " . self::UID . ")");
         $conn->exec("INSERT INTO teams_users (uid, id_team, is_admin) VALUES (" . self::UID . ", " . self::TEAM_ID . ", 1)");
@@ -93,7 +93,7 @@ class TeamAccessValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . self::TEAM_ID);
         $conn->exec("DELETE FROM teams WHERE id = " . self::TEAM_ID);
         $conn->exec("DELETE FROM users WHERE uid = " . self::UID);

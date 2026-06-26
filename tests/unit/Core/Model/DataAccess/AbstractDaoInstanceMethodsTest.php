@@ -428,7 +428,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($pdo);
         $database->method('buildInsertStatement')->willReturnCallback(
-            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => Database::obtain()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
+            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
         );
 
         $dao = new AutoIncrementTestableDao($database);
@@ -459,7 +459,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($pdo);
         $database->method('buildInsertStatement')->willReturnCallback(
-            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => Database::obtain()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
+            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
         );
 
         $dao = new AutoIncrementTestableDao($database);
@@ -493,7 +493,7 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
         $database = $this->createStub(IDatabase::class);
         $database->method('getConnection')->willReturn($pdo);
         $database->method('buildInsertStatement')->willReturnCallback(
-            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => Database::obtain()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
+            fn(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_update = []) => obtainTestDatabase()->buildInsertStatement($table, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_update)
         );
 
         $dao = new AutoIncrementTestableDao($database);

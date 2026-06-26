@@ -32,7 +32,7 @@ class InvitedUserTest extends AbstractTest
     private function makeTeamDaoStub(): TeamDao
     {
         $stub = $this->createStub(TeamDao::class);
-        $stub->method('getDatabaseHandler')->willReturn(Database::obtain());
+        $stub->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
         return $stub;
     }
 
@@ -195,7 +195,7 @@ class InvitedUserTest extends AbstractTest
 
         $teamDao = $this->createStub(TeamDao::class);
         $teamDao->method('fetchById')->willReturn($teamStruct);
-        $teamDao->method('getDatabaseHandler')->willReturn(Database::obtain());
+        $teamDao->method('getDatabaseHandler')->willReturn(obtainTestDatabase());
 
         $_SESSION = ['invited_to_team' => ['team_id' => 5, 'email' => 'member@example.com']];
 

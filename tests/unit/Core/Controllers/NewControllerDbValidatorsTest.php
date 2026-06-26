@@ -61,7 +61,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
         $userProp->setValue($this->controller, $this->user);
 
         $dbProp = $this->reflector->getProperty('database');
-        $dbProp->setValue($this->controller, Database::obtain());
+        $dbProp->setValue($this->controller, obtainTestDatabase());
 
         $fsProp = $this->reflector->getProperty('featureSet');
         $fsProp->setValue($this->controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));

@@ -44,7 +44,7 @@ class MembershipDaoInjectedDbGuardTest extends AbstractTest
             ->method('getConnection')
             ->willReturn($this->pdoStub);
 
-        // Singleton stub: absorbs UserDao internal Database::obtain() calls without asserting.
+        // Singleton stub: absorbs UserDao internal obtainTestDatabase() calls without asserting.
         $this->singletonDbStub = $this->createStub(IDatabase::class);
         $this->singletonDbStub->method('getConnection')->willReturn($this->pdoStub);
 

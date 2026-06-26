@@ -79,7 +79,7 @@ class ChangePasswordControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->setProp('database', \Model\DataAccess\Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -254,7 +254,7 @@ class ChangePasswordControllerTest extends AbstractTest
         $this->assertNotSame(self::PROJECT_PASSWORD, $captured['new_pwd']);
 
         // Verify the password was actually persisted under the new value.
-        $reloaded = (new ProjectDao(\Model\DataAccess\Database::obtain()))
+        $reloaded = (new ProjectDao(obtainTestDatabase()))
             ->findByIdAndPassword($projectId, $captured['new_pwd']);
         $this->assertInstanceOf(ProjectStruct::class, $reloaded);
         $this->assertSame($projectId, $reloaded->id);
@@ -323,7 +323,7 @@ class ChangePasswordControllerTest extends AbstractTest
         $this->assertSame(self::JOB_PASSWORD, $captured['old_pwd']);
         $this->assertNotEmpty($captured['new_pwd']);
 
-        $reloaded = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))
+        $reloaded = (new \Model\Jobs\JobDao(obtainTestDatabase()))
             ->getByIdAndPassword($jobId, $captured['new_pwd']);
         $this->assertInstanceOf(\Model\Jobs\JobStruct::class, $reloaded);
         $this->assertSame($jobId, $reloaded->id);
@@ -411,7 +411,7 @@ class ChangePasswordControllerTest extends AbstractTest
     public function checkUserPermissions_throws_when_user_not_in_team(): void
     {
         $projectId = $this->projectId(self::BASE);
-        $project = (new ProjectDao(\Model\DataAccess\Database::obtain()))
+        $project = (new ProjectDao(obtainTestDatabase()))
             ->findByIdAndPassword($projectId, self::PROJECT_PASSWORD);
 
         $stranger = new UserStruct();
@@ -431,7 +431,7 @@ class ChangePasswordControllerTest extends AbstractTest
     public function checkUserPermissions_passes_for_team_member(): void
     {
         $projectId = $this->projectId(self::BASE);
-        $project = (new ProjectDao(\Model\DataAccess\Database::obtain()))
+        $project = (new ProjectDao(obtainTestDatabase()))
             ->findByIdAndPassword($projectId, self::PROJECT_PASSWORD);
 
         $user = $this->controller->getUser();

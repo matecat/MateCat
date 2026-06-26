@@ -47,7 +47,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
         $this->controller = new ChunkPasswordValidatorTestController();
         $this->ctrlRef = new ReflectionClass(KleinController::class);
-        $this->setCtrlProp('database', Database::obtain());
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -80,7 +80,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT INTO projects (id, password, id_customer, name, create_date, status_analysis)
              VALUES (" . self::PROJECT_ID . ", 'cpwproj', '" . self::EMAIL . "', 'CtrlTestProject9932000', NOW(), 'DONE')"
@@ -97,7 +97,7 @@ class ChunkPasswordValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM qa_chunk_reviews WHERE id_job = " . self::JOB_ID);
         $conn->exec("DELETE FROM jobs WHERE id = " . self::JOB_ID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);

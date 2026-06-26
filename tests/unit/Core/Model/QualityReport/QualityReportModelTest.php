@@ -180,7 +180,7 @@ class QualityReportModelTest extends AbstractTest
     {
         $project = $this->createProjectStub();
         $chunk = $this->createChunkStub($project);
-        $model = new QualityReportModel($chunk, Database::obtain());
+        $model = new QualityReportModel($chunk, obtainTestDatabase());
 
         $this->assertSame($chunk, $model->getChunk());
         $this->assertSame($project, $model->getProject());

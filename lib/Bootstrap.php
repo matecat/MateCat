@@ -115,12 +115,15 @@ class Bootstrap
     {
         WorkerClient::init();
         // Composition root: build the one application DB connection as a plain instance and
-        // expose it via getDatabase() for injection. Not Database::obtain() — the singleton
-        // accessor is retained only as a legacy/test seam, no longer used in production.
-        self::$database = new Database(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
-        // Register the same instance for the deprecated obtain() accessor still used by legacy
-        // code and tests, so they share this connection instead of lazily building an empty one.
-        Database::setInstance(self::$database);
+        // expose it via getDatabase() for injection downstream.
+        $server   = AppConfig::$DB_SERVER;
+        $user     = AppConfig::$DB_USER;
+        $password = AppConfig::$DB_PASS;
+        $database = AppConfig::$DB_DATABASE;
+        if ($server === null || $user === null || $password === null || $database === null) {
+            throw new RuntimeException('Database configuration is incomplete: DB_SERVER, DB_USER, DB_PASS and DB_DATABASE must be set before bootstrap.');
+        }
+        self::$database = new Database($server, $user, $password, $database);
     }
 
     public static function getDatabase(): IDatabase

@@ -41,7 +41,7 @@ class SegmentTranslationDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getByJobId(5);
 
         $this->assertIsArray($results);
@@ -53,7 +53,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getByJobId(999);
 
         $this->assertIsArray($results);
@@ -71,7 +71,7 @@ class SegmentTranslationDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $result = $dao->findBySegmentAndJob(10, 5);
 
         $this->assertInstanceOf(SegmentTranslationStruct::class, $result);
@@ -82,7 +82,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $result = $dao->findBySegmentAndJob(999, 999);
 
         $this->assertNull($result);
@@ -93,7 +93,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     #[Test]
     public function updateSuggestionsArraySkipsEmpty(): void
     {
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $dao->updateSuggestionsArray(1, []);
 
         $this->assertTrue(true);
@@ -104,7 +104,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     {
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $dao->updateSuggestionsArray(1, [['suggestion' => 'test', 'match' => '100%']]);
 
         $this->assertTrue(true);
@@ -122,7 +122,7 @@ class SegmentTranslationDaoTest extends AbstractTest
         $struct->id_segment = 10;
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getByFile($file);
 
         $this->assertIsArray($results);
@@ -138,7 +138,7 @@ class SegmentTranslationDaoTest extends AbstractTest
         $struct->id_segment = 1;
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getAllSegmentsByIdListAndJobId([1, 2, 3], 5);
 
         $this->assertIsArray($results);
@@ -148,7 +148,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     #[Test]
     public function getAllSegmentsByIdListAndJobIdReturnsEmptyForEmptyList(): void
     {
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getAllSegmentsByIdListAndJobId([], 5);
 
         $this->assertIsArray($results);
@@ -160,7 +160,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     #[Test]
     public function updateLastTranslationDateByIdListSkipsEmptyList(): void
     {
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $dao->updateLastTranslationDateByIdList([], '2026-01-01 00:00:00');
 
         $this->assertTrue(true);
@@ -171,7 +171,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     {
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $dao->updateLastTranslationDateByIdList([1, 2], '2026-01-01 00:00:00');
 
         $this->assertTrue(true);
@@ -187,7 +187,7 @@ class SegmentTranslationDaoTest extends AbstractTest
         $chunk = new \Model\Jobs\JobStruct();
         $chunk->id = 5;
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getMaxSegmentIdsFromJob($chunk);
 
         $this->assertSame([100, 200], $results);
@@ -201,7 +201,7 @@ class SegmentTranslationDaoTest extends AbstractTest
         $chunk = new \Model\Jobs\JobStruct();
         $chunk->id = 5;
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getMaxSegmentIdsFromJob($chunk);
 
         $this->assertEmpty($results);
@@ -214,7 +214,7 @@ class SegmentTranslationDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([['words_per_second' => 5]]);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $results = $dao->getWordsPerSecond(1, [10, 20]);
 
         $this->assertCount(1, $results);
@@ -229,7 +229,7 @@ class SegmentTranslationDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $dao = new SegmentTranslationDao(\Model\DataAccess\Database::obtain());
+        $dao = new SegmentTranslationDao(obtainTestDatabase());
         $result = $dao->setAnalysisValue([
             'id_segment' => 10,
             'id_job' => 5,

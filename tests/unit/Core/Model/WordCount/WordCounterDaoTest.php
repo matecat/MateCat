@@ -49,7 +49,7 @@ class WordCounterDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $dao = new WordCounterDao(\Model\DataAccess\Database::obtain());
+        $dao = new WordCounterDao(obtainTestDatabase());
         $result = $dao->updateWordCount($this->makeStruct());
 
         $this->assertSame(1, $result);
@@ -60,7 +60,7 @@ class WordCounterDaoTest extends AbstractTest
     {
         $this->stmtStub->method('execute')->willThrowException(new PDOException('test', 42));
 
-        $dao = new WordCounterDao(\Model\DataAccess\Database::obtain());
+        $dao = new WordCounterDao(obtainTestDatabase());
         $result = $dao->updateWordCount($this->makeStruct());
 
         $this->assertSame(-42, $result);
@@ -77,7 +77,7 @@ class WordCounterDaoTest extends AbstractTest
 
         $this->setDatabaseInstance($dbMock);
 
-        $dao = new WordCounterDao(\Model\DataAccess\Database::obtain());
+        $dao = new WordCounterDao(obtainTestDatabase());
         $result = $dao->initializeWordCount($this->makeStruct());
 
         $this->assertSame(1, $result);
@@ -92,7 +92,7 @@ class WordCounterDaoTest extends AbstractTest
 
         $this->setDatabaseInstance($dbMock);
 
-        $dao = new WordCounterDao(\Model\DataAccess\Database::obtain());
+        $dao = new WordCounterDao(obtainTestDatabase());
         $result = $dao->initializeWordCount($this->makeStruct());
 
         $this->assertSame(-99, $result);
@@ -105,7 +105,7 @@ class WordCounterDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([['id' => 1, 'NEW' => 10]]);
 
-        $dao = new WordCounterDao(\Model\DataAccess\Database::obtain());
+        $dao = new WordCounterDao(obtainTestDatabase());
         $results = $dao->getStatsForJob(1);
 
         $this->assertIsArray($results);
@@ -117,7 +117,7 @@ class WordCounterDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new WordCounterDao(\Model\DataAccess\Database::obtain());
+        $dao = new WordCounterDao(obtainTestDatabase());
         $results = $dao->getStatsForJob(1, 5, 'abc');
 
         $this->assertIsArray($results);

@@ -19,7 +19,7 @@ class SignupTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        Database::obtain()->getConnection()->exec('DELETE FROM users');
+        obtainTestDatabase()->getConnection()->exec('DELETE FROM users');
     }
 
     /**
@@ -36,11 +36,11 @@ class SignupTest extends AbstractTest
             'password_confirmation' => '1234abcdxxxxxx!',
             'email' => 'foo@example.org',
             'wanted_url' => 'https://fake.example.com'
-        ], $session, new UserDao(Database::obtain()), new TeamDao(Database::obtain()));
+        ], $session, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
 
         $signup->processSignup();
 
-        $dao = new UserDao(Database::obtain());
+        $dao = new UserDao(obtainTestDatabase());
         $user = $dao->getByEmail('foo@example.org');
         $this->assertNotEmpty($user);
         $this->assertEquals('https://fake.example.com', $session['wanted_url']);

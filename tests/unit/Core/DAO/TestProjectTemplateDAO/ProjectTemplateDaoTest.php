@@ -16,7 +16,7 @@ class ProjectTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new ProjectTemplateDao(\Model\DataAccess\Database::obtain());
+        $this->dao = new ProjectTemplateDao(obtainTestDatabase());
     }
 
     #[Test]

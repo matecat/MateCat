@@ -76,7 +76,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);
@@ -86,7 +86,7 @@ class TeamsProjectsV3ControllerTest extends AbstractTest
         $this->setProp('user', $user);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet(\Model\DataAccess\Database::obtain()));
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
 
         $team = new TeamStruct();
         $team->id = $this->teamId(self::BASE);

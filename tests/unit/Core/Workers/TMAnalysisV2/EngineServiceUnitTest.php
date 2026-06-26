@@ -29,7 +29,7 @@ class EngineServiceUnitTest extends AbstractTest
             return $mtEngine ?? $tmEngine;
         });
 
-        return new EngineService($resolver, Database::obtain());
+        return new EngineService($resolver, obtainTestDatabase());
     }
 
     private function makeFeatureSet(): FeatureSet

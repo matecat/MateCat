@@ -95,7 +95,7 @@ class CommentsControllerTest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
         $this->reflector->getProperty('chunk')->setValue($this->controller, $this->loadChunk());
     }
 
@@ -134,7 +134,7 @@ class CommentsControllerTest extends AbstractTest
      */
     private function loadChunk(): JobStruct
     {
-        $chunk = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $chunk);
 
         return $chunk;

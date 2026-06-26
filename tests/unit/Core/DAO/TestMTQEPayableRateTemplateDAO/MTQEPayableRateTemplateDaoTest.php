@@ -19,7 +19,7 @@ class MTQEPayableRateTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new MTQEPayableRateTemplateDao(\Model\DataAccess\Database::obtain());
+        $this->dao = new MTQEPayableRateTemplateDao(obtainTestDatabase());
         $this->createdIds = [];
         $this->cleanupTestData();
     }
@@ -32,13 +32,13 @@ class MTQEPayableRateTemplateDaoTest extends AbstractTest
 
     private function cleanupTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM mt_qe_payable_rate_templates WHERE uid = {$this->uid}");
     }
 
     private function insertTemplate(string $name = 'Test MTQE PayableRate Template'): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $breakdowns = json_encode(['breakdowns' => ['ice' => 0, 'tm_100' => 0, 'top_quality_mt' => 9]]);
         $now = date('Y-m-d H:i:s');
         $stmt = $conn->prepare(

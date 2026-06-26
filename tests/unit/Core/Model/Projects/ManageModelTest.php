@@ -127,7 +127,7 @@ class ManageModelTest extends AbstractTest
     #[Test]
     public function getProjectsNumberReturnsCountRowsShape(): void
     {
-        $rows = ManageModel::getProjectsNumber(Database::obtain(), null, null, null, null, false);
+        $rows = ManageModel::getProjectsNumber(obtainTestDatabase(), null, null, null, null, false);
 
         $this->assertIsArray($rows);
         if ($rows !== []) {
@@ -147,7 +147,7 @@ class ManageModelTest extends AbstractTest
         $assignee = new UserStruct();
         $assignee->uid = 1;
 
-        $rows = ManageModel::getProjectsNumber(Database::obtain(), 'a', 'en', 'it', 'NEW', true, $team, $assignee, false);
+        $rows = ManageModel::getProjectsNumber(obtainTestDatabase(), 'a', 'en', 'it', 'NEW', true, $team, $assignee, false);
 
         $this->assertIsArray($rows);
         if ($rows !== []) {
@@ -261,7 +261,7 @@ class ManageModelTest extends AbstractTest
 
         $result = ManageModel::getProjects(
             $user,
-            Database::obtain(),
+            obtainTestDatabase(),
             0,
             0,
             null,
@@ -281,7 +281,7 @@ class ManageModelTest extends AbstractTest
     #[Test]
     public function getProjectsNumberWithNoAssigneeFilterReturnsCountRowsShape(): void
     {
-        $rows = ManageModel::getProjectsNumber(Database::obtain(), null, null, null, null, false, null, null, true);
+        $rows = ManageModel::getProjectsNumber(obtainTestDatabase(), null, null, null, null, false, null, null, true);
 
         $this->assertIsArray($rows);
         if ($rows !== []) {
@@ -322,7 +322,7 @@ class TestableManageModel extends ManageModel
         ?bool $no_assignee = false
     ): array {
         return parent::_getProjects(
-            Database::obtain(),
+            obtainTestDatabase(),
             $start,
             $step,
             $search_in_pname,

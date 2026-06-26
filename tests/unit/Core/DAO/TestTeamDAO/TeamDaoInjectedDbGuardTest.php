@@ -26,7 +26,7 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
 
     /**
      * Injected PDO stub. inTransaction() returns FALSE so that the pre-fix
-     * Database::obtain()->getConnection()->inTransaction() path is exercised —
+     * obtainTestDatabase()->getConnection()->inTransaction() path is exercised —
      * the fix routes that call through $this->database->getConnection() instead,
      * and beginTransaction() + commit() are called on this same stub.
      */
@@ -112,7 +112,7 @@ class TeamDaoInjectedDbGuardTest extends AbstractTest
         $dao->createUserTeam($user, $params);
 
         // The atLeastOnce beginTransaction on injectedPdoMock is the key assertion:
-        // pre-fix code calls Database::obtain()->getConnection()->beginTransaction()
+        // pre-fix code calls obtainTestDatabase()->getConnection()->beginTransaction()
         // (hits the singleton PDO, not the injected one → expectation unmet → FAIL).
         // Fixed code calls $this->database->getConnection()->beginTransaction()
         // (hits injectedPdoMock → expectation met → PASS).

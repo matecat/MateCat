@@ -18,7 +18,7 @@ class XliffConfigTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new XliffConfigTemplateDao(Database::obtain());
+        $this->dao = new XliffConfigTemplateDao(obtainTestDatabase());
         $this->createdIds = [];
     }
 

@@ -100,7 +100,7 @@ class ApiKeyControllerTest extends AbstractTest
         $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
         $this->reflector->getProperty('featureSet')->setValue($this->controller, new InternalFeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->reflector->getProperty('database')->setValue($this->controller, Database::obtain());
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     /**
@@ -117,7 +117,7 @@ class ApiKeyControllerTest extends AbstractTest
      */
     private function cleanTestData(): void
     {
-        Database::obtain()->getConnection()->exec("DELETE FROM api_keys WHERE uid = " . self::TEST_UID);
+        obtainTestDatabase()->getConnection()->exec("DELETE FROM api_keys WHERE uid = " . self::TEST_UID);
     }
 
     /**
@@ -125,7 +125,7 @@ class ApiKeyControllerTest extends AbstractTest
      */
     private function seedApiKey(string $key = 'ctrlkey_9017000', string $secret = 'ctrlsecret_9017000'): void
     {
-        Database::obtain()->getConnection()->exec(
+        obtainTestDatabase()->getConnection()->exec(
             "INSERT INTO api_keys (uid, api_key, api_secret, create_date, last_update, enabled) "
             . "VALUES (" . self::TEST_UID . ", '$key', '$secret', NOW(), NOW(), 1)"
         );
@@ -288,7 +288,7 @@ class ApiKeyControllerTest extends AbstractTest
 
         $this->controller->delete();
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->query("SELECT COUNT(*) FROM api_keys WHERE uid = " . self::TEST_UID);
         $this->assertNotFalse($stmt);
         $remain = (int) $stmt->fetchColumn();

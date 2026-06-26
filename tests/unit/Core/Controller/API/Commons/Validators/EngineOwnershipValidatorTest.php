@@ -57,7 +57,7 @@ class EngineOwnershipValidatorTest extends AbstractTest
 
         // Provide a minimal request so Base::__construct() can read it
         $this->setCtrlProp('request', new Request([], [], [], ['REQUEST_URI' => '/test', 'REQUEST_METHOD' => 'GET']));
-        $this->setCtrlProp('database', \Model\DataAccess\Database::obtain());
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -81,7 +81,7 @@ class EngineOwnershipValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
 
         // Engine 1: active, owned by UID
         $conn->exec(
@@ -104,7 +104,7 @@ class EngineOwnershipValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM engines WHERE id IN (" . self::ENGINE_ID . "," . self::ENGINE_ID2 . "," . self::ENGINE_ID3 . ")");
     }
 

@@ -86,7 +86,7 @@ class TestableLaraAuthStandaloneController extends LaraAuthStandaloneController
         $parentRef->getProperty('logger')->setValue($this, $logger);
         $parentRef->getProperty('user')->setValue($this, $user);
         $parentRef->getProperty('userIsLogged')->setValue($this, true);
-        $parentRef->getProperty('database')->setValue($this, Database::obtain());
+        $parentRef->getProperty('database')->setValue($this, obtainTestDatabase());
 
         $this->injectedRateLimiter = $rateLimiter;
     }

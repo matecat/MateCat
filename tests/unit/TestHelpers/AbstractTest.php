@@ -51,7 +51,7 @@ abstract class AbstractTest extends TestCase
             // rollback() is a no-op when no transaction is active; teardown cleanup
             // must never mask the test result, so swallow any error.
             try {
-                Database::obtain()->rollback();
+                obtainTestDatabase()->rollback();
             } catch (\Throwable) {
             }
         }
@@ -76,9 +76,7 @@ abstract class AbstractTest extends TestCase
         $dbStub = $this->createStub(IDatabase::class);
         $dbStub->method('getConnection')->willReturn($pdoStub);
 
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $dbStub);
+        \TestDatabaseProvider::set($dbStub);
         $this->databaseMockApplied = true;
 
         return [$dbStub, $pdoStub, $stmtStub];
@@ -86,18 +84,12 @@ abstract class AbstractTest extends TestCase
 
     protected function resetDatabaseMock(): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, null);
-
-        Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        \TestDatabaseProvider::reset();
     }
 
     protected function setDatabaseInstance(?IDatabase $db): void
     {
-        $ref = new ReflectionClass(Database::class);
-        $prop = $ref->getProperty('instance');
-        $prop->setValue(null, $db);
+        \TestDatabaseProvider::set($db);
         $this->databaseMockApplied = true;
     }
 

@@ -107,8 +107,8 @@ class AnalyzeViewControllerTest extends AbstractTest
         $this->prop('request')->setValue($this->controller, $this->requestStub);
         $this->prop('response')->setValue($this->controller, $response);
         $this->prop('logger')->setValue($this->controller, $this->createMock(MatecatLogger::class));
-        $this->prop('featureSet')->setValue($this->controller, new FeatureSet(Database::obtain()));
-        $this->prop('database')->setValue($this->controller, Database::obtain());
+        $this->prop('featureSet')->setValue($this->controller, new FeatureSet(obtainTestDatabase()));
+        $this->prop('database')->setValue($this->controller, obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = $this->userId(self::BASE);
@@ -135,7 +135,7 @@ class AnalyzeViewControllerTest extends AbstractTest
         $this->seedSegmentTranslation(self::BASE);
 
         // AbstractStatus reads jobs.subject as a LanguageDomains hashmap key.
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("UPDATE jobs SET subject = 'general', payable_rates = '{}' WHERE id = " . $this->jobId(self::BASE));
     }
 

@@ -78,7 +78,7 @@ class UserV2ControllerTest extends AbstractTest
 
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 

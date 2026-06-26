@@ -56,7 +56,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
 
         $this->controller = new SegmentTranslationIssueValidatorTestController();
         $this->ctrlRef    = new ReflectionClass(KleinController::class);
-        $this->setCtrlProp('database', Database::obtain());
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void

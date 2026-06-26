@@ -77,7 +77,7 @@ class MyMemoryControllerTest extends AbstractTest
 
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
 
@@ -126,7 +126,7 @@ class MyMemoryControllerTest extends AbstractTest
      */
     private function memoryKeyRowCount(string $keyValue): int
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare("SELECT COUNT(*) FROM memory_keys WHERE uid = :uid AND key_value = :kv");
         $stmt->execute(['uid' => $this->userId(self::BASE), 'kv' => $keyValue]);
 
@@ -239,7 +239,7 @@ class MyMemoryControllerTest extends AbstractTest
 
         $this->assertSame(1, $this->memoryKeyRowCount($keyValue));
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare(
             "SELECT key_name, key_tm, key_glos FROM memory_keys WHERE uid = :uid AND key_value = :kv"
         );
@@ -262,7 +262,7 @@ class MyMemoryControllerTest extends AbstractTest
     {
         $keyValue = 'mmkey_dup_' . self::BASE;
 
-        $dao = new MemoryKeyDao(Database::obtain());
+        $dao = new MemoryKeyDao(obtainTestDatabase());
 
         $struct      = new MemoryKeyStruct();
         $struct->uid = $this->userId(self::BASE);

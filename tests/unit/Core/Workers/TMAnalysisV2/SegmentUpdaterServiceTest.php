@@ -33,7 +33,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function test_service_can_be_instantiated_and_implements_interface(): void
     {
-        $service = new SegmentUpdaterService(Database::obtain());
+        $service = new SegmentUpdaterService(obtainTestDatabase());
         $this->assertInstanceOf(SegmentUpdaterServiceInterface::class, $service);
     }
 
@@ -122,7 +122,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
     private function seedTestSegmentTranslation(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "
             INSERT IGNORE INTO segments (id, id_file, internal_id, segment, segment_hash, raw_word_count, show_in_cattool)
@@ -139,7 +139,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
     private function cleanupTestSegmentTranslation(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM segment_translations WHERE id_segment = " . self::TEST_SEGMENT_ID);
         $conn->exec("DELETE FROM segments WHERE id = " . self::TEST_SEGMENT_ID);
     }
@@ -150,7 +150,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $service = new SegmentUpdaterService(Database::obtain());
+            $service = new SegmentUpdaterService(obtainTestDatabase());
 
             $affected = $service->setAnalysisValue([
                 'id_segment' => self::TEST_SEGMENT_ID,
@@ -166,7 +166,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
 
             $this->assertEquals(1, $affected);
 
-            $conn = Database::obtain()->getConnection();
+            $conn = obtainTestDatabase()->getConnection();
             $stmt = $conn->prepare("SELECT tm_analysis_status, match_type, suggestion_source FROM segment_translations WHERE id_segment = ? AND id_job = ?");
             $stmt->execute([self::TEST_SEGMENT_ID, self::TEST_JOB_ID]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -185,10 +185,10 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $conn = Database::obtain()->getConnection();
+            $conn = obtainTestDatabase()->getConnection();
             $conn->exec("UPDATE segment_translations SET tm_analysis_status = 'DONE' WHERE id_segment = " . self::TEST_SEGMENT_ID . " AND id_job = " . self::TEST_JOB_ID);
 
-            $service = new SegmentUpdaterService(Database::obtain());
+            $service = new SegmentUpdaterService(obtainTestDatabase());
 
             $affected = $service->setAnalysisValue([
                 'id_segment' => self::TEST_SEGMENT_ID,
@@ -210,13 +210,13 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $service = new SegmentUpdaterService(Database::obtain());
+            $service = new SegmentUpdaterService(obtainTestDatabase());
 
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
             $this->assertEquals(1, $result);
 
-            $conn = Database::obtain()->getConnection();
+            $conn = obtainTestDatabase()->getConnection();
             $stmt = $conn->prepare("SELECT tm_analysis_status FROM segment_translations WHERE id_segment = ? AND id_job = ?");
             $stmt->execute([self::TEST_SEGMENT_ID, self::TEST_JOB_ID]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -230,7 +230,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function forceSetSegmentAnalyzed_returns_false_for_nonexistent_segment(): void
     {
-        $service = new SegmentUpdaterService(Database::obtain());
+        $service = new SegmentUpdaterService(obtainTestDatabase());
 
         $result = $service->forceSetSegmentAnalyzed(999999, 999999);
 
@@ -261,14 +261,14 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $conn = Database::obtain()->getConnection();
+            $conn = obtainTestDatabase()->getConnection();
             $conn->exec(
                 "UPDATE segment_translations SET tm_analysis_status = 'DONE'"
                 . " WHERE id_segment = " . self::TEST_SEGMENT_ID
                 . " AND id_job = " . self::TEST_JOB_ID
             );
 
-            $service = new SegmentUpdaterService(Database::obtain());
+            $service = new SegmentUpdaterService(obtainTestDatabase());
 
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
@@ -285,14 +285,14 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $conn = Database::obtain()->getConnection();
+            $conn = obtainTestDatabase()->getConnection();
             $conn->exec(
                 "UPDATE segment_translations SET tm_analysis_status = 'SKIPPED'"
                 . " WHERE id_segment = " . self::TEST_SEGMENT_ID
                 . " AND id_job = " . self::TEST_JOB_ID
             );
 
-            $service = new SegmentUpdaterService(Database::obtain());
+            $service = new SegmentUpdaterService(obtainTestDatabase());
 
             $result = $service->forceSetSegmentAnalyzed(self::TEST_SEGMENT_ID, self::TEST_JOB_ID);
 
@@ -319,14 +319,14 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->seedTestSegmentTranslation();
 
         try {
-            $conn = Database::obtain()->getConnection();
+            $conn = obtainTestDatabase()->getConnection();
             $conn->exec(
                 "UPDATE segment_translations SET tm_analysis_status = 'SKIPPED'"
                 . " WHERE id_segment = " . self::TEST_SEGMENT_ID
                 . " AND id_job = " . self::TEST_JOB_ID
             );
 
-            $service = new SegmentUpdaterService(Database::obtain());
+            $service = new SegmentUpdaterService(obtainTestDatabase());
 
             $result = $service->setAnalysisValue([
                 'id_segment' => self::TEST_SEGMENT_ID,
@@ -345,7 +345,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function setAnalysisValue_throws_when_id_segment_missing(): void
     {
-        $service = new SegmentUpdaterService(Database::obtain());
+        $service = new SegmentUpdaterService(obtainTestDatabase());
 
         $this->expectException(Throwable::class);
 
@@ -360,7 +360,7 @@ class SegmentUpdaterServiceTest extends AbstractTest
     #[Test]
     public function setAnalysisValue_throws_when_id_job_missing(): void
     {
-        $service = new SegmentUpdaterService(Database::obtain());
+        $service = new SegmentUpdaterService(obtainTestDatabase());
 
         $this->expectException(Throwable::class);
 

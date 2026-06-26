@@ -101,7 +101,7 @@ class EngineControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->setProp('database', Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
     }
 
     /**
@@ -118,7 +118,7 @@ class EngineControllerTest extends AbstractTest
      */
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM engines WHERE id = " . $this->engineId());
         $conn->exec("DELETE FROM engines WHERE uid = " . $this->uid());
         $this->cleanFragments(self::BASE);
@@ -129,7 +129,7 @@ class EngineControllerTest extends AbstractTest
      */
     private function seedApertiumEngine(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO engines (id, name, type, description, base_url, translate_relative_url, "
             . "contribute_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid) "
@@ -364,7 +364,7 @@ class EngineControllerTest extends AbstractTest
     {
         // Engine row exists but belongs to a different uid → disable() UPDATE
         // matches no row → returns null → RuntimeException(-9).
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT IGNORE INTO engines (id, name, type, description, base_url, translate_relative_url, "
             . "others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid) "

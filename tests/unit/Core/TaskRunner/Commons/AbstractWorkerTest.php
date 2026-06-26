@@ -36,7 +36,7 @@ class AbstractWorkerTest extends AbstractTest
     {
         $handler = $this->stubAmqHandler;
 
-        $worker = new class($handler, $database ?? Database::obtain()) extends AbstractWorker {
+        $worker = new class($handler, $database ?? obtainTestDatabase()) extends AbstractWorker {
             public function process(AbstractElement $queueElement): void {}
 
             public function getLogMsg(): array|string

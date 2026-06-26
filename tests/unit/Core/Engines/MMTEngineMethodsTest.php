@@ -42,7 +42,7 @@ class MMTEngineMethodsTest extends AbstractTest
 
     private function createEngineWithClient(MMTServiceApi $client): TestMMT
     {
-        $engine = new TestMMT($this->createEngineStruct(), \Model\DataAccess\Database::obtain());
+        $engine = new TestMMT($this->createEngineStruct(), obtainTestDatabase());
         $engine->setMockClient($client);
 
         return $engine;
@@ -182,8 +182,8 @@ class MMTEngineMethodsTest extends AbstractTest
     public function getWithGlossariesPassesGlossaryParametersToClient(): void
     {
         $pid = 910001;
-        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_glossaries', '["g1","g2"]');
-        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_ignore_glossary_case', '1');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_glossaries', '["g1","g2"]');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_ignore_glossary_case', '1');
 
         $client = $this->createMock(MMTServiceApi::class);
         $client->expects(self::once())
@@ -514,7 +514,7 @@ class MMTEngineMethodsTest extends AbstractTest
         $memoryKey = $this->createMemoryKey('k1');
 
         $engineMine = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct(), \Model\DataAccess\Database::obtain()])
+            ->setConstructorArgs([$this->createEngineStruct(), obtainTestDatabase()])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineMine->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -522,7 +522,7 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertSame(['owner' => ['user' => '10']], $engineMine->getMemoryIfMine($memoryKey));
 
         $engineNotMine = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct(), \Model\DataAccess\Database::obtain()])
+            ->setConstructorArgs([$this->createEngineStruct(), obtainTestDatabase()])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineNotMine->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -530,7 +530,7 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertNull($engineNotMine->getMemoryIfMine($memoryKey));
 
         $engineEmpty = $this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([$this->createEngineStruct(), \Model\DataAccess\Database::obtain()])
+            ->setConstructorArgs([$this->createEngineStruct(), obtainTestDatabase()])
             ->onlyMethods(['checkAccount', 'memoryExists'])
             ->getMock();
         $engineEmpty->expects(self::once())->method('checkAccount')->willReturn(['id' => 10]);
@@ -668,7 +668,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesReturnsEarlyWhenContextAnalyzerEnabledAndSegmentsMissingKeys(): void
     {
         $pid = 920001;
-        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_activate_context_analyzer', '1');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], [['segment' => 'only-segment']]);
@@ -680,7 +680,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesSkipsContextBranchWhenContextAnalyzerDisabled(): void
     {
         $pid = 920002;
-        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_activate_context_analyzer', '0');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '0');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);
@@ -692,7 +692,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function configureContributionAnalysisBranchWithJobIdUsesIdUserKeys(): void
     {
         $jobId = 930001;
-        (new JobsMetadataDao(\Model\DataAccess\Database::obtain()))->set($jobId, '', 'mt_context', 'ctx:1,2,3');
+        (new JobsMetadataDao(obtainTestDatabase()))->set($jobId, '', 'mt_context', 'ctx:1,2,3');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->setAnalysis(true);
@@ -715,7 +715,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesReturnsEarlyWhenContextAnalyzerEnabledAndSegmentsEmpty(): void
     {
         $pid = 920003;
-        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_activate_context_analyzer', '1');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);
@@ -752,7 +752,7 @@ class MMTEngineMethodsTest extends AbstractTest
         $originalBuild = AppConfig::$BUILD_NUMBER;
         AppConfig::$BUILD_NUMBER = 'v1.2.3';
 
-        $engine = new MMT($this->createEngineStruct(), \Model\DataAccess\Database::obtain());
+        $engine = new MMT($this->createEngineStruct(), obtainTestDatabase());
         $method = new ReflectionMethod(MMT::class, '_getClient');
 
         $client = $method->invoke($engine);

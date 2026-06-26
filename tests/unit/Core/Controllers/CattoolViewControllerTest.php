@@ -89,7 +89,7 @@ class CattoolViewControllerTest extends AbstractTest
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
-        $this->setProp('database', \Model\DataAccess\Database::obtain());
+        $this->setProp('database', obtainTestDatabase());
         $this->setProp('userIsLogged', false);
     }
 
@@ -294,7 +294,7 @@ class CattoolViewControllerTest extends AbstractTest
     public function findOwnerEmailAndTeam_resolves_owner_for_personal_team(): void
     {
         $job = $this->loadSeededJob();
-        $project = $job->getProject(new ProjectDao(Database::obtain()));
+        $project = $job->getProject(new ProjectDao(obtainTestDatabase()));
 
         $result = $this->invokePrivate('findOwnerEmailAndTeam', [$project]);
 

@@ -64,14 +64,14 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $resProp->setValue($this->controller, $responseMock);
 
         $dbProp = $this->reflector->getProperty('database');
-        $dbProp->setValue($this->controller, Database::obtain());
+        $dbProp->setValue($this->controller, obtainTestDatabase());
 
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSetProp = $this->reflector->getProperty('featureSet');
         $featureSetProp->setValue($this->controller, $featureSet);
 
         $segmentDisabledServiceProp = $this->reflector->getProperty('segmentDisabledService');
-        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService(new SegmentMetadataDao(Database::obtain())));
+        $segmentDisabledServiceProp->setValue($this->controller, new SegmentDisabledService(new SegmentMetadataDao(obtainTestDatabase())));
     }
 
     protected function tearDown(): void
@@ -82,7 +82,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $this->cleanTestData();
 
         $conn->exec("INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" . self::TEST_PROJECT_ID . ", 'test@example.org', 'projpw_sa', 'TestSegAnalysis', NOW(), 'DONE')");
@@ -102,7 +102,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM segment_translations WHERE id_job = " . self::TEST_JOB_ID);
         $conn->exec("DELETE FROM segments WHERE id_file = " . self::TEST_FILE_ID);
         $conn->exec("DELETE FROM segment_metadata WHERE id_segment IN (" . self::TEST_SEGMENT_1 . ", " . self::TEST_SEGMENT_2 . ", " . self::TEST_SEGMENT_3 . ")");
@@ -346,11 +346,11 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function getSegmentsForAProjectReturnsPaginatedResult(): void
     {
         $projectProp = $this->reflector->getProperty('project');
-        $project = (new ProjectDao(\Model\DataAccess\Database::obtain()))->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::TEST_PROJECT_ID);
         $projectProp->setValue($this->controller, $project);
 
         $projectDaoProp = $this->reflector->getProperty('projectDao');
-        $projectDaoProp->setValue($this->controller, new ProjectDao(\Model\DataAccess\Database::obtain()));
+        $projectDaoProp->setValue($this->controller, new ProjectDao(obtainTestDatabase()));
 
         $result = $this->invokePrivate('getSegmentsForAProject', [self::TEST_PROJECT_ID, 'projpw_sa', 1, 50, 3, new StandardMatchTypeNamesConstants()]);
 
@@ -550,7 +550,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     #[Test]
     public function getSegmentTranslationsCountReturnsCountForProject(): void
     {
-        $project = (new ProjectDao(\Model\DataAccess\Database::obtain()))->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao(obtainTestDatabase()))->findById(self::TEST_PROJECT_ID);
 
         $result = $this->invokePrivate('getSegmentTranslationsCount', [$project]);
 

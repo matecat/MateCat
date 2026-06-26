@@ -60,7 +60,7 @@ class ConstructorTest extends AbstractTest
     #[Test]
     public function test__constructor_with_no_args()
     {
-        $word_counter = new CounterModel(\Model\DataAccess\Database::obtain());
+        $word_counter = new CounterModel(obtainTestDatabase());
         $mirror_word_counter = new ReflectionClass($word_counter);
         $constCache = $mirror_word_counter->getProperty('constCache');
 

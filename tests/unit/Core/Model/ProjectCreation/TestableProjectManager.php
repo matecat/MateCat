@@ -68,7 +68,7 @@ class TestableProjectManager extends ProjectManager
         $this->features = $features;
         $this->filesMetadataDao = $filesMetadataDao;
         // Same per-process DB handle the self-obtaining DAOs used before injection.
-        $this->dbHandler = Database::obtain();
+        $this->dbHandler = obtainTestDatabase();
 
         // Use reflection to set the private logger
         $ref = new ReflectionClass(ProjectManager::class);

@@ -36,7 +36,7 @@ class XliffReplacerCallbackTest extends AbstractTest
         $target = '<g id="3">Hola</g>';
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-EN', 'es-ES', $jobStructMock, Database::obtain());
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-EN', 'es-ES', $jobStructMock, obtainTestDatabase());
 
         $this->assertTrue($xliffReplacerCallback->thereAreErrors(1, $segment, $target));
     }
@@ -64,7 +64,7 @@ class XliffReplacerCallbackTest extends AbstractTest
         $target = '<ph id="3"/> Hola';
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-EN', 'es-ES', $jobStructMock, Database::obtain());
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-EN', 'es-ES', $jobStructMock, obtainTestDatabase());
 
         $this->assertTrue($xliffReplacerCallback->thereAreErrors(1, $segment, $target));
     }
@@ -98,7 +98,7 @@ class XliffReplacerCallbackTest extends AbstractTest
         );
 
         /** @noinspection PhpParamsInspection */
-        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'es-ES', $jobStructMock, Database::obtain());
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'es-ES', $jobStructMock, obtainTestDatabase());
 
         $this->assertFalse($xliffReplacerCallback->thereAreErrors(1, $source, $target, $dataRefMap), "Should not have errors");
     }

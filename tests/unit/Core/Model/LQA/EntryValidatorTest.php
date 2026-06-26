@@ -78,7 +78,7 @@ class EntryValidatorTest extends AbstractTest
         ModelDao    $modelDao,
         CategoryDao $categoryDao
     ): EntryValidator {
-        return new EntryValidator($struct, Database::obtain(), $segmentDao, $jobDao, $projectDao, $modelDao, $categoryDao);
+        return new EntryValidator($struct, obtainTestDatabase(), $segmentDao, $jobDao, $projectDao, $modelDao, $categoryDao);
     }
 
     // ─── isValid ────────────────────────────────────────────────────────
