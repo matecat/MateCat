@@ -17,4 +17,8 @@ if ( AppConfig::$FAST_ANALYSIS_MEMORY_LIMIT != null ) {
 }
 
 
-FastAnalysis::getInstance( @$argv[ 1 ] )->main();
+// Composition root: read the DB handle once from Bootstrap and inject it into
+// the daemon, which threads it down to the DAOs it builds.
+$daemon = FastAnalysis::getInstance(@$argv[1]);
+$daemon->setDatabase(Bootstrap::getDatabase());
+$daemon->main();

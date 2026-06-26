@@ -46,9 +46,9 @@ use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
-use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
 use Utils\Tools\Utils;
 
 /**
@@ -95,16 +95,27 @@ class FastAnalysis extends AbstractDaemon
      */
     protected AbstractFilesStorage $files_storage;
 
-    private ?IDatabase $db = null;
+    private IDatabase $db;
 
     /**
-     * Composition root for the FastAnalysis daemon process: the single place
-     * the Database singleton is resolved, then threaded into the DAOs this
-     * daemon builds.
+     * The DB handle for this daemon, injected by the entry point
+     * (daemons/FastAnalysis.php) via {@see self::setDatabase()} after
+     * Bootstrap::start(), then threaded into the DAOs this daemon builds. This
+     * class never resolves the connection itself — neither Database::obtain()
+     * nor Bootstrap::getDatabase().
      */
     protected function db(): IDatabase
     {
-        return $this->db ??= Database::obtain();
+        return $this->db;
+    }
+
+    /**
+     * Inject the per-process DB handle. Called by the daemon entry point
+     * (composition root) immediately after Bootstrap::start().
+     */
+    public function setDatabase(IDatabase $db): void
+    {
+        $this->db = $db;
     }
 
     private ?ProjectDao $projectDao = null;

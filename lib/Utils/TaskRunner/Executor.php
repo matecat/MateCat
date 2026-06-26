@@ -10,7 +10,6 @@
 namespace Utils\TaskRunner;
 
 use Exception;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -67,9 +66,10 @@ class Executor implements SplObserver
     protected AMQHandler $_queueHandler;
 
     /**
-     * The single per-process database handle, injected into every worker this
-     * Executor spawns. The Executor is the composition root for the worker
-     * process — the one place the Database singleton is resolved.
+     * The single per-process database handle, injected by the entry point
+     * (executor_worker.php) via {@see self::setDatabase()} and then passed to
+     * every worker this Executor spawns. This class never resolves the connection
+     * itself — neither Database::obtain() nor Bootstrap::getDatabase().
      *
      * @var IDatabase
      */
@@ -151,9 +151,9 @@ class Executor implements SplObserver
         $this->_executorPID = posix_getpid();
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
-        // Composition root: resolve the single per-process DB handle once, then
-        // inject it into every worker spawned by this Executor.
-        $this->database = Database::obtain();
+        // The DB handle is injected by the entry point (executor_worker.php) via
+        // setDatabase() right after Bootstrap::start(); every worker spawned by
+        // this Executor then receives that same instance.
 
         // Initialize the 'executor' logger using a specific filename from the context
         $this->logger = LoggerFactory::getLogger('executor', $_context->loggerName);
@@ -205,6 +205,16 @@ class Executor implements SplObserver
     public static function getInstance(Context $queueContext): self
     {
         return new self($queueContext);
+    }
+
+    /**
+     * Inject the per-process DB handle. Called by the entry point
+     * (executor_worker.php) immediately after Bootstrap::start(); the handle is
+     * then passed to every worker this Executor spawns.
+     */
+    public function setDatabase(IDatabase $database): void
+    {
+        $this->database = $database;
     }
 
     /**

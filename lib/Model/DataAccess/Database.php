@@ -67,6 +67,12 @@ class Database implements IDatabase
     /**
      * @Override
      * {@inheritdoc}
+     *
+     * @deprecated Process-wide singleton accessor. The ONLY legitimate caller is the application
+     *             composition root {@see \Bootstrap::start()}; everything beyond it — domain code
+     *             and entry points alike — must receive an {@see IDatabase} by injection (read it
+     *             from {@see \Bootstrap::getDatabase()} at an entry point, then thread it down).
+     *             Full rationale and best practices: {@see IDatabase::obtain()}.
      */
     public static function obtain(?string $server = null, ?string $user = null, ?string $password = null, ?string $database = null): IDatabase
     {
