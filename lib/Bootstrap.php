@@ -114,7 +114,13 @@ class Bootstrap
     private function installApplicationSingletons(): void
     {
         WorkerClient::init();
-        self::$database = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        // Composition root: build the one application DB connection as a plain instance and
+        // expose it via getDatabase() for injection. Not Database::obtain() — the singleton
+        // accessor is retained only as a legacy/test seam, no longer used in production.
+        self::$database = new Database(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        // Register the same instance for the deprecated obtain() accessor still used by legacy
+        // code and tests, so they share this connection instead of lazily building an empty one.
+        Database::setInstance(self::$database);
     }
 
     public static function getDatabase(): IDatabase

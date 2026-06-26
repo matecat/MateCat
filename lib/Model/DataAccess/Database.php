@@ -54,7 +54,7 @@ class Database implements IDatabase
      * @param string $password
      * @param string $database
      */
-    protected function __construct(string $server, string $user, string $password, string $database)
+    public function __construct(string $server, string $user, string $password, string $database)
     {
         // Set fields
         $this->server = $server;
@@ -81,6 +81,16 @@ class Database implements IDatabase
         }
 
         return self::$instance;
+    }
+
+    /**
+     * Register the instance built by the composition root so that legacy/test callers of the
+     * deprecated {@see self::obtain()} singleton accessor receive the SAME connection that
+     * {@see \Bootstrap::start()} constructed, instead of lazily building one with empty config.
+     */
+    public static function setInstance(IDatabase $database): void
+    {
+        self::$instance = $database;
     }
 
     /**
