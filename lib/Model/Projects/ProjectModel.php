@@ -126,7 +126,7 @@ class ProjectModel
             !is_null($this->changedFields['id_assignee']) &&
             $this->user->uid != $this->changedFields['id_assignee']
         ) {
-            $assignee = (new UserDao)->getByUid($this->changedFields['id_assignee']);
+            $assignee = (new UserDao($this->database))->getByUid($this->changedFields['id_assignee']);
             if ($assignee === null) {
                 return;
             }

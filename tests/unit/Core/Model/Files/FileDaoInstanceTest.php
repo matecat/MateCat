@@ -45,7 +45,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getByJobId(5);
 
         $this->assertIsArray($results);
@@ -58,7 +58,7 @@ class FileDaoInstanceTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getByJobId(999);
 
         $this->assertIsArray($results);
@@ -72,7 +72,7 @@ class FileDaoInstanceTest extends AbstractTest
         $struct->id = 2;
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getByJobId(5, 3600);
 
         $this->assertCount(1, $results);
@@ -90,7 +90,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct1, $struct2]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getByProjectId(10);
 
         $this->assertIsArray($results);
@@ -102,7 +102,7 @@ class FileDaoInstanceTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getByProjectId(999);
 
         $this->assertIsArray($results);
@@ -114,7 +114,7 @@ class FileDaoInstanceTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getByProjectId(10, 1200);
 
         $this->assertIsArray($results);
@@ -132,7 +132,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->updateField($file, 'filename', 'renamed.xliff');
 
         $this->assertTrue($result);
@@ -148,7 +148,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->updateField($file, 'sha1_original_file', null);
 
         $this->assertTrue($result);
@@ -164,7 +164,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->updateField($file, 'id_project', 20);
 
         $this->assertTrue($result);
@@ -178,7 +178,7 @@ class FileDaoInstanceTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->isFileInProject(5, 10);
 
         $this->assertSame(1, $result);
@@ -190,7 +190,7 @@ class FileDaoInstanceTest extends AbstractTest
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('rowCount')->willReturn(0);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->isFileInProject(999, 10);
 
         $this->assertSame(0, $result);
@@ -208,7 +208,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getById(5);
 
         $this->assertInstanceOf(FileStruct::class, $result);
@@ -220,7 +220,7 @@ class FileDaoInstanceTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getById(999);
 
         $this->assertNull($result);
@@ -233,7 +233,7 @@ class FileDaoInstanceTest extends AbstractTest
         $struct->id = 3;
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getById(3, 120);
 
         $this->assertInstanceOf(FileStruct::class, $result);
@@ -253,7 +253,7 @@ class FileDaoInstanceTest extends AbstractTest
 
         $this->setDatabaseInstance($dbMock);
 
-        $dao = new FileDao();
+        $dao = new FileDao(\Model\DataAccess\Database::obtain());
         $dao->insertFilesJob(5, 10);
     }
 }

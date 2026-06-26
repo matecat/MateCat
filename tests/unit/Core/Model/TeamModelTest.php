@@ -308,7 +308,7 @@ class TeamModelTest extends AbstractTest
     public function test_updateMembers_adds_new_member(): void
     {
         // Create a general team first
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
         \Model\DataAccess\Database::obtain()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
@@ -335,7 +335,7 @@ class TeamModelTest extends AbstractTest
     public function test_updateMembers_removes_member(): void
     {
         // Create a general team with both users
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
         \Model\DataAccess\Database::obtain()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
@@ -374,7 +374,7 @@ class TeamModelTest extends AbstractTest
 
     public function test_updateMembersProjectsCount_returns_self(): void
     {
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
         \Model\DataAccess\Database::obtain()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
@@ -408,7 +408,7 @@ class TeamModelTest extends AbstractTest
     public function test_getInvitedEmails_returns_only_non_member_emails(): void
     {
         // Create a team with both users as members
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
         \Model\DataAccess\Database::obtain()->begin();
         $team = $teamDao->createUserTeam($this->user, [
             'type' => Teams::GENERAL,
@@ -426,7 +426,7 @@ class TeamModelTest extends AbstractTest
 
         // Set all_memberships from the team
         $allMemberships = new ReflectionProperty($model, 'all_memberships');
-        $allMemberships->setValue($model, (new MembershipDao())->getMemberListByTeamId($team->id));
+        $allMemberships->setValue($model, (new MembershipDao(\Model\DataAccess\Database::obtain()))->getMemberListByTeamId($team->id));
 
         $method = new ReflectionMethod($model, '_getInvitedEmails');
         $result = $method->invoke($model);

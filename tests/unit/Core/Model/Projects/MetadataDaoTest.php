@@ -158,7 +158,7 @@ class MetadataDaoTest extends AbstractTest
         $chunk->id = 321;
         $chunk->password = 'chunk_pwd';
 
-        $result = (new MetadataDao)->buildChunkKey('base_key', $chunk);
+        $result = (new MetadataDao(\Model\DataAccess\Database::obtain()))->buildChunkKey('base_key', $chunk);
 
         $this->assertSame('base_key_chunk_321_chunk_pwd', $result);
     }

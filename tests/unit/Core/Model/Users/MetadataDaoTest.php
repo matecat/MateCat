@@ -30,7 +30,7 @@ class MetadataDaoTest extends AbstractTest
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->dao = new MetadataDao();
+        $this->dao = new MetadataDao(\Model\DataAccess\Database::obtain());
         $this->deleteFixtureRows();
     }
 

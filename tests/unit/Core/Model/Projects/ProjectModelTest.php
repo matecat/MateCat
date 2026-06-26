@@ -156,7 +156,7 @@ class ProjectModelTest extends AbstractTest
     public function checkAssigneeChangeInPersonalTeamThrowsValidationError(): void
     {
         $owner = $this->createUser();
-        $personalTeam = (new TeamDao())->getPersonalByUid((int)$owner->uid);
+        $personalTeam = (new TeamDao(\Model\DataAccess\Database::obtain()))->getPersonalByUid((int)$owner->uid);
 
         $model = new TestableProjectModel($this->db, new ProjectStruct());
 
@@ -210,7 +210,7 @@ class ProjectModelTest extends AbstractTest
     {
         $owner = $this->createUser();
         $oldTeam = $this->createGeneralTeamWithMembers($owner, []);
-        $personalTeam = (new TeamDao())->getPersonalByUid((int)$owner->uid);
+        $personalTeam = (new TeamDao(\Model\DataAccess\Database::obtain()))->getPersonalByUid((int)$owner->uid);
 
         $project = new ProjectStruct();
         $project->id_team = (int)$oldTeam->id;
@@ -444,7 +444,7 @@ class ProjectModelTest extends AbstractTest
      */
     private function createGeneralTeamWithMembers(UserStruct $owner, array $memberEmails): TeamStruct
     {
-        $teamDao = new TeamDao();
+        $teamDao = new TeamDao(\Model\DataAccess\Database::obtain());
         \Model\DataAccess\Database::obtain()->begin();
 
         $team = $teamDao->createUserTeam($owner, [

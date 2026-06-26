@@ -38,7 +38,7 @@ class JobsTranslatorsStructGetUserGuardTest extends AbstractTest
     /**
      * getUser must use the injected UserDao, never the singleton.
      *
-     * Before T1b: getUser() calls `new UserDao()` which hits Database::obtain() → poison fails.
+     * Before T1b: getUser() calls `new UserDao(\Model\DataAccess\Database::obtain())` which hits Database::obtain() → poison fails.
      * After T1b: getUser(UserDao $dao) uses $dao directly → singleton never touched → GREEN.
      */
     #[Test]

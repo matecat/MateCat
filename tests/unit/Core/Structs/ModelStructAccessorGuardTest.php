@@ -59,7 +59,7 @@ class ModelStructAccessorGuardTest extends AbstractTest
     /**
      * getSerializedCategories must use the injected CategoryDao, never the singleton.
      *
-     * Before T3: getSerializedCategories() calls `new CategoryDao()` → hits
+     * Before T3: getSerializedCategories() calls `new CategoryDao(\Model\DataAccess\Database::obtain())` → hits
      * Database::obtain() → poison fails.
      * After T3: getSerializedCategories(CategoryDao $dao) uses $dao directly
      * → singleton never touched → GREEN.

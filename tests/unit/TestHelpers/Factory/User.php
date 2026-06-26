@@ -18,7 +18,7 @@ class User extends Base
         $dao = new UserDao(Database::obtain());
         $user = $dao->createUser($userStruct);
 
-        $orgDao = new TeamDao();
+        $orgDao = new TeamDao(\Model\DataAccess\Database::obtain());
         $orgDao->createUserTeam($user, [
             'type' => Teams::PERSONAL,
             'name' => 'personal'

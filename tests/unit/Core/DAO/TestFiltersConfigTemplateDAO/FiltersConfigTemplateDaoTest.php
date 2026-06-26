@@ -20,7 +20,7 @@ class FiltersConfigTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new FiltersConfigTemplateDao();
+        $this->dao = new FiltersConfigTemplateDao(\Model\DataAccess\Database::obtain());
         $this->createdIds = [];
         $this->cleanupTestData();
     }

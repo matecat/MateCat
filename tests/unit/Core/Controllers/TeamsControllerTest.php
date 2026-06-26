@@ -360,7 +360,7 @@ class TeamsControllerTest extends AbstractTest
     public function update_throws_when_name_is_empty(): void
     {
         $user = $this->actAsFactoryUser();
-        $team = (new TeamDao())->createUserTeam($user, [
+        $team = (new TeamDao(\Model\DataAccess\Database::obtain()))->createUserTeam($user, [
             'type' => Teams::GENERAL,
             'name' => 'Updatable Team',
         ]);
@@ -386,7 +386,7 @@ class TeamsControllerTest extends AbstractTest
     public function update_returns_renamed_team_payload(): void
     {
         $user = $this->actAsFactoryUser();
-        $team = (new TeamDao())->createUserTeam($user, [
+        $team = (new TeamDao(\Model\DataAccess\Database::obtain()))->createUserTeam($user, [
             'type' => Teams::GENERAL,
             'name' => 'Old Team Name',
         ]);

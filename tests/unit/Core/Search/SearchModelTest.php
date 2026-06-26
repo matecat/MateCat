@@ -150,7 +150,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct[($key === 'target') ? 'trg' : 'src'] = $word;
 
         // jobData
-        $jobData = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId, $this->jobPwd);
 
         // instantiate the filters
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
@@ -187,7 +187,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct['src'] = 'Hello';
         $queryParamsStruct['trg'] = 'Ciao';
 
-        $jobData    = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData    = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId, $this->jobPwd);
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
@@ -214,7 +214,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct->isMatchCaseRequested  = false;
         $queryParamsStruct['key'] = 'status_only';
 
-        $jobData    = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData    = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId, $this->jobPwd);
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
@@ -241,7 +241,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct->isMatchCaseRequested  = false;
         $queryParamsStruct['key'] = 'unknown_key';
 
-        $jobData    = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData    = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId, $this->jobPwd);
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
@@ -264,7 +264,7 @@ class SearchModelTest extends AbstractTest
         $queryParamsStruct['key'] = 'target';
         $queryParamsStruct['trg'] = 'Ciao';
 
-        $jobData = (new JobDao())->getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId, $this->jobPwd);
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);

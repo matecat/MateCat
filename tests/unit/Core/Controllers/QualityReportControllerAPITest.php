@@ -127,7 +127,7 @@ class QualityReportControllerAPITest extends AbstractTest
             'INSERT IGNORE INTO files_job (id_job, id_file) VALUES (' . $this->jobId(self::BASE) . ', ' . $this->fileId(self::BASE) . ')'
         );
 
-        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $job = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
 
         return $job;

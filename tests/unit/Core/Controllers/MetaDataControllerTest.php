@@ -142,9 +142,9 @@ class MetaDataControllerTest extends AbstractTest
         $conn->exec("INSERT IGNORE INTO file_metadata (id_project, id_file, `key`, value) VALUES ($projectId, $fileId, 'original_filename', 'real_name.docx')");
 
         // metadata DAOs are Redis-cached (TTL); drop any stale cache for the seeded ids
-        (new ProjectMetadataDao())->destroyMetadataCache($projectId);
-        (new JobMetadataDao())->destroyCacheByJobAndPassword($jobId, self::JOB_PASSWORD);
-        (new FileMetadataDao())->destroyCacheByJobIdProjectAndIdFile($projectId, $fileId);
+        (new ProjectMetadataDao(\Model\DataAccess\Database::obtain()))->destroyMetadataCache($projectId);
+        (new JobMetadataDao(\Model\DataAccess\Database::obtain()))->destroyCacheByJobAndPassword($jobId, self::JOB_PASSWORD);
+        (new FileMetadataDao(\Model\DataAccess\Database::obtain()))->destroyCacheByJobIdProjectAndIdFile($projectId, $fileId);
     }
 
     /**

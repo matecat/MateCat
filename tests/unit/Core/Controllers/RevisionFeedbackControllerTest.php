@@ -28,7 +28,7 @@ class TestableRevisionFeedbackController extends RevisionFeedbackController
 
     protected function createFeedbackDao(): FeedbackDAO
     {
-        return $this->injectedFeedbackDao ?? new FeedbackDAO();
+        return $this->injectedFeedbackDao ?? new FeedbackDAO(\Model\DataAccess\Database::obtain());
     }
 
 }

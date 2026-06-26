@@ -753,7 +753,7 @@ class GetSearchControllerTest extends AbstractTest
             null
         ]);
 
-        $updated = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $updated = (new \Model\Translations\SegmentTranslationDao(\Model\DataAccess\Database::obtain()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
         $this->assertNotNull($updated);
         $this->assertStringContainsString('universo', $updated->translation);
     }

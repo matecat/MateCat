@@ -22,7 +22,7 @@ class ProjectTemplateDaoTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->dao = new ProjectTemplateDao();
+        $this->dao = new ProjectTemplateDao(\Model\DataAccess\Database::obtain());
 
         $conn = Database::obtain()->getConnection();
         $conn->exec(

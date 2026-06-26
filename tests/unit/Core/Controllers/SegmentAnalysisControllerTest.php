@@ -346,11 +346,11 @@ class SegmentAnalysisControllerTest extends AbstractTest
     public function getSegmentsForAProjectReturnsPaginatedResult(): void
     {
         $projectProp = $this->reflector->getProperty('project');
-        $project = (new ProjectDao())->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao(\Model\DataAccess\Database::obtain()))->findById(self::TEST_PROJECT_ID);
         $projectProp->setValue($this->controller, $project);
 
         $projectDaoProp = $this->reflector->getProperty('projectDao');
-        $projectDaoProp->setValue($this->controller, new ProjectDao());
+        $projectDaoProp->setValue($this->controller, new ProjectDao(\Model\DataAccess\Database::obtain()));
 
         $result = $this->invokePrivate('getSegmentsForAProject', [self::TEST_PROJECT_ID, 'projpw_sa', 1, 50, 3, new StandardMatchTypeNamesConstants()]);
 
@@ -550,7 +550,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
     #[Test]
     public function getSegmentTranslationsCountReturnsCountForProject(): void
     {
-        $project = (new ProjectDao())->findById(self::TEST_PROJECT_ID);
+        $project = (new ProjectDao(\Model\DataAccess\Database::obtain()))->findById(self::TEST_PROJECT_ID);
 
         $result = $this->invokePrivate('getSegmentTranslationsCount', [$project]);
 

@@ -65,7 +65,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function saveVersionInsertsRecord(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $result = $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1));
 
         $this->assertTrue($result);
@@ -84,7 +84,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function getVersionNumberForTranslationReturnsStruct(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 3, 'Specific'));
 
         $result = $dao->getVersionNumberForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 3);
@@ -97,7 +97,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function getVersionNumberForTranslationReturnsFalseWhenNotFound(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
 
         $result = $dao->getVersionNumberForTranslation(self::JOB_ID, self::SEGMENT_ID_1, 999);
 
@@ -107,7 +107,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function updateVersionModifiesExistingRecord(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Original'));
 
         $updated = new TranslationVersionStruct();
@@ -129,7 +129,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function updateVersionReturnsZeroForNonexistentRecord(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
 
         $struct = $this->makeStruct(self::SEGMENT_ID_1, 999, 'Ghost');
         $rowCount = $dao->updateVersion($struct);
@@ -142,7 +142,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function instanceGetVersionsForJobReturnsAllVersions(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Second'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other segment'));
@@ -156,7 +156,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function instanceGetVersionsForJobReturnsEmptyForNonexistentJob(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
 
         $results = $dao->getVersionsForJob(0);
 
@@ -166,7 +166,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function instanceGetVersionsForChunkReturnsAllVersions(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'First'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Second'));
 
@@ -182,7 +182,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function instanceGetVersionsForChunkReturnsEmptyForNonexistentJob(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
 
         $chunk = new JobStruct();
         $chunk->id = 0;
@@ -195,7 +195,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function instanceGetVersionsForTranslationFiltersCorrectly(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_2, 1, 'Other'));
@@ -211,7 +211,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function instanceGetVersionsForTranslationFiltersByVersionNumber(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'V1'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'V2'));
 
@@ -234,7 +234,7 @@ class TranslationVersionDaoTest extends AbstractTest
         $struct->old_status = 3;
         $struct->new_status = 4;
 
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $result = $dao->saveVersion($struct);
 
         $this->assertTrue($result);
@@ -261,7 +261,7 @@ class TranslationVersionDaoTest extends AbstractTest
         $jobStruct = new JobStruct();
         $jobStruct->id = self::JOB_ID;
 
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->savePropagationVersions($propagator, self::SEGMENT_ID_1, $jobStruct, [$seg1]);
 
         $rows = $this->database->getConnection()
@@ -294,7 +294,7 @@ class TranslationVersionDaoTest extends AbstractTest
             $segments[] = $seg;
         }
 
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->savePropagationVersions($propagator, self::SEGMENT_ID_1, $jobStruct, $segments);
 
         $count = $this->database->getConnection()
@@ -307,7 +307,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function getVersionsForRevisionReturnsEmptyForNonexistentData(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
 
         $results = $dao->getVersionsForRevision(0, 0);
 
@@ -317,7 +317,7 @@ class TranslationVersionDaoTest extends AbstractTest
     #[Test]
     public function getVersionsForRevisionReturnsVersionRecords(): void
     {
-        $dao = new TranslationVersionDao();
+        $dao = new TranslationVersionDao(\Model\DataAccess\Database::obtain());
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 1, 'Version 1'));
         $dao->saveVersion($this->makeStruct(self::SEGMENT_ID_1, 2, 'Version 2'));
 

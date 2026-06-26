@@ -182,8 +182,8 @@ class MMTEngineMethodsTest extends AbstractTest
     public function getWithGlossariesPassesGlossaryParametersToClient(): void
     {
         $pid = 910001;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_glossaries', '["g1","g2"]');
-        (new ProjectsMetadataDao())->set($pid, 'mmt_ignore_glossary_case', '1');
+        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_glossaries', '["g1","g2"]');
+        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_ignore_glossary_case', '1');
 
         $client = $this->createMock(MMTServiceApi::class);
         $client->expects(self::once())
@@ -668,7 +668,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesReturnsEarlyWhenContextAnalyzerEnabledAndSegmentsMissingKeys(): void
     {
         $pid = 920001;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_activate_context_analyzer', '1');
+        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], [['segment' => 'only-segment']]);
@@ -680,7 +680,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesSkipsContextBranchWhenContextAnalyzerDisabled(): void
     {
         $pid = 920002;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_activate_context_analyzer', '0');
+        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_activate_context_analyzer', '0');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);
@@ -692,7 +692,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function configureContributionAnalysisBranchWithJobIdUsesIdUserKeys(): void
     {
         $jobId = 930001;
-        (new JobsMetadataDao())->set($jobId, '', 'mt_context', 'ctx:1,2,3');
+        (new JobsMetadataDao(\Model\DataAccess\Database::obtain()))->set($jobId, '', 'mt_context', 'ctx:1,2,3');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->setAnalysis(true);
@@ -715,7 +715,7 @@ class MMTEngineMethodsTest extends AbstractTest
     public function syncMemoriesReturnsEarlyWhenContextAnalyzerEnabledAndSegmentsEmpty(): void
     {
         $pid = 920003;
-        (new ProjectsMetadataDao())->set($pid, 'mmt_activate_context_analyzer', '1');
+        (new ProjectsMetadataDao(\Model\DataAccess\Database::obtain()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
         $engine = $this->createEngineWithClient($this->createStub(MMTServiceApi::class));
         $engine->syncMemories(['id' => $pid, 'id_customer' => 'nobody@example.invalid'], []);

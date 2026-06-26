@@ -72,7 +72,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
         $map = $client->hgetall(UserDao::class . "::getByUid-" . self::$uid);
         $this->assertEmpty($map);
 
-        $underTest = new UserDao();
+        $underTest = new UserDao(\Model\DataAccess\Database::obtain());
 
         $underTest->setCacheTTL(600);
 
@@ -125,7 +125,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
         $this->assertEquals(UserDao::class . "::getByUid-" . self::$uid, $keyMap);
 
 
-        $underTest = new UserDao();
+        $underTest = new UserDao(\Model\DataAccess\Database::obtain());
         $underTest->destroyCacheByUid(self::$uid);
 
 

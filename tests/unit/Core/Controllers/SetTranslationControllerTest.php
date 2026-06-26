@@ -1379,7 +1379,7 @@ class SetTranslationControllerTest extends AbstractTest
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Eval set', 2);
 
         $controller = $this->createControllerWithoutConstructor();
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
         $this->setNamedProperty($controller, 'chunk', $chunk);
         $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(Database::obtain()), 'en-US', 'it-IT', []));
@@ -1684,7 +1684,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 884004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source', 2);
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
 
         $controller = $this->createControllerWithoutConstructor();
@@ -1886,7 +1886,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 894004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source persist', 2);
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
 
         $controller = $this->createControllerWithoutConstructor();
@@ -1970,7 +1970,7 @@ class SetTranslationControllerTest extends AbstractTest
             'segments_for_propagation' => [],
         ], $result);
 
-        $stored = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob($segmentId, $jobId);
+        $stored = (new \Model\Translations\SegmentTranslationDao(\Model\DataAccess\Database::obtain()))->findBySegmentAndJob($segmentId, $jobId);
         self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
         self::assertSame('nuova', $stored->translation);
     }
@@ -1985,7 +1985,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 898004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source propagation', 2);
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
 
         $controller = $this->createControllerWithoutConstructor();
@@ -2123,7 +2123,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 897004;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Init version', 2);
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
 
         $controller = $this->createControllerWithoutConstructor();
@@ -2381,7 +2381,7 @@ class SetTranslationControllerTest extends AbstractTest
             self::assertSame(TranslationStatus::STATUS_NEW, $old->status, 'Created row must be NEW status');
             self::assertSame($segmentId, $old->id_segment);
 
-            $stored = (new \Model\Translations\SegmentTranslationDao())->findBySegmentAndJob($segmentId, $jobId);
+            $stored = (new \Model\Translations\SegmentTranslationDao(\Model\DataAccess\Database::obtain()))->findBySegmentAndJob($segmentId, $jobId);
             self::assertInstanceOf(SegmentTranslationStruct::class, $stored);
             self::assertSame(TranslationStatus::STATUS_NEW, $stored->status);
         } finally {
@@ -2405,7 +2405,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 9027124;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source complete', 2);
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
 
         // Ensure the job-completeness guard key is absent so the branch is entered
         // (the key may linger from a prior run since Redis is not transaction-isolated).
@@ -2460,7 +2460,7 @@ class SetTranslationControllerTest extends AbstractTest
         $fileId = 9027134;
         $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source split', 2);
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
         $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
 
@@ -2560,7 +2560,7 @@ class SetTranslationControllerTest extends AbstractTest
         // id_mt_engine > 1 so the MT-contribution branch (Set::contributionMT) also runs.
         Database::obtain()->getConnection()->exec("UPDATE jobs SET id_mt_engine = 2 WHERE id = {$jobId}");
 
-        $chunk = (new \Model\Jobs\JobDao())->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $chunk = (new \Model\Jobs\JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
         $project = $chunk->getProject(new ProjectDao(Database::obtain()));
         $segmentDao = new \Model\Segments\SegmentDao(Database::obtain());
         $segment = $segmentDao->fetchById($segmentId, SegmentStruct::class);

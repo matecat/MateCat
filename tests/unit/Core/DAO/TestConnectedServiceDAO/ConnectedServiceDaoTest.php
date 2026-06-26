@@ -28,7 +28,7 @@ class ConnectedServiceDaoTest extends AbstractTest
 
         [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
 
-        $this->dao = new ConnectedServiceDao();
+        $this->dao = new ConnectedServiceDao(\Model\DataAccess\Database::obtain());
     }
 
     protected function tearDown(): void
@@ -120,7 +120,7 @@ class ConnectedServiceDaoTest extends AbstractTest
 
         $this->setDatabaseInstance($dbStub);
 
-        $dao = new ConnectedServiceDao();
+        $dao = new ConnectedServiceDao(\Model\DataAccess\Database::obtain());
         $dao->setDefaultService($service);
     }
 

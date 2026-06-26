@@ -19,7 +19,7 @@ class BaseCommentStructGuardTest extends AbstractTest
     /**
      * templateMessage must use the injected CommentDao, never the singleton.
      *
-     * Before T1: templateMessage() builds `new CommentDao()` internally → hits singleton.
+     * Before T1: templateMessage() builds `new CommentDao(\Model\DataAccess\Database::obtain())` internally → hits singleton.
      * After T1: templateMessage(CommentDao $dao) — injected dao is used, singleton never touched.
      */
     #[Test]

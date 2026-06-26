@@ -65,7 +65,7 @@ class JobStructNewAccessorGuardTest extends AbstractTest
 
     /**
      * getFiles must require a FileDao argument (mandatory param after T1).
-     * Before T1: getFiles() accepts no arg (has its own `new FileDao()`).
+     * Before T1: getFiles() accepts no arg (has its own `new FileDao(\Model\DataAccess\Database::obtain())`).
      * After T1: getFiles(FileDao $dao) — calling with no arg is an ArgumentCountError.
      *
      * Guard: pass an injected FileDao mock; assert the injected DAO is used
@@ -104,7 +104,7 @@ class JobStructNewAccessorGuardTest extends AbstractTest
 
     /**
      * isSplitted must require a JobDao argument (mandatory param after T1).
-     * Before T1: isSplitted() accepts no arg (calls $this->getChunks() which has `?? new JobDao()`).
+     * Before T1: isSplitted() accepts no arg (calls $this->getChunks() which has `?? new JobDao(\Model\DataAccess\Database::obtain())`).
      * After T1: isSplitted(JobDao $dao) — threading the dao into getChunks($dao).
      *
      * Guard: inject a mock JobDao returning 2 chunks → isSplitted returns true.

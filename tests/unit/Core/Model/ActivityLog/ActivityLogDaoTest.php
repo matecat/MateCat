@@ -19,7 +19,7 @@ class ActivityLogDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new ActivityLogDao();
+        $this->dao = new ActivityLogDao(\Model\DataAccess\Database::obtain());
         Database::obtain()->getConnection()->beginTransaction();
     }
 

@@ -90,7 +90,7 @@ class TranslationEventDaoTest extends AbstractTest
         // Draft should be excluded
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_DRAFT);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getLatestEventForSegment(self::JOB_ID, self::SEGMENT_ID_1);
 
         $this->assertInstanceOf(TranslationEventStruct::class, $result);
@@ -100,7 +100,7 @@ class TranslationEventDaoTest extends AbstractTest
     #[Test]
     public function getLatestEventForSegmentReturnsNullWhenNoEvents(): void
     {
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getLatestEventForSegment(self::JOB_ID, self::SEGMENT_ID_1);
 
         $this->assertNull($result);
@@ -112,7 +112,7 @@ class TranslationEventDaoTest extends AbstractTest
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_DRAFT);
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_DRAFT);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getLatestEventForSegment(self::JOB_ID, self::SEGMENT_ID_1);
 
         $this->assertNull($result);
@@ -129,7 +129,7 @@ class TranslationEventDaoTest extends AbstractTest
         // Draft with final_revision=1 should be excluded
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_DRAFT, self::SOURCE_PAGE_REVISION, 1);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getAllFinalRevisionsForSegment(self::JOB_ID, self::SEGMENT_ID_1);
 
         $this->assertCount(2, $results);
@@ -145,7 +145,7 @@ class TranslationEventDaoTest extends AbstractTest
     {
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_TRANSLATED, self::SOURCE_PAGE_TRANSLATION, 0);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getAllFinalRevisionsForSegment(self::JOB_ID, self::SEGMENT_ID_1);
 
         $this->assertSame([], $results);
@@ -164,7 +164,7 @@ class TranslationEventDaoTest extends AbstractTest
         // Segment 3: outside range — should not appear
         $this->insertEvent(self::SEGMENT_ID_3, TranslationStatus::STATUS_TRANSLATED);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getLatestEventsInSegmentInterval(self::JOB_ID, self::SEGMENT_ID_1, self::SEGMENT_ID_2);
 
         $this->assertCount(2, $results);
@@ -179,7 +179,7 @@ class TranslationEventDaoTest extends AbstractTest
     #[Test]
     public function getLatestEventsInSegmentIntervalReturnsEmptyWhenNoEvents(): void
     {
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getLatestEventsInSegmentInterval(self::JOB_ID, self::SEGMENT_ID_1, self::SEGMENT_ID_2);
 
         $this->assertSame([], $results);
@@ -198,7 +198,7 @@ class TranslationEventDaoTest extends AbstractTest
         // Segment 2, translation page: 1500
         $this->insertEvent(self::SEGMENT_ID_2, TranslationStatus::STATUS_TRANSLATED, self::SOURCE_PAGE_TRANSLATION, 0, 1500);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getTteForSegments([self::SEGMENT_ID_1, self::SEGMENT_ID_2], self::JOB_ID);
 
         $this->assertNotNull($results);
@@ -222,7 +222,7 @@ class TranslationEventDaoTest extends AbstractTest
     #[Test]
     public function getTteForSegmentsReturnsNullWhenNoEvents(): void
     {
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getTteForSegments([self::SEGMENT_ID_1], self::JOB_ID);
 
         $this->assertNull($results);
@@ -237,7 +237,7 @@ class TranslationEventDaoTest extends AbstractTest
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_APPROVED, self::SOURCE_PAGE_TRANSLATION, 1);
         $this->insertEvent(self::SEGMENT_ID_2, TranslationStatus::STATUS_APPROVED, self::SOURCE_PAGE_REVISION, 1);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $rowCount = $dao->unsetFinalRevisionFlag(
             self::JOB_ID,
             [self::SEGMENT_ID_1, self::SEGMENT_ID_2],
@@ -274,7 +274,7 @@ class TranslationEventDaoTest extends AbstractTest
     {
         $this->insertEvent(self::SEGMENT_ID_1, TranslationStatus::STATUS_TRANSLATED, self::SOURCE_PAGE_TRANSLATION, 0);
 
-        $dao = new TranslationEventDao();
+        $dao = new TranslationEventDao(\Model\DataAccess\Database::obtain());
         $rowCount = $dao->unsetFinalRevisionFlag(
             self::JOB_ID,
             [self::SEGMENT_ID_1],

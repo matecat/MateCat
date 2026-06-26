@@ -19,7 +19,7 @@ class EntryCommentStructGuardTest extends AbstractTest
     /**
      * getEntriesById must use the injected EntryCommentDao, never the singleton.
      *
-     * Before T1: getEntriesById(int $id) builds `new EntryCommentDao()` internally → hits singleton.
+     * Before T1: getEntriesById(int $id) builds `new EntryCommentDao(\Model\DataAccess\Database::obtain())` internally → hits singleton.
      * After T1: getEntriesById(EntryCommentDao $dao, int $id, ?int $ttl) — injected dao is used.
      */
     #[Test]

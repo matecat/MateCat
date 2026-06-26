@@ -119,7 +119,7 @@ class ChunkV3ControllerTest extends AbstractTest
      */
     private function loadChunk(): JobStruct
     {
-        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $job = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
 
         return $job;
@@ -204,7 +204,7 @@ class ChunkV3ControllerTest extends AbstractTest
     #[Test]
     public function wrong_password_does_not_load_the_seeded_job(): void
     {
-        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'wrong_pw_xyz');
+        $job = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'wrong_pw_xyz');
 
         $this->assertNull($job);
     }

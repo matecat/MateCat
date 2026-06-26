@@ -51,27 +51,27 @@ class TestableGetSegmentsController extends GetSegmentsController
 
     protected function createSegmentDao(): SegmentDao
     {
-        return $this->fakeSegmentDao ?? new SegmentDao();
+        return $this->fakeSegmentDao ?? new SegmentDao(\Model\DataAccess\Database::obtain());
     }
 
     protected function createProjectMetadataDao(): ProjectMetadataDao
     {
-        return $this->fakeProjectMetadataDao ?? new ProjectMetadataDao();
+        return $this->fakeProjectMetadataDao ?? new ProjectMetadataDao(\Model\DataAccess\Database::obtain());
     }
 
     protected function createFilesMetadataDao(): FilesMetadataDao
     {
-        return $this->fakeFilesMetadataDao ?? new FilesMetadataDao();
+        return $this->fakeFilesMetadataDao ?? new FilesMetadataDao(\Model\DataAccess\Database::obtain());
     }
 
     protected function createJobMetadataDao(): JobMetadataDao
     {
-        return $this->fakeJobMetadataDao ?? new JobMetadataDao();
+        return $this->fakeJobMetadataDao ?? new JobMetadataDao(\Model\DataAccess\Database::obtain());
     }
 
     protected function createSegmentMetadataDao(): SegmentMetadataDao
     {
-        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao();
+        return $this->fakeSegmentMetadataDao ?? new SegmentMetadataDao(\Model\DataAccess\Database::obtain());
     }
 }
 

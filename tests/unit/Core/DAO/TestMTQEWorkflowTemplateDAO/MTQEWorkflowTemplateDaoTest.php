@@ -19,7 +19,7 @@ class MTQEWorkflowTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new MTQEWorkflowTemplateDao();
+        $this->dao = new MTQEWorkflowTemplateDao(\Model\DataAccess\Database::obtain());
         $this->createdIds = [];
         $this->cleanupTestData();
     }

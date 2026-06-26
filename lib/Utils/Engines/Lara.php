@@ -689,7 +689,7 @@ class Lara extends AbstractEngine
                 return;
             }
 
-            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            $user = (new UserDao($this->database))->getByEmail($projectRow['id_customer']);
             if ($user === null) {
                 return;
             }

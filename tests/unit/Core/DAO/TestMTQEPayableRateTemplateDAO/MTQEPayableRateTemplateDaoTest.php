@@ -19,7 +19,7 @@ class MTQEPayableRateTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new MTQEPayableRateTemplateDao();
+        $this->dao = new MTQEPayableRateTemplateDao(\Model\DataAccess\Database::obtain());
         $this->createdIds = [];
         $this->cleanupTestData();
     }

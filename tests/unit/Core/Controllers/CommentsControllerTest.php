@@ -134,7 +134,7 @@ class CommentsControllerTest extends AbstractTest
      */
     private function loadChunk(): JobStruct
     {
-        $chunk = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $chunk = (new JobDao(\Model\DataAccess\Database::obtain()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $chunk);
 
         return $chunk;

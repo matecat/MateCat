@@ -32,7 +32,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->dao = new SegmentMetadataDao();
+        $this->dao = new SegmentMetadataDao(\Model\DataAccess\Database::obtain());
         $this->deleteFixtureRows();
     }
 

@@ -46,7 +46,7 @@ class CommentDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getOpenThreadsForProjects([1, 2]);
 
         $this->assertIsArray($results);
@@ -59,7 +59,7 @@ class CommentDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getOpenThreadsForProjects([999]);
 
         $this->assertIsArray($results);
@@ -77,7 +77,7 @@ class CommentDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $result = $dao->deleteComment($comment);
 
         $this->assertTrue($result);
@@ -94,7 +94,7 @@ class CommentDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$comment]);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getBySegmentId(50);
 
         $this->assertIsArray($results);
@@ -107,7 +107,7 @@ class CommentDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getBySegmentId(999);
 
         $this->assertIsArray($results);
@@ -138,7 +138,7 @@ class CommentDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $result = $dao->saveComment($obj);
 
         $this->assertSame(CommentDao::TYPE_COMMENT, $result->message_type);
@@ -155,7 +155,7 @@ class CommentDaoTest extends AbstractTest
         $obj->message = '';
         $obj->message_type = CommentDao::TYPE_COMMENT;
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage("Comment message can't be blank.");
@@ -172,7 +172,7 @@ class CommentDaoTest extends AbstractTest
         $obj->message = 'Hello';
         $obj->message_type = CommentDao::TYPE_COMMENT;
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage("Full name can't be blank.");
@@ -191,7 +191,7 @@ class CommentDaoTest extends AbstractTest
         $obj->id_segment = 100;
         $obj->uid = 5;
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getThreadContributorUids($obj);
 
         $this->assertCount(2, $results);
@@ -207,7 +207,7 @@ class CommentDaoTest extends AbstractTest
         $obj->id_segment = 100;
         $obj->uid = null;
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getThreadContributorUids($obj);
 
         $this->assertCount(1, $results);
@@ -224,7 +224,7 @@ class CommentDaoTest extends AbstractTest
 
         $this->stmtStub->method('fetchAll')->willReturn([$comment]);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getThreadsBySegments([10, 20], 1);
 
         $this->assertIsArray($results);
@@ -236,7 +236,7 @@ class CommentDaoTest extends AbstractTest
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getThreadsBySegments([10], 1);
 
         $this->assertIsArray($results);
@@ -256,7 +256,7 @@ class CommentDaoTest extends AbstractTest
         $chunk = new JobStruct();
         $chunk->id = 5;
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getCommentsForChunk($chunk);
 
         $this->assertIsArray($results);
@@ -271,7 +271,7 @@ class CommentDaoTest extends AbstractTest
         $chunk = new JobStruct();
         $chunk->id = 5;
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $results = $dao->getCommentsForChunk($chunk, ['from_id' => 10]);
 
         $this->assertIsArray($results);
@@ -301,7 +301,7 @@ class CommentDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
 
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $result = $dao->resolveThread($obj);
 
         $this->assertSame(CommentDao::TYPE_RESOLVE, $result->message_type);
@@ -313,7 +313,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function placeholdContentReplacesTeamMention(): void
     {
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $result = $dao->placeholdContent('Hello {@team@}');
 
         $this->assertSame('Hello @team', $result);
@@ -324,7 +324,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function getUsersIdFromContentExtractsIds(): void
     {
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getUsersIdFromContent('Hello {@123@} and {@456@}');
 
         $this->assertSame(['123', '456'], $result);
@@ -333,7 +333,7 @@ class CommentDaoTest extends AbstractTest
     #[Test]
     public function getUsersIdFromContentReturnsEmptyForNoMentions(): void
     {
-        $dao = new CommentDao();
+        $dao = new CommentDao(\Model\DataAccess\Database::obtain());
         $result = $dao->getUsersIdFromContent('Hello world');
 
         $this->assertEmpty($result);

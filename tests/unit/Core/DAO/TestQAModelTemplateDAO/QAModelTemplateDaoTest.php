@@ -22,7 +22,7 @@ class QAModelTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new QAModelTemplateDao();
+        $this->dao = new QAModelTemplateDao(\Model\DataAccess\Database::obtain());
         $this->createdIds = [];
         $this->cleanupTestData();
     }

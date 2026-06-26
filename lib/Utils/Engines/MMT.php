@@ -416,7 +416,7 @@ class MMT extends AbstractEngine
             // send user keys on a project basis
             // ==============================================
             //
-            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            $user = (new UserDao($this->database))->getByEmail($projectRow['id_customer']);
             if ($user === null) {
                 return;
             }

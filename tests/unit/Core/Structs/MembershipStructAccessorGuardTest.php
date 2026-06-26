@@ -36,7 +36,7 @@ class MembershipStructAccessorGuardTest extends AbstractTest
     /**
      * getUser must use the injected UserDao, never the singleton.
      *
-     * Before T2: getUser() calls `new UserDao()` which hits Database::obtain() → poison fails.
+     * Before T2: getUser() calls `new UserDao(\Model\DataAccess\Database::obtain())` which hits Database::obtain() → poison fails.
      * After T2: getUser(UserDao $userDao) uses $userDao directly → singleton never touched → GREEN.
      */
     #[Test]
@@ -118,7 +118,7 @@ class MembershipStructAccessorGuardTest extends AbstractTest
     /**
      * getTeam must use the injected TeamDao, never the singleton.
      *
-     * Before T2: getTeam() calls `new TeamDao()` which hits Database::obtain() → poison fails.
+     * Before T2: getTeam() calls `new TeamDao(\Model\DataAccess\Database::obtain())` which hits Database::obtain() → poison fails.
      * After T2: getTeam(TeamDao $teamDao) uses $teamDao directly → singleton never touched → GREEN.
      */
     #[Test]

@@ -274,7 +274,7 @@ class JobMergeControllerTest extends AbstractTest
     #[Test]
     public function merge_returns_success_payload_and_sets_http_200(): void
     {
-        $project = (new \Model\Projects\ProjectDao())->findByIdAndPassword(
+        $project = (new \Model\Projects\ProjectDao(\Model\DataAccess\Database::obtain()))->findByIdAndPassword(
             $this->projectId(self::BASE),
             self::PROJECT_PASSWORD
         );

@@ -20,7 +20,7 @@ class CustomPayableRateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new CustomPayableRateDao();
+        $this->dao = new CustomPayableRateDao(\Model\DataAccess\Database::obtain());
         $this->cleanupTestData();
     }
 
