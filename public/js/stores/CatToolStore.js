@@ -13,8 +13,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   qr: null,
   firstLoad: true,
   languages: [],
+  // pc-carrying ph tags are collapsed by default; only an explicit opt-out persists
   phTagsCompressed:
-    localStorage.getItem('phTagsCompressed-' + config.userMail) === 'true',
+    localStorage.getItem('phTagsCompressed-' + config.userMail) !== 'false',
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],

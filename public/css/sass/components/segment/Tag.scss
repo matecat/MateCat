@@ -157,6 +157,20 @@
     }
   }
 
+  // Open/close affordance for pc-carrying ph tags: a paired open tag flattens its
+  // trailing edge (content follows to the right), a close tag flattens its leading
+  // edge (content precedes on the left), echoing the g open/close pair.
+  &.tag-ph.tag-pc-open {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: inset -3px 0 0 0 #4a5260;
+  }
+  &.tag-ph.tag-pc-close {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    box-shadow: inset 3px 0 0 0 #4a5260;
+  }
+
   span {
     all: revert;
   }
@@ -452,8 +466,12 @@
 }
 
 // Body-level toggle for HTML-rendered (closed) segments
+// Scoped to pc-carrying ph tags ONLY. Targeting every .tag-ph would also hide
+// the Draft.js-rendered text (span[data-text='true']) of normal/semantic ph tags
+// in the open editor, making them vanish when compaction is on.
 body.ph-tags-compressed {
-  .tag.tag-ph {
+  .tag.tag-ph.tag-pc-open,
+  .tag.tag-ph.tag-pc-close {
     .index-counter {
       margin-left: 0;
       margin-right: 0;

@@ -1,6 +1,7 @@
 import matchTag from './matchTag'
 import {Modifier, SelectionState, ContentState} from 'draft-js'
 import {decodeHtmlEntities} from './tagUtils'
+import {createPcNumberer} from './pcTagUtils'
 
 /**
  *
@@ -45,6 +46,7 @@ const createNewEntitiesFromMap = (
               ...tag.data,
               ...(tagSource?.data?.index !== undefined && {
                 index: tagSource.data.index,
+                pcRole: tagSource.data.pcRole,
               }),
             },
           }
@@ -158,27 +160,25 @@ const createNewEntitiesFromMap = (
   }
 }
 
+// Numbers ONLY the ph tags that carry an XLIFF pc tag. Open and close of a pair
+// get the same 0-based index (rendered as index + 1); a `pcRole` of 'open'/'close'
+// drives the CSS. Non-pc ph tags are left untouched (no index => not compactable).
+// Any `index`/`pcRole` already present (inherited from the source tag map) is honoured.
 const addIncrementalIndex = (tagRange) => {
-  let phIndex = 0
+  const numberer = createPcNumberer()
   return tagRange.map((cur) => {
     if (cur.data.name !== 'ph') return cur
-
-    if (cur.data.index !== undefined) {
-      phIndex = Math.max(phIndex, cur.data.index + 1)
-      return cur
-    }
-
+    const result = numberer(cur.data.encodedText, cur.data.index)
+    if (!result) return cur
     return {
       ...cur,
       data: {
         ...cur.data,
-        index: phIndex++,
+        index: result.index,
+        pcRole: result.role,
       },
     }
   })
 }
-
-const isXliff2 = (encodedText) =>
-  /\bph\b/.test(encodedText) && !/id=\"mtc_/.test(encodedText) //eslint-disable-line
 
 export default createNewEntitiesFromMap

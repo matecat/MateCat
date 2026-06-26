@@ -234,7 +234,7 @@ describe('TagEntityLite', () => {
     expect(tooltipContent.textContent).toContain('test')
   })
 
-  test('does not show tooltip when not compressed', () => {
+  test('shows tooltip on hover when ph has a placeholder (even if not compressed)', () => {
     const {container} = render(
       <TagEntityLite
         entityKey="1"
@@ -245,7 +245,9 @@ describe('TagEntityLite', () => {
         <span>{'<p>'}</span>
       </TagEntityLite>,
     )
-    expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
+    expect(
+      container.querySelector('[data-testid="tooltip-wrapper"]'),
+    ).toBeTruthy()
   })
 
   test('does not show tooltip when placeholder is absent', () => {
@@ -253,7 +255,7 @@ describe('TagEntityLite', () => {
     const {container} = render(
       <TagEntityLite
         entityKey="1"
-        contentState={mockContentState('ph', 0, undefined)}
+        contentState={mockContentState('ph', 0, '')}
         offsetkey="1-0-0"
         isRTL={false}
       >

@@ -47,11 +47,12 @@ export const TagEntityLite = ({
   const style = getStyle()
 
   const {
-    data: {index, name: entityName, placeholder},
+    data: {index, name: entityName, placeholder, pcRole},
   } = contentState.getEntity(entityKey)
 
   const isPhTag = entityName === 'ph'
   const isCompressedPh = isPhTag && phTagsCompressed && index >= 0
+  const pcRoleClass = isPhTag && pcRole ? ` tag-pc-${pcRole}` : ''
 
   const getChildrenContent = () => {
     if (isPhTag && index >= 0) {
@@ -71,7 +72,9 @@ export const TagEntityLite = ({
     <span ref={containerRef} className="tag-container tag-container-lite">
       <span
         ref={tagRef}
-        className={`tag ${style}${isCompressedPh ? ' tag-compressed' : ''}`}
+        className={`tag ${style}${
+          isCompressedPh ? ' tag-compressed' : ''
+        }${pcRoleClass}`}
         data-offset-key={offsetkey}
         unselectable="on"
         suppressContentEditableWarning={true}

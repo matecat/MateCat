@@ -39,10 +39,10 @@ beforeEach(() => {
 })
 
 describe('CatToolStore - phTagsCompressed', () => {
-  test('initializes phTagsCompressed to false when localStorage is empty', () => {
+  test('initializes phTagsCompressed to true when localStorage is empty (collapsed by default)', () => {
     CatToolStore = require('./CatToolStore').default
-    expect(CatToolStore.isPhTagsCompressed()).toBe(false)
-    expect(document.body.classList.contains('ph-tags-compressed')).toBe(false)
+    expect(CatToolStore.isPhTagsCompressed()).toBe(true)
+    expect(document.body.classList.contains('ph-tags-compressed')).toBe(true)
   })
 
   test('initializes phTagsCompressed to true from localStorage', () => {
@@ -65,6 +65,10 @@ describe('CatToolStore - phTagsCompressed', () => {
   })
 
   test('TOGGLE_PH_TAGS_COMPRESSED toggles state from false to true', () => {
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === 'phTagsCompressed-test@example.com') return 'false'
+      return null
+    })
     CatToolStore = require('./CatToolStore').default
     CatToolConstants = require('../constants/CatToolConstants').default
     AppDispatcher = require('./AppDispatcher')
@@ -101,6 +105,10 @@ describe('CatToolStore - phTagsCompressed', () => {
   })
 
   test('TOGGLE_PH_TAGS_COMPRESSED emits change event', () => {
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === 'phTagsCompressed-test@example.com') return 'false'
+      return null
+    })
     CatToolStore = require('./CatToolStore').default
     CatToolConstants = require('../constants/CatToolConstants').default
     AppDispatcher = require('./AppDispatcher')

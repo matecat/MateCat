@@ -248,7 +248,13 @@ class TagEntity extends Component {
         : this.selectCorrectStyle()
     const {openSplit} = getUpdatedSegmentInfo()
     const {
-      data: {id: entityId, placeholder: entityPlaceholder, index, name: entityName},
+      data: {
+        id: entityId,
+        placeholder: entityPlaceholder,
+        index,
+        name: entityName,
+        pcRole,
+      },
     } = contentState.getEntity(entityKey)
     const decoratedText = Array.isArray(children)
       ? children[0].props.text
@@ -256,6 +262,8 @@ class TagEntity extends Component {
 
     const {phTagsCompressed} = this.state
     const isCompressedPh = entityName === 'ph' && phTagsCompressed && index >= 0
+    const pcRoleClass =
+      entityName === 'ph' && pcRole ? ` tag-pc-${pcRole}` : ''
     const showTooltip =
       (shouldTooltipOnHover && tooltipAvailable) || isCompressedPh
 
@@ -275,7 +283,7 @@ class TagEntity extends Component {
             ref={(ref) => (this.tagRef = ref)}
             className={`tag ${style}${
               focused ? ' tag-focused' : ''
-            }${isCompressedPh ? ' tag-compressed' : ''} ${tagWarningStyle}`}
+            }${isCompressedPh ? ' tag-compressed' : ''}${pcRoleClass} ${tagWarningStyle}`}
             data-offset-key={this.props.offsetkey}
             unselectable="on"
             suppressContentEditableWarning={true}
