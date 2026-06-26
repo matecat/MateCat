@@ -1267,3 +1267,8 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 .ui.popup.bottom.right.qr-score-popup code {
   font-size: 12px;
 }
+
+.tooltip--wide {
+  max-width: 360px;
+  width: max-content;
+}

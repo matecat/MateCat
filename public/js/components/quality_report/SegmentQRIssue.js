@@ -1,10 +1,10 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
-import {Popup} from 'semantic-ui-react'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import CommentsSquareIconFilled from '../../../img/icons/CommentsSquareIconFilled'
+import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
 
 const generateCommentLines = (issue) => {
   const lines = []
@@ -21,7 +21,9 @@ const generateCommentLines = (issue) => {
         lines.push(
           <p key={comment.id} className="re-comment">
             <span className={cls}>{role} </span>
-            <span className="re-comment-date"><i>({date}): </i></span>
+            <span className="re-comment-date">
+              <i>({date}): </i>
+            </span>
             {comment.comment}
           </p>,
         )
@@ -31,7 +33,9 @@ const generateCommentLines = (issue) => {
   if (issue.get('target_text')) {
     lines.push(
       <p key={issue.get('issue_id')} className="re-comment">
-        <span className="re-selected-text"><b>Selected text: </b></span>
+        <span className="re-selected-text">
+          <b>Selected text: </b>
+        </span>
         {issue.get('target_text')}
       </p>,
     )
@@ -53,31 +57,20 @@ const SegmentQRIssue = ({issue, index}) => {
         <b key={'sev' + index}>[{issue.get('issue_severity')}]</b>
       </div>
       {hasComments && (
-        <Popup
-          hoverable
-          position="bottom right"
-          trigger={
-            <Button
-              size={BUTTON_SIZE.ICON_XSMALL}
-              title="Comments"
-              mode={BUTTON_MODE.OUTLINE}
-            >
-              <CommentsSquareIconFilled size={18} />
-            </Button>
-          }
+        <Tooltip
+          position={TOOLTIP_POSITION.BOTTOM}
+          isInteractiveContent
+          content={<div>{generateCommentLines(issue)}</div>}
         >
-          <div
-            style={{
-              top: '0px',
-              right: 'auto',
-              left: '616.766px',
-              bottom: 'auto',
-              width: '368.594px',
-            }}
+          <Button
+            ref={createRef()}
+            size={BUTTON_SIZE.ICON_XSMALL}
+            title="Comments"
+            mode={BUTTON_MODE.OUTLINE}
           >
-            {generateCommentLines(issue)}
-          </div>
-        </Popup>
+            <CommentsSquareIconFilled size={18} />
+          </Button>
+        </Tooltip>
       )}
     </div>
   )

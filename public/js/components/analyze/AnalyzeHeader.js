@@ -1,7 +1,7 @@
-import React, {useRef, useEffect, useCallback} from 'react'
+import React, {createRef, useRef, useEffect, useCallback} from 'react'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
-import {Popup} from 'semantic-ui-react'
 import {downloadAnalysisReport} from '../../api/downloadAnalysisReport'
+import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {Badge, BADGE_TYPE} from '../common/Badge'
 import Check from '../../../img/icons/Check'
@@ -286,15 +286,11 @@ const AnalyzeHeader = ({data, project}) => {
             </div>
           </div>
         </div>
-        <Popup
-          content={tooltipText}
-          position="bottom center"
-          trigger={
-            <div>
-              <InfoIcon size={16} />
-            </div>
-          }
-        />
+        <Tooltip position={TOOLTIP_POSITION.BOTTOM} content={tooltipText}>
+          <div ref={createRef()}>
+            <InfoIcon size={16} />
+          </div>
+        </Tooltip>
       </div>
     )
   }, [data, getSavingWorkCount])

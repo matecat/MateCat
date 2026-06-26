@@ -1,7 +1,7 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import JobProgressBar from '../common/JobProgressBar'
-import {Popup} from 'semantic-ui-react'
 import HelpCircle from '../../../img/icons/HelpCircle'
+import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
 
 export const ProductionSummary = ({
   qualitySummary,
@@ -140,18 +140,16 @@ export const ProductionSummary = ({
       {config.project_type !== 'old' ? (
         <div className={'qr-effort qr-score ' + jobPassedClass}>
           <div>
-            <Popup
+            <Tooltip
+              position={TOOLTIP_POSITION.BOTTOM}
               content={tooltipText}
-              position="bottom right"
-              // /**/ popper={{className: 'ui popup qr-score-popup'}}
-              hoverable
-              wide="very"
-              trigger={
-                <div className="qr-ept-info">
-                  EPT score <HelpCircle size={12} />
-                </div>
-              }
-            />
+              isInteractiveContent
+              className="tooltip--wide"
+            >
+              <div className="qr-ept-info" ref={createRef()}>
+                EPT score <HelpCircle size={12} />
+              </div>
+            </Tooltip>
             <div className="qr-tolerated-score">{score}</div>
           </div>
           <div>

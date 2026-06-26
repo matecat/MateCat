@@ -1,18 +1,12 @@
 import React from 'react'
-import {Popup} from 'semantic-ui-react'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import {
   ANALYSIS_STATUS,
   ANALYSIS_WORKFLOW_TYPES,
 } from '../../constants/Constants'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import OutsourceButton from './OutsourceButton'
-import CopyIcon from '../../../img/icons/CopyIcon'
+import CopyButton from '../common/CopyButton/CopyButton'
 
 const SplitChunkJob = ({
   job,
@@ -67,23 +61,7 @@ const SplitChunkJob = ({
                 value={encodeURI(chunkAnalysis.urls.t)}
                 onClick={(e) => e.stopPropagation()}
               />
-              <Popup
-                content="Copied to Clipboard!"
-                on="click"
-                pinned
-                position="top center"
-                trigger={
-                  <Button
-                    size={BUTTON_SIZE.ICON_XSMALL}
-                    mode={BUTTON_MODE.GHOST}
-                    type={BUTTON_TYPE.PRIMARY}
-                    onClick={copyJobLinkToClipboard(job.id)}
-                    data-position="top center"
-                  >
-                    <CopyIcon size={16} />
-                  </Button>
-                }
-              />
+              <CopyButton onCopy={copyJobLinkToClipboard(job.id)} />
             </div>
           </div>
           <div className="project-card__count">
