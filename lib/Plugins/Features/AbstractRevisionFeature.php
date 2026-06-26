@@ -345,11 +345,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        // Dispatch-boundary composition root: feature handlers are invoked reflectively by
-        // FeatureSet::dispatch() with only the event, and the feature object holds no IDatabase.
-        // Obtaining here is intentional until a FeatureSet DB-injection phase lets features carry one;
-        // the event stays a pure notification and must NOT carry an IDatabase handle.
-        $model = new QualityReportModel($event->chunk, Database::obtain());
+        // The event stays a pure notification and must NOT carry an IDatabase handle; the feature
+        // itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
+        $model = new QualityReportModel($event->chunk, $this->getDatabase());
         $model->resetScore($event->completionEventId);
     }
 
@@ -468,7 +466,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $project = $this->getProjectDao()->findById($idProject)
             ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
-        $dao = new ProjectDao(Database::obtain());
+        $dao = new ProjectDao($this->getDatabase());
         $dao->updateField($project, 'id_qa_model', $model_record->id);
     }
 

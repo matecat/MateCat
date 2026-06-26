@@ -386,7 +386,7 @@ class MMT extends AbstractEngine
 
                 $jMetadataDao = new MetadataDao($this->database);
 
-                Database::obtain()->begin();
+                $this->database->begin();
                 foreach ($result as $langPair => $context) {
                     $jobId = array_search($langPair, $jobLanguages, true);
                     if ($jobId === false) {
@@ -400,7 +400,7 @@ class MMT extends AbstractEngine
                         $context
                     );
                 }
-                Database::obtain()->commit();
+                $this->database->commit();
             } catch (Exception $e) {
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());

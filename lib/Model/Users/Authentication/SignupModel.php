@@ -89,9 +89,9 @@ class SignupModel
             $this->__prepareNewUser();
             $this->user->uid = $this->userDao->insertStruct($this->user) ?: throw new RuntimeException('User uid must be set after signup insert');
 
-            Database::obtain()->begin();
+            $this->teamDao->getDatabaseHandler()->begin();
             $this->teamDao->createPersonalTeam($this->user);
-            Database::obtain()->commit();
+            $this->teamDao->getDatabaseHandler()->commit();
         }
 
         $this->__saveWantedUrl();
