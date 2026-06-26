@@ -271,7 +271,7 @@ class GetSearchController extends AbstractStatefulKleinController
             throw new RuntimeException("Expected MateCatFilter instance");
         }
 
-        return new SearchModel($queryParams, $filter);
+        return new SearchModel($queryParams, $filter, $this->getDatabase());
     }
 
     /**

@@ -332,7 +332,7 @@ class GlossaryController extends KleinController
                 $userRole = Filter::ROLE_TRANSLATOR;
             }
 
-            $userKeys = new UserKeysModel($this->user, $userRole);
+            $userKeys = new UserKeysModel($this->user, $this->getDatabase(), $userRole);
 
             $json['userKeys'] = $userKeys->getKeys($job->tm_keys)['job_keys'];
         }

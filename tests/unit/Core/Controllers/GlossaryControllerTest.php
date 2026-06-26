@@ -397,6 +397,7 @@ class GlossaryControllerTest extends AbstractTest
         $response = $this->createStub(Response::class);
         $response->method('json')->willReturnSelf();
         $ref->getProperty('response')->setValue($controller, $response);
+        $ref->getProperty('database')->setValue($controller, \Model\DataAccess\Database::obtain());
 
         return $controller;
     }

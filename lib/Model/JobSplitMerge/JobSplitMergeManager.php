@@ -121,7 +121,7 @@ class JobSplitMergeManager
     {
         if ($this->jobSplitMergeService === null) {
             $this->jobSplitMergeService = new JobSplitMergeService(
-                Database::obtain(),
+                $this->features->getDatabase(),
                 $this->features,
                 $this->logger,
             );

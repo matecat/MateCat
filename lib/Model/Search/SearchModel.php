@@ -45,10 +45,10 @@ class SearchModel
      * @param MateCatFilter $filters
      * @throws TypeError
      */
-    public function __construct(SearchQueryParamsStruct $queryParams, MateCatFilter $filters)
+    public function __construct(SearchQueryParamsStruct $queryParams, MateCatFilter $filters, IDatabase $database)
     {
         $this->queryParams = $queryParams;
-        $this->db = Database::obtain();
+        $this->db = $database;
         $this->filters = $filters;
         $this->_loadParams();
     }

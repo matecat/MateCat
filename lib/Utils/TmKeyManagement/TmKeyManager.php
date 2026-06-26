@@ -305,7 +305,7 @@ class TmKeyManager
      * @see TmKeyStruct
      *
      */
-    public static function mergeJsonKeys(string $Json_clientKeys, string $Json_jobKeys, string $userRole = Filter::ROLE_TRANSLATOR, ?int $uid = null): array
+    public static function mergeJsonKeys(string $Json_clientKeys, string $Json_jobKeys, IDatabase $database, string $userRole = Filter::ROLE_TRANSLATOR, ?int $uid = null): array
     {
         //we put the already present job keys so they can be checked against the client keys when cycle advances
         //( jobs has more elements than the client objects )
@@ -490,7 +490,7 @@ class TmKeyManager
                         /*
                          * Take the keys of the user
                          */
-                        $_keyDao = new MemoryKeyDao(Database::obtain());
+                        $_keyDao = new MemoryKeyDao($database);
                         $dh = new MemoryKeyStruct([
                             'uid' => $uid,
                             'tm_key' => new TmKeyStruct([

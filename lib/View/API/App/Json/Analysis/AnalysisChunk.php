@@ -179,7 +179,7 @@ class AnalysisChunk implements JsonSerializable
             return $tmKeys;
         }
 
-        $jobKeys = $this->chunkStruct->getClientKeys($this->user, Filter::OWNER)['job_keys'];
+        $jobKeys = $this->chunkStruct->getClientKeys($this->user, Filter::OWNER, $this->database)['job_keys'];
 
         foreach ($jobKeys as $tmKey) {
             $tmKeys[][trim($tmKey->name ?? '')] = trim($tmKey->key ?? '');

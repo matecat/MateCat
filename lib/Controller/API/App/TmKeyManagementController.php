@@ -81,7 +81,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             $userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel($this->getUser(), $userRole);
+        $userKeys = new UserKeysModel($this->getUser(), $this->getDatabase(), $userRole);
         $keys = $userKeys->getKeys($chunk->tm_keys);
 
         $this->response->json([

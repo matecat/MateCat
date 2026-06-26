@@ -19,6 +19,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
+use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\UserKeysModel;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
@@ -301,9 +302,9 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @throws Exception
      * @throws TypeError
      */
-    public function getClientKeys(UserStruct $user, string $role, ?UserKeysModel $uKModel = null): array
+    public function getClientKeys(UserStruct $user, string $role, IDatabase $database, ?UserKeysModel $uKModel = null): array
     {
-        $uKModel ??= new UserKeysModel($user, $role);
+        $uKModel ??= new UserKeysModel($user, $database, $role);
 
         return $uKModel->getKeys($this->tm_keys, 60 * 10);
     }

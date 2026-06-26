@@ -160,7 +160,7 @@ class SearchModelTest extends AbstractTest
         $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
 
         // instantiate the searchModel
-        $searchModel = new SearchModel($queryParamsStruct, $filters);
+        $searchModel = new SearchModel($queryParamsStruct, $filters, \Model\DataAccess\Database::obtain());
 
         // make assertions
         $expected = [
@@ -191,7 +191,7 @@ class SearchModelTest extends AbstractTest
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
-        $searchModel = new SearchModel($queryParamsStruct, $filters);
+        $searchModel = new SearchModel($queryParamsStruct, $filters, \Model\DataAccess\Database::obtain());
 
         $result = $searchModel->search(true);
 
@@ -218,7 +218,7 @@ class SearchModelTest extends AbstractTest
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
-        $searchModel = new SearchModel($queryParamsStruct, $filters);
+        $searchModel = new SearchModel($queryParamsStruct, $filters, \Model\DataAccess\Database::obtain());
 
         $result = $searchModel->search(false);
 
@@ -245,7 +245,7 @@ class SearchModelTest extends AbstractTest
         $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters     = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
-        $searchModel = new SearchModel($queryParamsStruct, $filters);
+        $searchModel = new SearchModel($queryParamsStruct, $filters, \Model\DataAccess\Database::obtain());
 
         $result = $searchModel->search(false);
 
@@ -269,7 +269,7 @@ class SearchModelTest extends AbstractTest
         $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
         $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
 
-        $searchModel = new SearchModel($queryParamsStruct, $filters);
+        $searchModel = new SearchModel($queryParamsStruct, $filters, \Model\DataAccess\Database::obtain());
         return $searchModel->search(true);
     }
 }

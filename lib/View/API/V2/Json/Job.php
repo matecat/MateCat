@@ -126,9 +126,9 @@ class Job
         }
 
         if (!$this->called_from_api) {
-            $out = $jStruct->getClientKeys($this->user, Filter::OWNER)['job_keys'];
+            $out = $jStruct->getClientKeys($this->user, Filter::OWNER, $this->database)['job_keys'];
         } else {
-            $out = $jStruct->getClientKeys($this->user, Filter::ROLE_TRANSLATOR)['job_keys'];
+            $out = $jStruct->getClientKeys($this->user, Filter::ROLE_TRANSLATOR, $this->database)['job_keys'];
         }
 
         return (new JobClientKeys($out))->render();

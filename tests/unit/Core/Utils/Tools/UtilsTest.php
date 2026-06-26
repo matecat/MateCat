@@ -1819,7 +1819,7 @@ class UtilsTest extends AbstractTest
     }
 
     // =========================================================================
-    // Tests for changeMemorySuggestionSource()
+    // Tests for changeMemorySuggestionSource(\Model\DataAccess\Database::obtain())
     // =========================================================================
 
     /**
@@ -1833,7 +1833,7 @@ class UtilsTest extends AbstractTest
             'memory_key' => 'irrelevant'
         ];
 
-        $result = Utils::changeMemorySuggestionSource($match, '[]');
+        $result = Utils::changeMemorySuggestionSource($match, '[]', \Model\DataAccess\Database::obtain());
 
         $this->assertSame(\Utils\Constants\Constants::PUBLIC_TM, $result);
     }
@@ -1849,7 +1849,7 @@ class UtilsTest extends AbstractTest
             'memory_key' => 'irrelevant'
         ];
 
-        $result = Utils::changeMemorySuggestionSource($match, '[]');
+        $result = Utils::changeMemorySuggestionSource($match, '[]', \Model\DataAccess\Database::obtain());
 
         $this->assertSame('AcmeTM', $result);
     }
@@ -1886,7 +1886,7 @@ class UtilsTest extends AbstractTest
             'memory_key' => $key,
         ];
 
-        $result = Utils::changeMemorySuggestionSource($match, $jobTmKeys, null);
+        $result = Utils::changeMemorySuggestionSource($match, $jobTmKeys, \Model\DataAccess\Database::obtain(), null);
 
         $this->assertSame('Default Key Name', $result);
     }
@@ -1928,7 +1928,7 @@ class UtilsTest extends AbstractTest
             'memory_key' => $key,
         ];
 
-        $result = Utils::changeMemorySuggestionSource($match, $jobTmKeys, $uid);
+        $result = Utils::changeMemorySuggestionSource($match, $jobTmKeys, \Model\DataAccess\Database::obtain(), $uid);
 
         $this->assertSame('User Key Name', $result);
         $this->deleteMemoryKeyRow($uid, $key);
@@ -1945,13 +1945,13 @@ class UtilsTest extends AbstractTest
             'memory_key' => 'not-a-md5',
         ];
 
-        $result = Utils::changeMemorySuggestionSource($match, '[]');
+        $result = Utils::changeMemorySuggestionSource($match, '[]', \Model\DataAccess\Database::obtain());
 
         $this->assertSame(\Utils\Constants\Constants::PUBLIC_TM, $result);
     }
 
     // =========================================================================
-    // Tests for keyNameFromUserKeyring()
+    // Tests for keyNameFromUserKeyring(\Model\DataAccess\Database::obtain())
     // =========================================================================
 
     /**
@@ -1960,7 +1960,7 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testKeyNameFromUserKeyringReturnsNullWhenUidIsNull(): void
     {
-        $result = Utils::keyNameFromUserKeyring(md5('key-with-null-uid'), null);
+        $result = Utils::keyNameFromUserKeyring(md5('key-with-null-uid'), \Model\DataAccess\Database::obtain(), null);
 
         $this->assertNull($result);
     }
@@ -1977,7 +1977,7 @@ class UtilsTest extends AbstractTest
         $this->deleteMemoryKeyRow($uid, $key);
         $this->insertMemoryKeyRow($uid, $key, 'Existing Key Name');
 
-        $result = Utils::keyNameFromUserKeyring($key, $uid);
+        $result = Utils::keyNameFromUserKeyring($key, \Model\DataAccess\Database::obtain(), $uid);
 
         $this->assertSame('Existing Key Name', $result);
         $this->deleteMemoryKeyRow($uid, $key);
@@ -1994,7 +1994,7 @@ class UtilsTest extends AbstractTest
         $key = md5('missing-key-name');
         $this->deleteMemoryKeyRow($uid, $key);
 
-        $result = Utils::keyNameFromUserKeyring($key, $uid);
+        $result = Utils::keyNameFromUserKeyring($key, \Model\DataAccess\Database::obtain(), $uid);
 
         $this->assertNull($result);
     }
@@ -2011,7 +2011,7 @@ class UtilsTest extends AbstractTest
         $this->deleteMemoryKeyRow($uid, $key);
         $this->insertMemoryKeyRow($uid, $key, '   ');
 
-        $result = Utils::keyNameFromUserKeyring($key, $uid);
+        $result = Utils::keyNameFromUserKeyring($key, \Model\DataAccess\Database::obtain(), $uid);
 
         $this->assertSame(\Utils\Constants\Constants::NO_DESCRIPTION_TM, $result);
         $this->deleteMemoryKeyRow($uid, $key);
