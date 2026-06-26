@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@babel/core": "^8.0.0",
-    "@babel/eslint-parser": "^7.28.5",
+    "@babel/eslint-parser": "^8.0.0",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "@sentry/vite-plugin": "^5.2.0",

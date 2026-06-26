@@ -87,3 +87,4 @@ certs
 /storage
 # Added by code-review-graph
 .code-review-graph/
+plugins/headroom_memory.db

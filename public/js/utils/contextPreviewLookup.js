@@ -128,6 +128,31 @@ export class ClientNodepathRegistry {
 const BLOCK_SELECTOR =
   'p, h1, h2, h3, h4, h5, h6, li, td, th, div, title'
 
+/**
+ * Normalized Levenshtein distance in [0, 1].
+ * 0 = identical, 1 = completely different.
+ * Uses an O(min(m,n)) space implementation.
+ */
+const normalizedLevenshtein = (a, b) => {
+  if (a === b) return 0
+  if (!a.length) return 1
+  if (!b.length) return 1
+  // Keep `a` as the shorter string to minimise memory usage
+  if (a.length > b.length) [a, b] = [b, a]
+  const m = a.length, n = b.length
+  let row = Array.from({length: m + 1}, (_, i) => i)
+  for (let j = 1; j <= n; j++) {
+    let prev = row[0]
+    row[0] = j
+    for (let i = 1; i <= m; i++) {
+      const tmp = row[i]
+      row[i] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, row[i], row[i - 1])
+      prev = tmp
+    }
+  }
+  return row[m] / n  // n = max length (longer string)
+}
+
 export class AemContainerTextMatchStrategy {
   execute(rootContainer, path, normSource) {
     if (!path || !normSource) return null
@@ -137,15 +162,19 @@ export class AemContainerTextMatchStrategy {
       'x-attribute_name_value',
     )
     if (!aemContainer) return null
-    const match = findElementByTextMatch(aemContainer, normSource)
+    // allowTagged: multiple segments can share the same AEM container path and
+    // text — they must all land on the same element rather than being distributed.
+    const match = findElementByTextMatch(aemContainer, normSource, {allowTagged: true})
     if (match) return match
-    // Fall back to the container itself only when it is a leaf-like node
-    // (at most one block descendant). A container with many block children
-    // is a page-level layout node — tagging it causes highlightBySid to wrap
-    // every text node in the subtree in <mark> elements, breaking the preview.
-    // In that case return null so the segment is shown as "not found".
+    // Fallback: use the container itself only when it is a leaf-like node
+    // (≤1 block descendant) AND its text is similar enough to the source.
+    // Using normalized Levenshtein (threshold 0.25) handles minor differences
+    // from HTML entities, typographic quotes, trailing punctuation, etc., while
+    // soundly rejecting unrelated text (e.g. "requires login" vs "GET STARTED").
     if (aemContainer.querySelectorAll(BLOCK_SELECTOR).length > 1) return null
-    return aemContainer
+    const containerText = aemContainer.textContent.replace(/\s+/g, ' ').trim().toLowerCase()
+    const needle = normSource.replace(/\s+/g, ' ').trim().toLowerCase()
+    return normalizedLevenshtein(containerText, needle) <= 0.25 ? aemContainer : null
   }
 }
 
