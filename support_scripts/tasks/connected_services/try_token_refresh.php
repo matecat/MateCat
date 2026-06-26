@@ -38,7 +38,7 @@ if ( !array_key_exists( 'id_service', $options ) ) {
 }
 
 
-$dao     = new ConnectedServiceDao();
+$dao     = new ConnectedServiceDao(\Model\DataAccess\Database::obtain());
 $service = $dao->fetchById( (int)$options[ 'id_service' ], ConnectedServiceStruct::class ) ?? throw new Exception( "service not found" );
 
 //FIX
