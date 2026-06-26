@@ -219,6 +219,6 @@ class DeleteContributionController extends KleinController
      */
     protected function createTmsEngine(mixed $id_tms): AbstractEngine
     {
-        return EnginesFactory::getInstance($id_tms, AbstractEngine::class);
+        return EnginesFactory::getInstance($id_tms, $this->getDatabase(), AbstractEngine::class);
     }
 }

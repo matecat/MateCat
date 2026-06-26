@@ -252,7 +252,7 @@ class ProjectTemplateDao extends AbstractDao
             $mt = $projectTemplateStruct->getMt();
 
             if (isset($mt->id)) {
-                $engine = EnginesFactory::getInstance($mt->id, AbstractEngine::class);
+                $engine = EnginesFactory::getInstance($mt->id, $this->database, AbstractEngine::class);
 
                 $engineRecord = $engine->getEngineRecord();
 

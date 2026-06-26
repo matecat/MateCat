@@ -88,7 +88,7 @@ class TMAnalysisWorker extends AbstractWorker
                 new CounterModel($this->database),
             )
         );
-        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver(), $this->database);
+        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver($this->database), $this->database);
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);
     }
 
@@ -400,7 +400,7 @@ class TMAnalysisWorker extends AbstractWorker
             $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? '', true) ?? []);
         }
 
-        $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, AbstractEngine::class);
+        $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, $this->database, AbstractEngine::class);
         if ($mtEngine instanceof MyMemory) {
             $_config['get_mt'] = true;
             $_config['id_mt_engine'] = 0;  // Don't call MyMemory as MT separately — TMS call already includes MT via get_mt flag

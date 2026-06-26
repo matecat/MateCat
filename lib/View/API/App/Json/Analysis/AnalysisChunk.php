@@ -148,13 +148,13 @@ class AnalysisChunk implements JsonSerializable
     private function getEngines(): array
     {
         try {
-            $tmEngine = EnginesFactory::getInstance($this->chunkStruct->id_tms, AbstractEngine::class);
+            $tmEngine = EnginesFactory::getInstance($this->chunkStruct->id_tms, $this->database, AbstractEngine::class);
         } catch (Exception) {
             $tmEngine = null;
         }
 
         try {
-            $mtEngine = EnginesFactory::getInstance($this->chunkStruct->id_mt_engine, AbstractEngine::class);
+            $mtEngine = EnginesFactory::getInstance($this->chunkStruct->id_mt_engine, $this->database, AbstractEngine::class);
         } catch (Exception) {
             $mtEngine = null;
         }

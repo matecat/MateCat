@@ -112,7 +112,7 @@ class Altlang extends AbstractEngine
         // Fallback on MyMemory in case of not supported source/target combination
         if (!$this->checkLanguageCombination($_config['source'], $_config['target'])) {
             /** @var MyMemory $myMemory */
-            $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
+            $myMemory = EnginesFactory::getInstance(1, $this->database, MyMemory::class);
 
             return $myMemory->get($_config);
         }

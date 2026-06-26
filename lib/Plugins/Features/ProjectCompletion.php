@@ -28,13 +28,14 @@ class ProjectCompletion extends BaseFeature
         ?ChunkCompletionUpdateDao $chunkCompletionUpdateDao = null,
     ) {
         parent::__construct($feature);
-        // DAOs are lazily built from the injected database (set by the FeatureSet framework
-        // via setDatabase() after construction), so the ctor stays no-arg for framework
-        // instantiation without ever falling back to Database::obtain().
+        // DAOs are optional: the FeatureSet framework instantiates features with only the
+        // feature struct, so they default to null and are built lazily on first use (below).
         $this->chunkCompletionEventDao = $chunkCompletionEventDao;
         $this->chunkCompletionUpdateDao = $chunkCompletionUpdateDao;
     }
 
+    // Lazy accessors: build from the database injected via setDatabase() (called by the
+    // framework after construction), never falling back to Database::obtain().
     private function chunkCompletionEventDao(): ChunkCompletionEventDao
     {
         return $this->chunkCompletionEventDao ??= new ChunkCompletionEventDao($this->getDatabase());

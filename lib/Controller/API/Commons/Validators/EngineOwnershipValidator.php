@@ -45,7 +45,7 @@ class EngineOwnershipValidator extends Base
         }
 
         /** @var T $engine */
-        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $user->uid, $this->engineClass);
+        $engine = EnginesFactory::getInstanceByIdAndUser($this->engineId, $user->uid, $this->controller->getDatabase(), $this->engineClass);
         $this->engine = $engine;
     }
 

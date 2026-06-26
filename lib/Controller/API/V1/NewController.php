@@ -153,7 +153,7 @@ class NewController extends KleinController
 
         $filesFound = $this->getFilesList(FilesStorageFactory::create(), $arFiles, $uploadDir);
 
-        $engine = EnginesFactory::getInstance($request['mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($request['mt_engine'], $this->getDatabase(), AbstractEngine::class);
 
         $projectStructure = $this->buildProjectStructure(
             $request,
@@ -696,7 +696,7 @@ class NewController extends KleinController
 
             try {
                 $uid = $this->user->uid ?? throw new TypeError('User not authenticated');
-                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $uid, AbstractEngine::class);
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $uid, $this->getDatabase(), AbstractEngine::class);
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage(), -2);
             }

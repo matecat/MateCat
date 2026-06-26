@@ -119,7 +119,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->data['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
-        $engine = EnginesFactory::getInstance($this->data['mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($this->data['mt_engine'], $this->getDatabase(), AbstractEngine::class);
 
         $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
 
@@ -446,6 +446,7 @@ class CreateProjectController extends AbstractStatefulKleinController
                 $engineStruct = EnginesFactory::getInstanceByIdAndUser(
                     $mt_engine,
                     $this->user->uid ?? throw new TypeError('User not authenticated'),
+                    $this->getDatabase(),
                     AbstractEngine::class,
                 );
             } catch (Exception $exception) {

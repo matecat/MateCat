@@ -57,6 +57,7 @@ class EngineOwnershipValidatorTest extends AbstractTest
 
         // Provide a minimal request so Base::__construct() can read it
         $this->setCtrlProp('request', new Request([], [], [], ['REQUEST_URI' => '/test', 'REQUEST_METHOD' => 'GET']));
+        $this->setCtrlProp('database', \Model\DataAccess\Database::obtain());
     }
 
     protected function tearDown(): void

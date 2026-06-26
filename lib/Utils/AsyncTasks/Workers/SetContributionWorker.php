@@ -128,7 +128,7 @@ class SetContributionWorker extends AbstractWorker
     protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
         try {
-            $engine = EnginesFactory::getInstance($jobStruct->id_tms, AbstractEngine::class); //Load MyMemory
+            $engine = EnginesFactory::getInstance($jobStruct->id_tms, $this->database, AbstractEngine::class); //Load MyMemory
 
             return $engine;
         } catch (Exception $e) {

@@ -427,7 +427,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         $_worker->attach($this);
 
         //create an empty engine
-        $_worker->setEngine(EnginesFactory::getInstance(0));
+        $_worker->setEngine(EnginesFactory::getInstance(0, \Model\DataAccess\Database::obtain()));
 
 
         $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');

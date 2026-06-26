@@ -67,7 +67,7 @@ class TMSService
         $this->database = $database;
 
         //get MyMemory service
-        $mymemory_engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $mymemory_engine = EnginesFactory::getInstance(1, $this->database, MyMemory::class);
 
         if (!$mymemory_engine instanceof MyMemory) {
             throw new RuntimeException('MyMemory engine instance is required');
@@ -216,7 +216,7 @@ class TMSService
                             $this->logger->debug("Invalid engine ID value for user $user->uid: " . print_r($engineId, true));
                             continue;
                         }
-                        $engine = EnginesFactory::getInstance((int)$engineId, AbstractEngine::class);
+                        $engine = EnginesFactory::getInstance((int)$engineId, $this->database, AbstractEngine::class);
                         $userAdaptiveEngines[] = $engine;
                         $this->logger->debug("User [$user->uid, '$user->email'] found adaptive engine: {$engine->getEngineRecord()->class_load}");
                     }
@@ -573,7 +573,7 @@ class TMSService
         }
 
         $suggestionsArray = json_decode($row['suggestions_array'], true);
-        $suggestionOrigin = Utils::changeMemorySuggestionSource($suggestionsArray[0], $row['tm_keys'], $uid);
+        $suggestionOrigin = Utils::changeMemorySuggestionSource($suggestionsArray[0], $row['tm_keys'], $this->database, $uid);
         $tmOrigin = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
         if (preg_match("/[a-f0-9]{8,}/", $suggestionsArray[0]['memory_key'])) {
             $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[0]['memory_key'] . "</prop>";

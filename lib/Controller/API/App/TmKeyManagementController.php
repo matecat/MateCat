@@ -191,7 +191,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                         if (!is_numeric($engineId)) {
                             continue;
                         }
-                        $engine = EnginesFactory::getInstance((int)$engineId, AbstractEngine::class);
+                        $engine = EnginesFactory::getInstance((int)$engineId, $this->getDatabase(), AbstractEngine::class);
                         if ($engine->getMemoryIfMine($memoryKey)) {
                             $engineType = $engine->getEngineRecord()->getEngineType();
                             if ($engineType !== null) {

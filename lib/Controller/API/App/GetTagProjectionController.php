@@ -39,7 +39,7 @@ class GetTagProjectionController extends KleinController
         $jobStruct = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($request['id_job'], $request['password']);
         $this->featureSet->loadForProject($jobStruct->getProject(new ProjectDao($this->getDatabase())));
 
-        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
         $engine->setFeatureSet($this->featureSet);
 
         $dataRefMap = (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($request['id_segment']);

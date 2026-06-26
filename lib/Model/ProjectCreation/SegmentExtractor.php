@@ -937,7 +937,7 @@ class SegmentExtractor
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = EnginesFactory::getInstance(1, MyMemory::class);
+        $engine = EnginesFactory::getInstance(1, $this->dbHandler, MyMemory::class);
         $config = $engine->getConfigStruct();
 
         foreach ($privateTmKeys as $tm_info) {

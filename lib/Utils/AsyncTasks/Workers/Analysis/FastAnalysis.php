@@ -390,7 +390,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {
-        $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
+        $myMemory = EnginesFactory::getInstance(1, $this->db(), MyMemory::class);
         if (!$myMemory instanceof MyMemory) {
             throw new Exception("Expected MyMemory engine for id=1, got " . $myMemory::class);
         }
@@ -692,7 +692,7 @@ class FastAnalysis extends AbstractDaemon
             return $e->getCode() * -1;
         }
 
-        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
@@ -968,7 +968,7 @@ HD;
     {
         $mtEngine = null;
         try {
-            $mtEngine = EnginesFactory::getInstance($id_mt_engine, AbstractEngine::class);
+            $mtEngine = EnginesFactory::getInstance($id_mt_engine, $this->db(), AbstractEngine::class);
         } catch (Exception $e) {
             $this->logger->debug("Caught Exception: " . $e->getMessage());
         }

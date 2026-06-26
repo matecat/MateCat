@@ -381,7 +381,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             $redisService ?? $this->createStub(AnalysisRedisServiceInterface::class),
             $segmentUpdater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
             $projectCompletion ?? $this->createStub(ProjectCompletionServiceInterface::class),
-            new EngineService(new DefaultEngineResolver(), Database::obtain()),
+            new EngineService(new DefaultEngineResolver(Database::obtain()), Database::obtain()),
             new MatchProcessorService(new MatchSorter(), Database::obtain()),
         );
 

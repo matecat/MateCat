@@ -75,7 +75,7 @@ class MyMemoryController extends KleinController
      */
     private function createANewKeyAndAssignToUser(string $name): mixed
     {
-        $tms = EnginesFactory::getInstance(1, MyMemory::class);
+        $tms = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
         $newKey = $tms->createMyMemoryKey();
 
         $this->saveMemoryKey($newKey->key, $name);

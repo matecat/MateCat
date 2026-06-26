@@ -74,7 +74,7 @@ H;
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT");
-        EnginesFactory::getInstance($this->not_valid_engine_id);
+        EnginesFactory::getInstance($this->not_valid_engine_id, \Model\DataAccess\Database::obtain());
     }
 
     /**
