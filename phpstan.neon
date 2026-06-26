@@ -6,6 +6,7 @@ parameters:
     paths:
         - lib
         - plugins
+        - internal_scripts/tasks
     # Vendor type stubs — correct wrong/missing types in third-party libraries
     # OpenAi::chat() declares $stream as null but accepts callable at runtime
     stubFiles:

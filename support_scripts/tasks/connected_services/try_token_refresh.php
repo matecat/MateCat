@@ -5,14 +5,13 @@ use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
-use Model\DataAccess\Database;
 use Utils\Registry\AppConfig;
 
 $root = realpath( dirname( __FILE__ ) . '/../../../' );
 include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db        = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+$db        = \Bootstrap::getDatabase();
 $db->debug = false;
 $db->connect();
 
@@ -38,7 +37,7 @@ if ( !array_key_exists( 'id_service', $options ) ) {
 }
 
 
-$dao     = new ConnectedServiceDao(\Model\DataAccess\Database::obtain());
+$dao     = new ConnectedServiceDao($db);
 $service = $dao->fetchById( (int)$options[ 'id_service' ], ConnectedServiceStruct::class ) ?? throw new Exception( "service not found" );
 
 //FIX
