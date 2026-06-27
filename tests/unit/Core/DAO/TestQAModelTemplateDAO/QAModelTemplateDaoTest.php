@@ -9,8 +9,10 @@ use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplatePassfailStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplatePassfailThresholdStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use PDOException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Registry\AppConfig;
 
 class QAModelTemplateDaoTest extends AbstractTest
 {
@@ -315,5 +317,71 @@ class QAModelTemplateDaoTest extends AbstractTest
 
         $this->assertGreaterThan(0, $saved->id);
         $this->assertStringContainsString('Direct Save', $saved->label);
+    }
+
+    /**
+     * save() opens a transaction, inserts the parent template, then the child rows. A NULL
+     * penalty (NOT NULL column) makes the severity INSERT fail mid-transaction, exercising the
+     * catch/rollBack/throw arm. The rollback must leave qa_model_templates at its prior count.
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function saveRollsBackWhenAChildInsertFails(): void
+    {
+        $struct = (new QAModelTemplateStruct())->hydrateFromJSON($this->makeValidJson('Rollback Save'));
+        $struct->uid = $this->uid;
+        // NULL penalty violates the NOT NULL qa_model_template_severities.penalty column.
+        $struct->categories[0]->severities[0]->penalty = null;
+
+        $conn = obtainTestDatabase()->getConnection();
+        $before = (int)$conn->query("SELECT COUNT(*) FROM qa_model_templates WHERE uid = {$this->uid}")->fetchColumn();
+
+        try {
+            $this->dao->save($struct);
+            $this->fail('save() should have thrown on the NULL penalty child insert');
+        } catch (PDOException) {
+            // expected
+        }
+
+        $after = (int)$conn->query("SELECT COUNT(*) FROM qa_model_templates WHERE uid = {$this->uid}")->fetchColumn();
+        $this->assertSame($before, $after, 'transaction must roll back the parent template insert');
+    }
+
+    /**
+     * update() likewise wraps its writes in a transaction; a NULL penalty trips the
+     * catch/rollBack/throw arm. Runs against a real, previously-saved template.
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function updateRollsBackWhenAChildInsertFails(): void
+    {
+        $struct = $this->create('Rollback Update');
+        $struct->categories[0]->severities[0]->penalty = null;
+
+        $this->expectException(PDOException::class);
+        $this->dao->update($struct);
+    }
+
+    /**
+     * readDefaultQaModelJson() throws when the config file cannot be read. Point ROOT at a
+     * missing path and swallow the file_get_contents warning so it returns false and the
+     * explicit guard (not the warning) is what raises.
+     */
+    #[Test]
+    public function getDefaultTemplateThrowsWhenConfigFileMissing(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+        AppConfig::$ROOT = '/nonexistent_rsq_' . uniqid();
+        set_error_handler(static fn(): bool => true);
+
+        try {
+            $this->dao->getDefaultTemplate(1);
+            $this->fail('expected an exception when the QA model config file is missing');
+        } catch (Exception $e) {
+            $this->assertStringContainsString('Cannot read QA model configuration file', $e->getMessage());
+        } finally {
+            restore_error_handler();
+            AppConfig::$ROOT = $originalRoot;
+        }
     }
 }
