@@ -89,8 +89,14 @@ class RealSqlDaoTestGuardTest extends AbstractTest
         // Allowlisted DB but a non-test env (e.g. production boot) must still trip the guard.
         AppConfig::$DB_DATABASE = 'unittest_matecat_local';
         AppConfig::$ENV = 'production';
+        $hadCi = getenv('CI_ENV');
+        putenv('CI_ENV');
+        try {
+            $this->assertFalse($this->callPrivateBool('isRecognisedTestEnv'));
+        } finally {
+            putenv('CI_ENV=' . $hadCi);
+        }
 
-        $this->assertFalse($this->callPrivateBool('isRecognisedTestEnv'));
     }
 
     public function testUseLocalDevelopmentEnvIsNotWritePermitting(): void
