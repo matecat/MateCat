@@ -108,6 +108,10 @@ class SetContributionTest extends AbstractTest
 
     public function tearDown(): void
     {
+        // Restore WorkerClient static handler to avoid polluting subsequent tests
+        // with stale mock that may have uninitialised typed properties.
+        disableAmqWorkerClientHelper();
+
         $conn = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE)->getConnection();
         $redisHandler = (new RedisHandler())->getConnection();
         $redisHandler->flushdb();
