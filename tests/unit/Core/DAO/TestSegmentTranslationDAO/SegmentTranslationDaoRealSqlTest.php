@@ -87,6 +87,12 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
 
     protected function tearDown(): void
     {
+        // Restore WorkerClient static handler — this test creates a fake AMQHandler
+        // (anonymous class skipping parent constructor) that leaves $statefulStomp
+        // uninitialised; subsequent tests that touch email/worker paths would crash
+        // with "Typed property $statefulStomp must not be accessed before initialization".
+        disableAmqWorkerClientHelper();
+
         $this->realSqlTearDown(function (): void {
             $conn = $this->realSqlDb->getConnection();
             // child rows first, then builder cleans parents in reverse order.

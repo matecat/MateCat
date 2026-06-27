@@ -32,6 +32,9 @@ class ProjectQueueTest extends AbstractTest
     protected function tearDown(): void
     {
         WorkerClient::$_QUEUES = $this->originalQueues;
+        // Restore WorkerClient static handler to avoid polluting subsequent tests
+        // with stale mock or stub that may have uninitialised typed properties.
+        disableAmqWorkerClientHelper();
         parent::tearDown();
     }
 
