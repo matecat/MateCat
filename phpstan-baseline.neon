@@ -746,53 +746,6 @@ parameters:
 			count: 1
 			path: lib/Controller/Views/ManageController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Parameter \#2 \$provider of method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) expects null, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 		-
 			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:initDependencies\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -861,18 +814,6 @@ parameters:
 			count: 1
 			path: lib/Controller/API/GDrive/OAuthController.php
 
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
 
 		-
