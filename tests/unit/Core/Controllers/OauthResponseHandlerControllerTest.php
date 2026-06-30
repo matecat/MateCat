@@ -196,7 +196,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['google-Xsrf-Token'] = 'valid_state';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -218,7 +218,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['google-Xsrf-Token'] = 'different_state';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -240,7 +240,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['google-Xsrf-Token'] = 'wrong_value';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -262,7 +262,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['google-Xsrf-Token'] = 'valid_state';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -285,7 +285,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['google-Xsrf-Token'] = 'valid_state';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -309,7 +309,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['-Xsrf-Token'] = 'valid_state';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -371,7 +371,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $encProp->setValue(null, $encMock);
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected
@@ -475,7 +475,7 @@ class OauthResponseHandlerControllerTest extends AbstractTest
         $_SESSION['test-Xsrf-Token'] = 'valid_state';
 
         try {
-            $controller->response();
+            $controller->renderView();
             $this->fail('Expected RenderTerminatedException was not thrown');
         } catch (RenderTerminatedException) {
             // Expected

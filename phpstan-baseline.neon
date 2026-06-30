@@ -646,60 +646,15 @@ parameters:
 			count: 1
 			path: lib/Controller/Views/ContextReviewController.php
 
-		-
-			message: '#^Method Controller\\Views\\ManageController\:\:renderView\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/ManageController.php
 
 
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:initDependencies\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:setTemplateVars\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:validateTheRequest\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Offset ''currency'' might not exist on Utils\\Shop\\AbstractItem\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Offset ''id'' might not exist on Utils\\Shop\\AbstractItem\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Offset ''quote_pid'' might not exist on Utils\\Shop\\AbstractItem\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
 
-		-
-			message: '#^Method Controller\\Views\\XliffToTargetController\:\:renderView\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/XliffToTargetController.php
 
 
 

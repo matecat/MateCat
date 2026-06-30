@@ -35,7 +35,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * @throws ResponseAlreadySentException
      * @throws TypeError
      */
-    public function response(): void
+    public function renderView(): void
     {
         $params = filter_var_array($this->request->params(), [
             'provider' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS],
