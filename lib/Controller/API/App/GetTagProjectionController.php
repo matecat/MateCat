@@ -64,7 +64,7 @@ class GetTagProjectionController extends KleinController
                 ]
             );
 
-            throw new ExternalServiceException($result->error->message);
+            throw new ExternalServiceException($result->error->message ?? 'Unknown external service error');
         }
 
         // no errors, response ok

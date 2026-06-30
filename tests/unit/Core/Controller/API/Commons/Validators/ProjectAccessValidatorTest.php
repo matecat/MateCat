@@ -69,6 +69,7 @@ class ProjectAccessValidatorTest extends AbstractTest
         $user->uid = self::UID;
         $user->email = self::EMAIL;
         $this->setCtrlProp($this->controller, 'user', $user);
+        $this->setCtrlProp($this->controller, 'userIsLogged', true);
     }
 
     protected function tearDown(): void
@@ -140,6 +141,7 @@ class ProjectAccessValidatorTest extends AbstractTest
         $user->uid = self::UID;
         $user->email = self::EMAIL;
         $this->setCtrlProp($ctrl, 'user', $user);
+        $this->setCtrlProp($ctrl, 'userIsLogged', true);
         $this->setCtrlProp($ctrl, 'request', $this->makeRequest());
         $this->setCtrlProp($ctrl, 'database', obtainTestDatabase());
 
@@ -151,11 +153,36 @@ class ProjectAccessValidatorTest extends AbstractTest
         $this->assertTrue(true);
     }
 
-    // NOTE: the "user not logged in" branch (ProjectAccessValidator::_validate lines 47-48,
-    // `if (empty($this->controller->getUser()))`) is unreachable defensive code: getUser():
-    // UserStruct is a non-null typed contract, so empty() on the returned object is always
-    // false. It cannot be exercised without a type-incompatible stub, so it is intentionally
-    // not tested.
+    // ─── user not logged in => AuthorizationError 401 ───
+
+    #[Test]
+    public function throws_authorization_error_when_user_not_logged_in(): void
+    {
+        $this->setCtrlProp($this->controller, 'userIsLogged', false);
+
+        $project = $this->makeProjectStruct(self::TEAM_ID);
+        $validator = new ProjectAccessValidator($this->controller, $project);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->validate();
+    }
+
+    // ─── project without a team => AuthorizationError 401 ───
+
+    #[Test]
+    public function throws_authorization_error_when_project_has_no_team(): void
+    {
+        $project = new ProjectStruct();
+        $project->id_team = null;
+        $validator = new ProjectAccessValidator($this->controller, $project);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->validate();
+    }
 
     // ─── user not in team => AuthorizationError 401 ───
 

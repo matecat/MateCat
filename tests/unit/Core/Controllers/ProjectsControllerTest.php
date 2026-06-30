@@ -93,6 +93,7 @@ class ProjectsControllerTest extends AbstractTest
         $this->user->first_name = 'Ctrl';
         $this->user->last_name = 'Tester';
         $this->setProp('user', $this->user);
+        $this->setProp('userIsLogged', true);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));

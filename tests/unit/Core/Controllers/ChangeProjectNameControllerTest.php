@@ -82,6 +82,7 @@ class ChangeProjectNameControllerTest extends AbstractTest
         $user->first_name = 'Ctrl';
         $user->last_name = 'Tester';
         $this->setProp('user', $user);
+        $this->setProp('userIsLogged', true);
 
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));

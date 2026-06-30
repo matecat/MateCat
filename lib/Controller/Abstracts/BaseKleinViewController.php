@@ -222,4 +222,16 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         die();
     }
 
+    public function redirectToSignin(): never
+    {
+        $_SESSION['wanted_url'] = ltrim($_SERVER['REQUEST_URI'], '/');
+        header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
+
+        if (AppConfig::$ENV === 'testing') {
+            throw new RenderTerminatedException();
+        }
+
+        die();
+    }
+
 }
