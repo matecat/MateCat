@@ -202,11 +202,13 @@ class Translated extends AbstractProvider
          ************************** GET VOLUME ANALYSIS FIRST *************************
          */
 
-        $_project_data = (new ProjectDao())->getProjectAndJobData($this->pid);
-
         if ($this->features === null) {
             throw new RuntimeException('FeatureSet is required for volume analysis');
         }
+
+        $database = $this->features->getDatabase();
+
+        $_project_data = (new ProjectDao($database))->getProjectAndJobData($this->pid);
 
         $analysisStatus = new Status($_project_data, $this->features, $this->user);
         $volAnalysisJson = json_encode($analysisStatus->fetchData()->getResult());
@@ -222,7 +224,7 @@ class Translated extends AbstractProvider
         $jStruct = new JobStruct();
         $jStruct->id = $this->jobList[0]['jid'];
         $jStruct->password = $this->jobList[0]['jpassword'];
-        $jobDao = new JobDao();
+        $jobDao = new JobDao($database);
         $jobData = $jobDao->setCacheTTL(60 * 60)->read($jStruct)[0];
 
         return [$jobData['subject'], json_decode($volAnalysisJson, true)];

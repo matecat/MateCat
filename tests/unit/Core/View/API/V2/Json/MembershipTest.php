@@ -4,6 +4,7 @@ namespace Matecat\Core\View\API\V2\Json;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Teams\MembershipStruct;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
 use View\API\V2\Json\Membership;
@@ -11,6 +12,13 @@ use View\API\V2\Json\Membership;
 #[CoversClass(Membership::class)]
 class MembershipTest extends AbstractTest
 {
+    private function makeUserDao(): UserDao
+    {
+        $stub = $this->createStub(UserDao::class);
+        $stub->method('setCacheTTL')->willReturnSelf();
+        return $stub;
+    }
+
     private function makeMembership(int $id = 1, int $idTeam = 10, int $uid = 100): MembershipStruct
     {
         $struct           = new MembershipStruct();
@@ -33,14 +41,14 @@ class MembershipTest extends AbstractTest
 
     public function testConstructorAcceptsArray(): void
     {
-        $view = new Membership([$this->makeMembership()]);
+        $view = new Membership([$this->makeMembership()], $this->makeUserDao());
         $this->assertInstanceOf(Membership::class, $view);
     }
 
     public function testRenderItemReturnsExpectedKeys(): void
     {
         $membership = $this->makeMembership(5, 20);
-        $view       = new Membership([$membership]);
+        $view = new Membership([$membership], $this->makeUserDao());
         $result     = $view->renderItem($membership);
 
         $this->assertSame(5, $result['id']);
@@ -59,7 +67,7 @@ class MembershipTest extends AbstractTest
         $metadata->value = 'http://example.com/pic.jpg';
         $membership->setUserMetadata([$metadata]);
 
-        $view   = new Membership([$membership]);
+        $view = new Membership([$membership], $this->makeUserDao());
         $result = $view->renderItem($membership);
 
         $this->assertArrayHasKey('user_metadata', $result);
@@ -68,7 +76,7 @@ class MembershipTest extends AbstractTest
     public function testRenderItemOmitsUserMetadataWhenEmpty(): void
     {
         $membership = $this->makeMembership();
-        $view       = new Membership([$membership]);
+        $view = new Membership([$membership], $this->makeUserDao());
         $result     = $view->renderItem($membership);
 
         $this->assertArrayNotHasKey('user_metadata', $result);
@@ -79,7 +87,7 @@ class MembershipTest extends AbstractTest
         $m1 = $this->makeMembership(1, 10, 100);
         $m2 = $this->makeMembership(2, 10, 200);
 
-        $view   = new Membership([$m1, $m2]);
+        $view = new Membership([$m1, $m2], $this->makeUserDao());
         $result = $view->render();
 
         $this->assertCount(2, $result);
@@ -91,7 +99,7 @@ class MembershipTest extends AbstractTest
     {
         $m1 = $this->makeMembership(1, 10, 100);
 
-        $view   = new Membership([$m1]);
+        $view = new Membership([$m1], $this->makeUserDao());
         $result = $view->renderPublic();
 
         $this->assertCount(1, $result);
@@ -101,7 +109,7 @@ class MembershipTest extends AbstractTest
     public function testRenderItemPublicReturnsArray(): void
     {
         $membership = $this->makeMembership();
-        $view       = new Membership([$membership]);
+        $view = new Membership([$membership], $this->makeUserDao());
         $result     = $view->renderItemPublic($membership);
 
         $this->assertIsArray($result);

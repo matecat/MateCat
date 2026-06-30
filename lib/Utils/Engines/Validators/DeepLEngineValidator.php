@@ -3,6 +3,7 @@
 namespace Utils\Engines\Validators;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
@@ -12,6 +13,10 @@ use Utils\Validator\Contracts\ValidatorObjectInterface;
 
 class DeepLEngineValidator extends AbstractValidator
 {
+    public function __construct(private readonly IDatabase $database)
+    {
+    }
+
     /**
      * @param EngineValidatorObject $object
      * @return ValidatorObjectInterface|null
@@ -23,7 +28,7 @@ class DeepLEngineValidator extends AbstractValidator
         $engineStruct = $object->engineStruct ?? throw new Exception('Engine struct required');
 
         /** @var DeepL $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct, $this->database);
         try {
             $config = $newTestCreatedMT->getConfigStruct();
             $config['segment'] = "Hello World";

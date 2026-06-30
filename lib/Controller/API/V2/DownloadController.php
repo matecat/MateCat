@@ -174,7 +174,7 @@ class DownloadController extends AbstractDownloadController
             $this->forceXliff = true;
         }
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->getDatabase());
         $this->processDownload();
         $this->finalize($forceXliff);
     }
@@ -205,18 +205,18 @@ class DownloadController extends AbstractDownloadController
             if (empty($chunkReviewStruct)) {
                 throw new NotFoundException("Not found.");
             }
-            $jobData = $chunkReviewStruct->getChunk();
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         $this->job = $jobData;
 
-        $this->project = $this->job->getProject();
+        $this->project = $this->job->getProject(new ProjectDao($this->getDatabase()));
 
         $this->featureSet->loadForProject($this->project);
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job);
 
         $output_content = [];
 
@@ -293,7 +293,7 @@ class DownloadController extends AbstractDownloadController
                     if ($this->disableErrorCheck === true) {
                         $xliffReplacerCallback = new SilentXliffReplacerCallback();
                     } else {
-                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job);
+                        $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $this->job->source, $jobData['target'], $this->job, $this->getDatabase());
                     }
 
                     // run xliff replacer

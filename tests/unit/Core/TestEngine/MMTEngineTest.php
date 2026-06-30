@@ -36,7 +36,7 @@ class MMTEngineTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->database_instance = Database::obtain();
+        $this->database_instance = obtainTestDatabase();
 
         /**
          * engine insertion
@@ -74,7 +74,7 @@ H;
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT");
-        EnginesFactory::getInstance($this->not_valid_engine_id);
+        EnginesFactory::getInstance($this->not_valid_engine_id, obtainTestDatabase());
     }
 
     /**
@@ -90,7 +90,7 @@ H;
         $mmtClient->expects($invocation = $this->once())->method('updateMemoryContent');
 
         $mmtEngine = @$this->getMockBuilder(MMT::class)
-            ->setConstructorArgs([new EngineStruct($record)])
+            ->setConstructorArgs([new EngineStruct($record), $this->createStub(\Model\DataAccess\IDatabase::class)])
             ->onlyMethods(['_getClient'])->getMock();
 
         $mmtEngine->expects($this->once())

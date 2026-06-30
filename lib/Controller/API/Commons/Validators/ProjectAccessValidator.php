@@ -4,6 +4,7 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Exception;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use ReflectionException;
@@ -41,20 +42,26 @@ class ProjectAccessValidator extends Base
      * @return void
      * @throws AuthorizationError If a user is not logged-in or if the user does not belong to the team.
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _validate(): void
     {
-        if (empty($this->controller->getUser())) {
+        if (!$this->controller->isLoggedIn()) {
             throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
         }
 
+        $idTeam = $this->project->id_team;
+        if ($idTeam === null) {
+            throw new AuthorizationError("Not Authorized, the user does not belong to team", 401);
+        }
+
         $team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL(60 * 10)->findTeamByIdAndUser(
-            $this->project->id_team,
+            $idTeam,
             $this->controller->getUser()
         );
 
         if (empty($team)) {
-            throw new AuthorizationError("Not Authorized, the user does not belong to team " . $this->project->id_team, 401);
+            throw new AuthorizationError("Not Authorized, the user does not belong to team " . $idTeam, 401);
         }
 
         if (method_exists($this->controller, 'setTeam')) {

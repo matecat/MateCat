@@ -7,6 +7,7 @@ namespace Controller\API\Commons\Validators;
  */
 
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use ReflectionException;
@@ -22,6 +23,7 @@ class JobPasswordValidator extends Base
      * @return void
      * @throws NotFoundException
      * @throws ReflectionException
+     * @throws Exception
      * @throws \Model\Exceptions\NotFoundException
      */
     protected function _validate(): void

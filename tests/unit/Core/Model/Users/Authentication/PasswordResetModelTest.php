@@ -42,7 +42,7 @@ class PasswordResetModelTest extends AbstractTest
     {
         $session = [];
         $dao = $this->makeMockDao();
-        $model = new PasswordResetModel($session, 'my-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'my-token');
 
         $ref = new ReflectionProperty($model, 'token');
         $this->assertSame('my-token', $ref->getValue($model));
@@ -53,7 +53,7 @@ class PasswordResetModelTest extends AbstractTest
     {
         $session = ['password_reset_token' => 'session-token'];
         $dao = $this->makeMockDao();
-        $model = new PasswordResetModel($session, null, $dao);
+        $model = new PasswordResetModel($session, $dao, null);
 
         $ref = new ReflectionProperty($model, 'token');
         $this->assertSame('session-token', $ref->getValue($model));
@@ -67,7 +67,7 @@ class PasswordResetModelTest extends AbstractTest
 
         $session = [];
         $dao = $this->makeMockDao(null);
-        $model = new PasswordResetModel($session, 'bad-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'bad-token');
         $model->validateUser();
     }
 
@@ -82,7 +82,7 @@ class PasswordResetModelTest extends AbstractTest
 
         $session = [];
         $dao = $this->makeMockDao($user);
-        $model = new PasswordResetModel($session, 'valid-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'valid-token');
         $model->validateUser();
     }
 
@@ -93,7 +93,7 @@ class PasswordResetModelTest extends AbstractTest
 
         $session = [];
         $dao = $this->makeMockDao($user);
-        $model = new PasswordResetModel($session, 'valid-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'valid-token');
         $model->validateUser();
 
         $this->assertSame('valid-token', $session['password_reset_token']);
@@ -107,7 +107,7 @@ class PasswordResetModelTest extends AbstractTest
 
         $session = [];
         $dao = $this->makeMockDao($user);
-        $model = new PasswordResetModel($session, 'valid-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'valid-token');
         $model->resetPassword('new-secure-pass!');
 
         $this->assertNotSame($oldPass, $user->pass);
@@ -122,7 +122,7 @@ class PasswordResetModelTest extends AbstractTest
 
         $session = [];
         $dao = $this->makeMockDao(null);
-        $model = new PasswordResetModel($session, 'bad-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'bad-token');
         $model->resetPassword('new-pass!');
     }
 
@@ -134,7 +134,7 @@ class PasswordResetModelTest extends AbstractTest
 
         $session = [];
         $dao = $this->makeMockDao($user);
-        $model = new PasswordResetModel($session, 'valid-token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'valid-token');
         $model->resetPassword('new-pass!');
 
         $this->assertNotNull($user->email_confirmed_at);
@@ -145,7 +145,7 @@ class PasswordResetModelTest extends AbstractTest
     {
         $session = ['wanted_url' => 'https://example.com/target'];
         $dao = $this->makeMockDao();
-        $model = new PasswordResetModel($session, 'token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'token');
 
         $url = $model->flushWantedURL();
 
@@ -158,7 +158,7 @@ class PasswordResetModelTest extends AbstractTest
     {
         $session = [];
         $dao = $this->makeMockDao();
-        $model = new PasswordResetModel($session, 'token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'token');
 
         $url = $model->flushWantedURL();
 
@@ -170,7 +170,7 @@ class PasswordResetModelTest extends AbstractTest
     {
         $session = [];
         $dao = $this->makeMockDao();
-        $model = new PasswordResetModel($session, 'token', $dao);
+        $model = new PasswordResetModel($session, $dao, 'token');
 
         $this->assertNull($model->getUser());
     }

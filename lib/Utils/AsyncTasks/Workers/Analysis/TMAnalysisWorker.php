@@ -5,7 +5,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -67,28 +67,29 @@ class TMAnalysisWorker extends AbstractWorker
      */
     public function __construct(
         AMQHandler $queueHandler,
+        IDatabase $database,
         ?AnalysisRedisServiceInterface $redisService = null,
         ?SegmentUpdaterServiceInterface $segmentUpdater = null,
         ?ProjectCompletionServiceInterface $projectCompletion = null,
         ?EngineServiceInterface $engineService = null,
         ?MatchProcessorServiceInterface $matchProcessor = null,
     ) {
-        parent::__construct($queueHandler);
+        parent::__construct($queueHandler, $database);
 
         $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
-        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService(Database::obtain());
+        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database);
         $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
             $this->redisService,
             new ProjectCompletionRepository(
-                Database::obtain(),
-                new ProjectDao(),
-                new JobDao(),
-                new AnalysisDao(),
-                new CounterModel(),
+                $this->database,
+                new ProjectDao($this->database),
+                new JobDao($this->database),
+                new AnalysisDao($this->database),
+                new CounterModel($this->database),
             )
         );
-        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver());
-        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter());
+        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver($this->database), $this->database);
+        $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);
     }
 
     /**
@@ -104,7 +105,7 @@ class TMAnalysisWorker extends AbstractWorker
 
         $params = $queueElement->params;
 
-        $this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet($this->database);
         $this->featureSet->loadFromString($params->features);
 
         $this->_matches = null;
@@ -399,7 +400,7 @@ class TMAnalysisWorker extends AbstractWorker
             $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? '', true) ?? []);
         }
 
-        $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, AbstractEngine::class);
+        $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, $this->database, AbstractEngine::class);
         if ($mtEngine instanceof MyMemory) {
             $_config['get_mt'] = true;
             $_config['id_mt_engine'] = 0;  // Don't call MyMemory as MT separately — TMS call already includes MT via get_mt flag

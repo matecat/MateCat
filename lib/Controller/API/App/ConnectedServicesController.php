@@ -89,7 +89,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController
     private function __handleGDrive(): void
     {
         $service = $this->connectedServiceStruct ?? throw new TypeError('connectedServiceStruct is null');
-        $verifier = new GDriveTokenVerifyModel($service);
+        $verifier = new GDriveTokenVerifyModel($service, new ConnectedServiceDao($this->getDatabase()));
 
         $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
 

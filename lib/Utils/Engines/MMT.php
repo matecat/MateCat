@@ -5,8 +5,10 @@ namespace Utils\Engines;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
@@ -66,9 +68,9 @@ class MMT extends AbstractEngine
      * @throws Exception
      * @throws TypeError
      */
-    public function __construct($engineRecord)
+    public function __construct($engineRecord, IDatabase $database)
     {
-        parent::__construct($engineRecord);
+        parent::__construct($engineRecord, $database);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
             throw new Exception(
@@ -122,17 +124,17 @@ class MMT extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $metadataDao = new ProjectsMetadataDao();
+        $metadataDao = new ProjectsMetadataDao($this->database);
 
         $glossaries = null;
 
         if (!empty($_config['id_project'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'mmt_glossaries');
+            $glossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], 'mmt_glossaries');
         }
 
         if ($glossaries !== null) {
-            $mmtGlossariesArray = json_decode($glossaries->value, true);
-            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get(
+            $mmtGlossariesArray = json_decode($glossaries, true);
+            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->getValue(
                 $_config['id_project'],
                 'mmt_ignore_glossary_case'
             );
@@ -140,7 +142,7 @@ class MMT extends AbstractEngine
             $_config['glossaries'] = implode(",", $mmtGlossariesArray);
 
             if ($ignore_glossary_case !== null) {
-                $_config['ignore_glossary_case'] = $ignore_glossary_case->value;
+                $_config['ignore_glossary_case'] = $ignore_glossary_case;
             }
         }
 
@@ -345,9 +347,9 @@ class MMT extends AbstractEngine
     {
         $pid = $projectRow['id'];
 
-        $metadataDao = new ProjectsMetadataDao();
-        $context = $metadataDao->setCacheTTL(86400)->get($pid, "mmt_activate_context_analyzer");
-        $context_analyzer = $context->value ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
+        $metadataDao = new ProjectsMetadataDao($this->database);
+        $context = $metadataDao->setCacheTTL(86400)->getValue($pid, "mmt_activate_context_analyzer");
+        $context_analyzer = $context ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
 
         if (!empty($context_analyzer)) {
             if (empty($segments) || !isset($segments[0]['source'], $segments[0]['target'])) {
@@ -382,9 +384,9 @@ class MMT extends AbstractEngine
                     return;
                 }
 
-                $jMetadataDao = new MetadataDao();
+                $jMetadataDao = new MetadataDao($this->database);
 
-                Database::obtain()->begin();
+                $this->database->begin();
                 foreach ($result as $langPair => $context) {
                     $jobId = array_search($langPair, $jobLanguages, true);
                     if ($jobId === false) {
@@ -398,7 +400,7 @@ class MMT extends AbstractEngine
                         $context
                     );
                 }
-                Database::obtain()->commit();
+                $this->database->commit();
             } catch (Exception $e) {
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());
@@ -414,18 +416,18 @@ class MMT extends AbstractEngine
             // send user keys on a project basis
             // ==============================================
             //
-            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
+            $user = (new UserDao($this->database))->getByEmail($projectRow['id_customer']);
             if ($user === null) {
                 return;
             }
 
             // get jobs keys
-            $project = (new ProjectDao())->findById($pid);
+            $project = (new ProjectDao($this->database))->findById($pid);
             if ($project === null) {
                 return;
             }
 
-            foreach ($project->getJobs() as $job) {
+            foreach ((new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id) as $job) {
                 $memoryKeyStructs = [];
                 $jobKeyList = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
 
@@ -743,7 +745,7 @@ class MMT extends AbstractEngine
 
         // Common metadata loading
         if (!empty($id_job)) {
-            $metadataDao = new MetadataDao();
+            $metadataDao = new MetadataDao($this->database);
             $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
             $mt_context = array_pop($contextRs);

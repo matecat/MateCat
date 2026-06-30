@@ -20,7 +20,7 @@ class CustomPayableRateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new CustomPayableRateDao();
+        $this->dao = new CustomPayableRateDao(obtainTestDatabase());
         $this->cleanupTestData();
     }
 
@@ -32,7 +32,7 @@ class CustomPayableRateDaoTest extends AbstractTest
 
     private function cleanupTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $uids = implode(',', self::TEST_UIDS);
         $conn->exec("DELETE FROM payable_rate_templates WHERE uid IN ($uids)");
         $conn->exec("DELETE FROM job_custom_payable_rates WHERE id_job = 999999");
@@ -236,7 +236,7 @@ class CustomPayableRateDaoTest extends AbstractTest
     {
         $this->dao->assocModelToJob(1, 999999, 1, 'Test Model');
 
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM job_custom_payable_rates WHERE id_job = :id_job");
         $stmt->execute(['id_job' => 999999]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);

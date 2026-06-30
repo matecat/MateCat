@@ -10,6 +10,8 @@ namespace Utils\Email;
 
 use Exception;
 use Model\Teams\MembershipStruct;
+use Model\Teams\TeamDao;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
@@ -35,25 +37,30 @@ class MembershipCreatedEmail extends AbstractEmail
      */
     protected UserStruct $sender;
 
+    protected TeamDao $teamDao;
+
     /**
      * MembershipCreatedEmail constructor.
      *
      * @param UserStruct $sender
      * @param MembershipStruct $membership
+     * @param UserDao $userDao
+     * @param TeamDao $teamDao
      *
      * @throws Exception
      * @throws ReflectionException
      * @throws RuntimeException
      */
-    public function __construct(UserStruct $sender, MembershipStruct $membership)
+    public function __construct(UserStruct $sender, MembershipStruct $membership, UserDao $userDao, TeamDao $teamDao)
     {
-        $this->user = $membership->getUser();
+        $this->user = $membership->getUser($userDao);
         $this->_setlayout('skeleton.html');
         $this->_settemplate('Team/membership_created_content.html');
         $this->membership = $membership;
+        $this->teamDao = $teamDao;
 
         $this->sender = $sender;
-        $this->title = "You've been added to team " . $this->membership->getTeam()->name;
+        $this->title = "You've been added to team " . $this->membership->getTeam($teamDao)->name;
     }
 
     /**
@@ -100,7 +107,7 @@ class MembershipCreatedEmail extends AbstractEmail
         return [
             'user' => $this->user->toArray(),
             'sender' => $this->sender->toArray(),
-            'team' => $this->membership->getTeam()->toArray(),
+            'team' => $this->membership->getTeam($this->teamDao)->toArray(),
             'manageUrl' => CanonicalRoutes::manage()
         ];
     }

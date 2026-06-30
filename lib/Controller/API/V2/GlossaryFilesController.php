@@ -14,6 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
+use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
@@ -49,7 +50,7 @@ class GlossaryFilesController extends KleinController
      */
     protected function initDependencies(): void
     {
-        $this->TMService = new TMSService();
+        $this->TMService = new TMSService($this->getDatabase());
     }
 
     protected function registerValidators(): void
@@ -97,7 +98,7 @@ class GlossaryFilesController extends KleinController
      */
     public function check(): void
     {
-        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
+        $stdResult = (new Upload())->uploadFiles($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
         if (empty($this->tm_key)) {
@@ -130,7 +131,7 @@ class GlossaryFilesController extends KleinController
      */
     public function import(): void
     {
-        $stdResult = $this->TMService->uploadFile($this->request->files()->all());
+        $stdResult = (new Upload())->uploadFiles($this->request->files()->all());
 
         // validation on request parameters has been performed by $this->validateRequest
         if (empty($this->tm_key)) {

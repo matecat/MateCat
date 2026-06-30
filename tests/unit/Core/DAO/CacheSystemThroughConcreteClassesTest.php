@@ -42,8 +42,8 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
          */
         self::$email = Utils::uuid4() . "bar@foo.net";
         $sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . self::$email . "', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
-        Database::obtain()->getConnection()->query($sql_insert_user);
-        self::$uid = Database::obtain()->getConnection()->lastInsertId();
+        obtainTestDatabase()->getConnection()->query($sql_insert_user);
+        self::$uid = obtainTestDatabase()->getConnection()->lastInsertId();
 
         self::$sql_delete_user = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`users` WHERE uid='" . self::$uid . "';";
     }
@@ -55,7 +55,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
     #[AfterClass]
     public static function clean(): void
     {
-        Database::obtain()->getConnection()->query(self::$sql_delete_user);
+        obtainTestDatabase()->getConnection()->query(self::$sql_delete_user);
         $client = (new RedisHandler)->getConnection();
         $client->flushdb();
     }
@@ -72,7 +72,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
         $map = $client->hgetall(UserDao::class . "::getByUid-" . self::$uid);
         $this->assertEmpty($map);
 
-        $underTest = new UserDao();
+        $underTest = new UserDao(obtainTestDatabase());
 
         $underTest->setCacheTTL(600);
 
@@ -125,7 +125,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest
         $this->assertEquals(UserDao::class . "::getByUid-" . self::$uid, $keyMap);
 
 
-        $underTest = new UserDao();
+        $underTest = new UserDao(obtainTestDatabase());
         $underTest->destroyCacheByUid(self::$uid);
 
 

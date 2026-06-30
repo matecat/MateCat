@@ -11,6 +11,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -59,34 +60,28 @@ class CatUtils
     /** @var array<string, float> */
     public static array $cj = ['zh' => 1.8, 'ja' => 2.5];
 
-    private ChunkReviewDao $chunkReviewDao;
-    private JobDao $jobDao;
-    private SegmentTranslationDao $segmentTranslationDao;
-    private FeatureSet $featureSet;
+    protected IDatabase $database;
+    protected ChunkReviewDao $chunkReviewDao;
+    protected JobDao $jobDao;
+    protected SegmentTranslationDao $segmentTranslationDao;
+    protected FeatureSet $featureSet;
     /** @var array<string, mixed> */
     private array $serverGlobalVars;
 
     /**
-     * @param ChunkReviewDao|null $chunkReviewDao
-     * @param JobDao|null $jobDao
-     * @param SegmentTranslationDao|null $segmentTranslationDao
-     * @param FeatureSet|null $featureSet
+     * @param IDatabase $database
      * @param array<string, mixed>|null $serverGlobalVars
      *
      * @throws Exception
      */
-    public function __construct(
-        ?ChunkReviewDao $chunkReviewDao = null,
-        ?JobDao $jobDao = null,
-        ?SegmentTranslationDao $segmentTranslationDao = null,
-        ?FeatureSet $featureSet = null,
-        ?array $serverGlobalVars = null
-    ) {
+    public function __construct(IDatabase $database, ?array $serverGlobalVars = null)
+    {
+        $this->database = $database;
         $this->serverGlobalVars = $serverGlobalVars ?? $_SERVER;
-        $this->chunkReviewDao = $chunkReviewDao ?? new ChunkReviewDao();
-        $this->jobDao = $jobDao ?? new JobDao();
-        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
-        $this->featureSet = $featureSet ?? new FeatureSet();
+        $this->chunkReviewDao = new ChunkReviewDao($database);
+        $this->jobDao = new JobDao($database);
+        $this->segmentTranslationDao = new SegmentTranslationDao($database);
+        $this->featureSet = new FeatureSet($database);
     }
 
     /**
@@ -650,7 +645,7 @@ class CatUtils
 
         // For projects created with No tm analysis enabled
         if ($wStruct->getTotal() == 0 && ($projectStruct['status_analysis'] == ProjectStatus::STATUS_DONE || $projectStruct['status_analysis'] == ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
-            $counter ??= new CounterModel();
+            $counter ??= new CounterModel($this->database);
             $wStruct = $counter->initializeJobWordCount($job['id'], $job['password']);
             LoggerFactory::doJsonLog("BackWard compatibility set Counter.");
 
@@ -762,7 +757,7 @@ class CatUtils
      */
     public function isRevisionFromIdJobAndPassword(int $jid, string $password, ?IsJobRevisionValidator $validator = null): bool
     {
-        $validator ??= new IsJobRevisionValidator();
+        $validator ??= new IsJobRevisionValidator($this->chunkReviewDao);
 
         try {
             return $validator->validate(
@@ -848,7 +843,7 @@ class CatUtils
 
         if (!$job) {
             $chunkReview = $this->chunkReviewDao->findByReviewPasswordAndJobId($jobPassword, $jobId);
-            $job = $chunkReview?->getChunk();
+            $job = $chunkReview?->getChunk($this->jobDao);
         }
 
         return $job;
@@ -907,7 +902,7 @@ class CatUtils
     {
         $idJobs = [];
 
-        foreach ($projectStruct->getJobs() as $job) {
+        foreach ($this->jobDao->getNotDeletedByProjectId((int) $projectStruct->id) as $job) {
             $idJobs[] = $job->id;
         }
 
@@ -952,7 +947,7 @@ class CatUtils
         $extraction_parameters = null;
 
         if ($filtersTemplateId > 0) {
-            $filtersDao ??= new FiltersConfigTemplateDao();
+            $filtersDao ??= new FiltersConfigTemplateDao($this->database);
             $filtersTemplateStruct = $filtersDao->getById($filtersTemplateId);
 
             if ($filtersTemplateStruct !== null) {

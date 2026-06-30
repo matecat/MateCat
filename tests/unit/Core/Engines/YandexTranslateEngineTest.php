@@ -30,7 +30,7 @@ class YandexTranslateEngineTest extends AbstractTest
             'client_secret' => 'test-secret',
         ];
 
-        $this->engine = new TestYandexTranslate($struct);
+        $this->engine = new TestYandexTranslate($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]
@@ -157,7 +157,7 @@ class YandexTranslateEngineTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('is not a MT engine');
 
-        new TestYandexTranslate($struct);
+        new TestYandexTranslate($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]

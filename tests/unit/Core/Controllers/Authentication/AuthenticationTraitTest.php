@@ -54,7 +54,7 @@ class TraitTestSubject
 
     public function getDatabase(): IDatabase
     {
-        return Database::obtain();
+        return obtainTestDatabase();
     }
 
     public static function sessionStart(): void

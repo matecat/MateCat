@@ -93,6 +93,7 @@ class EnginesV2ControllerTest extends AbstractTest
         $this->reflector  = new ReflectionClass(EnginesController::class);
 
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
+        $this->reflector->getProperty('database')->setValue($this->controller, $dbStub);
 
         $user      = new UserStruct();
         $user->uid = 9049010;

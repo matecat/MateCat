@@ -172,7 +172,8 @@ Follow the project `.github/prompts/conventional-commit.prompt.md` for commit me
 
 When creating worktrees, those commands MUST be used:
 
-- `git checkout -b <branch-name>`
+- `cd <project-root> && git branch --show-current`
+- `git branch <branch-name> <current-branch-name>`
 - `git worktree add ../matecat-<branch-name> <branch-name>`
 - `cp composer.phar ../matecat-<branch-name>/composer.phar`
 - `cd ../matecat-<branch-name>/ && php composer.phar install`

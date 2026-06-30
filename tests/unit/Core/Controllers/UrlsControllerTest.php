@@ -42,6 +42,9 @@ class TestableUrlsProjectPasswordValidator extends ProjectPasswordValidator
 
 class TestableUrlsController extends UrlsController
 {
+    /** @var \Model\Jobs\JobStruct[]|null */
+    public ?array $fakeJobs = null;
+
     public function __construct()
     {
     }
@@ -52,6 +55,15 @@ class TestableUrlsController extends UrlsController
 
     protected function registerValidators(): void
     {
+    }
+
+    protected function getProjectJobs(\Model\Projects\ProjectStruct $project): array
+    {
+        if ($this->fakeJobs === null) {
+            throw new \RuntimeException('fakeJobs not configured');
+        }
+
+        return $this->fakeJobs;
     }
 }
 
@@ -93,7 +105,7 @@ class UrlsControllerTest extends AbstractTest
 
         // Mock-seam: swap the Database singleton with a stub. getProjectData()'s
         // statement therefore returns no rows -> ProjectUrls renders an empty shape.
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller    = new TestableUrlsController();
         $this->reflector     = new \ReflectionClass(UrlsController::class);
@@ -102,6 +114,7 @@ class UrlsControllerTest extends AbstractTest
         $this->responseMock = $this->createMock(Response::class);
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
+        $this->setProp('database', $dbStub);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
     }
 
@@ -123,21 +136,18 @@ class UrlsControllerTest extends AbstractTest
     }
 
     /**
-     * Builds a real ProjectStruct whose getJobs() cache is pre-seeded (so JobDao is
-     * never hit) and whose getMetadataValue('features') cache returns empty.
-     *
-     * @param JobStruct[] $jobs
+     * Builds a real ProjectStruct whose getMetadataValue('features') cache returns
+     * empty. Jobs are provided separately via {@see TestableUrlsController::$fakeJobs}.
      *
      * @throws \ReflectionException
      */
-    private function seedProjectStruct(int $id, array $jobs): ProjectStruct
+    private function seedProjectStruct(int $id): ProjectStruct
     {
         $project = new ProjectStruct(['id' => $id]);
 
         $ref  = new \ReflectionClass(ProjectStruct::class);
         $prop = $ref->getProperty('cached_results');
         $prop->setValue($project, [
-            ProjectStruct::class . '::getJobs'                       => $jobs,
             ProjectStruct::class . '::getMetadataValue:' . 'features' => '',
         ]);
 
@@ -190,8 +200,9 @@ class UrlsControllerTest extends AbstractTest
 
         try {
             $activeJob = new JobStruct(['id' => self::BASE + 2, 'status_owner' => JobStatus::STATUS_ACTIVE]);
-            $project   = $this->seedProjectStruct(self::BASE + 1, [$activeJob]);
+            $project   = $this->seedProjectStruct(self::BASE + 1);
 
+            $this->controller->fakeJobs = [$activeJob];
             $this->injectValidatorWithProject($project);
             $this->injectNeuteredFeatureSet();
 
@@ -231,8 +242,9 @@ class UrlsControllerTest extends AbstractTest
 
         try {
             $activeJob = new JobStruct(['id' => self::BASE + 2, 'status_owner' => JobStatus::STATUS_ACTIVE]);
-            $project   = $this->seedProjectStruct(self::BASE + 1, [$activeJob]);
+            $project   = $this->seedProjectStruct(self::BASE + 1);
 
+            $this->controller->fakeJobs = [$activeJob];
             $this->injectValidatorWithProject($project);
 
             // FeatureSet rewrites the formatted object to a stub whose render() is sentinel data.

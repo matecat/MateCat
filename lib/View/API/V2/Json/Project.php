@@ -11,9 +11,12 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Model\Analysis\Status;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
@@ -23,11 +26,6 @@ use Utils\Tools\Utils;
 
 class Project
 {
-
-    /**
-     * @var Job
-     */
-    protected Job $jRenderer;
 
     /**
      * @var ProjectStruct[]
@@ -73,41 +71,27 @@ class Project
         return $this;
     }
 
-    /**
-     * @var MetadataDao|null
-     */
-    protected ?MetadataDao $metadataDao = null;
+    protected IDatabase $database;
+
+    protected MetadataDao $metadataDao;
+
+    protected ProjectDao $projectDao;
 
     /**
-     * @var ProjectDao|null
-     */
-    protected ?ProjectDao $projectDao = null;
-
-    /**
-     * Project constructor.
-     *
+     * @param IDatabase $database
      * @param ProjectStruct[] $data
      * @param string|null $search_status
-     * @param MetadataDao|null $metadataDao
-     * @param ProjectDao|null $projectDao
      */
     public function __construct(
+        IDatabase $database,
         array $data = [],
         ?string $search_status = null,
-        ?MetadataDao $metadataDao = null,
-        ?ProjectDao $projectDao = null
     ) {
+        $this->database = $database;
+        $this->metadataDao = new MetadataDao($database);
+        $this->projectDao = new ProjectDao($database);
         $this->data = $data;
         $this->status = $search_status;
-        $this->metadataDao = $metadataDao;
-        $this->projectDao = $projectDao;
-        $jRendered = new Job();
-
-        if ($search_status) {
-            $jRendered->setStatus($search_status);
-        }
-
-        $this->jRenderer = $jRendered;
     }
 
     /**
@@ -120,14 +104,13 @@ class Project
      */
     public function renderItem(ProjectStruct $project): array
     {
-        $featureSet = $project->getFeaturesSet();
-        $jobs = $project->getJobs(60 * 10); //cached
+        $featureSet = FeatureSet::forProject($project, $this->database);
+        $jobs = (new JobDao($this->database))->getNotDeletedByProjectId((int) $project->id, 60 * 10); //cached
 
         $jobJSONs = [];
         $jobStatuses = [];
         if (!empty($jobs)) {
-            /** @var Job $jobJSON */
-            $jobJSON = new $this->jRenderer();
+            $jobJSON = new Job($this->database);
 
             if (!empty($this->user)) {
                 $jobJSON->setUser($this->user);
@@ -155,11 +138,9 @@ class Project
             }
         }
 
-        $this->metadataDao ??= new MetadataDao();
-        $projectInfo = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
-        $fromApi = $this->metadataDao->setCacheTTL(60)->get((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
+        $projectInfo = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, 'project_info');
+        $fromApi = $this->metadataDao->setCacheTTL(60)->getValue((int)$project->id, ProjectsMetadataMarshaller::FROM_API->value);
 
-        $this->projectDao ??= new ProjectDao();
         $_project_data = $this->projectDao->getProjectAndJobData((int)$project->id);
         $analysisStatus = new Status($_project_data, $featureSet, $this->user);
 
@@ -169,7 +150,7 @@ class Project
             'name' => $project->name,
             'id_team' => (int)$project->id_team,
             'id_assignee' => (int)$project->id_assignee,
-            'from_api' => ($fromApi->value ?? 0) == 1,
+            'from_api' => ($fromApi ?? 0) == 1,
             'analysis' => $analysisStatus->fetchData()->getResult(),
             'create_date' => $project->create_date,
             'fast_analysis_wc' => (int)$project->fast_analysis_wc,
@@ -180,9 +161,9 @@ class Project
             'features' => implode(",", $featureSet->getCodes()),
             'is_cancelled' => (in_array(JobStatus::STATUS_CANCELLED, $jobStatuses)),
             'is_archived' => (in_array(JobStatus::STATUS_ARCHIVED, $jobStatuses)),
-            'remote_file_service' => $project->getRemoteFileServiceName(),
+            'remote_file_service' => $this->projectDao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([(int) $project->id])[0] ?? null,
             'due_date' => Utils::api_timestamp($project->due_date),
-            'project_info' => (null !== $projectInfo) ? $projectInfo->value : null,
+            'project_info' => $projectInfo,
         ];
     }
 

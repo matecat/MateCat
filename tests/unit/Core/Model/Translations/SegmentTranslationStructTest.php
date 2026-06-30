@@ -7,6 +7,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionMethod;
 
 class SegmentTranslationStructTest extends AbstractTest
 {
@@ -113,6 +114,17 @@ class SegmentTranslationStructTest extends AbstractTest
         $this->assertSame(100, $struct['id_segment']);
         $this->assertSame('TRANSLATED', $struct['status']);
         $this->assertTrue(isset($struct['status']));
+    }
+
+    #[Test]
+    public function getJobRequiresInjectedJobDao(): void
+    {
+        $param = (new ReflectionMethod(SegmentTranslationStruct::class, 'getJob'))->getParameters()[0] ?? null;
+
+        $this->assertNotNull($param, 'getJob() must accept an injected $jobDao');
+        $this->assertSame(JobDao::class, (string)$param->getType(), '$jobDao must be typed JobDao');
+        $this->assertFalse($param->isOptional(), '$jobDao must be mandatory');
+        $this->assertFalse($param->allowsNull(), '$jobDao must be non-nullable');
     }
 
     // ─── getJob() / getChunk() ───

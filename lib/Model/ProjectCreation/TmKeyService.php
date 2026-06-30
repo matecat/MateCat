@@ -305,7 +305,7 @@ class TmKeyService
      */
     protected function getKeyringOwnerKeys(int $uid): array
     {
-        return (new MemoryKeyDao())->getKeyringOwnerKeysByUid($uid);
+        return (new MemoryKeyDao($this->dbHandler))->getKeyringOwnerKeysByUid($uid);
     }
 
     /**
@@ -316,6 +316,6 @@ class TmKeyService
      */
     protected function getUserByUid(int $uid): ?UserStruct
     {
-        return (new UserDao())->setCacheTTL(60 * 60)->getByUid($uid);
+        return (new UserDao($this->dbHandler))->setCacheTTL(60 * 60)->getByUid($uid);
     }
 }

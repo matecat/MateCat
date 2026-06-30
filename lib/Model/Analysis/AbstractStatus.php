@@ -14,6 +14,7 @@ use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -80,9 +81,6 @@ abstract class AbstractStatus
      * @param array<mixed> $_project_data
      * @param FeatureSet $features
      * @param UserStruct|null $user
-     * @param AnalysisDao|null $analysisDao
-     * @param JobDao|null $jobDao
-     * @param FileMetadataDao|null $fileMetadataDao
      *
      * @throws ReflectionException
      * @throws Exception
@@ -91,26 +89,24 @@ abstract class AbstractStatus
     public function __construct(
         array $_project_data,
         FeatureSet $features,
-        ?UserStruct $user = null,
-        ?AnalysisDao $analysisDao = null,
-        ?JobDao $jobDao = null,
-        ?FileMetadataDao $fileMetadataDao = null
+        ?UserStruct $user = null
     ) {
         if (is_null($user)) {
             $user = new UserStruct();
             $user->uid = -1;
         }
         $this->user = $user;
-        $project = (new ProjectDao())->findById((int)$_project_data[0]['pid'], 60 * 60);
+        $db = $features->getDatabase();
+        $project = (new ProjectDao($db))->findById((int)$_project_data[0]['pid'], 60 * 60);
         if ($project === null) {
             throw new Exception("Project not found for pid: " . $_project_data[0]['pid']);
         }
         $this->project = $project;
         $this->_project_data = $_project_data;
         $this->featureSet = $features;
-        $this->analysisDao = $analysisDao ?? new AnalysisDao();
-        $this->jobDao = $jobDao ?? new JobDao();
-        $this->fileMetadataDao = $fileMetadataDao ?? new FileMetadataDao();
+        $this->analysisDao = new AnalysisDao($db);
+        $this->jobDao = new JobDao($db);
+        $this->fileMetadataDao = new FileMetadataDao($db);
     }
 
     /**
@@ -207,7 +203,7 @@ abstract class AbstractStatus
     protected function loadObjects(): AbstractStatus
     {
         $target = null;
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+        $mt_qe_workflow_enabled = (new ProjectMetadataDao($this->featureSet->getDatabase()))->setCacheTTL(3600)->getValue((int)$this->project->id, ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
         $matchConstantsClass = MatchConstantsFactory::getInstance(is_bool($mt_qe_workflow_enabled) ? $mt_qe_workflow_enabled : null);
 
         $this->result = $project = new AnalysisProject(
@@ -240,7 +236,7 @@ abstract class AbstractStatus
 
             if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
                 $chunkStruct = $this->jobDao->getByIdAndPasswordOrFail($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
+                $chunk = new AnalysisChunk($this->jobDao->getDatabaseHandler(), $chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }
@@ -326,7 +322,7 @@ abstract class AbstractStatus
                 $chunkStruct->target = $lang_pair[1];
                 $chunkStruct->payable_rates = $_job_fallback['payable_rates'];
 
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
+                $chunk = new AnalysisChunk($this->jobDao->getDatabaseHandler(), $chunkStruct, $this->_project_data[0]['pname'], $this->user ?? new UserStruct(), $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }

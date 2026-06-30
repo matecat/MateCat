@@ -428,7 +428,7 @@ class ChunkReviewDaoTest extends AbstractTest
     public function passFailCountsAtomicUpdateReturnsEarlyWhenLqaModelIsNull(): void
     {
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getLqaModel')->willReturn(null);
+        $projectStub->id_qa_model = null;
 
         $chunkStub = $this->createStub(JobStruct::class);
         $chunkStub->method('getProject')->willReturn($projectStub);
@@ -466,7 +466,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([10]);
 
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getLqaModel')->willReturn($lqaModel);
+        $projectStub->id_qa_model = 1;
 
         $chunkStub = $this->createStub(JobStruct::class);
         $chunkStub->method('getProject')->willReturn($projectStub);
@@ -480,6 +480,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview->review_password = 'rp';
 
         $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
 
         $dao = new ChunkReviewDao($this->dbStub);
         $dao->passFailCountsAtomicUpdate(99, [
@@ -499,7 +500,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([5, 8]);
 
         $projectStub = $this->createStub(ProjectStruct::class);
-        $projectStub->method('getLqaModel')->willReturn($lqaModel);
+        $projectStub->id_qa_model = 1;
 
         $chunkStub = $this->createStub(JobStruct::class);
         $chunkStub->method('getProject')->willReturn($projectStub);
@@ -513,6 +514,7 @@ class ChunkReviewDaoTest extends AbstractTest
         $chunkReview->review_password = 'rrp';
 
         $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('fetchAll')->willReturn([$lqaModel]);
 
         $dao = new ChunkReviewDao($this->dbStub);
         $dao->passFailCountsAtomicUpdate(100, [
@@ -770,5 +772,39 @@ class ChunkReviewDaoTest extends AbstractTest
         $result = $dao->deleteByJobId(88);
 
         $this->assertFalse($result);
+    }
+
+    /**
+     * Guards the obtain() removal: the DAO must take its PDO connection from the
+     * INJECTED IDatabase, never from the obtainTestDatabase() singleton. The
+     * singleton stays wired to a distinct stub (setUp) so the pre-fix code path
+     * would silently use it instead of the injected mock.
+     */
+    #[Test]
+    public function queriesUseInjectedDatabaseNotSingleton(): void
+    {
+        $injectedStmt = $this->createStub(PDOStatement::class);
+        $injectedStmt->queryString = '';
+        $injectedStmt->method('execute')->willReturn(true);
+        $injectedStmt->method('rowCount')->willReturn(0);
+
+        $injectedPdo = $this->createStub(PDO::class);
+        $injectedPdo->method('prepare')->willReturn($injectedStmt);
+
+        $injectedDb = $this->createMock(IDatabase::class);
+        $injectedDb->expects($this->atLeastOnce())
+            ->method('getConnection')
+            ->willReturn($injectedPdo);
+
+        // Poison the singleton: it must NEVER be touched. Any obtainTestDatabase()
+        // fallback (full revert OR a partial/mixed path) hits this mock and trips
+        // the never() expectation — a clean, deterministic failure that does not
+        // depend on the permissive createDatabaseMock stub installed in setUp.
+        $poison = $this->createMock(IDatabase::class);
+        $poison->expects($this->never())->method('getConnection');
+        $this->setDatabaseInstance($poison);
+
+        $dao = new ChunkReviewDao($injectedDb);
+        $dao->updatePassword(1, 'old', 'new');
     }
 }

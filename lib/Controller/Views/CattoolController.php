@@ -25,12 +25,16 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\MetadataDao;
+use Model\LQA\CategoryDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Users\UserDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -73,8 +77,8 @@ class CattoolController extends BaseKleinViewController
         $result = filter_var_array($this->request->paramsNamed()->all(), $filterArgs);
 
         return [
-            'jid' => (string) ($result['jid'] ?? ''),
-            'password' => (string) ($result['password'] ?? ''),
+            'jid' => (string)($result['jid'] ?? ''),
+            'password' => (string)($result['password'] ?? ''),
         ];
     }
 
@@ -108,7 +112,7 @@ class CattoolController extends BaseKleinViewController
                 throw new NotFoundException('Review record was not found');
             }
 
-            $result['chunk'] = $chunkReviewStruct->getChunk();
+            $result['chunk'] = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
             $result['chunkReviewStruct'] = $chunkReviewStruct;
         } else {
             $result['chunk'] = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($job_id, $password);
@@ -125,11 +129,11 @@ class CattoolController extends BaseKleinViewController
     {
         $chunkAndPasswords = new stdClass();
         $request = $this->validateTheRequest();
-        $isRevision = (new CatUtils())->getIsRevisionFromRequestUri();
+        $isRevision = (new CatUtils($this->getDatabase()))->getIsRevisionFromRequestUri();
         $revisionNumber = null;
 
         try {
-            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int) $request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
+            $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage((int)$request['jid'], $request['password'], Utils::getSourcePage(), $isRevision);
             $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($chunkAndPasswords->chunkReviewStruct ? $chunkAndPasswords->chunkReviewStruct->source_page : null);
         } catch (NotFoundException) {
             $this->notFound();
@@ -143,9 +147,9 @@ class CattoolController extends BaseKleinViewController
 
         $chunkId = $chunkStruct->id ?? throw new RuntimeException('Chunk id is null after successful load');
         $chunkPassword = $chunkStruct->password ?? throw new RuntimeException('Chunk password is null after successful load');
-        $projectId = $chunkStruct->getProject()->id ?? throw new RuntimeException('Project id is null');
+        $projectId = $chunkStruct->getProject(new ProjectDao($this->getDatabase()))->id ?? throw new RuntimeException('Project id is null');
 
-        $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject());
+        $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
 
         if ($chunkStruct->isCanceled()) {
             $this->cancelled($jobOwnership);
@@ -163,7 +167,8 @@ class CattoolController extends BaseKleinViewController
             $this->notFound();
         }
 
-        $model = $chunkStruct->getProject()->getLqaModel();
+        $project = $chunkStruct->getProject(new ProjectDao($this->getDatabase()));
+        $model = $project->id_qa_model !== null ? (new ModelDao($this->getDatabase()))->findById($project->id_qa_model) : null;
         $jobsMetadataDao = new MetadataDao($this->getDatabase());
         $public_tm_penalty = $jobsMetadataDao->get($chunkId, $chunkPassword, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
 
@@ -177,7 +182,7 @@ class CattoolController extends BaseKleinViewController
             'first_job_segment' => $chunkStruct->job_first_segment,
             'id_job' => $chunkId,
             'id_project' => $projectId,
-            'id_team' => $chunkStruct->getProject()->id_team,
+            'id_team' => $chunkStruct->getProject(new ProjectDao($this->getDatabase()))->id_team,
             'isCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->source)),
             'isGDriveProject' => new PHPTalBoolean((new ProjectDao($this->getDatabase()))->isGDriveProject($chunkStruct->id_project)),
             'isOpenAiEnabled' => new PHPTalBoolean(!empty(AppConfig::$OPENAI_API_KEY)),
@@ -185,8 +190,8 @@ class CattoolController extends BaseKleinViewController
             'isSourceRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->source)),
             'isTargetRTL' => new PHPTalBoolean(Languages::getInstance()->isRTL($chunkStruct->target)),
             'jobOwnerIsMe' => new PHPTalBoolean($jobOwnership['jobOwnerIsMe']),
-            'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplitted()),
-            'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories() : []),
+            'job_is_splitted' => new PHPTalBoolean($chunkStruct->isSplit(new JobDao($this->getDatabase()))),
+            'lqa_categories' => new PHPTalMap($model ? $model->getSerializedCategories(new CategoryDao($this->getDatabase())) : []),
             'lqa_flat_categories' => new PHPTalMap($model ? $this->getCategoriesAsJson($model) : []),
             'maxFileSize' => AppConfig::$MAX_UPLOAD_FILE_SIZE,
             'maxTMXFileSize' => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
@@ -195,8 +200,8 @@ class CattoolController extends BaseKleinViewController
             'overall_quality_class' => $chunkReviewStruct ? ($chunkReviewStruct->is_pass ? 'excellent' : 'fail') : '',
             'pageTitle' => $this->buildPageTitle($revisionNumber, $chunkStruct),
             'password' => $chunkPassword,
-            'project' => $chunkStruct->getProject(),
-            'project_name' => Utils::friendlySlug($chunkStruct->getProject()->name),
+            'project' => $chunkStruct->getProject(new ProjectDao($this->getDatabase())),
+            'project_name' => Utils::friendlySlug($chunkStruct->getProject(new ProjectDao($this->getDatabase()))->name),
             'quality_report_href' => AppConfig::$BASEURL . "revise-summary/$chunkId-$chunkPassword",
             'review_extended' => new PHPTalBoolean(true),
             'review_password' => $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : (new ChunkReviewDao($this->getDatabase()))->findChunkReviewsForSourcePage(
@@ -236,7 +241,10 @@ class CattoolController extends BaseKleinViewController
             'translation_engines_intento_providers' => new PHPTalMap(Intento::getProviderList()),
             'translation_matches_enabled' => new PHPTalBoolean(true),
             'warningPollingInterval' => 1000 * (AppConfig::$WARNING_POLLING_INTERVAL),
-            'word_count_type' => $chunkStruct->getProject()->getWordCountType(),
+            'word_count_type' => (new \Model\Projects\MetadataDao($this->getDatabase()))
+                    ->setCacheTTL(3600)
+                    ->getValue((int)$project->id, ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value)
+                ?? ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value,
             'analysis_enabled' => new PHPTalBoolean(AppConfig::$VOLUME_ANALYSIS_ENABLED),
             'get_public_matches' => new PHPTalBoolean(!$chunkStruct->only_private_tm),
 
@@ -272,7 +280,7 @@ class CattoolController extends BaseKleinViewController
         }
 
         // reset the feature set and load only the features for the current project (plus the autoloaded ones)
-        $this->featureSet->loadForProject($chunkStruct->getProject());
+        $this->featureSet->loadForProject($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
         $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
         $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
         $this->addParamsToView([
@@ -286,7 +294,7 @@ class CattoolController extends BaseKleinViewController
             new CatDecoratorArguments(
                 $chunkStruct,
                 $isRevision,
-                (new CatUtils())->getWStructFromJobArray($chunkStruct, $chunkStruct->getProject()),
+                (new CatUtils($this->getDatabase()))->getWStructFromJobArray($chunkStruct, $chunkStruct->getProject(new ProjectDao($this->getDatabase()))),
                 $chunkReviewStruct
             )
         );
@@ -368,17 +376,18 @@ class CattoolController extends BaseKleinViewController
         $ownerMail = AppConfig::$SUPPORT_MAIL;
         $jobOwnerIsMe = false;
 
-        $team = $project->getTeam();
+        $team = $project->id_team !== null ? (new TeamDao($this->getDatabase()))->findById($project->id_team) : null;
 
         if (!empty($team)) {
-            $teamModel = new TeamModel($team);
+            $teamModel = new TeamModel($team, new UserDao($this->getDatabase()), new TeamDao($this->getDatabase()));
             $teamModel->updateMembersProjectsCount();
             $membersIdList = [];
             $members = $team->getMembers();
             if ($team->type == Teams::PERSONAL) {
                 $firstMember = $members[0] ?? null;
                 if ($firstMember !== null) {
-                    $ownerMail = $firstMember->getUser()->getEmail() ?? AppConfig::$SUPPORT_MAIL;
+                    $ownerMail = $firstMember->getUser(new UserDao($this->getDatabase()))->getEmail(
+                    ) ?? AppConfig::$SUPPORT_MAIL;
                 }
             } else {
                 $idAssignee = $project->id_assignee ?? 0;
@@ -451,7 +460,7 @@ class CattoolController extends BaseKleinViewController
      */
     private function getCategoriesAsJson(ModelStruct $model): array
     {
-        $categories = $model->getCategories();
+        $categories = $model->getCategories(new CategoryDao($this->getDatabase()));
         $out = [];
 
         foreach ($categories as $category) {
@@ -466,6 +475,7 @@ class CattoolController extends BaseKleinViewController
      * @param JobStruct $jobStruct
      *
      * @return string
+     * @throws ReflectionException
      */
     protected function buildPageTitle(?int $revisionNumber, JobStruct $jobStruct): string
     {
@@ -477,7 +487,7 @@ class CattoolController extends BaseKleinViewController
             $pageTitle = 'Translate - ';
         }
 
-        return $pageTitle . $jobStruct->getProject()->name . ' - ' . $jobStruct->id;
+        return $pageTitle . $jobStruct->getProject(new ProjectDao($this->getDatabase()))->name . ' - ' . $jobStruct->id;
     }
 
 }

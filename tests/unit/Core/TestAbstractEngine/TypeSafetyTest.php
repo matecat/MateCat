@@ -29,7 +29,7 @@ class TypeSafetyTest extends AbstractTest
         $struct->others = ['key1' => 'val1'];
         $struct->extra_parameters = ['key2' => 'val2'];
 
-        $this->engine = new NONE($struct);
+        $this->engine = new NONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     #[Test]
@@ -47,7 +47,7 @@ class TypeSafetyTest extends AbstractTest
         $struct->others = [];
         $struct->extra_parameters = [];
 
-        $engine = new NONE($struct);
+        $engine = new NONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->assertSame('', $engine->getName());
     }
 
@@ -60,7 +60,7 @@ class TypeSafetyTest extends AbstractTest
         $struct->others = 'some_string';
         $struct->extra_parameters = [];
 
-        $engine = new NONE($struct);
+        $engine = new NONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->assertNull($engine->nonExistentKey);
     }
 
@@ -73,7 +73,7 @@ class TypeSafetyTest extends AbstractTest
         $struct->others = [];
         $struct->extra_parameters = null;
 
-        $engine = new NONE($struct);
+        $engine = new NONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->assertNull($engine->nonExistentKey);
     }
 
@@ -86,7 +86,7 @@ class TypeSafetyTest extends AbstractTest
         $struct->others = 'some_string';
         $struct->extra_parameters = [];
 
-        $engine = new NONE($struct);
+        $engine = new NONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $this->expectException(DomainException::class);
         $engine->nonExistentKey = 'value';
     }

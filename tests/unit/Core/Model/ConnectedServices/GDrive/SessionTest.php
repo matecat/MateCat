@@ -12,6 +12,8 @@ use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\RemoteFileService;
 use Model\ConnectedServices\GDrive\Session;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Users\UserStruct;
@@ -72,10 +74,23 @@ class TestableSession extends Session
 
         return parent::getService($gClient);
     }
+
+    public function exposeCreateFeatureSet(): FeatureSet
+    {
+        return $this->createFeatureSet();
+    }
 }
 
 class SessionTest extends AbstractTest
 {
+    private IDatabase $dbStub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        [$this->dbStub] = $this->createDatabaseMock();
+    }
+
     private function createUserStruct(): UserStruct
     {
         $user = new UserStruct();
@@ -101,7 +116,7 @@ class SessionTest extends AbstractTest
     public function constructorWithNoSessionReturnsEarly(): void
     {
         $sessionData = [];
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->assertFalse($session->hasFiles());
     }
@@ -110,7 +125,7 @@ class SessionTest extends AbstractTest
     public function constructorWithSessionDataSetsProperties(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->assertFalse($session->hasFiles());
     }
@@ -125,7 +140,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertTrue($session->hasFiles());
     }
 
@@ -135,7 +150,7 @@ class SessionTest extends AbstractTest
         $sessionData = $this->createSessionData();
         $sessionData[Session::SESSION_KEY] = 'not-an-array';
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertFalse($session->hasFiles());
     }
 
@@ -145,7 +160,7 @@ class SessionTest extends AbstractTest
         $sessionData = $this->createSessionData();
         $filesStorage = $this->createStub(AbstractFilesStorage::class);
 
-        $session = new Session($sessionData, null, $filesStorage);
+        $session = new Session($this->dbStub, $sessionData, null, $filesStorage);
 
         $this->assertFalse($session->hasFiles());
     }
@@ -154,7 +169,7 @@ class SessionTest extends AbstractTest
     public function getInstanceForCLICreatesSession(): void
     {
         $sessionData = $this->createSessionData();
-        $session = TestableSession::getInstanceForCLI($sessionData);
+        $session = TestableSession::getInstanceForCLI($this->dbStub, $sessionData);
 
         $this->assertInstanceOf(Session::class, $session);
         $this->assertFalse($session->hasFiles());
@@ -164,7 +179,7 @@ class SessionTest extends AbstractTest
     public function setConversionParamsSetsAllProperties(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
 
         $filters = new FiltersConfigTemplateStruct();
         $filters->id = 1;
@@ -183,7 +198,7 @@ class SessionTest extends AbstractTest
     public function setConversionParamsWithNullSegRule(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
 
         $session->setConversionParams('guid-456', 'fr-FR', 'de-DE');
 
@@ -199,7 +214,7 @@ class SessionTest extends AbstractTest
     public function hasFilesReturnsFalseWhenNoFiles(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->assertFalse($session->hasFiles());
     }
@@ -212,7 +227,7 @@ class SessionTest extends AbstractTest
             Session::FILE_LIST => ['file1' => []],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertTrue($session->hasFiles());
     }
 
@@ -220,7 +235,7 @@ class SessionTest extends AbstractTest
     public function sessionHasFilesReturnsFalseWhenNoFiles(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->assertFalse($session->sessionHasFiles());
     }
@@ -233,7 +248,7 @@ class SessionTest extends AbstractTest
             Session::FILE_LIST => ['file1' => [Session::FILE_NAME => 'test.docx']],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertTrue($session->sessionHasFiles());
     }
 
@@ -245,7 +260,7 @@ class SessionTest extends AbstractTest
             Session::FILE_LIST => [],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertFalse($session->sessionHasFiles());
     }
 
@@ -253,7 +268,7 @@ class SessionTest extends AbstractTest
     public function findFileIdByNameReturnsNullWhenNoFiles(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->assertNull($session->findFileIdByName('test.docx'));
     }
@@ -269,7 +284,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertSame('file1', $session->findFileIdByName('doc1.docx'));
         $this->assertSame('file2', $session->findFileIdByName('doc2.pdf'));
     }
@@ -284,7 +299,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertNull($session->findFileIdByName('nonexistent.docx'));
     }
 
@@ -296,7 +311,7 @@ class SessionTest extends AbstractTest
             Session::FILE_LIST => ['file1' => []],
         ];
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
         $this->assertTrue($session->hasFiles());
 
         $session->clearFileListFromSession();
@@ -316,7 +331,7 @@ class SessionTest extends AbstractTest
                 Session::FILE_LIST => ['file1' => []],
             ];
 
-            $session = new Session($sessionData);
+            $session = new Session($this->dbStub, $sessionData);
             $this->assertTrue($session->hasFiles());
 
             $session->clearSession();
@@ -334,7 +349,7 @@ class SessionTest extends AbstractTest
 
         try {
             $sessionData = $this->createSessionData();
-            $session = new Session($sessionData);
+            $session = new Session($this->dbStub, $sessionData);
 
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('This method MUST NOT be called from the CLI.');
@@ -348,7 +363,7 @@ class SessionTest extends AbstractTest
     public function addFilesAddsToFileList(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
 
         $ref = new ReflectionClass($session);
         $serviceStruct = new ConnectedServiceStruct();
@@ -366,7 +381,7 @@ class SessionTest extends AbstractTest
     public function addFilesInitializesFileListIfNotSet(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
 
         $ref = new ReflectionClass($session);
         $serviceStruct = new ConnectedServiceStruct();
@@ -384,7 +399,7 @@ class SessionTest extends AbstractTest
     public function addFilesThrowsWhenServiceStructNotSet(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Service struct not set');
@@ -398,7 +413,7 @@ class SessionTest extends AbstractTest
             'uid' => 42,
             'user' => null,
         ];
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $this->assertNull($session->getToken());
     }
@@ -412,7 +427,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'token123'];
 
         $token = $session->getToken();
@@ -429,7 +444,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'token123'];
 
         $token1 = $session->getToken();
@@ -447,7 +462,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'user-token-456'];
 
         $token = $session->getTokenByUser($user);
@@ -470,10 +485,22 @@ class SessionTest extends AbstractTest
             'uid' => 42,
             'user' => $user,
         ];
-        $session = new Session($sessionData, $dao);
+        $session = new Session($this->dbStub, $sessionData, $dao);
 
         $token = $session->getTokenByUser($user);
         $this->assertNull($token);
+    }
+
+    #[Test]
+    public function createFeatureSetUsesInjectedDatabase(): void
+    {
+        $session = new TestableSession($this->dbStub, $this->createSessionData());
+
+        self::assertSame(
+            $this->dbStub,
+            $session->exposeCreateFeatureSet()->getDatabase(),
+            'createFeatureSet must build the FeatureSet from the injected IDatabase, not Database::obtain()'
+        );
     }
 
     #[Test]
@@ -485,7 +512,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'valid-token'];
 
         $client = $this->getMockBuilder(Google_Client::class)
@@ -506,7 +533,7 @@ class SessionTest extends AbstractTest
             'uid' => 42,
             'user' => null,
         ];
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $client = $this->createStub(Google_Client::class);
 
@@ -523,7 +550,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'valid-token'];
 
         $client = $this->getMockBuilder(Google_Client::class)
@@ -547,7 +574,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'valid-token'];
 
         $client = $this->getMockBuilder(Google_Client::class)
@@ -567,7 +594,7 @@ class SessionTest extends AbstractTest
             'uid' => 42,
             'user' => null,
         ];
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $client = $this->createStub(Google_Client::class);
 
@@ -580,7 +607,7 @@ class SessionTest extends AbstractTest
     public function getFileStructureForJsonOutputReturnsEmptyWhenNoFiles(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $result = $session->getFileStructureForJsonOutput();
         $this->assertSame([], $result);
@@ -603,7 +630,7 @@ class SessionTest extends AbstractTest
                 ],
             ];
 
-            $session = new Session($sessionData);
+            $session = new Session($this->dbStub, $sessionData);
             $result = $session->getFileStructureForJsonOutput();
             $this->assertSame([], $result);
             $this->assertFalse($session->hasFiles());
@@ -641,7 +668,7 @@ class SessionTest extends AbstractTest
             $filePath = $fileDir . '/mydoc.docx';
             file_put_contents($filePath, 'test document content for coverage');
 
-            $session = new Session($sessionData);
+            $session = new Session($this->dbStub, $sessionData);
             $result = $session->getFileStructureForJsonOutput();
 
             $this->assertCount(1, $result['files']);
@@ -667,7 +694,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->lastConversionHash = ['cacheHash' => 'newHash', 'diskHash' => 'newDiskHash'];
 
         $result = $session->reConvert('new-lang', null, null);
@@ -687,7 +714,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->conversionException = new Exception('Conversion failed');
 
         $result = $session->reConvert('new-lang', null, null);
@@ -704,7 +731,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->lastConversionHash = [];
 
         $result = $session->reConvert('new-lang', null, null);
@@ -715,9 +742,9 @@ class SessionTest extends AbstractTest
     public function removeFileReturnsFalseWhenFileNotInList(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
-        $result = $session->removeFile('nonexistent', 'en-US');
+        $result = $session->removeFile($this->dbStub, 'nonexistent', 'en-US');
         $this->assertFalse($result);
     }
 
@@ -760,11 +787,11 @@ class SessionTest extends AbstractTest
             $uploadedFile = $uploadTokenDir . '/doc1.docx';
             file_put_contents($uploadedFile, 'test document content');
 
-            $session = new Session($sessionData);
+            $session = new Session($this->dbStub, $sessionData);
             $this->assertTrue($session->hasFiles());
 
             // suppress E_WARNING from Session.php:416 ($file['fileHash'] array-to-string concat)
-            $result = @$session->removeFile('file1', 'en-US');
+            $result = @$session->removeFile($this->dbStub, 'file1', 'en-US');
             $this->assertTrue($result);
             $this->assertFalse($session->hasFiles());
         } finally {
@@ -784,8 +811,8 @@ class SessionTest extends AbstractTest
             Session::FILE_LIST => [],
         ];
 
-        $session = new Session($sessionData);
-        $session->removeAllFiles('en-US');
+        $session = new Session($this->dbStub, $sessionData);
+        $session->removeAllFiles($this->dbStub, 'en-US');
         $this->assertArrayNotHasKey(Session::FILE_LIST, $sessionData[Session::SESSION_KEY]);
     }
 
@@ -796,7 +823,7 @@ class SessionTest extends AbstractTest
             'uid' => 42,
             'user' => null,
         ];
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $client = $this->createStub(Google_Client::class);
 
@@ -814,7 +841,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'valid-token'];
 
         $expectedPermission = $this->createStub(Google_Service_Drive_Permission::class);
@@ -847,7 +874,7 @@ class SessionTest extends AbstractTest
             'uid' => 42,
             'user' => $user,
         ];
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $client = $this->createStub(Google_Client::class);
 
@@ -865,7 +892,7 @@ class SessionTest extends AbstractTest
             'user' => $user,
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->forcedToken = ['access_token' => 'valid-token'];
 
         $ref = new ReflectionClass($session);
@@ -893,7 +920,7 @@ class SessionTest extends AbstractTest
     public function getInstanceForCLIReturnsSessionInstance(): void
     {
         $sessionData = $this->createSessionData();
-        $session = Session::getInstanceForCLI($sessionData);
+        $session = Session::getInstanceForCLI($this->dbStub, $sessionData);
 
         $this->assertInstanceOf(Session::class, $session);
     }
@@ -902,7 +929,7 @@ class SessionTest extends AbstractTest
     public function importFileThrowsWhenConversionParamsNotSet(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $client = $this->createStub(Google_Client::class);
 
@@ -915,7 +942,7 @@ class SessionTest extends AbstractTest
     public function sanitizeFileNameReplacesSlashes(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $method = new \ReflectionMethod($session, 'sanitizeFileName');
         $result = $method->invoke($session, 'path/to/file.docx');
@@ -927,7 +954,7 @@ class SessionTest extends AbstractTest
     public function sanitizeFileNameThrowsForEmptyName(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $method = new \ReflectionMethod($session, 'sanitizeFileName');
 
@@ -940,7 +967,7 @@ class SessionTest extends AbstractTest
     public function sanitizeFileNameReturnsValidName(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $method = new \ReflectionMethod($session, 'sanitizeFileName');
         $result = $method->invoke($session, 'valid-file.docx');
@@ -952,7 +979,7 @@ class SessionTest extends AbstractTest
     public function deleteDirectoryRemovesDirectory(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $testDir = sys_get_temp_dir() . '/matecat-test-delete-' . uniqid();
         mkdir($testDir, 0777, true);
@@ -974,7 +1001,7 @@ class SessionTest extends AbstractTest
         $sessionData = $this->createSessionData();
         $sessionData['actualSourceLang'] = 'it-IT';
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $file = [
             Session::FILE_NAME => 'test.docx',
@@ -995,7 +1022,7 @@ class SessionTest extends AbstractTest
         $sessionData = $this->createSessionData();
         $sessionData['actualSourceLang'] = 'en-US';
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $file = [
             Session::FILE_NAME => 'mydoc.docx',
@@ -1015,7 +1042,7 @@ class SessionTest extends AbstractTest
         $sessionData = $this->createSessionData();
         $sessionData['actualSourceLang'] = 'en-US';
 
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $file = [
             Session::FILE_NAME => 's3doc.pdf',
@@ -1033,7 +1060,7 @@ class SessionTest extends AbstractTest
     public function createFeatureSetReturnsFeatureSetInstance(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new Session($sessionData);
+        $session = new Session($this->dbStub, $sessionData);
 
         $method = new \ReflectionMethod($session, 'createFeatureSet');
         $result = $method->invoke($session);
@@ -1045,11 +1072,11 @@ class SessionTest extends AbstractTest
     public function createFilesConverterReturnsConverterInstance(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
 
         $session->setConversionParams('guid-789', 'fr-FR', 'de-DE', 'general');
 
-        $featureSet = new \Model\FeaturesBase\FeatureSet();
+        $featureSet = new \Model\FeaturesBase\FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $ref = new \ReflectionClass($session);
         $ref->getProperty('featureSet')->setValue($session, $featureSet);
 
@@ -1069,7 +1096,7 @@ class SessionTest extends AbstractTest
 
         try {
             $sessionData = $this->createSessionData();
-            $session = new TestableSession($sessionData);
+            $session = new TestableSession($this->dbStub, $sessionData);
             $session->setConversionParams('test-guid', 'en-US', 'it-IT');
             $session->lastConversionHash = ['cacheHash' => 'abc123', 'diskHash' => 'def456'];
 
@@ -1109,7 +1136,7 @@ class SessionTest extends AbstractTest
     public function importFileThrowsWhenServiceIsNull(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->setConversionParams('test-guid', 'en-US', 'it-IT');
         $session->mockService = null;
         $session->forcedToken = null;
@@ -1122,7 +1149,7 @@ class SessionTest extends AbstractTest
     public function importFileThrowsOnDownloadError(): void
     {
         $sessionData = $this->createSessionData();
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->setConversionParams('test-guid', 'en-US', 'it-IT');
 
         $fileMeta = new \Google_Service_Drive_DriveFile();
@@ -1159,7 +1186,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->lastConversionHash = ['cacheHash' => 'new123', 'diskHash' => 'new456'];
 
         $result = $session->reConvert('fr-FR');
@@ -1180,7 +1207,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->conversionException = new Exception('Conversion failed');
 
         $result = $session->reConvert('fr-FR');
@@ -1201,7 +1228,7 @@ class SessionTest extends AbstractTest
             ],
         ];
 
-        $session = new TestableSession($sessionData);
+        $session = new TestableSession($this->dbStub, $sessionData);
         $session->lastConversionHash = [];
 
         $result = $session->reConvert('fr-FR');
@@ -1219,7 +1246,7 @@ class SessionTest extends AbstractTest
 
         try {
             $sessionData = $this->createSessionData();
-            $session = new TestableSession($sessionData);
+            $session = new TestableSession($this->dbStub, $sessionData);
             $session->setConversionParams('test-guid', 'en-US', 'it-IT');
             $session->lastConversionHash = [];
 

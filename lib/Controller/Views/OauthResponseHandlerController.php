@@ -6,10 +6,16 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\Exceptions\RenderTerminatedException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
+use InvalidArgumentException;
+use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\Oauth\OauthClient;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use Model\Teams\TeamDao;
 use Model\Users\Authentication\OAuthSignInModel;
+use Model\Users\MetadataDao;
+use Model\Users\UserDao;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 
 class OauthResponseHandlerController extends BaseKleinViewController
@@ -21,11 +27,15 @@ class OauthResponseHandlerController extends BaseKleinViewController
     private ProviderUser $remoteUser;
 
     /**
+     * @throws Exception
+     * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
-    public function response(): void
+    public function renderView(): void
     {
         $params = filter_var_array($this->request->params(), [
             'provider' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS],
@@ -39,7 +49,8 @@ class OauthResponseHandlerController extends BaseKleinViewController
         }
 
         if (!empty($params['code'])) {
-            $this->_processSuccessfulOAuth($params['code'], $params['provider']);
+            $provider = is_string($params['provider']) ? $params['provider'] : null;
+            $this->_processSuccessfulOAuth($params['code'], $provider);
         }
 
         $this->render(200);
@@ -56,14 +67,16 @@ class OauthResponseHandlerController extends BaseKleinViewController
     /**
      * Successful OAuth2 authentication handling
      *
-     * @param      $code
-     * @param null $provider
+     * @param string   $code
+     * @param string|null $provider
      *
-     * @throws ReflectionException
+     * @throws Exception
      * @throws EnvironmentIsBrokenException
+     * @throws ReflectionException
      * @throws RenderTerminatedException
+     * @throws TypeError
      */
-    protected function _processSuccessfulOAuth($code, $provider = null): void
+    protected function _processSuccessfulOAuth(string $code, ?string $provider = null): void
     {
         // OAuth2 authentication
         $this->_initRemoteUser($code, $provider);
@@ -72,7 +85,10 @@ class OauthResponseHandlerController extends BaseKleinViewController
             $_SESSION,
             $this->remoteUser->email,
             $this->remoteUser->name,
-            $this->remoteUser->lastName
+            $this->remoteUser->lastName,
+            new UserDao($this->getDatabase()),
+            new MetadataDao($this->getDatabase()),
+            new TeamDao($this->getDatabase())
         );
 
         $model->setProvider($this->remoteUser->provider);
@@ -86,11 +102,15 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * This method fetches the remote user
      * from the OAuth2 provider
      *
-     * @param      $code
-     * @param null $provider
+     * @param string      $code
+     * @param string|null $provider
+     *
+     * @throws InvalidArgumentException
      * @throws RenderTerminatedException
+     * @throws ResponseAlreadySentException
+     * @throws TypeError
      */
-    protected function _initRemoteUser($code, $provider = null): void
+    protected function _initRemoteUser(string $code, ?string $provider = null): void
     {
         try {
             $client = OauthClient::getInstance($provider)->getProvider();

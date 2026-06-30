@@ -32,7 +32,7 @@ class JobsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetInsertsMultipleKeys(): void
     {
-        $dao = new JobsMetadataDao(Database::obtain());
+        $dao = new JobsMetadataDao(obtainTestDatabase());
         $this->resetJobMetadata($dao);
 
         $dao->bulkSet(self::TEST_JOB_ID, self::TEST_PASSWORD, [
@@ -56,7 +56,7 @@ class JobsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetUpsertsExistingKeys(): void
     {
-        $dao = new JobsMetadataDao(Database::obtain());
+        $dao = new JobsMetadataDao(obtainTestDatabase());
         $this->resetJobMetadata($dao);
         $dao->set(self::TEST_JOB_ID, self::TEST_PASSWORD, 'existing_key', 'old_value');
 
@@ -78,7 +78,7 @@ class JobsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetWithEmptyArrayIsNoop(): void
     {
-        $dao = new JobsMetadataDao(Database::obtain());
+        $dao = new JobsMetadataDao(obtainTestDatabase());
         $this->resetJobMetadata($dao);
         $countBefore = count($dao->getByJobIdAndPassword(self::TEST_JOB_ID, self::TEST_PASSWORD));
 
@@ -94,7 +94,7 @@ class JobsMetadataDaoTest extends AbstractTest
     #[Test]
     public function testBulkSetWithSinglePair(): void
     {
-        $dao = new JobsMetadataDao(Database::obtain());
+        $dao = new JobsMetadataDao(obtainTestDatabase());
         $this->resetJobMetadata($dao);
 
         $dao->bulkSet(self::TEST_JOB_ID, self::TEST_PASSWORD, [

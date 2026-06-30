@@ -33,7 +33,7 @@ class BuildResultEngineTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->engineDao = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->engineDao = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $reflector = new ReflectionClass($this->engineDao);
         $this->method = $reflector->getMethod("_buildResult");
     }

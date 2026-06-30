@@ -74,11 +74,6 @@ parameters:
 
 
 
-		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/App/HeartBeat.php
 
 		-
 			message: '#^Method Controller\\API\\App\\HeartBeat\:\:ping\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
@@ -196,329 +191,19 @@ parameters:
 
 
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Parameter \#1 \$body of method Klein\\AbstractResponse\:\:body\(\) expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Parameter \#1 \$xliffsData of method Model\\Conversion\\Filters\:\:xliffToTarget\(\) expects array\<int\|string, array\{document_content\: string\}\>, array\{array\{document_content\: string\|false\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\Commons\\Exceptions\\ExternalServiceException\:\:__construct\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Exceptions/ExternalServiceException.php
 
-		-
-			message: '#^Method Controller\\API\\Commons\\Exceptions\\ExternalServiceException\:\:__construct\(\) has parameter \$message with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Exceptions/ExternalServiceException.php
 
-		-
-			message: '#^Method Controller\\API\\Commons\\Exceptions\\UnprocessableException\:\:__construct\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Exceptions/UnprocessableException.php
 
-		-
-			message: '#^Method Controller\\API\\Commons\\Exceptions\\UnprocessableException\:\:__construct\(\) has parameter \$message with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Exceptions/UnprocessableException.php
 
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\Base\:\:__construct\(\) has parameter \$args with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Validators/Base.php
 
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\Base\:\:onFailure\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/Base.php
 
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\Base\:\:\$_failureCallback \(Closure\|null\) does not accept callable\(\)\: mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/Base.php
 
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\Base\:\:\$_validationCallbacks \(array\<Closure\>\) does not accept non\-empty\-array\<callable\(\)\: mixed\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/Base.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\Base\:\:\$args type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: lib/Controller/API/Commons/Validators/Base.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 3
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunk\(\) should return Model\\Jobs\\JobStruct but returns Model\\Jobs\\JobStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkFromRevisePassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkFromRevisePassword\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkFromTranslatePassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:getChunkReview\(\) should return Model\\LQA\\ChunkReviewStruct but returns Model\\LQA\\ChunkReviewStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:\$id_job \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:\$password \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ChunkPasswordValidator\:\:\$revision_number \(int\|null\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php
-
-		-
-			message: '#^Parameter \#1 \$email of class Model\\FeaturesBase\\Hook\\Event\\Filter\\IsAnInternalUserEvent constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/InternalUserValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\JobPasswordValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/JobPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectAccessTokenValidator\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/Commons/Validators/ProjectAccessTokenValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectAccessTokenValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectAccessTokenValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ProjectAccessTokenValidator\:\:\$accessToken \(string\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectAccessTokenValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ProjectAccessTokenValidator\:\:\$id_project \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectAccessTokenValidator.php
-
-		-
-			message: '#^Expression in empty\(\) is not falsy\.$#'
-			identifier: empty.expr
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectAccessValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectAccessValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectAccessValidator.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Model\\Teams\\MembershipDao\:\:findTeamByIdAndUser\(\) expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectAccessValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectPasswordValidator\:\:__construct\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/Commons/Validators/ProjectPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectPasswordValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectPasswordValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectPasswordValidator\:\:getPassword\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectPasswordValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ProjectPasswordValidator\:\:\$id_project \(int\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectPasswordValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\ProjectPasswordValidator\:\:\$password \(string\|null\) does not accept string\|false\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectPasswordValidator.php
-
-		-
-			message: '#^Cannot access property \$id_customer on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Cannot call method isFeatureEnabled\(\) on Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:_validate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:getProject\(\) should return Model\\Projects\\ProjectStruct but returns Model\\Projects\\ProjectStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:setFeature\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:setFeature\(\) has parameter \$feature with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:setFeature\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:setIdProject\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\ProjectValidator\:\:setProject\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type void\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/ProjectValidator.php
-
-		-
-			message: '#^Cannot access property \$source_page on Model\\LQA\\EntryStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
-
-		-
-			message: '#^Cannot access property \$source_page on Plugins\\Features\\TranslationEvents\\Model\\TranslationEventStruct\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\SegmentTranslationIssueValidator\:\:__ensureIssueIsInScope\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
-
-		-
-			message: '#^Method Controller\\API\\Commons\\Validators\\SegmentTranslationIssueValidator\:\:__ensureIssueIsInScope\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
-
-		-
-			message: '#^Property Controller\\API\\Commons\\Validators\\SegmentTranslationIssueValidator\:\:\$translation \(Model\\Translations\\SegmentTranslationStruct\) does not accept Model\\Translations\\SegmentTranslationStruct\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Controller/API/Commons/Validators/SegmentTranslationIssueValidator.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/Commons/Validators/WhitelistAccessValidator.php
 
 		-
 			message: '#^Call to method Controller\\API\\GDrive\\OAuthController\:\:__handleError\(\) on a separate line has no effect\.$#'
@@ -616,11 +301,6 @@ parameters:
 
 
 
-		-
-			message: '#^Method Controller\\API\\App\\TeamsInvitationsController\:\:collectBackInvitation\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/TeamsInvitationsController.php
 
 
 
@@ -762,107 +442,15 @@ parameters:
 			count: 1
 			path: lib/Controller/Views/ContextReviewController.php
 
-		-
-			message: '#^Method Controller\\Views\\ManageController\:\:renderView\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/ManageController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Parameter \#2 \$provider of method Controller\\Views\\OauthResponseHandlerController\:\:_processSuccessfulOAuth\(\) expects null, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
 
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:initDependencies\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:setTemplateVars\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:validateTheRequest\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Offset ''currency'' might not exist on Utils\\Shop\\AbstractItem\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Offset ''id'' might not exist on Utils\\Shop\\AbstractItem\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Offset ''quote_pid'' might not exist on Utils\\Shop\\AbstractItem\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Method Controller\\Views\\OutsourceTo\\AbstractController\:\:renderView\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OutsourceTo/AbstractController.php
-
-		-
-			message: '#^Method Controller\\Views\\XliffToTargetController\:\:renderView\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/Views/XliffToTargetController.php
 
 
 
@@ -878,16 +466,12 @@ parameters:
 			path: lib/Routes/app_routes.php
 
 		-
-			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'
-			identifier: property.notFound
+			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleCode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
+			path: lib/Controller/API/GDrive/OAuthController.php
 
-		-
-			message: '#^Parameter \#1 \$directory of function scandir expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
+
 
 		-
 			message: '#^Method Features\\Aligner\:\:getConfigs\(\) has no return type specified\.$#'
@@ -916,6 +500,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\:\:getConfigs\(\) has parameter \$service with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner.php
+
+		-
+			message: '#^Method Features\\Aligner\:\:getConfigs\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner.php
 
@@ -950,7 +540,7 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner.php
 
 		-
-			message: '#^Method Features\\Aligner\:\:getConfigs\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			message: '#^Method Features\\Aligner\:\:homeRoute\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner.php
@@ -1070,12 +660,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception Model\\Exceptions\\ValidationError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -1083,6 +667,12 @@ parameters:
 
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception ReflectionException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:checkProgress\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
@@ -1158,7 +748,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobController.php
-
 
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobController\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -1295,7 +884,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:addGap\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -1313,12 +902,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:delete\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
@@ -1343,7 +926,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:hide\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -1361,12 +944,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:merge\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:merge\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
@@ -1391,7 +968,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:mergeAndAlign\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -1431,12 +1008,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:moveInEmpty\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:moveInEmpty\(\) throws checked exception Model\\Exceptions\\ValidationError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
@@ -1463,7 +1034,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:moveInFill\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -1481,12 +1052,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:show\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:show\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
@@ -1511,7 +1076,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:split\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 7
+			count: 6
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
@@ -1533,12 +1098,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:switchAction\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\JobDirectActionController\:\:switchAction\(\) throws checked exception Model\\Exceptions\\ValidationError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
@@ -1551,12 +1110,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
 		-
-			message: '#^Part \$orders \(list\<mixed\>\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
-
-		-
 			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, array\<int, array\<string, mixed\>\> given\.$#'
 			identifier: argument.type
 			count: 3
@@ -1565,6 +1118,12 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$obj_arr of method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:createList\(\) expects array\<int, Model\\DataAccess\\IDaoStruct\>, array\<int, mixed\> given\.$#'
 			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
+
+		-
+			message: '#^Part \$orders \(list\<mixed\>\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobDirectActionController.php
 
@@ -1635,15 +1194,15 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\JobTmxController\:\:pushTMXInTM\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\JobTmxController\:\:pushTMXInTM\(\) throws checked exception Model\\Exceptions\\ValidationError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\JobTmxController\:\:pushTMXInTM\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
 
 		-
@@ -1663,12 +1222,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobTmxController.php
-
-		-
-			message: '#^Part \$orders \(list\<mixed\>\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
 			message: '#^Call to an undefined method object\:\:toArray\(\)\.$#'
@@ -1709,7 +1262,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoDelete\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 5
+			count: 4
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -1727,12 +1280,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoHide\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoHide\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
@@ -1793,7 +1340,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMerge\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 10
+			count: 9
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -1817,7 +1364,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMergeAndAlign\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 17
+			count: 14
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -1853,7 +1400,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMoveEmpty\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 3
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -1877,7 +1424,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoMoveFull\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 4
+			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
@@ -1895,12 +1442,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoShow\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoShow\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
@@ -1923,12 +1464,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
 		-
-			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoSplit\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
-
-		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoSplit\(\) throws checked exception Model\\Exceptions\\ValidationError but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -1943,12 +1478,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoSwitchAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\JobUndoActionController\:\:undoSwitchAction\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
@@ -1991,6 +1520,12 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of method Utils\\Tools\\CatUtils\:\:countSegmentRawWords\(\) expects string\|null, array\<string, mixed\>\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
+
+		-
+			message: '#^Part \$orders \(list\<mixed\>\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/JobUndoActionController.php
 
@@ -2101,7 +1636,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/ProjectController.php
-
 
 		-
 			message: '#^Method Features\\Aligner\\Controller\\ProjectController\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -2259,7 +1793,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/SegmentsController.php
 
-
 		-
 			message: '#^Call to an undefined method Features\\Aligner\\Utils\\TMSService\:\:setTmKey\(\)\.$#'
 			identifier: method.notFound
@@ -2282,6 +1815,12 @@ parameters:
 			message: '#^Cannot access property \$name on Utils\\TmKeyManagement\\TmKeyStruct\|null\.$#'
 			identifier: property.nonObject
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\TmController\:\:__uploadTMX\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
 		-
@@ -2351,20 +1890,8 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
 		-
-			message: '#^Method Utils\\TMS\\TMSService\:\:uploadFile\(\) invoked with 0 parameters, 1\-2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
-
-		-
 			message: '#^Property Model\\TmKeyManagement\\MemoryKeyStruct\:\:\$uid \(int\) does not accept int\|null\.$#'
 			identifier: assign.propertyType
-			count: 2
-			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\TmController\:\:__uploadTMX\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
@@ -2374,22 +1901,9 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/TmController.php
 
-
-		-
-			message: '#^Parameter \#1 \$message of class RuntimeException constructor expects string, array\<string, int\|string\|null\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
-
 		-
 			message: '#^Call to static method setCookie\(\) on an unknown class Features\\Aligner\\Controller\\CookieManager\.$#'
 			identifier: class.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
-
-		-
-			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:convert\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 
@@ -2414,6 +1928,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:convert\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
+
+		-
+			message: '#^Method Features\\Aligner\\Controller\\UploadController\:\:convert\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 
@@ -2478,6 +1998,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
 
 		-
+			message: '#^Parameter \#1 \$message of class RuntimeException constructor expects string, array\<string, int\|string\|null\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Controller/UploadController.php
+
+		-
 			message: '#^Parameter \#1 \$segmentation_rule of static method Utils\\Constants\\Constants\:\:validateSegmentationRules\(\) expects string\|null, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -2532,15 +2058,27 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Controller/Validators/JobPasswordValidator.php
 
 		-
+			message: '#^Access to an undefined property Utils\\Templating\\PHPTALWithAppend\:\:\$languages_array\.$#'
+			identifier: property.notFound
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
+
+		-
+			message: '#^Parameter \#1 \$directory of function scandir expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Decorator/HomeDecorator.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\DualDatabase\:\:getAlignerDatabase\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/DualDatabase.php
+
+		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:createFromStruct\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:createFromStruct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -2552,12 +2090,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getById\(\) has parameter \$id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getById\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
@@ -2582,7 +2114,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getByJobId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -2600,7 +2132,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:getByProjectId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
@@ -2634,12 +2166,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:updateField\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Files_FileDao\:\:updateField\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -2650,18 +2176,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileDao.php
-
-		-
-			message: '#^Call to an undefined method Features\\Aligner\\Model\\Segments_SegmentDao\:\:countByFile\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Files_FileStruct\:\:getSegmentsCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Files/FileStruct.php
 
 		-
 			message: '#^Property Features\\Aligner\\Model\\Files_FileStruct\:\:\$extension has no type specified\.$#'
@@ -2718,12 +2232,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:changePassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:changePassword\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
@@ -2736,12 +2244,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:createFromStruct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:createFromStruct\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 7
@@ -2750,7 +2252,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:getById\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -2780,7 +2282,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:getByIdAndPassword\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -2810,7 +2312,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:getByProjectId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
@@ -2820,8 +2322,14 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
+			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) has parameter \$where with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
 
@@ -2853,12 +2361,6 @@ parameters:
 			message: '#^Method Features\\Aligner\\Model\\Jobs_JobExportedDao\:\:createFromStruct\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobExportedDao\:\:createFromStruct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobExportedDao.php
 
 		-
@@ -2982,12 +2484,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:createFromStruct\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:createFromStruct\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 7
@@ -3012,12 +2508,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:deleteFailedProject\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:deleteFailedProject\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 4
@@ -3026,7 +2516,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:findById\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
@@ -3054,12 +2544,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:updateField\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectDao\:\:updateField\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -3082,30 +2566,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectDao.php
-
-		-
-			message: '#^Call to an undefined method Features\\Aligner\\Model\\Projects_ProjectDao\:\:getRemoteFileServiceName\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectStruct\:\:getOriginalOwner\(\) should return Model\\Users\\UserStruct but returns Model\\Users\\UserStruct\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectStruct\:\:getOriginalOwner\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Projects_ProjectStruct\:\:getRemoteFileServiceName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Projects/ProjectStruct.php
 
 		-
 			message: '#^Property Features\\Aligner\\Model\\Projects_ProjectStruct\:\:\$create_date has no type specified\.$#'
@@ -3212,7 +2672,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:countByJobId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3230,12 +2690,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:deleteSegmentsByIds\(\) has parameter \$segments_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:deleteSegmentsByIds\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
@@ -3260,7 +2714,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:findById\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3296,7 +2750,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getByJobIdAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3326,12 +2780,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getDataForAlignment\(\) has parameter \$type with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getDataForAlignment\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
@@ -3374,7 +2822,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getFromOrderArrayJobIdAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3422,7 +2870,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getFromOrderInterval\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3464,7 +2912,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getFromOrderJobIdAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3506,7 +2954,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getNextFromNonExistentOrderJobIdAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3536,7 +2984,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getOrderedByJobId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3578,7 +3026,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getPreviousFromNonExistentOrderJobIdAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3620,7 +3068,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getPreviousFromOrderJobIdAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3668,12 +3116,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTMForTMXExport\(\) has parameter \$id_job with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTMForTMXExport\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
@@ -3728,7 +3170,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTranslationsForTMXExport\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3764,7 +3206,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTypeOrderedByJobId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3818,7 +3260,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:getTypeOrderedByJobIdWithPagination\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
@@ -3864,12 +3306,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:updateField\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:updateField\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -3890,12 +3326,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:updateSegmentContent\(\) has parameter \$id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentDao\:\:updateSegmentContent\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentDao.php
 
@@ -3984,12 +3414,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:deleteByJobId\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:deleteByJobId\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -4016,12 +3440,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:deleteMatch\(\) has parameter \$type with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:deleteMatch\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
@@ -4058,7 +3476,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getLastSegmentMatch\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4100,7 +3518,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMatchesFromOrderArray\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4142,7 +3560,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMisalignmentCount\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4172,7 +3590,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getMisalignments\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4214,7 +3632,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getNextMatchOfNonExistent\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4256,7 +3674,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getPreviousMatchOfNonExistent\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4298,7 +3716,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getPreviousSegmentMatch\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4340,7 +3758,7 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:getSegmentMatch\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
-			count: 2
+			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4374,12 +3792,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:hideByOrderAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:hideByOrderAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -4406,12 +3818,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:nullifySegmentsInMatches\(\) has parameter \$type with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:nullifySegmentsInMatches\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
@@ -4452,12 +3858,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:setSegmentInMatch\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:setSegmentInMatch\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
@@ -4488,21 +3888,27 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:showByOrderAndType\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:showByOrderAndType\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) has parameter \$where with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
+
+		-
+			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 5
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
 		-
@@ -4526,12 +3932,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateMatchBeforeDeletion\(\) has parameter \$type with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateMatchBeforeDeletion\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
@@ -4568,12 +3968,6 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateNextSegmentMatch\(\) has parameter \$type with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:updateNextSegmentMatch\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
 
@@ -5033,7 +4427,6 @@ parameters:
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
-
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:getProgress\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -5091,6 +4484,18 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:popProjectInQueue\(\) has parameter \$queue with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
 
@@ -5245,18 +4650,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_file2segments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_saveSegmentsAsJson\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_file2segments\(\) has parameter \$file with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -5271,6 +4664,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_file2segments\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_file2segments\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
@@ -5314,6 +4713,12 @@ parameters:
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_saveSegmentsAsJson\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 3
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:_saveSegmentsAsJson\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
 		-
@@ -5388,7 +4793,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
-
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:popProjectInQueue\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -5404,6 +4808,18 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:popProjectInQueue\(\) has parameter \$queue with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
 
@@ -5720,6 +5136,12 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
 
 		-
+			message: '#^Method Features\\Aligner\\Utils\\GoogleTranslate\:\:_callMulti\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
+
+		-
 			message: '#^Method Features\\Aligner\\Utils\\GoogleTranslate\:\:_callMulti\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 2
@@ -5830,6 +5252,12 @@ parameters:
 		-
 			message: '#^Method Features\\Aligner\\Utils\\Engines_MyMemory\:\:_callMulti\(\) has parameter \$url with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\Engines_MyMemory\:\:_callMulti\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
 
@@ -5948,12 +5376,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
 
 		-
-			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCachePackage\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: plugins/aligner/lib/Features/Aligner/Utils/FilesStorage/S3AlignerFilesStorage.php
-
-		-
 			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCacheFolder\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5999,6 +5421,12 @@ parameters:
 			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCachePackage\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
 			identifier: missingType.checkedException
 			count: 1
+			path: plugins/aligner/lib/Features/Aligner/Utils/FilesStorage/S3AlignerFilesStorage.php
+
+		-
+			message: '#^Method Features\\Aligner\\Utils\\FilesStorage\\S3AlignerFilesStorage\:\:getJsonCachePackage\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
+			identifier: missingType.checkedException
+			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/FilesStorage/S3AlignerFilesStorage.php
 
 		-
@@ -6210,7 +5638,6 @@ parameters:
 			identifier: missingType.checkedException
 			count: 2
 			path: plugins/aligner/lib/Features/Aligner/Utils/NewAlignmentAlgorithm.php
-
 
 		-
 			message: '#^Method Features\\Aligner\\Utils\\NewAlignmentAlgorithm\:\:popProjectInQueue\(\) has no return type specified\.$#'
@@ -6716,7 +6143,6 @@ parameters:
 			count: 1
 			path: plugins/aligner/lib/Features/Aligner/Utils/OldAlignmentAlgorithm.php
 
-
 		-
 			message: '#^Method Features\\Aligner\\Utils\\OldAlignmentAlgorithm\:\:mapAlignment\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -7078,18 +6504,6 @@ parameters:
 			path: plugins/aligner/lib/Features/Aligner/Utils/TMSService.php
 
 		-
-			message: '#^Call to an undefined method Model\\DataAccess\\IDatabase\:\:ping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\TaskRunner\\Commons\\AbstractWorker\:\:_checkDatabaseConnection\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/TaskRunner/Commons/AbstractWorker.php
-
-		-
 			message: '#^Property Features\\Aligner\\Utils\\TaskRunner\\Commons\\AbstractWorker\:\:\$dbHandler has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -7238,97 +6652,3 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: plugins/aligner/migrations/20210313183027_add_jobs_exported_table.php
-
-
-	
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Jobs_JobDao\:\:staticUpdate\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Jobs/JobDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) has parameter \$where with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Model\\Segments_SegmentMatchDao\:\:staticUpdate\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 5
-			path: plugins/aligner/lib/Features/Aligner/Model/Segments/SegmentMatchDao.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\AlignJobWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/AlignJobWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:process\(\) throws checked exception PDOException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\AsyncTasks\\Workers\\SegmentWorker\:\:process\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/AsyncTasks/Workers/SegmentWorker.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\GoogleTranslate\:\:_callMulti\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/GoogleTranslate.php
-
-		-
-			message: '#^Method Features\\Aligner\\Utils\\Engines_MyMemory\:\:_callMulti\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner/Utils/Engines/MyMemory.php
-
-		-
-			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleCode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/GDrive/OAuthController.php
-
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:response\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-		-
-			message: '#^Method Controller\\Views\\OauthResponseHandlerController\:\:_initRemoteUser\(\) throws checked exception InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/Views/OauthResponseHandlerController.php
-
-
-		-
-			message: '#^Method Features\\Aligner\:\:homeRoute\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: plugins/aligner/lib/Features/Aligner.php

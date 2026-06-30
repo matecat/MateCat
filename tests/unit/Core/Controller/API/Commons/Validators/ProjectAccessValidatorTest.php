@@ -63,11 +63,13 @@ class ProjectAccessValidatorTest extends AbstractTest
 
         $this->controller = new ProjectAccessValidatorTestController();
         $this->setCtrlProp($this->controller, 'request', $this->makeRequest());
+        $this->setCtrlProp($this->controller, 'database', obtainTestDatabase());
 
         $user = new UserStruct();
         $user->uid = self::UID;
         $user->email = self::EMAIL;
         $this->setCtrlProp($this->controller, 'user', $user);
+        $this->setCtrlProp($this->controller, 'userIsLogged', true);
     }
 
     protected function tearDown(): void
@@ -102,7 +104,7 @@ class ProjectAccessValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("INSERT INTO users (uid, email, first_name, last_name) VALUES (" . self::UID . ", '" . self::EMAIL . "', 'T', 'U')");
         $conn->exec("INSERT INTO teams (id, name, created_by) VALUES (" . self::TEAM_ID . ", '" . self::TEAM_NAME . "', " . self::UID . ")");
         $conn->exec("INSERT INTO teams_users (uid, id_team, is_admin) VALUES (" . self::UID . ", " . self::TEAM_ID . ", 1)");
@@ -110,7 +112,7 @@ class ProjectAccessValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM teams_users WHERE id_team = " . self::TEAM_ID);
         $conn->exec("DELETE FROM teams WHERE id = " . self::TEAM_ID);
         $conn->exec("DELETE FROM users WHERE uid = " . self::UID);
@@ -139,7 +141,9 @@ class ProjectAccessValidatorTest extends AbstractTest
         $user->uid = self::UID;
         $user->email = self::EMAIL;
         $this->setCtrlProp($ctrl, 'user', $user);
+        $this->setCtrlProp($ctrl, 'userIsLogged', true);
         $this->setCtrlProp($ctrl, 'request', $this->makeRequest());
+        $this->setCtrlProp($ctrl, 'database', obtainTestDatabase());
 
         $project = $this->makeProjectStruct(self::TEAM_ID);
         $validator = new ProjectAccessValidator($ctrl, $project);
@@ -149,11 +153,36 @@ class ProjectAccessValidatorTest extends AbstractTest
         $this->assertTrue(true);
     }
 
-    // NOTE: the "user not logged in" branch (ProjectAccessValidator::_validate lines 47-48,
-    // `if (empty($this->controller->getUser()))`) is unreachable defensive code: getUser():
-    // UserStruct is a non-null typed contract, so empty() on the returned object is always
-    // false. It cannot be exercised without a type-incompatible stub, so it is intentionally
-    // not tested.
+    // ─── user not logged in => AuthorizationError 401 ───
+
+    #[Test]
+    public function throws_authorization_error_when_user_not_logged_in(): void
+    {
+        $this->setCtrlProp($this->controller, 'userIsLogged', false);
+
+        $project = $this->makeProjectStruct(self::TEAM_ID);
+        $validator = new ProjectAccessValidator($this->controller, $project);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->validate();
+    }
+
+    // ─── project without a team => AuthorizationError 401 ───
+
+    #[Test]
+    public function throws_authorization_error_when_project_has_no_team(): void
+    {
+        $project = new ProjectStruct();
+        $project->id_team = null;
+        $validator = new ProjectAccessValidator($this->controller, $project);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $validator->validate();
+    }
 
     // ─── user not in team => AuthorizationError 401 ───
 

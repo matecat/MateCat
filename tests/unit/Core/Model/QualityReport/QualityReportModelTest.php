@@ -6,7 +6,10 @@ namespace Matecat\Core\Model\QualityReport;
 
 use DateMalformedStringException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Projects\MetadataStruct;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -27,10 +30,19 @@ class QualityReportModelTest extends AbstractTest
     private FeedbackDAO $feedbackDao;
     private RevisionFactory $revisionFactory;
     private IChunkReviewModel $defaultChunkReviewModel;
+    private IDatabase $dbStub;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        $metaStruct = new MetadataStruct();
+        $metaStruct->key = 'domain';
+        $metaStruct->value = 'medical';
+
+        [$this->dbStub, , $stmtStub] = $this->createDatabaseMock();
+        $stmtStub->method('execute')->willReturn(true);
+        $stmtStub->method('fetchAll')->willReturn([$metaStruct]);
 
         $this->defaultChunkReviewModel = $this->createConfiguredStub(IChunkReviewModel::class, [
             'getScore' => 0.0,
@@ -55,9 +67,7 @@ class QualityReportModelTest extends AbstractTest
 
     private function createProjectStub(): ProjectStruct
     {
-        $project = $this->createConfiguredStub(ProjectStruct::class, [
-            'getAllMetadataAsKeyValue' => ['domain' => 'medical'],
-        ]);
+        $project = $this->createStub(ProjectStruct::class);
         $project->id = 123;
         $project->create_date = '2024-01-02 03:04:05';
 
@@ -94,6 +104,7 @@ class QualityReportModelTest extends AbstractTest
 
         $model = new TestableQualityReportModel(
             $chunk,
+            $this->dbStub,
             $qualityReportDao ?? $this->qualityReportDao,
             $chunkReviewDao ?? $this->chunkReviewDao,
             $feedbackDao ?? $this->feedbackDao,
@@ -169,7 +180,7 @@ class QualityReportModelTest extends AbstractTest
     {
         $project = $this->createProjectStub();
         $chunk = $this->createChunkStub($project);
-        $model = new QualityReportModel($chunk);
+        $model = new QualityReportModel($chunk, obtainTestDatabase());
 
         $this->assertSame($chunk, $model->getChunk());
         $this->assertSame($project, $model->getProject());

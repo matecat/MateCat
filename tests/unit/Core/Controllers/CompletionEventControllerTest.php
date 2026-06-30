@@ -73,8 +73,8 @@ class CompletionEventControllerTest extends AbstractTest
         $this->setProp('request', $this->requestStub);
         $this->setProp('response', $this->responseMock);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
-        $this->setProp('featureSet', new FeatureSet());
-        $this->setProp('database', Database::obtain());
+        $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
+        $this->setProp('database', obtainTestDatabase());
 
         $event           = new ChunkCompletionEventStruct();
         $event->id       = self::EVENT_ID;
@@ -233,8 +233,8 @@ class CompletionEventControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($controller, $request);
         $ref->getProperty('response')->setValue($controller, $this->createMock(Response::class));
         $ref->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
-        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet());
-        $ref->getProperty('database')->setValue($controller, Database::obtain());
+        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet(obtainTestDatabase()));
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
 
         $paramsProp = $ref->getProperty('params');
         $paramsProp->setValue($controller, $params);
@@ -279,8 +279,8 @@ class CompletionEventControllerTest extends AbstractTest
         $ref->getProperty('request')->setValue($controller, $request);
         $ref->getProperty('response')->setValue($controller, $this->createMock(Response::class));
         $ref->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
-        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet());
-        $ref->getProperty('database')->setValue($controller, Database::obtain());
+        $ref->getProperty('featureSet')->setValue($controller, new FeatureSet(obtainTestDatabase()));
+        $ref->getProperty('database')->setValue($controller, obtainTestDatabase());
         $ref->getProperty('params')->setValue($controller, $params);
 
         $ref->getMethod('registerValidators')->invoke($controller);
@@ -307,7 +307,7 @@ class CompletionEventControllerTest extends AbstractTest
         $job->id      = $this->jobId(self::BASE);
         $job->password = 'jobpw';
 
-        $dao   = new ChunkCompletionEventDao(Database::obtain());
+        $dao   = new ChunkCompletionEventDao(obtainTestDatabase());
         $event = $dao->getByIdAndChunk(self::EVENT_ID, $job);
 
         $this->assertInstanceOf(ChunkCompletionEventStruct::class, $event);

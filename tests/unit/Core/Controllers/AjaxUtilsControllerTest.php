@@ -64,7 +64,7 @@ class AjaxUtilsControllerTest extends AbstractTest
 
         // ID block base 9018000: mock-seam suite, no DB rows seeded. The stubbed
         // PDOStatement returned by createDatabaseMock answers execute() by default.
-        $this->createDatabaseMock();
+        [$dbStub] = $this->createDatabaseMock();
 
         $this->controller = new TestableAjaxUtilsController();
         $this->reflector  = new \ReflectionClass(AjaxUtilsController::class);
@@ -73,6 +73,7 @@ class AjaxUtilsControllerTest extends AbstractTest
         $this->setProp('response', $this->responseMock);
         $this->setProp('request', new Request());
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
+        $this->setProp('database', $dbStub);
     }
 
     protected function tearDown(): void

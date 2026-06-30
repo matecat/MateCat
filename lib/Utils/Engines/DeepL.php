@@ -107,11 +107,11 @@ class DeepL extends AbstractEngine
         }
 
         // glossaries (only for DeepL)
-        $metadataDao = new MetadataDao();
+        $metadataDao = new MetadataDao($this->database);
         // null coalescing operator is used to avoid errors when validating the engine for the first time
-        $deepLFormality = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_formality');
-        $deepLIdGlossary = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_id_glossary');
-        $deepLEngineType = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_engine_type');
+        $deepLFormality = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'deepl_formality');
+        $deepLIdGlossary = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'deepl_id_glossary');
+        $deepLEngineType = $metadataDao->setCacheTTL(86400)->getValue($_config['pid'], 'deepl_engine_type');
 
         $parameters = [
             'text' => [
@@ -121,9 +121,9 @@ class DeepL extends AbstractEngine
             'target_lang' => $target[0],
 
             // glossaries (only for DeepL)
-            'formality' => $deepLFormality?->value,
-            'glossary_id' => $deepLIdGlossary?->value,
-            'model_type' => $deepLEngineType?->value
+            'formality' => $deepLFormality,
+            'glossary_id' => $deepLIdGlossary,
+            'model_type' => $deepLEngineType
         ];
 
         $this->_setAdditionalCurlParams(

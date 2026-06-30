@@ -3,16 +3,28 @@
 namespace Matecat\Core\Model\Translators;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserStruct;
+use PDOStatement;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TypeError;
 
 class TranslatorsModelTest extends AbstractTest
 {
+    private IDatabase $dbStub;
+    private PDOStatement $stmtStub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        [$this->dbStub, , $this->stmtStub] = $this->createDatabaseMock();
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+    }
+
     private function makeJobStructWithProject(
         ?int $id = 1,
         ?string $password = 'abc123',
@@ -41,7 +53,7 @@ class TranslatorsModelTest extends AbstractTest
     ): TranslatorsModel {
         $job = $this->makeJobStructWithProject(id: $id, password: $password);
 
-        return new TranslatorsModel($job);
+        return new TranslatorsModel($job, $this->dbStub);
     }
 
     #[Test]
@@ -59,7 +71,7 @@ class TranslatorsModelTest extends AbstractTest
         $job->password = null;
         $job->method('getProject')->willReturn($project);
 
-        new TranslatorsModel($job);
+        new TranslatorsModel($job, $this->dbStub);
     }
 
     #[Test]

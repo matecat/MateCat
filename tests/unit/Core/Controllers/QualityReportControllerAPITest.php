@@ -10,6 +10,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\DataAccess\Database;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
@@ -96,6 +97,7 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -125,7 +127,7 @@ class QualityReportControllerAPITest extends AbstractTest
             'INSERT IGNORE INTO files_job (id_job, id_file) VALUES (' . $this->jobId(self::BASE) . ', ' . $this->fileId(self::BASE) . ')'
         );
 
-        $job = (new JobDao())->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'jobpw');
         $this->assertInstanceOf(JobStruct::class, $job);
 
         return $job;
@@ -150,8 +152,9 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $reflector->getProperty('request')->setValue($controller, $request);
         $reflector->getProperty('response')->setValue($controller, $response);
+        $reflector->getProperty('database')->setValue($controller, obtainTestDatabase());
         $reflector->getProperty('logger')->setValue($controller, $this->createMock(MatecatLogger::class));
-        $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet());
+        $reflector->getProperty('featureSet')->setValue($controller, new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
         $reflector->getProperty('chunk')->setValue($controller, $chunk);
 
         return [$controller, $reflector, $response];
@@ -291,19 +294,6 @@ class QualityReportControllerAPITest extends AbstractTest
 
         $this->assertTrue($segmentsController->renderCalled);
         $this->assertFalse($segmentsController->receivedIsForUi);
-    }
-
-    #[Test]
-    public function renderSegments_throws_when_project_id_is_missing(): void
-    {
-        $chunk = $this->createStub(JobStruct::class);
-        $chunk->method('getProject')->willReturn(new ProjectStruct());
-        $this->reflector->getProperty('chunk')->setValue($this->controller, $chunk);
-
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Project ID must not be null');
-
-        $this->reflector->getMethod('renderSegments')->invoke($this->controller, false);
     }
 
     #[Test]

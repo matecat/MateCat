@@ -3,6 +3,7 @@
 namespace Matecat\Core\Search;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Search\MySQLReplaceEventDao;
 use Model\Search\ReplaceEventStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -22,7 +23,7 @@ class MySQLReplaceEventDaoTest extends AbstractTest
         $this->stmt = $this->createStub(PDOStatement::class);
         $this->pdo = $this->createStub(PDO::class);
         $this->pdo->method('prepare')->willReturn($this->stmt);
-        $this->dao = new MySQLReplaceEventDao(null, $this->pdo);
+        $this->dao = new MySQLReplaceEventDao($this->createStub(IDatabase::class), $this->pdo);
     }
 
     #[Test]
@@ -78,7 +79,7 @@ class MySQLReplaceEventDaoTest extends AbstractTest
         $segmentDao = $this->createStub(SegmentTranslationDao::class);
         $segmentDao->method('getByJobId')->willReturn([$segmentStub]);
 
-        $dao = new MySQLReplaceEventDao(null, $this->pdo, $segmentDao);
+        $dao = new MySQLReplaceEventDao($this->createStub(IDatabase::class), $this->pdo, $segmentDao);
 
         $this->stmt->method('rowCount')->willReturn(1);
 

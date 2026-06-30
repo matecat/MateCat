@@ -18,6 +18,7 @@ use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 
 class CompletionEventController extends KleinController
 {
@@ -49,7 +50,7 @@ class CompletionEventController extends KleinController
 
             $this->chunk = $Validator->getChunk();
             $this->event = $event;
-            $this->featureSet->loadForProject($this->chunk->getProject(60 * 60));
+            $this->featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->getDatabase()), 60 * 60));
         });
 
         $this->appendValidator($Validator);

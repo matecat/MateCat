@@ -3,6 +3,7 @@
 namespace Matecat\Core\Search;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\Search\RedisReplaceEventIndexDao;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\ClientInterface;
@@ -16,7 +17,7 @@ class RedisReplaceEventIndexDaoTest extends AbstractTest
     {
         parent::setUp();
         $this->redis = $this->createStub(ClientInterface::class);
-        $this->dao = new RedisReplaceEventIndexDao(null, $this->redis);
+        $this->dao = new RedisReplaceEventIndexDao($this->createStub(IDatabase::class), $this->redis);
     }
 
     #[Test]

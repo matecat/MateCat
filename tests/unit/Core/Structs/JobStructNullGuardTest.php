@@ -5,7 +5,9 @@ namespace Matecat\Core\Structs;
 
 use DomainException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Segments\SegmentDao;
 use PHPUnit\Framework\Attributes\Test;
 
 class JobStructNullGuardTest extends AbstractTest
@@ -18,7 +20,7 @@ class JobStructNullGuardTest extends AbstractTest
         $struct->password = 'pass';
 
         $this->expectException(DomainException::class);
-        $struct->getPeeForTranslatedSegments();
+        $struct->getPeeForTranslatedSegments($this->createStub(JobDao::class));
     }
 
     #[Test]
@@ -29,7 +31,7 @@ class JobStructNullGuardTest extends AbstractTest
         $struct->password = null;
 
         $this->expectException(DomainException::class);
-        $struct->getPeeForTranslatedSegments();
+        $struct->getPeeForTranslatedSegments($this->createStub(JobDao::class));
     }
 
     #[Test]
@@ -40,7 +42,7 @@ class JobStructNullGuardTest extends AbstractTest
         $struct->password = 'pass';
 
         $this->expectException(DomainException::class);
-        $struct->getSegments();
+        $struct->getSegments($this->createStub(SegmentDao::class));
     }
 
     #[Test]
@@ -51,7 +53,7 @@ class JobStructNullGuardTest extends AbstractTest
         $struct->password = null;
 
         $this->expectException(DomainException::class);
-        $struct->getSegments();
+        $struct->getSegments($this->createStub(SegmentDao::class));
     }
 
     #[Test]
@@ -61,6 +63,6 @@ class JobStructNullGuardTest extends AbstractTest
         $struct->id = null;
 
         $this->expectException(DomainException::class);
-        $struct->getChunks();
+        $struct->getChunks($this->createStub(JobDao::class));
     }
 }

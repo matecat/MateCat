@@ -11,7 +11,6 @@ namespace Model\Teams;
 use DomainException;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\Users\UserStruct;
 use PDO;
 use PDOException;
@@ -45,6 +44,16 @@ class TeamDao extends AbstractDao
         DELETE FROM teams 
         WHERE id = :id_team and type != 'personal' 
     ";
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function findById(int $id): ?TeamStruct
+    {
+        /** @var ?TeamStruct */
+        return $this->fetchById($id, TeamStruct::class);
+    }
 
     /**
      * Delete a team
@@ -105,23 +114,23 @@ class TeamDao extends AbstractDao
         $params['members'][] = $orgCreatorUser->email;
 
         // wrap createList() in a transaction
-        if (false === Database::obtain()->getConnection()->inTransaction()) {
-            Database::obtain()->getConnection()->beginTransaction();
+        if (false === $this->database->getConnection()->inTransaction()) {
+            $this->database->getConnection()->beginTransaction();
         }
 
         // get fresh cache from the primary database
-        (new TeamDao())->setCacheTTL(60 * 60 * 24)->fetchById($teamStruct->id, TeamStruct::class);
+        (new TeamDao($this->database))->setCacheTTL(60 * 60 * 24)->fetchById($teamStruct->id, TeamStruct::class);
 
         $members = array_values(array_filter($params['members'], fn($member) => $member !== null));
 
-        $membersList = (new MembershipDao)->createList([
+        $membersList = (new MembershipDao($this->database))->createList([
             'team' => $teamStruct,
             'members' => $members
         ]);
         $teamStruct->setMembers($membersList);
 
-        if (false === Database::obtain()->getConnection()->inTransaction()) {
-            Database::obtain()->getConnection()->commit();
+        if (false === $this->database->getConnection()->inTransaction()) {
+            $this->database->getConnection()->commit();
         }
 
         return $teamStruct;

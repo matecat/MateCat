@@ -23,9 +23,7 @@ class DatabaseTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->resetSingleton();
-
-        $this->db = Database::obtain(
+        $this->db = new Database(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
@@ -36,47 +34,8 @@ class DatabaseTest extends AbstractTest
     protected function tearDown(): void
     {
         $this->db->close();
-        $this->resetSingleton();
 
         parent::tearDown();
-    }
-
-    private function resetSingleton(): void
-    {
-        $reflector = new ReflectionClass(Database::class);
-        $instanceProp = $reflector->getProperty('instance');
-        $instanceProp->setValue(null, null);
-    }
-
-    // ─── Singleton / obtain() ───────────────────────────────────────────────
-
-    #[Test]
-    public function obtainReturnsSameInstance(): void
-    {
-        $second = Database::obtain();
-        $this->assertSame($this->db, $second);
-    }
-
-    #[Test]
-    public function obtainWithoutParamsReturnsCachedInstance(): void
-    {
-        $cached = Database::obtain();
-        $this->assertSame($this->db, $cached);
-    }
-
-    #[Test]
-    public function obtainWithNewParamsCreatesNewInstance(): void
-    {
-        $this->resetSingleton();
-
-        $new = Database::obtain(
-            AppConfig::$DB_SERVER,
-            AppConfig::$DB_USER,
-            AppConfig::$DB_PASS,
-            AppConfig::$DB_DATABASE
-        );
-
-        $this->assertNotSame($this->db, $new);
     }
 
     // ─── getConnection() ────────────────────────────────────────────────────
@@ -99,11 +58,7 @@ class DatabaseTest extends AbstractTest
     #[Test]
     public function getConnectionThrowsPDOExceptionOnBadCredentials(): void
     {
-        $reflector = new ReflectionClass(Database::class);
-        $instanceProp = $reflector->getProperty('instance');
-        $instanceProp->setValue(null, null);
-
-        $badDb = Database::obtain('invalid_host_that_does_not_exist', 'bad', 'bad', 'bad');
+        $badDb = new Database('invalid_host_that_does_not_exist', 'bad', 'bad', 'bad');
 
         $this->expectException(PDOException::class);
         $badDb->getConnection();

@@ -46,7 +46,7 @@ class CreateMyMemoryKeyTest extends AbstractTest
 T;
 
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -59,7 +59,7 @@ T;
         /**
          * creation of the engine
          */
-        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($mock_json_return);
 
 
@@ -112,7 +112,7 @@ T;
         );
 
 
-        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -126,7 +126,7 @@ T;
          * creation of the engine
          * @var $engine_MyMemory MockObject|MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
 
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
 
