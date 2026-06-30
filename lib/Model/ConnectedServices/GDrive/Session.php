@@ -33,6 +33,7 @@ use ReflectionException;
 use RuntimeException;
 use TypeError;
 use UnexpectedValueException;
+use Model\DataAccess\IDatabase;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
@@ -82,9 +83,11 @@ class Session
 
     protected ?ConnectedServiceDao $dao = null;
 
+    protected IDatabase $database;
+
     private function getRemoteFileDao(): RemoteFileDao
     {
-        return $this->remoteFileDao ??= new RemoteFileDao();
+        return $this->remoteFileDao ??= new RemoteFileDao($this->database);
     }
 
     /**
@@ -94,13 +97,16 @@ class Session
      *
      * @param array<string, mixed>|null $sessionData Optional session data (for testing).
      *                                               If null, uses $_SESSION superglobal.
+     * @param IDatabase $database
      * @param ConnectedServiceDao|null $dao
      * @param AbstractFilesStorage|null $filesStorage
      * @throws Exception
      * @throws \TypeError
      */
-    public function __construct(?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
+    public function __construct(IDatabase $database, ?array &$sessionData = null, ?ConnectedServiceDao $dao = null, ?AbstractFilesStorage $filesStorage = null)
     {
+        $this->database = $database;
+
         // Use the provided session data or fall back to the $_SESSION superglobal
         if ($sessionData !== null) {
             $source = &$sessionData;
@@ -126,6 +132,7 @@ class Session
     /**
      * Creates a new instance of the Session class for CLI usage.
      *
+     * @param IDatabase $database
      * @param array<string, mixed> $session
      *
      * @return Session
@@ -133,13 +140,13 @@ class Session
      * @throws Exception
      * @throws \TypeError
      */
-    public static function getInstanceForCLI(array $session): Session
+    public static function getInstanceForCLI(IDatabase $database, array $session): Session
     {
         if (PHP_SAPI != 'cli') {
             throw new RuntimeException("This method MUST be called by CLI.");
         }
 
-        return new self($session);
+        return new self($database, $session);
     }
 
     /**
@@ -266,7 +273,7 @@ class Session
      */
     public function getTokenByUser(UserStruct $user): ?array
     {
-        $serviceDao = $this->dao ?? new ConnectedServiceDao();
+        $serviceDao = $this->dao ?? new ConnectedServiceDao($this->database);
         $this->serviceStruct = $serviceDao->findDefaultServiceByUserAndName($user, 'gdrive');
 
         return $this->serviceStruct?->getDecodedOauthAccessToken();
@@ -396,7 +403,7 @@ class Session
      * @throws UnexpectedValueException
      * @throws TypeError
      */
-    public function removeFile(string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): bool
+    public function removeFile(IDatabase $database, string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): bool
     {
         $success = false;
 
@@ -428,7 +435,7 @@ class Session
                 $hashFile = $file['fileHash'] . "|" . end($target);
 
                 if ($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile) {
-                    (new CatUtils())->deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
+                    (new CatUtils($database))->deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
                     unlink($item);
                 }
             }
@@ -451,10 +458,10 @@ class Session
      * @throws TypeError
      * @throws UnexpectedValueException
      */
-    public function removeAllFiles(string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
+    public function removeAllFiles(IDatabase $database, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
     {
         foreach ($this->gDriveSession[self::FILE_LIST] as $singleFileId => $file) {
-            $this->removeFile($singleFileId, $source, $segmentationRule, $filtersTemplate);
+            $this->removeFile($database, $singleFileId, $source, $segmentationRule, $filtersTemplate);
         }
 
         unset($this->gDriveSession[self::FILE_LIST]);
@@ -580,7 +587,7 @@ class Session
         $gdriveFile = $service->files->get($remoteFile->remote_id);
         $fileTitle = $gdriveFile->getName();
 
-        $job = (new JobDao())->getNotDeletedById($id_job)[0];
+        $job = (new JobDao($this->database))->getNotDeletedById($id_job)[0];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
         $remoteFileService = $this->buildRemoteFile($gClient);
@@ -753,7 +760,7 @@ class Session
      */
     protected function createFeatureSet(): FeatureSet
     {
-        return new FeatureSet();
+        return new FeatureSet($this->database);
     }
 
     /**

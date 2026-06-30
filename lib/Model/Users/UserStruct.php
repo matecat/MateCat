@@ -122,9 +122,8 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
       * @throws ReflectionException
       * @throws Exception
       */
-     public function getPersonalTeam(?TeamDao $teamDao = null): TeamStruct
+     public function getPersonalTeam(TeamDao $teamDao): TeamStruct
     {
-        $teamDao ??= new TeamDao();
         $teamDao->setCacheTTL(60 * 60 * 24);
 
         return $teamDao->getPersonalByUser($this);
@@ -135,9 +134,8 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
       * @throws ReflectionException
       * @throws Exception
       */
-     public function getUserTeams(?MembershipDao $membershipDao = null): ?array
+     public function getUserTeams(MembershipDao $membershipDao): ?array
     {
-        $membershipDao ??= new MembershipDao();
         $membershipDao->setCacheTTL(60 * 60 * 24);
 
         return $membershipDao->findUserTeams($this);
@@ -148,7 +146,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
       * @throws ReflectionException
       * @throws Exception
       */
-     public function belongsToTeam(int $teamId, ?MembershipDao $membershipDao = null): bool
+     public function belongsToTeam(int $teamId, MembershipDao $membershipDao): bool
     {
         foreach ($this->getUserTeams($membershipDao) ?? [] as $team) {
             if ($team->id === $teamId) {
@@ -163,13 +161,13 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * @return array<string, mixed>
      * @throws RuntimeException
      */
-    public function getMetadataAsKeyValue(?MetadataDao $metadataDao = null): array
+    public function getMetadataAsKeyValue(MetadataDao $metadataDao): array
     {
         if ($this->uid === null) {
             throw new RuntimeException('User uid must be set before reading metadata');
         }
 
-        $dao = $metadataDao ?? new MetadataDao();
+        $dao = $metadataDao;
         $collection = $dao->getAllByUid($this->uid);
         $data = [];
 

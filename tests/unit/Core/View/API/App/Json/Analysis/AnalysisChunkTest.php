@@ -5,6 +5,7 @@ namespace Matecat\Core\View\API\App\Json\Analysis;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -16,6 +17,7 @@ use View\API\App\Json\Analysis\AnalysisJobSummary;
 #[CoversClass(AnalysisChunk::class)]
 class AnalysisChunkTest extends AbstractTest
 {
+    private IDatabase $dbStub;
     private JobStruct $jobStruct;
     private UserStruct $userStruct;
     private StandardMatchTypeNamesConstants $constants;
@@ -23,6 +25,7 @@ class AnalysisChunkTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
+        [$this->dbStub] = $this->createDatabaseMock();
         $this->jobStruct            = new JobStruct();
         $this->jobStruct->id        = null;
         $this->jobStruct->password  = 'abc123';
@@ -44,7 +47,7 @@ class AnalysisChunkTest extends AbstractTest
 
     private function makeChunk(): AnalysisChunk
     {
-        return new AnalysisChunk($this->jobStruct, 'Test Project', $this->userStruct, $this->constants);
+        return new AnalysisChunk($this->dbStub, $this->jobStruct, 'Test Project', $this->userStruct, $this->constants);
     }
 
     public function testGetChunkStructReturnsJobStruct(): void

@@ -4,6 +4,7 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
@@ -28,7 +29,7 @@ class EngineServiceUnitTest extends AbstractTest
             return $mtEngine ?? $tmEngine;
         });
 
-        return new EngineService($resolver);
+        return new EngineService($resolver, obtainTestDatabase());
     }
 
     private function makeFeatureSet(): FeatureSet
@@ -81,6 +82,13 @@ class EngineServiceUnitTest extends AbstractTest
 
     private function makeEngineStub($returnValue): AbstractEngine
     {
+        // A real engine stamps its featureSet onto the response it returns
+        // (e.g. MyMemory::get -> getInstance($decoded, $this->featureSet)).
+        // Mirror that so the response matches can build their filtering layer.
+        if ($returnValue instanceof GetMemoryResponse) {
+            $returnValue->featureSet(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        }
+
         $engine = $this->createStub(AbstractEngine::class);
         $engine->method('getConfigStruct')->willReturn([]);
         $engine->method('setFeatureSet')->willReturnSelf();

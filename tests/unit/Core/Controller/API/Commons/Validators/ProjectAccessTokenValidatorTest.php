@@ -50,6 +50,7 @@ class ProjectAccessTokenValidatorTest extends AbstractTest
         $this->setCtrlProp('request', new Request(
             [], [], [], ['REQUEST_URI' => '/api/v2/projects', 'REQUEST_METHOD' => 'GET']
         ));
+        $this->setCtrlProp('database', obtainTestDatabase());
     }
 
     protected function tearDown(): void
@@ -76,7 +77,7 @@ class ProjectAccessTokenValidatorTest extends AbstractTest
 
     private function seedTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec(
             "INSERT INTO projects (id, id_customer, password, name, create_date, status_analysis) VALUES (" .
             self::PROJECT_ID . ", '" . self::EMAIL . "', '" . self::PASSWORD .
@@ -86,7 +87,7 @@ class ProjectAccessTokenValidatorTest extends AbstractTest
 
     private function cleanTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
     }
 

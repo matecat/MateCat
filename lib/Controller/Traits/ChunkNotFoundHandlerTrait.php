@@ -33,7 +33,7 @@ trait ChunkNotFoundHandlerTrait
         if (null === $job) {
             $chunkReview = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($password, $id_job);
             if ($chunkReview) {
-                $job = $chunkReview->getChunk();
+                $job = $chunkReview->getChunk(new JobDao($this->getDatabase()));
             }
         }
 

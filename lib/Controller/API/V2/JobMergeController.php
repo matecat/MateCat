@@ -34,7 +34,7 @@ class JobMergeController extends KleinController
      */
     public function merge(): void
     {
-        $pManager = new JobSplitMergeManager($this->project);
+        $pManager = new JobSplitMergeManager($this->project, $this->getDatabase());
 
         $data = $pManager->getProjectData();
         $data->jobToMerge = (int)$this->request->param('id_job');

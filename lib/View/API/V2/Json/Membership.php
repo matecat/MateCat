@@ -11,6 +11,7 @@ namespace View\API\V2\Json;
 
 use Exception;
 use Model\Teams\MembershipStruct;
+use Model\Users\UserDao;
 use ReflectionException;
 use RuntimeException;
 
@@ -22,14 +23,18 @@ class Membership
      */
     protected array $data;
 
+    protected UserDao $userDao;
+
     /**
      * @param MembershipStruct[] $data
+     * @param UserDao $userDao
      *
      * @throws \TypeError
      */
-    public function __construct($data)
+    public function __construct($data, UserDao $userDao)
     {
         $this->data = $data;
+        $this->userDao = $userDao;
     }
 
     /**
@@ -46,7 +51,7 @@ class Membership
             'id_team' => $membership->id_team,
         ];
 
-        $out['user'] = User::renderItem($membership->getUser());
+        $out['user'] = User::renderItem($membership->getUser($this->userDao));
 
         $metadata = UserMetadata::renderMetadataCollection($membership->getUserMetadata());
         if (!empty($metadata)) {
@@ -104,7 +109,7 @@ class Membership
      */
     public function renderItemPublic(MembershipStruct $membership): false|array
     {
-        return User::renderItemPublic($membership->getUser());
+        return User::renderItemPublic($membership->getUser($this->userDao));
     }
 
 

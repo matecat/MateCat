@@ -3,6 +3,7 @@
 namespace Utils\Engines\Results\MyMemory;
 
 use Exception;
+use Model\FeaturesBase\FeatureSet;
 use TypeError;
 use Utils\Engines\Results\TMSAbstractResponse;
 
@@ -12,6 +13,14 @@ class GetMemoryResponse extends TMSAbstractResponse
      * @var Matches[]
      */
     public array $matches = [];
+
+    public function featureSet(FeatureSet $featureSet): void
+    {
+        parent::featureSet($featureSet);
+        foreach ($this->matches as $match) {
+            $match->featureSet($featureSet);
+        }
+    }
 
     /**
      * @param array<string, mixed>|int|null $result

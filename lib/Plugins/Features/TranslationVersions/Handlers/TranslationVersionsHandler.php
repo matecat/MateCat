@@ -3,16 +3,20 @@
 namespace Plugins\Features\TranslationVersions\Handlers;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
@@ -52,6 +56,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     private SegmentTranslationDao $segmentTranslationDao;
     private JobDao $jobDao;
     private ProjectDao $projectDao;
+    private IDatabase $database;
 
     /**
      * TranslationVersionsHandler constructor.
@@ -59,10 +64,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      * @param JobStruct $chunkStruct
      * @param int|null $id_segment
      * @param ProjectStruct $projectStruct
-     * @param TranslationVersionDao|null $translationVersionDao
-     * @param SegmentTranslationDao|null $segmentTranslationDao
-     * @param JobDao|null $jobDao
-     * @param ProjectDao|null $projectDao
+     * @param IDatabase $database
      *
      * @throws RuntimeException
      */
@@ -70,19 +72,17 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         JobStruct $chunkStruct,
         ?int $id_segment,
         ProjectStruct $projectStruct,
-        ?TranslationVersionDao $translationVersionDao = null,
-        ?SegmentTranslationDao $segmentTranslationDao = null,
-        ?JobDao $jobDao = null,
-        ?ProjectDao $projectDao = null,
+        IDatabase $database,
     ) {
         $this->chunkStruct = $chunkStruct;
         $this->id_job = $chunkStruct->id ?? throw new RuntimeException('Job id is required');
         $this->id_segment = $id_segment ?? throw new RuntimeException('Segment id is required');
-        $this->dao = $translationVersionDao ?? new TranslationVersionDao();
         $this->projectStruct = $projectStruct;
-        $this->segmentTranslationDao = $segmentTranslationDao ?? new SegmentTranslationDao();
-        $this->jobDao = $jobDao ?? new JobDao();
-        $this->projectDao = $projectDao ?? new ProjectDao();
+        $this->database = $database;
+        $this->dao = new TranslationVersionDao($database);
+        $this->segmentTranslationDao = new SegmentTranslationDao($database);
+        $this->jobDao = new JobDao($database);
+        $this->projectDao = new ProjectDao($database);
     }
 
     /**
@@ -282,17 +282,19 @@ class TranslationVersionsHandler implements VersionHandlerInterface
             $user,
             $source_page_code,
             $chunk,
+            new TranslationEventDao($this->database),
+            new SegmentDao($this->database),
         );
     }
 
     protected function createTranslationEventsHandler(JobStruct $chunk): TranslationEventsHandler
     {
-        return new TranslationEventsHandler($chunk);
+        return new TranslationEventsHandler($chunk, new TranslationEventDao($this->database));
     }
 
     protected function createBatchReviewProcessor(): BatchReviewProcessor
     {
-        return new BatchReviewProcessor();
+        return new BatchReviewProcessor(new ChunkReviewDao($this->database));
     }
 
 }

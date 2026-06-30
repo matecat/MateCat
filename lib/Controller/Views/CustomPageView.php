@@ -3,6 +3,7 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
+use Exception;
 use Klein\Request;
 use Klein\Response;
 

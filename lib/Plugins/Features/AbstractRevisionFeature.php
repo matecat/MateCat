@@ -55,7 +55,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao();
+        return $this->projectDao ??= new ProjectDao($this->getDatabase());
     }
 
     public function __construct(BasicFeatureStruct $feature)
@@ -102,7 +102,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             $lastSegment = end($lastFile['segments']);
             $lastSid = $lastSegment['sid'];
 
-            $segment_translation_events = (new TranslationEventDao())->getLatestEventsInSegmentInterval(
+            $segment_translation_events = (new TranslationEventDao($this->getDatabase()))->getLatestEventsInSegmentInterval(
                 $chunkId,
                 $firstSid,
                 $lastSid
@@ -137,7 +137,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $password = $event->getPassword();
         $id_job = $event->getIdJob();
 
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
         $chunk_review = $chunkReviewDao->findChunkReviews(new JobStruct(['id' => $id_job, 'password' => $password]))[0] ?? null;
 
         if (!$chunk_review) {
@@ -204,7 +204,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 $data['review_password'] = $options['first_record_password'];
             }
 
-            $chunkReview = (new ChunkReviewDao())->createRecord($data);
+            $chunkReview = (new ChunkReviewDao($this->getDatabase()))->createRecord($data);
             $createdRecords[] = $chunkReview;
         }
 
@@ -223,7 +223,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
             ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
         foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
-            $chunkStruct = (new JobDao())->getNotDeletedById($id_job);
+            $chunkStruct = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
 
             $iMax = $projectStructure->create_2_pass_review ? 4 : 3;
 
@@ -251,14 +251,14 @@ abstract class AbstractRevisionFeature extends BaseFeature
          */
 
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
         $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
         $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
         $chunkReviewDao->deleteByJobId($id_job);
 
-        $jobDao = new JobDao();
+        $jobDao = new JobDao($this->getDatabase());
         $chunksStructArray = $jobDao->getNotDeletedById($id_job);
 
         $reviews = [];
@@ -282,7 +282,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         foreach ($reviews as $review) {
-            $model = new ChunkReviewModel($review);
+            $model = new ChunkReviewModel($review, $this->getDatabase());
             $model->recountAndUpdatePassFailResult($project);
         }
     }
@@ -299,7 +299,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $projectStructure = $event->data;
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
-        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
         $old_reviews = $chunkReviewDao->findByIdJob($id_job);
         $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
@@ -316,7 +316,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $chunkReviewDao->deleteByJobId($id_job);
 
-        $chunksStructArray = (new JobDao())->getNotDeletedById($id_job);
+        $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
 
         $reviews = [];
         foreach ($reviewGroupedData as $source_page => $data) {
@@ -334,7 +334,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         foreach ($reviews as $review) {
-            $model = new ChunkReviewModel($review);
+            $model = new ChunkReviewModel($review, $this->getDatabase());
             $model->recountAndUpdatePassFailResult($project);
         }
     }
@@ -345,7 +345,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        $model = new QualityReportModel($event->chunk);
+        // The event stays a pure notification and must NOT carry an IDatabase handle; the feature
+        // itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
+        $model = new QualityReportModel($event->chunk, $this->getDatabase());
         $model->resetScore($event->completionEventId);
     }
 
@@ -358,7 +360,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
         $struct = $event->event;
-        $review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
+        $review = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
             ?? throw new ValidationError('chunk review not found');
 
         $undo_data = $review->getUndoData();
@@ -374,7 +376,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $review->reviewed_words_count = $undo_data['reviewed_words_count'];
         $review->undo_data = null;
 
-        (new ChunkReviewDao())->updateStruct($review, [
+        (new ChunkReviewDao($this->getDatabase()))->updateStruct($review, [
             'fields' => [
                 'is_pass',
                 'penalty_points',
@@ -414,7 +416,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
-        $feedbackDao = new FeedbackDAO();
+        $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
     }
 
@@ -427,7 +429,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $jobId = $event->job->id ?? throw new RuntimeException('Job id is required to update chunk review password');
         $jobPassword = $event->job->password ?? throw new RuntimeException('Job password is required to update chunk review password');
 
-        $dao = new ChunkReviewDao();
+        $dao = new ChunkReviewDao($this->getDatabase());
         $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
     }
 
@@ -458,13 +460,13 @@ abstract class AbstractRevisionFeature extends BaseFeature
          * }} $model_json
          */
 
-        $model_record = (new ModelDao())->createModelFromJsonDefinition($model_json);
+        $model_record = (new ModelDao($this->getDatabase()))->createModelFromJsonDefinition($model_json);
 
         $idProject = $projectStructure->id_project ?? throw new RuntimeException('Project id is required to set QA model');
         $project = $this->getProjectDao()->findById($idProject)
             ?? throw new RuntimeException('Project not found for id: ' . $idProject);
 
-        $dao = new ProjectDao(Database::obtain());
+        $dao = new ProjectDao($this->getDatabase());
         $dao->updateField($project, 'id_qa_model', $model_record->id);
     }
 
@@ -528,7 +530,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
     public function getChunkReviewModel(ChunkReviewStruct $chunkReviewStruct): ChunkReviewModel
     {
-        return new ChunkReviewModel($chunkReviewStruct);
+        return new ChunkReviewModel($chunkReviewStruct, $this->getDatabase());
     }
 
 }

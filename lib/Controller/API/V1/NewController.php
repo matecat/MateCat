@@ -25,6 +25,7 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\LQA\CategoryDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -39,6 +40,7 @@ use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -151,7 +153,7 @@ class NewController extends KleinController
 
         $filesFound = $this->getFilesList(FilesStorageFactory::create(), $arFiles, $uploadDir);
 
-        $engine = EnginesFactory::getInstance($request['mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($request['mt_engine'], $this->getDatabase(), AbstractEngine::class);
 
         $projectStructure = $this->buildProjectStructure(
             $request,
@@ -161,7 +163,7 @@ class NewController extends KleinController
             $engine,
         );
 
-        $projectManager = new ProjectManager($projectStructure);
+        $projectManager = new ProjectManager($projectStructure, $this->getDatabase());
         $projectManager->setTeam($request['team']);
 
         $fs->moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
@@ -265,11 +267,11 @@ class NewController extends KleinController
 
         // with the qa template id
         if ($request['qaModelTemplate']) {
-            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel();
+            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if ($request['qaModel']) {
-            $projectStructure->qa_model = $request['qaModel']->getDecodedModel();
+            $projectStructure->qa_model = $request['qaModel']->getDecodedModel(new CategoryDao($this->getDatabase()));
         }
 
         if ($request['mt_qe_workflow_payable_rate']) {
@@ -694,7 +696,7 @@ class NewController extends KleinController
 
             try {
                 $uid = $this->user->uid ?? throw new TypeError('User not authenticated');
-                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $uid, AbstractEngine::class);
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $uid, $this->getDatabase(), AbstractEngine::class);
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage(), -2);
             }
@@ -911,7 +913,7 @@ class NewController extends KleinController
             //from api a key is sent and the value is 'new'
             if ($tm_key['key'] == 'new') {
                 try {
-                    $APIKeySrv = new TMSService();
+                    $APIKeySrv = new TMSService($this->getDatabase());
                     $newUser = $APIKeySrv->createMyMemoryKey();
 
                     $private_tm_user = $newUser->id;
@@ -1011,7 +1013,7 @@ class NewController extends KleinController
             return $org;
         }
 
-        return $this->user->getPersonalTeam();
+        return $this->user->getPersonalTeam(new TeamDao($this->getDatabase()));
     }
 
     /**

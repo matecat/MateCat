@@ -34,13 +34,13 @@ class SegmentDisableIntegrationTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->database = Database::obtain(
+        $this->database = obtainTestDatabase(
             AppConfig::$DB_SERVER,
             AppConfig::$DB_USER,
             AppConfig::$DB_PASS,
             AppConfig::$DB_DATABASE
         );
-        $this->service = new SegmentDisabledService();
+        $this->service = new SegmentDisabledService(new SegmentMetadataDao($this->database));
         $this->cleanFixtures();
     }
 
@@ -75,7 +75,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
         );
 
         // get-segments path: SegmentMetadataDao::getAll()
-        $metadata = (new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID);
+        $metadata = (new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID);
         $disabledEntries = $this->filterDisabledMetadata($metadata);
 
         $this->assertEmpty(
@@ -102,7 +102,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
         $this->service->disable(self::TEST_SEGMENT_ID);
 
         // get-segments path
-        $metadata = (new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID);
+        $metadata = (new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID);
         $disabledEntries = $this->filterDisabledMetadata($metadata);
 
         $this->assertCount(1, $disabledEntries, 'Expected exactly one translation_disabled metadata entry');
@@ -129,7 +129,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
         $this->service->enable(self::TEST_SEGMENT_ID);
 
         // get-segments path
-        $metadata = (new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID);
+        $metadata = (new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID);
         $disabledEntries = $this->filterDisabledMetadata($metadata);
 
         $this->assertEmpty(
@@ -145,13 +145,13 @@ class SegmentDisableIntegrationTest extends AbstractTest
     {
         // 1. Initial state: both paths agree segment is enabled
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
-        $this->assertEmpty($this->filterDisabledMetadata((new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID)));
+        $this->assertEmpty($this->filterDisabledMetadata((new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID)));
 
         // 2. After disable: both paths agree segment is disabled
         $this->service->disable(self::TEST_SEGMENT_ID);
 
         $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID));
-        $disabledEntries = $this->filterDisabledMetadata((new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID));
+        $disabledEntries = $this->filterDisabledMetadata((new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID));
         $this->assertCount(1, $disabledEntries);
         $this->assertSame('1', $disabledEntries[0]->meta_value);
 
@@ -159,7 +159,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
         $this->service->enable(self::TEST_SEGMENT_ID);
 
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
-        $this->assertEmpty($this->filterDisabledMetadata((new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID)));
+        $this->assertEmpty($this->filterDisabledMetadata((new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID)));
     }
 
     // ─── Cross-segment isolation ──────────────────────────────────────
@@ -176,7 +176,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
         );
 
         // get-segments path: other segment unaffected
-        $metadata = (new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID_2);
+        $metadata = (new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID_2);
         $disabledEntries = $this->filterDisabledMetadata($metadata);
 
         $this->assertEmpty(
@@ -195,7 +195,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
 
         $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID));
 
-        $metadata = (new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID);
+        $metadata = (new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID);
         $disabledEntries = $this->filterDisabledMetadata($metadata);
         $this->assertCount(1, $disabledEntries);
     }
@@ -206,7 +206,7 @@ class SegmentDisableIntegrationTest extends AbstractTest
         $this->service->enable(self::TEST_SEGMENT_ID);
 
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
-        $this->assertEmpty($this->filterDisabledMetadata((new SegmentMetadataDao())->getAll(self::TEST_SEGMENT_ID)));
+        $this->assertEmpty($this->filterDisabledMetadata((new SegmentMetadataDao(obtainTestDatabase()))->getAll(self::TEST_SEGMENT_ID)));
     }
 
     // ─── Helper ───────────────────────────────────────────────────────

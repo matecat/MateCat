@@ -60,7 +60,7 @@ class AbstractEngineTest extends AbstractTest
         $struct->others     = ['custom_key' => 'custom_value'];
         $struct->extra_parameters = ['param_key' => 'param_value'];
 
-        $this->engine = new TestableNONE($struct);
+        $this->engine = new TestableNONE($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
     }
 
     // ---------------------------------------------------------------

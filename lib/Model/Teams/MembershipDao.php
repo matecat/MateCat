@@ -10,7 +10,6 @@ namespace Model\Teams;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
@@ -179,8 +178,8 @@ class MembershipDao extends AbstractDao
 
             $memberUIDs = array_values(array_filter($membersUIDs, fn($v) => $v !== null));
 
-            $users = (new UserDao())->setCacheTTL(60 * 60 * 24)->getByUids($memberUIDs);
-            $metadata = (new MetadataDao())->setCacheTTL(60 * 60 * 24)->getAllByUidList($memberUIDs);
+            $users = (new UserDao($this->database))->setCacheTTL(60 * 60 * 24)->getByUids($memberUIDs);
+            $metadata = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24)->getAllByUidList($memberUIDs);
 
             foreach ($members as $member) {
                 if ($member->uid !== null && isset($users[$member->uid])) {
@@ -230,9 +229,9 @@ class MembershipDao extends AbstractDao
      */
     public function deleteUserFromTeam(int $uid, int $teamId): ?UserStruct
     {
-        $user = (new UserDao())->setCacheTTL(3600)->getByUid($uid);
+        $user = (new UserDao($this->database))->setCacheTTL(3600)->getByUid($uid);
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare(self::$_delete_member);
         $stmt->execute([
             'uid' => $uid,
@@ -264,7 +263,7 @@ class MembershipDao extends AbstractDao
      */
     public function createList(array $obj_arr): array
     {
-        if (!Database::obtain()->getConnection()->inTransaction()) {
+        if (!$this->database->getConnection()->inTransaction()) {
             throw new Exception('this method requires to be wrapped in a transaction');
         }
 
@@ -284,7 +283,7 @@ class MembershipDao extends AbstractDao
         $members = $obj_arr['members'];
         $teamStruct = $obj_arr['team'];
 
-        $users = (new UserDao)->getByEmails($members);
+        $users = (new UserDao($this->database))->getByEmails($members);
 
         if (empty($users)) {
             return [];

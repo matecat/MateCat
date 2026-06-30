@@ -9,6 +9,7 @@
 namespace Plugins\Features\TranslationEvents;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\TransactionalTrait;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -26,6 +27,11 @@ class TranslationEventsHandler
 {
 
     use TransactionalTrait;
+
+    protected function getTransactionalDatabase(): IDatabase
+    {
+        return $this->translationEventDao->getDatabaseHandler();
+    }
 
     /**
      * @var TranslationEvent[]
@@ -53,14 +59,14 @@ class TranslationEventsHandler
      * TranslationEventsHandler constructor.
      *
      * @param JobStruct $chunkStruct
-     * @param TranslationEventDao|null $translationEventDao
+     * @param TranslationEventDao $translationEventDao
      */
     public function __construct(
         JobStruct $chunkStruct,
-        ?TranslationEventDao $translationEventDao = null,
+        TranslationEventDao $translationEventDao,
     ) {
         $this->_chunk = $chunkStruct;
-        $this->translationEventDao = $translationEventDao ?? new TranslationEventDao();
+        $this->translationEventDao = $translationEventDao;
     }
 
     /**

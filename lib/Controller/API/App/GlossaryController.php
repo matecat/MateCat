@@ -332,7 +332,7 @@ class GlossaryController extends KleinController
                 $userRole = Filter::ROLE_TRANSLATOR;
             }
 
-            $userKeys = new UserKeysModel($this->user, $userRole);
+            $userKeys = new UserKeysModel($this->user, $this->getDatabase(), $userRole);
 
             $json['userKeys'] = $userKeys->getKeys($job->tm_keys)['job_keys'];
         }
@@ -346,7 +346,7 @@ class GlossaryController extends KleinController
      */
     protected function getJobFromIdAndAnyPassword(int $idJob, string $jobPassword): ?JobStruct
     {
-        return (new CatUtils())->getJobFromIdAndAnyPassword($idJob, $jobPassword);
+        return (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($idJob, $jobPassword);
     }
 
     /**
@@ -354,7 +354,7 @@ class GlossaryController extends KleinController
      */
     protected function isRevisionFromIdJobAndPassword(int $idJob, string $jobPassword): bool
     {
-        return (new CatUtils())->isRevisionFromIdJobAndPassword($idJob, $jobPassword);
+        return (new CatUtils($this->getDatabase()))->isRevisionFromIdJobAndPassword($idJob, $jobPassword);
     }
 
     /**

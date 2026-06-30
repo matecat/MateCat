@@ -52,7 +52,7 @@ trait ControllerSeedFragments
 
     protected function seedConnection(): PDO
     {
-        return Database::obtain()->getConnection();
+        return obtainTestDatabase()->getConnection();
     }
 
     // ─── id helpers (deterministic offsets inside the reserved block) ───

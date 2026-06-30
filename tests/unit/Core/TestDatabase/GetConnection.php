@@ -49,18 +49,13 @@ class GetConnection extends AbstractTest
         );
 
 
-        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
-        $this->reflector = new ReflectionClass($this->databaseInstance);
-        $this->property = $this->reflector->getProperty('instance');
-        $this->databaseInstance->close();
-
-        $this->property->setValue($this->databaseInstance, null);
-        $this->instance_after_reset = $this->databaseInstance->obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->instance_after_reset = new Database(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->reflector = new ReflectionClass($this->instance_after_reset);
     }
 
     public function tearDown(): void
     {
-        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $this->databaseInstance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->databaseInstance->close();
         startConnection();
         parent::tearDown();

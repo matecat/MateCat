@@ -20,7 +20,7 @@ class FiltersConfigTemplateDaoTest extends AbstractTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dao = new FiltersConfigTemplateDao();
+        $this->dao = new FiltersConfigTemplateDao(obtainTestDatabase());
         $this->createdIds = [];
         $this->cleanupTestData();
     }
@@ -39,7 +39,7 @@ class FiltersConfigTemplateDaoTest extends AbstractTest
 
     private function cleanupTestData(): void
     {
-        $conn = Database::obtain()->getConnection();
+        $conn = obtainTestDatabase()->getConnection();
         $conn->exec("DELETE FROM filters_config_templates WHERE uid = {$this->uid}");
     }
 

@@ -6,6 +6,7 @@ use Exception;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\LQA\CategoryDao;
 use Model\LQA\QAModelInterface;
 use TypeError;
 use Utils\Date\DateTimeUtil;
@@ -104,7 +105,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      * @return array<string, mixed>
      * @throws \RuntimeException
      */
-    public function getDecodedModel(): array
+    public function getDecodedModel(CategoryDao $dao): array
     {
         $categoriesArray = [];
         $limitsArray = [];

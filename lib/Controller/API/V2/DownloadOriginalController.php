@@ -61,12 +61,16 @@ class DownloadOriginalController extends AbstractDownloadController
                 $this->logger->debug($msg);
                 return;
             }
-            $jobData = $chunkReviewStruct->getChunk();
+            $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         //get storage object
         $fs = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob($this->id_job, false);
+        $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job, false);
+
+        if (empty($files_job)) {
+            throw new Exception("No files found for job {$this->id_job}");
+        }
 
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[0]['id_project'];

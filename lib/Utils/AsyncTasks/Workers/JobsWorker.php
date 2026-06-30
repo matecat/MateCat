@@ -3,6 +3,7 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use PDOException;
@@ -22,10 +23,10 @@ class JobsWorker extends AbstractWorker
     /**
      * @throws ReflectionException
      */
-    public function __construct(AMQHandler $queueHandler, ?JobDao $jobDao = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?JobDao $jobDao = null)
     {
-        parent::__construct($queueHandler);
-        $this->jobDao = $jobDao ?? new JobDao();
+        parent::__construct($queueHandler, $database);
+        $this->jobDao = $jobDao ?? new JobDao($this->database);
     }
 
     /**

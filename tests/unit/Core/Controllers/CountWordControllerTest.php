@@ -78,6 +78,7 @@ class CountWordControllerTest extends AbstractTest
 
         $this->controller = new TestableCountWordController();
         $this->reflector = new ReflectionClass(CountWordController::class);
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -158,7 +159,7 @@ class CountWordControllerTest extends AbstractTest
     #[Test]
     public function buildSizeRestriction_returns_restriction_for_plain_text(): void
     {
-        $featureSet = new FeatureSet();
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
         $this->reflector->getProperty('featureSet')->setValue($this->controller, $featureSet);
 
         $method = $this->reflector->getMethod('buildSizeRestriction');

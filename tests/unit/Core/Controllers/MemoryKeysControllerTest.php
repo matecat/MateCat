@@ -125,6 +125,7 @@ class MemoryKeysControllerTest extends AbstractTest
         $db->method('getConnection')->willReturn($pdo);
 
         $this->setDatabaseInstance($db);
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
     }
 
     /**

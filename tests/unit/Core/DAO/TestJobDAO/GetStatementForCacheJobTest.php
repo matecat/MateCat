@@ -33,7 +33,7 @@ class GetStatementForCacheJobTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->jobDAO = new JobDao(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->jobDAO = new JobDao(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $this->reflector = new ReflectionClass($this->jobDAO);
         $this->method = $this->reflector->getMethod("_getStatementForQuery");
     }

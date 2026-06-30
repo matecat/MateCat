@@ -10,9 +10,11 @@ namespace Plugins\Features\ReviewExtended;
 
 use Closure;
 use Exception;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
@@ -47,14 +49,14 @@ class BatchReviewProcessor
     private Closure $chunkReviewModelFactory;
 
     public function __construct(
-        private ChunkReviewDao $chunkReviewDao = new ChunkReviewDao(),
+        private readonly ChunkReviewDao $chunkReviewDao,
         ?Closure $reviewedWordCountModelFactory = null,
         ?Closure $chunkReviewModelFactory = null,
     ) {
         $this->reviewedWordCountModelFactory = $reviewedWordCountModelFactory
-            ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews);
+            ?? fn(TranslationEvent $event, CounterModel $counter, array $reviews) => new ReviewedWordCountModel($event, $counter, $reviews, $this->chunkReviewDao->getDatabaseHandler());
         $this->chunkReviewModelFactory = $chunkReviewModelFactory
-            ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr);
+            ?? fn(ChunkReviewStruct $cr) => new ChunkReviewModel($cr, $this->chunkReviewDao->getDatabaseHandler());
     }
 
     /**
@@ -68,7 +70,7 @@ class BatchReviewProcessor
     {
         $this->chunk = $chunk;
         $old_wStruct = WordCountStruct::loadFromJob($chunk);
-        $this->jobWordCounter = $jobWordCounter ?? new CounterModel($old_wStruct);
+        $this->jobWordCounter = $jobWordCounter ?? new CounterModel($this->chunkReviewDao->getDatabaseHandler(), $old_wStruct);
 
         return $this;
     }
@@ -114,7 +116,7 @@ class BatchReviewProcessor
             ];
 
             $chunkReview = $this->chunkReviewDao->createRecord($data);
-            (new ChunkReviewModel($chunkReview))->recountAndUpdatePassFailResult($project);
+            (new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler()))->recountAndUpdatePassFailResult($project);
             $chunkReviews[] = $chunkReview;
 
             LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
@@ -132,7 +134,7 @@ class BatchReviewProcessor
      */
     public function process(): void
     {
-        $project = $this->chunk->getProject();
+        $project = $this->chunk->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
         $chunkReviews = $this->getOrCreateChunkReviews($project);
 
         foreach ($this->prepared_events as $translationEvent) {
@@ -143,7 +145,7 @@ class BatchReviewProcessor
             $segmentTranslationModel->sendNotificationEmail();
 
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
-                $project = $chunkReview->getChunk()->getProject();
+                $project = $chunkReview->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()))->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
                 $chunkReviewModel = ($this->chunkReviewModelFactory)($chunkReview);
                 $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points ?? 0.0, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }

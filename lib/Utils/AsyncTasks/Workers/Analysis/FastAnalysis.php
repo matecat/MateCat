@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\TmAnalysisDisabledEvent;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -15,6 +16,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -46,6 +48,7 @@ use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
 use Utils\Tools\Utils;
 
 /**
@@ -92,11 +95,34 @@ class FastAnalysis extends AbstractDaemon
      */
     protected AbstractFilesStorage $files_storage;
 
+    private IDatabase $db;
+
+    /**
+     * The DB handle for this daemon, injected by the entry point
+     * (daemons/FastAnalysis.php) via {@see self::setDatabase()} after
+     * Bootstrap::start(), then threaded into the DAOs this daemon builds. This
+     * class never resolves the connection itself — neither Database::obtain()
+     * nor Bootstrap::getDatabase().
+     */
+    protected function db(): IDatabase
+    {
+        return $this->db;
+    }
+
+    /**
+     * Inject the per-process DB handle. Called by the daemon entry point
+     * (composition root) immediately after Bootstrap::start().
+     */
+    public function setDatabase(IDatabase $db): void
+    {
+        $this->db = $db;
+    }
+
     private ?ProjectDao $projectDao = null;
 
     private function getProjectDao(): ProjectDao
     {
-        return $this->projectDao ??= new ProjectDao();
+        return $this->projectDao ??= new ProjectDao($this->db());
     }
 
     const int ERR_NO_SEGMENTS = 127;
@@ -124,7 +150,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _checkDatabaseConnection(): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
         if (!$db instanceof Database) {
             return;
         }
@@ -163,6 +189,9 @@ class FastAnalysis extends AbstractDaemon
         } catch (Exception $ex) {
             $this->logger->debug(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
             $this->logger->debug(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
+            if (AppConfig::$ENV === 'testing') {
+                throw new DaemonTerminatedException();
+            }
             die();
         }
 
@@ -201,7 +230,7 @@ class FastAnalysis extends AbstractDaemon
 
             $this->logger->debug("Projects found", ['projects' => $projects_list]);
 
-            $featureSet = new FeatureSet();
+            $featureSet = new FeatureSet($this->db());
 
             foreach ($projects_list as $project_row) {
                 $this->actual_project_row = $project_row;
@@ -282,7 +311,7 @@ class FastAnalysis extends AbstractDaemon
                     /**
                      * Ensure we have fresh data from the master node
                      */
-                    $metadataResult = Database::obtain()->transaction(function () use ($pid) {
+                    $metadataResult = $this->db()->transaction(function () use ($pid) {
                         $projectStruct = $this->getProjectDao()->findById($pid);
                         if ($projectStruct === null) {
                             return null;
@@ -290,7 +319,9 @@ class FastAnalysis extends AbstractDaemon
 
                         return [
                             'project' => $projectStruct,
-                            'metadata' => $projectStruct->getAllMetadataAsKeyValue(),
+                            'metadata' => (new ProjectMetadataDao($this->db()))
+                                ->setCacheTTL(3600)
+                                ->allByProjectIdAsKeyValue((int)$projectStruct->id),
                         ];
                     });
 
@@ -351,10 +382,10 @@ class FastAnalysis extends AbstractDaemon
                 $fs = $this->files_storage;
                 $fs->deleteFastAnalysisFile((string)$pid);
 
-                (new JobDao())->destroyCacheByProjectId($pid);
-                (new ProjectDao())->destroyFetchByIdCache($pid, ProjectStruct::class);
+                (new JobDao($this->db()))->destroyCacheByProjectId($pid);
+                (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
                 $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $projectStruct->password);
-                (new AnalysisDao())->destroyCacheByProjectId($pid);
+                (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
             }
         } while ($this->RUNNING);
 
@@ -370,7 +401,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _fetchMyMemoryFast(int $pid): AnalyzeResponse
     {
-        $myMemory = EnginesFactory::getInstance(1, MyMemory::class);
+        $myMemory = EnginesFactory::getInstance(1, $this->db(), MyMemory::class);
         if (!$myMemory instanceof MyMemory) {
             throw new Exception("Expected MyMemory engine for id=1, got " . $myMemory::class);
         }
@@ -384,7 +415,7 @@ class FastAnalysis extends AbstractDaemon
             $this->logger->debug("Error Fetching data from disk. Fallback to database.");
 
             try {
-                $this->segments = self::_getSegmentsForFastVolumeAnalysis($pid);
+                $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
             } catch (PDOException) {
                 throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
@@ -464,7 +495,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _updateProject(int $pid, string $status): void
     {
-        Database::obtain()->transaction(function () use ($pid, $status) {
+        $this->db()->transaction(function () use ($pid, $status) {
             $project = $this->getProjectDao()->findById($pid);
             if ($project === null) {
                 $this->logger->debug("*** Project $pid: not found. Skip update.");
@@ -492,7 +523,7 @@ class FastAnalysis extends AbstractDaemon
      */
     protected function _executeInsert(array $tuple_list, array $bind_values): void
     {
-        $db = Database::obtain();
+        $db = $this->db();
         $query_st = "INSERT INTO `segment_translations` ( 
                                       id_job, 
                                       id_segment, 
@@ -530,18 +561,19 @@ class FastAnalysis extends AbstractDaemon
      * @throws Throwable
      */
     protected function _insertFastAnalysis(
-        ProjectStruct $projectStruct,
-        string $projectFeaturesString,
-        array $equivalentWordMapping,
-        FeatureSet $featureSet,
-        bool $perform_Tms_Analysis = true,
-        ?bool $mt_evaluation = false,
-        ?bool $mt_qe_workflow_enabled = false,
+        ProjectStruct       $projectStruct,
+        string              $projectFeaturesString,
+        array               $equivalentWordMapping,
+        FeatureSet          $featureSet,
+        bool                $perform_Tms_Analysis = true,
+        ?bool               $mt_evaluation = false,
+        ?bool               $mt_qe_workflow_enabled = false,
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
-        ?int $mt_quality_value_in_editor = 85,
-        ?array $subfiltering_handlers = [],
-        bool $icu_enabled = false
-    ): int {
+        ?int                $mt_quality_value_in_editor = 85,
+        ?array              $subfiltering_handlers = [],
+        bool                $icu_enabled = false
+    ): int
+    {
         $pid = $projectStruct->id;
         if ($pid === null) {
             throw new RuntimeException('ProjectStruct has no ID');
@@ -644,7 +676,7 @@ class FastAnalysis extends AbstractDaemon
         $where = ["id" => $pid];
 
         try {
-            $project_creation_success = Database::obtain()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
+            $project_creation_success = $this->db()->transaction(function () use ($perform_Tms_Analysis, $pid, $data2, $where) {
                 /*
                  * IF NO TM ANALYSIS, update the jobs global word count
                  */
@@ -657,13 +689,13 @@ class FastAnalysis extends AbstractDaemon
                     $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
 
                     foreach ($_details as $job_info) {
-                        $counter = new CounterModel();
+                        $counter = new CounterModel($this->db());
                         $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);
                     }
                 }
                 /* IF NO TM ANALYSIS, upload the jobs global word count */
 
-                return Database::obtain()->update('projects', $data2, $where);
+                return $this->db()->update('projects', $data2, $where);
             });
         } catch (PDOException $e) {
             $this->logger->debug($e->getMessage());
@@ -671,7 +703,7 @@ class FastAnalysis extends AbstractDaemon
             return $e->getCode() * -1;
         }
 
-        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], AbstractEngine::class);
+        $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
@@ -751,7 +783,7 @@ class FastAnalysis extends AbstractDaemon
 
                         $cacheKey = "$id_job:$password";
                         if (!isset($metadataCache[$cacheKey])) {
-                            $jobsMetadataDao = new MetadataDao();
+                            $jobsMetadataDao = new MetadataDao($this->db());
                             $metadataCache[$cacheKey] = [
                                 'tm_prioritization' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60),
                                 'dialect_strict' => $jobsMetadataDao->get((int)$id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60),
@@ -848,7 +880,7 @@ class FastAnalysis extends AbstractDaemon
      * @return array<int, array<string, mixed>>
      * @throws Exception
      */
-    protected static function _getSegmentsForFastVolumeAnalysis(int $pid): array
+    protected function _getSegmentsForFastVolumeAnalysis(int $pid): array
     {
         //with this query, we decide what segments
         //must be inserted in the segment_translations table
@@ -875,7 +907,7 @@ class FastAnalysis extends AbstractDaemon
             ORDER BY s.id
 HD;
 
-        $db = Database::obtain();
+        $db = $this->db();
         try {
             $stmt = $db->getConnection()->prepare($query);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -907,7 +939,8 @@ HD;
             'pid' => null,
             'queueInfo' => null
         ]
-    ): void {
+    ): void
+    {
         if (empty($config['pid'])) {
             throw new Exception('Can Not set a Total without a Queue ID.');
         }
@@ -946,7 +979,7 @@ HD;
     {
         $mtEngine = null;
         try {
-            $mtEngine = EnginesFactory::getInstance($id_mt_engine, AbstractEngine::class);
+            $mtEngine = EnginesFactory::getInstance($id_mt_engine, $this->db(), AbstractEngine::class);
         } catch (Exception $e) {
             $this->logger->debug("Caught Exception: " . $e->getMessage());
         }
@@ -987,7 +1020,7 @@ HD;
             GROUP BY p.id
         ORDER BY id LIMIT " . $limit;
 
-        $db = Database::obtain();
+        $db = $this->db();
         // Needed to address the query to the master database if exists
         $results = $db->transaction(function () use ($db, $query, $bindParams) {
             $stmt = $db->getConnection()->prepare($query);

@@ -62,7 +62,7 @@ class ProjectTemplateDao extends AbstractDao
     public function getDefaultTemplate(int $uid): ProjectTemplateStruct
     {
         $defaultProject = $this->getTheDefaultProject($uid);
-        $team = (new TeamDao())->getPersonalByUid($uid);
+        $team = (new TeamDao($this->database))->getPersonalByUid($uid);
 
         $default = new ProjectTemplateStruct();
         $default->id = 0;
@@ -170,7 +170,7 @@ class ProjectTemplateDao extends AbstractDao
     private function checkValues(ProjectTemplateStruct $projectTemplateStruct, UserStruct $user): void
     {
         // check id_team
-        $team = (new MembershipDao())->setCacheTTL(60 * 5)->findTeamByIdAndUser(
+        $team = (new MembershipDao($this->database))->setCacheTTL(60 * 5)->findTeamByIdAndUser(
             $projectTemplateStruct->id_team,
             $user
         );
@@ -210,7 +210,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check xliff_config_template_id
         if ($projectTemplateStruct->xliff_config_template_id > 0) {
-            $xliffConfigModel = (new XliffConfigTemplateDao())->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
+            $xliffConfigModel = (new XliffConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
 
             if (empty($xliffConfigModel)) {
                 throw new Exception("Not existing Xliff template.", 404);
@@ -219,7 +219,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check filters_template_id
         if ($projectTemplateStruct->filters_template_id > 0) {
-            $filtersConfigModel = (new FiltersConfigTemplateDao())->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
+            $filtersConfigModel = (new FiltersConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
 
             if (empty($filtersConfigModel)) {
                 throw new Exception("Not existing Filters config template.", 404);
@@ -228,7 +228,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check qa_id
         if ($projectTemplateStruct->qa_model_template_id > 0) {
-            $qaModel = (new QAModelTemplateDao())->getQaModelTemplateByIdAndUid([
+            $qaModel = (new QAModelTemplateDao($this->database))->getQaModelTemplateByIdAndUid([
                 'id' => $projectTemplateStruct->qa_model_template_id,
                 'uid' => $projectTemplateStruct->uid
             ]);
@@ -240,7 +240,7 @@ class ProjectTemplateDao extends AbstractDao
 
         // check pr_id
         if ($projectTemplateStruct->payable_rate_template_id > 0) {
-            $payableRateModel = (new CustomPayableRateDao())->getByIdAndUser($projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid);
+            $payableRateModel = (new CustomPayableRateDao($this->database))->getByIdAndUser($projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid);
 
             if (empty($payableRateModel)) {
                 throw new Exception("Not existing payable rate template.", 404);
@@ -252,7 +252,7 @@ class ProjectTemplateDao extends AbstractDao
             $mt = $projectTemplateStruct->getMt();
 
             if (isset($mt->id)) {
-                $engine = EnginesFactory::getInstance($mt->id, AbstractEngine::class);
+                $engine = EnginesFactory::getInstance($mt->id, $this->database, AbstractEngine::class);
 
                 $engineRecord = $engine->getEngineRecord();
 
@@ -269,7 +269,7 @@ class ProjectTemplateDao extends AbstractDao
         // check tm
         if ($projectTemplateStruct->tm !== null) {
             $tmKeys = $projectTemplateStruct->getTm();
-            $mkDao = new MemoryKeyDao();
+            $mkDao = new MemoryKeyDao($this->database);
 
             foreach ($tmKeys as $tmKey) {
                 $tmKeyJson = json_encode($tmKey);

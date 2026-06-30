@@ -69,7 +69,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Matecat\\": "tests/unit"
+            "Matecat\\": "tests/unit",
+            "Matecat\\PhpStan\\": "dev-tools/phpstan"
         }
     }
 }

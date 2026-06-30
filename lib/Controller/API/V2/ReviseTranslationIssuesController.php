@@ -16,6 +16,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use View\API\V2\Json\SegmentVersion;
@@ -29,7 +30,7 @@ class ReviseTranslationIssuesController extends KleinController
         $this->appendValidator(new LoginValidator($this));
         $validator = new JobPasswordValidator($this);
         $validator->onSuccess(function () use ($validator) {
-            $this->featureSet->loadForProject($validator->getJob()->getProject());
+            $this->featureSet->loadForProject($validator->getJob()->getProject(new ProjectDao($this->getDatabase())));
             $this->chunk = $validator->getJob();
         });
         $this->appendValidator($validator);

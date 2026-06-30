@@ -6,6 +6,7 @@ use Controller\Abstracts\IController;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Projects\MetadataStruct;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -17,6 +18,18 @@ use Utils\Templating\PHPTALWithAppend;
 
 class CatDecoratorTest extends AbstractTest
 {
+    private \PDOStatement $stmtStub;
+    private IController $controllerStub;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        [$dbStub, , $this->stmtStub] = $this->createDatabaseMock();
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->controllerStub = $this->createStub(IController::class);
+        $this->controllerStub->method('getDatabase')->willReturn($dbStub);
+    }
+
     private function makeTemplate(): PHPTALWithAppend
     {
         return $this->createStub(PHPTALWithAppend::class);
@@ -24,14 +37,22 @@ class CatDecoratorTest extends AbstractTest
 
     private function makeController(): IController
     {
-        return $this->createStub(IController::class);
+        return $this->controllerStub;
     }
 
     private function makeProject(string $wordCountType = 'eq_word_count'): ProjectStruct
     {
         $project = $this->createStub(ProjectStruct::class);
         $project->id = 1;
-        $project->method('getWordCountType')->willReturn($wordCountType);
+
+        if ($wordCountType === ProjectsMetadataMarshaller::WORD_COUNT_RAW->value) {
+            $meta = new MetadataStruct();
+            $meta->key = 'word_count_type';
+            $meta->value = $wordCountType;
+            $this->stmtStub->method('fetchAll')->willReturn([$meta]);
+        } else {
+            $this->stmtStub->method('fetchAll')->willReturn([]);
+        }
 
         return $project;
     }

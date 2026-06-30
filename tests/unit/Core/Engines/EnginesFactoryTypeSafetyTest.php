@@ -42,7 +42,7 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
         $struct = EngineStruct::getStruct();
         $struct->class_load = 'NONE';
 
-        $engine = EnginesFactory::createTempInstance($struct);
+        $engine = EnginesFactory::createTempInstance($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         self::assertInstanceOf(EngineInterface::class, $engine);
         self::assertInstanceOf(NONE::class, $engine);
     }
@@ -53,7 +53,7 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
         $struct = EngineStruct::getStruct();
         $struct->class_load = 'NONE';
 
-        $engine = EnginesFactory::createTempInstance($struct);
+        $engine = EnginesFactory::createTempInstance($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $result = $engine->delete([]);
 
         self::assertIsBool($result);
@@ -66,7 +66,7 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
         $struct->class_load = 'NONE';
 
         /** @var NONE $engine */
-        $engine = EnginesFactory::createTempInstance($struct);
+        $engine = EnginesFactory::createTempInstance($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $result = $engine->get([]);
 
         self::assertInstanceOf(GetMemoryResponse::class, $result);
@@ -78,7 +78,7 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
         $struct = EngineStruct::getStruct();
         $struct->class_load = 'NONE';
 
-        $engine = EnginesFactory::createTempInstance($struct);
+        $engine = EnginesFactory::createTempInstance($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $result = $engine->set([]);
 
         self::assertIsBool($result);
@@ -90,7 +90,7 @@ class EnginesFactoryTypeSafetyTest extends AbstractTest
         $struct = EngineStruct::getStruct();
         $struct->class_load = 'NONE';
 
-        $engine = EnginesFactory::createTempInstance($struct);
+        $engine = EnginesFactory::createTempInstance($struct, $this->createStub(\Model\DataAccess\IDatabase::class));
         $result = $engine->update([]);
 
         self::assertIsBool($result);

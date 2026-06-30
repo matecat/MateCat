@@ -10,14 +10,19 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
+use Model\LQA\EntryValidator;
+use Model\Projects\ProjectDao;
+use Model\Translations\SegmentTranslationDao;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Throwable;
 use TypeError;
 use Utils\Tools\Utils;
 
@@ -58,9 +63,10 @@ class TranslationIssueModel
      * @param ChunkReviewDao        $chunkReviewDao
      * @param EntryDao              $entryDao
      * @param TranslationVersionDao $translationVersionDao
+     * @param ProjectDao            $projectDao
      *
      * @throws Exception
-     * @throws TypeError
+     * @throws TypeError|Throwable
      */
     public function __construct(
         int $id_job,
@@ -68,7 +74,8 @@ class TranslationIssueModel
         EntryStruct $issue,
         ChunkReviewDao $chunkReviewDao,
         EntryDao $entryDao,
-        TranslationVersionDao $translationVersionDao
+        TranslationVersionDao $translationVersionDao,
+        ProjectDao $projectDao
     ) {
         $this->issue = $issue;
         $this->chunkReviewDao = $chunkReviewDao;
@@ -81,8 +88,8 @@ class TranslationIssueModel
             throw new Exception('ChunkReview not found for job ' . $id_job);
         }
         $this->chunk_review = $review;
-        $this->chunk = $this->chunk_review->getChunk();
-        $this->project = $this->chunk->getProject();
+        $this->chunk = $this->chunk_review->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()));
+        $this->project = $this->chunk->getProject($projectDao);
     }
 
     /**
@@ -113,7 +120,7 @@ class TranslationIssueModel
         }
 
         $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->issue->setDefaults();
+        $this->applyIssueDefaults();
         $this->entryDao->modifyEntry($this->issue);
 
         // update score
@@ -148,13 +155,28 @@ class TranslationIssueModel
         }
 
         $this->issue->ensureStartAndStopPositionAreOrdered();
-        $this->issue->setDefaults();
+        $this->applyIssueDefaults();
         $this->entryDao->createEntry($this->issue);
 
         $chunk_review_model = $this->createChunkReviewModel($this->chunk_review);
         $chunk_review_model->addPenaltyPoints($this->issue->penalty_points ?? 0.0, $this->project);
 
         return $this->issue;
+    }
+
+    /**
+     * Builds the issue collaborators from the live database handle and applies defaults.
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function applyIssueDefaults(): void
+    {
+        $db = $this->chunkReviewDao->getDatabaseHandler();
+        $this->issue->setDefaults(
+            new EntryValidator($this->issue, database: $db),
+            new SegmentTranslationDao($db)
+        );
     }
 
     /**
@@ -232,7 +254,7 @@ class TranslationIssueModel
 
     protected function createChunkReviewModel(ChunkReviewStruct $chunkReview): ChunkReviewModel
     {
-        return new ChunkReviewModel($chunkReview);
+        return new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler());
     }
 
     /**

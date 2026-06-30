@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\ProjectCreation\ProjectStructure;
@@ -37,7 +38,8 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
         $this->logger = $this->createStub(MatecatLogger::class);
-        $this->service = new TestableJobCreationService($featureSet, $this->logger);
+        $db = $this->createStub(IDatabase::class);
+        $this->service = new TestableJobCreationService($featureSet, $this->logger, $db);
     }
 
     protected function tearDown(): void

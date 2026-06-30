@@ -7,11 +7,13 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
 use Model\OwnerFeatures\OwnerFeatureDao;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
@@ -27,22 +29,11 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * Class FeatureSet
+ * Manages the set of active features (plugins) for a request or task.
  *
- * Represents a set of features provided in the system. This class allows the
- * management of features, including loading, merging, filtering, and various
- * dependency-related operations for projects and users.
- *
- * Implements EventDispatcherInterface.
- *
- * NOTE: When called with no arguments (i.e. `new FeatureSet()`), the constructor
- * invokes `loadFromMandatory()` → `getAutoloadPlugins()` → `merge()`, which
- * iterates over {@see AppConfig::$AUTOLOAD_PLUGINS} and calls `toNewObject()`
- * on each {@see BasicFeatureStruct}, forcing PHP to autoload the plugin feature
- * classes. All state is stored in instance properties (`$this->features`) — there
- * is no static registry. {@see \Bootstrap::initMandatoryPlugins()} creates and
- * immediately discards a FeatureSet instance purely to trigger this early
- * autoloading of plugin classes during bootstrap.
+ * Every db-holding root (controller, worker, ProjectManager) MUST pass an
+ * IDatabase handle via the constructor so that features receive a real connection
+ * instead of relying on any hidden fallback.
  */
 class FeatureSet implements EventDispatcherInterface
 {
@@ -55,6 +46,8 @@ class FeatureSet implements EventDispatcherInterface
 
     private LoggerInterface $logger;
 
+    private IDatabase $database;
+
     /**
      * @return BasicFeatureStruct[]
      */
@@ -64,16 +57,15 @@ class FeatureSet implements EventDispatcherInterface
     }
 
     /**
-     * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
-     * Otherwise, it is populated with mandatory features.
-     *
+     * @param IDatabase $database A real handle from a db-holding root.
      * @param BasicFeatureStruct[]|null $features
      *
      * @throws Exception
      */
-    public function __construct(?array $features = null)
+    public function __construct(IDatabase $database, ?array $features = null)
     {
-        $this->logger = LoggerFactory::getLogger('feature_set');
+        $this->logger   = LoggerFactory::getLogger('feature_set');
+        $this->database = $database;
 
         if (is_null($features)) {
             $this->loadFromMandatory();
@@ -84,6 +76,35 @@ class FeatureSet implements EventDispatcherInterface
             }
             $this->merge($_features);
         }
+    }
+
+    public function getDatabase(): IDatabase
+    {
+        return $this->database;
+    }
+
+    /**
+     * Build a FeatureSet loaded for a specific project.
+     *
+     * Replaces the old ProjectStruct::getFeaturesSet() with an explicit
+     * IDatabase dependency so no hidden Database::obtain() fallback is needed.
+     *
+     * @throws Exception
+     */
+    public static function forProject(ProjectStruct $project, IDatabase $database): self
+    {
+        $featureSet = new self($database);
+        $featureSet->loadForProject($project);
+
+        return $featureSet;
+    }
+
+    /**
+     * Check whether a feature code is active in this set.
+     */
+    public function hasFeature(string $feature_code): bool
+    {
+        return in_array($feature_code, $this->getCodes());
     }
 
     /**
@@ -138,9 +159,10 @@ class FeatureSet implements EventDispatcherInterface
      * @return void
      * @throws Exception
      */
-    public function loadForProject(ProjectStruct $project): void
+    public function loadForProject(ProjectStruct $project, ?MetadataDao $metadataDao = null): void
     {
-        $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
+        $metadataDao ??= new MetadataDao($this->database);
+        $featureStrings = $metadataDao->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::FEATURES_KEY->value);
         $featureCodes = (!empty($featureStrings)) ? $this->splitString($featureStrings) : [];
 
         $this->clear();
@@ -191,7 +213,7 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadFromUserEmail(string $id_customer): void
     {
-        $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
+        $features = (new OwnerFeatureDao($this->database))->getByIdCustomer($id_customer);
         $this->clear();
         $this->_setIgnoreDependencies(false);
         $this->loadFromMandatory();
@@ -207,7 +229,7 @@ class FeatureSet implements EventDispatcherInterface
     public function loadForceableProjectFeatures(): void
     {
         $returnable = array_filter($this->getAutoloadPlugins(), function (BasicFeatureStruct $feature) {
-            $concreteClass = $feature->toNewObject();
+            $concreteClass = $feature->toNewObject($this->database);
 
             return $concreteClass->isForceableOnProject();
         });
@@ -236,10 +258,10 @@ class FeatureSet implements EventDispatcherInterface
      */
     public function loadAutoActivableOwnerFeatures(string $id_customer): void
     {
-        $features = (new OwnerFeatureDao())->getByIdCustomer($id_customer);
+        $features = (new OwnerFeatureDao($this->database))->getByIdCustomer($id_customer);
 
         $objs = array_map(function (BasicFeatureStruct $feature): BaseFeature {
-            return $feature->toNewObject();
+            return $feature->toNewObject($this->database);
         }, $features);
 
         $returnable = array_filter($objs, function (BaseFeature $obj): bool {
@@ -281,7 +303,7 @@ class FeatureSet implements EventDispatcherInterface
 
         foreach ($this->features as $feature) {
             try {
-                $obj = $feature->toNewObject();
+                $obj = $feature->toNewObject($this->database);
                 if (method_exists($obj, $hookName)) {
                     $obj->$hookName($event);
                 }
@@ -361,7 +383,7 @@ class FeatureSet implements EventDispatcherInterface
         }
 
         $firstInList = $featureStructsList[0];
-        $ObjectFeatureFirst = $firstInList->toNewObject();
+        $ObjectFeatureFirst = $firstInList->toNewObject($this->database);
 
         $leftBucket = $rightBucket = [];
 
@@ -384,7 +406,7 @@ class FeatureSet implements EventDispatcherInterface
     {
         $codes = $this->getCodes();
         foreach ($this->features as $feature) {
-            $baseFeature = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject($this->database);
             $missing_dependencies = array_diff($baseFeature::getDependencies(), $codes);
 
             if (!empty($missing_dependencies)) {
@@ -414,7 +436,7 @@ class FeatureSet implements EventDispatcherInterface
 
         foreach ($new_features as $feature) {
             // flat dependency management
-            $baseFeature = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject($this->database);
 
             $conflictingDeps[$feature->feature_code] = $baseFeature::getConflictingDependencies();
 

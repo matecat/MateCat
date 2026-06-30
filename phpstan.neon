@@ -1,11 +1,27 @@
 includes:
     - phpstan-baseline.neon
 
+# Custom architectural rule: Bootstrap::getDatabase() may only be called from the
+# composition-root entry points listed below; everything else must inject IDatabase.
+# Rule class autoloaded via composer autoload-dev (Matecat\PhpStan\ -> dev-tools/phpstan).
+services:
+    -
+        class: Matecat\PhpStan\Rules\NoDirectBootstrapGetDatabaseRule
+        tags:
+            - phpstan.rules.rule
+        arguments:
+            allowedFiles:
+                - lib/View/fileupload/index.php
+                - lib/Utils/TaskRunner/executor_worker.php
+                - internal_scripts/tasks/tasks.php
+                - plugins/aligner/lib/Features/Aligner/Model/DualDatabase.php
+
 parameters:
     level: 8
     paths:
         - lib
         - plugins
+        - internal_scripts/tasks
     # Vendor type stubs — correct wrong/missing types in third-party libraries
     # OpenAi::chat() declares $stream as null but accepts callable at runtime
     stubFiles:
@@ -31,6 +47,7 @@ parameters:
         uncheckedExceptionClasses:
             - 'Model\DataAccess\UnknownPropertyException'
             - 'Controller\Exceptions\RenderTerminatedException'
+            - 'Controller\Exceptions\MissingDatabaseException'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

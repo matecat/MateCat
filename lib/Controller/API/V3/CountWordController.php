@@ -51,7 +51,7 @@ class CountWordController extends KleinController
      */
     protected function getRawWordsCount(string $text, string $language): int
     {
-        return (new CatUtils())->countSegmentRawWords($text, $language);
+        return (new CatUtils($this->getDatabase()))->countSegmentRawWords($text, $language);
     }
 
     /**
