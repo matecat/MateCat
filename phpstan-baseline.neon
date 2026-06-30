@@ -205,29 +205,9 @@ parameters:
 
 
 
-		-
-			message: '#^Call to method Controller\\API\\GDrive\\OAuthController\:\:__handleError\(\) on a separate line has no effect\.$#'
-			identifier: method.resultUnused
-			count: 1
-			path: lib/Controller/API/GDrive/OAuthController.php
 
-		-
-			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleCode\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 2
-			path: lib/Controller/API/GDrive/OAuthController.php
 
-		-
-			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Controller/API/GDrive/OAuthController.php
 
-		-
-			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleError\(\) has parameter \$error with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/GDrive/OAuthController.php
 
 
 
@@ -399,11 +379,6 @@ parameters:
 			count: 1
 			path: lib/Routes/app_routes.php
 
-		-
-			message: '#^Method Controller\\API\\GDrive\\OAuthController\:\:__handleCode\(\) throws checked exception TypeError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/GDrive/OAuthController.php
 
 
 

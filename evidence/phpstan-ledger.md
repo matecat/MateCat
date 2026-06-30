@@ -43,6 +43,8 @@ Any change that introduces a new PHPStan error in a ledger file MUST be fixed, n
 | `lib/Controller/API/Commons/Validators/WhitelistAccessValidator.php` | 2026-06-30 | 100% (string-cast IP) |
 | `lib/Controller/API/Commons/ViewValidators/MandatoryKeysValidator.php` | 2026-06-30 | 100% |
 | `lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php` | 2026-06-30 | 100% (redirectToSignin seam) |
+| `lib/Controller/API/GDrive/GDriveController.php` | 2026-06-30 | 98.2% (RenderTerminatedException redirect seam; +7 tests) |
+| `lib/Controller/API/GDrive/OAuthController.php` | 2026-06-30 | 94.1% (typed __handleError+log, base-Exception import, @throws fixes; 1 line needs live Google token exchange) |
 | `lib/Controller/API/V3/CancelRequestController.php` | 2026-06-30 | pre-existing (≥90%) |
 | `lib/Controller/API/V3/ChunkController.php` | 2026-06-30 | pre-existing (≥90%) |
 | `lib/Controller/API/V3/CountWordController.php` | 2026-06-30 | 96.2% (filter method/limit casts; 1 dead defensive guard) |
