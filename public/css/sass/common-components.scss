@@ -4,6 +4,30 @@
 @use 'components/common/UserMenu';
 @use 'components/common/OnBoardingTooltip';
 
+.ui-user-dropdown-image {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  vertical-align: middle;
+  object-fit: cover;
+}
+
+.user-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e8e8e8;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+  cursor: default;
+}
+
 .cancel-label {
   display: inline-flex;
   align-items: center;

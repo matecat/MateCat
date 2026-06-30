@@ -19,11 +19,11 @@ const MembersFilter = ({selectedTeam, currentUser, setCurrentUser}) => {
 
     return metadata ? (
       <img
-        className="ui avatar image ui-user-dropdown-image"
+        className="ui-user-dropdown-image"
         src={metadata.gplus_picture}
       />
     ) : (
-      <a className="ui circular label">{CommonUtils.getUserShortName(user)}</a>
+      <a className="user-initials">{CommonUtils.getUserShortName(user)}</a>
     )
   }
 

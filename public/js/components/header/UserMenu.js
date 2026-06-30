@@ -45,7 +45,7 @@ export const UserMenu = () => {
             />
           ) : (
             <div
-              className="ui user circular image ui-user-top-image user-menu-popover"
+              className="ui-user-top-image user-menu-popover"
               data-testid="user-menu-metadata"
               title="Personal settings"
             >
@@ -67,7 +67,7 @@ export const UserMenu = () => {
                 alt="Profile picture"
               />
             ) : (
-              <div className="ui user circular image ui-user-top-image user-avatar">
+              <div className="ui-user-top-image user-avatar">
                 {CommonUtils.getUserShortName(userInfo.user)}
               </div>
             )}
