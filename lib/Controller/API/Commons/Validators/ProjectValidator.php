@@ -10,6 +10,8 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use RuntimeException;
+use TypeError;
 
 /**
  * @daprecated this should extend Base
@@ -46,6 +48,7 @@ class ProjectValidator extends Base
      * @param mixed $id_project
      *
      * @return $this
+     * @throws TypeError
      */
     public function setIdProject($id_project): ProjectValidator
     {
@@ -63,23 +66,28 @@ class ProjectValidator extends Base
     /**
      * @param ProjectStruct $project
      */
-    public function setProject(ProjectStruct $project)
+    public function setProject(ProjectStruct $project): void
     {
         $this->project = $project;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public function getProject(): ProjectStruct
     {
+        if ($this->project === null) {
+            throw new RuntimeException('validate() must be called before getProject()');
+        }
         return $this->project;
     }
 
-    public function setFeature($feature)
+    public function setFeature(string $feature): void
     {
         $this->feature = $feature;
     }
 
     /**
-     * @return mixed|void
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ReflectionException
@@ -119,11 +127,16 @@ class ProjectValidator extends Base
     /**
      * @return bool
      * @throws AuthenticationError
+     * @throws RuntimeException
      */
     private function inProjectScope(): bool
     {
         if (!$this->user) {
             throw new AuthenticationError("Invalid API key", 401);
+        }
+
+        if ($this->project === null) {
+            throw new RuntimeException('project must be set before calling inProjectScope()');
         }
 
         return $this->user->email == $this->project->id_customer;

@@ -187,4 +187,16 @@ class ProjectValidatorTest extends AbstractTest
 
         $validator->validate();
     }
+
+    // ─── getProject() before validate() => RuntimeException ───
+
+    #[Test]
+    public function getProject_throws_when_called_before_validate(): void
+    {
+        $validator = $this->makeValidator();
+
+        $this->expectException(\RuntimeException::class);
+
+        $validator->getProject();
+    }
 }

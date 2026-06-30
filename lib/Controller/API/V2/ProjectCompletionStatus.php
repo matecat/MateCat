@@ -10,12 +10,16 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use RuntimeException;
+use TypeError;
 
 class ProjectCompletionStatus extends KleinController
 {
 
     private ?ProjectStruct $project = null;
 
+    /**
+     * @throws TypeError
+     */
     protected function registerValidators(): void
     {
         $projectValidator = new ProjectValidator($this);
