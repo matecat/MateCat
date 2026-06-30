@@ -11,6 +11,7 @@ Any change that introduces a new PHPStan error in a ledger file MUST be fixed, n
 | File | Cleaned | Coverage |
 |------|---------|----------|
 | `lib/Controller/API/App/Authentication/LaraAuthController.php` | 2026-06-30 | pre-existing |
+| `lib/Controller/API/App/XliffToTargetConverterController.php` | 2026-06-30 | 100% (prepareUploadedXliff/createFilters seams) |
 | `lib/Controller/Views/OutsourceTo/AbstractController.php` | 2026-06-30 | 91.04% (refactor: setTemplateVars folded into setView; createLogger/createShopCart seams) |
 | `lib/Controller/API/Commons/Validators/ChunkPasswordValidator.php` | 2026-06-30 | 100% |
 | `lib/Controller/API/Commons/Validators/ProjectValidator.php` | 2026-06-30 | 96% |

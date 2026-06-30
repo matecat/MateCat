@@ -191,41 +191,11 @@ parameters:
 
 
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception Klein\\Exceptions\\ResponseAlreadySentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception LogicException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Parameter \#1 \$body of method Klein\\AbstractResponse\:\:body\(\) expects string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception Psr\\Log\\InvalidArgumentException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Method Controller\\API\\App\\XliffToTargetConverterController\:\:convert\(\) throws checked exception RuntimeException but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
-		-
-			message: '#^Parameter \#1 \$xliffsData of method Model\\Conversion\\Filters\:\:xliffToTarget\(\) expects array\<int\|string, array\{document_content\: string\}\>, array\{array\{document_content\: string\|false\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/App/XliffToTargetConverterController.php
 
 		-
 			message: '#^Method Controller\\API\\Commons\\Exceptions\\ExternalServiceException\:\:__construct\(\) has parameter \$code with no type specified\.$#'
