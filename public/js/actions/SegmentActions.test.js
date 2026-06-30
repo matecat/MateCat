@@ -16,6 +16,7 @@ jest.mock('../stores/CatToolStore', () => ({
 jest.mock('../utils/segmentUtils', () => ({
   isIceSegment: jest.fn(() => false),
   isReadonlySegment: jest.fn(),
+  removeUnlockedSegment: jest.fn(),
 }))
 
 jest.mock('./CatToolActions', () => ({
@@ -126,9 +127,20 @@ jest.mock('../utils/speech2text', () => ({
   default: {enabled: jest.fn(() => false)},
 }))
 
+jest.mock('./segmentClassActions', () => ({
+  addClassToSegment: jest.fn(),
+  removeClassToSegment: jest.fn(),
+}))
+
+jest.mock('../setTranslationUtil', () => ({
+  segmentTranslation: jest.fn(),
+  translationIsToSaveBeforeClose: jest.fn(() => false),
+}))
+
 import SegmentActions from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
+import CatToolStore from '../stores/CatToolStore'
 
 describe('SegmentActions.handleClickOnReadOnly', () => {
   beforeEach(() => {
@@ -217,5 +229,93 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
       }),
       'Segment disabled',
     )
+  })
+})
+
+describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () => {
+  let openIssuesSpy
+  let showIssuesMessageSpy
+
+  beforeAll(async () => {
+    await Promise.resolve()
+  })
+
+  beforeEach(() => {
+    global.config = {
+      isReview: true,
+      revisionNumber: 1,
+    }
+    jest.useFakeTimers()
+    jest.clearAllMocks()
+    openIssuesSpy = jest
+      .spyOn(SegmentActions, 'openIssuesPanel')
+      .mockReturnValue()
+    showIssuesMessageSpy = jest
+      .spyOn(SegmentActions, 'showIssuesMessage')
+      .mockReturnValue()
+  })
+
+  afterEach(() => {
+    openIssuesSpy.mockRestore()
+    showIssuesMessageSpy.mockRestore()
+    jest.useRealTimers()
+  })
+
+  const makeSegment = () => ({
+    sid: '1-1',
+    modified: true,
+    splitted: false,
+    ice_locked: false,
+    versions: [],
+  })
+
+  test('opens issues panel when mandatory_issues is undefined (non-array defaults to required)', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: undefined},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
+  test('opens issues panel when current revision is in mandatory_issues array', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1', 'r2']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
+  test('skips issues panel when current revision is absent from mandatory_issues', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r2']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+
+  test('skips issues panel when mandatory_issues is empty (none required)', () => {
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: []},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
+  })
+
+  test('opens issues panel for revision 2 when r2 is in mandatory_issues', () => {
+    global.config.revisionNumber = 2
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1', 'r2']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).toHaveBeenCalledWith({sid: '1-1'}, true)
+  })
+
+  test('skips issues panel for revision 2 when only r1 is in mandatory_issues', () => {
+    global.config.revisionNumber = 2
+    CatToolStore.getJobMetadata.mockReturnValue({
+      project: {mandatory_issues: ['r1']},
+    })
+    SegmentActions.clickOnApprovedButton(makeSegment(), false)
+    expect(openIssuesSpy).not.toHaveBeenCalled()
   })
 })
