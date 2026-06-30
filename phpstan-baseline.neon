@@ -320,31 +320,6 @@ parameters:
 
 
 
-		-
-			message: '#^Call to an undefined method Matecat\\SubFiltering\\AbstractFilter\:\:fromLayer0ToLayer2\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
-
-
-
-		-
-			message: '#^Parameter \#1 \$id_customer of method Model\\FeaturesBase\\FeatureSet\:\:loadFromUserEmail\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
-
-		-
-			message: '#^Parameter \#1 \$limit of method Utils\\LQA\\SizeRestriction\\SizeRestriction\:\:checkLimit\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
-
-		-
-			message: '#^Parameter \#1 \$limit of method Utils\\LQA\\SizeRestriction\\SizeRestriction\:\:getCharactersRemaining\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Controller/API/V3/CountWordController.php
 
 
 
@@ -356,17 +331,6 @@ parameters:
 
 
 
-		-
-			message: '#^Parameter \#1 \$csvContent of method Controller\\API\\V3\\ModernMTController\:\:validateCSVContent\(\) expects array\<int, array\<int, string\>\>, list\<list\<string\|null\>\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V3/ModernMTController.php
-
-		-
-			message: '#^Parameter \#1 \$csv of method Controller\\API\\V3\\ModernMTController\:\:getCsvType\(\) expects array\<int, array\<int, string\>\>, list\<list\<string\|null\>\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: lib/Controller/API/V3/ModernMTController.php
 
 
 
@@ -374,36 +338,6 @@ parameters:
 
 
 
-
-		-
-			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:index\(\) throws checked exception DivisionByZeroError but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Call to an undefined method Throwable\:\:getFormattedError\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:getQaModelSchema\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:validateJSON\(\) has parameter \$json with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
-
-		-
-			message: '#^Method Controller\\API\\V3\\QAModelTemplateController\:\:validateJSON\(\) throws checked exception Exception but it''s missing from the PHPDoc @throws tag\.$#'
-			identifier: missingType.checkedException
-			count: 1
-			path: lib/Controller/API/V3/QAModelTemplateController.php
 
 
 

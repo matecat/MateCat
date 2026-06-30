@@ -43,3 +43,25 @@ Any change that introduces a new PHPStan error in a ledger file MUST be fixed, n
 | `lib/Controller/API/Commons/Validators/WhitelistAccessValidator.php` | 2026-06-30 | 100% (string-cast IP) |
 | `lib/Controller/API/Commons/ViewValidators/MandatoryKeysValidator.php` | 2026-06-30 | 100% |
 | `lib/Controller/API/Commons/ViewValidators/ViewLoginRedirectValidator.php` | 2026-06-30 | 100% (redirectToSignin seam) |
+| `lib/Controller/API/V3/CancelRequestController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/ChunkController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/CountWordController.php` | 2026-06-30 | 96.2% (filter method/limit casts; 1 dead defensive guard) |
+| `lib/Controller/API/V3/DeepLGlossaryController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/DownloadQRController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/FileInfoController.php` | 2026-06-30 | 90.2% (pre-existing) |
+| `lib/Controller/API/V3/FiltersConfigTemplateController.php` | 2026-06-30 | 93.6% (pre-existing) |
+| `lib/Controller/API/V3/IssueCheckController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/LaraController.php` | 2026-06-30 | 100% (new test) |
+| `lib/Controller/API/V3/MetaDataController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/ModernMTController.php` | 2026-06-30 | 90.9% (CSV null-cell annotations; HTTP-kernel/dead-code lines uncovered) |
+| `lib/Controller/API/V3/MyMemoryController.php` | 2026-06-30 | 95.8% (2 valid-key lines need live service) |
+| `lib/Controller/API/V3/PayableRateController.php` | 2026-06-30 | 100% |
+| `lib/Controller/API/V3/ProjectTemplateController.php` | 2026-06-30 | 100% |
+| `lib/Controller/API/V3/QAModelTemplateController.php` | 2026-06-30 | 94.1% (new test; typed params, instanceof guard, pagination clamp, schema null-guard) |
+| `lib/Controller/API/V3/QualityReportControllerAPI.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/RevisionFeedbackController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/SegmentAnalysisController.php` | 2026-06-30 | 100% |
+| `lib/Controller/API/V3/StatusController.php` | 2026-06-30 | 100% |
+| `lib/Controller/API/V3/TeamsProjectsController.php` | 2026-06-30 | 100% |
+| `lib/Controller/API/V3/TmKeyManagementController.php` | 2026-06-30 | pre-existing (≥90%) |
+| `lib/Controller/API/V3/XliffConfigTemplateController.php` | 2026-06-30 | pre-existing (≥90%) |

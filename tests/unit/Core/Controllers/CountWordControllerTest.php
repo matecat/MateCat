@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V3\CountWordController;
 use Exception;
 use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -30,6 +33,23 @@ class TestableCountWordController extends CountWordController
     protected function registerValidators(): void
     {
     }
+}
+
+/**
+ * Subclass that allows registerValidators() to run the REAL production code,
+ * while still bypassing the real constructor (no Klein App / session needed).
+ */
+class ValidatorTestableCountWordController extends CountWordController
+{
+    public function __construct()
+    {
+    }
+
+    protected function initDependencies(): void
+    {
+    }
+
+    // registerValidators() is NOT overridden — the real method runs.
 }
 
 /**
@@ -269,5 +289,112 @@ class CountWordControllerTest extends AbstractTest
         $ref->getProperty('response')->setValue($controller, $response);
 
         $controller->rawWords();
+    }
+
+    // ── registerValidators ───────────────────────────────────────────────────
+
+    /**
+     * Build a ValidatorTestableCountWordController with the minimal reflection
+     * injections needed to run registerValidators() safely:
+     * - request stub (param() returns from $params map)
+     * - database stub (so getRequest() inside LoginValidator constructor works)
+     * - userIsLogged = true (so LoginValidator passes)
+     *
+     * @param array<string, string|null> $params
+     */
+    private function buildValidatorController(array $params): ValidatorTestableCountWordController
+    {
+        $controller = new ValidatorTestableCountWordController();
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $request = $this->createStub(Request::class);
+        $request->method('param')->willReturnCallback(
+            static fn(string $key, mixed $default = null) => $params[$key] ?? $default
+        );
+        $ref->getProperty('request')->setValue($controller, $request);
+        $ref->getProperty('database')->setValue($controller, $this->createStub(IDatabase::class));
+        $ref->getProperty('userIsLogged')->setValue($controller, true);
+
+        return $controller;
+    }
+
+    #[Test]
+    public function registerValidators_sets_default_language_when_language_param_is_absent(): void
+    {
+        $controller = $this->buildValidatorController(['text' => 'hello']);
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->setAccessible(true);
+        $method->invoke($controller);
+
+        self::assertSame('en-US', $ref->getProperty('language')->getValue($controller));
+    }
+
+    #[Test]
+    public function registerValidators_uses_provided_language_param(): void
+    {
+        $controller = $this->buildValidatorController(['text' => 'ciao', 'language' => 'it-IT']);
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->setAccessible(true);
+        $method->invoke($controller);
+
+        self::assertSame('it-IT', $ref->getProperty('language')->getValue($controller));
+    }
+
+    #[Test]
+    public function registerValidators_throws_ValidationError_when_text_is_null(): void
+    {
+        $this->expectException(ValidationError::class);
+
+        $controller = $this->buildValidatorController(['text' => null]);
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->setAccessible(true);
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function registerValidators_throws_ValidationError_when_text_is_empty_string(): void
+    {
+        $this->expectException(ValidationError::class);
+
+        $controller = $this->buildValidatorController(['text' => '']);
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->setAccessible(true);
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function registerValidators_throws_ValidationError_for_invalid_language(): void
+    {
+        $this->expectException(ValidationError::class);
+
+        $controller = $this->buildValidatorController(['text' => 'hello', 'language' => 'xx-NOTREAL']);
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->setAccessible(true);
+        $method->invoke($controller);
+    }
+
+    #[Test]
+    public function registerValidators_appends_LoginValidator_for_valid_inputs(): void
+    {
+        $controller = $this->buildValidatorController(['text' => 'hello', 'language' => 'en-US']);
+        $ref = new ReflectionClass(CountWordController::class);
+
+        $method = $ref->getMethod('registerValidators');
+        $method->setAccessible(true);
+        $method->invoke($controller);
+
+        $validators = $ref->getProperty('validators')->getValue($controller);
+        self::assertCount(1, $validators);
+        self::assertInstanceOf(LoginValidator::class, $validators[0]);
     }
 }
