@@ -478,6 +478,7 @@ const NewProject = () => {
       mtQualityValueInEditor,
       subfilteringHandlers,
       icuEnabled,
+      mandatoryIssues,
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
@@ -581,6 +582,7 @@ const NewProject = () => {
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
       icu_enabled: icuEnabled,
+      mandatory_issues: JSON.stringify(mandatoryIssues),
     })
 
     if (!projectSent) {

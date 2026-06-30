@@ -142,8 +142,8 @@ class ReviewExtendedPanel extends React.Component {
         {this.state.showAddIssueMessage ? (
           <div className="re-warning-not-added-issue">
             <p>
-              In order to Approve the segment you need to add an Issue from the
-              list below.
+              You must add an issue from the list below before approving this
+              segment.
               <br />
               <a
                 onClick={() =>
@@ -159,6 +159,10 @@ class ReviewExtendedPanel extends React.Component {
                     Shortcuts.shortCutsKeyType
                   ]}
               </a>
+              <i>
+                Note: the job owner and workspace members can disable this
+                requirement from settings.
+              </i>
               .
             </p>
           </div>

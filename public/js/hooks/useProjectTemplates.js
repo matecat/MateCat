@@ -81,6 +81,7 @@ export const SCHEMA_KEYS = {
   mtQualityValueInEditor: 'mt_quality_value_in_editor',
   subfilteringHandlers: 'subfiltering_handlers',
   icuEnabled: 'icu_enabled',
+  mandatoryIssues: 'mandatory_issues',
 }
 
 export class UseProjectTemplateInterface extends ComponentExtendInterface {
