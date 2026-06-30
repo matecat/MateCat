@@ -306,7 +306,11 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             //enable dynamic loading (Factory) by callback hook on revision features
-            $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $jobValidator->getChunkReview() );
+            $chunkReview = $jobValidator->getChunkReview();
+            if ( $chunkReview === null ) {
+                throw new NotFoundException( 'Chunk review not found' );
+            }
+            $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $chunkReview );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );

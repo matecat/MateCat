@@ -161,6 +161,22 @@ class ChunkPasswordValidatorTest extends AbstractTest
         $this->assertInstanceOf(ChunkReviewStruct::class, $validator->getChunkReview());
     }
 
+    // ─── getChunk() before validate() throws RuntimeException ───
+
+    #[Test]
+    public function getChunk_throws_when_called_before_validate(): void
+    {
+        $this->configureRequest([
+            'id_job' => (string) self::JOB_ID,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $validator = new ChunkPasswordValidator($this->controller);
+
+        $this->expectException(\RuntimeException::class);
+        $validator->getChunk();
+    }
+
     // ─── neither translate nor review password matches => NotFoundException ───
 
     #[Test]
