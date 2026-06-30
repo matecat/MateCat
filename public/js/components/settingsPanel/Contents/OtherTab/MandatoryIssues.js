@@ -28,7 +28,7 @@ export const MandatoryIssues = () => {
 
   const {SELECT_HEIGHT} = useContext(CreateProjectContext)
 
-  const mandatoryIssue = currentProjectTemplate.mandatoryIssues
+  const mandatoryIssue = currentProjectTemplate.mandatoryIssues ?? []
   const setMandatoryIssue = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
@@ -39,9 +39,12 @@ export const MandatoryIssues = () => {
     <div className="options-box">
       <div className="option-description">
         <h3>Mandatory issue marking</h3>
-        <p>lorem ipsum</p>
+        <p>
+          Select which review rounds require adding an issue before approving a
+          segment.
+        </p>
       </div>
-      <div className="options-select-container" data-testid="container-team">
+      <div className="options-select-container">
         <Select
           id="mandatory-issue"
           name="mandatory-issue"
