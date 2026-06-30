@@ -43,10 +43,9 @@ class MyMemoryEntryStatusController extends KleinController
      */
     private function getMMEngine(FeatureSet $featureSet): MyMemory
     {
-        $_TMS = EnginesFactory::getInstance(1, $this->getDatabase());
+        $_TMS = EnginesFactory::getInstance(1, $this->getDatabase(), MyMemory::class);
         $_TMS->setFeatureSet($featureSet);
 
-        /** @var MyMemory $_TMS */
         return $_TMS;
     }
 }

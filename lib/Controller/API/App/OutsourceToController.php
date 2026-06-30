@@ -4,8 +4,10 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
 use InvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\OutsourceTo\Translated;
 
 class OutsourceToController extends KleinController
@@ -18,6 +20,8 @@ class OutsourceToController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function outsource(): void
     {
@@ -74,7 +78,8 @@ class OutsourceToController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {

@@ -29,9 +29,9 @@ class RequestExportTMXController extends KleinController
         $tmxHandler = $request['tmxHandler'];
 
         $res = $tmxHandler->requestTMXEmailDownload(
-            $this->user->email,
-            $this->user->first_name,
-            $this->user->last_name,
+            $this->user->email ?? '',
+            $this->user->first_name ?? '',
+            $this->user->last_name ?? '',
             $request['tm_key'],
             $request['strip_tags']
         );
@@ -43,7 +43,7 @@ class RequestExportTMXController extends KleinController
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function validateTheRequest(): array
