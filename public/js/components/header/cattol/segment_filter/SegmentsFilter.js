@@ -211,7 +211,7 @@ const SegmentsFilter = ({active}) => {
   const statusOptions = config.searchable_statuses.map((item) => ({
     name: (
       <>
-        <div className={'ui ' + item.label.toLowerCase() + '-color empty circular label'} />
+        <div className={'status-dot ' + item.label.toLowerCase() + '-color'} />
         {item.label}
       </>
     ),
@@ -222,7 +222,7 @@ const SegmentsFilter = ({active}) => {
     statusOptions.push({
       name: (
         <>
-          <div className={'ui approved-2ndpass-color empty circular label'} />
+          <div className={'status-dot approved-2ndpass-color'} />
           APPROVED 2
         </>
       ),

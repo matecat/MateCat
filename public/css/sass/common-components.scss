@@ -4,3 +4,20 @@
 @use 'components/common/UserMenu';
 @use 'components/common/OnBoardingTooltip';
 
+.cancel-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+

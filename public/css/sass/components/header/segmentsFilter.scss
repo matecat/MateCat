@@ -292,7 +292,8 @@ body.cattool .filter:hover {
 }
 
 // --- Status color dots ---
-#header-bars-wrapper .filter-status .circular.label {
+#header-bars-wrapper .filter-status .circular.label,
+#header-bars-wrapper .filter-status .status-dot {
   &.new-color {
     box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
     background: colors.$white;

@@ -108,7 +108,7 @@ const FilterSegments = ({
           name: (
             <>
               <div
-                className={`ui ${item.label.toLowerCase()}-color empty circular label`}
+                className={`status-dot ${item.label.toLowerCase()}-color`}
               />
               {item.label}
             </>

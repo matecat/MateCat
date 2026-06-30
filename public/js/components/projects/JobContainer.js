@@ -767,7 +767,7 @@ export const JobContainer = ({
               onClick={removeTranslator}
               data-testid="remove-translator-button"
             >
-              <div className="ui cancel label">
+              <div className="cancel-label">
                 <i className="icon-cancel3" />
               </div>
             </div>

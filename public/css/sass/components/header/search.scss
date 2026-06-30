@@ -289,6 +289,17 @@ button#exec-replace {
   background: colors.$red400;
 }
 
+.find-element.find-dropdown-status .find-dropdown {
+  .status-dot {
+    &.new-color { box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset; background: colors.$white; }
+    &.draft-color { background: colors.$grey100; }
+    &.translated-color, &.post-edited-color { background: colors.$blue500; }
+    &.approved-color { background: colors.$green800; }
+    &.approved-2ndpass-color { background: colors.$purple500; }
+    &.rejected-color { background: colors.$red400; }
+  }
+}
+
 .ui.form .find-wrapper .find-container .find-container-inside .find-element.find-clear-all {
   width: fit-content;
   margin-right: 0;

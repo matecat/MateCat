@@ -103,7 +103,7 @@ const InputField = (props) => {
       {showCancel && value.length > 0 ? (
         <div
           data-testid="reset-button"
-          className="ui cancel label"
+          className="cancel-label"
           style={styleIcon}
           onClick={resetInput}
         >

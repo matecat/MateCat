@@ -596,7 +596,7 @@ class Search extends React.Component {
           <>
             <div
               className={
-                'ui ' + item.label.toLowerCase() + '-color empty circular label'
+                'status-dot ' + item.label.toLowerCase() + '-color'
               }
             />
             {item.label}
@@ -610,7 +610,7 @@ class Search extends React.Component {
         name: (
           <>
             <div
-              className={'ui ' + 'approved-2ndpass-color empty circular label'}
+              className={'status-dot approved-2ndpass-color'}
             />
             APPROVED
           </>
