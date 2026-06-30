@@ -94,7 +94,7 @@ const AnalyzeHeader = ({data, project}) => {
 
     let html = (
       <div className="analysis-create">
-        <div className="ui active inline loader" />
+        <div className="inline-loader" />
         <div className="complete">Fast word counting...</div>
       </div>
     )
@@ -131,7 +131,7 @@ const AnalyzeHeader = ({data, project}) => {
         if (previousQueueSizeRef.current <= in_queue_before) {
           html = (
             <div className="analysis-create">
-              <div className="ui active inline loader right-15" />
+              <div className="inline-loader" />
               <span className="not-complete">
                 Please wait...{' '}
                 <p className="label">There are other projects in queue. </p>
@@ -141,7 +141,7 @@ const AnalyzeHeader = ({data, project}) => {
         } else {
           html = (
             <div className="analysis-create">
-              <div className="ui active inline loader right-15" />
+              <div className="inline-loader" />
               <div className="not-complete">
                 Please wait...
                 <p className="label">
@@ -156,7 +156,7 @@ const AnalyzeHeader = ({data, project}) => {
       } else {
         html = (
           <div className="analysis-create">
-            <div className="ui active inline loader right-15" />
+            <div className="inline-loader" />
             <div className="not-complete">
               Please wait...
               <p className="label">There are other projects in queue. </p>

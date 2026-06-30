@@ -1,5 +1,13 @@
 @use './colors';
 @use '../commons/variables';
+
+// Inline spinner replacing Semantic UI's `.ui.active.inline.loader`
+// (semantic-ui-react / semantic.css removal).
+@keyframes inline-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 // rewrite semantic CSS
 html,
 body {
@@ -80,8 +88,14 @@ body.analyze {
           align-items: center;
           font-size: 16px;
           width: 100%;
-          .loader {
+          .inline-loader {
+            width: 20px;
+            height: 20px;
             margin-right: 5px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top-color: colors.$grey700;
+            border-radius: 50%;
+            animation: inline-loader-spin 0.6s linear infinite;
           }
           .analysis-progressbar {
             width: 100%;
