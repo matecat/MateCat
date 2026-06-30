@@ -497,43 +497,47 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
           <div className="segment-container qr-issues">
             <div className="segment-content qr-segment-title">
               <b>QA</b>
-              <div className="ui basic mini buttons segment-production">
+              <div className="qa-buttons segment-production">
                 {issuesCount > 0 && !secondPassReviewEnabled && (
-                  <div
-                    className={classnames('ui button human-qa', {
+                  <Button
+                    size={BUTTON_SIZE.SMALL}
+                    className={classnames('human-qa', {
                       active: humanQaOpen,
                       'no-hover': warningsTotal === 0,
                     })}
                     onClick={openHumanQa}
                   >
                     Human<b> ({issuesCount})</b>
-                  </div>
+                  </Button>
                 )}
                 {issuesR1?.size > 0 && secondPassReviewEnabled && (
-                  <div
-                    className={classnames('ui button human-qa', {
+                  <Button
+                    size={BUTTON_SIZE.SMALL}
+                    className={classnames(' human-qa', {
                       active: r1QaOpen,
                     })}
                     style={{padding: '8px'}}
                     onClick={openR1Qa}
                   >
                     R1<b> ({issuesR1.size})</b>
-                  </div>
+                  </Button>
                 )}
                 {issuesR2?.size > 0 && secondPassReviewEnabled && (
-                  <div
-                    className={classnames('ui button human-qa', {
+                  <Button
+                    size={BUTTON_SIZE.SMALL}
+                    className={classnames('qa-button human-qa', {
                       active: r2QaOpen,
                     })}
                     style={{padding: '8px'}}
                     onClick={openR2Qa}
                   >
                     R2<b> ({issuesR2.size})</b>
-                  </div>
+                  </Button>
                 )}
                 {warningsTotal > 0 && (
-                  <div
-                    className={classnames('ui button automated-qa', {
+                  <Button
+                    size={BUTTON_SIZE.SMALL}
+                    className={classnames('automated-qa', {
                       active: automatedQaOpen,
                       'no-hover': issuesCount === 0,
                     })}
@@ -541,7 +545,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                   >
                     Automated
                     <b> ({warningsTotal})</b>
-                  </div>
+                  </Button>
                 )}
               </div>
             </div>

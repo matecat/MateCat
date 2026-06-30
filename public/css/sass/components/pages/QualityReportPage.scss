@@ -609,10 +609,6 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   width: 80%;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container.qr-issues .button.no-hover {
-  cursor: default !important;
-}
-
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .segment-content {
   display: flex;
   align-items: center;
@@ -645,20 +641,8 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   justify-content: space-between;
 }
 
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .buttons.segment-production {
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons.segment-production {
   margin-left: 16px;
-}
-
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title button {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  margin: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-  background: none;
-  cursor: pointer;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title button i {

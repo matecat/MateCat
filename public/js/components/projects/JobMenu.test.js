@@ -119,7 +119,7 @@ const getFakeProperties = (fakeProperties) => {
       getDownloadLabel: {
         label: (
           <>
-            <i className="icon-eye icon" /> Draft
+            Draft
           </>
         ),
         action: () => {},

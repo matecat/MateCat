@@ -4,6 +4,8 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
+import IconChevronLeft from '../../../icons/IconChevronLeft'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -130,7 +132,7 @@ class BulkSelectionBar extends React.Component {
 
   render() {
     let buttonClass = classnames({
-      'ui button approve-all-segments': true,
+      'approve-all-segments': true,
       'translated-all-bulked': !this.props.isReview,
       'approved-all-bulked': this.props.isReview,
       'approved-2nd-pass':
@@ -142,10 +144,14 @@ class BulkSelectionBar extends React.Component {
       <div className="bulk-approve-bar">
         <div className="bulk-back-info">
           <div className="bulk-back">
-            <button className="ui button back-bulk" onClick={this.onClickBack}>
-              {' '}
-              <i className="icon-arrow-left2 icon" /> back
-            </button>
+            <Button
+              mode={BUTTON_MODE.GHOST}
+              size={BUTTON_SIZE.SMALL}
+              className="back-bulk"
+              onClick={this.onClickBack}
+            >
+              <IconChevronLeft size={16} /> back
+            </Button>
           </div>
           {this.state.count === 1 ? (
             <div className="bulk-info">

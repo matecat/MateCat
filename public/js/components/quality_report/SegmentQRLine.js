@@ -1,5 +1,8 @@
 import React, {useRef} from 'react'
 import {Badge, BADGE_TYPE} from '../common/Badge'
+import EyeOn from '../icons/EyeOn'
+import EyeOff from '../icons/EyeOff'
+import {BUTTON_SIZE, Button} from '../common/Button/Button'
 const SegmentQRLine = ({
   showSuggestionSource = false,
   segment,
@@ -87,13 +90,13 @@ const SegmentQRLine = ({
         <a className="segment-content qr-segment-title">
           <b onClick={onClickLabel}>{label}</b>
           {showDiffButton ? (
-            <button
+            <Button size={BUTTON_SIZE.SMALL}
               className={diffActive ? 'active' : ''}
               onClick={onClickDiff}
               title="Show Diff"
             >
-              <i className="icon-eye2 icon" />
-            </button>
+              {diffActive?  <EyeOn size={16} /> : <EyeOff size={16} />}
+            </Button>
           ) : null}
         </a>
       ) : (

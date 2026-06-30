@@ -46,18 +46,11 @@ const ReviewExtendedCategorySelector = ({
     } else {
       return (
         <div
-          className="re-severities-buttons ui tiny buttons"
+          className="re-severities-buttons"
           title="Select severities"
         >
           {category.severities.map((severity, i) => {
             const buttonClass = classNames({
-              ui: true,
-              attached: true,
-              button: true,
-              left: i === 0 && category.severities.length > 1,
-              right:
-                i === category.severities.length - 1 ||
-                category.severities.length === 1,
               active: active && i === severityActiveIndex,
             })
             let label =
@@ -69,7 +62,7 @@ const ReviewExtendedCategorySelector = ({
               <button
                 key={'value-' + severity.label}
                 onClick={() => onClickSeverity(severity.label)}
-                className={'ui ' + buttonClass + ' attached button'}
+                className={buttonClass}
                 title={severity.label}
               >
                 {sevName}

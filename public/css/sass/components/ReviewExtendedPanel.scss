@@ -159,6 +159,31 @@ input {
   margin-right: 5px;
 }
 
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button {
+  cursor: pointer;
+  font-size: 12px;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-right: none;
+  border-radius: 0;
+  background: colors.$white;
+  color: rgba(0, 0, 0, 0.6);
+  outline: none;
+  font-weight: bold;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:last-child {
+  border-right: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 0 4px 4px 0;
+}
+
+.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons button:only-child {
+  border-radius: 3px;
+}
+
 .review-balloon-container .re-wrapper .re-issues-box .re-list .re-item .re-severities-buttons {
   display: none;
 }
