@@ -4,6 +4,7 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use DivisionByZeroError;
 use Exception;
 use Klein\Response;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -32,12 +33,13 @@ class QAModelTemplateController extends KleinController
     }
 
     /**
-     * @param $json
+     * @param ?string $json
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws Exception
      */
-    private function validateJSON($json): void
+    private function validateJSON(?string $json): void
     {
         $validatorObject = new JSONValidatorObject($json);
         $validator = new JSONValidator('qa_model.json', true);
@@ -50,20 +52,17 @@ class QAModelTemplateController extends KleinController
      * @return Response
      * @throws Exception
      * @throws TypeError
+     * @throws DivisionByZeroError
      */
     public function index(): Response
     {
         try {
-            $currentPage = $this->request->param('page') ?? 1;
-            $pagination = $this->request->param('perPage') ?? 20;
-
-            if ($pagination > 200) {
-                $pagination = 200;
-            }
+            $currentPage = max(1, (int)($this->request->param('page') ?? 1));
+            $pagination = max(1, min(200, (int)($this->request->param('perPage') ?? 20)));
 
             $uid = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
 
-            return $this->response->json($this->getQaModelTemplateDao()->getAllPaginated($uid, "/api/v3/qa_model_template?page=", (int)$currentPage, (int)$pagination));
+            return $this->response->json($this->getQaModelTemplateDao()->getAllPaginated($uid, "/api/v3/qa_model_template?page=", $currentPage, $pagination));
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
@@ -234,6 +233,7 @@ class QAModelTemplateController extends KleinController
      * This is the QA Model JSON schema
      *
      * @return Response
+     * @throws RuntimeException
      */
     public function schema(): Response
     {
@@ -262,7 +262,9 @@ class QAModelTemplateController extends KleinController
             $formattedErrors = [];
 
             foreach ($errors as $error) {
-                $formattedErrors[] = $error->getFormattedError("qa_model_template");
+                $formattedErrors[] = ($error instanceof JSONValidatorException)
+                    ? $error->getFormattedError("qa_model_template")
+                    : $error->getMessage();
             }
 
             return $this->response->json([
@@ -279,10 +281,16 @@ class QAModelTemplateController extends KleinController
 
     /**
      * @return string
+     * @throws RuntimeException
      */
     private function getQaModelSchema(): string
     {
-        return file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/qa_model.json');
+        $schema = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/qa_model.json');
+        if ($schema === false) {
+            throw new RuntimeException('Unable to read the QA model JSON schema');
+        }
+
+        return $schema;
     }
 
     /**

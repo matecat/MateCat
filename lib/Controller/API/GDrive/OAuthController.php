@@ -9,11 +9,13 @@
 namespace Controller\API\GDrive;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
-use Google\Service\Exception;
+use Exception;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\GDrive\GDriveUserAuthorizationModel;
 use Model\Exceptions\ValidationError;
+use Psr\Log\InvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\Registry\AppConfig;
 
 class OAuthController extends AbstractStatefulKleinController
@@ -23,6 +25,7 @@ class OAuthController extends AbstractStatefulKleinController
      * @throws ReflectionException
      * @throws ValidationError
      * @throws Exception
+     * @throws TypeError
      */
     public function response(): void
     {
@@ -53,14 +56,19 @@ EOF;
         $this->response->body($body);
     }
 
-    private function __handleError($error)
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function __handleError(mixed $error): void
     {
+        $this->logger->warning('GDrive OAuth authorization returned an error', ['error' => $error]);
     }
 
     /**
      * @throws ValidationError
      * @throws ReflectionException
      * @throws Exception
+     * @throws TypeError
      */
     private function __handleCode(string $code): void
     {

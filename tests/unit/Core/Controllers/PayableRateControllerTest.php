@@ -11,6 +11,7 @@ use Klein\HttpStatus;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\Users\UserStruct;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
 class TestablePayableRateController extends PayableRateController
 {
@@ -373,5 +375,145 @@ class PayableRateControllerTest extends AbstractTest
 
         $validators = $ref->getProperty('validators')->getValue($controller);
         self::assertCount(1, $validators);
+    }
+
+    // ── getCustomPayableRateDao (base impl, line 26) ─────────────────────
+
+    #[Test]
+    public function base_getCustomPayableRateDao_returns_dao_instance(): void
+    {
+        $controller = new ValidatorTestablePayableRateController();
+        $ref        = new ReflectionClass(PayableRateController::class);
+
+        $dbStub = $this->createStub(IDatabase::class);
+        $ref->getProperty('database')->setValue($controller, $dbStub);
+        $ref->getProperty('logger')->setValue($controller, $this->createStub(MatecatLogger::class));
+
+        $dao = $ref->getMethod('getCustomPayableRateDao')->invoke($controller);
+
+        self::assertInstanceOf(CustomPayableRateDao::class, $dao);
+    }
+
+    // ── create: JSONValidatorException branch (lines 99-104) ────────────
+
+    /**
+     * @throws \TypeError
+     */
+    #[Test]
+    public function create_returns_validation_error_for_schema_invalid_json(): void
+    {
+        // NO_MATCH > 100 triggers a JSONValidatorException via validateJSON()
+        $schemaInvalidJson = '{"payable_rate_template_name":"Test","breakdowns":{"default":{"NO_MATCH":999}}}';
+        $this->setRequest([], $schemaInvalidJson, 'application/json');
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(static function (array $data): bool {
+                return isset($data['error']) && is_array($data['error']);
+            }));
+
+        $this->controller->create();
+    }
+
+    // ── create: JsonValidatorGenericException branch (line 107) ──────────
+
+    #[Test]
+    public function create_returns_generic_error_when_dao_throws_generic_exception(): void
+    {
+        $this->setRequest([], self::VALID_JSON, 'application/json');
+        $this->daoStub->method('createFromJSON')
+            ->willThrowException(new JsonValidatorGenericException('generic error'));
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(['error' => 'generic error']);
+
+        $this->controller->create();
+    }
+
+    // ── edit: body null after model found (line 166) ─────────────────────
+
+    #[Test]
+    public function edit_returns_400_when_body_null_after_model_found(): void
+    {
+        $this->setRequest(['id' => '42'], null, 'application/json');
+        $existing = new CustomPayableRateStruct();
+        $this->daoStub->method('getByIdAndUser')->willReturn($existing);
+
+        $response = $this->responseMock();
+        $response->expects(self::once())->method('json')->with(['error' => 'Missing request body']);
+
+        $this->controller->edit();
+    }
+
+    // ── edit: JSONValidatorException branch (lines 176-180) ─────────────
+
+    /**
+     * @throws \TypeError
+     */
+    #[Test]
+    public function edit_returns_validation_error_for_schema_invalid_json(): void
+    {
+        $schemaInvalidJson = '{"payable_rate_template_name":"Test","breakdowns":{"default":{"NO_MATCH":999}}}';
+        $this->setRequest(['id' => '42'], $schemaInvalidJson, 'application/json');
+
+        $existing = new CustomPayableRateStruct();
+        $this->daoStub->method('getByIdAndUser')->willReturn($existing);
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(static function (array $data): bool {
+                return isset($data['error']) && is_array($data['error']);
+            }));
+
+        $this->controller->edit();
+    }
+
+    // ── edit: JsonValidatorGenericException branch (line 183) ────────────
+
+    #[Test]
+    public function edit_returns_generic_error_when_dao_throws_generic_exception(): void
+    {
+        $this->setRequest(['id' => '42'], self::VALID_JSON, 'application/json');
+
+        $existing = new CustomPayableRateStruct();
+        $this->daoStub->method('getByIdAndUser')->willReturn($existing);
+        $this->daoStub->method('editFromJSON')
+            ->willThrowException(new JsonValidatorGenericException('edit generic error'));
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(['error' => 'edit generic error']);
+
+        $this->controller->edit();
+    }
+
+    // ── validate: JSONValidatorException branch in foreach (line 261) ────
+
+    /**
+     * @throws \TypeError
+     */
+    #[Test]
+    public function validate_returns_formatted_errors_for_schema_invalid_json(): void
+    {
+        // NO_MATCH > 100 → validator collects a JSONValidatorException (not thrown,
+        // since throwExceptions=false in validate()), hits the if-branch at line 260.
+        $schemaInvalidJson = '{"payable_rate_template_name":"Test","breakdowns":{"default":{"NO_MATCH":999}}}';
+        $this->setRequest([], $schemaInvalidJson, 'application/json');
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(static function (array $data): bool {
+                return isset($data['errors'])
+                    && count($data['errors']) === 1
+                    && isset($data['errors'][0]['error']);
+            }));
+
+        $this->controller->validate();
     }
 }

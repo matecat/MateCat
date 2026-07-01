@@ -7,10 +7,12 @@ namespace Matecat\Core\Controllers;
 /**
  * Mock-seam unit test (Playbook §2) for {@see \Controller\API\V3\StatusController}.
  *
- * ID block base 9056000 (reserved; this suite uses NO real-DB seeding — pure mock seam).
- * Per-suite owner identifier (unused — no DB rows seeded): ctrltest_9056000@example.org
+ * ID block base 9056000 (reserved; mock-seam tests use NO real-DB seeding).
+ * ID block base 9942000 (reserved; real-DB seeding for index() branch coverage).
+ * Per-suite owner identifier: ctrltest_9056000@example.org
  */
 
+use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\V3\StatusController;
@@ -37,6 +39,7 @@ use ReflectionException;
 use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use View\API\App\Json\Analysis\AnalysisProject;
 
 /**
  * Bare subclass: neutralised constructor + empty hooks so the controller can be
@@ -224,5 +227,124 @@ class StatusV3ControllerTest extends AbstractTest
         $this->expectException(TypeError::class);
 
         $this->controller->index();
+    }
+
+    // ── Real-DB integration paths ──────────────────────────────────────────
+
+    /**
+     * Project 1886428330 exists in the test DB with job 1886428338 and real
+     * segment_translations, so getProjectStatsVolumeAnalysis returns non-empty
+     * rows.  loadObjects() builds at least one non-deleted chunk → chunksCount > 0
+     * → response->json() is called (line 54).
+     *
+     * Covers: Status construction (line 34), fetchData()->getResult() (line 35),
+     * the foreach loop body (lines 40-44), the chunksCount conditional (line 50),
+     * and the json() call (line 54).
+     *
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function index_calls_json_for_project_with_real_analysis_data(): void
+    {
+        // setUp installed a mock via createDatabaseMock(); reset it so that
+        // obtainTestDatabase() falls back to Bootstrap::getDatabase() (the real DB).
+        $this->resetDatabaseMock();
+        $realDb = obtainTestDatabase();
+
+        // Point the controller's own DB at the real test DB so
+        // getProjectAndJobData(1886428330) returns the seeded row.
+        $this->reflector->getProperty('database')->setValue($this->controller, $realDb);
+
+        // The featureSet must also wrap the real DB so AbstractStatus::__construct()
+        // can resolve the project via ProjectDao::findById(), and loadObjects() can
+        // run the analysis and job queries.
+        $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($realDb));
+
+        // Inject a user so isLoggedIn() does not hit an uninitialized property.
+        $user = new UserStruct();
+        $user->uid   = 1;
+        $user->email = 'ctrltest_9056000@example.org';
+        $this->reflector->getProperty('user')->setValue($this->controller, $user);
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+
+        // The response mock must accept json() exactly once with an AnalysisProject.
+        $this->responseMock
+            ->expects($this->once())
+            ->method('json')
+            ->with($this->isInstanceOf(AnalysisProject::class));
+
+        $this->setRequestParams(['id_project' => '1886428330']);
+
+        // Should complete without throwing — real chunks are not deleted.
+        $this->controller->index();
+    }
+
+    /**
+     * A project that exists in the DB but has NO segment_translations (pid 9942001)
+     * causes getProjectStatsVolumeAnalysis to return [] and status_analysis='DONE'
+     * skips the new/busy fallback → no jobs are added → chunksCount remains 0
+     * → NotFoundException is thrown (line 51).
+     *
+     * Covers: the empty-jobs conditional (line 39) and the NotFoundException throw
+     * (lines 50-51).
+     *
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function index_throws_not_found_exception_when_project_has_no_chunks(): void
+    {
+        // Reset the mock so obtainTestDatabase() returns the real composition-root DB.
+        $this->resetDatabaseMock();
+        $realDb = obtainTestDatabase();
+        $conn   = $realDb->getConnection();
+
+        // Seed a minimal project + job with no segment_translations so that the
+        // volume-analysis query returns an empty result set.
+        $conn->exec(
+            "INSERT IGNORE INTO projects
+                 (id, password, id_customer, name, create_date, status_analysis, id_team, id_assignee)
+             VALUES
+                 (9942001, 'aabbccdd1122', 'ctrltest_9942000@example.org', 'StatusCtrlTest',
+                  '2024-01-01 00:00:00', 'DONE', 32786, 18052)"
+        );
+        $conn->exec(
+            "INSERT IGNORE INTO jobs
+                 (id, password, id_project, job_first_segment, job_last_segment,
+                  tm_keys, source, target, create_date, owner, status_owner, status)
+             VALUES
+                 (9942001, 'aabbccdd9999', 9942001, 9942001, 9942002,
+                  '[]', 'en-GB', 'it-IT', '2024-01-01 00:00:00',
+                  'ctrltest_9942000@example.org', 'active', 'active')"
+        );
+
+        try {
+            $this->reflector->getProperty('database')->setValue($this->controller, $realDb);
+            $this->reflector->getProperty('featureSet')->setValue($this->controller, new FeatureSet($realDb));
+
+            $user = new UserStruct();
+            $user->uid   = 1;
+            $user->email = 'ctrltest_9942000@example.org';
+            $this->reflector->getProperty('user')->setValue($this->controller, $user);
+            $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+
+            $this->responseMock->expects($this->never())->method('json');
+
+            $this->setRequestParams(['id_project' => '9942001']);
+
+            $this->expectException(NotFoundException::class);
+            $this->expectExceptionMessageMatches("/doesn't have any jobs/i");
+
+            $this->controller->index();
+        } finally {
+            // Always clean up seeded rows regardless of test outcome.
+            $conn->exec("DELETE FROM jobs     WHERE id         = 9942001");
+            $conn->exec("DELETE FROM projects WHERE id         = 9942001");
+        }
     }
 }
