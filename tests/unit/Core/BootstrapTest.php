@@ -548,4 +548,28 @@ class BootstrapTest extends AbstractTest
 
         $this->assertStringContainsString('original cause 99', $output);
     }
+
+    #[Test]
+    public function renderErrorPage_uses_empty_report_when_errors_off(): void
+    {
+        // With a non-null database the try-block runs and evaluates the report:
+        // PRINT_ERRORS off takes the empty-report branch. Status 599 has no
+        // template so rendering throws and is swallowed — output stays empty.
+        $oldPrint = AppConfig::$PRINT_ERRORS;
+        AppConfig::$PRINT_ERRORS = false;
+
+        set_error_handler(
+            static fn(int $errno, string $errstr): bool => str_contains($errstr, 'session_start'),
+            E_WARNING
+        );
+
+        try {
+            $output = self::invokeRenderErrorPage(599, new RuntimeException('boom'), $this->createStub(IDatabase::class));
+        } finally {
+            restore_error_handler();
+            AppConfig::$PRINT_ERRORS = $oldPrint;
+        }
+
+        $this->assertSame('', $output);
+    }
 }
