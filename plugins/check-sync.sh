@@ -47,6 +47,40 @@
 #   ⚠️  plugin — error description
 #
 
+usage() {
+    cat <<'EOF'
+check-sync.sh — verify and align git submodule branches with their remotes.
+
+Usage:
+  bash check-sync.sh [options] [branch]
+
+Options:
+  --push       Push local-ahead commits to the remote (submodule must be on the
+               target branch). Does NOT pull.
+  --update     Rebase each submodule's local branch onto origin/<branch> WITHOUT
+               moving the checkout (HEAD restored afterward; superproject gitlink
+               unchanged).
+  --sync       Like --update, but leaves the submodule checked out on the updated
+               branch tip (superproject sees the gitlink move).
+  --dry-run    Show what would happen; no fetch, no writes, no mutations.
+  -h, --help   Show this help and exit.
+
+--push, --update and --sync are mutually exclusive.
+
+Arguments:
+  branch       Optional branch to check (e.g. develop). Defaults to per-submodule
+               auto-detection of main or master.
+
+Examples:
+  bash check-sync.sh                    # check main/master alignment
+  bash check-sync.sh develop            # check develop alignment
+  bash check-sync.sh --push             # push local-ahead commits
+  bash check-sync.sh --update           # rebase local branches, keep checkout
+  bash check-sync.sh --sync             # rebase and move checkout to branch tip
+  bash check-sync.sh --update --dry-run # preview an --update, no changes
+EOF
+}
+
 MODE=""            # "" | push | update | sync (mutually exclusive)
 DRY_RUN=false
 BRANCH=""
@@ -62,6 +96,7 @@ set_mode() {
 
 for arg in "$@"; do
     case "$arg" in
+        -h|--help) usage; exit 0 ;;
         --push)    set_mode push ;;
         --update)  set_mode update ;;
         --sync)    set_mode sync ;;

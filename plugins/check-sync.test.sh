@@ -155,6 +155,20 @@ out=$(run_script "$fx" --update)
 assert_contains "$out" "synced" "--update on already-synced plugin reports synced"
 [[ "$out" != *"rebased"* ]] && echo "✅ PASS: --update no-op when nothing behind" && PASS=$((PASS+1)) || { echo "❌ FAIL: --update acted when nothing behind"; FAIL=$((FAIL+1)); }
 
+# --- -h / --help print usage and exit 0 without touching submodules ---
+fx=$(make_fixture)
+before_local=$(git -C "$fx/plugin" rev-parse master)
+out=$(run_script "$fx" --help); RC=$?
+assert_eq "$RC" "0" "--help exits 0"
+assert_contains "$out" "Usage:" "--help prints Usage header"
+assert_contains "$out" "--update" "--help documents --update"
+assert_contains "$out" "--sync" "--help documents --sync"
+assert_eq "$(git -C "$fx/plugin" rev-parse master)" "$before_local" "--help performed no submodule work"
+
+out=$(run_script "$fx" -h); RC=$?
+assert_eq "$RC" "0" "-h exits 0"
+assert_contains "$out" "Usage:" "-h prints Usage header"
+
 echo ""
 echo "Passed: $PASS  Failed: $FAIL"
 [ "$FAIL" -eq 0 ]
