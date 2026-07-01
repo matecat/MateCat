@@ -8,6 +8,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use TypeError;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -23,7 +24,7 @@ class MyMemoryController extends KleinController
     /**
      * Create a MM key and assign to the logged user
      *
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function create(): void
     {
@@ -71,7 +72,7 @@ class MyMemoryController extends KleinController
      *
      * @return mixed
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function createANewKeyAndAssignToUser(string $name): mixed
     {
@@ -89,7 +90,7 @@ class MyMemoryController extends KleinController
      *
      * @return string
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function checkTheKeyAndAssignToUser(string $key, string $name): string
     {
@@ -110,7 +111,7 @@ class MyMemoryController extends KleinController
      * @param string $name
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     private function saveMemoryKey(string $key, string $name): void
     {
@@ -123,7 +124,7 @@ class MyMemoryController extends KleinController
         $mkDao = new MemoryKeyDao($this->getDatabase());
 
         $newMemoryKey = new MemoryKeyStruct();
-        $newMemoryKey->uid = $this->user->uid ?? throw new \TypeError('User UID must not be null');
+        $newMemoryKey->uid = $this->user->uid ?? throw new TypeError('User UID must not be null');
         $newMemoryKey->tm_key = $tmKeyStruct;
 
         try {

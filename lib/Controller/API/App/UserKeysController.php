@@ -196,6 +196,18 @@ class UserKeysController extends KleinController
     }
 
     /**
+     * Testability seam: overridable so tests can inject a stub TMSService
+     * and avoid firing a live MyMemory API call from checkCorrectKey().
+     *
+     * @return TMSService
+     * @throws Exception
+     */
+    protected function getTmService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
      * @param string $key
      * @param string|null $description
      *
@@ -205,7 +217,7 @@ class UserKeysController extends KleinController
      */
     private function getMemoryToUpdate(string $key, ?string $description = null): MemoryKeyStruct
     {
-        $tmService = new TMSService($this->getDatabase());
+        $tmService = $this->getTmService();
 
         //validate the key
         $tmService->checkCorrectKey($key);

@@ -73,7 +73,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             return;
         }
 
-        if ($this->getUser()->email == $chunk->status_owner) {
+        if ($this->getUser()->email == $chunk->owner) {
             $userRole = Filter::OWNER;
         } elseif ((new CatUtils($this->getDatabase()))->isRevisionFromIdJobAndPassword($idJob, $password)) {
             $userRole = Filter::ROLE_REVISOR;

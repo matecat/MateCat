@@ -27,6 +27,7 @@ class HeartBeat extends KleinController
 
     /**
      * @throws PDOException
+     * @throws RuntimeException
      */
     public function ping(): void
     {

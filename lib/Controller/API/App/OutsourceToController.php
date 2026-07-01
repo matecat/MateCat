@@ -4,8 +4,10 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
 use InvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\OutsourceTo\Translated;
 
 class OutsourceToController extends KleinController
@@ -18,6 +20,8 @@ class OutsourceToController extends KleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
      */
     public function outsource(): void
     {
@@ -30,7 +34,7 @@ class OutsourceToController extends KleinController
         $typeOfService = $request['typeOfService'];
         $jobList = $request['jobList'];
 
-        $outsourceTo = new Translated();
+        $outsourceTo = $this->getOutsourceService();
         $outsourceTo->setPid($pid)
             ->setPpassword($ppassword)
             ->setCurrency($currency)
@@ -74,7 +78,19 @@ class OutsourceToController extends KleinController
     }
 
     /**
-     * @return array
+     * Testability/extension seam: isolates the external quote-service construction so tests can
+     * inject a stub returning canned quote data instead of firing a live outbound HTTP call.
+     *
+     * @throws Exception
+     */
+    protected function getOutsourceService(): Translated
+    {
+        return new Translated();
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @throws InvalidArgumentException
      */
     private function validateTheRequest(): array
     {
