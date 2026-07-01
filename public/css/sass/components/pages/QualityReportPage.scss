@@ -625,7 +625,6 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   background-color: colors.$grey50 !important;
   border-bottom: none !important;
   height: unset;
-  padding-right: 24px;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container.qr-issues .segment-content {
@@ -643,6 +642,42 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons.segment-production {
   margin-left: 16px;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons {
+  gap: 0;
+  flex-wrap: nowrap;
+  display: flex;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button {
+  border-radius: 0;
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  padding: 4px 8px;
+  font-weight: normal;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button:first-child {
+  border-radius: 3px 0 0 3px;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button:last-child {
+  border-radius: 0 3px 3px 0;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button:only-child {
+  border-radius: 3px;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button:not(:first-child) {
+  margin-left: -1px;
+}
+
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button:hover,
+.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title .qa-buttons button.active {
+  z-index: 2;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-segment-title button i {
@@ -704,6 +739,7 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   display: flex;
   flex-wrap: wrap;
   margin-top: -5px;
+  margin-left: 12px;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container .qr-segment-details-container .qr-segments-summary .qr-segments .qr-segments-list .qr-single-segment .qr-segment-body .segment-container .qr-text .qr-issues-list .qr-issue {

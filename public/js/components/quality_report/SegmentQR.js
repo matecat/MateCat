@@ -22,7 +22,7 @@ import InfoIcon from '../../../img/icons/InfoIcon'
 import {Badge, BADGE_MODE, BADGE_TYPE} from '../common/Badge'
 import Tooltip from '../common/Tooltip'
 import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
-import {Button, BUTTON_SIZE} from '../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_MODE} from '../common/Button/Button'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import ChevronUp from '../../../img/icons/ChevronUp'
 
@@ -500,6 +500,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
               <div className="qa-buttons segment-production">
                 {issuesCount > 0 && !secondPassReviewEnabled && (
                   <Button
+                    mode={BUTTON_MODE.OUTLINE}
                     size={BUTTON_SIZE.SMALL}
                     className={classnames('human-qa', {
                       active: humanQaOpen,
@@ -512,11 +513,11 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 )}
                 {issuesR1?.size > 0 && secondPassReviewEnabled && (
                   <Button
+                    mode={BUTTON_MODE.OUTLINE}
                     size={BUTTON_SIZE.SMALL}
-                    className={classnames(' human-qa', {
+                    className={classnames('human-qa', {
                       active: r1QaOpen,
                     })}
-                    style={{padding: '8px'}}
                     onClick={openR1Qa}
                   >
                     R1<b> ({issuesR1.size})</b>
@@ -524,11 +525,11 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 )}
                 {issuesR2?.size > 0 && secondPassReviewEnabled && (
                   <Button
+                    mode={BUTTON_MODE.OUTLINE}
                     size={BUTTON_SIZE.SMALL}
-                    className={classnames('qa-button human-qa', {
+                    className={classnames('human-qa', {
                       active: r2QaOpen,
                     })}
-                    style={{padding: '8px'}}
                     onClick={openR2Qa}
                   >
                     R2<b> ({issuesR2.size})</b>
@@ -536,6 +537,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 )}
                 {warningsTotal > 0 && (
                   <Button
+                    mode={BUTTON_MODE.OUTLINE}
                     size={BUTTON_SIZE.SMALL}
                     className={classnames('automated-qa', {
                       active: automatedQaOpen,
@@ -571,25 +573,27 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 </div>
               )}
             </div>
-            {(segment.get('history')?.size ?? 0) > 0 ? (
-              !showHistory ? (
-                <Button
-                  onClick={() => setShowHistory(true)}
-                  size={BUTTON_SIZE.SMALL}
-                >
-                  Open history
-                  <ChevronDown size={16} />
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setShowHistory(false)}
-                  size={BUTTON_SIZE.SMALL}
-                >
-                  Close history
-                  <ChevronUp size={16} />
-                </Button>
-              )
-            ) : null}
+            <div style={{alignSelf: 'center', marginRight: 24}}>
+              {(segment.get('history')?.size ?? 0) > 0 ? (
+                !showHistory ? (
+                  <Button
+                    onClick={() => setShowHistory(true)}
+                    size={BUTTON_SIZE.SMALL}
+                  >
+                    Open history
+                    <ChevronDown size={16} />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setShowHistory(false)}
+                    size={BUTTON_SIZE.SMALL}
+                  >
+                    Close history
+                    <ChevronUp size={16} />
+                  </Button>
+                )
+              ) : null}
+            </div>
           </div>
         )}
         {(segment.get('history')?.size ?? 0) > 0 && showHistory && (
