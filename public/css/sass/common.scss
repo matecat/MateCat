@@ -723,3 +723,10 @@ body svg {
     }
   }
 }
+
+a {
+  color: colors.$blue700;
+  &:hover, &:active {
+    color: colors.$blue400;
+  }
+}
