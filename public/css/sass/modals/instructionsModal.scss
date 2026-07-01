@@ -6,54 +6,6 @@
   h2 {
     padding-top: 16px;
   }
-  .ui.accordion {
-    max-height: 400px;
-    overflow: auto;
-    -webkit-box-shadow: unset;
-    box-shadow: unset;
-    border-radius: 0px;
-    margin-bottom: 20px;
-    ul {
-      list-style: disc;
-      padding-left: 30px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      li {
-        margin-bottom: 4px;
-        line-height: 24px;
-      }
-    }
-    .title {
-      display: flex;
-      align-items: center;
-      color: colors.$grey700;
-      &:hover {
-        color: colors.$black;
-      }
-      &.current {
-        //color: #fff;
-        background: colors.$grey150;
-        &:hover {
-          background: colors.$grey150;
-          //color: #fff;
-        }
-        .current-icon {
-          display: block;
-          float: right;
-          margin-left: 10px;
-        }
-      }
-    }
-    .transition {
-      line-height: 25px;
-      padding: 10px 72px;
-
-      p {
-        line-height: 26px;
-        word-break: break-word;
-      }
-    }
-  }
   .instructions-container {
     background-color: colors.$white;
     padding: 20px;

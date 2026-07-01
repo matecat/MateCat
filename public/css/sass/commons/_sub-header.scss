@@ -2,9 +2,6 @@
 @use '../commons/variables';
 .sub-head {
   color: white;
-  .ui.container.equal.width.grid {
-    width: 1335px !important;
-  }
   .projects-state {
     width: 40px !important;
   }
@@ -48,56 +45,6 @@
         border: none !important;
         & + .dropdown {
           background-color: colors.$white;
-        }
-      }
-    }
-    .ui.dropdown {
-      background-color: colors.$white;
-      border-left: 1px solid colors.$blue900;
-      /*transition: 0.2s ease-in;*/
-      color: colors.$blue900;
-      font-weight: 500;
-      padding: 2px 16px 2px 8px;
-      line-height: 1.21;
-      border-radius: 0px 2px 2px 0px;
-      font-size: 1em;
-      min-width: 110px;
-      display: grid;
-      grid-template-columns: 36px auto;
-      align-items: center;
-      .text svg {
-        display: none;
-      }
-      .menu {
-        min-width: 144px;
-        padding: 8px 8px 12px 8px;
-        border-radius: 2px;
-        border: solid 1px colors.$grey150;
-        right: 0 !important;
-        left: auto !important;
-        box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.2);
-
-        &::after {
-          left: 50% !important;
-        }
-      }
-      .menu .item {
-        border-radius: 2px;
-        color: colors.$blue900;
-        font-size: 15px;
-        padding: 8px !important;
-        font-weight: normal;
-        display: grid;
-        grid-template-columns: auto 16px;
-        align-items: center;
-        margin: 4px 0 0 0;
-
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.03);
-        }
-        &.selected {
-          background-color: colors.$blue900;
-          color: colors.$white !important;
         }
       }
     }

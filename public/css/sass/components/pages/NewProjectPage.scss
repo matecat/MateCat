@@ -1,6 +1,5 @@
 @use '../../common-main';
 
-@use '../../commons/buttons';
 @use '../../commons/filter-teams';
 @use '../../commons/icons';
 @use '../../commons/team-member';
@@ -269,21 +268,11 @@
         #source-lang,
         #target-lang {
             !*width: 127px ;*!
-            .ui.icon.search.input {
-                min-width: unset;
-            }
         }*/
-
-    .ui.icon.search.input {
-      min-width: unset;
-    }
 
     #tmx-select {
       &:hover {
         box-shadow: none !important;
-      }
-      .ui.multiple.search.dropdown > .text {
-        width: 150px;
       }
     }
     div.item {

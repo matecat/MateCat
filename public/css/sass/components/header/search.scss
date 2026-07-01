@@ -227,27 +227,6 @@ button#exec-replace {
   padding: 9px 46px 9px 12px;
 }
 
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .ui.cancel.label {
-  padding: 4px;
-  background-color: colors.$grey200;
-  border-radius: 15px;
-  top: 8px;
-  line-height: 0px;
-  right: 0px;
-
-  &:hover {
-    background-color: colors.$grey200 !important;
-  }
-}
-
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown .ui.input input {
-  box-shadow: inset 0 1px 3px colors.$grey200;
-}
-
-.search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown.not-filtered .ui.basic.button.disabled {
-  box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-}
-
 .search-form .find-wrapper .find-container .find-container-inside .find-element.find-dropdown-status .find-dropdown.disabled {
   background: unset;
   opacity: 0.5 !important;
@@ -425,40 +404,6 @@ button#exec-replace {
 .search-form .find-wrapper .find-container .search-display .search-result-buttons p {
   padding: 8px 5px;
   margin-bottom: 0;
-}
-
-.search-form .find-wrapper .find-container .search-display .search-result-buttons .ui.basic.button {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  margin: 0;
-  line-height: 36px;
-  margin-left: 10px;
-  position: relative;
-}
-
-.search-form .find-wrapper .find-container .search-display .search-result-buttons .ui.basic.button span {
-  position: absolute;
-  font-size: 12px;
-  color: colors.$grey400;
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in;
-  visibility: hidden;
-  width: 160px;
-  left: -50px;
-  top: 26px;
-}
-
-.search-form .find-wrapper .find-container .search-display .search-result-buttons .ui.basic.button.disabled {
-  box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
-}
-
-.search-form .find-wrapper .find-container .search-display .search-result-buttons .ui.basic.button.disabled span {
-  display: none;
-}
-
-.search-form .find-wrapper .find-container .search-display .search-result-buttons .ui.basic.button:hover span {
-  visibility: visible;
 }
 
 .search-form .select-with-icon__wrapper {

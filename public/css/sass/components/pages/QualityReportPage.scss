@@ -3,7 +3,6 @@
 @use '../../commons/shadows';
 @use '../../commons/divider';
 @use '../../commons/progress-mc-bar';
-@use '../../commons/buttons';
 @use '../signin/OnBoarding';
 @use '../../common';
 @use '../segment/tagsMenu';
@@ -125,10 +124,6 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   top: -2px;
 }
 
-header .nav-bar .header-project-container-info .header-project-info .header-team-assignee-icon .ui.top.right.pointing.dropdown > .menu {
-  margin: 7px -4px 0 0px !important;
-}
-
 .qr-wrapper {
   width: 100%;
   height: calc(100% - 60px);
@@ -155,18 +150,6 @@ header .nav-bar .header-project-container-info .header-project-info .header-team
   position: absolute;
   width: 100%;
   z-index: -1;
-}
-
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .ui.table thead th {
-  background: colors.$white;
-  border: none;
-  border-bottom: 1px solid colors.$grey50;
-  border-radius: 0;
-}
-
-.qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .ui.celled.table tr th, .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .ui.celled.table tr td {
-  border-left: 1px solid colors.$grey50;
-  border-radius: 0;
 }
 
 .qr-wrapper .qr-container .qr-container-inside .qr-job-summary-container .layout__container {
@@ -1056,26 +1039,6 @@ line-height: unset;
 background: colors.$white !important;
 }
 
-.qr-filter-list .filter-dropdown .ui.basic.button {
-font-family: 'calibri', Arial, Helvetica, sans-serif;
-font-size: 16px !important;
-padding: 10px 20px;
-border-radius: 40px;
-transition: 0.3s ease;
-box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-max-width: 155px;
-min-width: 30px;
-display: flex;
-}
-
-.qr-filter-list .filter-dropdown .ui.basic.button .text {
-transition: 0.3s ease;
-align-items: center;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-
 .qr-filter-list .filter-dropdown .cancel-label {
 position: absolute;
 padding: 4px;
@@ -1089,58 +1052,6 @@ visibility: hidden;
 
 .qr-filter-list .filter-dropdown .cancel-label:hover {
 background-color: colors.$grey200 !important;
-}
-
-.qr-filter-list .filter-dropdown .not-filtered .ui.basic.button:hover {
-box-shadow: 0px 0px 0px 1px colors.$blue500 inset;
-color: colors.$blue500 !important;
-}
-
-.qr-filter-list .filter-dropdown .not-filtered .ui.basic.button.disabled {
-box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-pointer-events: none;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button {
-background-color: colors.$white !important;
-box-shadow:
-      0 0 0 colors.$grey200,
-      0 0 2px rgba(0, 0, 0, 0.12),
-      0 2px 4px rgba(0, 0, 0, 0.24) !important;
-color: colors.$black !important;
-padding: 9px 20px 9px 15px;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button:hover {
-width: fit-content;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button:hover .text {
-margin-right: 15px;
-}
-
-.qr-filter-list .filter-dropdown .filtered .ui.basic.button:hover .cancel-label {
-visibility: unset;
-right: 5px;
-}
-
-.qr-filter-list .filter-dropdown .active .ui.basic.button {
-background: transparent none !important;
-box-shadow:
-      0 0 0 colors.$grey200,
-      0 0 2px rgba(0, 0, 0, 0.12),
-      0 2px 4px rgba(0, 0, 0, 0.24) !important;
-color: colors.$black !important;
-padding: 9px 20px 9px 15px;
-}
-
-.qr-filter-list .filter-dropdown .active .ui.basic.button:hover {
-background-color: colors.$white !important;
-}
-
-.qr-filter-list .filter-dropdown .active .ui.basic.button:hover .cancel-label {
-visibility: unset;
-right: 5px;
 }
 
 .qr-filter-list .filter-dropdown .disabled {
@@ -1248,10 +1159,6 @@ margin: 30px 15px 15px;
 z-index: 1;
 }
 
-.spinner-row__inner .ui.active.inverted.dimmer {
-background: colors.$grey100;
-}
-
 .per-orange {
 background: colors.$orange600 !important;
 color: colors.$white !important;
@@ -1280,14 +1187,6 @@ color: colors.$white !important;
 .per-gray {
 background: colors.$grey400 !important;
 color: colors.$grey500 !important;
-}
-
-.ui.popup.bottom.right.qr-score-popup {
-max-width: 350px !important;
-}
-
-.ui.popup.bottom.right.qr-score-popup code {
-font-size: 12px;
 }
 
 .tooltip--wide {

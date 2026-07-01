@@ -73,26 +73,6 @@
         }
       }
     }
-    .qa-issues-list .ui.basic.buttons button {
-      font-size: 16px !important;
-      padding: 10px;
-      color: colors.$black !important;
-      font-family: calibri;
-      display: flex;
-      gap: 4px;
-      &.error svg {
-        color: colors.$red400;
-      }
-      &.warning svg {
-        color: colors.$orange200;
-      }
-      &:hover {
-        background: colors.$grey50 !important;
-      }
-      &.mc-bg-gray {
-        background: colors.$grey50 !important;
-      }
-    }
     .qa-issues-navigator {
       display: flex;
       flex-grow: 1;

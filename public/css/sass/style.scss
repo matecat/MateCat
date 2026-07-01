@@ -1008,7 +1008,7 @@ section.loaded .submenu {
   background: colors.$white;
 }
 
-.loader:not(.ui) {
+.loader {
   width: 20px;
   height: 20px;
   background: url(/public/img/loading.gif) 0 0 no-repeat !important;
