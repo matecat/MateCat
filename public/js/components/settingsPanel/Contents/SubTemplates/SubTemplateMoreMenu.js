@@ -4,7 +4,7 @@ import {
   SubTemplatesContext,
   isStandardSubTemplate,
 } from './SubTemplateContext'
-import IconEdit from '../../../icons/IconEdit'
+import IconEdit from '../../../../../img/icons/IconEdit'
 import Trash from '../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
 import ModalsActions from '../../../../actions/ModalsActions'

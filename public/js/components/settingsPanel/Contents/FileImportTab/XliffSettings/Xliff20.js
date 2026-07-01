@@ -4,7 +4,7 @@ import {XliffRulesRow} from './XliffRulesRow'
 import {Accordion} from '../../../../common/Accordion/Accordion'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
 import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
-import IconAdd from '../../../../icons/IconAdd'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {isEqual} from 'lodash'
 
 export const Xliff20 = () => {

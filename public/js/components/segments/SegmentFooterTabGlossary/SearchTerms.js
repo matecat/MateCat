@@ -1,10 +1,10 @@
 import React, {useContext, useEffect, useState} from 'react'
 import SegmentActions from '../../../actions/SegmentActions'
 import {SegmentedControl} from '../../common/SegmentedControl'
-import IconClose from '../../icons/IconClose'
-import IconSearch from '../../icons/IconSearch'
+import IconClose from '../../../../img/icons/IconClose'
+import IconSearch from '../../../../img/icons/IconSearch'
 import {TabGlossaryContext} from './TabGlossaryContext'
-import IconAdd from '../../icons/IconAdd'
+import IconAdd from '../../../../img/icons/IconAdd'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
 
 export const SearchTerms = () => {

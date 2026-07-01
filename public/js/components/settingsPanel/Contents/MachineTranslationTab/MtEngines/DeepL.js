@@ -6,7 +6,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
-import IconClose from '../../../../icons/IconClose'
+import IconClose from '../../../../../../img/icons/IconClose'
 import Checkmark from '../../../../../../img/icons/Checkmark'
 import ExternalLink from '../../../../../../img/icons/ExternalLink'
 

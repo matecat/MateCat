@@ -6,11 +6,11 @@ import {
   EmailsBadge,
   SPECIALS_SEPARATORS,
 } from '../common/EmailsBadge/EmailsBadge'
-import IconSearch from '../icons/IconSearch'
-import IconClose from '../icons/IconClose'
+import IconSearch from '../../../img/icons/IconSearch'
+import IconClose from '../../../img/icons/IconClose'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
-import IconEdit from '../icons/IconEdit'
+import IconEdit from '../../../img/icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
 import Close from '../../../img/icons/Close'
 import {EMAIL_PATTERN} from '../../constants/Constants'

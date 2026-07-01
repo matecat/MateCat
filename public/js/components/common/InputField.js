@@ -1,7 +1,7 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {debounce} from 'lodash/function'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 
 const styleInput = {
   fontFamily: 'calibri, Arial, Helvetica, sans-serif',

@@ -27,8 +27,8 @@ import {ApplicationThreshold} from './ApplicationThreshold'
 import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
 import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
-import IconClose from '../../../icons/IconClose'
-import IconAdd from '../../../icons/IconAdd'
+import IconClose from '../../../../../img/icons/IconClose'
+import IconAdd from '../../../../../img/icons/IconAdd'
 
 let engineIdFromQueryString = new URLSearchParams(window.location.search).get(
   'engineId',

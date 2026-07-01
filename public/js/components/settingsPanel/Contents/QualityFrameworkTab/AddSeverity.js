@@ -11,7 +11,7 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {getCodeFromLabel} from './CategoriesSeveritiesTableUtils'
 import {TOOLTIP_POSITION} from '../../../common/Tooltip'

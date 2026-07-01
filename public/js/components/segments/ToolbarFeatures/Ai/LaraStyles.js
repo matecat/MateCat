@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import {LARA_STYLES_OPTIONS} from '../../../settingsPanel/Contents/MachineTranslationTab/LaraOptions/LaraOptions'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
-import Palette from '../../../icons/Palette'
+import Palette from '../../../../../img/icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CatToolStore from '../../../../stores/CatToolStore'

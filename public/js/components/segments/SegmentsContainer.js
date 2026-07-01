@@ -28,7 +28,7 @@ import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
-import IconSplit from '../icons/IconSplit'
+import IconSplit from '../../../img/icons/IconSplit'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90

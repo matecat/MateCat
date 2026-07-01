@@ -10,8 +10,8 @@ import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
 import CommonUtils from '../../utils/commonUtils'
-import IconLike from '../icons/IconLike'
-import IconDislike from '../icons/IconDislike'
+import IconLike from '../../../img/icons/IconLike'
+import IconDislike from '../../../img/icons/IconDislike'
 import {MemoizeRequest} from '../../utils/MemoizeRequest'
 
 const aiCache = new MemoizeRequest()

@@ -34,9 +34,9 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import {SegmentQAIcon} from './SegmentQAIcon'
-import IconUnlock from '../icons/IconUnlock'
-import IconLock from '../icons/IconLock'
-import IconSplit from '../icons/IconSplit'
+import IconUnlock from '../../../img/icons/IconUnlock'
+import IconLock from '../../../img/icons/IconLock'
+import IconSplit from '../../../img/icons/IconSplit'
 
 const SegmentComponent = ({
   segment,

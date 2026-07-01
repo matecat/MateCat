@@ -3,7 +3,7 @@ import {CompositeDecorator, Editor, EditorState} from 'draft-js'
 
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentUtils from '../../utils/segmentUtils'
-import IconSplit from '../icons/IconSplit'
+import IconSplit from '../../../img/icons/IconSplit'
 
 class SegmentPlaceholderLite extends React.Component {
   constructor(props) {

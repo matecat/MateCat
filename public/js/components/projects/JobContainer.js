@@ -9,8 +9,8 @@ import ManageActions from '../../actions/ManageActions'
 import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
-import IconDown from '../icons/IconDown'
-import IconClose from '../icons/IconClose'
+import IconDown from '../../../img/icons/IconDown'
+import IconClose from '../../../img/icons/IconClose'
 import {
   Button,
   BUTTON_MODE,

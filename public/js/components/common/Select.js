@@ -12,7 +12,7 @@ import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 import classnames from 'classnames'
 export const Select = ({
   className,

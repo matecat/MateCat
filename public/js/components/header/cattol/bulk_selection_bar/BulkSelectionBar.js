@@ -5,8 +5,8 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
-import IconChevronLeft from '../../../icons/IconChevronLeft'
-import IconTick from '../../../icons/IconTick'
+import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
+import IconTick from '../../../../../img/icons/IconTick'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {

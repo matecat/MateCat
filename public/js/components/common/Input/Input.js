@@ -3,8 +3,8 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../Button/Button'
-import Hide from '../../icons/Hide'
-import Show from '../../icons/Show'
+import Hide from '../../../../img/icons/Hide'
+import Show from '../../../../img/icons/Show'
 import styles from './Input.module.scss'
 
 export const INPUT_SIZE = {

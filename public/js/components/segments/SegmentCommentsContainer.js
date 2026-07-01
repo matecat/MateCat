@@ -23,7 +23,7 @@ import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import Trash from '../../../img/icons/Trash'
 import Check from '../../../img/icons/Check'
 import commonUtils from '../../utils/commonUtils'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext

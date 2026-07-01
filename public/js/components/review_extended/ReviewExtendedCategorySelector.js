@@ -5,7 +5,7 @@ import {
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
-import IconDown from '../icons/IconDown'
+import IconDown from '../../../img/icons/IconDown'
 
 const ReviewExtendedCategorySelector = ({
   sendIssue,

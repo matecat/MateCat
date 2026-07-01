@@ -2,7 +2,7 @@ import React, {createRef} from 'react'
 import JobProgressBar from '../common/JobProgressBar'
 import HelpCircle from '../../../img/icons/HelpCircle'
 import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
-import IconChevronRight from '../icons/IconChevronRight'
+import IconChevronRight from '../../../img/icons/IconChevronRight'
 
 export const ProductionSummary = ({
   qualitySummary,

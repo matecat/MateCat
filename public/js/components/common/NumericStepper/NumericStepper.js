@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_SIZE} from '../Button/Button'
 import {debounce} from 'lodash'
-import IconDown from '../../icons/IconDown'
+import IconDown from '../../../../img/icons/IconDown'
 import styles from './NumericStepper.module.scss'
 
 export const NumericStepper = ({

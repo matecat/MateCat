@@ -23,9 +23,9 @@ import Archive from '../../../../img/icons/Archive'
 import Trash from '../../../../img/icons/Trash'
 import ChangePassword from '../../../../img/icons/ChangePassword'
 import Revise from '../../../../img/icons/Revise'
-import IconCloseCircle from '../../icons/IconCloseCircle'
+import IconCloseCircle from '../../../../img/icons/IconCloseCircle'
 import CheckDone from '../../../../img/icons/CheckDone'
-import FlipBackward from '../../icons/FlipBackward'
+import FlipBackward from '../../../../img/icons/FlipBackward'
 
 const MAX_JOBS_SELECTABLE = 100
 

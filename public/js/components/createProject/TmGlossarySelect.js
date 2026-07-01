@@ -5,7 +5,7 @@ import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import HelpCircle from '../../../img/icons/HelpCircle'
-import IconAdd from '../icons/IconAdd'
+import IconAdd from '../../../img/icons/IconAdd'
 
 export const TmGlossarySelect = () => {
   const {

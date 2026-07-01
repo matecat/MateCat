@@ -12,7 +12,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
 import ModalsActions from '../../actions/ModalsActions'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 
 class ReviewExtendedPanel extends React.Component {
   static contextType = SegmentContext

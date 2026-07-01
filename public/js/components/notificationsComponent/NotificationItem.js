@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {useState, useRef, useEffect} from 'react'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 import {
   Button,
   BUTTON_MODE,

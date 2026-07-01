@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {each} from 'lodash'
 
 import LXQ from '../../../utils/lxq.main'
-import IconCloseCircle from '../../icons/IconCloseCircle'
+import IconCloseCircle from '../../../../img/icons/IconCloseCircle'
 
 class LexiqaTooltipInfo extends Component {
   ignoreError(message) {

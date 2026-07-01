@@ -12,7 +12,7 @@ import Users from '../../../../../img/icons/Users'
 import AddWide from '../../../../../img/icons/AddWide'
 import {METADATA_KEY} from '../../../../constants/Constants'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 import UsersPlus from '../../../../../img/icons/UsersPlus'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
 

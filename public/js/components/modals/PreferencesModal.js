@@ -5,7 +5,7 @@ import {getUserApiKey} from '../../api/getUserApiKey'
 import {createUserApiKey} from '../../api/createUserApiKey'
 import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
-import IconEdit from '../icons/IconEdit'
+import IconEdit from '../../../img/icons/IconEdit'
 import {modifyUserInfo} from '../../api/modifyUserInfo/modifyUser'
 import UserActions from '../../actions/UserActions'
 import {
@@ -14,9 +14,9 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-import IconClose from '../icons/IconClose'
-import Copy from '../icons/Copy'
-import IconInfo from '../icons/IconInfo'
+import IconClose from '../../../img/icons/IconClose'
+import Copy from '../../../img/icons/Copy'
+import IconInfo from '../../../img/icons/IconInfo'
 import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'

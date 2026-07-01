@@ -49,8 +49,8 @@ import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
 import useResizable from '../hooks/useResizable'
-import IconRedirect from '../components/icons/IconRedirect'
-import IconDown from '../components/icons/IconDown'
+import IconRedirect from '../../img/icons/IconRedirect'
+import IconDown from '../../img/icons/IconDown'
 import {
   Button,
   BUTTON_MODE,
