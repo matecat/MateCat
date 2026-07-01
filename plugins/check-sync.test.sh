@@ -104,6 +104,32 @@ assert_contains "$out" "Unknown flag" "unknown flag names itself"
 out=$(run_script "$fx" --update --dry-run); RC=$?
 assert_eq "$RC" "0" "--update --dry-run exits 0"
 
+# --- --update --dry-run: reports, mutates nothing ---
+fx=$(make_fixture)
+before_local=$(git -C "$fx/plugin" rev-parse master)
+before_head=$(git -C "$fx/plugin" rev-parse HEAD)
+out=$(run_script "$fx" --update --dry-run)
+assert_contains "$out" "would rebase 1 commit" "--update --dry-run reports the rebase"
+assert_eq "$(git -C "$fx/plugin" rev-parse master)" "$before_local" "--update --dry-run left master ref unchanged"
+assert_eq "$(git -C "$fx/plugin" rev-parse HEAD)" "$before_head" "--update --dry-run left HEAD unchanged"
+
+# --- --update: advances master to origin/master, restores detached HEAD ---
+fx=$(make_fixture)
+before_head=$(git -C "$fx/plugin" rev-parse HEAD)
+remote_master=$(git -C "$fx/plugin" rev-parse origin/master)
+out=$(run_script "$fx" --update)
+assert_eq "$(git -C "$fx/plugin" rev-parse master)" "$remote_master" "--update advanced local master to origin/master"
+assert_eq "$(git -C "$fx/plugin" rev-parse HEAD)" "$before_head" "--update restored original detached HEAD"
+# HEAD must be detached (not on master) after --update
+head_ref=$(git -C "$fx/plugin" symbolic-ref -q --short HEAD || echo DETACHED)
+assert_eq "$head_ref" "DETACHED" "--update left HEAD detached (checkout pinned)"
+
+# --- --update skips a dirty working tree ---
+fx=$(make_fixture)
+touch "$fx/plugin/dirty.txt"; git -C "$fx/plugin" add dirty.txt
+out=$(run_script "$fx" --update)
+assert_contains "$out" "working tree not clean" "--update skips dirty submodule"
+
 echo ""
 echo "Passed: $PASS  Failed: $FAIL"
 [ "$FAIL" -eq 0 ]

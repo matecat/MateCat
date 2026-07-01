@@ -198,5 +198,35 @@ for submodule in "${ALL_SUBMODULES[@]}"; do
                 fi
             fi
         fi
+
+        # --update / --sync: rebase the local branch onto origin/<branch> to catch
+        # up on "behind" commits. Both rebase; they differ only in the final HEAD:
+        #   --update restores the original checkout (superproject gitlink unchanged)
+        #   --sync    stays on the updated branch tip (checkout moves to newer code)
+        if [ "$MODE" = update ] || [ "$MODE" = sync ]; then
+            if [ "${behind:-0}" -le 0 ] 2>/dev/null; then
+                :   # nothing behind to catch up to; leave as-is
+            elif ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+                echo "⚠️  $submodule — working tree not clean; skipping $MODE"
+            elif [ "$DRY_RUN" = true ]; then
+                echo "🔍 $submodule ($branch) — would rebase ${behind} commit(s) onto origin/$branch ($MODE)"
+            else
+                # Remember where HEAD is so --update can return to it. Prefer the
+                # symbolic branch name; fall back to the raw SHA for a detached HEAD.
+                orig_head=$(git symbolic-ref -q --short HEAD 2>/dev/null || git rev-parse HEAD 2>/dev/null)
+                if git checkout --quiet "$branch" 2>/dev/null && git rebase --quiet "origin/$branch" 2>/dev/null; then
+                    if [ "$MODE" = update ] && [ "$orig_head" != "$branch" ]; then
+                        git checkout --quiet "$orig_head" 2>/dev/null
+                        echo "🔄 $submodule ($branch) — rebased ${behind} commit(s) onto origin/$branch; HEAD restored"
+                    else
+                        echo "🔄 $submodule ($branch) — rebased ${behind} commit(s) onto origin/$branch; now on $branch"
+                    fi
+                else
+                    git rebase --abort 2>/dev/null
+                    git checkout --quiet "$orig_head" 2>/dev/null
+                    echo "⚠️  $submodule ($branch) — rebase onto origin/$branch failed (conflicts); left untouched"
+                fi
+            fi
+        fi
     )
 done
